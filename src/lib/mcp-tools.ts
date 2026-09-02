@@ -3,12 +3,13 @@
  * src/lib/shortlist-core.ts; handlers here only validate and dispatch.
  */
 
-import { FEATURES, FEATURE_NAMES, getShortlistDataset, getVendor, getAllVendorSlugs } from "@/lib/vendors";
-import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput } from "@/lib/shortlist-core";
+import { FEATURES, FEATURE_NAMES, getVendor, getAllVendorSlugs } from "@/lib/vendors";
+import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
 import { applyComparisonHandoff } from "@/lib/comparison-handoff";
 import { SITE_URL } from "@/lib/structured-data";
 import { getDemandIndex } from "@/lib/demand-index";
-import { getGovernedProviderSummary, GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
+import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
+import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 // Moved to its own dependency-free module (18 Aug 2026) so a client
 // component (McpEvidencePanel.tsx) can import the tool catalogue without
 // pulling this file's server-only imports (`@/lib/vendors`, node:fs) into
@@ -16,12 +17,13 @@ import { getGovernedProviderSummary, GOVERNED_SHORTLIST_CONTRACT_VERSION } from 
 // Re-exported here so every existing import site is unaffected.
 export { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tool-definitions";
 
-export function callMcpTool(name: string, args: unknown): unknown | Promise<unknown> {
-  const shortlist = getShortlistDataset();
+export async function callMcpTool(name: string, args: unknown): Promise<unknown> {
+  const live = await getLiveShortlistDataset();
+  const shortlist = live.vendors;
   const knownShortlistSlugs = shortlist.map((vendor) => vendor.slug);
   switch (name) {
     case "build_sase_shortlist": {
-      const result = buildShortlist(getShortlistDataset(), args ?? {}, FEATURE_NAMES);
+      const result = buildShortlist(shortlist, args ?? {}, FEATURE_NAMES);
       // The resume address (25 July 2026, machine-layer parity): the same
       // scenario codec the page itself uses to make every state shareable,
       // so this URL lands a human on the live shortlist with these exact
@@ -71,16 +73,23 @@ export function callMcpTool(name: string, args: unknown): unknown | Promise<unkn
       if (!knownShortlistSlugs.includes(slug)) {
         return { error: `Unknown vendor slug: ${slug}. Call list_sase_vendors for valid slugs.` };
       }
-      const governed = getGovernedProviderSummary(slug);
       const v = shortlist.find((vendor) => vendor.slug === slug);
-      return { ...v, governed_profile: governed, contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION, _meta: { canonicalUrl: v?.marketplace_url } };
+      return {
+        ...v,
+        governed_profile: { evidenceSourceCount: v?.evidence_source_count ?? 0, reviewedAt: v?.last_verified, profileUrl: v?.marketplace_url },
+        contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
+        source_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
+        dataset_versions: live.datasetVersions,
+        runtime_provider_source: live.source,
+        _meta: { canonicalUrl: v?.marketplace_url },
+      };
     }
     case "compare_vendors": {
       const input = (args ?? {}) as { slugs?: string[]; question?: string };
       const slugs = (input.slugs ?? [])
         .filter((slug, index, all) => knownShortlistSlugs.includes(slug) && all.indexOf(slug) === index)
         .slice(0, 3);
-      const comparison = buildComparison(getShortlistDataset(), slugs, FEATURES);
+      const comparison = buildComparison(shortlist, slugs, FEATURES);
       if (!comparison) return { error: "Provide two or three distinct valid provider slugs. Call list_sase_vendors for valid values." };
       const params = applyComparisonHandoff(new URLSearchParams(), {
         providers: comparison.slugs,
@@ -111,7 +120,7 @@ export function callMcpTool(name: string, args: unknown): unknown | Promise<unkn
     case "list_exclusions":
       return listExclusions(args);
     case "explain_shortlist":
-      return explainShortlist(args);
+      return explainShortlist(args, shortlist);
 
     default:
       return { error: `Unknown tool: ${name}` };
@@ -332,14 +341,14 @@ export function listExclusions(args: unknown): unknown {
   };
 }
 
-export function explainShortlist(args: unknown): unknown {
+export function explainShortlist(args: unknown, shortlist?: ShortlistVendor[]): unknown {
   const a = (args ?? {}) as { a?: string; b?: string; criteria?: Record<string, unknown> };
   const slugA = (a.a ?? "").trim(), slugB = (a.b ?? "").trim();
-  const known = getAllVendorSlugs();
+  const known = shortlist?.map((provider) => provider.slug) ?? getAllVendorSlugs();
   if (!known.includes(slugA) || !known.includes(slugB)) {
     return { error: `Give two known vendor slugs as a and b. Unknown: ${[slugA, slugB].filter((s) => !known.includes(s)).join(", ") || "(none given)"}. Call list_sase_vendors.` };
   }
-  const result = buildShortlist(getShortlistDataset(), a.criteria ?? {}, FEATURE_NAMES);
+  const result = buildShortlist(shortlist ?? [], a.criteria ?? {}, FEATURE_NAMES);
   // buildShortlist numbers the shortlist and leaves near misses at rank 0. A
   // model reading rank 0 reports the supplier as ranked zero rather than absent,
   // which is worse than saying nothing, so placement is stated explicitly and

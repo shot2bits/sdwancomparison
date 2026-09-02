@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { FEATURES, FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_NAMES } from "@/lib/vendors";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { buildShortlist, decodeScenario } from "@/lib/shortlist-core";
 import PrintTrigger from "@/components/PrintTrigger";
 
@@ -17,7 +18,8 @@ export default async function ShortlistPrintPage({ searchParams }: Props) {
     if (typeof v === "string") qs.set(k, v);
   }
   const input = decodeScenario(qs.toString(), FEATURES.map((f) => f.id));
-  const result = buildShortlist(getShortlistDataset(), input, FEATURE_NAMES);
+  const { vendors } = await getLiveShortlistDataset();
+  const result = buildShortlist(vendors, input, FEATURE_NAMES);
   const today = new Date().toISOString().slice(0, 10);
 
   return (

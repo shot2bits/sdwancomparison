@@ -19,6 +19,10 @@ const SLUGS: Record<string, string> = {
   vodafone: "vodafone-business", zscaler: "zscaler",
 };
 
+export function comparisonSlugForGovernedProvider(slug: string): string {
+  return SLUGS[slug] ?? slug;
+}
+
 const NAMES: Record<string, string> = {
   aryaka: "Aryaka", att: "AT&T Business", "barracuda-secureedge": "Barracuda SecureEdge", bt: "BT", checkpoint: "Check Point",
   "cato-networks": "Cato Networks", cisco: "Cisco", "cloudflare-one": "Cloudflare One", expereo: "Expereo", forcepoint: "Forcepoint", gtt: "GTT",

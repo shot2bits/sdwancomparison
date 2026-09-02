@@ -3,9 +3,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
 import { BEST_PAGES } from "@/lib/best-pages";
-import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
-import { getGovernedProviderSummaries, GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
+import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -31,12 +32,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ShortlistPage() {
-  const vendors = getShortlistDataset();
-  // Full records for the server-rendered tables: they carry the provenance
-  // fields, which the compact shortlist dataset deliberately does not.
-  const governed = getGovernedProviderSummaries();
-  const verified = governed.map((v) => v.reviewedAt.slice(0, 10)).sort().slice(-1)[0] ?? "";
+export const dynamic = "force-dynamic";
+
+export default async function ShortlistPage() {
+  const live = await getLiveShortlistDataset();
+  const vendors = live.vendors;
+  const verified = vendors.map((v) => v.last_verified).sort().slice(-1)[0] ?? "";
   const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
 
   const schemas = [
@@ -48,8 +49,8 @@ export default function ShortlistPage() {
     getShortlistFaqSchema(SHORTLIST_FAQS),
     {
       "@context": "https://schema.org", "@type": "ItemList", name: "SASE and SD-WAN providers compared by Netify",
-      numberOfItems: governed.length,
-      itemListElement: governed.map((provider, index) => ({ "@type": "ListItem", position: index + 1, url: provider.url, name: provider.name, description: provider.summary })),
+      numberOfItems: vendors.length,
+      itemListElement: vendors.map((provider, index) => ({ "@type": "ListItem", position: index + 1, url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
     },
     // The 40 capability definitions as a DefinedTermSet, mirroring the
     // visible glossary below so AI engines can quote a row's meaning

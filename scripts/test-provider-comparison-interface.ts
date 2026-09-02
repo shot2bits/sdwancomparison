@@ -29,21 +29,23 @@ const comparison = buildComparison(vendors, parsed.providers, FEATURES);
 assert.ok(comparison);
 assert.deepEqual(comparison.slugs, parsed.providers);
 assert.equal(comparison.groups.length > 5, true);
-const mcpComparison = callMcpTool("compare_vendors", { slugs: parsed.providers, question: parsed.question }) as { slugs: string[]; resume_url: string };
+const mcpComparison = await callMcpTool("compare_vendors", { slugs: parsed.providers, question: parsed.question }) as { slugs: string[]; resume_url: string };
 assert.deepEqual(mcpComparison.slugs, parsed.providers);
 assert.match(mcpComparison.resume_url, /source=mcp/);
-const governedOnlyProfile = callMcpTool("get_sase_vendor_profile", { slug: "expereo" }) as { slug: string; governed_profile?: { evidenceSourceCount: number } };
+const governedOnlyProfile = await callMcpTool("get_sase_vendor_profile", { slug: "expereo" }) as { slug: string; governed_profile?: { evidenceSourceCount: number } };
 assert.equal(governedOnlyProfile.slug, "expereo");
 assert.ok((governedOnlyProfile.governed_profile?.evidenceSourceCount ?? 0) > 0, "MCP must expose the governed profile for a newly governed provider");
 
-const btProfile = callMcpTool("get_sase_vendor_profile", { slug: "bt-business" }) as {
+const btProfile = await callMcpTool("get_sase_vendor_profile", { slug: "bt-business" }) as {
   evidence_source_count?: number;
   independent_evidence_source_count?: number;
-  governed_profile?: { evidenceSources?: Array<{ publisher?: string }> };
+  runtime_provider_source?: string;
+  governed_profile?: { evidenceSourceCount?: number };
 };
 assert.ok((btProfile.evidence_source_count ?? 0) >= 17, "BT must expose the combined governed and independent source count");
 assert.equal(btProfile.independent_evidence_source_count, 1, "BT must identify the independent evidence contribution");
-assert.ok(btProfile.governed_profile?.evidenceSources?.some((source) => source.publisher === "Computer Weekly"), "BT governed profile must include the independent Computer Weekly source");
+assert.equal(btProfile.governed_profile?.evidenceSourceCount, btProfile.evidence_source_count);
+assert.ok(["neon", "snapshot_fallback"].includes(btProfile.runtime_provider_source ?? ""));
 
 for (const sector of SECTOR_KEYS) {
   const decoded = decodeScenario(encodeScenario({ ...DEFAULT_INPUT, sector }), FEATURES.map((feature) => feature.id));

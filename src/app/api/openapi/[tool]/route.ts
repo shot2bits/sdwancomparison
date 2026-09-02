@@ -60,5 +60,5 @@ export async function POST(req: Request, ctx: Ctx) {
   } catch {
     // empty body is acceptable for zero-argument tools
   }
-  return Response.json(callMcpTool(tool, args), { headers: corsHeaders(req) });
+  return Response.json(await callMcpTool(tool, args), { headers: corsHeaders(req) });
 }

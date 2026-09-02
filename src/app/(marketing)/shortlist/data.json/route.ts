@@ -1,17 +1,18 @@
-import { FEATURES, FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_NAMES } from "@/lib/vendors";
 import { buildShortlist, DEFAULT_INPUT } from "@/lib/shortlist-core";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { SITE_URL } from "@/lib/structured-data";
-import { getGovernedProviderSummaries, GOVERNED_SHORTLIST_CONTRACT_VERSION, GOVERNED_SOURCE_VERSION } from "@/lib/governed-provider-catalogue";
+import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
+import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 
 /**
  * JSON twin of /shortlist. Same content as the page, structured for machines.
  * AI agents can read the dataset and discover the callable tools here.
  */
 export async function GET() {
-  const vendors = getShortlistDataset();
+  const live = await getLiveShortlistDataset();
+  const vendors = live.vendors;
   const defaultResult = buildShortlist(vendors, DEFAULT_INPUT, FEATURE_NAMES);
-  const governedProviders = getGovernedProviderSummaries();
 
   return Response.json(
     {
@@ -20,28 +21,28 @@ export async function GET() {
       description: SHORTLIST_INTRO.subhead,
       publisher: "Netify Group Limited",
       contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
-      source_contract_version: GOVERNED_SOURCE_VERSION,
-      last_reviewed: governedProviders.map((provider) => provider.reviewedAt).sort().slice(-1)[0],
+      source_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
+      runtime_provider_source: live.source,
+      provider_dataset_versions: live.datasetVersions,
+      provider_loaded_at: live.loadedAt,
+      last_reviewed: vendors.map((provider) => provider.last_verified).sort().slice(-1)[0],
       evidence: {
         method:
           "Each public provider profile is a reviewed projection of the governed provider record. Capability states distinguish supported, partial, partner-delivered, unsupported, unknown and requires-confirmation evidence.",
-        sources_total: governedProviders.reduce((n, provider) => n + provider.evidenceSourceCount, 0),
+        sources_total: vendors.reduce((n, provider) => n + (provider.evidence_source_count ?? 0), 0),
       },
       faqs: SHORTLIST_FAQS,
       features: FEATURES,
       vendors,
-      governed_provider_profiles: governedProviders.map((provider) => ({
-        slug: provider.slug,
-        comparison_slug: provider.comparisonSlug,
+      governed_provider_profiles: vendors.map((provider) => ({
+        comparison_slug: provider.slug,
         name: provider.name,
-        provider_types: provider.providerTypes,
-        summary: provider.summary,
-        reviewed_at: provider.reviewedAt,
-        dataset_version: provider.datasetVersion,
-        products: provider.products.map((product) => product.name),
-        evidence_source_count: provider.evidenceSourceCount,
-        independent_evidence_source_count: provider.independentEvidenceSourceCount,
-        url: provider.url,
+        provider_types: provider.category.split(" / "),
+        summary: provider.shortlist_summary,
+        reviewed_at: provider.last_verified,
+        products: provider.product_focus?.split(", ") ?? [],
+        evidence_source_count: provider.evidence_source_count ?? 0,
+        url: provider.marketplace_url,
       })),
       default_shortlist: defaultResult,
       interactiveSurfaces: [

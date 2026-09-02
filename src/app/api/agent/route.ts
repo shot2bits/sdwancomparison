@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { FEATURES, FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_NAMES } from "@/lib/vendors";
 import {
   AI_KEYS,
   CLOUD_KEYS,
@@ -15,8 +15,8 @@ import {
   type ComparisonResult,
   type ShortlistInput,
 } from "@/lib/shortlist-core";
-import { getAllVendorSlugs } from "@/lib/vendors";
 import { corsHeaders, preflight } from "@/lib/cors";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 
 /** The Anthropic SDK needs the Node runtime (it imports node:fs et al). */
 export const runtime = "nodejs";
@@ -89,7 +89,7 @@ function criteriaTool(): Anthropic.Tool {
 
 const COMPARE_TOOL_NAME = "compare_vendors";
 
-function compareTool(): Anthropic.Tool {
+function compareTool(slugs: string[]): Anthropic.Tool {
   return {
     name: COMPARE_TOOL_NAME,
     description:
@@ -101,7 +101,7 @@ function compareTool(): Anthropic.Tool {
           type: "array",
           minItems: 2,
           maxItems: 3,
-          items: { type: "string", enum: getAllVendorSlugs() },
+          items: { type: "string", enum: slugs },
           description: "Vendor slugs to compare.",
         },
       },
@@ -156,6 +156,9 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid JSON body." }, { status: 400, headers: cors });
   }
 
+  const { vendors } = await getLiveShortlistDataset();
+  const knownVendorSlugs = vendors.map((vendor) => vendor.slug);
+
   const history: Anthropic.MessageParam[] = (body.messages ?? [])
     .filter((m) => m && typeof m.content === "string" && m.content.trim())
     .slice(-12)
@@ -166,7 +169,7 @@ export async function POST(req: Request) {
     history.push({ role: "user", content: prompt });
   }
   const selectedComparison = (body.comparison_slugs ?? [])
-    .filter((slug) => getAllVendorSlugs().includes(slug))
+    .filter((slug) => knownVendorSlugs.includes(slug))
     .slice(0, 3);
   history[history.length - 1] = {
     role: "user",
@@ -186,7 +189,7 @@ export async function POST(req: Request) {
         model: MODEL,
         max_tokens: 1200,
         system: SYSTEM,
-        tools: [criteriaTool(), compareTool()],
+        tools: [criteriaTool(), compareTool(knownVendorSlugs)],
         messages,
       });
 
@@ -207,7 +210,7 @@ export async function POST(req: Request) {
         const parsed = ShortlistInputSchema.safeParse(toolUse.input);
         if (parsed.success) {
           appliedInput = parsed.data;
-          const result = buildShortlist(getShortlistDataset(), appliedInput, FEATURE_NAMES);
+          const result = buildShortlist(vendors, appliedInput, FEATURE_NAMES);
           toolResult = JSON.stringify({
             applied: true,
             criteria: result.criteria_summary,
@@ -220,7 +223,7 @@ export async function POST(req: Request) {
       } else if (toolUse.name === COMPARE_TOOL_NAME) {
         const slugs = ((toolUse.input as { slugs?: string[] })?.slugs ?? []).slice(0, 3);
         comparison = buildComparison(
-          getShortlistDataset(),
+          vendors,
           slugs,
           FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category })),
         );
