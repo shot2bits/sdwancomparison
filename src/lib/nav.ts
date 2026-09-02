@@ -168,7 +168,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
     label: "By Sector",
     columns: 2,
     items: [
-      { label: "Healthcare", href: "/sd-wan-for-healthcare/", desc: "Clinical resilience, DSPT, patient data and secure multi-site access." },
+      { label: "BT for healthcare", href: "/sd-wan-for-healthcare/", desc: "BT SD-WAN and SASE for NHS and healthcare organisations." },
       { label: "Manufacturing", href: "/sd-wan-sase-for-manufacturing/", desc: "OT segmentation, plant uptime, failover and brownfield estates." },
       { label: "Retail", href: "/sd-wan-sase-for-retail/", desc: "Store rollout, POS, PCI, guest Wi-Fi and resilient connectivity." },
       { label: "Financial services", href: "/sd-wan-sase-for-financial-services/", desc: "DORA, auditability, resilience and supplier due diligence." },
@@ -199,8 +199,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
       { label: "Resell BT Business Broadband", href: "/resell/bt-business-broadband/", desc: "BT products, eligibility, commission and the application route." },
       { label: "BT Business Internet", href: "/resell/bt-business-internet/", desc: "BTnet leased lines and associated managed services." },
       { label: "BT Cloud Voice", href: "/resell/bt-hosted-voip/", desc: "Hosted voice for organisations and the BT reseller route." },
-      { label: "BT SD-WAN", href: "/bt-sase-sd-wan/", desc: "Managed SD-WAN sourcing and reseller information." },
-      { label: "BT SASE", href: "/bt-sase-sd-wan/", desc: "Managed SASE sourcing and reseller information." },
+      { label: "BT SD-WAN and SASE databank", href: "/bt-sase-sd-wan/", desc: "Query sourced BT evidence and turn requirements into a buying brief." },
       { label: "Virgin Media Business profile", href: "/marketplace/virgin-media/", desc: "Connectivity, SD-WAN capabilities and buying fit." },
       { label: "Virgin reseller route", href: "/resell/virgin-media-business/", desc: "Current status and reseller interest registration." },
     ],

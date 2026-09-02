@@ -14,7 +14,7 @@ import frameworkData from "@data/harry-rfp-framework.json";
  */
 
 export const metadata: Metadata = {
-  title: "Living SASE & SD-WAN RFP Template | 120 Questions | Netify",
+  title: "Living SASE & SD-WAN RFP Template | 120 Questions",
   description:
     "A vendor-neutral SASE and SD-WAN RFP template with 120 supplier questions across 20 procurement pillars, evidence requests, strong-response markers and red flags.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/questions/` },
