@@ -5,6 +5,7 @@ import { getShortlistDatasetSchema } from "../src/lib/structured-data";
 
 const page = readFileSync("src/app/(marketing)/shortlist/page.tsx", "utf8");
 const dataRoute = readFileSync("src/app/(marketing)/shortlist/data.json/route.ts", "utf8");
+const csvRoute = readFileSync("src/app/(marketing)/shortlist/data.csv/route.ts", "utf8");
 const content = readFileSync("src/lib/shortlist-content.ts", "utf8");
 const interfaceSource = readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
 
@@ -15,6 +16,9 @@ assert.match(page, /itemListOrder: "https:\/\/schema\.org\/ItemListOrderDescendi
 assert.match(page, /position: provider\.rank/);
 assert.match(dataRoute, /top_providers_at_balanced_setting: defaultResult\.shortlist\.slice\(0, 10\)/);
 assert.match(dataRoute, /shortlist_size: vendors\.length/);
+assert.match(dataRoute, /csv: `\$\{SITE_URL\}\/shortlist\/data\.csv`/);
+assert.match(csvRoute, /getLiveShortlistDataset/);
+assert.match(csvRoute, /GOVERNED_SHORTLIST_CONTRACT_VERSION/);
 assert.match(interfaceSource, /\{result\.shortlist\.map\(\(v\) => \(/);
 assert.doesNotMatch(interfaceSource, /isDefaultView \? result\.shortlist\.slice\(0, 10\) : result\.shortlist/);
 assert.doesNotMatch(interfaceSource, /Show the remaining .* ranked providers/);

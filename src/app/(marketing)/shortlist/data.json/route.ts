@@ -75,6 +75,10 @@ export async function GET() {
           backingTool: "compare_vendors",
         },
       ],
+      distributions: {
+        json: `${SITE_URL}/shortlist/data.json`,
+        csv: `${SITE_URL}/shortlist/data.csv`,
+      },
     },
     { headers: { "X-Robots-Tag": "noindex" } },
   );
