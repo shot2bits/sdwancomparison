@@ -12,6 +12,12 @@ assert.doesNotMatch(dataRoute, /X-Robots-Tag.*noindex/);
 assert.doesNotMatch(csvRoute, /X-Robots-Tag.*noindex/);
 const content = readFileSync("src/lib/shortlist-content.ts", "utf8");
 const interfaceSource = readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
+const llms = readFileSync("src/app/llms.txt/route.ts", "utf8");
+const consolidatedOpenApi = readFileSync("src/app/openapi.json/route.ts", "utf8");
+const perToolOpenApi = readFileSync("src/app/api/openapi/[tool]/route.ts", "utf8");
+const shortlistBuilder = readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
+const nav = readFileSync("src/lib/nav.ts", "utf8");
+const workspaceTools = readFileSync("src/lib/mcp-workspace-tools.ts", "utf8");
 
 assert.match(content, /Compare SD-WAN and SASE providers, vendors and managed services/);
 assert.match(page, /Top SD-WAN providers at a glance/);
@@ -28,6 +34,21 @@ assert.doesNotMatch(interfaceSource, /isDefaultView \? result\.shortlist\.slice\
 assert.doesNotMatch(interfaceSource, /Show the remaining .* ranked providers/);
 assert.match(interfaceSource, /Build from requirements/);
 assert.doesNotMatch(interfaceSource, /Build around your requirements/);
+assert.match(page, /https:\/\/netify\.co\.uk\/sase-sd-wan-rfp-builder\//);
+assert.doesNotMatch(llms, /https:\/\/netify\.co\.uk\/\?q=/);
+assert.match(llms, /endpoint \/sase\/api\/mcp\/, trailing slash required/);
+assert.match(llms, /\/openapi\.json/);
+assert.match(consolidatedOpenApi, /"\/api\/mcp\/"/);
+assert.match(consolidatedOpenApi, /MCP_RFP_TOOL_DEFINITIONS/);
+assert.match(consolidatedOpenApi, /WORKSPACE_TOOL_DEFINITIONS/);
+assert.match(perToolOpenApi, /`\/api\/openapi\/\$\{def\.name\}\/`/);
+assert.match(shortlistBuilder, /`\/sase\/shortlist\/print\/\$\{qs/);
+assert.match(shortlistBuilder, /aria-label="Main priority"/);
+assert.match(shortlistBuilder, /aria-label="Deployment ceiling"/);
+assert.match(shortlistBuilder, /aria-label="Scoring profile"/);
+assert.match(shortlistBuilder, /aria-label="Work email"/);
+assert.doesNotMatch(nav, /\/resell\/bt-(?:sd-wan|sase)\//);
+assert.doesNotMatch(workspaceTools, /https:\/\/netify\.co\.uk\/\?q=/);
 
 const dataset = getShortlistDatasetSchema(30, 40, "2026-09-01") as { keywords: string[]; distribution: Array<{ contentUrl: string }> };
 assert.ok(dataset.keywords.includes("SD-WAN providers"));

@@ -121,7 +121,7 @@ export default async function ShortlistPage() {
         </ul>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written and reviewed by the Netify research team. The governed provider records were last updated on {verified}. Comparison contract {GOVERNED_SHORTLIST_CONTRACT_VERSION}. To act on a shortlist, describe the project once at{" "}
-          <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
+          <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">the Netify RFP Builder</a>
           {", "}raise it to a full RFP and publish to the providers it names, then
           compare structured responses, with pricing kept private to the buyer.
           {" "}<a href="/sase/shortlist/cite.bib" className="underline">Cite this dataset</a>.
@@ -144,7 +144,7 @@ export default async function ShortlistPage() {
           {BEST_PAGES.map((bp) => (
             <Link
               key={bp.slug}
-              href={`/best/${bp.slug}`}
+              href={`/best/${bp.slug}/`}
               className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
             >
               {bp.title.replace("Best SD-WAN and SASE providers for ", "")}

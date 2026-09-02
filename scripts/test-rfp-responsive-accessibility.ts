@@ -6,6 +6,9 @@ const root = process.cwd();
 const css = fs.readFileSync(path.join(root, "src/app/globals.css"), "utf8");
 const modes = fs.readFileSync(path.join(root, "src/components/procurement/JourneyModeSelector.tsx"), "utf8");
 const procurements = fs.readFileSync(path.join(root, "src/components/MyProcurements.tsx"), "utf8");
+const guidedBuild = fs.readFileSync(path.join(root, "src/components/procurement/GuidedBuild.tsx"), "utf8");
+const sectionBuild = fs.readFileSync(path.join(root, "src/components/procurement/SectionBuildPanel.tsx"), "utf8");
+const projectDesk = fs.readFileSync(path.join(root, "src/components/ProjectDesk.tsx"), "utf8");
 
 function luminance(hex: string) {
   const rgb = [0, 2, 4].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255);
@@ -36,5 +39,11 @@ assert.doesNotMatch(css, /color: #fff; background: var\(--lpos-orange\)/, "white
 assert.match(procurements, /fetch\("\/sase\/api\/auth\/session"/, "private account data needs a session preflight");
 assert.match(procurements, /if \(!session\.authenticated\) \{[\s\S]*?setRfps\(\[\]\);[\s\S]*?return;/, "signed-out visitors must stop before private record requests");
 assert.match(procurements, /Promise\.all\(\[loadRfps\(\), loadOpps\(\)\]\)/, "private records should load only after the session gate");
+assert.doesNotMatch(guidedBuild, /<main className="nf-guided-main">/, "the guided panel must not nest a second main landmark");
+assert.doesNotMatch(guidedBuild, /<h1>\{visibleQuestion\.prompt\}<\/h1>/, "the current question must not create a second page H1");
+assert.doesNotMatch(sectionBuild, /<main className="nf-section-build-panel"/, "the section panel must not create a nested main landmark");
+assert.doesNotMatch(sectionBuild, /<h1>/, "the section panel must not create a second page H1");
+assert.match(projectDesk, /<textarea\s+aria-label="Describe your requirements"/, "the primary requirement composer needs an accessible name");
+assert.match(projectDesk, /<input\s+aria-label="Attach an RFP or requirements document"[\s\S]*?type="file"/, "the document upload needs an accessible name");
 
 console.log("RFP responsive layout, contrast and session-gate tests passed");

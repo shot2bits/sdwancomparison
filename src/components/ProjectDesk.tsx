@@ -4756,6 +4756,7 @@ export default function ProjectDesk({
               right, which is not how any chat surface reads. */}
           <div className="nf-2030-composer flex items-end gap-2 rounded-[4px] border border-[#d3d0cd] bg-white py-2 pl-[18px] pr-2">
             <textarea
+              aria-label="Describe your requirements"
               ref={inputRef}
               value={draft}
               onChange={(e) => { setDraft(e.target.value); if (!firstKeyAt.current) firstKeyAt.current = Date.now(); }}
@@ -4806,6 +4807,7 @@ export default function ProjectDesk({
                 </svg>
               </button>
               <input
+                aria-label="Attach an RFP or requirements document"
                 ref={fileRef}
                 type="file"
                 accept=".txt,.md,.csv,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,application/pdf,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

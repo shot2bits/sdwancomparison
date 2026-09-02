@@ -339,7 +339,7 @@ export default function GuidedBuild({
 
   return (
     <div className="lpos-builder">
-      <main className="nf-guided-main">
+      <div className="nf-guided-main">
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
           <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Guided conversation</strong></div>
           <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
@@ -394,7 +394,7 @@ export default function GuidedBuild({
           </div>
           <div className="nf-guided-focus">
             <div className="lpos-question-heading"><p className="nf-guided-next-label">{ready ? "Essential baseline complete" : sectionComplete ? "Section complete" : "Next essential question"}</p><span>{Math.max(1, position)} of {Math.max(1, total)}</span></div>
-            <h1>{visibleQuestion.prompt}</h1>
+            <h2>{visibleQuestion.prompt}</h2>
             {visibleQuestion.context && <p className="nf-guided-question-context">{visibleQuestion.context}</p>}
             <div className="lpos-why"><strong>♙ &nbsp; Why this matters</strong><p>{questionReason}</p></div>
             <p className="lpos-adds"><span aria-hidden="true">▣</span> Adds to your document: <strong>{sectionTitle}</strong></p>
@@ -557,7 +557,7 @@ export default function GuidedBuild({
           </section>
 
         </section>
-      </main>
+      </div>
 
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">

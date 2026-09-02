@@ -57,10 +57,17 @@ assert.equal(result.shortlist[0]?.slug, "hpe-aruba", "all shortlist controls mus
 
 const page = readFileSync("src/app/(marketing)/shortlist/page.tsx", "utf8");
 const data = readFileSync("src/app/(marketing)/shortlist/data.json/route.ts", "utf8");
+const csvData = readFileSync("src/app/(marketing)/shortlist/data.csv/route.ts", "utf8");
 const agent = readFileSync("src/app/api/agent/route.ts", "utf8");
 const mcp = readFileSync("src/lib/mcp-tools.ts", "utf8");
 for (const source of [page, data, agent, mcp]) assert.match(source, /getLiveShortlistDataset/);
 assert.match(data, /runtime_provider_source/);
 assert.match(data, /provider_contract_version:\s*live\.providerContractVersion/);
+assert.match(data, /generated_at:\s*generatedAt/);
+assert.match(data, /createHash\("sha256"\)/);
+assert.match(data, /if-none-match/);
+assert.match(csvData, /'generated_at'/);
+assert.match(csvData, /createHash\('sha256'\)/);
+assert.match(csvData, /if-none-match/);
 assert.match(mcp, /runtime_provider_source/);
 console.log("live Neon shortlist tests passed");

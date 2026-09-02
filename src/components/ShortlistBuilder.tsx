@@ -218,7 +218,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
 
   function printUrl(): string {
     const qs = encodeScenario(input);
-    return `/sase/shortlist/print${qs ? `?${qs}` : ""}`;
+    return `/sase/shortlist/print/${qs ? `?${qs}` : ""}`;
   }
 
   /** The ranked state is persisted losslessly before navigation. */
@@ -457,6 +457,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           <div>
             <p className="eyebrow mb-3">Main priority</p>
             <select
+              aria-label="Main priority"
               value={input.intent}
               onChange={(e) => set("intent", e.target.value as ShortlistInput["intent"])}
               className="select-field"
@@ -573,6 +574,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           <div>
             <p className="eyebrow mb-3">Deployment ceiling</p>
             <select
+              aria-label="Deployment ceiling"
               value={input.max_deployment_speed}
               onChange={(e) => set("max_deployment_speed", e.target.value as ShortlistInput["max_deployment_speed"])}
               className="select-field"
@@ -585,6 +587,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           <div>
             <p className="eyebrow mb-3">Scoring profile</p>
             <select
+              aria-label="Scoring profile"
               value={input.weight_preset}
               onChange={(e) => set("weight_preset", e.target.value as ShortlistInput["weight_preset"])}
               className="select-field"
@@ -869,6 +872,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           ) : (
             <form onSubmit={submitLead} className="grid sm:grid-cols-3 gap-3">
               <input
+                aria-label="Name"
                 required
                 placeholder="Name"
                 value={lead.name}
@@ -876,6 +880,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                 className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm bg-white"
               />
               <input
+                aria-label="Work email"
                 required
                 type="email"
                 placeholder="Work email"
@@ -884,6 +889,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                 className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm bg-white"
               />
               <input
+                aria-label="Company"
                 placeholder="Company"
                 value={lead.company}
                 onChange={(e) => setLead({ ...lead, company: e.target.value })}

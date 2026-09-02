@@ -24,7 +24,7 @@ export async function GET(_req: Request, ctx: Ctx) {
     },
     servers: [{ url: SITE_URL }],
     paths: {
-      [`/api/openapi/${def.name}`]: {
+      [`/api/openapi/${def.name}/`]: {
         post: {
           operationId: def.name,
           description: def.description,

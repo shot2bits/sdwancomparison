@@ -2,13 +2,14 @@ import { buildShortlist, DEFAULT_INPUT } from '@/lib/shortlist-core';
 import { FEATURE_NAMES } from '@/lib/vendors';
 import { getLiveShortlistDataset } from '@/lib/live-shortlist';
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from '@/lib/governed-provider-catalogue';
+import { createHash } from 'node:crypto';
 
 function csv(value: unknown): string {
   const text = Array.isArray(value) ? value.join(' | ') : String(value ?? '');
   return `"${text.replaceAll('"', '""')}"`;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const live = await getLiveShortlistDataset();
   const ranked = buildShortlist(
     live.vendors,
@@ -18,13 +19,15 @@ export async function GET() {
   const sourceBySlug = new Map(live.vendors.map((provider) => [provider.slug, provider]));
   const lastModified = live.vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
   const headings = [
-    'contract_version', 'rank', 'slug', 'name', 'provider_type', 'score',
+    'contract_version', 'generated_at', 'rank', 'slug', 'name', 'provider_type', 'score',
     'summary', 'products', 'evidence_source_count', 'reviewed_at', 'profile_url',
   ];
   const rows = ranked.map((provider) => {
     const source = sourceBySlug.get(provider.slug);
+    const generatedAt = new Date(`${lastModified}T00:00:00.000Z`).toISOString();
     return [
     GOVERNED_SHORTLIST_CONTRACT_VERSION,
+    generatedAt,
     provider.rank,
     provider.slug,
     provider.name,
@@ -38,12 +41,15 @@ export async function GET() {
   ];
   });
   const body = [headings, ...rows].map((row) => row.map(csv).join(',')).join('\r\n');
+  const responseBody = `${body}\r\n`;
+  const etag = `"${createHash('sha256').update(responseBody).digest('hex')}"`;
+  const headers = {
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': 'inline; filename="netify-sase-sd-wan-shortlist.csv"',
+    'Last-Modified': new Date(lastModified).toUTCString(),
+    'ETag': etag,
+  };
+  if (request.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers });
 
-  return new Response(`${body}\r\n`, {
-    headers: {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': 'inline; filename="netify-sase-sd-wan-shortlist.csv"',
-      'Last-Modified': new Date(lastModified).toUTCString(),
-    },
-  });
+  return new Response(responseBody, { headers });
 }

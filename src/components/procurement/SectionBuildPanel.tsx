@@ -29,11 +29,11 @@ export default function SectionBuildPanel({
   const ready = row?.state === "confirmed" || (coreTotal > 0 && required.length === 0);
 
   return (
-    <main className="nf-section-build-panel" aria-label={`${row?.title ?? "RFP"} section builder`}>
+    <section className="nf-section-build-panel" aria-label={`${row?.title ?? "RFP"} section builder`}>
       <header>
         <div className="nf-section-build-eyebrow"><strong>RFP Builder</strong><span>· One living document</span></div>
         <p>Section {Math.max(position, 1)} of {Math.max(total, 1)}</p>
-        <h1>{row?.title ?? "Organisation and scale"}</h1>
+        <h2>{row?.title ?? "Organisation and scale"}</h2>
         <span>{ready ? "This section is ready. Review the captured answers below or choose the next section." : `Complete the ${required.length || 1} remaining core question${required.length === 1 ? "" : "s"}. Your answers build this section live.`}</span>
       </header>
 
@@ -82,6 +82,6 @@ export default function SectionBuildPanel({
         )}
         {optional.length > 0 && <small>{optional.length} optional refinement{optional.length === 1 ? "" : "s"} available after the core section is complete.</small>}
       </section>
-    </main>
+    </section>
   );
 }

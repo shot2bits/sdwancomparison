@@ -4,19 +4,20 @@ import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { SITE_URL } from "@/lib/structured-data";
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
 import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
+import { createHash } from "node:crypto";
 
 /**
  * JSON twin of /shortlist. Same content as the page, structured for machines.
  * AI agents can read the dataset and discover the callable tools here.
  */
-export async function GET() {
+export async function GET(request: Request) {
   const live = await getLiveShortlistDataset();
   const vendors = live.vendors;
   const lastModified = vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
   const defaultResult = buildShortlist(vendors, { ...DEFAULT_INPUT, shortlist_size: vendors.length }, FEATURE_NAMES);
 
-  return Response.json(
-    {
+  const generatedAt = new Date(`${lastModified}T00:00:00.000Z`).toISOString();
+  const payload = {
       page: `${SITE_URL}/shortlist/`,
       title: SHORTLIST_INTRO.h1,
       description: SHORTLIST_INTRO.subhead,
@@ -27,6 +28,7 @@ export async function GET() {
       runtime_provider_source: live.source,
       provider_dataset_versions: live.datasetVersions,
       provider_loaded_at: live.loadedAt,
+      generated_at: generatedAt,
       last_reviewed: vendors.map((provider) => provider.last_verified).sort().slice(-1)[0],
       evidence: {
         method:
@@ -62,7 +64,7 @@ export async function GET() {
         {
           id: "mcp-server",
           kind: "mcp",
-          url: `${SITE_URL}/api/mcp`,
+          url: `${SITE_URL}/api/mcp/`,
           description:
             "JSON-RPC 2.0 MCP server. tools/list returns available tools; tools/call executes build_sase_shortlist, list_sase_vendors or get_sase_vendor_profile.",
         },
@@ -80,7 +82,14 @@ export async function GET() {
         json: `${SITE_URL}/shortlist/data.json`,
         csv: `${SITE_URL}/shortlist/data.csv`,
       },
-    },
-    { headers: { "Last-Modified": new Date(lastModified).toUTCString() } },
-  );
+  };
+  const body = JSON.stringify(payload);
+  const etag = `"${createHash("sha256").update(body).digest("hex")}"`;
+  const headers = {
+    "Content-Type": "application/json; charset=utf-8",
+    "Last-Modified": new Date(lastModified).toUTCString(),
+    ETag: etag,
+  };
+  if (request.headers.get("if-none-match") === etag) return new Response(null, { status: 304, headers });
+  return new Response(body, { headers });
 }

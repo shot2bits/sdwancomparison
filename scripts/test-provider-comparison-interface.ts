@@ -89,7 +89,7 @@ assert.match(interfaceSource, /Live since 1 September 2026/);
 assert.match(interfaceSource, /Turn this shortlist into a provider RFP/);
 assert.match(interfaceSource, /Continue with this shortlist/);
 assert.match(interfaceSource, /Use current top five in RFP Builder/);
-assert.match(interfaceSource, /Show the remaining/);
+assert.match(interfaceSource, /shortlist_size: vendors\.length/, "the default view must show all 30 providers without an expansion gate");
 assert.match(interfaceSource, /Publishing is free and does not commit you to buy or speak to anyone/);
 assert.doesNotMatch(interfaceSource, /You already have this for free/);
 assert.doesNotMatch(interfaceSource, /Publishing is what gets them responding/);
