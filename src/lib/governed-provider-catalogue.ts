@@ -63,11 +63,13 @@ function status(states: SupportState[]): CapabilityStatus {
   return "unknown";
 }
 
-function excerpt(overview: string) {
-  const paragraph = overview.split(/\n{2,}/)[0].trim();
-  const sentences = paragraph.match(/[^.!?]+[.!?]+(?:[”’"']|$)?/g) ?? [paragraph];
-  const selected = sentences.slice(0, 2).join(" ").trim();
-  return selected.length <= 700 ? selected : `${selected.slice(0, 697).trimEnd()}...`;
+export function shortlistExcerpt(overview: string, fallback = "") {
+  const paragraph = overview.split(/\n{2,}/)[0].trim().replace(/(\d)\.\s+(\d)/g, "$1.$2");
+  const sentences = paragraph.split(/(?<=[.!?])\s+(?=[A-Z“"'])/);
+  const selected = sentences.slice(0, 2).join(" ").replace(/\s+/g, " ").trim();
+  const looksLikeHeading = /^(suitability matrix|executive summary|overview|who should\b)/i.test(selected);
+  const usable = selected && !looksLikeHeading ? selected : fallback.trim().replace(/(\d)\.\s+(\d)/g, "$1.$2");
+  return usable.length <= 700 ? usable : `${usable.slice(0, 697).trimEnd()}...`;
 }
 
 function blank(record: GovernedRecord): ShortlistVendor {
@@ -88,7 +90,7 @@ function blank(record: GovernedRecord): ShortlistVendor {
     agent_platforms: { windows: unknown, macos: unknown, ios: unknown, android: unknown, linux: unknown, chromeos: unknown, agentless: unknown },
     pop_count: null, sla_availability_pct: null, support_model: { follow_the_sun_24x7: unknown, uk_support_desk: unknown, named_tam: unknown },
     logging: { siem_export: unknown, log_retention_days: null }, marketplace_url: `https://netify.co.uk/marketplace/${record.provider.slug}/`,
-    shortlist_summary: excerpt(record.editorial.overview), key_differentiators: [], best_fit_for: [], watch_outs: [],
+    shortlist_summary: shortlistExcerpt(record.editorial.overview, record.products.map((product) => product.name).slice(0, 4).join(", ")), key_differentiators: [], best_fit_for: [], watch_outs: [],
     evidence_coverage_pct: 0, last_verified: record.revision.reviewed_at.slice(0, 10),
   };
 }
@@ -100,7 +102,7 @@ export function getGovernedShortlistDataset(legacy: ShortlistVendor[]): Shortlis
     const provider = { ...(bySlug.get(comparisonSlug) ?? blank(record)), slug: comparisonSlug } as ShortlistVendor;
     provider.name = NAMES[record.provider.slug] ?? provider.name;
     provider.marketplace_url = `https://netify.co.uk/marketplace/${record.provider.slug}/`;
-    provider.shortlist_summary = excerpt(record.editorial.overview);
+    provider.shortlist_summary = shortlistExcerpt(record.editorial.overview, provider.shortlist_summary);
     provider.last_verified = record.revision.reviewed_at.slice(0, 10);
     provider.evidence_source_count = record.evidence_source_count + ((independentEvidence.sources as Record<string, unknown[]>)[comparisonSlug]?.length ?? 0);
     provider.independent_evidence_source_count = (independentEvidence.sources as Record<string, unknown[]>)[comparisonSlug]?.length ?? 0;
@@ -118,7 +120,7 @@ export function getGovernedShortlistDataset(legacy: ShortlistVendor[]): Shortlis
 export function getGovernedProviderSummaries() {
   return snapshot.providers.map((record) => ({
     slug: record.provider.slug, comparisonSlug: SLUGS[record.provider.slug], name: NAMES[record.provider.slug] ?? record.provider.display_name,
-    providerTypes: record.provider.provider_types, summary: excerpt(record.editorial.overview), reviewedAt: record.revision.reviewed_at,
+    providerTypes: record.provider.provider_types, summary: shortlistExcerpt(record.editorial.overview, record.products.map((product) => product.name).slice(0, 4).join(", ")), reviewedAt: record.revision.reviewed_at,
     datasetVersion: record.revision.dataset_version, products: record.products, capabilities: record.capabilities,
     geographies: record.geographies, serviceModels: record.service_models, sectors: record.sector_evidence,
     compliance: record.compliance, integrations: record.integrations, caseStudies: record.case_studies,

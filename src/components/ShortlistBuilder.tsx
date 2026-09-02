@@ -16,8 +16,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import CompareTable from "@/components/CompareTable";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
-import Continuation from "@/components/Continuation";
-import { deriveContinuationTool } from "@/lib/continuation/derive";
 import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import {
   AI_KEYS,
@@ -88,6 +86,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
 
   // Agent chat state (multi-turn)
   const [chatPrompt, setChatPrompt] = useState("");
+  const [requirementPrompt, setRequirementPrompt] = useState("");
   const [chatBusy, setChatBusy] = useState(false);
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [chatComparison, setChatComparison] = useState<ComparisonResult | null>(null);
@@ -180,6 +179,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     setCompareSlugs([]);
     setComparisonSource("");
     setChatPrompt("");
+    setRequirementPrompt("");
     setChatMessages([]);
     setChatComparison(null);
     setChatError(null);
@@ -242,19 +242,20 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     }
   }
 
-  async function askAgent(promptOverride?: string) {
-    const prompt = (promptOverride ?? chatPrompt).trim();
+  async function askAgent(promptOverride?: string, requirementsOnly = false) {
+    const prompt = (promptOverride ?? (requirementsOnly ? requirementPrompt : chatPrompt)).trim();
     if (!prompt || chatBusy) return;
     const nextMessages = [...chatMessages, { role: "user" as const, content: prompt }];
     setChatMessages(nextMessages);
-    setChatPrompt("");
+    if (requirementsOnly) setRequirementPrompt("");
+    else setChatPrompt("");
     setChatBusy(true);
     setChatError(null);
     try {
       const res = await fetch("/sase/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages, current_input: input, comparison_slugs: compareSlugs }),
+        body: JSON.stringify({ messages: nextMessages, current_input: input, comparison_slugs: requirementsOnly ? [] : compareSlugs }),
       });
       if (!res.ok) throw new Error(`Agent returned ${res.status}`);
       const data = (await res.json()) as {
@@ -389,12 +390,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   return (
     <section id="provider-decision-workspace" className="rounded-xl border border-[var(--ink-200,#e8ebef)] p-4 sm:p-6">
       <p className="eyebrow mb-2">Netify comparison workspace</p>
-      <h2 className="mb-6">Compare providers and build around your requirements</h2>
-      {comparisonCount !== null && (
-        <p className="-mt-4 mb-6 text-xs text-[var(--ink-500)] tabular-nums">
-          {comparisonCount.toLocaleString("en-GB")} provider {comparisonCount === 1 ? "comparison" : "comparisons"} completed since 1 September 2026
-        </p>
-      )}
+      <h2 className="mb-6">Compare providers or build a shortlist</h2>
       <ComparisonWorkspace
         vendors={vendors}
         comparison={activeComparison}
@@ -403,64 +399,18 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         question={chatPrompt}
         setQuestion={setChatPrompt}
         ask={() => void askAgent()}
+        requirementText={requirementPrompt}
+        setRequirementText={setRequirementPrompt}
+        buildFromRequirements={() => void askAgent(requirementPrompt, true)}
         busy={chatBusy}
         messages={chatMessages}
         error={chatError}
         source={comparisonSource}
+        comparisonCount={comparisonCount}
       />
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
       {/* ---------------- Filters column ---------------- */}
       <div className="min-w-0 lg:col-span-4 space-y-8">
-        {/* AI advisor */}
-        <section className="border border-[var(--ink-900)] rounded-sm p-5 bg-[var(--paper-base)]">
-          <p className="eyebrow mb-2">AI advisor</p>
-          <h2 className="text-lg mb-3">Build around your requirements</h2>
-          <p className="text-sm text-[var(--ink-700)] mb-3">
-            Tell the advisor about your sites, regions, security needs and how you
-            want the service run. It sets the filters below for you.
-          </p>
-          <textarea
-            value={chatPrompt}
-            onChange={(e) => setChatPrompt(e.target.value)}
-            rows={4}
-            placeholder="Example: 60 sites across the UK and Germany, fully managed, ZTNA and SWG required. Or: compare Cato Networks and Zscaler."
-            className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-sm bg-white"
-          />
-          <button
-            onClick={() => void askAgent()}
-            disabled={chatBusy || !chatPrompt.trim()}
-            className="mt-3 w-full px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm disabled:opacity-50 hover:bg-amber-400 transition-colors"
-          >
-            {chatBusy ? "Thinking..." : chatMessages.length > 0 ? "Ask a follow-up" : "Build my shortlist with AI"}
-          </button>
-          {chatMessages.length > 0 && (
-            <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-              {chatMessages.map((m, i) => (
-                <div
-                  key={i}
-                  className={`text-sm whitespace-pre-wrap ${
-                    m.role === "user"
-                      ? "text-[var(--ink-500)]"
-                      : "text-[var(--ink-700)] border-l-2 border-[var(--accent)] pl-3"
-                  }`}
-                >
-                  {m.role === "user" ? `You: ${m.content}` : m.content}
-                </div>
-              ))}
-            </div>
-          )}
-          {chatError && <p className="mt-3 text-sm text-red-700">{chatError}</p>}
-          {chatMessages.some((m) => m.role === "assistant") && (
-            <button type="button"
-              onClick={() => void continueCanonicalProject()}
-              disabled={handoffState === "busy"}
-              className="mt-3 block w-full text-center px-4 py-2.5 border border-[var(--ink-900)] rounded-full text-sm font-medium no-underline hover:bg-zinc-900 hover:text-white transition-colors"
-            >
-              Continue in the workspace with what you just described
-            </button>
-          )}
-        </section>
-
         <details open className="rounded-lg border border-[var(--ink-200,#e8ebef)] p-4">
           <summary className="cursor-pointer font-medium">Refine requirements</summary>
           <div className="mt-5 space-y-8">
@@ -812,16 +762,16 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         {handoffState === "error" && <p className="mb-4 text-sm text-red-700">Your shortlist is still here, but the private project could not be created. Try again.</p>}
         <p className="text-sm text-[var(--ink-500)] mb-6">
           {isDefaultView
-            ? "Balanced capability score across all 40 features. Set filters, pick your sector, or describe your needs to the AI advisor to build your bespoke shortlist."
+            ? "Balanced capability score across all 40 features. Set filters, pick your sector, or use Build from requirements to create your shortlist."
             : result.criteria_summary}
         </p>
         <section className="mb-6 overflow-hidden rounded-sm border border-zinc-950 bg-zinc-950 text-white">
           <div className="grid gap-6 p-6 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.72fr)] md:p-8">
             <div>
-              <p className="eyebrow mb-2 text-amber-400">Your shortlist is ready</p>
-              <h3 className="mb-3 text-2xl text-white">Turn this shortlist into a provider RFP</h3>
+              <p className="eyebrow mb-2 text-amber-400">{isDefaultView ? "Current balanced ranking" : "Your shortlist is ready"}</p>
+              <h3 className="mb-3 text-2xl text-white">{isDefaultView ? "Use the current top providers in an RFP" : "Turn this shortlist into a provider RFP"}</h3>
               <p className="max-w-2xl text-sm leading-6 text-zinc-300">
-                Your requirements and top providers will carry into Netify&apos;s RFP Builder.
+                {isDefaultView ? "The current order uses the balanced score across all 40 capabilities. " : "Your requirements and top providers will carry into Netify's RFP Builder. "}
                 Review the project, publish it anonymously and invite providers to submit written
                 responses. Publishing is free and does not commit you to buy or speak to anyone.
               </p>
@@ -855,7 +805,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                 disabled={handoffState === "busy" || result.shortlist.length === 0}
                 className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {handoffState === "busy" ? "Opening the RFP Builder..." : "Continue with this shortlist"}
+                {handoffState === "busy" ? "Opening the RFP Builder..." : isDefaultView ? "Use current top five in RFP Builder" : "Continue with this shortlist"}
               </button>
               <p className="mt-3 text-center text-xs text-zinc-400">
                 Review and edit everything before publishing.
@@ -876,7 +826,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         )}
 
         <ol className="space-y-5 list-none p-0">
-          {result.shortlist.map((v) => (
+          {(isDefaultView ? result.shortlist.slice(0, 10) : result.shortlist).map((v) => (
             <VendorCard
               key={`${v.slug}-${providerCardReset}`}
               v={v}
@@ -886,22 +836,23 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           ))}
         </ol>
 
-        {/* The Continuation (DEF wave one): the tool speaks its own live
-            state or says nothing. An empty shortlist derives null and
-            renders nothing at all. Keyed by source so a re-ranked
-            shortlist reseeds the sentence. */}
-        {(() => {
-          const cont = deriveContinuationTool({
-            names: result.shortlist.map((v) => v.name),
-            slugs: result.shortlist.slice(0, 5).map((v) => v.slug),
-            considered: result.considered,
-          });
-          return cont ? (
-            <div className="mt-10">
-              <Continuation key={cont.source} c={cont} />
-            </div>
-          ) : null;
-        })()}
+        {isDefaultView && result.shortlist.length > 10 && (
+          <details className="mt-5 rounded-sm border border-[var(--ink-300,#ccc)] p-4">
+            <summary className="cursor-pointer text-sm font-medium">
+              Show the remaining {result.shortlist.length - 10} ranked providers
+            </summary>
+            <ol start={11} className="mt-5 space-y-5 p-0">
+              {result.shortlist.slice(10).map((v) => (
+                <VendorCard
+                  key={`${v.slug}-${providerCardReset}`}
+                  v={v}
+                  compared={compareSlugs.includes(v.slug)}
+                  onCompare={() => toggleCompare(v.slug)}
+                />
+              ))}
+            </ol>
+          </details>
+        )}
 
         {result.near_misses.length > 0 && (
           <div className="mt-10">
@@ -995,10 +946,14 @@ function ComparisonWorkspace({
   question,
   setQuestion,
   ask,
+  requirementText,
+  setRequirementText,
+  buildFromRequirements,
   busy,
   messages,
   error,
   source,
+  comparisonCount,
 }: {
   vendors: ShortlistVendor[];
   comparison: ComparisonResult | null;
@@ -1007,11 +962,16 @@ function ComparisonWorkspace({
   question: string;
   setQuestion: React.Dispatch<React.SetStateAction<string>>;
   ask: () => void;
+  requirementText: string;
+  setRequirementText: React.Dispatch<React.SetStateAction<string>>;
+  buildFromRequirements: () => void;
   busy: boolean;
   messages: { role: "user" | "assistant"; content: string }[];
   error: string | null;
   source: string;
+  comparisonCount: number | null;
 }) {
+  const [mode, setMode] = useState<"compare" | "requirements">("compare");
   const choose = (index: number, slug: string) => {
     setCompareSlugs((current) => {
       const next = [...current];
@@ -1024,46 +984,69 @@ function ComparisonWorkspace({
     <section id="comparison-workspace" className="mb-12 overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950 text-white shadow-[0_24px_70px_rgba(24,24,27,0.16)]">
       <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
         <div className="p-6 md:p-8">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400">Netify comparison workspace</p>
             <span className="rounded-full border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-400">{COMPARISON_HANDOFF_VERSION}</span>
-          </div>
-          <h2 className="mt-4 max-w-xl text-3xl font-semibold tracking-tight !text-white md:text-4xl">Compare providers, then interrogate the evidence.</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Select two providers for a deterministic comparison across 40 capabilities. Ask a follow-up and the advisor uses the same comparison function exposed through Netify MCP.</p>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
-            {[0, 1].map((index) => (
-              <label key={index} className="block text-xs font-medium text-zinc-300">
-                Provider {index === 0 ? "one" : "two"}
-                <select value={compareSlugs[index] ?? ""} onChange={(event) => choose(index, event.target.value)} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white outline-none focus:border-amber-400">
-                  <option value="">Choose a provider</option>
-                  {vendors.map((vendor) => <option key={vendor.slug} value={vendor.slug} disabled={compareSlugs[index === 0 ? 1 : 0] === vendor.slug}>{vendor.name}</option>)}
-                </select>
-              </label>
-            )).reduce<React.ReactNode[]>((nodes, field, index) => index === 0 ? [field, <span key="versus" className="hidden pb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500 sm:block">versus</span>] : [...nodes, field], [])}
-          </div>
-
-          <a
-            href={comparison ? "#comparison-table" : undefined}
-            aria-disabled={!comparison}
-            className={`mt-5 flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left text-sm font-semibold no-underline transition-colors ${comparison ? "border-amber-300 bg-amber-400 text-zinc-950 shadow-[0_10px_30px_rgba(251,191,36,0.18)] hover:bg-amber-300" : "pointer-events-none border-zinc-800 bg-zinc-900 text-zinc-600"}`}
-          >
-            <span>Compare every feature across your selected providers</span>
-            <span aria-hidden="true" className="ml-4 text-lg">↓</span>
-          </a>
-
-          <form className="mt-6 border-t border-zinc-800 pt-5" onSubmit={(event) => { event.preventDefault(); ask(); }}>
-            <label htmlFor="comparison-question" className="text-xs font-medium text-zinc-300">Ask about the comparison</label>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-              <input id="comparison-question" value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Which is stronger for a managed UK healthcare deployment?" maxLength={1000} className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-amber-400" />
-              <button disabled={busy || !question.trim()} className="rounded-lg bg-amber-400 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400">{busy ? "Reading evidence…" : "Ask Netify AI"}</button>
             </div>
-          </form>
-          {source && <p className="mt-3 text-xs text-zinc-500">Opened from {source.replaceAll("-", " ")}.</p>}
+            {comparisonCount !== null && (
+              <p className="text-[11px] text-zinc-500 tabular-nums">
+                Live since 1 September 2026: {comparisonCount.toLocaleString("en-GB")} completed
+              </p>
+            )}
+          </div>
+          <div className="mt-5 inline-flex rounded-lg border border-zinc-700 bg-zinc-900 p-1" role="tablist" aria-label="Choose how to use the comparison workspace">
+            <button type="button" role="tab" aria-selected={mode === "compare"} onClick={() => setMode("compare")} className={`rounded-md px-4 py-2 text-sm font-medium ${mode === "compare" ? "bg-white text-zinc-950" : "text-zinc-300 hover:text-white"}`}>
+              Compare two providers
+            </button>
+            <button type="button" role="tab" aria-selected={mode === "requirements"} onClick={() => setMode("requirements")} className={`rounded-md px-4 py-2 text-sm font-medium ${mode === "requirements" ? "bg-white text-zinc-950" : "text-zinc-300 hover:text-white"}`}>
+              Build from requirements
+            </button>
+          </div>
+
+          {mode === "compare" ? (
+            <>
+              <h2 className="mt-5 max-w-xl text-3xl font-semibold tracking-tight !text-white md:text-4xl">Compare two providers</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Select any two providers to compare all 40 capabilities. Asking a question is optional.</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+                {[0, 1].map((index) => (
+                  <label key={index} className="block text-xs font-medium text-zinc-300">
+                    Provider {index === 0 ? "one" : "two"}
+                    <select value={compareSlugs[index] ?? ""} onChange={(event) => choose(index, event.target.value)} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white outline-none focus:border-amber-400">
+                      <option value="">Choose a provider</option>
+                      {vendors.map((vendor) => <option key={vendor.slug} value={vendor.slug} disabled={compareSlugs[index === 0 ? 1 : 0] === vendor.slug}>{vendor.name}</option>)}
+                    </select>
+                  </label>
+                )).reduce<React.ReactNode[]>((nodes, field, index) => index === 0 ? [field, <span key="versus" className="hidden pb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500 sm:block">versus</span>] : [...nodes, field], [])}
+              </div>
+              <a href={comparison ? "#comparison-table" : undefined} aria-disabled={!comparison} className={`mt-5 flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left text-sm font-semibold no-underline transition-colors ${comparison ? "border-amber-300 bg-amber-400 text-zinc-950 shadow-[0_10px_30px_rgba(251,191,36,0.18)] hover:bg-amber-300" : "pointer-events-none border-zinc-800 bg-zinc-900 text-zinc-600"}`}>
+                <span>Compare every feature across your selected providers</span>
+                <span aria-hidden="true" className="ml-4 text-lg">↓</span>
+              </a>
+              <form className="mt-6 border-t border-zinc-800 pt-5" onSubmit={(event) => { event.preventDefault(); ask(); }}>
+                <label htmlFor="comparison-question" className="text-xs font-medium text-zinc-300">Ask about the comparison, optional</label>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <input id="comparison-question" value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Which is stronger for a managed UK healthcare deployment?" maxLength={1000} className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-amber-400" />
+                  <button disabled={busy || !question.trim()} className="rounded-lg bg-amber-400 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400">{busy ? "Reading evidence..." : "Ask Netify AI"}</button>
+                </div>
+              </form>
+              {source && <p className="mt-3 text-xs text-zinc-500">Opened from {source.replaceAll("-", " ")}.</p>}
+            </>
+          ) : (
+            <>
+              <h2 className="mt-5 max-w-xl text-3xl font-semibold tracking-tight !text-white md:text-4xl">Build a shortlist from your requirements</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Describe your sites, regions, security requirements and operating model. Netify maps the description to the same filters and governed provider evidence shown below.</p>
+              <form className="mt-6" onSubmit={(event) => { event.preventDefault(); buildFromRequirements(); }}>
+                <label htmlFor="shortlist-requirements" className="text-xs font-medium text-zinc-300">Your requirements</label>
+                <textarea id="shortlist-requirements" value={requirementText} onChange={(event) => setRequirementText(event.target.value)} rows={5} placeholder="Example: 60 sites across the UK and Germany, fully managed, ZTNA and secure web gateway required." maxLength={2000} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-amber-400" />
+                <button disabled={busy || !requirementText.trim()} className="mt-3 w-full rounded-lg bg-amber-400 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400">{busy ? "Reading evidence..." : "Build my shortlist"}</button>
+              </form>
+            </>
+          )}
         </div>
 
         <div className="border-t border-zinc-800 bg-zinc-900/70 p-6 md:p-8 lg:border-l lg:border-t-0">
-          {comparison ? (
+          {mode === "compare" && comparison ? (
             <>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">Live evidence comparison</p>
               <div className="mt-4 grid grid-cols-2 gap-3">
@@ -1073,7 +1056,10 @@ function ComparisonWorkspace({
             </>
           ) : (
             <div className="flex min-h-64 flex-col justify-center">
-              {[['01', 'Select', 'Choose any two of the 30 researched providers.'], ['02', 'Compare', 'See the same evidence matrix used by the public MCP tool.'], ['03', 'Question', 'Ask what the differences mean for your project.']].map(([number, title, copy]) => <div key={number} className="mb-5 last:mb-0"><p className="font-mono text-xs text-zinc-500">{number} {title.toUpperCase()}</p><p className="mt-1 text-base text-zinc-200">{copy}</p></div>)}
+              {(mode === "compare"
+                ? [['01', 'Select', 'Choose any two of the 30 researched providers.'], ['02', 'Compare', 'Open the full evidence matrix.'], ['03', 'Question', 'Ask what the differences mean for your project.']]
+                : [['01', 'Describe', 'Enter the requirements that matter to your organisation.'], ['02', 'Rank', 'Netify applies the same evidence rules as the manual filters.'], ['03', 'Continue', 'Review the shortlist and take it into the RFP Builder.']]
+              ).map(([number, title, copy]) => <div key={number} className="mb-5 last:mb-0"><p className="font-mono text-xs text-zinc-500">{number} {title.toUpperCase()}</p><p className="mt-1 text-base text-zinc-200">{copy}</p></div>)}
             </div>
           )}
         </div>

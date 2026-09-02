@@ -52,7 +52,7 @@ export function getShortlistWebApplicationSchema() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "Interactive tool that builds a bespoke SASE and SD-WAN provider shortlist from 30 graded vendors. Filter by operating model, region, cloud support, AI capability, resilience and 40 capability features, or describe requirements in plain language to the AI advisor.",
+      "Interactive tool that builds an SD-WAN and SASE provider shortlist from 30 graded vendors. Filter by operating model, region, cloud support, AI capability, resilience and 40 capability features, or describe requirements in plain language.",
     offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
     provider: { "@id": `${SITE_URL}/#organization` },
   };

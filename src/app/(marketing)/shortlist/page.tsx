@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
 import { BEST_PAGES } from "@/lib/best-pages";
+import { buildShortlist, DEFAULT_INPUT } from "@/lib/shortlist-core";
 import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
@@ -20,12 +21,12 @@ import {
 export const metadata: Metadata = {
   title: "Best SD-WAN and SASE Providers (2026): Compare the Market, Build a Shortlist",
   description:
-    "Compare the SASE and SD-WAN UK and North American market: 30 evidence-graded providers, ranked. Build a shortlist by filters or AI advisor, then publish an RFP within minutes.",
+    "Compare 30 SD-WAN providers, SD-WAN vendors, SASE providers and managed services using Netify's evidence-graded capability data. Build a shortlist and continue to an RFP.",
   alternates: { canonical: `${SITE_URL}/shortlist/` },
   openGraph: {
     title: "Best SD-WAN and SASE Providers (2026): Compare the Market, Build a Shortlist",
     description:
-      "Compare the SASE and SD-WAN UK and North American market from 30 graded providers, then publish an RFP within minutes.",
+      "Compare 30 SD-WAN and SASE providers using Netify's evidence-graded capability data, then build a shortlist and continue to an RFP.",
     url: `${SITE_URL}/shortlist/`,
     type: "website",
     locale: "en_GB",
@@ -39,6 +40,11 @@ export default async function ShortlistPage() {
   const vendors = live.vendors;
   const verified = vendors.map((v) => v.last_verified).sort().slice(-1)[0] ?? "";
   const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
+  const defaultRanking = buildShortlist(
+    vendors,
+    { ...DEFAULT_INPUT, shortlist_size: vendors.length },
+    Object.fromEntries(features.map((feature) => [feature.id, feature.name])),
+  ).shortlist;
 
   const schemas = [
     getOrganizationSchema(),
@@ -48,9 +54,10 @@ export default async function ShortlistPage() {
     getShortlistDatasetSchema(vendors.length, features.length, verified),
     getShortlistFaqSchema(SHORTLIST_FAQS),
     {
-      "@context": "https://schema.org", "@type": "ItemList", name: "SASE and SD-WAN providers compared by Netify",
-      numberOfItems: vendors.length,
-      itemListElement: vendors.map((provider, index) => ({ "@type": "ListItem", position: index + 1, url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
+      "@context": "https://schema.org", "@type": "ItemList", name: "SD-WAN and SASE providers ranked by Netify",
+      numberOfItems: defaultRanking.length,
+      itemListOrder: "https://schema.org/ItemListOrderDescending",
+      itemListElement: defaultRanking.map((provider) => ({ "@type": "ListItem", position: provider.rank, url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
     },
     // The 40 capability definitions as a DefinedTermSet, mirroring the
     // visible glossary below so AI engines can quote a row's meaning
@@ -87,8 +94,22 @@ export default async function ShortlistPage() {
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           {SHORTLIST_INTRO.subhead}
         </p>
+        <section className="mt-5 rounded-lg border border-[var(--ink-200,#e8ebef)] bg-[var(--ink-50,#f6f8fa)] p-4" aria-labelledby="top-sd-wan-providers">
+          <h2 id="top-sd-wan-providers" className="text-lg">Top SD-WAN providers at a glance</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">
+            At the current balanced setting, the first ten providers are listed below. Change the requirements to recalculate the order against the same governed evidence.
+          </p>
+          <ol className="mt-3 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-sm">
+            {defaultRanking.slice(0, 10).map((provider) => (
+              <li key={provider.slug}>
+                <span className="mr-1 text-[var(--ink-500)]">{provider.rank}.</span>
+                <a href={provider.marketplace_url!} className="font-medium underline underline-offset-4">{provider.name}</a>
+              </li>
+            ))}
+          </ol>
+        </section>
         <p className="mt-4 text-base leading-7 text-[var(--ink-800)]">
-          <strong>Short answer:</strong> this page compares 30 technology vendors, carriers and managed providers using one governed research dataset. Use the filters for a ranked shortlist, compare two providers feature by feature, or open each evidence profile before issuing an RFP.
+          <strong>Short answer:</strong> compare 30 SD-WAN providers, SD-WAN vendors, SASE providers, carriers and managed services using one governed research dataset. Build a ranked shortlist, compare two providers feature by feature, or open each evidence profile before issuing an RFP.
         </p>
         {/* The offer in one glance (Robert, 17 July 2026), server-rendered
             so agents and crawlers read it alongside the ranking data. */}

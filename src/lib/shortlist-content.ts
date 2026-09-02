@@ -13,8 +13,8 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
     a: "Yes absolutely, every filter combination is matched to an associated page URL, enabling you to copy a link to take you (or board directors) straight back to the same filtered list again at a later date, as well as being able to download a PDF version or have the ranked list emailed to you.",
   },
   {
-    q: "What does the AI advisor do?",
-    a: "We've built our AI advisor to make everything easier for you: you describe your estate in plain language (for example site count, regions, security requirements and operating model) and the advisor will take your instructions to map them onto the same filters and scoring engine used by the manual controls, then the advisor will explain the resulting shortlist to you.",
+    q: "What does Build from requirements do?",
+    a: "Describe your estate in plain language, including site count, regions, security requirements and operating model. Netify maps the description to the same filters and scoring engine used by the manual controls, then explains the resulting shortlist.",
   },
   {
     q: "Is this comparison vendor neutral?",
@@ -27,8 +27,8 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
 ];
 
 export const SHORTLIST_INTRO = {
-  eyebrow: "SASE and SD-WAN shortlist builder",
-  h1: "Compare SASE and SD-WAN providers, vendors and managed services",
+  eyebrow: "SD-WAN and SASE shortlist builder",
+  h1: "Compare SD-WAN and SASE providers, vendors and managed services",
   subhead:
-    "Compare 30 researched SASE and SD-WAN providers across operating model, network and security capability. Build a ranked shortlist, inspect the evidence, compare two providers directly, then hand your requirements to the Netify RFP Builder.",
+    "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Build a ranked shortlist, inspect the evidence, compare two providers directly, then hand your requirements to the Netify RFP Builder.",
 };

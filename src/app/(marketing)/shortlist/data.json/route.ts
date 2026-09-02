@@ -12,7 +12,7 @@ import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/
 export async function GET() {
   const live = await getLiveShortlistDataset();
   const vendors = live.vendors;
-  const defaultResult = buildShortlist(vendors, DEFAULT_INPUT, FEATURE_NAMES);
+  const defaultResult = buildShortlist(vendors, { ...DEFAULT_INPUT, shortlist_size: vendors.length }, FEATURE_NAMES);
 
   return Response.json(
     {
@@ -45,6 +45,7 @@ export async function GET() {
         evidence_source_count: provider.evidence_source_count ?? 0,
         url: provider.marketplace_url,
       })),
+      top_providers_at_balanced_setting: defaultResult.shortlist.slice(0, 10),
       default_shortlist: defaultResult,
       interactiveSurfaces: [
         {

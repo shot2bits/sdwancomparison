@@ -1,4 +1,4 @@
-import { comparisonSlugForGovernedProvider } from "@/lib/governed-provider-catalogue";
+import { comparisonSlugForGovernedProvider, shortlistExcerpt } from "@/lib/governed-provider-catalogue";
 import type { ProviderMatchInput, ProviderMatchRecord } from "@/lib/provider-matching";
 import {
   CLOUD_KEYS,
@@ -116,13 +116,6 @@ function combinedSaseStatus(record: ProviderMatchRecord): CapabilityStatus {
   return "unknown";
 }
 
-function excerpt(value: string): string {
-  const paragraph = value.split(/\n{2,}/)[0]?.trim() ?? "";
-  const sentences = paragraph.match(/[^.!?]+[.!?]+(?:[”’"']|$)?/g) ?? [paragraph];
-  const selected = sentences.slice(0, 2).join(" ").replace(/\s+/g, " ").trim();
-  return selected.length <= 700 ? selected : `${selected.slice(0, 697).trimEnd()}...`;
-}
-
 const REGION_TERMS: Record<(typeof REGION_KEYS)[number], string[]> = {
   uk_ireland: ["united kingdom", "uk", "ireland"], europe: ["europe", "emea"],
   north_america: ["north america", "united states", "usa", "canada", "mexico"],
@@ -158,7 +151,7 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     const provider: ShortlistVendor = JSON.parse(JSON.stringify(original));
     provider.category = record.provider_types.join(" / ").replaceAll("_", " ");
     provider.product_focus = record.product_names.slice(0, 4).join(", ");
-    provider.shortlist_summary = excerpt(record.overview);
+    provider.shortlist_summary = shortlistExcerpt(record.overview, provider.shortlist_summary);
     provider.marketplace_url = `https://netify.co.uk/marketplace/${record.slug}/`;
     provider.last_verified = record.reviewed_at?.slice(0, 10) ?? provider.last_verified;
     provider.evidence_source_count = record.evidence_source_count;
