@@ -496,9 +496,10 @@ function latestPublishConsent(p: ProjectDetails): PublishedSnapshot["consent"] {
  * email, no new connection).
  */
 async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnapshot): Promise<PublishResult> {
+  const frozenBySlug = new Map((snapshot.provider_evidence ?? []).map((provider) => [provider.slug, provider]));
   const invited = await Promise.all(
     snapshot.invited_vendor_ids.map(async (slug) => {
-      const vendor = vendorBySlug(slug);
+      const vendor = frozenBySlug.get(slug) ?? vendorBySlug(slug);
       const vendorToken = await getOrCreateSupplierVendorToken(project.id, slug);
       return {
         slug,
@@ -512,7 +513,7 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
   // snapshot resolves the same real matched_vendor_ids against the live
   // dataset, same pattern `invited` above already used for names.
   const matchedVendorsReplay =
-    snapshot.matched_vendors ?? snapshot.matched_vendor_ids.map((slug) => ({ slug, name: vendorBySlug(slug)?.name ?? slug }));
+    snapshot.matched_vendors ?? snapshot.matched_vendor_ids.map((slug) => ({ slug, name: frozenBySlug.get(slug)?.name ?? vendorBySlug(slug)?.name ?? slug }));
   return {
     published: project,
     invited,

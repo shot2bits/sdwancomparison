@@ -54,6 +54,8 @@ assert.ok(publishBody.indexOf("getStrictLiveShortlistDataset()") < publishBody.i
 assert.match(publishBody, /provider_evidence: providerEvidence/);
 assert.match(publishBody, /provider_provenance/);
 assert.match(publishBody, /provider_match_input: attempt\.match_input/);
+assert.match(publish, /const frozenBySlug = new Map\(\(snapshot\.provider_evidence \?\? \[\]\)/);
+assert.match(publish, /frozenBySlug\.get\(slug\) \?\? vendorBySlug\(slug\)/);
 
 const mcp = fs.readFileSync("src/lib/mcp-rfp-tools.ts", "utf8");
 assert.match(mcp, /const snapshot = await getLatestPublishedSnapshot\(projectId\)/);
