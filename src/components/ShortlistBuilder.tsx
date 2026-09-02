@@ -428,6 +428,15 @@ export default function ShortlistBuilder({ vendors, features, initialView = "all
         error={chatError}
         source={comparisonSource}
         comparisonCount={comparisonCount}
+        topProviders={result.shortlist.slice(0, 5)}
+        openRfp={() => {
+          fireNetifyEvent("shortlist_rfp_continue_click", {
+            placement: "comparison_workspace",
+            provider_count: String(Math.min(result.shortlist.length, 5)),
+          });
+          void continueCanonicalProject();
+        }}
+        handoffState={handoffState}
       />
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
       {/* ---------------- Filters column ---------------- */}
@@ -789,55 +798,6 @@ export default function ShortlistBuilder({ vendors, features, initialView = "all
             ? "Balanced capability score across all 40 features. Set filters, pick your sector, or use Build from requirements to create your shortlist."
             : result.criteria_summary}
         </p>
-        <section className="mb-6 overflow-hidden rounded-sm border border-zinc-950 bg-zinc-950 text-white">
-          <div className="grid gap-6 p-6 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.72fr)] md:p-8">
-            <div>
-              <p className="eyebrow mb-2 text-amber-400">{isDefaultView ? "Current balanced ranking" : "Your shortlist is ready"}</p>
-              <h3 className="mb-3 text-2xl text-white">{isDefaultView ? "Use the current top providers in an RFP" : "Turn this shortlist into a provider RFP"}</h3>
-              <p className="max-w-2xl text-sm leading-6 text-zinc-300">
-                {isDefaultView ? "The current order uses the balanced score across all 40 capabilities. " : "Your requirements and top providers will carry into Netify's RFP Builder. "}
-                Review the project, publish it anonymously and invite providers to submit written
-                responses. Publishing is free and does not commit you to buy or speak to anyone.
-              </p>
-              <ul className="mt-5 grid list-none gap-2 p-0 text-sm text-zinc-200 sm:grid-cols-3">
-                <li className="flex items-start gap-2"><span className="text-amber-400" aria-hidden="true">✓</span>Free to publish</li>
-                <li className="flex items-start gap-2"><span className="text-amber-400" aria-hidden="true">✓</span>Anonymous and non-binding</li>
-                <li className="flex items-start gap-2"><span className="text-amber-400" aria-hidden="true">✓</span>Contact details stay private</li>
-              </ul>
-            </div>
-            <div className="rounded-sm border border-zinc-700 bg-zinc-900 p-5">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                Carried into the RFP Builder
-              </p>
-              <ol className="mb-5 list-none space-y-2 p-0 text-sm">
-                {result.shortlist.slice(0, 5).map((vendor, index) => (
-                  <li key={vendor.slug} className="flex items-center gap-3 border-b border-zinc-700 pb-2 last:border-0 last:pb-0">
-                    <span className="w-5 text-xs text-zinc-500">{index + 1}</span>
-                    <span className="font-medium text-white">{vendor.name}</span>
-                  </li>
-                ))}
-              </ol>
-              <button
-                type="button"
-                onClick={() => {
-                  fireNetifyEvent("shortlist_rfp_continue_click", {
-                    placement: "handoff_panel",
-                    provider_count: String(Math.min(result.shortlist.length, 5)),
-                  });
-                  void continueCanonicalProject();
-                }}
-                disabled={handoffState === "busy" || result.shortlist.length === 0}
-                className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {handoffState === "busy" ? "Opening the RFP Builder..." : isDefaultView ? "Use current top five in RFP Builder" : "Continue with this shortlist"}
-              </button>
-              <p className="mt-3 text-center text-xs text-zinc-400">
-                Review and edit everything before publishing.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {result.shortlist.length === 0 && (
           <div className="border border-[var(--ink-300,#ccc)] rounded-sm p-6 text-[var(--ink-700)]">
             <p className="mb-2 font-medium">No provider meets every requirement.</p>
@@ -963,6 +923,9 @@ function ComparisonWorkspace({
   error,
   source,
   comparisonCount,
+  topProviders,
+  openRfp,
+  handoffState,
 }: {
   vendors: ShortlistVendor[];
   comparison: ComparisonResult | null;
@@ -979,8 +942,11 @@ function ComparisonWorkspace({
   error: string | null;
   source: string;
   comparisonCount: number | null;
+  topProviders: VendorVerdict[];
+  openRfp: () => void;
+  handoffState: "idle" | "busy" | "error";
 }) {
-  const [mode, setMode] = useState<"compare" | "requirements">("compare");
+  const [mode, setMode] = useState<"compare" | "requirements" | "top-five">("compare");
   const choose = (index: number, slug: string) => {
     setCompareSlugs((current) => {
       const next = [...current];
@@ -1004,12 +970,15 @@ function ComparisonWorkspace({
               </p>
             )}
           </div>
-          <div className="mt-5 inline-flex rounded-lg border border-zinc-700 bg-zinc-900 p-1" role="tablist" aria-label="Choose how to use the comparison workspace">
+          <div className="mt-5 grid w-full gap-1 rounded-lg border border-zinc-700 bg-zinc-900 p-1 sm:grid-cols-3" role="tablist" aria-label="Choose how to use the comparison workspace">
             <button type="button" role="tab" aria-selected={mode === "compare"} onClick={() => setMode("compare")} className={`rounded-md px-4 py-2 text-sm font-medium ${mode === "compare" ? "bg-white text-zinc-950" : "text-zinc-300 hover:text-white"}`}>
               Compare two providers
             </button>
             <button type="button" role="tab" aria-selected={mode === "requirements"} onClick={() => setMode("requirements")} className={`rounded-md px-4 py-2 text-sm font-medium ${mode === "requirements" ? "bg-white text-zinc-950" : "text-zinc-300 hover:text-white"}`}>
               Build from requirements
+            </button>
+            <button type="button" role="tab" aria-selected={mode === "top-five"} onClick={() => setMode("top-five")} className={`rounded-md px-4 py-2 text-sm font-medium ${mode === "top-five" ? "bg-white text-zinc-950" : "text-zinc-300 hover:text-white"}`}>
+              Use current top five
             </button>
           </div>
 
@@ -1041,7 +1010,7 @@ function ComparisonWorkspace({
               </form>
               {source && <p className="mt-3 text-xs text-zinc-500">Opened from {source.replaceAll("-", " ")}.</p>}
             </>
-          ) : (
+          ) : mode === "requirements" ? (
             <>
               <h2 className="mt-5 max-w-xl text-3xl font-semibold tracking-tight !text-white md:text-4xl">Build a shortlist from your requirements</h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Describe your sites, regions, security requirements and operating model. Netify maps the description to the same filters and governed provider evidence shown below.</p>
@@ -1050,6 +1019,23 @@ function ComparisonWorkspace({
                 <textarea id="shortlist-requirements" value={requirementText} onChange={(event) => setRequirementText(event.target.value)} rows={5} placeholder="Example: 60 sites across the UK and Germany, fully managed, ZTNA and secure web gateway required." maxLength={2000} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-amber-400" />
                 <button disabled={busy || !requirementText.trim()} className="mt-3 w-full rounded-lg bg-amber-400 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400">{busy ? "Reading evidence..." : "Build my shortlist"}</button>
               </form>
+            </>
+          ) : (
+            <>
+              <h2 className="mt-5 max-w-xl text-3xl font-semibold tracking-tight !text-white md:text-4xl">Use the current top five in an RFP</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Carry the current balanced ranking into Netify&apos;s RFP Builder. Review and edit everything before publishing.</p>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Publishing is free and does not commit you to buy or speak to anyone. Your opportunity is anonymous and your contact details stay private.</p>
+              <ol className="mt-6 list-none space-y-2 p-0 text-sm">
+                {topProviders.map((provider, index) => (
+                  <li key={provider.slug} className="flex items-center gap-3 border-b border-zinc-800 pb-2 last:border-0">
+                    <span className="w-5 text-xs text-zinc-500">{index + 1}</span>
+                    <span className="font-medium text-white">{provider.name}</span>
+                  </li>
+                ))}
+              </ol>
+              <button type="button" onClick={openRfp} disabled={handoffState === "busy" || topProviders.length === 0} className="mt-6 w-full rounded-lg bg-amber-400 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400">
+                {handoffState === "busy" ? "Opening the RFP Builder..." : "Use current top five in RFP Builder"}
+              </button>
             </>
           )}
         </div>
@@ -1067,7 +1053,9 @@ function ComparisonWorkspace({
             <div className="flex min-h-64 flex-col justify-center">
               {(mode === "compare"
                 ? [['01', 'Select', 'Choose any two of the 30 researched providers.'], ['02', 'Compare', 'Open the full evidence matrix.'], ['03', 'Question', 'Ask what the differences mean for your project.']]
-                : [['01', 'Describe', 'Enter the requirements that matter to your organisation.'], ['02', 'Rank', 'Netify applies the same evidence rules as the manual filters.'], ['03', 'Continue', 'Review the shortlist and take it into the RFP Builder.']]
+                : mode === "requirements"
+                  ? [['01', 'Describe', 'Enter the requirements that matter to your organisation.'], ['02', 'Rank', 'Netify applies the same evidence rules as the manual filters.'], ['03', 'Continue', 'Review the shortlist and take it into the RFP Builder.']]
+                  : [['01', 'Review', 'See the five highest balanced capability scores.'], ['02', 'Continue', 'Carry all five into the RFP Builder.'], ['03', 'Control', 'Edit the project before you publish anything.']]
               ).map(([number, title, copy]) => <div key={number} className="mb-5 last:mb-0"><p className="font-mono text-xs text-zinc-500">{number} {title.toUpperCase()}</p><p className="mt-1 text-base text-zinc-200">{copy}</p></div>)}
             </div>
           )}
