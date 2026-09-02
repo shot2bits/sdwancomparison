@@ -92,11 +92,12 @@ export default function MyProcurements() {
   const [opps, setOpps] = useState<MineOpp[] | null>(null);
 
   useEffect(() => {
+    let active = true;
     const loadRfps = () =>
       fetch("/sase/api/rfp/mine")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (!d?.rfps) return;
+          if (!active || !d?.rfps) return;
           setRfps(d.rfps as Rfp[]);
           try { window.dispatchEvent(new Event("netify:rfps-changed")); } catch { /* ignore */ }
         })
@@ -105,6 +106,7 @@ export default function MyProcurements() {
       fetch("/sase/api/opportunity/mine")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
+          if (!active) return;
           if (!d?.opportunities) { setOpps([]); return; }
           const list = d.opportunities as MineOpp[];
           for (const o of list) {
@@ -112,16 +114,29 @@ export default function MyProcurements() {
           }
           setOpps(list);
         })
-        .catch(() => setOpps([]));
-    const drafts = localDrafts();
-    if (drafts.length > 0) {
-      fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) })
-        .catch(() => {})
-        .then(() => { loadRfps(); loadOpps(); });
-    } else {
-      loadRfps();
-      loadOpps();
-    }
+        .catch(() => { if (active) setOpps([]); });
+
+    const loadPrivateRecords = async () => {
+      const session = await fetch("/sase/api/auth/session", { cache: "no-store" })
+        .then((response) => response.ok ? response.json() as Promise<{ authenticated?: boolean }> : { authenticated: false })
+        .catch(() => ({ authenticated: false }));
+      if (!active) return;
+      if (!session.authenticated) {
+        setRfps([]);
+        setOpps([]);
+        return;
+      }
+
+      const drafts = localDrafts();
+      if (drafts.length > 0) {
+        await fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) }).catch(() => {});
+        if (!active) return;
+      }
+      await Promise.all([loadRfps(), loadOpps()]);
+    };
+
+    void loadPrivateRecords();
+    return () => { active = false; };
   }, []);
 
   // Signed out (or still loading the projects list): render nothing.

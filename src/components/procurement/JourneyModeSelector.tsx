@@ -146,19 +146,20 @@ export default function JourneyModeSelector() {
   }
 
   return (
-    <section className="mx-auto max-w-[1180px] px-5 pb-5 pt-6" aria-labelledby="journey-mode-title">
-      <p id="journey-mode-title" className="m-0 mb-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#66635e]">
-        Choose how to start — every route creates the same private project
-      </p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        {MODES.map((mode) => (
-          <button key={mode.id} type="button" aria-pressed={selected === mode.id} onClick={() => choose(mode.id)}
-            className={`rounded-md border p-4 text-left transition-colors ${selected === mode.id ? "border-[#b64b16] bg-[#fff5ed]" : "border-[#d8d3cc] bg-white hover:border-[#9d958b]"}`}>
-            <strong className="block text-[15px] text-[#110f0d]">{mode.title}</strong>
-            <span className="mt-1 block text-[12.5px] leading-5 text-[#66635e]">{mode.description}</span>
-          </button>
-        ))}
-      </div>
+    <section className="journey-mode-selector px-5 pb-5 pt-6" aria-labelledby="journey-mode-title">
+      <div className="journey-mode-selector-inner mx-auto max-w-[1180px]">
+        <p id="journey-mode-title" className="m-0 mb-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#66635e]">
+          Choose how to start. Every route creates the same private project
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {MODES.map((mode) => (
+            <button key={mode.id} type="button" aria-pressed={selected === mode.id} onClick={() => choose(mode.id)}
+              className={`rounded-md border p-4 text-left transition-colors ${selected === mode.id ? "border-[#b64b16] bg-[#fff5ed]" : "border-[#d8d3cc] bg-white hover:border-[#9d958b]"}`}>
+              <strong className="block text-[15px] text-[#110f0d]">{mode.title}</strong>
+              <span className="mt-1 block text-[12.5px] leading-5 text-[#66635e]">{mode.description}</span>
+            </button>
+          ))}
+        </div>
       {(selected === "quick_list" || selected === "find_providers") && (
         <div className="mt-3 rounded-md border border-[#d8d3cc] bg-white p-4" aria-live="polite">
           <div className="grid gap-3 md:grid-cols-3">
@@ -183,6 +184,7 @@ export default function JourneyModeSelector() {
           {publishedUrl && <p className="mt-4 text-sm font-semibold text-emerald-800">Publication completed and MarketUnlock verified. <a href={publishedUrl} className="underline">View the anonymous opportunity</a>.</p>}
         </div>
       )}
+      </div>
     </section>
   );
 }
