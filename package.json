@@ -42,6 +42,8 @@
     "test:marketplace-foundation": "npm run test:publication-policy && npm run test:project-entrance && npm run test:provider-matching && npm run test:project-marketplace-envelope && npm run test:sector-profiles && npm run test:marketplace-project-session && npm run test:journey-modes && npm run test:provider-match-preview && npm run test:marketplace-mcp && npm run test:marketplace-examples && npm run test:marketplace-funnel",
     "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
     "validate:rfp-ui": "node scripts/validate-rfp-builder-flow-ui.mjs",
+    "validate:rfp-repair": "node scripts/validate-rfp-repair-pass.mjs",
+    "build:nonmutating": "next build --webpack",
     "validate:ui:reversal": "node scripts/validate-sector-suggestion-reversal-ui.mjs",
     "validate:ui:row8": "node scripts/validate-row8-vendor-disclosure-ui.mjs",
     "validate:ui:setup": "playwright install chromium"
