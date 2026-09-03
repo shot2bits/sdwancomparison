@@ -16,12 +16,12 @@ import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchem
  */
 
 export const metadata: Metadata = {
-  title: "SASE & SD-WAN RFP Template (2026.1): free Word download + full worked sample",
+  title: "SASE RFP Template (2026.1): worked sample with ZTNA, SWG, CASB and FWaaS, free Word download",
   description:
-    "A free SASE / SD-WAN RFP template as a Word download, shown as a complete worked sample for a fictional 38-site UK retailer: methodology-backed sections, evidence checklist, weighted scoring matrix and submission instructions. Or build a tailored RFP in minutes with the Netify RFP Builder.",
+    "A free SASE RFP template as a Word download, shown as a complete worked sample for a fictional 38-site UK retailer buying single-vendor SASE: identity, ZTNA, SWG, CASB, FWaaS and SD-WAN sections, evidence checklist, weighted scoring matrix and submission instructions. Build a tailored SD-WAN or SASE RFP with the Netify RFP Builder.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/sample-rfp/` },
   openGraph: {
-    title: "SASE & SD-WAN RFP Template: free Word download and worked sample",
+    title: "SASE RFP Template: free Word download and worked sample",
     description: "What the Netify RFP Builder produces: sections, evidence checklist, scoring matrix and submission instructions. Download the template or build a tailored RFP in minutes.",
     url: `${SITE_URL}/rfp-builder/sample-rfp`,
     type: "website",
@@ -80,7 +80,7 @@ export default function SampleRfpPage() {
       ))}
 
       <nav className="mb-6 text-sm text-[var(--ink-500)]">
-        <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">SD-WAN and SASE RFP Builder</a> / Sample RFP
+        <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">SD-WAN and SASE RFP Builder</a> / SASE sample RFP
       </nav>
 
       <p className="mb-3 max-w-3xl rounded-sm border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800">
