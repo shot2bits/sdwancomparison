@@ -5178,6 +5178,7 @@ export default function ProjectDesk({
             aria-disabled={item.disabled || undefined}
             aria-describedby={item.disabled ? tooltipId : undefined}
             aria-current={item.current ? "page" : undefined}
+            disabled={item.disabled}
             data-current={item.current}
             data-locked={item.disabled || undefined}
             data-disabled-reason={item.disabled ? item.disabledReason : undefined}

@@ -2,7 +2,7 @@
 import { chromium } from "playwright";
 
 const BASE_URL = process.env.RFP_UI_BASE_URL ?? "http://localhost:3100/sase/home/?test=1";
-const VIEWPORTS = [390, 768, 819, 821, 1024, 1280, 1440, 1728];
+const VIEWPORTS = [390, 768, 819, 820, 821, 1024, 1280, 1440, 1728];
 let checks = 0;
 let failures = 0;
 
@@ -34,6 +34,30 @@ try {
     check(layout.position === "sticky", `${width}px: navigation rail is sticky inside the application`, JSON.stringify(layout));
     check(!layout.overlap, `${width}px: navigation rail does not cover canonical or entrance content`);
     check(layout.overflow <= 1, `${width}px: application creates no viewport overflow`, JSON.stringify(layout));
+    if (width === 390 || width === 820) {
+      const mobileRail = await page.evaluate(() => {
+        const buttons = [...document.querySelectorAll(".lpos-product-rail button")].filter((element) => {
+          const style = getComputedStyle(element);
+          return style.display !== "none" && style.visibility !== "hidden";
+        });
+        const lockedIcon = document.querySelector('.lpos-product-rail button[data-locked="true"] .lpos-rail-icon');
+        const badge = lockedIcon?.querySelector("i");
+        const iconBox = lockedIcon?.getBoundingClientRect();
+        const badgeBox = badge?.getBoundingClientRect();
+        return {
+          targets: buttons.map((button) => {
+            const box = button.getBoundingClientRect();
+            return { width: box.width, height: box.height };
+          }),
+          badgeContained: Boolean(iconBox && badgeBox && badgeBox.left >= iconBox.left && badgeBox.right <= iconBox.right && badgeBox.top >= iconBox.top && badgeBox.bottom <= iconBox.bottom),
+        };
+      });
+      check(mobileRail.targets.every((target) => target.width >= 44 && target.height >= 44), `${width}px: rail touch targets are at least 44 by 44 pixels`, JSON.stringify(mobileRail.targets));
+      check(mobileRail.badgeContained, `${width}px: lock badge remains inside its icon box`);
+      const suppliers = page.locator('.lpos-product-rail button[data-disabled-reason]').filter({ has: page.locator('.lpos-rail-label', { hasText: "Suppliers" }) });
+      check(await suppliers.isDisabled(), `${width}px: locked supplier navigation is natively disabled`);
+      check((await suppliers.getAttribute("data-disabled-reason")) === "Complete the essential baseline before reviewing publication and supplier matching.", `${width}px: locked supplier navigation exposes the full reason`);
+    }
     await page.close();
   }
 

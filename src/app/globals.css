@@ -963,6 +963,27 @@
 .nf-supplier-projection > h4 { margin: 0 0 8px; color: #171513; font-size: 17px; line-height: 1.35; }
 .nf-supplier-projection-summary { margin: 0 0 18px; color: #5d5954; font-size: 13px; line-height: 1.55; }
 
+/* Touch and lock indicators remain inside their controls at every width. */
+.nf-2030-workspace .lpos-product-rail button .lpos-rail-icon {
+  width: 28px;
+  height: 28px;
+}
+.nf-2030-workspace .lpos-product-rail button .lpos-rail-icon i {
+  right: 0;
+  bottom: 0;
+}
+.nf-2030-workspace .lpos-profile > button {
+  width: 44px;
+  height: 44px;
+}
+.nf-2030-workspace .lpos-profile > b {
+  width: 44px;
+  height: 44px;
+}
+.nf-2030-workspace .lpos-header .nf-2030-lifecycle button {
+  min-height: 44px !important;
+}
+
 .nf-2030-document-tabs { display: flex; flex-wrap: wrap; gap: 3px; margin: 0 0 10px; }
 .nf-2030-document-tabs button { border: 0; border-radius: 8px; padding: 10px 12px; color: #7e7e85; background: transparent; cursor: pointer; font-size: 10px; }
 .nf-2030-document-tabs button[aria-selected="true"] { color: #f1eee8; background: #292a30; }
