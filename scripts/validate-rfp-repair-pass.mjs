@@ -18,6 +18,8 @@ try {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
     await page.goto(BASE_URL, { waitUntil: "networkidle" });
     check(await page.locator(".nf-2030-workspace").count() === 1, `${width}px: RFP workspace renders`);
+    check(await page.locator(".lpos-header").count() === 1, `${width}px: exactly one application header renders`);
+    check(await page.locator("h1").count() === 1, `${width}px: exactly one H1 remains after hydration`);
     const layout = await page.evaluate(() => {
       const rail = document.querySelector(".lpos-product-rail");
       const targets = [document.querySelector("#page-h1"), document.querySelector("#rfp-definitions"), document.querySelector(".journey-mode-selector")].filter(Boolean);
@@ -95,6 +97,8 @@ try {
   check(await complete.getByRole("button", { name: /Continue to publication|Complete \d+ more sections? to continue/ }).isEnabled(), "a complete project can continue to the separate publication step");
   const supplierProjection = complete.getByTestId("supplier-projection");
   check(await supplierProjection.count() === 1, "review exposes one scoped supplier-facing projection");
+  check(await complete.locator(".lpos-header").count() === 1, "review keeps one application header after project start and navigation");
+  check(await complete.locator("h1").count() === 1, "review keeps one H1 after project start and navigation");
   const supplierText = await supplierProjection.innerText();
   const forbiddenSupplierText = ["Procurement lead", "Private workspace", "Draft saved", "Document settings", "NOT PUBLISHED"];
   check(forbiddenSupplierText.every((text) => !supplierText.includes(text)), "supplier projection excludes buyer workspace chrome", supplierText.slice(0, 220).replace(/\s+/g, " "));
