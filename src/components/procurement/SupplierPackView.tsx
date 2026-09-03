@@ -26,7 +26,7 @@ export default function SupplierPackView({ groups }: { groups: SupplierResponseG
   if (totalQuestions === 0) {
     return (
       <div className="pb-4">
-        <p className="m-0 text-[13.5px] leading-[1.55] text-[#66635e]">No supplier questions yet — they compile alongside the requirements above.</p>
+        <p className="m-0 text-[13.5px] leading-[1.55] text-[#66635e]">No supplier questions yet. They compile alongside the requirements above.</p>
       </div>
     );
   }
@@ -34,7 +34,7 @@ export default function SupplierPackView({ groups }: { groups: SupplierResponseG
   return (
     <div className="flex flex-col gap-1">
       <p className="m-0 max-w-[48em] pb-2 text-[13px] leading-[1.6] text-[#66635e]">
-        What suppliers and vendors will be asked to answer against — {totalQuestions} question{totalQuestions === 1 ? "" : "s"} across {groups.length}{" "}
+        What suppliers and vendors will be asked to answer against: {totalQuestions} question{totalQuestions === 1 ? "" : "s"} across {groups.length}{" "}
         area{groups.length === 1 ? "" : "s"}, each tied to a numbered requirement above.
       </p>
       {groups.map((g) => (

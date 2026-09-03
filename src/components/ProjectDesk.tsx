@@ -111,6 +111,7 @@ import GuidedBuild, { type RfpDepth } from "@/components/procurement/GuidedBuild
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
+import SupplierPackView from "@/components/procurement/SupplierPackView";
 import DecisionRail2030 from "@/components/procurement/DecisionRail2030";
 import { buildAnsweredLog } from "@/lib/workspace/answered-log";
 import CapturedList from "@/components/procurement/CapturedList";
@@ -5543,7 +5544,7 @@ export default function ProjectDesk({
                       Review before publishing
                     </h2>
                     <p className="m-0 mb-6 mt-2 max-w-[62ch] text-[13.5px] leading-[1.55]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
-                      Suppliers will see everything below. Nothing about price or preferred vendors is shared.
+                      Check the publication baseline and the supplier question schedule. Buyer identity, pricing preferences and preferred vendors are never included.
                     </p>
                     <section className="nf-publication-checklist" aria-labelledby="nf-publication-checklist-title">
                       <div className="nf-publication-checklist-heading">
@@ -5570,7 +5571,13 @@ export default function ProjectDesk({
                           : `Complete ${publishChecklist.total - publishChecklist.doneCount} more ${publishChecklist.total - publishChecklist.doneCount === 1 ? "section" : "sections"} to continue`}
                       </button>
                     </section>
-                    {canvasBlock}
+                    <section className="nf-supplier-projection" data-testid="supplier-projection" aria-labelledby="nf-supplier-projection-title">
+                      <p>Supplier-facing preview</p>
+                      <h3 id="nf-supplier-projection-title">What suppliers will receive</h3>
+                      <h4>{canvasDocument.title}</h4>
+                      <div className="nf-supplier-projection-summary">{canvasDocument.summary}</div>
+                      <SupplierPackView groups={canvasDocument.responseGroups} />
+                    </section>
                     {/* ── THE LIVING STATEMENT ── one document card, five ruled
                         sections of labelled rows, from the very first paint (Robert's
                         ruling: the empty project IS the door): every empty line

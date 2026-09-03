@@ -93,6 +93,12 @@ try {
   const completeChecklist = await complete.locator(".nf-publication-checklist").innerText();
   check(completeChecklist.includes("7 of 7 essential sections complete"), "review shows the complete seven-section publication baseline", completeChecklist.replace(/\s+/g, " "));
   check(await complete.getByRole("button", { name: /Continue to publication|Complete \d+ more sections? to continue/ }).isEnabled(), "a complete project can continue to the separate publication step");
+  const supplierProjection = complete.getByTestId("supplier-projection");
+  check(await supplierProjection.count() === 1, "review exposes one scoped supplier-facing projection");
+  const supplierText = await supplierProjection.innerText();
+  const forbiddenSupplierText = ["Procurement lead", "Private workspace", "Draft saved", "Document settings", "NOT PUBLISHED"];
+  check(forbiddenSupplierText.every((text) => !supplierText.includes(text)), "supplier projection excludes buyer workspace chrome", supplierText.slice(0, 220).replace(/\s+/g, " "));
+  check((await complete.locator("body").innerText()).includes("Review before publishing") && !supplierText.includes("Review before publishing"), "buyer review controls remain outside the supplier projection boundary");
   await complete.close();
 } finally {
   await browser.close();
