@@ -59,7 +59,25 @@ import { useEffect, useState } from "react";
  * intent → lean pre-start reality → compact post-start), permanently for
  * this session ("Start again" reloads the page, resetting this too).
  */
-export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: string; promise: string; value: string; eyebrow?: string }) {
+export default function CollapsibleHero({
+  h1,
+  promise,
+  value,
+  eyebrow,
+  definitions,
+  role,
+}: {
+  h1: string;
+  promise: string;
+  value: string;
+  eyebrow?: string;
+  /** Short "what an SD-WAN RFP is / what a SASE RFP is" definitions shown
+   *  above the application pre-start (Robert, 3 Sep 2026). Optional so the
+   *  hero still renders for callers that pass none. */
+  definitions?: { term: string; article: string; text: string }[];
+  /** One sentence on what Netify does with the document. */
+  role?: string;
+}) {
   const [compact, setCompact] = useState(false);
 
   useEffect(() => {
@@ -68,8 +86,20 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
     return () => window.removeEventListener("pd:project-started", onStart);
   }, []);
 
+  /* VISIBILITY (Robert, 3 Sep 2026, "sd-wan rfp" / "sase rfp" citation
+     work). The 19 Aug structural pass wrapped this whole block in sr-only,
+     so the served page had no visible heading and no visible explanation
+     of what the application is for; the crawlable prose on the canonical
+     builder page came to roughly 120 words of UI labels. The pre-start
+     hero is visible again: eyebrow, H1, the promise line, two short
+     definitions and one sentence on Netify's role, inside the
+     Constitution's height budget (H1 clamp unchanged at 30-42px, small
+     text below). Once a project starts (`pd:project-started`) the whole
+     block returns to sr-only exactly as before, so the workspace still
+     carries no marketing headline. ids page-h1 / page-subhead / page-value
+     are unconditional for the speakable schema and the h1 audit. */
   return (
-    <div className="sr-only">
+    <div className={compact ? "sr-only" : "mx-auto max-w-[1150px] px-5 pb-4 pt-8 lg:px-8"}>
       {!compact && eyebrow && (
         <p
           className="mx-auto mb-2 text-center"
@@ -78,19 +108,6 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
           {eyebrow}
         </p>
       )}
-      {/* Structural pass (19 Aug 2026, Robert's "UI mockups request"
-          handoff bundle): post-start, the H1 is now VISUALLY hidden
-          outright rather than shrunk to a 16px line. Every reference
-          screenshot shows the workspace carrying no marketing headline
-          at all — the top bar's project identity is the only title a
-          started project has — and the leftover 16px line read as
-          exactly the "huge marketing landing page" residue the
-          Constitution's own State-0 rule exists to remove.
-          `id="page-h1"` and its text stay in the DOM, unchanged and
-          unconditional, because the speakable schema's `cssSelector`
-          (structured-data.ts) and the site's h1-id audit
-          (scripts/full-audit.py) both read it on this route — sr-only
-          is a visual change, not a removal, so neither is affected. */}
       <h1
         id="page-h1"
         className={compact ? "sr-only" : "mx-auto max-w-[1150px] text-center"}
@@ -116,6 +133,29 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
           style={{ fontSize: "clamp(16px, 0.6vw + 13px, 19px)", lineHeight: 1.5, color: "#66635e", margin: "0 auto 14px", maxWidth: "52em" }}
         >
           {promise}
+        </p>
+      )}
+      {definitions && definitions.length > 0 && (
+        <dl
+          id="rfp-definitions"
+          className={compact ? "sr-only" : "mx-auto grid gap-3 text-left sm:grid-cols-2"}
+          style={compact ? undefined : { maxWidth: "62em", margin: "18px auto 0" }}
+        >
+          {definitions.map((d) => (
+            <div key={d.term} className="rounded-lg border border-[#e2dfdb] bg-[#fefdfc] px-4 py-3">
+              <dt className="text-[13px] font-semibold uppercase tracking-[0.06em] text-[#110f0d]">{`What is ${d.article} ${d.term}?`}</dt>
+              <dd className="mt-1 text-[14px] leading-6 text-[#55514d]">{d.text}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      {role && (
+        <p
+          id="page-role"
+          className={compact ? "sr-only" : "mx-auto text-center"}
+          style={compact ? undefined : { fontSize: "14.5px", lineHeight: 1.55, color: "#55514d", margin: "14px auto 0", maxWidth: "52em" }}
+        >
+          {role}
         </p>
       )}
       {/* `value` (the third, most marketing-toned paragraph): visible only

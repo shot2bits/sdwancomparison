@@ -69,10 +69,10 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       // The sector doors carry their prefill sentence straight to the desk
       // (the same destinations the 301s serve, without the hop).
-      { label: "Create Healthcare RFP", href: "https://netify.co.uk/?q=We%20are%20a%20healthcare%20provider%20replacing%20legacy%20connectivity%20with%20managed%20SD-WAN%20and%20SASE." },
-      { label: "Create Retail RFP", href: "https://netify.co.uk/?q=We%20are%20a%20retailer%20needing%20a%20PCI%20DSS%20compliant%20network." },
-      { label: "Create Manufacturing RFP", href: "https://netify.co.uk/?q=We%20are%20a%20manufacturer%20securing%20IT%20and%20OT%20with%20managed%20SASE." },
-      { label: "Create Financial Services RFP", href: "https://netify.co.uk/?q=We%20are%20a%20financial%20services%20firm%20consolidating%20network%20and%20security%20into%20SASE." },
+      { label: "Create Healthcare RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20healthcare%20provider%20replacing%20legacy%20connectivity%20with%20managed%20SD-WAN%20and%20SASE." },
+      { label: "Create Retail RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20retailer%20needing%20a%20PCI%20DSS%20compliant%20network." },
+      { label: "Create Manufacturing RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20manufacturer%20securing%20IT%20and%20OT%20with%20managed%20SASE." },
+      { label: "Create Financial Services RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20financial%20services%20firm%20consolidating%20network%20and%20security%20into%20SASE." },
       { label: "All sector guides", href: "/sase/best/" },
     ],
   },
@@ -178,7 +178,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
     label: "Tools",
     columns: 2,
     items: [
-      { label: "SASE and SD-WAN RFP Builder", href: "/sase-sd-wan-rfp-builder/", desc: "Build requirements, shortlist providers and manage a structured procurement workflow." },
+      { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/", desc: "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation." },
       { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Score evaluated suppliers against capability and sector requirements." },
       { label: "Cost and TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership for SASE and SD-WAN." },
       { label: "SD-WAN vendor filter", href: "/sd-wan/vendor-filter/", desc: "Narrow the market by service model, capability and requirement." },

@@ -40,7 +40,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Marketplace and procurement",
     links: [
       { label: "How It Works", href: "/sase/how-it-works/" },
-      { label: "SASE & SD-WAN RFP Builder", href: "/sase-sd-wan-rfp-builder/" },
+      { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/" },
       { label: "Publish a project notice", href: "/sase/opportunities/new/" },
       { label: "Opportunities board", href: "/sase/opportunities/board/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },

@@ -62,7 +62,7 @@ export default function QuestionBankPage() {
       ))}
 
       <nav className="mb-6 text-sm text-[var(--ink-500)]">
-        <Link href="/rfp-builder" className="underline">RFP Builder</Link> / Question bank
+        <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">SD-WAN and SASE RFP Builder</a> / Question bank
       </nav>
 
       <div className="mb-10 rounded-3xl bg-[#081f33] px-6 py-10 text-white sm:px-10 sm:py-14">
@@ -71,7 +71,7 @@ export default function QuestionBankPage() {
         <p className="max-w-3xl text-xl leading-8 text-slate-200">{framework.strapline}</p>
         <p id="page-subhead" className="mt-5 max-w-3xl text-base leading-7 text-slate-300">{framework.introduction}</p>
         <div className="mt-7 flex flex-wrap gap-3">
-          <a href="/sase/rfp-builder/" className="rounded-full bg-amber-400 px-5 py-3 font-semibold text-slate-950">Build my living RFP</a>
+          <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="rounded-full bg-amber-400 px-5 py-3 font-semibold text-slate-950">Build an SD-WAN or SASE RFP</a>
           <a href="#supplier-questions" className="rounded-full border border-white/30 px-5 py-3 font-semibold text-white">Explore all 120 questions</a>
         </div>
         <p className="mt-6 text-sm text-slate-300">Your project stays private until you choose to publish it. A public opportunity can be listed anonymously, with you controlling when your identity is disclosed.</p>
@@ -150,7 +150,7 @@ export default function QuestionBankPage() {
         <h2 className="mb-1 text-lg font-semibold">Optional sector packs</h2>
         <p className="mb-5 text-sm text-[var(--ink-600)]">
           The governed bank remains available beneath Harry&apos;s public 120-question framework. These deeper, sector-specific sets carry buyer and vendor lenses on every question. Browse them in full
-          inside the <a href="/sase/rfp-builder/" className="underline">RFP Builder</a> or via the <a href="/sase/question-bank.json" className="underline">machine-readable bank</a>.
+          inside the <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">SD-WAN and SASE RFP Builder</a> or via the <a href="/sase/question-bank.json" className="underline">machine-readable bank</a>.
         </p>
         <div className="space-y-3">
           {Object.entries(QUESTION_BANK.sector_packs).map(([key, pack]) => (
@@ -203,10 +203,10 @@ export default function QuestionBankPage() {
       <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 text-sm text-[var(--ink-600)]">
         <p className="eyebrow mb-2">Use the bank</p>
         <p>
-          <a href="/sase/rfp-builder/" className="underline">Build an RFP with these questions</a> ·{" "}
+          <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">Build an SD-WAN or SASE RFP with these questions</a> ·{" "}
           <Link href="/rfp-builder/sample-rfp" className="underline">See a sample RFP built from the bank</Link> ·{" "}
           <Link href="/opportunities/new" className="underline">Post a project notice instead</Link> ·{" "}
-          Paths: <Link href="/rfp-builder/sase" className="underline">SASE</Link> · <Link href="/rfp-builder/sd-wan" className="underline">SD-WAN</Link> · <Link href="/rfp-builder/sse" className="underline">SSE</Link>
+          Samples: <Link href="/rfp-builder/sample-rfp" className="underline">SASE sample RFP</Link> · <a href="https://netify.co.uk/sd-wan/sample-rfp/" className="underline">SD-WAN sample RFP</a>
         </p>
       </div>
     </div>

@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import ProcurementEntry, {
   ENGINE_PROMISE,
   ENGINE_DESCRIPTION,
+  RFP_META_DESCRIPTION,
 } from "@/components/procurement/ProcurementEntry";
+import RfpPublicContent from "@/components/procurement/RfpPublicContent";
+import RfpCitationEvidence from "@/components/procurement/RfpCitationEvidence";
 import { getOrganizationSchema } from "@/lib/structured-data";
 
 /**
@@ -40,14 +43,17 @@ import { getOrganizationSchema } from "@/lib/structured-data";
 const APEX = "https://netify.co.uk";
 const BUILDER_URL = `${APEX}/sase-sd-wan-rfp-builder/`;
 
+/* Title, description (Robert, 3 Sep 2026, "sd-wan rfp" / "sase rfp"
+ * citation work): head terms first, one concise meta description. The
+ * root layout's template appends " | Netify". */
 export const metadata: Metadata = {
-  title: "SASE & SD-WAN RFP Validator and Procurement-Ready Builder",
-  description: ENGINE_DESCRIPTION,
+  title: "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation",
+  description: RFP_META_DESCRIPTION,
   alternates: { canonical: BUILDER_URL },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Netify | SASE & SD-WAN RFP Validator and Builder",
-    description: ENGINE_DESCRIPTION,
+    title: "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation | Netify",
+    description: RFP_META_DESCRIPTION,
     url: BUILDER_URL,
     type: "website",
     locale: "en_GB",
@@ -169,6 +175,13 @@ export default function Page() {
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
       <ProcurementEntry />
+      {/* The citable public content (3 Sep 2026): table, FAQs, review
+          date, breadcrumb and links, then the validation method. Both are
+          Server Components rendered here directly. They used to be passed
+          to ProjectDesk as `afterPrompt`, which ProjectDesk accepts and
+          discards, so none of it reached the served HTML. */}
+      <RfpPublicContent />
+      <RfpCitationEvidence />
     </>
   );
 }

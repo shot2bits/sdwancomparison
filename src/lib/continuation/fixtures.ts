@@ -139,7 +139,7 @@ export async function runContinuationTests(): Promise<ContinuationTestResult> {
   });
   ok("the workspace URL carries the words and the pins, human links untagged", () => {
     const url = continuationUrl("We are evaluating Cato Networks.", ["cato-networks"]);
-    expect(url.startsWith("https://netify.co.uk/?"), "one door");
+    expect(url.startsWith("https://netify.co.uk/sase-sd-wan-rfp-builder/?"), "one door: the builder page, which reads ?q= (the apex root no longer does)");
     expect(url.includes("vendors=cato-networks"), "pins travel");
     expect(!url.includes("utm_"), "page-served human links carry no attribution tag");
   });

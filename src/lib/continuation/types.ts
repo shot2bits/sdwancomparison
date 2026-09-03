@@ -18,6 +18,11 @@ export const CONTINUATIONS_VERSION = "continuations v2026.2";
 
 /** The one door. Every Continuation opens the Netify Workspace. */
 export const WORKSPACE_ORIGIN = "https://netify.co.uk";
+/** The workspace's public path (3 Sep 2026). The apex root now serves the
+ *  partner-led homepage and ignores ?q=, so a Continuation that opened
+ *  "/?q=" dropped the buyer's sentence on arrival. The builder page at
+ *  this path reads ?q= and ?vendors= exactly as the root once did. */
+export const WORKSPACE_PATH = "/sase-sd-wan-rfp-builder/";
 
 export type ContinuationFamily =
   | "vendor"
@@ -80,7 +85,7 @@ export function continuationUrl(sentence: string, pins: string[], opts?: { mediu
     params.set("utm_source", "ai_assistant");
     params.set("utm_medium", opts.medium);
   }
-  return `${WORKSPACE_ORIGIN}/?${params.toString()}`;
+  return `${WORKSPACE_ORIGIN}${WORKSPACE_PATH}?${params.toString()}`;
 }
 
 /** The machine-twin serialisation of a Continuation. Twins omit the key
