@@ -44,15 +44,17 @@ const APEX = "https://netify.co.uk";
 const BUILDER_URL = `${APEX}/sase-sd-wan-rfp-builder/`;
 
 /* Title, description (Robert, 3 Sep 2026, "sd-wan rfp" / "sase rfp"
- * citation work): head terms first, one concise meta description. The
- * root layout's template appends " | Netify". */
+ * citation work; title shortened on his review the same day from
+ * "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation", 68
+ * characters with the suffix, which truncates in results). The root
+ * layout's template appends " | Netify": 52 characters in total. */
 export const metadata: Metadata = {
-  title: "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation",
+  title: "Free SD-WAN and SASE RFP Builder and Template",
   description: RFP_META_DESCRIPTION,
   alternates: { canonical: BUILDER_URL },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation | Netify",
+    title: "Free SD-WAN and SASE RFP Builder and Template | Netify",
     description: RFP_META_DESCRIPTION,
     url: BUILDER_URL,
     type: "website",

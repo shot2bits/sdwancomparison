@@ -1,5 +1,3 @@
-import { RFP_VALIDATION_REVIEWED } from "@/lib/workspace/rfp-validator";
-
 /**
  * The citable, server-rendered public content of the canonical builder
  * page, https://netify.co.uk/sase-sd-wan-rfp-builder/ (Robert, 3 Sep
@@ -20,15 +18,19 @@ import { RFP_VALIDATION_REVIEWED } from "@/lib/workspace/rfp-validator";
  * that serves it.
  *
  * Copy laws: no em or en dashes, no fluff words, UK English, no invented
- * figures. The review date is the validator's own reviewed date so the
- * visible date and the machine-readable one are the same constant.
+ * figures. The review date is this content's own editorial date (one
+ * constant, shown in the <time> and in the WebPage dateModified).
  */
 
 export const CANONICAL_BUILDER_URL = "https://netify.co.uk/sase-sd-wan-rfp-builder/";
 export const QUESTION_BANK_URL = "https://netify.co.uk/sase/rfp-builder/questions/";
 export const SASE_SAMPLE_RFP_URL = "https://netify.co.uk/sase/rfp-builder/sample-rfp/";
 export const SDWAN_SAMPLE_RFP_URL = "https://netify.co.uk/sd-wan/sample-rfp/";
-export const RFP_CONTENT_REVIEWED = RFP_VALIDATION_REVIEWED;
+/** The editorial review date of THIS content (the definitions, table and
+ *  FAQs), distinct from the validator's own reviewed date in
+ *  rfp-validator.ts, which dates the scoring method and is shown by
+ *  RfpCitationEvidence. Update this when the content below changes. */
+export const RFP_CONTENT_REVIEWED = "2026-09-03";
 
 /** What an SD-WAN or SASE RFP covers. Eight areas (Robert's list), each
  *  with the SD-WAN emphasis, the SASE emphasis and the evidence a buyer
@@ -74,13 +76,13 @@ export const RFP_AREAS: { area: string; sdwan: string; sase: string; evidence: s
     area: "Pricing and contract terms",
     sdwan: "Pricing model per site and per circuit, hardware, licences, contract term, indexation and exit.",
     sase: "Pricing per user and per function, bundles, licence tiers, overage, term and exit provisions.",
-    evidence: "Itemised pricing schedule, three-year total cost and the assumptions behind it.",
+    evidence: "Itemised pricing schedule, total cost over the proposed contract term (Netify recommends a three-year basis for comparison) and the assumptions behind it.",
   },
   {
     area: "Supplier evidence",
     sdwan: "Customer references in comparable sectors, accreditations and financial standing.",
     sase: "Analyst coverage, security certifications, data handling and sub-processor disclosure.",
-    evidence: "Two references, certification copies, insurance and the evidence request answered in full.",
+    evidence: "Customer references (Netify recommends at least two, in comparable sectors), certification copies, insurance and the evidence request answered in full.",
   },
 ];
 
@@ -100,7 +102,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How should SD-WAN and SASE vendors be evaluated?",
-    a: "Score each supplier against the same weighted criteria: capability fit against the stated requirements, security efficacy, performance and PoP coverage in your regions, resilience and SLA, operating model fit, implementation approach, three-year total cost and the quality of evidence provided. Netify grades 30 vendors and service providers on 40 capabilities, and supplier responses to a published RFP land side by side against the questions you asked.",
+    a: "Score each supplier against the same weighted criteria: capability fit against the stated requirements, security efficacy, performance and PoP coverage in your regions, resilience and SLA, operating model fit, implementation approach, total cost over the contract term and the quality of evidence provided. Netify grades 30 vendors and service providers on 40 capabilities, and supplier responses to a published RFP land side by side against the questions you asked.",
   },
   {
     q: "Is the Netify RFP Builder free?",
@@ -141,7 +143,7 @@ export function getRfpWebPageSchema() {
     "@type": "WebPage",
     "@id": `${CANONICAL_BUILDER_URL}#webpage`,
     url: CANONICAL_BUILDER_URL,
-    name: "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation",
+    name: "Free SD-WAN and SASE RFP Builder and Template",
     dateModified: RFP_CONTENT_REVIEWED,
     inLanguage: "en-GB",
     isPartOf: { "@id": "https://netify.co.uk/#website" },
@@ -177,13 +179,13 @@ export default function RfpPublicContent() {
         What an SD-WAN or SASE RFP covers
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-[#55514d]">
-        The eight areas below are the sections Netify builds and validates. Each row shows the SD-WAN emphasis, the SASE emphasis and the evidence to request from suppliers. Reviewed <time dateTime={RFP_CONTENT_REVIEWED}>{RFP_CONTENT_REVIEWED}</time>.
+        The eight areas below are the sections Netify builds and validates. Each row shows the SD-WAN emphasis, the SASE emphasis and the evidence Netify recommends requesting from suppliers; adapt them to your own procurement rules. Reviewed <time dateTime={RFP_CONTENT_REVIEWED}>{RFP_CONTENT_REVIEWED}</time>.
       </p>
 
       <div className="mt-5 overflow-x-auto rounded-xl border border-[#d6d4d0]">
         <table className="w-full min-w-[720px] border-collapse text-left text-sm">
           <caption className="px-4 py-3 text-left text-xs text-[#66635e]">
-            SD-WAN and SASE RFP sections compared: what each area covers and the supplier evidence to request. Source: Netify governed question bank, reviewed {RFP_CONTENT_REVIEWED}.
+            SD-WAN and SASE RFP sections compared: what each area covers and the supplier evidence Netify recommends requesting. Source: Netify governed question bank; content reviewed {RFP_CONTENT_REVIEWED}.
           </caption>
           <thead className="bg-[#f5f2ee] text-xs uppercase tracking-[0.06em] text-[#55514d]">
             <tr>

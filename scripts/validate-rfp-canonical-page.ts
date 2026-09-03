@@ -74,7 +74,8 @@ function main() {
   record(!/https:\/\/netify\.co\.uk\/\?q=/.test(config), "1: ?sector= prefill redirects open the builder page, not the apex root");
 
   /* 2. Title, H1, description */
-  record(/title:\s*"SD-WAN and SASE RFP Builder, Template and Vendor Evaluation"/.test(home), "2: page title is the ruled wording (layout template appends ' | Netify')");
+  record(/title:\s*"Free SD-WAN and SASE RFP Builder and Template"/.test(home), "2: page title is the ruled wording (layout template appends ' | Netify')");
+  record("Free SD-WAN and SASE RFP Builder and Template | Netify".length <= 60, "2: full title with suffix is 60 characters or fewer");
   record(ENGINE_H1 === "Build an SD-WAN or SASE RFP and compare vendor responses", "2: H1 is the ruled wording", ENGINE_H1);
   record(/description:\s*RFP_META_DESCRIPTION/.test(home), "2: metadata description uses the concise RFP_META_DESCRIPTION");
   record(RFP_META_DESCRIPTION.length <= 160, "2: meta description is 160 characters or fewer", String(RFP_META_DESCRIPTION.length));
@@ -98,6 +99,9 @@ function main() {
   record(/<th scope="col"/.test(content) && /<th scope="row"/.test(content), "3: column and row headers carry scope");
   record(/<time dateTime=\{RFP_CONTENT_REVIEWED\}>/.test(content), "3: the review date is visible and machine-readable (<time dateTime>)");
   record(/^\d{4}-\d{2}-\d{2}$/.test(RFP_CONTENT_REVIEWED), "3: review date is ISO YYYY-MM-DD", RFP_CONTENT_REVIEWED);
+  record(/export const RFP_CONTENT_REVIEWED = "\d{4}-\d{2}-\d{2}"/.test(content) && !/RFP_VALIDATION_REVIEWED/.test(content), "3: the content review date is its own explicit constant, not the validator's date");
+  record(RFP_CONTENT_REVIEWED >= "2026-09-03", "3: content review date is on or after the date the content was written");
+  record(RFP_AREAS.every((r) => !/\bthree-year total cost\b|\bTwo references\b/.test(r.evidence)), "3: table evidence states recommendations, not universal rules");
   record(content.includes("https://netify.co.uk/sase/rfp-builder/questions/") && content.includes("https://netify.co.uk/sase/rfp-builder/sample-rfp/") && content.includes("https://netify.co.uk/sd-wan/sample-rfp/"), "3: links to the question bank and both sample RFPs");
   const faqQs = [
     "What should an SD-WAN RFP include?",

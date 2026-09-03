@@ -108,7 +108,7 @@ async function main() {
   }
 
   /* Head */
-  expect(b.title === "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation | Netify", "title is the ruled wording", b.title);
+  expect(b.title === "Free SD-WAN and SASE RFP Builder and Template | Netify", "title is the ruled wording", b.title);
   expect(b.h1.length === 1, "exactly one h1", b.h1);
   expect(b.h1[0] === "Build an SD-WAN or SASE RFP and compare vendor responses", "h1 is the ruled wording", b.h1);
   expect(b.canonical === CANON, "canonical is the apex builder URL", b.canonical);
