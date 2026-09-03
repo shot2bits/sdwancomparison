@@ -5545,6 +5545,31 @@ export default function ProjectDesk({
                     <p className="m-0 mb-6 mt-2 max-w-[62ch] text-[13.5px] leading-[1.55]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
                       Suppliers will see everything below. Nothing about price or preferred vendors is shared.
                     </p>
+                    <section className="nf-publication-checklist" aria-labelledby="nf-publication-checklist-title">
+                      <div className="nf-publication-checklist-heading">
+                        <div>
+                          <p>Publication readiness</p>
+                          <h3 id="nf-publication-checklist-title">Publication checklist</h3>
+                        </div>
+                        <strong>{publishChecklist.doneCount} of {publishChecklist.total} essential sections complete</strong>
+                      </div>
+                      <ul>
+                        {publishChecklist.items.map((item) => (
+                          <li key={item.key} data-complete={item.done ? "true" : "false"}>
+                            <span aria-hidden="true">{item.done ? "✓" : "○"}</span>
+                            {item.label}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="nf-publication-checklist-note">
+                        The two acknowledgements are on the next step, Publish, and unlock when the baseline is complete.
+                      </p>
+                      <button type="button" disabled={!publishChecklist.ready} onClick={() => goToStep("publish")}>
+                        {publishChecklist.ready
+                          ? "Continue to publication"
+                          : `Complete ${publishChecklist.total - publishChecklist.doneCount} more ${publishChecklist.total - publishChecklist.doneCount === 1 ? "section" : "sections"} to continue`}
+                      </button>
+                    </section>
                     {canvasBlock}
                     {/* ── THE LIVING STATEMENT ── one document card, five ruled
                         sections of labelled rows, from the very first paint (Robert's

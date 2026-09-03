@@ -59,6 +59,41 @@ try {
     check(await page.locator(".lpos-sections > li").count() === 8, `${width}px: guided answer preserves eight document sections`);
     await page.close();
   }
+
+  const partial = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await partial.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+  await partial.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await partial.reload({ waitUntil: "domcontentloaded" });
+  await partial.getByRole("radio", { name: "Healthcare & pharma", exact: true }).click();
+  await partial.waitForTimeout(700);
+  await partial.getByRole("button", { name: "Review", exact: true }).click();
+  await partial.locator(".nf-publication-checklist").waitFor();
+  const partialChecklist = await partial.locator(".nf-publication-checklist").innerText();
+  check(!partialChecklist.includes("7 of 7 essential sections complete"), "review shows an incomplete publication checklist for a partial project");
+  check(await partial.locator(".nf-publication-checklist input[type=checkbox]").count() === 0, "review does not present publication acknowledgements before the baseline is complete");
+  check(await partial.locator(".nf-publication-checklist > button").isDisabled(), "review keeps the publication handoff disabled for a partial project");
+  await partial.close();
+
+  const complete = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await complete.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+  await complete.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await complete.reload({ waitUntil: "domcontentloaded" });
+  const completePrompt = complete.locator("textarea").first();
+  await completePrompt.fill("We are a healthcare organisation with 20 UK sites and 200 users across the United Kingdom and Ireland. We need fully managed SASE and SD-WAN to replace MPLS and legacy firewalls, with dual circuits, automatic failover and 99.99% availability. Security must include ZTNA, secure web gateway, CASB, DLP, Entra ID and MFA. We need a 24/7 managed NOC and SOC, incident escalation and service reviews. Migration must include a pilot, phased cutover, rollback, training and handover by December 2026.");
+  await completePrompt.press("Enter");
+  await complete.locator('[data-workspace-started="true"]').waitFor({ timeout: 25_000 });
+  await complete.waitForTimeout(900);
+  await complete.getByRole("button", { name: "Select all SASE controls", exact: true }).click();
+  await complete.getByRole("button", { name: /Save 5 selections/ }).click();
+  await complete.waitForTimeout(1100);
+  await complete.getByRole("radio", { name: "Migration", exact: true }).click();
+  await complete.waitForTimeout(1100);
+  await complete.getByRole("button", { name: "Review", exact: true }).click();
+  await complete.locator(".nf-publication-checklist").waitFor();
+  const completeChecklist = await complete.locator(".nf-publication-checklist").innerText();
+  check(completeChecklist.includes("7 of 7 essential sections complete"), "review shows the complete seven-section publication baseline", completeChecklist.replace(/\s+/g, " "));
+  check(await complete.getByRole("button", { name: /Continue to publication|Complete \d+ more sections? to continue/ }).isEnabled(), "a complete project can continue to the separate publication step");
+  await complete.close();
 } finally {
   await browser.close();
 }
