@@ -5244,7 +5244,9 @@ export default function ProjectDesk({
             </div>
           </header>
 
+          <div className="lpos-app-shell">
           {livingOsRail}
+          <div className="lpos-app-content">
 
           {activeStep !== "describe" && <section className="nf-2030-command-zone" aria-label="Describe or change the procurement">
             <div className="nf-2030-command-title">
@@ -6336,6 +6338,8 @@ export default function ProjectDesk({
               </div>
             </div>
           </div>
+          </div>
+          </div>
         </>
       ) : (
         /* A blank project is already a project. It uses the same product
@@ -6354,7 +6358,9 @@ export default function ProjectDesk({
             <div className="lpos-profile"><button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><div><strong>Procurement lead</strong><span>Private workspace</span></div><b>PL</b></div>
           </header>
 
+          <div className="lpos-app-shell">
           {livingOsRail}
+          <div className="lpos-app-content">
 
           {prestartSurface === "intro" ? <section className="nf-2030-command-zone nf-2030-command-zone-empty" aria-label="Start the procurement">
             <div className="nf-2030-command-inner">
@@ -6450,6 +6456,8 @@ export default function ProjectDesk({
             />
           </div>
           </>}
+          </div>
+          </div>
         </>
       )}
 
