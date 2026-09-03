@@ -117,6 +117,7 @@ import CapturedList from "@/components/procurement/CapturedList";
 import RfpReady from "@/components/procurement/RfpReady";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 import { persistedEssentialBaselineChecklist } from "@/lib/workspace/publish-checklist";
+import { publicationFailureMessage } from "@/lib/publication-error";
 import { buildRfpCoverage, RFP_SECTION_QUESTION_TARGET, SHORT_RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 import { buildSectionQuestionRegister, questionProgressBySection, type SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
@@ -3740,10 +3741,10 @@ export default function ProjectDesk({
         setNeedAuth(true);
         ev("workspace_auth_required", { scope: buying ?? "security" });
       } else {
-        throw new Error(data.error || "The opportunity was not listed on the board. Nothing was sent; review the RFP and try again.");
+        throw new Error(publicationFailureMessage(data, res.status));
       }
     } catch (e) {
-      setSignError(e instanceof Error ? e.message : "Something failed; nothing has been sent to vendors or service providers. Try again.");
+      setSignError(e instanceof Error ? e.message : publicationFailureMessage(null));
     } finally {
       setSignStage(null);
     }

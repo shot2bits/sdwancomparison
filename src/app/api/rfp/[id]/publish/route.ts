@@ -5,6 +5,7 @@ import { executePublish, DeclinedApprovalError } from "@/lib/rfp-publish";
 import { SITE_URL } from "@/lib/structured-data";
 import { PUBLICATION_POLICY_VERSION, publicationAuthorization, publicationCompleted } from "@/lib/publication-policy";
 import { isMarketUnlocked } from "@/lib/market-unlock";
+import { createHash, randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -21,7 +22,15 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  */
 export async function POST(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
-  if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
+  const attemptId = randomUUID();
+  const recordFailure = (projectId: string, stage: string, status: number, code: string) => {
+    const projectRef = projectId ? createHash("sha256").update(projectId).digest("hex").slice(0, 12) : "unknown";
+    console.error(JSON.stringify({ event: "rfp_publication_failed", attempt_id: attemptId, project_ref: projectRef, stage, status, code, publication_policy_version: PUBLICATION_POLICY_VERSION }));
+  };
+  if (!kvConfigured()) {
+    recordFailure("", "storage", 503, "storage_not_configured");
+    return Response.json({ error: "Storage not configured.", code: "storage_not_configured" }, { status: 503, headers: cors });
+  }
   const { id } = await ctx.params;
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
@@ -32,12 +41,16 @@ export async function POST(req: Request, ctx: Ctx) {
   const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
   const sessionEmail = access.session && (access.session.role === "buyer" || access.session.role === "netify") ? access.session.email : "";
   const authorization = publicationAuthorization({ ownerAuthorized: access.ok, verifiedSession: Boolean(sessionEmail), channel: "api" });
-  if (authorization.reason === "owner_required") return ownerRequired("Publishing this RFP", cors);
+  if (authorization.reason === "owner_required") {
+    recordFailure(id, "authorization", 403, "owner_required");
+    return ownerRequired("Publishing this RFP", cors);
+  }
 
   // Hard identity gate: signed-out owners and agents get a machine-readable
   // handoff instead of a silent token-only publish. Drafting stays open; the
   // manage_token remains the ownership proof, the session is the identity.
   if (!authorization.allowed) {
+    recordFailure(id, "authorization", 401, "sign_in_required");
     return Response.json(
       {
         error: "sign_in_required",
@@ -67,11 +80,13 @@ export async function POST(req: Request, ctx: Ctx) {
     // machine's own refusals (open gaps, missing consent) surface with
     // their reasons instead of a blank 500.
     if (e instanceof DeclinedApprovalError) {
+      recordFailure(id, "approval", 409, "declined_approval_confirmation_required");
       return Response.json(
         { error: e.message, requires_decline_confirmation: true, confirmation_text: e.message },
         { status: 409, headers: cors },
       );
     }
+    recordFailure(id, "publication", 409, "publication_refused");
     return Response.json({ error: (e as Error).message }, { status: 409, headers: cors });
   }
   const { published, invited, criteria, board, market_report, matched_vendors } = result;
@@ -86,6 +101,7 @@ export async function POST(req: Request, ctx: Ctx) {
   // the lifecycle boundary explicit at the API: no public board id means
   // publication did not complete.
   if (!publicationCompleted({ publicBoardOpportunityId: board.opportunity_id, marketUnlockValid: marketUnlocked })) {
+    recordFailure(id, board.opportunity_id ? "market_unlock" : "board", 409, "board_publication_incomplete");
     return Response.json(
       {
         ok: false,

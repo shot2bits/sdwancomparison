@@ -17,6 +17,7 @@ import {
 } from "../src/lib/publication-policy";
 import { MarketUnlockSchema } from "../src/lib/market-unlock";
 import { OpportunitySchema, toPublicOpportunity } from "../src/lib/opportunity-types";
+import { publicationFailureMessage } from "../src/lib/publication-error";
 
 const root = process.cwd();
 const source = (file: string) => fs.readFileSync(path.join(root, file), "utf8");
@@ -111,6 +112,18 @@ test("web, API, auth continuation, OpenAPI and MCP converge on policy-controlled
   assert.match(mcpTools, /opp\.source_rfp_id && !\(await isMarketUnlocked/);
   assert.match(mcpRoute, /callMcpTool/);
   assert.match(openapi, /callMcpTool/);
+  const desk = source("src/components/ProjectDesk.tsx");
+  assert.match(desk, /fetch\(`\/sase\/api\/rfp\/\$\{proj\.id\}\/publish`/);
+  assert.match(desk, /fetch\("\/sase\/api\/rfp"/);
+  assert.match(desk, /testMode && !securityScope/);
+});
+
+test("publication refusals remain specific and safe", () => {
+  assert.match(publicationFailureMessage({ error: "sign_in_required", auth_required: true, message: "Verify your work email." }, 401), /Verify your work email/);
+  assert.match(publicationFailureMessage({ code: "board_publication_incomplete", error: "Board listing failed" }, 409), /Board listing failed/);
+  assert.match(publicationFailureMessage({ error: "Market-unlock verification failed" }, 409), /supplier access remains locked/i);
+  assert.match(publicationFailureMessage({ error: "Storage not configured." }, 503), /Storage not configured/);
+  assert.match(publicationFailureMessage(null, 500), /Nothing was published or sent/);
 });
 
 test("existing valid publication still completes", () => {
