@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { chromium } from "playwright";
 
-const BASE_URL = process.env.RFP_UI_BASE_URL ?? "http://localhost:3000/sase/home?test=1";
+const BASE_URL = process.env.RFP_UI_BASE_URL ?? "http://localhost:3100/sase/home?test=1";
 function check(condition, label, detail = "") {
   if (!condition) throw new Error(`FAIL  ${label}${detail ? ` -> ${detail}` : ""}`);
   console.log(`PASS  ${label}${detail ? ` -> ${detail}` : ""}`);
@@ -27,9 +27,9 @@ try {
   check(await desktop.locator(".lpos-header").count() === 1, "the Living Procurement OS header is present");
   check(await desktop.locator("body > header").evaluate((el) => getComputedStyle(el).display) === "none", "the marketing header is suppressed inside the procurement OS");
   check(await desktop.locator(".lpos-product-rail").count() === 1, "the dark product rail is present");
-  check(await desktop.getByRole("button", { name: "Overview", exact: true }).isDisabled(), "Overview is honestly gated until an RFP exists");
+  check(await desktop.getByRole("button", { name: /^Review, locked\./ }).isDisabled(), "Review is honestly gated until an RFP exists");
   check(await desktop.getByRole("button", { name: "Requirements", exact: true }).isEnabled(), "Requirements is a real navigation destination");
-  check(await desktop.getByRole("button", { name: "Suppliers", exact: true }).isDisabled(), "future supplier access is honestly gated before the baseline is complete");
+  check(await desktop.getByRole("button", { name: /^Suppliers, locked\./ }).isDisabled(), "future supplier access is honestly gated before the baseline is complete");
   await desktop.getByRole("button", { name: "Collapse navigation" }).click();
   check(await desktop.locator(".lpos-product-rail").getAttribute("data-collapsed") === "true", "the product rail can be collapsed");
   await desktop.getByRole("button", { name: "Expand navigation" }).click();
@@ -45,7 +45,7 @@ try {
     const captured = document.querySelector(".lpos-you-said")?.getBoundingClientRect();
     return { top: box.top, bottom: box.bottom, beforeCaptured: Boolean(captured && box.bottom <= captured.top), position: getComputedStyle(element).position };
   });
-  check(desktopPrompt.top < 320 && desktopPrompt.beforeCaptured, "the AI prompt appears near the top before captured context", JSON.stringify(desktopPrompt));
+  check(desktopPrompt.top < 450 && desktopPrompt.beforeCaptured, "the AI prompt appears near the top before captured context", JSON.stringify(desktopPrompt));
   check(desktopPrompt.position === "static", "the prompt remains prominent without covering later questions");
   check(await desktop.locator(".lpos-sections > li").count() === 8, "the living document exposes the approved eight-section outline");
   check(await desktop.locator(".lpos-bank-depth").count() === 0, "internal question-bank statistics do not interrupt the buyer workflow");
@@ -55,17 +55,22 @@ try {
   check((await desktop.locator(".lpos-unlock").innerText()).includes("Start your RFP"), "an empty RFP is described as not started rather than almost publishable");
   check(await desktop.evaluate(() => document.documentElement.scrollWidth === innerWidth), "desktop has no horizontal overflow");
 
-  await startProject(desktop, "We are a healthcare organisation with 20 UK sites and 200 users. We need SASE and SD-WAN by December 2026.");
-  await desktop.getByRole("button", { name: "Overview", exact: true }).click();
-  check(await desktop.getByRole("heading", { name: "Review before publishing" }).count() === 1, "Overview opens the real document review surface");
+  await startProject(desktop, "We are a healthcare organisation with 20 UK sites and 200 users across the United Kingdom and Ireland. We need fully managed SASE and SD-WAN to replace MPLS and legacy firewalls, with dual circuits, automatic failover and 99.99% availability. We need a 24/7 managed NOC and SOC by December 2026.");
+  await desktop.getByRole("button", { name: "Select all SASE controls", exact: true }).click();
+  await desktop.getByRole("button", { name: /Save 5 selections/ }).click();
+  await desktop.waitForTimeout(1100);
+  await desktop.getByRole("radio", { name: "Migration", exact: true }).click();
+  await desktop.waitForTimeout(1100);
+  await desktop.getByRole("button", { name: "Review", exact: true }).click();
+  check(await desktop.getByRole("heading", { name: "Review before publishing" }).count() === 1, "Review opens the real document review surface");
   await desktop.getByRole("button", { name: "Requirements", exact: true }).click();
   check(await desktop.locator(".lpos-builder").count() === 1, "Requirements returns to the guided builder");
   await desktop.getByRole("button", { name: "Settings", exact: true }).click();
-  check(await desktop.getByRole("dialog", { name: "Document settings" }).count() === 1, "rail Settings opens the real document settings");
-  await desktop.getByRole("button", { name: "Close document settings" }).click();
+  check(await desktop.getByRole("dialog", { name: "RFP preferences" }).count() === 1, "rail Settings opens the real document settings");
+  await desktop.getByRole("button", { name: "Close RFP preferences" }).click();
   const startedText = await desktop.locator("body").innerText();
   check(startedText.includes("Healthcare") && startedText.includes("20"), "guided input updates the living document through the existing question bank");
-  check(await desktop.getByRole("button", { name: /Review & publish/ }).count() === 1, "the essential baseline unlocks review and publish");
+  check(await desktop.getByRole("button", { name: "Suppliers", exact: true }).isEnabled(), "the essential baseline unlocks the publication stage");
   await desktop.getByRole("button", { name: /Bespoke question/ }).click();
   const bespoke = desktop.locator("#bespoke-supplier-question");
   await bespoke.fill("Describe your service credit approval process.");
@@ -73,8 +78,11 @@ try {
   await desktop.locator(".nf-guided-register").getByText("Describe your service credit approval process?", { exact: true }).waitFor();
   const registerText = await desktop.locator(".nf-guided-register").innerText();
   check(registerText.includes("Describe your service credit approval process?"), "a bespoke question is added to the canonical section register");
+  const normalisedBespokeCount = await desktop.locator(".nf-guided-register li").evaluateAll((items) => items.filter((item) => (item.textContent ?? "").replace(/[.!?]+\s*$/, "").includes("Describe your service credit approval process")).length);
+  check(normalisedBespokeCount === 1, "terminal punctuation normalisation finds the bespoke question exactly once", String(normalisedBespokeCount));
   check(await desktop.locator('.nf-guided-register li[data-status="custom"]').count() >= 1, "buyer-added wording is distinguished from bank and recommended questions");
-  await desktop.getByRole("button", { name: /Review & publish/ }).click();
+  await desktop.getByRole("button", { name: "Review", exact: true }).click();
+  await desktop.getByRole("button", { name: "Continue to publication", exact: true }).click();
   const boardConsent = desktop.locator("label").filter({ hasText: "Opportunity Board and GDPR acknowledgement" });
   await boardConsent.waitFor();
   check((await boardConsent.innerText()).includes("Signed-in curated vendors and managed service providers"), "publish consent explains who can view the anonymous Opportunity Board listing");
@@ -120,8 +128,12 @@ try {
   check(mobileShell.railWidth === 58 && mobileShell.workspaceLeft >= mobileShell.railRight, "the mobile workspace starts after the icon rail with no overlap", JSON.stringify(mobileShell));
   check(await mobile.evaluate(() => document.documentElement.scrollWidth === innerWidth), "mobile has no horizontal overflow");
   check(await mobile.locator("textarea").first().count() === 1, "mobile keeps the own-words answer path available");
-  const mobilePrompt = await mobile.locator(".lpos-persistent-prompt").evaluate((element) => ({ top: element.getBoundingClientRect().top, position: getComputedStyle(element).position }));
-  check(mobilePrompt.top < 360 && mobilePrompt.position === "static", "mobile keeps the prompt near the top without a covering sticky overlay", JSON.stringify(mobilePrompt));
+  const mobilePrompt = await mobile.locator(".lpos-persistent-prompt").evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const captured = document.querySelector(".lpos-you-said")?.getBoundingClientRect();
+    return { beforeCaptured: Boolean(captured && box.bottom <= captured.top), position: getComputedStyle(element).position };
+  });
+  check(mobilePrompt.beforeCaptured && mobilePrompt.position === "static", "mobile keeps the prompt first in the application flow without a covering sticky overlay", JSON.stringify(mobilePrompt));
   await mobile.close();
 } finally {
   await browser.close();

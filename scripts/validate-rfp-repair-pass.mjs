@@ -42,6 +42,16 @@ try {
     check(layout.position === "sticky", `${width}px: navigation rail is sticky inside the application`, JSON.stringify(layout));
     check(!layout.overlap, `${width}px: navigation rail does not cover canonical or entrance content`);
     check(layout.overflow <= 1, `${width}px: application creates no viewport overflow`, JSON.stringify(layout));
+    if (width === 1440) {
+      await page.getByRole("button", { name: /Detailed RFP/ }).click();
+      check(await page.getByRole("button", { name: /Recommended questions/ }).count() === 1, "detailed mode keeps recommended questions available in the active section");
+      const lockedLabels = ["Suppliers", "Responses", "Evidence", "Reports", "Exports"];
+      for (const label of lockedLabels) {
+        const locked = page.getByRole("button", { name: new RegExp(`^${label}, locked\\.`) });
+        check(await locked.isDisabled() && (await locked.getAttribute("aria-disabled")) === "true", `${label} is disabled and exposes aria-disabled before publication`);
+      }
+      await page.getByRole("button", { name: /Short RFP/ }).click();
+    }
     if (width === 390 || width === 820) {
       const mobileRail = await page.evaluate(() => {
         const buttons = [...document.querySelectorAll(".lpos-product-rail button")].filter((element) => {

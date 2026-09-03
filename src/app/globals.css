@@ -1629,3 +1629,6 @@ body:has(.nf-2030-workspace) .journey-mode-selector { margin-left: 0; }
   .nf-publication-checklist ul { grid-template-columns: 1fr; }
   .nf-publication-checklist > button { width: 100%; }
 }
+@media (max-width: 820px) {
+  .nf-2030-workspace .lpos-product-rail .lpos-rail-label { display: none; }
+}
