@@ -5,6 +5,7 @@ const root = process.cwd();
 const read = (file: string) => fs.readFileSync(path.join(root, file), "utf8");
 const route = read("src/app/api/rfp/[id]/publish/route.ts");
 const desk = read("src/components/ProjectDesk.tsx");
+const publicationError = read("src/lib/publication-error.ts");
 const board = read("src/app/(marketing)/opportunities/board/page.tsx");
 
 let failed = 0;
@@ -31,7 +32,9 @@ check(
 );
 check(
   "the builder has an explicit safe failure message when the board listing is absent",
-  desk.includes("The opportunity was not listed on the board. Nothing was sent"),
+  desk.includes("publicationFailureMessage(data, res.status)")
+    && publicationError.includes('code === "board_publication_incomplete"')
+    && publicationError.includes("The opportunity board entry was not created. Nothing was published or sent."),
 );
 check(
   "the success state links directly to the buyer's public notice",
