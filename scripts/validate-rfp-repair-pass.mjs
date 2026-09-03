@@ -18,6 +18,20 @@ try {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
     await page.goto(BASE_URL, { waitUntil: "networkidle" });
     check(await page.locator(".nf-2030-workspace").count() === 1, `${width}px: RFP workspace renders`);
+    const layout = await page.evaluate(() => {
+      const rail = document.querySelector(".lpos-product-rail");
+      const targets = [document.querySelector("#page-h1"), document.querySelector("#rfp-definitions"), document.querySelector(".journey-mode-selector")].filter(Boolean);
+      const railBox = rail?.getBoundingClientRect();
+      const intersects = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+      return {
+        position: rail ? getComputedStyle(rail).position : "missing",
+        overlap: Boolean(railBox && targets.some((target) => intersects(railBox, target.getBoundingClientRect()))),
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+    check(layout.position === "sticky", `${width}px: navigation rail is sticky inside the application`, JSON.stringify(layout));
+    check(!layout.overlap, `${width}px: navigation rail does not cover canonical or entrance content`);
+    check(layout.overflow <= 1, `${width}px: application creates no viewport overflow`, JSON.stringify(layout));
     await page.close();
   }
 
@@ -31,6 +45,7 @@ try {
     check(await page.locator(".lpos-sections > li").count() === 8, `${width}px: eight document sections before guided answers`);
     await page.getByRole("radio", { name: "Healthcare & pharma", exact: true }).click();
     await page.waitForTimeout(800);
+    check(await page.locator(".journey-mode-selector").count() === 0, `${width}px: entrance cards unmount after the project starts`);
     await page.getByRole("radio", { name: "Up to 50", exact: true }).click();
     await page.waitForTimeout(800);
     const before = await page.locator(".nf-guided-focus h2").innerText();

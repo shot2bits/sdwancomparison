@@ -19,6 +19,7 @@ function modeFromLocation(): ProjectJourneyMode {
 }
 
 export default function JourneyModeSelector() {
+  const [workspaceStarted, setWorkspaceStarted] = useState(false);
   const [selected, setSelected] = useState<ProjectJourneyMode>("build_rfp");
   const [scope, setScope] = useState("sase");
   const [sector, setSector] = useState("");
@@ -38,6 +39,11 @@ export default function JourneyModeSelector() {
   useEffect(() => {
     queueMicrotask(() => setSelected(modeFromLocation()));
     fetch("/sase/api/auth/session").then((response) => response.json()).then((session) => setSignedIn(Boolean(session.authenticated))).catch(() => {});
+  }, []);
+  useEffect(() => {
+    const hideEntrances = () => setWorkspaceStarted(true);
+    window.addEventListener("pd:project-started", hideEntrances);
+    return () => window.removeEventListener("pd:project-started", hideEntrances);
   }, []);
 
   function choose(mode: ProjectJourneyMode) {
@@ -144,6 +150,8 @@ export default function JourneyModeSelector() {
       setCreating(false);
     }
   }
+
+  if (workspaceStarted) return null;
 
   return (
     <section className="journey-mode-selector px-5 pb-5 pt-6" aria-labelledby="journey-mode-title">
