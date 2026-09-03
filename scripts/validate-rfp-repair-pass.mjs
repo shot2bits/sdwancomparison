@@ -20,6 +20,14 @@ try {
     check(await page.locator(".nf-2030-workspace").count() === 1, `${width}px: RFP workspace renders`);
     check(await page.locator(".lpos-header").count() === 1, `${width}px: exactly one application header renders`);
     check(await page.locator("h1").count() === 1, `${width}px: exactly one H1 remains after hydration`);
+    check(await page.getByRole("img", { name: "Netify Living Procurement OS", exact: true }).count() === 1, `${width}px: product brand has one accessible name`);
+    const unnamedButtons = await page.locator("button").evaluateAll((elements) => elements.filter((element) => {
+      const style = getComputedStyle(element);
+      const box = element.getBoundingClientRect();
+      const name = element.getAttribute("aria-label") || element.getAttribute("title") || element.textContent || "";
+      return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0 && !name.trim();
+    }).length);
+    check(unnamedButtons === 0, `${width}px: every visible button has an accessible name`, `${unnamedButtons} unnamed`);
     const layout = await page.evaluate(() => {
       const rail = document.querySelector(".lpos-product-rail");
       const targets = [document.querySelector("#page-h1"), document.querySelector("#rfp-definitions"), document.querySelector(".journey-mode-selector")].filter(Boolean);

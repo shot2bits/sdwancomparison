@@ -5214,7 +5214,7 @@ export default function ProjectDesk({
         /* ============================================================ */
         <>
           <header className="nf-2030-header nf-2030-journey lpos-header">
-            <div className="lpos-brand"><span>N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
+            <div className="lpos-brand" role="img" aria-label="Netify Living Procurement OS"><span aria-hidden="true">N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
               <button type="button" data-complete="true" onClick={() => goToStep("describe")}><b>✓</b><span>Describe project</span></button>
               <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}><b>2</b><span>Complete essentials</span></button>
@@ -6380,7 +6380,7 @@ export default function ProjectDesk({
            they are building, how complete it is and where it will go. */
         <>
           <header className="nf-2030-header nf-2030-journey lpos-header">
-            <div className="lpos-brand"><span>N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
+            <div className="lpos-brand" role="img" aria-label="Netify Living Procurement OS"><span aria-hidden="true">N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
               <button type="button" data-current="true" onClick={() => inputRef.current?.focus()}><b>1</b><span>Describe project</span></button>
               <button type="button" disabled><b>2</b><span>Complete essentials</span></button>

@@ -58,7 +58,7 @@
 .lpos-header { position: sticky; z-index: 45; top: 0; display: grid !important; min-height: 78px; grid-template-columns: 250px minmax(620px,1fr) 250px !important; align-items: center; gap: 20px; padding: 0 24px !important; color: #f7f5f0; background: #080a09 !important; box-shadow: inset 0 -1px rgba(255,255,255,.13); }
 .lpos-brand { display: flex; align-items: center; gap: 14px; }
 .lpos-brand > span { color: var(--lpos-orange); font-size: 34px; font-weight: 900; font-style: italic; transform: skew(-8deg); }
-.lpos-brand > div { display: flex; flex-direction: column; padding-left: 14px; border-left: 1px solid #292b29; }
+.lpos-brand > div { display: flex; flex-direction: column; }
 .lpos-brand strong { font-size: 20px; line-height: 1.05; }
 .lpos-brand small { margin-top: 3px; color: #a8a8a4; font-size: 15px; }
 .lpos-header .nf-2030-lifecycle { display: flex; align-items: center; justify-content: center; }
