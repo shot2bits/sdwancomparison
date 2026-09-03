@@ -27,7 +27,7 @@ Branch: `codex/rfp-builder-repair-2026-09-03`
 - Canonical crawler and live-shape suite: 54 passed, 0 failed.
 - Canonical desktop and mobile journey: passed.
 - RFP Builder interface journey: passed.
-- Repair suite: 106 passed, 0 failed across 390, 768, 819, 820, 821, 1024, 1280, 1440 and 1728 pixels.
+- Repair suite: 116 passed, 0 failed across 390, 768, 819, 820, 821, 1024, 1280, 1440 and 1728 pixels. This includes synthetic level-one heading detection and a named buyer-identity redaction check inside the supplier projection.
 - Publication policy: 13 passed, including idempotency, identity redaction, board failure atomicity and legacy KV readability.
 - Match disclosure and MarketUnlock: 168 passed, 0 failed.
 - Project entrance, journey-mode and responsive-accessibility contracts: passed.

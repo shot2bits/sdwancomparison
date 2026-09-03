@@ -20,6 +20,7 @@ try {
     check(await page.locator(".nf-2030-workspace").count() === 1, `${width}px: RFP workspace renders`);
     check(await page.locator(".lpos-header").count() === 1, `${width}px: exactly one application header renders`);
     check(await page.locator("h1").count() === 1, `${width}px: exactly one H1 remains after hydration`);
+    check(await page.locator('[role="heading"][aria-level="1"]').count() === 0, `${width}px: no synthetic level-one heading duplicates the canonical H1`);
     check(await page.getByRole("img", { name: "Netify Living Procurement OS", exact: true }).count() === 1, `${width}px: product brand has one accessible name`);
     const unnamedButtons = await page.locator("button").evaluateAll((elements) => elements.filter((element) => {
       const style = getComputedStyle(element);
@@ -130,7 +131,7 @@ try {
   await complete.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
   await complete.reload({ waitUntil: "domcontentloaded" });
   const completePrompt = complete.locator("textarea").first();
-  await completePrompt.fill("We are a healthcare organisation with 20 UK sites and 200 users across the United Kingdom and Ireland. We need fully managed SASE and SD-WAN to replace MPLS and legacy firewalls, with dual circuits, automatic failover and 99.99% availability. Security must include ZTNA, secure web gateway, CASB, DLP, Entra ID and MFA. We need a 24/7 managed NOC and SOC, incident escalation and service reviews. Migration must include a pilot, phased cutover, rollback, training and handover by December 2026.");
+  await completePrompt.fill("We are Example Buyer 7391, a healthcare organisation with 20 UK sites and 200 users across the United Kingdom and Ireland. We need fully managed SASE and SD-WAN to replace MPLS and legacy firewalls, with dual circuits, automatic failover and 99.99% availability. Security must include ZTNA, secure web gateway, CASB, DLP, Entra ID and MFA. We need a 24/7 managed NOC and SOC, incident escalation and service reviews. Migration must include a pilot, phased cutover, rollback, training and handover by December 2026.");
   await completePrompt.press("Enter");
   await complete.locator('[data-workspace-started="true"]').waitFor({ timeout: 25_000 });
   await complete.waitForTimeout(900);
@@ -148,9 +149,10 @@ try {
   check(await supplierProjection.count() === 1, "review exposes one scoped supplier-facing projection");
   check(await complete.locator(".lpos-header").count() === 1, "review keeps one application header after project start and navigation");
   check(await complete.locator("h1").count() === 1, "review keeps one H1 after project start and navigation");
+  check(await complete.locator('[role="heading"][aria-level="1"]').count() === 0, "review has no synthetic level-one heading after project start and navigation");
   const supplierText = await supplierProjection.innerText();
-  const forbiddenSupplierText = ["Procurement lead", "Private workspace", "Draft saved", "Document settings", "NOT PUBLISHED"];
-  check(forbiddenSupplierText.every((text) => !supplierText.includes(text)), "supplier projection excludes buyer workspace chrome", supplierText.slice(0, 220).replace(/\s+/g, " "));
+  const forbiddenSupplierText = ["Example Buyer 7391", "Procurement lead", "Private workspace", "Draft saved", "Document settings", "NOT PUBLISHED"];
+  check(forbiddenSupplierText.every((text) => !supplierText.includes(text)), "supplier projection excludes buyer identity and workspace chrome", supplierText.slice(0, 220).replace(/\s+/g, " "));
   check((await complete.locator("body").innerText()).includes("Review before publishing") && !supplierText.includes("Review before publishing"), "buyer review controls remain outside the supplier projection boundary");
   await complete.close();
 } finally {
