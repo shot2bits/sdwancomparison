@@ -154,10 +154,16 @@ export default function ProcurementArchitecture({
           </span>
         )}
       </div>
-      <div className="rounded-[4px] border p-4" style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-raised, #fefdfc)" }}>
+      <div
+        className="nf-procurement-architecture-scroll rounded-[4px] border p-4"
+        role="region"
+        tabIndex={0}
+        aria-label="Solution architecture. Scroll horizontally to see every element."
+        style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-raised, #fefdfc)" }}
+      >
         {nodes.length === 0 ? (
           <p className="m-0 text-[13.5px] leading-[1.55]" style={{ color: "var(--nf-ink-400, #83807b)" }}>
-            Nothing derived yet — it fills in as you describe sites, users, network and cloud.
+            Nothing derived yet. It fills in as you describe sites, users, network and cloud.
           </p>
         ) : edges.length === 0 ? (
           <div className="flex flex-wrap gap-2.5">
@@ -172,7 +178,7 @@ export default function ProcurementArchitecture({
                 technology exactly as the previous SVG did — the full
                 relationship list is still rendered below, unconditionally
                 and never display:none. */}
-            <div className="flex flex-wrap items-stretch gap-x-3 gap-y-3" role="img" aria-label={architecture.accessibleSummary}>
+            <div className="nf-procurement-architecture-pipeline flex items-stretch gap-x-3 gap-y-3" role="img" aria-label={architecture.accessibleSummary}>
               {filled.map((col, ci) => (
                 <div key={ci} className="flex items-stretch gap-x-3">
                   <div className="flex flex-col justify-center gap-2">
@@ -194,7 +200,7 @@ export default function ProcurementArchitecture({
                     className="inline-block h-[11px] w-[11px] flex-none rounded-[2px]"
                     style={{ border: "1.5px solid var(--nf-emerald-soft-border, #91bb91)", background: "var(--nf-emerald-soft, #d9f4d9)" }}
                   />
-                  Confirmed — a governed clause stands behind it
+                  Confirmed, with a governed clause behind it
                 </span>
               )}
               {anyInScope && (
@@ -204,7 +210,7 @@ export default function ProcurementArchitecture({
                     className="inline-block h-[11px] w-[11px] flex-none rounded-[2px]"
                     style={{ border: "1.5px solid var(--nf-ink-200, #d3d0cd)", background: "#fff" }}
                   />
-                  In scope — stated, no clause yet
+                  In scope, more detail required
                 </span>
               )}
             </div>

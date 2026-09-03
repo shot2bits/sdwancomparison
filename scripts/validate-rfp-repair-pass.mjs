@@ -57,6 +57,13 @@ try {
       const suppliers = page.locator('.lpos-product-rail button[data-disabled-reason]').filter({ has: page.locator('.lpos-rail-label', { hasText: "Suppliers" }) });
       check(await suppliers.isDisabled(), `${width}px: locked supplier navigation is natively disabled`);
       check((await suppliers.getAttribute("data-disabled-reason")) === "Complete the essential baseline before reviewing publication and supplier matching.", `${width}px: locked supplier navigation exposes the full reason`);
+      const architecture = page.getByRole("region", { name: "Solution architecture. Scroll horizontally to see every element." }).first();
+      await architecture.evaluate((element) => { element.scrollLeft = 0; });
+      const architectureOverflows = await architecture.evaluate((element) => element.scrollWidth > element.clientWidth);
+      await architecture.focus();
+      await architecture.press("ArrowRight");
+      await page.waitForTimeout(100);
+      check(!architectureOverflows || (await architecture.evaluate((element) => element.scrollLeft)) > 0, `${width}px: architecture fits or keyboard users can pan it`, architectureOverflows ? "overflowing" : "fits without horizontal pan");
     }
     await page.close();
   }

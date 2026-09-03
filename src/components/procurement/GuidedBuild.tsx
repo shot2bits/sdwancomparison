@@ -588,7 +588,7 @@ export default function GuidedBuild({
           <div><strong>{sectionQuestions.length}</strong><span>Supplier questions<br/>prepared</span></div>
           <div><strong>{Math.max(0, materialDecisionsRemaining)}</strong><span>Open decisions<br/>remaining</span></div>
         </div>
-        <div className="lpos-architecture" aria-label="Procurement architecture">
+        <div className="lpos-architecture" role="region" tabIndex={0} aria-label="Solution architecture. Scroll horizontally to see every element.">
           <div><strong>Sites</strong><span>your estate</span></div><b>→</b><div><strong>SD-WAN</strong><span>secure connectivity</span></div><b>→</b><div><strong>SASE</strong><span>security &amp; access</span></div><b>→</b><div><strong>Cloud apps</strong><span>apps and data</span></div>
         </div>
         <ol className="lpos-sections" aria-label="Essential document sections">

@@ -983,6 +983,13 @@
 .nf-2030-workspace .lpos-header .nf-2030-lifecycle button {
   min-height: 44px !important;
 }
+.lpos-architecture:focus-visible,
+.nf-procurement-architecture-scroll:focus-visible {
+  outline: 3px solid #1b67a5;
+  outline-offset: 3px;
+}
+.nf-procurement-architecture-scroll { overflow-x: auto; }
+.nf-procurement-architecture-pipeline { width: max-content; min-width: 100%; flex-wrap: nowrap; }
 
 .nf-2030-document-tabs { display: flex; flex-wrap: wrap; gap: 3px; margin: 0 0 10px; }
 .nf-2030-document-tabs button { border: 0; border-radius: 8px; padding: 10px 12px; color: #7e7e85; background: transparent; cursor: pointer; font-size: 10px; }
