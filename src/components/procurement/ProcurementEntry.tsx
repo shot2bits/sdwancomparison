@@ -84,6 +84,22 @@ export const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALU
 // ready procurement asset), not invented marketing filler.
 export const ENGINE_EYEBROW = "SASE and SD-WAN procurement, from requirement to bids";
 
+/* The document on the page (Robert, 3 Sep 2026). Every result that ranks
+ * for "sd-wan rfp" and "sase rfp" is a document a buyer can take away, and
+ * this page's title promises one. The Word file is the governed sample RFP
+ * (rfp-builder/sample-rfp/template.doc, open, no sign-in); the question
+ * bank is Harry Yelland's 120-question, 20-pillar public set. Figures come
+ * from those pages, never typed here twice: keep them in step. */
+export const RFP_DOCUMENT = {
+  lead: "Start from the document.",
+  downloadHref: "/sase/rfp-builder/sample-rfp/template.doc",
+  downloadLabel: "Download the SD-WAN and SASE RFP (Word, free, no sign-in)",
+  questionsHref: "https://netify.co.uk/sase/rfp-builder/questions/",
+  questionsLabel: "120 supplier questions across 20 pillars",
+  sampleHref: "https://netify.co.uk/sase/rfp-builder/sample-rfp/",
+  sampleLabel: "Read the worked SASE sample",
+};
+
 export default function ProcurementEntry() {
   return (
     // .procurement-2030 activates the scoped 2030 design tokens (see
@@ -116,7 +132,7 @@ export default function ProcurementEntry() {
             heading. The gap before the input is trust mb 12px +
             ProjectDesk's own mt-10 (40px) = 52px, inside his ruled
             44-56px range. */}
-        <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />
+        <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} document={RFP_DOCUMENT} />
 
         <JourneyModeSelector />
 

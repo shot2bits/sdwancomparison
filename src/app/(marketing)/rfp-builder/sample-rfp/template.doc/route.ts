@@ -12,7 +12,7 @@ import { buildRfpHtml } from "@/lib/rfp-document";
 export async function GET() {
   const html = buildRfpHtml(buildSampleProject(), {
     watermark:
-      "SAMPLE TEMPLATE — fictional buyer. Build your own tailored RFP free at netify.co.uk/sase/rfp-builder/",
+      "SAMPLE for a fictional buyer. Build your own tailored RFP free at netify.co.uk/sase-sd-wan-rfp-builder/",
   });
   return new Response(html, {
     headers: {

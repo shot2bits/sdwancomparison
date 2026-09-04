@@ -26,6 +26,9 @@ export const CANONICAL_BUILDER_URL = "https://netify.co.uk/sase-sd-wan-rfp-build
 export const QUESTION_BANK_URL = "https://netify.co.uk/sase/rfp-builder/questions/";
 export const SASE_SAMPLE_RFP_URL = "https://netify.co.uk/sase/rfp-builder/sample-rfp/";
 export const SDWAN_SAMPLE_RFP_URL = "https://netify.co.uk/sd-wan/sample-rfp/";
+/** The open Word download of the governed sample RFP (no sign-in). Served
+ *  by the SASE app under its /sase basePath; the apex rewrites the path. */
+export const RFP_DOWNLOAD_URL = "https://netify.co.uk/sase/rfp-builder/sample-rfp/template.doc";
 /** The editorial review date of THIS content (the definitions, table and
  *  FAQs), distinct from the validator's own reviewed date in
  *  rfp-validator.ts, which dates the scoring method and is shown by
@@ -106,7 +109,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is the Netify RFP Builder free?",
-    a: "Yes. Building, validating and downloading an SD-WAN or SASE RFP is free for buyers. Publishing is anonymous, pricing returned by suppliers is private to you, and nothing is published without your signature.",
+    a: "Yes. Building, validating and downloading an SD-WAN or SASE RFP is free for buyers, and the sample RFP is available as a Word download on this page without sign-in. Publishing is anonymous, pricing returned by suppliers is private to you, and nothing is published without your signature.",
   },
 ];
 
@@ -150,6 +153,11 @@ export function getRfpWebPageSchema() {
     breadcrumb: { "@id": `${CANONICAL_BUILDER_URL}#breadcrumb` },
     mainEntity: { "@id": `${CANONICAL_BUILDER_URL}#webapplication` },
     significantLink: [QUESTION_BANK_URL, SASE_SAMPLE_RFP_URL, SDWAN_SAMPLE_RFP_URL],
+    potentialAction: {
+      "@type": "DownloadAction",
+      name: "Download the SD-WAN and SASE RFP (Word, free)",
+      target: RFP_DOWNLOAD_URL,
+    },
   };
 }
 
@@ -174,6 +182,10 @@ export default function RfpPublicContent() {
           <li aria-current="page">SD-WAN and SASE RFP Builder</li>
         </ol>
       </nav>
+
+      <p className="mt-6 max-w-3xl text-sm leading-6 text-[#55514d]">
+        The document this page builds is also available as it stands: <a className="underline" href={RFP_DOWNLOAD_URL}>download the SD-WAN and SASE RFP (Word, free, no sign-in)</a>, drawn from the <a className="underline" href={QUESTION_BANK_URL}>120 supplier questions across 20 pillars</a> in the question bank. Use it as a starting point, or build a tailored version above and publish it to receive supplier responses.
+      </p>
 
       <h2 id="rfp-guide-heading" className="mt-6 text-[clamp(22px,3vw,32px)] font-semibold tracking-[-0.02em]">
         What an SD-WAN or SASE RFP covers

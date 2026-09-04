@@ -66,6 +66,7 @@ export default function CollapsibleHero({
   eyebrow,
   definitions,
   role,
+  document,
 }: {
   h1: string;
   promise: string;
@@ -77,6 +78,18 @@ export default function CollapsibleHero({
   definitions?: { term: string; article: string; text: string }[];
   /** One sentence on what Netify does with the document. */
   role?: string;
+  /** The document itself (Robert, 3 Sep 2026): the page title promises a
+   *  template, so the template is on the page. Word download without
+   *  sign-in, the question count, and the worked sample. Pre-start only. */
+  document?: {
+    lead: string;
+    downloadHref: string;
+    downloadLabel: string;
+    questionsHref: string;
+    questionsLabel: string;
+    sampleHref: string;
+    sampleLabel: string;
+  };
 }) {
   const [compact, setCompact] = useState(false);
 
@@ -156,6 +169,23 @@ export default function CollapsibleHero({
           style={compact ? undefined : { fontSize: "14.5px", lineHeight: 1.55, color: "#55514d", margin: "14px auto 0", maxWidth: "52em" }}
         >
           {role}
+        </p>
+      )}
+      {document && !compact && (
+        <p
+          id="rfp-document"
+          className="mx-auto flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center"
+          style={{ fontSize: "14px", lineHeight: 1.5, color: "#55514d", margin: "16px auto 0", maxWidth: "62em" }}
+        >
+          <span>{document.lead}</span>
+          <a
+            href={document.downloadHref}
+            className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-[13.5px] font-semibold text-zinc-950 no-underline transition-colors hover:bg-amber-400"
+          >
+            {document.downloadLabel}
+          </a>
+          <a href={document.questionsHref} className="underline underline-offset-4">{document.questionsLabel}</a>
+          <a href={document.sampleHref} className="underline underline-offset-4">{document.sampleLabel}</a>
         </p>
       )}
       {/* `value` (the third, most marketing-toned paragraph): visible only
