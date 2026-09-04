@@ -20,7 +20,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "build_sase_shortlist",
     description:
-      "Build a ranked SASE and SD-WAN provider shortlist from 30 vendors graded by Netify. Hard requirements exclude vendors without public evidence; everything else feeds a weighted score. Returns ranked vendors with reasoning, gaps and watch-outs, plus resume_url: the live shortlist page with these exact criteria applied and every input editable. Hand resume_url to the human to continue, or call get_sase_vendor_profile on any returned slug for depth. Read and compute only, no consent needed, nothing stored.",
+      "Build a ranked SASE and SD-WAN provider shortlist from 30 vendors graded by Netify. Hard requirements exclude vendors without public evidence; everything else feeds a weighted score. Returns ranked vendors with reasoning, gaps and watch-outs, plus engine_url: the Netify RFP Builder with these criteria in place and the top five providers pinned, from which the human publishes the project anonymously on the opportunity board and receives vendor responses. Hand engine_url to the human to continue; resume_url opens the research shortlist page itself with the criteria applied. Call get_sase_vendor_profile on any returned slug for depth. Read and compute only, no consent needed, nothing stored.",
     inputSchema: {
       type: "object",
       properties: {
@@ -67,7 +67,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "compare_vendors",
     description:
-      "Compare two or three SASE and SD-WAN providers on the same Netify evidence matrix used by the public comparison workspace. Returns scores, feature-by-feature grades, clear capability leads and a canonical URL that opens the selected providers for a human. Read and compute only, no consent needed and nothing stored.",
+      "Compare two or three SASE and SD-WAN providers on the same Netify evidence matrix used by the public comparison workspace. Returns scores, feature-by-feature grades, clear capability leads, resume_url (the comparison open for a human) and engine_url (the Netify RFP Builder with both providers pinned, from which the human publishes anonymously on the opportunity board). Read and compute only, no consent needed and nothing stored.",
     inputSchema: {
       type: "object",
       properties: {

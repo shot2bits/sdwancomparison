@@ -4,8 +4,9 @@
  */
 
 import { FEATURES, FEATURE_NAMES, getVendor, getAllVendorSlugs } from "@/lib/vendors";
-import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
+import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, ShortlistInputSchema, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
 import { applyComparisonHandoff } from "@/lib/comparison-handoff";
+import { buildEngineHandoff } from "@/lib/engine-handoff";
 import { SITE_URL } from "@/lib/structured-data";
 import { getDemandIndex } from "@/lib/demand-index";
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
@@ -32,13 +33,27 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       // this result.
       const scenario = encodeScenario({ ...DEFAULT_INPUT, ...((args ?? {}) as Partial<ShortlistInput>) } as ShortlistInput);
       const resumeUrl = `${SITE_URL}/shortlist/${scenario ? `?${scenario}` : ""}`;
+      // Shortlist to engine handoff (3 Sep 2026, Robert's ruling that every
+      // path ends on the opportunity board): an agent-built shortlist lands
+      // in the engine with these criteria as facts and the top five pinned,
+      // so a ChatGPT or Claude user is one link from publishing, not left
+      // with a chat answer. Same URL the page's own workspace tabs use.
+      const parsedInput = ShortlistInputSchema.safeParse({ ...DEFAULT_INPUT, ...((args ?? {}) as Partial<ShortlistInput>) });
+      const engineUrl = buildEngineHandoff({
+        input: parsedInput.success ? parsedInput.data : DEFAULT_INPUT,
+        vendorSlugs: result.shortlist.slice(0, 5).map((vendor) => vendor.slug),
+        featureNames: FEATURE_NAMES,
+        mode: "top_five",
+      }).url;
       return {
         ...result,
         resume_url: resumeUrl,
+        engine_url: engineUrl,
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
           resume_url: resumeUrl,
-          note: "Hand resume_url to the human: it opens the live shortlist with these criteria applied and editable, one step from inviting these providers to respond in the workspace.",
+          engine_url: engineUrl,
+          note: "Hand engine_url to the human: it opens the Netify RFP Builder with these criteria in place and the top five providers pinned, so they can publish the project anonymously on the opportunity board and receive responses. resume_url opens the research shortlist itself with the criteria applied.",
         },
       };
     }
@@ -97,13 +112,16 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
         source: "mcp",
       });
       const resumeUrl = `${SITE_URL}/shortlist/?${params.toString()}#comparison-workspace`;
+      const engineUrl = buildEngineHandoff({ input: DEFAULT_INPUT, vendorSlugs: comparison.slugs, featureNames: FEATURE_NAMES, mode: "compare" }).url;
       return {
         ...comparison,
         resume_url: resumeUrl,
+        engine_url: engineUrl,
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
           resume_url: resumeUrl,
-          note: "The human workspace uses this same deterministic comparison result and can continue with contextual questions.",
+          engine_url: engineUrl,
+          note: "The human workspace uses this same deterministic comparison result and can continue with contextual questions. Hand engine_url to the human to take these providers into the Netify RFP Builder, pinned to a project they can publish anonymously on the opportunity board.",
         },
       };
     }

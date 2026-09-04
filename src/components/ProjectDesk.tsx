@@ -1779,11 +1779,43 @@ export default function ProjectDesk({
             // was already arriving in this exact response -- simply never read
             // out of it until now. See McpEvidencePanel.tsx.
             history?: ProjectHistoryEvent[];
+            // Shortlist to engine handoff (3 Sep 2026): a record minted by
+            // an older /shortlist "Use current top five" link carries the
+            // buyer's providers here and nowhere the desk used to read.
+            buyer?: { pinned_vendors?: string[]; notes?: string };
+            entrance_context?: { source?: string; vendor_slugs?: string[]; requirement_text?: string } | null;
           };
           setProjectHistory(proj.history ?? []);
           const resumeState = resumeStateFromProject(proj);
           const hasCanonicalWorkspaceState = Array.isArray(proj.facts) && proj.facts.length > 0;
           if (!resumeState && !hasCanonicalWorkspaceState) {
+            /* Shortlist to engine handoff (3 Sep 2026): links issued by the
+               old top-five handoff (POST /api/rfp, then ?id=) reach a
+               record with no engine and no facts. Before this branch the
+               desk said "starting fresh" and the buyer's five providers
+               stayed in KV, invisible. New handoffs travel by ?vendors=
+               and ?q= instead (engine-handoff.ts), but an old link in an
+               inbox or a browser history must still land with its match:
+               pin the carried providers and feed the carried requirement
+               text through the same extractor a typed sentence uses. The
+               desk does not adopt the record's id: nothing here was saved
+               by this surface, so a later Save mints the project properly. */
+            const carriedPins = [...new Set([...(proj.entrance_context?.vendor_slugs ?? []), ...(proj.buyer?.pinned_vendors ?? [])])]
+              .filter((slug) => /^[a-z0-9-]{2,60}$/.test(slug))
+              .slice(0, 5);
+            const carriedText = (proj.entrance_context?.requirement_text || proj.buyer?.notes || "").trim();
+            if (carriedPins.length || carriedText) {
+              if (carriedPins.length) setAdded((current) => [...new Set([...current, ...carriedPins])].slice(0, 5));
+              say(carriedPins.length
+                ? `Your shortlist of ${carriedPins.length} provider${carriedPins.length === 1 ? "" : "s"} is pinned to this project. Describe the project, then publish anonymously so they can respond.`
+                : "Your shortlist requirements are carried into this project. Review them, then publish anonymously to the opportunity board.");
+              if (carriedText && !q) {
+                firstKeyAt.current = Date.now();
+                setResuming(false);
+                void send(carriedText.slice(0, 1200));
+              }
+              return;
+            }
             say("This project isn't a Security Sourcing engagement yet, so it can't be reopened here -- starting fresh instead.");
             return;
           }
@@ -1971,9 +2003,17 @@ export default function ProjectDesk({
       const m = applyMerge(seedFacts, "link");
       if (m.changed.length) markChanged(m.changed, m.facts);
     }
+    /* Shortlist to engine handoff (3 Sep 2026, Robert's ruling that every
+       path ends on the opportunity board): ?vendors= is honoured on its own,
+       not only alongside ?q=. The comparison workspace on /shortlist now
+       sends every tab through this door (src/lib/engine-handoff.ts), and
+       the pinned providers must be visible on arrival whether or not the
+       sentence extracted anything. Pins are the buyer's own selection, so
+       showing them pre-publish stays inside the product rule that hides
+       Netify's computed ranking until publication. */
+    if (vendorsParam.length) setAdded(vendorsParam);
     if (q) {
       firstKeyAt.current = Date.now();
-      if (vendorsParam.length) setAdded(vendorsParam);
       void send(q);
     }
     setBooted(true);
@@ -2289,6 +2329,20 @@ export default function ProjectDesk({
      the corresponding removal. */
   const marketTotal = fit?.total ?? market?.counts.vendors ?? null;
   const pins = [...new Set(added)].slice(0, 5);
+  /* Shortlist to engine handoff (3 Sep 2026): the buyer's own pinned
+     providers, named from the live market directory, rendered pre-publish
+     by GuidedBuild as "Your shortlist". Removable one by one; the same
+     `added` list feeds pinned_vendors at publish, so what the buyer sees is
+     exactly what is invited. */
+  const pinnedShortlist = useMemo(() => {
+    if (!pins.length) return null;
+    const names = new Map((market?.vendors ?? []).map((vendor) => [vendor.slug, vendor.name]));
+    return {
+      vendors: pins.map((slug) => ({ slug, name: names.get(slug) ?? slug.replace(/-/g, " ") })),
+      onRemove: (slug: string) => setAdded((current) => current.filter((item) => item !== slug)),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pins.join(","), market]);
 
   function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
   const unansweredGaps = brief.openGaps;
@@ -5372,6 +5426,7 @@ export default function ProjectDesk({
                 settingsOpen={documentSettingsOpen}
                 onSettingsOpenChange={setDocumentSettingsOpen}
                 published={publishedFlag}
+                shortlist={pinnedShortlist}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -6486,6 +6541,7 @@ export default function ProjectDesk({
               settingsOpen={documentSettingsOpen}
               onSettingsOpenChange={setDocumentSettingsOpen}
               published={publishedFlag}
+              shortlist={pinnedShortlist}
             />
           </div>
           </>}

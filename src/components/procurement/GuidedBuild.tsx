@@ -93,6 +93,7 @@ export default function GuidedBuild({
   settingsOpen,
   onSettingsOpenChange,
   published,
+  shortlist = null,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
@@ -138,6 +139,10 @@ export default function GuidedBuild({
   onContinueBuilding: () => void;
   settingsOpen: boolean;
   onSettingsOpenChange: (open: boolean) => void;
+  /** Shortlist to engine handoff (3 Sep 2026): the buyer's own pinned
+   *  providers, carried from /shortlist by ?vendors=. Buyer intent, not
+   *  Netify's computed match, so it may show before publication. */
+  shortlist?: { vendors: { slug: string; name: string }[]; onRemove: (slug: string) => void } | null;
   published: boolean;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
@@ -598,7 +603,16 @@ export default function GuidedBuild({
             return <li key={row.key} data-current={current} data-state={row.state}><button type="button" onClick={() => onSelectSection(row.key)}><b>{index + 1}</b><strong>{row.title}</strong><span><b>{row.detail}</b><small>{coverage.join(" · ")}</small></span><em>{row.state === "confirmed" ? "✓ Confirmed" : current ? "● Needs input" : row.state === "needs_decision" ? "● Needs decision" : "○ Later"}</em><i>⌄</i></button>{current && <div className="lpos-section-extensions"><button type="button" onClick={() => openQuestionManager(true)}>＋ Recommended questions</button><button type="button" onClick={() => openQuestionManager(false)}>＋ Bespoke question</button></div>}</li>;
           })}
         </ol>
-        <div className="lpos-unlock"><span aria-hidden="true">{publishReachable ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{publishReachable ? "Ready to publish" : hasStarted ? "Continue building your RFP" : "Start your RFP"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : hasStarted ? advisorMessage : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
+        {shortlist && shortlist.vendors.length > 0 && !published && (
+          <div className="lpos-captured lpos-shortlist" aria-label="Your shortlist">
+            <small>Your shortlist</small>
+            {shortlist.vendors.map((vendor, index) => (
+              <div key={vendor.slug}><span aria-hidden="true">{index + 1}</span><p><strong>{vendor.name}</strong><small>Pinned from your comparison. Invited when you publish.</small></p><button type="button" onClick={() => shortlist.onRemove(vendor.slug)} aria-label={`Remove ${vendor.name} from your shortlist`}>Remove</button></div>
+            ))}
+            <p className="lpos-shortlist-note">These are your own picks. Netify&apos;s evaluated match across the whole market is computed the moment you publish, never before.</p>
+          </div>
+        )}
+        <div className="lpos-unlock"><span aria-hidden="true">{publishReachable ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{publishReachable ? "Ready to publish" : hasStarted ? "Continue building your RFP" : shortlist?.vendors.length ? "Your shortlist is waiting" : "Start your RFP"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : hasStarted ? advisorMessage : shortlist?.vendors.length ? "Your providers are pinned. Tell Netify your sector, site count and regions, then publish so they can respond." : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
         <div className="lpos-document-actions"><button type="button" className="primary" onClick={publishReachable ? onPublish : onContinueBuilding}>{publishReachable ? "Review & publish" : "Continue to next requirement"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
       </aside>
       {settingsOpen && (
