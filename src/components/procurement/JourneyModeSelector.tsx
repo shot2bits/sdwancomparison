@@ -7,7 +7,6 @@ import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_V
 import { REGION_KEYS, REGION_LABELS, SECTOR_KEYS, SECTOR_LABELS } from '@/lib/shortlist-core';
 import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY, PROJECT_DRAFT_KEY, projectTokenKey } from '@/lib/buying-entry';
 import SignIn from '@/components/SignIn';
-import styles from './JourneyModeSelector.module.css';
 
 type Fields = { scope: string; sector: string; sites: string; regions: string[]; operatingModel: string; outcome: string; timescale: string; company: string; requiredFeatures: string[] };
 const EMPTY: Fields = { scope: 'sase', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '', requiredFeatures: [] };
@@ -169,16 +168,16 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
     });
   }
   return <>
-    {!resuming && <div className={styles.toolbar}>
+    {!resuming && <div className="nf-brief-toolbar">
       <div><strong>Your buying workspace</strong><span>Build your requirements here, or publish a short brief.</span></div>
       <button type="button" disabled={!ready} onClick={() => choose(selected === 'find_providers' ? 'find_providers' : 'quick_list')}>
         {project ? 'Return to my project brief' : 'Publish a short brief'} <span aria-hidden="true">↗</span>
       </button>
     </div>}
     {ready && children}
-    <dialog ref={dialogRef} className={styles.dialog} aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
-      <header className={styles.panelHeader}><span>NETIFY · PROJECT BRIEF</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
-      <div className={styles.panelBody}>
+    <dialog ref={dialogRef} className="nf-brief-dialog" aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
+      <header className="nf-brief-panel-header"><span>NETIFY · PROJECT BRIEF</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
+      <div className="nf-brief-panel-body">
           <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Publish a short project brief'}</h2>
           <p className="mt-2 text-sm text-[#66635e]">Describe what you need, review the anonymous notice, then verify your work email to publish. A full RFP is optional.</p>
           {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
