@@ -35,3 +35,11 @@ To disable this release, retain the new compatible memory readers/writers and de
 - Existing browser suites exercise bespoke questions, supplier pack, draft save failures, comparison and publication gates.
 
 Authenticated production writes and real opportunity publication are deliberately not performed with invented buyer identities. Production smoke checks verify the live interface and unauthenticated access denial; isolated tests cover authenticated writes and publication paths.
+
+## Released and checked — 5 September 2026
+
+Application commit: `d8b628b`. Production deployment: `dpl_Fj9U59qXHxV5kgxBWn2bJtpPQWrt` (`https://sasecomparison-deuy7sarl-netifymarketplace.vercel.app`), promoted to the existing Netify production alias.
+
+All 48 regression groups passed; final changed-account tests, TypeScript and targeted lint passed afterwards. Local and hosted production builds passed. Desktop/mobile assistant tests and existing shell/brief tests passed against the live canonical URL. Authenticated assistant UI tests use isolated API fixtures; real storage/auth tests run against isolated fake KV, including actual requirement extraction. Live unauthenticated API returns 401 with `private, no-store`; live provider data reports Neon and 30 providers. Builder, shortlist and board return 200. The deployment error-log query returned no entries.
+
+The live page is `https://netify.co.uk/sase-sd-wan-rfp-builder/`. Sign in, then open Memories or Skills in the sidebar. No real buyer emails, supplier invitations or opportunity-board test publications were sent.
