@@ -1,0 +1,31 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 28px;
+  background: #f8f6f2;
+  border-top: 1px solid #ded9d0;
+  color: #26231f;
+}
+.toolbar strong { display: block; font-size: 14px; font-weight: 650; }
+.toolbar div > span { display: block; margin-top: 3px; color: #70695f; font-size: 12px; }
+.toolbar button { flex-shrink: 0; border: 1px solid #aa420d; border-radius: 6px; padding: 10px 16px; background: #aa420d; color: white; font-size: 13px; font-weight: 600; cursor: pointer; }
+.toolbar button > span { margin-left: 10px; }
+.toolbar button:disabled { opacity: .5; cursor: wait; }
+.dialog { position: fixed; inset: 0; margin: auto; width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); padding: 0; overflow-y: auto; overscroll-behavior: contain; background: #fffdfa; color: #26231f; border: 1px solid #d7d0c5; border-radius: 12px; box-shadow: 0 24px 80px #0004; }
+.dialog::backdrop { background: #10100eb3; backdrop-filter: blur(3px); }
+.panelHeader { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 26px; background: #fffdfa; border-bottom: 1px solid #e7e1d7; }
+.panelHeader > span { font-size: 10px; font-weight: 650; letter-spacing: .12em; color: #7a6e60; }
+.panelHeader button { padding: 5px 8px; border: 0; background: transparent; color: #4e453a; cursor: pointer; font-size: 13px; }
+.panelHeader button > span { margin-left: 12px; font-size: 20px; }
+.panelBody { padding: 24px 28px 28px; }
+.toolbar button:focus-visible, .panelHeader button:focus-visible { outline: 2px solid #aa420d; outline-offset: 3px; }
+@media (max-width: 600px) {
+  .toolbar { align-items: flex-start; flex-direction: column; gap: 12px; padding: 16px 20px; }
+  .toolbar button { width: 100%; text-align: center; }
+  .dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); border-radius: 8px; }
+  .dialog input, .dialog select, .dialog textarea { font-size: 16px; }
+  .panelHeader { padding: 12px 18px; }
+  .panelBody { padding: 20px 18px 24px; }
+}

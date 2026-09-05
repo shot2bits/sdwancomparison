@@ -18,13 +18,13 @@ try {
       draft = body;
       return route.fulfill({ json: { project_reference: 'rfp-test', revision, project_session_token: 'private-test-token' } });
     });
-    await page.goto('http://localhost:3107/sase/home/');
+    await page.goto('http://localhost:3107/sase/home/?journey=find_providers');
+    await page.getByRole('button', { name: 'Publish a short brief', exact: false }).click();
     await page.getByLabel('Company name (private)').fill('Example Ltd');
     await page.getByRole('combobox', { name: /^Sector/ }).selectOption('manufacturing');
     await page.getByLabel('Number of sites').fill('20');
     await page.getByLabel('Buying timescale').fill('Six months');
     await page.getByLabel('What do you need to achieve?').fill('Connect twenty factories with a resilient managed network.');
-    await page.getByRole('button', { name: /^Find providers for my project/ }).click();
     await page.getByRole('button', { name: 'Review my project' }).click();
     await page.getByRole('heading', { name: 'Review your anonymous project notice' }).waitFor();
     assert.equal(draft.mode, 'find_providers');

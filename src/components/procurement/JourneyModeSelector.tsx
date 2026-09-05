@@ -7,19 +7,16 @@ import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_V
 import { REGION_KEYS, REGION_LABELS, SECTOR_KEYS, SECTOR_LABELS } from '@/lib/shortlist-core';
 import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY, PROJECT_DRAFT_KEY, projectTokenKey } from '@/lib/buying-entry';
 import SignIn from '@/components/SignIn';
+import styles from './JourneyModeSelector.module.css';
 
-const MODES: { id: ProjectJourneyMode; title: string; description: string }[] = [
-  { id: 'quick_list', title: 'Start my project', description: 'Publish a short anonymous brief. A full RFP is optional.' },
-  { id: 'find_providers', title: 'Find providers for my project', description: 'Publish your requirements to unlock personalised matches.' },
-  { id: 'build_rfp', title: 'Build a full RFP', description: 'Develop detailed supplier questions and evaluation criteria.' },
-  { id: 'validate_rfp', title: 'Check an existing RFP', description: 'Upload or paste a draft to identify missing requirements.' },
-];
 type Fields = { scope: string; sector: string; sites: string; regions: string[]; operatingModel: string; outcome: string; timescale: string; company: string; requiredFeatures: string[] };
 const EMPTY: Fields = { scope: 'sase', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '', requiredFeatures: [] };
 type Project = { project_reference: string; revision: number };
 const inputClass = 'mt-1 block w-full rounded border border-[#cfc8bf] bg-white p-2 text-sm font-normal';
 
 export default function JourneyModeSelector({ children }: { children?: ReactNode }) {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [selected, setSelected] = useState<ProjectJourneyMode>('quick_list');
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [project, setProject] = useState<Project | null>(null);
@@ -47,6 +44,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
         const chosen = params.has('id') || params.has('q') ? 'build_rfp' : PROJECT_JOURNEY_MODES.includes(requested) ? requested : 'quick_list';
         mode.current = chosen; setSelected(chosen); setResuming(params.has('id'));
         const id = params.get('project');
+        if (id || params.get('from') === 'comparison') setPanelOpen(true);
         const fragment = new URLSearchParams(location.hash.slice(1));
         const incoming = fragment.get('project_session');
         if (id && incoming) {
@@ -94,11 +92,22 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
     return () => window.removeEventListener('focus', refresh);
   }, []);
 
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || !ready) return;
+    if (panelOpen && !dialog.open) dialog.showModal();
+    if (!panelOpen && dialog.open) dialog.close();
+    if (!panelOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [panelOpen, ready]);
+
   function choose(next: ProjectJourneyMode) {
     mode.current = next; setSelected(next);
     const url = new URL(location.href); url.searchParams.set('journey', next);
     history.replaceState(history.state, '', url);
-    window.dispatchEvent(new CustomEvent('netify:journey-mode', { detail: { mode: next } }));
+    setPanelOpen(true);
   }
   async function request(path: string, body: unknown, method = 'POST', current = project) {
     const token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
@@ -159,16 +168,20 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
       setProject({ ...project, revision: data.revision }); setCoverage(data.preview.meets_all_mandatory_count);
     });
   }
-  const shortJourney = selected === 'quick_list' || selected === 'find_providers';
   return <>
+    {!resuming && <div className={styles.toolbar}>
+      <div><strong>Your buying workspace</strong><span>Build your requirements here, or publish a short brief.</span></div>
+      <button type="button" disabled={!ready} onClick={() => choose(selected === 'find_providers' ? 'find_providers' : 'quick_list')}>
+        {project ? 'Return to my project brief' : 'Publish a short brief'} <span aria-hidden="true">↗</span>
+      </button>
+    </div>}
     {ready && children}
-    <section className="journey-mode-selector px-5 pb-5 pt-6" aria-label="Start your buying project">
-      <div className="mx-auto max-w-[1180px]">
-        {!project && !resuming && <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{MODES.map((item) => <button key={item.id} type="button" aria-pressed={selected === item.id} onClick={() => choose(item.id)} className={`rounded-md border p-4 text-left ${selected === item.id ? 'border-[#b64b16] bg-[#fff5ed]' : 'border-[#d8d3cc] bg-white'}`}><strong className="block">{item.title}</strong><span className="mt-1 block text-sm text-[#66635e]">{item.description}</span></button>)}</div>}
-        {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-        {shortJourney && <div className="mt-4 rounded-lg border border-[#d8d3cc] bg-white p-5">
-          <h2 className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Tell us what your business needs'}</h2>
-          <p className="mt-2 text-sm text-[#66635e]">Publish a free, anonymous project to unlock your personalised shortlist, comparisons and supplier responses. A full RFP is optional.</p>
+    <dialog ref={dialogRef} className={styles.dialog} aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
+      <header className={styles.panelHeader}><span>NETIFY · PROJECT BRIEF</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
+      <div className={styles.panelBody}>
+          <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Publish a short project brief'}</h2>
+          <p className="mt-2 text-sm text-[#66635e]">Describe what you need, review the anonymous notice, then verify your work email to publish. A full RFP is optional.</p>
+          {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
           {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your board listing is live. Supplier responses and pricing will appear as providers reply.</p><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
             <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
             <p className="mt-4 text-sm">Your company name and contact details are private. Remove identifying information from the requirement before publishing.</p>
@@ -179,24 +192,23 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
             {prepared && !signedIn && <div className="mt-4"><SignIn role="buyer" prompt="Verify your work email, then return here to publish. Your company stays private." onAuthed={() => setSignedIn(true)} /></div>}
             <button type="button" disabled={busy || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
           </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void saveForReview(); }}>
-            <fieldset disabled={busy} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <fieldset disabled={busy} className="grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold">Solution<select className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
               <label className="text-sm font-semibold">Sector<select required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
               <label className="text-sm font-semibold">Number of sites<input required type="number" min="1" step="1" className={inputClass} value={fields.sites} onChange={(e) => setField('sites', e.target.value)}/></label>
               <label className="text-sm font-semibold">Operating model<select className={inputClass} value={fields.operatingModel} onChange={(e) => setField('operatingModel', e.target.value)}><option value="any">Not decided</option><option value="managed">Fully managed</option><option value="co_managed">Co-managed</option><option value="diy">Self-managed</option></select></label>
               <label className="text-sm font-semibold">Buying timescale<input required maxLength={200} placeholder="e.g. within six months" className={inputClass} value={fields.timescale} onChange={(e) => setField('timescale', e.target.value)}/></label>
               <label className="text-sm font-semibold">Company name (private)<input required minLength={2} maxLength={200} autoComplete="organization" className={inputClass} value={fields.company} onChange={(e) => setField('company', e.target.value)}/></label>
-              <fieldset className="sm:col-span-2 lg:col-span-3"><legend className="mb-2 text-sm font-semibold">Regions to cover</legend><div className="flex flex-wrap gap-3">{REGION_KEYS.map((r) => <label key={r} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fields.regions.includes(r)} onChange={(e) => setField('regions', e.target.checked ? [...fields.regions, r] : fields.regions.filter((v) => v !== r))}/>{REGION_LABELS[r]}</label>)}</div></fieldset>
-              <details className="sm:col-span-2 lg:col-span-3"><summary className="cursor-pointer text-sm font-semibold">Required capabilities (optional)</summary><p className="my-2 text-xs">Select only essentials. These filters determine your personalised matches; other details in your brief are for suppliers to confirm.</p><div className="grid gap-2 sm:grid-cols-2">{[
+              <fieldset className="sm:col-span-2"><legend className="mb-2 text-sm font-semibold">Regions to cover</legend><div className="flex flex-wrap gap-3">{REGION_KEYS.map((r) => <label key={r} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fields.regions.includes(r)} onChange={(e) => setField('regions', e.target.checked ? [...fields.regions, r] : fields.regions.filter((v) => v !== r))}/>{REGION_LABELS[r]}</label>)}</div></fieldset>
+              <details className="sm:col-span-2"><summary className="cursor-pointer text-sm font-semibold">Required capabilities (optional)</summary><p className="my-2 text-xs">Select only essentials. These filters determine your personalised matches; other details in your brief are for suppliers to confirm.</p><div className="grid gap-2 sm:grid-cols-2">{[
                 ['f30_zero_trust_network_access', 'Zero Trust Network Access'], ['f31_secure_web_gateway', 'Secure web gateway'], ['f32_casb_capability', 'CASB'], ['f33_data_loss_prevention', 'Data loss prevention'], ['f16_mpls_coexistence_and_migration', 'MPLS migration'], ['f17_cellular_and_5g_support', 'Cellular and 5G'], ['f25_high_availability_design', 'High availability'], ['f28_full_sase_platform', 'Full SASE platform'],
               ].map(([id, label]) => <label key={id} className="flex gap-2 text-sm"><input type="checkbox" checked={fields.requiredFeatures.includes(id)} onChange={(e) => setField('requiredFeatures', e.target.checked ? [...fields.requiredFeatures, id] : fields.requiredFeatures.filter((v) => v !== id))}/>{label}</label>)}</div></details>
-              <label className="text-sm font-semibold sm:col-span-2 lg:col-span-3">What do you need to achieve?<textarea required minLength={20} maxLength={4000} rows={4} placeholder="Describe your sites, users, security needs and what should improve. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
+              <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea required minLength={20} maxLength={4000} rows={4} placeholder="Describe your sites, users, security needs and what should improve. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
             </fieldset>
             <button disabled={busy} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Review my project'}</button>
             <p className="mt-3 text-xs text-[#66635e]">Nothing is published until you verify your work email and approve the notice.</p>
           </form>}
-        </div>}
       </div>
-    </section>
+    </dialog>
   </>;
 }
