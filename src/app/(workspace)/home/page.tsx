@@ -176,14 +176,9 @@ export default function Page() {
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
-      <ProcurementEntry />
-      {/* The citable public content (3 Sep 2026): table, FAQs, review
-          date, breadcrumb and links, then the validation method. Both are
-          Server Components rendered here directly. They used to be passed
-          to ProjectDesk as `afterPrompt`, which ProjectDesk accepts and
-          discards, so none of it reached the served HTML. */}
-      <RfpPublicContent />
-      <RfpCitationEvidence />
+      {/* Server-rendered guidance stays in the initial HTML, inside the
+          workspace's single accessible, collapsed buying guide. */}
+      <ProcurementEntry guidance={<><RfpPublicContent /><RfpCitationEvidence /></>} />
     </>
   );
 }

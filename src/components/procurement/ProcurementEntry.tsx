@@ -1,7 +1,7 @@
 import { buyerAssistantEnabled } from "@/lib/buyer-assistant";
 import BuyingWorkspaceShell from "@/components/procurement/BuyingWorkspaceShell";
 import PublicComparison from "@/components/procurement/PublicComparison";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import ProjectDesk from "@/components/ProjectDesk";
 import JourneyStrip from "@/components/JourneyStrip";
 import CapabilityBlock from "@/components/CapabilityBlock";
@@ -88,7 +88,7 @@ export const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALU
 // ready procurement asset), not invented marketing filler.
 export const ENGINE_EYEBROW = "SASE and SD-WAN procurement, from requirement to bids";
 
-export default function ProcurementEntry() {
+export default function ProcurementEntry({ guidance }: { guidance?: ReactNode } = {}) {
   return (
     // .procurement-2030 activates the scoped 2030 design tokens (see
     // globals.css) for everything inside this component and nothing
@@ -123,7 +123,7 @@ export default function ProcurementEntry() {
         <BuyingWorkspaceShell
           assistantEnabled={buyerAssistantEnabled()}
           comparison={<Suspense fallback={<a href="/sase/shortlist/">Compare SD-WAN and SASE providers</a>}><PublicComparison expanded /></Suspense>}
-          information={<CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />}
+          information={<><CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />{guidance}</>}
         >
         <JourneyModeSelector>
 
@@ -139,8 +139,8 @@ export default function ProcurementEntry() {
         {/* NOTE (3 Sep 2026): ProjectDesk accepts `afterPrompt` for
             compatibility and does not render it, so nothing passed here
             reaches the page. The citable public content for the canonical
-            builder page (RfpPublicContent, RfpCitationEvidence) is rendered
-            by (workspace)/home/page.tsx directly, after this component. */}
+            builder page (RfpPublicContent, RfpCitationEvidence) is supplied
+            by (workspace)/home/page.tsx through the guidance slot above. */}
         <ProjectDesk afterPrompt={<><EmptyDocumentFrame /><JourneyStrip /><CapabilityBlock /></>} />
         </JourneyModeSelector>
         </BuyingWorkspaceShell>

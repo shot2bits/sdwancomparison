@@ -1889,3 +1889,17 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
   box-shadow: 0 0 0 3px rgba(82,96,118,.12);
 }
 .nf-buying-shell .nf-buying-topbar > a { color: #526076; }
+
+/* Supplementary guidance occupies one quiet row until the buyer opens it.
+   All content remains server-rendered inside the native details element. */
+.nf-buying-information > summary { font-weight: 500; color: #526076; }
+.nf-buying-information[open] > summary { margin-bottom: 24px; }
+.nf-buying-guide-content { max-width: 1180px; margin: 0 auto; }
+.nf-buying-guide-content > section { padding-left: 0; padding-right: 0; }
+.nf-buying-guide-content a { color: #334155; text-decoration: underline; }
+.nf-buying-guide-content h2, .nf-buying-guide-content h3 { color: #19283d; }
+.nf-buying-guide-content table { font-size: 13px; }
+.nf-buying-guide-content th, .nf-buying-guide-content td { border-color: #e4e8ed; }
+@media (max-width: 760px) {
+  .nf-buying-information { padding: 18px 20px; }
+}
