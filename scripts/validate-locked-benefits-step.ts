@@ -12,7 +12,7 @@ const checks: Array<[string, boolean]> = [
   ["mobile users receive the same unlock explanation beside their progress", /lpos-mobile-unlock-note[\s\S]{0,180}Supplier matching, responses, evidence, reports and exports unlock after anonymous publication/.test(guided)],
   ["mobile layouts hide the longer desktop notice instead of duplicating it", /\.lpos-builder \.lpos-publish-unlock-note \{ display: none; \}/.test(css)],
   ["the pre-publication notice disappears after publication", /\{!published && \(\s*<p className="lpos-publish-unlock-note"/.test(guided)],
-  ["the document status no longer says draft after publication", /published \? "PUBLISHED" : "DRAFT · NOT PUBLISHED"/.test(guided)],
+  ["the document status no longer says draft after publication", /published \? "Published" : "Draft · not published"/.test(guided)],
   ["disabled navigation reasons are exposed to assistive technology", /aria-describedby=\{item\.disabled \? tooltipId : undefined\}/.test(desk) && /role="tooltip"/.test(desk)],
   ["the guided builder receives the real publication state everywhere it renders", (desk.match(/<GuidedBuild[\s\S]{0,5000}?published=\{publishedFlag\}/g) ?? []).length === 2],
 ];

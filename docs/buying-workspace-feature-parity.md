@@ -45,3 +45,10 @@ Presentation shell, navigation, wordmark, spacing and contextual panels. Engine 
 - Existing short-brief dialog tests: focus/close/Escape, draft retention and mobile containment.
 - Isolated publication UI: reload, failed publication and retry; comparison handoff; published project reopening with frozen provider identities.
 - Existing source and pipeline tests cover imports, validation, question register, decisions, publication gates, exports and MCP contracts. External supplier messaging, live email delivery and actual live board publication are not exercised by UI smoke checks.
+
+## Production layout refresh — 5 September 2026
+The approved concept is applied to the existing production shell and GuidedBuild engine. The production section-question register, custom-question handlers, imports, validation, short-brief publication, persistence, identity and approval gates remain authoritative. No prototype question data, verification or sample publishing is copied.
+
+Added direct Short RFP / Detailed RFP navigation using the existing persisted depth handler; import navigation opens the existing file chooser for source requirements. The menu collapses on desktop and retains the existing mobile menu. The live RFP document sits beside the editor on wide screens and below it on narrow screens. Draft status and labels use sentence case.
+
+Verification: full existing build validators including section-question register and export parity; desktop/mobile brief-dialog and draft-retention browser checks; new navigation checks cover both depths, retained editor input, file chooser, menu collapse and comparison round-trip. RFI imports use existing document ingestion; this layout does not introduce a separate RFI publication backend.

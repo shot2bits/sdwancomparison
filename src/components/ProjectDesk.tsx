@@ -4630,6 +4630,8 @@ export default function ProjectDesk({
       const action = (event as CustomEvent<string>).detail;
       if (action === "settings") { goToStep("describe"); setDocumentSettingsOpen(true); }
       if (action === "requirements") goToStep("describe");
+      if (action === "short-rfp" || action === "detailed-rfp") { changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
+      if (action === "import") { goToStep("describe"); fileRef.current?.click(); }
       if (action === "review") goToStep(started ? "review" : "describe");
       if (action === "responses") goToStep(reachable.has("compare") ? "compare" : "describe");
       if (action === "tools") {

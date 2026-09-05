@@ -153,7 +153,8 @@ export default function GuidedBuild({
   useEffect(() => {
     const onAction = (event: Event) => {
       const action = (event as CustomEvent<string>).detail;
-      if (action === "requirements") setWorkspaceTab("requirements");
+      if (action === "requirements" || action === "short-rfp" || action === "detailed-rfp") setWorkspaceTab("requirements");
+      if (action === "import") setWorkspaceTab("overview");
     };
     window.addEventListener("netify:workspace-action", onAction);
     return () => window.removeEventListener("netify:workspace-action", onAction);
@@ -359,7 +360,7 @@ export default function GuidedBuild({
 
   return (
     <div className="lpos-builder" data-workspace-tab={workspaceTab}>
-      <div className="nf-calm-heading"><div><p>{published ? "PUBLISHED PROJECT" : "YOUR PRIVATE WORKSPACE"}</p><h1>{displayDocumentTitle}</h1><span>Shape your requirements. Publish when you are ready.</span>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" disabled={!publishReachable} title={publishReachable ? "Review this RFP before publishing" : "Complete the essential requirements, or publish a short brief"} onClick={onPublish}>Review &amp; publish →</button></div>
+      <div className="nf-calm-heading"><div><div className="nf-workspace-title"><h1>{displayDocumentTitle}</h1><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" disabled={!publishReachable} title={publishReachable ? "Review this RFP before publishing" : "Complete the essential requirements, or publish a short brief"} onClick={onPublish}>Review &amp; publish →</button></div>
       <nav className="nf-calm-tabs" aria-label="Project views">
         <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
         <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>
@@ -369,7 +370,7 @@ export default function GuidedBuild({
       <div className="nf-guided-main">
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
           <div className="nf-calm-overview">
-          <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Netify engine</strong></div>
+          <div className="nf-guided-builder-label"><strong>Your requirements</strong></div>
           <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
           <div className="nf-essential-progress" role="status" aria-live="polite">
             <strong>{ready ? "Essential baseline complete" : `${Math.max(0, total - Math.max(0, position - 1))} essential section${Math.max(0, total - Math.max(0, position - 1)) === 1 ? "" : "s"} remaining`}</strong>
@@ -595,7 +596,7 @@ export default function GuidedBuild({
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
           <div><h2>{displayDocumentTitle}</h2><span>{progress.ready} of {progress.total} essential sections ready</span></div>
-          <span>● &nbsp; {published ? "PUBLISHED" : "DRAFT · NOT PUBLISHED"}</span>
+          <span>{published ? "Published" : "Draft · not published"}</span>
           <button type="button" onClick={() => onSettingsOpenChange(true)}>⚙ &nbsp; Document settings</button>
         </div>
         {!published && (
