@@ -1,198 +1,197 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode } from "@/lib/rfp-types";
-import { PROJECT_ENTRANCE_CONTRACT_VERSION } from "@/lib/project-entrance-contract";
-import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION } from "@/lib/publication-policy";
-import SignIn from "@/components/SignIn";
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode } from '@/lib/rfp-types';
+import { PROJECT_ENTRANCE_CONTRACT_VERSION, type ProjectEntranceContext } from '@/lib/project-entrance-contract';
+import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION, quickListingReadiness } from '@/lib/publication-policy';
+import { REGION_KEYS, REGION_LABELS, SECTOR_KEYS, SECTOR_LABELS } from '@/lib/shortlist-core';
+import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY, PROJECT_DRAFT_KEY, projectTokenKey } from '@/lib/buying-entry';
+import SignIn from '@/components/SignIn';
 
-const MODES: Array<{ id: ProjectJourneyMode; title: string; description: string }> = [
-  { id: "quick_list", title: "List a project", description: "Create a short anonymous opportunity without writing an RFP first." },
-  { id: "find_providers", title: "Find providers", description: "Describe the essentials and see aggregate market coverage before publication." },
-  { id: "build_rfp", title: "Build an RFP", description: "Develop a governed short or detailed RFP from your requirement." },
-  { id: "validate_rfp", title: "Check an existing RFP", description: "Paste or upload an existing draft to identify gaps and improve comparability." },
+const MODES: { id: ProjectJourneyMode; title: string; description: string }[] = [
+  { id: 'quick_list', title: 'Start my project', description: 'Publish a short anonymous brief. A full RFP is optional.' },
+  { id: 'find_providers', title: 'Find providers for my project', description: 'Publish your requirements to unlock personalised matches.' },
+  { id: 'build_rfp', title: 'Build a full RFP', description: 'Develop detailed supplier questions and evaluation criteria.' },
+  { id: 'validate_rfp', title: 'Check an existing RFP', description: 'Upload or paste a draft to identify missing requirements.' },
 ];
+type Fields = { scope: string; sector: string; sites: string; regions: string[]; operatingModel: string; outcome: string; timescale: string; company: string };
+const EMPTY: Fields = { scope: 'sase', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '' };
+type Project = { project_reference: string; revision: number };
+const inputClass = 'mt-1 block w-full rounded border border-[#cfc8bf] bg-white p-2 text-sm font-normal';
 
-function modeFromLocation(): ProjectJourneyMode {
-  const value = new URLSearchParams(window.location.search).get("journey");
-  return PROJECT_JOURNEY_MODES.includes(value as ProjectJourneyMode) ? (value as ProjectJourneyMode) : "build_rfp";
-}
-
-export default function JourneyModeSelector() {
-  const [workspaceStarted, setWorkspaceStarted] = useState(false);
-  const [selected, setSelected] = useState<ProjectJourneyMode>("build_rfp");
-  const [scope, setScope] = useState("sase");
-  const [sector, setSector] = useState("");
-  const [sites, setSites] = useState("");
-  const [regions, setRegions] = useState("uk_ireland");
-  const [operatingModel, setOperatingModel] = useState("any");
-  const [outcome, setOutcome] = useState("");
-  const [timescale, setTimescale] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [created, setCreated] = useState<{ project_reference: string; revision: number } | null>(null);
-  const [preview, setPreview] = useState<{ considered_count: number; eligible_technology_count: number; eligible_managed_provider_count: number; meets_all_mandatory_count: number; unresolved_requirements: string[] } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [consentAccepted, setConsentAccepted] = useState(false);
+export default function JourneyModeSelector({ children }: { children?: ReactNode }) {
+  const [selected, setSelected] = useState<ProjectJourneyMode>('quick_list');
+  const [fields, setFields] = useState<Fields>(EMPTY);
+  const [project, setProject] = useState<Project | null>(null);
+  const [entrance, setEntrance] = useState<ProjectEntranceContext | null>(null);
+  const [review, setReview] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState('');
+  const [consent, setConsent] = useState(false);
   const [prepared, setPrepared] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
-  const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const [published, setPublished] = useState(false);
+  const [coverage, setCoverage] = useState<number | null>(null);
+  const inFlight = useRef(false);
+  const mode = useRef<ProjectJourneyMode>('quick_list');
+  function setField<K extends keyof Fields>(key: K, value: Fields[K]) { setFields((old) => ({ ...old, [key]: value })); }
+
   useEffect(() => {
-    queueMicrotask(() => setSelected(modeFromLocation()));
-    fetch("/sase/api/auth/session").then((response) => response.json()).then((session) => setSignedIn(Boolean(session.authenticated))).catch(() => {});
+    let active = true;
+    async function restore() {
+      try {
+        const params = new URLSearchParams(location.search);
+        const requested = params.get('journey') as ProjectJourneyMode;
+        const chosen = params.has('id') || params.has('q') ? 'build_rfp' : PROJECT_JOURNEY_MODES.includes(requested) ? requested : 'quick_list';
+        mode.current = chosen; setSelected(chosen);
+        const id = params.get('project');
+        const fragment = new URLSearchParams(location.hash.slice(1));
+        const incoming = fragment.get('project_session');
+        if (id && incoming) {
+          localStorage.setItem(projectTokenKey(id), incoming);
+          history.replaceState(history.state, '', location.pathname + location.search);
+        }
+        if (id) {
+          const token = localStorage.getItem(projectTokenKey(id));
+          if (!token) throw new Error('Open this project on the browser where you started it, or use your assistant’s private resume link.');
+          const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
+          const data = await response.json();
+          if (!response.ok) throw new Error('This private project session has expired or is unavailable. Your saved project has not been deleted.');
+          if (!active) return;
+          const raw = data.entrance_context?.raw_input ?? {}, buyer = data.buyer;
+          setFields({ scope: raw.solution_scope ?? (buyer.product_scope === 'sdwan_only' ? 'sdwan' : buyer.product_scope === 'sse_only' ? 'sse' : 'sase'), sector: buyer.sector ?? '', sites: buyer.site_count == null ? '' : String(buyer.site_count), regions: buyer.regions, operatingModel: buyer.operating_model, outcome: buyer.notes, timescale: raw.timescale ?? '', company: buyer.organisation });
+          setEntrance(data.entrance_context ?? null); setProject({ project_reference: id, revision: data.revision });
+          setPrepared(data.prepared); setReview(true);
+          setPublished(data.marketplace_state?.publication_status === 'published' && data.marketplace_state?.market_unlock_status === 'unlocked');
+          mode.current = data.mode === 'find_providers' ? 'find_providers' : 'quick_list'; setSelected(mode.current);
+        } else if (!params.has('id') && !params.has('q')) {
+          const handoff = params.get('from') === 'comparison' ? sessionStorage.getItem(COMPARISON_PROJECT_DRAFT_KEY) : null;
+          if (handoff) {
+            const context = JSON.parse(handoff) as ProjectEntranceContext;
+            setEntrance(context);
+            const buyer = context.buyer_input;
+            setFields({ ...EMPTY, outcome: context.requirement_text, sector: context.sector ?? '', regions: Array.isArray(buyer.regions) && buyer.regions.length ? buyer.regions as string[] : EMPTY.regions, operatingModel: String(buyer.operating_model ?? 'any') });
+          } else {
+            const cached = localStorage.getItem(PROJECT_DRAFT_KEY);
+            if (cached) setFields({ ...EMPTY, ...JSON.parse(cached) });
+          }
+        }
+      } catch (reason) { if (active) setError(reason instanceof Error ? reason.message : 'Could not restore the project.'); }
+      finally { if (active) setReady(true); }
+    }
+    void restore();
+    return () => { active = false; };
   }, []);
   useEffect(() => {
-    const hideEntrances = () => setWorkspaceStarted(true);
-    window.addEventListener("pd:project-started", hideEntrances);
-    return () => window.removeEventListener("pd:project-started", hideEntrances);
+    if (!ready || project) return;
+    try { localStorage.setItem(PROJECT_DRAFT_KEY, JSON.stringify(fields)); } catch { /* Saving on the server reports storage errors separately. */ }
+  }, [fields, ready, project]);
+  useEffect(() => {
+    const refresh = () => { void fetch('/sase/api/auth/session', { cache: 'no-store' }).then((r) => r.json()).then((s) => setSignedIn(Boolean(s.authenticated && ['buyer', 'netify'].includes(s.role)))).catch(() => {}); };
+    refresh(); window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
   }, []);
 
-  function choose(mode: ProjectJourneyMode) {
-    setSelected(mode);
-    setCreated(null);
-    setPreview(null);
-    setPrepared(false);
-    setConsentAccepted(false);
-    const url = new URL(window.location.href);
-    url.searchParams.set("journey", mode);
-    window.history.replaceState(window.history.state, "", url);
-    window.dispatchEvent(new CustomEvent("netify:journey-mode", { detail: { mode } }));
+  function choose(next: ProjectJourneyMode) {
+    mode.current = next; setSelected(next);
+    const url = new URL(location.href); url.searchParams.set('journey', next);
+    history.replaceState(history.state, '', url);
+    window.dispatchEvent(new CustomEvent('netify:journey-mode', { detail: { mode: next } }));
   }
-
-  async function publishPreparedProject(project: { project_reference: string; revision: number }) {
-    const token = sessionStorage.getItem(`netify_marketplace_project_${project.project_reference}`);
-    const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}/publish`, {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` },
-      body: JSON.stringify({ base_revision: project.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT, marketing_opt_in: false }),
-    });
+  async function request(path: string, body: unknown, method = 'POST', current = project) {
+    const token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
+    if (current && !token) throw new Error('Your private session is unavailable. Reload to recover your project.');
+    const response = await fetch(path, { method, headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Publication did not complete.");
-    setPublishedUrl(data.opportunity_url);
+    if (!response.ok) throw new Error(data.message || data.error || 'The request did not complete. Your project is still saved.');
+    return data;
   }
-
-  async function preparePublication() {
-    if (!created || !consentAccepted) return;
-    setCreating(true); setError(null);
-    try {
-      const token = sessionStorage.getItem(`netify_marketplace_project_${created.project_reference}`);
-      const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(created.project_reference)}/prepare-publication`, {
-        method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` },
-        body: JSON.stringify({ base_revision: created.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT, marketing_opt_in: false }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Could not prepare publication.");
-      const next = { ...created, revision: data.revision };
-      setCreated(next); setPrepared(true);
-      if (signedIn) await publishPreparedProject(next);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not prepare publication."); }
-    finally { setCreating(false); }
+  async function action(work: () => Promise<void>) {
+    if (inFlight.current) return;
+    inFlight.current = true; setBusy(true); setError('');
+    try { await work(); } catch (reason) { setError(reason instanceof Error ? reason.message : 'The request did not complete.'); }
+    finally { inFlight.current = false; setBusy(false); }
   }
-
-  async function loadAggregatePreview() {
-    if (!created) return;
-    setCreating(true);
-    setError(null);
-    try {
-      const token = sessionStorage.getItem(`netify_marketplace_project_${created.project_reference}`);
-      const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(created.project_reference)}/match-preview`, {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` },
-        body: JSON.stringify({ base_revision: created.revision, input: { mandatory_capabilities: [], preferred_capabilities: [], required_regions: [regions.trim()], service_model: operatingModel === "managed" ? "fully_managed" : operatingModel === "any" ? null : operatingModel, sector: sector.trim(), provider_scope: "both" } }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Could not calculate market coverage.");
-      setCreated({ ...created, revision: data.revision });
-      setPreview(data.preview);
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not calculate market coverage.");
-    } finally {
-      setCreating(false);
-    }
+  async function saveForReview() {
+    await action(async () => {
+      const readiness = quickListingReadiness({ solutionScope: fields.scope, sector: fields.sector, siteCount: Number(fields.sites), regions: fields.regions, operatingModel: fields.operatingModel, outcome: fields.outcome, timescale: fields.timescale });
+      if (!readiness.allowed || !Number.isSafeInteger(Number(fields.sites))) throw new Error(`Please complete: ${readiness.reasons.join(', ') || 'a whole-number site count'}.`);
+      if (fields.company.trim().length < 2) throw new Error('Enter your company name. It stays private.');
+      // Fail before creating if this browser cannot retain its private recovery credential.
+      localStorage.setItem('netify_storage_check', '1'); localStorage.removeItem('netify_storage_check');
+      const buyer = { ...(entrance?.buyer_input ?? {}), organisation: fields.company.trim(), sector: fields.sector, site_count: Number(fields.sites), regions: fields.regions, operating_model: fields.operatingModel, product_scope: fields.scope === 'sdwan' ? 'sdwan_only' : fields.scope === 'sse' ? 'sse_only' : 'full_sase', notes: fields.outcome.trim(), pinned_vendors: [] };
+      const raw = { ...(entrance?.raw_input ?? {}), solution_scope: fields.scope, outcome: fields.outcome.trim(), timescale: fields.timescale.trim() };
+      let saved: Project;
+      if (project) saved = await request(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}`, { base_revision: project.revision, idempotency_key: crypto.randomUUID(), buyer_patch: buyer, raw_input: raw }, 'PATCH');
+      else {
+        const context = { version: PROJECT_ENTRANCE_CONTRACT_VERSION, source: entrance?.source ?? 'rfp_builder', source_url: entrance?.source_url ?? location.href, captured_at: entrance?.captured_at ?? Date.now(), requirement_text: fields.outcome.trim(), sector: fields.sector, marketplace_slug: null, vendor_slugs: [], buyer_input: buyer, shortlist_input: entrance?.shortlist_input ?? null, raw_input: raw };
+        const data = await request('/sase/api/marketplace/projects', { mode: selected, entrance_context: context });
+        localStorage.setItem(projectTokenKey(data.project_reference), data.project_session_token);
+        saved = { project_reference: data.project_reference, revision: data.revision };
+      }
+      setProject(saved); setReview(true); setPrepared(false); setConsent(false); setCoverage(null);
+      const url = new URL(location.href); url.searchParams.set('project', saved.project_reference); url.searchParams.delete('from');
+      history.replaceState(history.state, '', url);
+      localStorage.removeItem(PROJECT_DRAFT_KEY);
+    });
   }
-
-  async function createCanonicalProject() {
-    if (!outcome.trim() || !sector || !sites || !regions.trim() || !timescale.trim()) {
-      setError("Add the sector, estate, geography, outcome and timescale to create the private project.");
-      return;
-    }
-    setCreating(true);
-    setError(null);
-    const capturedAt = Date.now();
-    const rawInput = { solution_scope: scope, sector, site_count: Number(sites), regions: [regions.trim()], operating_model: operatingModel, outcome: outcome.trim(), timescale: timescale.trim() };
-    try {
-      const response = await fetch("/sase/api/marketplace/projects", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          mode: selected,
-          entrance_context: {
-            version: PROJECT_ENTRANCE_CONTRACT_VERSION,
-            source: "rfp_builder",
-            source_url: window.location.href,
-            captured_at: capturedAt,
-            requirement_text: outcome.trim(),
-            sector,
-            marketplace_slug: null,
-            vendor_slugs: [],
-            buyer_input: { sector, site_count: Number(sites), regions: [regions.trim()], operating_model: operatingModel, product_scope: scope === "sdwan" ? "sdwan_only" : scope === "sse" ? "sse_only" : "full_sase", notes: outcome.trim() },
-            shortlist_input: null,
-            raw_input: rawInput,
-          },
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Could not create the private project.");
-      sessionStorage.setItem(`netify_marketplace_project_${data.project_reference}`, data.project_session_token);
-      setCreated({ project_reference: data.project_reference, revision: data.revision });
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not create the private project.");
-    } finally {
-      setCreating(false);
-    }
+  async function publish() {
+    if (!project || !consent) return;
+    await action(async () => {
+      let current = project;
+      if (!prepared) {
+        const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(current.project_reference)}/prepare-publication`, { base_revision: current.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT });
+        current = { ...current, revision: data.revision }; setProject(current); setPrepared(true);
+      }
+      if (!signedIn) return;
+      const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(current.project_reference)}/publish`, { base_revision: current.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT }, 'POST', current);
+      if (!data.ok || !data.market_unlocked || !data.opportunity_id) throw new Error('The board listing is not complete. Please retry.');
+      setPublished(true);
+    });
   }
-
-  if (workspaceStarted) return null;
-
-  return (
-    <section className="journey-mode-selector px-5 pb-5 pt-6" aria-labelledby="journey-mode-title">
-      <div className="journey-mode-selector-inner mx-auto max-w-[1180px]">
-        <p id="journey-mode-title" className="m-0 mb-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#66635e]">
-          Choose how to start. Every route creates the same private project
-        </p>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {MODES.map((mode) => (
-            <button key={mode.id} type="button" aria-pressed={selected === mode.id} onClick={() => choose(mode.id)}
-              className={`rounded-md border p-4 text-left transition-colors ${selected === mode.id ? "border-[#b64b16] bg-[#fff5ed]" : "border-[#d8d3cc] bg-white hover:border-[#9d958b]"}`}>
-              <strong className="block text-[15px] text-[#110f0d]">{mode.title}</strong>
-              <span className="mt-1 block text-[12.5px] leading-5 text-[#66635e]">{mode.description}</span>
-            </button>
-          ))}
-        </div>
-      {(selected === "quick_list" || selected === "find_providers") && (
-        <div className="mt-3 rounded-md border border-[#d8d3cc] bg-white p-4" aria-live="polite">
-          <div className="grid gap-3 md:grid-cols-3">
-            <label className="text-xs font-semibold text-[#4f4b46]">Solution scope<select value={scope} onChange={(e) => setScope(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="sase">SASE</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
-            <label className="text-xs font-semibold text-[#4f4b46]">Sector<select value={sector} onChange={(e) => setSector(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="">Choose sector</option><option value="healthcare">Healthcare</option><option value="manufacturing">Manufacturing</option><option value="retail_ecommerce">Retail and e-commerce</option><option value="financial_services">Financial services</option></select></label>
-            <label className="text-xs font-semibold text-[#4f4b46]">Sites<input type="number" min="1" value={sites} onChange={(e) => setSites(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
-            <label className="text-xs font-semibold text-[#4f4b46]">Geography<select value={regions} onChange={(e) => setRegions(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="uk_ireland">UK and Ireland</option><option value="europe">Europe</option><option value="north_america">North America</option><option value="asia_pacific">Asia Pacific</option><option value="middle_east_africa">Middle East and Africa</option><option value="latin_america">Latin America</option></select></label>
-            <label className="text-xs font-semibold text-[#4f4b46]">Operating model<select value={operatingModel} onChange={(e) => setOperatingModel(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="any">No preference</option><option value="managed">Managed</option><option value="co_managed">Co-managed</option><option value="self_managed">Self-managed</option></select></label>
-            <label className="text-xs font-semibold text-[#4f4b46]">Timescale<input value={timescale} onChange={(e) => setTimescale(e.target.value)} placeholder="e.g. within 6 months" className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
-          </div>
-          <label className="mt-3 block text-xs font-semibold text-[#4f4b46]">Problem or desired outcome<textarea value={outcome} onChange={(e) => setOutcome(e.target.value)} rows={2} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
-          <div className="mt-3 flex items-center gap-3">
-            <button type="button" disabled={creating || Boolean(created)} onClick={createCanonicalProject} className="rounded-full bg-[#b64b16] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50">{creating ? "Creating…" : created ? "Private project created" : selected === "quick_list" ? "Create opportunity draft" : "Create provider search"}</button>
-            {created && <span className="text-xs text-emerald-800">Saved privately as {created.project_reference}. Nothing has been published and no supplier can see it.</span>}
-            {error && <span className="text-xs text-red-700">{error}</span>}
-          </div>
-          {created && selected === "find_providers" && !preview && <button type="button" disabled={creating} onClick={loadAggregatePreview} className="mt-3 text-sm font-semibold text-[#8c360d] underline">Show aggregate provider coverage</button>}
-          {preview && <div className="mt-3 rounded bg-[#f4f1ec] p-3 text-sm text-[#403c37]"><strong>{preview.meets_all_mandatory_count} providers currently meet the stated baseline</strong><span className="ml-2">({preview.eligible_technology_count} technology, {preview.eligible_managed_provider_count} managed; {preview.considered_count} reviewed). Provider identities stay locked until successful publication.</span>{preview.unresolved_requirements.length > 0 && <p className="mt-1 text-xs">Unresolved: {preview.unresolved_requirements.join(", ")}</p>}</div>}
-          {created && selected === "quick_list" && !publishedUrl && <div className="mt-4 border-t border-[#e3ded7] pt-4"><label className="flex items-start gap-2 text-xs leading-5 text-[#4f4b46]"><input type="checkbox" checked={consentAccepted} onChange={(event) => setConsentAccepted(event.target.checked)} className="mt-1" /><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label><button type="button" disabled={!consentAccepted || creating || prepared} onClick={preparePublication} className="mt-3 rounded-full bg-[#151311] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50">{prepared ? "Publication prepared" : "Publish anonymously"}</button></div>}
-          {prepared && !signedIn && created && <div className="mt-4"><SignIn role="buyer" publishRfpId={created.project_reference} prompt="Verify your work email to complete anonymous publication. Your company and contact details never appear on the board." onAuthed={() => setSignedIn(true)} /></div>}
-          {prepared && signedIn && !publishedUrl && <button type="button" onClick={() => created && publishPreparedProject(created).catch((reason) => setError(reason instanceof Error ? reason.message : "Publication failed."))} className="mt-3 text-sm font-semibold underline">Complete publication</button>}
-          {publishedUrl && <p className="mt-4 text-sm font-semibold text-emerald-800">Publication completed and MarketUnlock verified. <a href={publishedUrl} className="underline">View the anonymous opportunity</a>.</p>}
-        </div>
-      )}
+  async function previewCoverage() {
+    if (!project) return;
+    await action(async () => {
+      const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}/match-preview`, { base_revision: project.revision, input: { mandatory_capabilities: [], preferred_capabilities: [], required_regions: fields.regions, service_model: fields.operatingModel === 'managed' ? 'fully_managed' : fields.operatingModel === 'any' ? null : fields.operatingModel === 'diy' ? 'self_managed' : fields.operatingModel, sector: fields.sector, provider_scope: 'both' } });
+      setProject({ ...project, revision: data.revision }); setCoverage(data.preview.meets_all_mandatory_count);
+    });
+  }
+  const shortJourney = selected === 'quick_list' || selected === 'find_providers';
+  return <>
+    <section className="journey-mode-selector px-5 pb-5 pt-6" aria-label="Start your buying project">
+      <div className="mx-auto max-w-[1180px]">
+        {!project && <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{MODES.map((item) => <button key={item.id} type="button" aria-pressed={selected === item.id} onClick={() => choose(item.id)} className={`rounded-md border p-4 text-left ${selected === item.id ? 'border-[#b64b16] bg-[#fff5ed]' : 'border-[#d8d3cc] bg-white'}`}><strong className="block">{item.title}</strong><span className="mt-1 block text-sm text-[#66635e]">{item.description}</span></button>)}</div>}
+        {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+        {shortJourney && <div className="mt-4 rounded-lg border border-[#d8d3cc] bg-white p-5">
+          <h2 className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Tell us what your business needs'}</h2>
+          <p className="mt-2 text-sm text-[#66635e]">Publish a free, anonymous project to unlock your personalised shortlist, comparisons and supplier responses. A full RFP is optional.</p>
+          {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your board listing is live. Supplier responses and pricing will appear as providers reply.</p><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
+            <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
+            <p className="mt-4 text-sm">Your company name and contact details are private. Remove identifying information from the requirement before publishing.</p>
+            <button type="button" disabled={busy} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
+            {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
+            {coverage !== null && <p className="mt-3 text-sm">{coverage} providers meet the filters checked so far. This is market coverage, not confirmation of every requirement. Personalised matches unlock after publication.</p>}
+            <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} disabled={busy} onChange={(e) => setConsent(e.target.checked)} className="mt-1"/><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label>
+            {prepared && !signedIn && <div className="mt-4"><SignIn role="buyer" prompt="Verify your work email, then return here to publish. Your company stays private." onAuthed={() => setSignedIn(true)} /></div>}
+            <button type="button" disabled={busy || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
+          </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void saveForReview(); }}>
+            <fieldset disabled={busy} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="text-sm font-semibold">Solution<select className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
+              <label className="text-sm font-semibold">Sector<select required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
+              <label className="text-sm font-semibold">Number of sites<input required type="number" min="1" step="1" className={inputClass} value={fields.sites} onChange={(e) => setField('sites', e.target.value)}/></label>
+              <label className="text-sm font-semibold">Operating model<select className={inputClass} value={fields.operatingModel} onChange={(e) => setField('operatingModel', e.target.value)}><option value="any">Not decided</option><option value="managed">Fully managed</option><option value="co_managed">Co-managed</option><option value="diy">Self-managed</option></select></label>
+              <label className="text-sm font-semibold">Buying timescale<input required maxLength={200} placeholder="e.g. within six months" className={inputClass} value={fields.timescale} onChange={(e) => setField('timescale', e.target.value)}/></label>
+              <label className="text-sm font-semibold">Company name (private)<input required minLength={2} maxLength={200} autoComplete="organization" className={inputClass} value={fields.company} onChange={(e) => setField('company', e.target.value)}/></label>
+              <fieldset className="sm:col-span-2 lg:col-span-3"><legend className="mb-2 text-sm font-semibold">Regions to cover</legend><div className="flex flex-wrap gap-3">{REGION_KEYS.map((r) => <label key={r} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fields.regions.includes(r)} onChange={(e) => setField('regions', e.target.checked ? [...fields.regions, r] : fields.regions.filter((v) => v !== r))}/>{REGION_LABELS[r]}</label>)}</div></fieldset>
+              <label className="text-sm font-semibold sm:col-span-2 lg:col-span-3">What do you need to achieve?<textarea required minLength={20} maxLength={4000} rows={4} placeholder="Describe your sites, users, security needs and what should improve. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
+            </fieldset>
+            <button disabled={busy} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Review my project'}</button>
+            <p className="mt-3 text-xs text-[#66635e]">Nothing is published until you verify your work email and approve the notice.</p>
+          </form>}
+        </div>}
       </div>
     </section>
-  );
+    {ready && !shortJourney && children}
+  </>;
 }

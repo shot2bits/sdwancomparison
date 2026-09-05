@@ -118,7 +118,7 @@ export default function ProcurementEntry() {
             44-56px range. */}
         <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />
 
-        <JourneyModeSelector />
+        <JourneyModeSelector>
 
         {/* State 0 correction (18 Aug 2026): "a blank project must still
             show a compelling empty living document -- not a huge
@@ -135,6 +135,7 @@ export default function ProcurementEntry() {
             builder page (RfpPublicContent, RfpCitationEvidence) is rendered
             by (workspace)/home/page.tsx directly, after this component. */}
         <ProjectDesk afterPrompt={<><EmptyDocumentFrame /><JourneyStrip /><CapabilityBlock /></>} />
+        </JourneyModeSelector>
       </div>
     </div>
   );
