@@ -1,6 +1,6 @@
 # Publication-first buying journey
 
-Implemented on `codex/publication-first-comparison`, based on `dbe6986`. Production has not been changed.
+Implemented on `codex/publication-first-comparison`, based on `dbe6986`. Released to production on 5 September 2026 with explicit user approval.
 
 ## Buyer-facing changes
 
@@ -36,3 +36,13 @@ Run `node scripts/verify-publication-first.mjs` for the broad suite. Browser scr
 No live board entries, buyer emails or supplier messages were created. Live email delivery, production storage credentials and external AI-client approval/listing were not exercised. Those require a configured staging integration check before release. This is a tested implementation, not a guarantee that the entire legacy codebase is bug-free.
 
 Deploy from a reviewed branch/preview with the existing production configuration. Retain the preceding deployment for rollback. No destructive schema migration is introduced. Confirm a staging buyer can verify, publish once, reopen matches and reach responses before promoting the deployment. Marketplace submission and third-party approval remain separate work.
+
+## Production release
+
+- Deployed code: `5f7dc7f`, including compatibility with the preceding live `3599a45` handoff change.
+- Deployment: https://sasecomparison-lyublhz1e-netifymarketplace.vercel.app (`dpl_BMg9mpUGzN4u9NM2QHEej8u6JEJQ`).
+- Previous deployment retained for rollback: https://sasecomparison-2hv0pqsdi-netifymarketplace.vercel.app.
+- Vercel production build passed before domain promotion; 47 local regression checks passed after reconciliation.
+- Live canonical page passed desktop/mobile browser checks. Public shortlist HTML and live provider database (30 providers, Neon) responded successfully.
+- Post-deploy error-level log query returned no entries. This is a short smoke-test window, not continuous monitoring.
+- Production publication/email delivery was not exercised with a real buyer; no synthetic public opportunity or supplier message was created during deployment verification.
