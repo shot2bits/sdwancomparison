@@ -92,6 +92,22 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   }, []);
 
   useEffect(() => {
+    const accept = (event: Event) => {
+      const detail = (event as CustomEvent<{ text: string; accepted: boolean; error: string }>).detail;
+      if (!detail || typeof detail.text !== 'string' || detail.text.length > 4000) return;
+      if (!ready || busy || inFlight.current) { detail.error = 'Wait for the current project operation to finish.'; return; }
+      if (published || resuming) { detail.error = 'This project is already published or opened in the full engine. Use its existing review and amendment controls.'; return; }
+      if (fields.outcome.length + detail.text.length + (fields.outcome.trim() ? 2 : 0) > 4000) { detail.error = 'Your existing brief is too long to append these requirements. Review it in the project first.'; return; }
+      setFields(old => ({ ...old, outcome: old.outcome.trim() ? old.outcome.trim() + '\n\n' + detail.text : detail.text }));
+      setReview(false); setPrepared(false); setConsent(false); setError('');
+      mode.current = 'quick_list'; setSelected('quick_list'); setPanelOpen(true);
+      detail.accepted = true;
+    };
+    window.addEventListener('netify:assistant-brief', accept);
+    return () => window.removeEventListener('netify:assistant-brief', accept);
+  }, [ready, busy, published, resuming, fields.outcome]);
+
+  useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog || !ready) return;
     if (panelOpen && !dialog.open) dialog.showModal();
@@ -202,7 +218,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
               <details className="sm:col-span-2"><summary className="cursor-pointer text-sm font-semibold">Required capabilities (optional)</summary><p className="my-2 text-xs">Select only essentials. These filters determine your personalised matches; other details in your brief are for suppliers to confirm.</p><div className="grid gap-2 sm:grid-cols-2">{[
                 ['f30_zero_trust_network_access', 'Zero Trust Network Access'], ['f31_secure_web_gateway', 'Secure web gateway'], ['f32_casb_capability', 'CASB'], ['f33_data_loss_prevention', 'Data loss prevention'], ['f16_mpls_coexistence_and_migration', 'MPLS migration'], ['f17_cellular_and_5g_support', 'Cellular and 5G'], ['f25_high_availability_design', 'High availability'], ['f28_full_sase_platform', 'Full SASE platform'],
               ].map(([id, label]) => <label key={id} className="flex gap-2 text-sm"><input type="checkbox" checked={fields.requiredFeatures.includes(id)} onChange={(e) => setField('requiredFeatures', e.target.checked ? [...fields.requiredFeatures, id] : fields.requiredFeatures.filter((v) => v !== id))}/>{label}</label>)}</div></details>
-              <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea required minLength={20} maxLength={4000} rows={4} placeholder="Describe your sites, users, security needs and what should improve. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
+              <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea aria-label="What do you need to achieve?" required minLength={20} maxLength={4000} rows={4} placeholder="Describe your sites, users, security needs and what should improve. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
             </fieldset>
             <button disabled={busy} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Review my project'}</button>
             <p className="mt-3 text-xs text-[#66635e]">Nothing is published until you verify your work email and approve the notice.</p>

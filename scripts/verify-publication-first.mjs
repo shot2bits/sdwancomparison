@@ -4,6 +4,7 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const checks = [
  'npx tsc --noEmit --incremental false',
  'npm run lint',
+ 'npx tsx scripts/test-buyer-memory.ts',
  'npm run test:marketplace-foundation',
  'npm run test:provider-comparison-ui',
  'npm run test:shortlist-geo',

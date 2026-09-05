@@ -1,3 +1,4 @@
+import { buyerAssistantEnabled } from "@/lib/buyer-assistant";
 import BuyingWorkspaceShell from "@/components/procurement/BuyingWorkspaceShell";
 import PublicComparison from "@/components/procurement/PublicComparison";
 import { Suspense } from "react";
@@ -120,6 +121,7 @@ export default function ProcurementEntry() {
             ProjectDesk's own mt-10 (40px) = 52px, inside his ruled
             44-56px range. */}
         <BuyingWorkspaceShell
+          assistantEnabled={buyerAssistantEnabled()}
           comparison={<Suspense fallback={<a href="/sase/shortlist/">Compare SD-WAN and SASE providers</a>}><PublicComparison expanded /></Suspense>}
           information={<CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />}
         >

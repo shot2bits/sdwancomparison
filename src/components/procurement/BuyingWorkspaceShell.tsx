@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
+const BuyerAssistant = dynamic(() => import('./BuyerAssistant'));
 import { MEGA_GROUPS } from '@/lib/nav';
 
-type View = 'project' | 'compare' | 'responses' | 'tools';
+type View = 'project' | 'compare' | 'responses' | 'tools' | 'memories' | 'skills';
 const resources = [
   ['Provider directory', '/sase/vendors/', 'Explore vendor and managed service provider profiles.'],
   ['Cost & TCO', '/sase/cost-estimator/', 'Model indicative costs and contract assumptions.'],
@@ -17,10 +19,12 @@ const resources = [
 ] as const;
 
 /** Presentation only: keep the engine mounted across research navigation. */
-export default function BuyingWorkspaceShell({ children, comparison, information }: { children: ReactNode; comparison: ReactNode; information: ReactNode }) {
+export default function BuyingWorkspaceShell({ children, comparison, information, assistantEnabled = false }: { children: ReactNode; comparison: ReactNode; information: ReactNode; assistantEnabled?: boolean }) {
   const [view, setView] = useState<View>('project');
+  const [assistantVisited, setAssistantVisited] = useState(false);
+  const [assistantMode, setAssistantMode] = useState<'memories' | 'skills'>('memories');
   const [menuOpen, setMenuOpen] = useState(false);
-  function navigate(next: View) { setView(next); setMenuOpen(false); }
+  function navigate(next: View) { if (next === 'memories' || next === 'skills') { setAssistantVisited(true); setAssistantMode(next); } setView(next); setMenuOpen(false); }
   function projectTool(action: string) {
     navigate('project');
     window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('netify:workspace-action', { detail: action })));
@@ -37,6 +41,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       </nav>
       <nav aria-label="Workspace tools" className="nf-buying-secondary">
         <span>WORKSPACE</span>
+        {assistantEnabled && <><button onClick={() => navigate('memories')} aria-current={view === 'memories' ? 'page' : undefined}><span aria-hidden="true">◇</span>Memories</button><button onClick={() => navigate('skills')} aria-current={view === 'skills' ? 'page' : undefined}><span aria-hidden="true">✦</span>Skills</button></>}
         <button onClick={() => navigate('tools')} aria-current={view === 'tools' ? 'page' : undefined}><span aria-hidden="true">⊞</span>All tools</button>
         <a href="/sase/connector/"><span aria-hidden="true">⌘</span>Connections</a>
         <button onClick={() => projectTool('review')}><span aria-hidden="true">◷</span>Activity &amp; review</button>
@@ -45,8 +50,9 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <div className="nf-buying-privacy"><strong>Your identity stays private</strong><p>You review and approve what suppliers receive.</p><a href="/sase/account/">My projects &amp; account →</a></div>
     </aside>
     <div className="nf-buying-body">
-      <header className="nf-buying-topbar"><button className="nf-buying-menu" aria-label="Toggle workspace navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button><a className="nf-buying-mobile-logo" href="/sase/home/" aria-label="Netify home">netify<sup>®</sup></a><span className="nf-buying-breadcrumb">Workspace <b>/</b> {view === 'project' ? 'My project' : view === 'compare' ? 'Compare providers' : view === 'responses' ? 'Supplier responses' : 'All tools'}</span><a href="/sase/account/">My account</a></header>
+      <header className="nf-buying-topbar"><button className="nf-buying-menu" aria-label="Toggle workspace navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button><a className="nf-buying-mobile-logo" href="/sase/home/" aria-label="Netify home">netify<sup>®</sup></a><span className="nf-buying-breadcrumb">Workspace <b>/</b> {view === 'project' ? 'My project' : view === 'compare' ? 'Compare providers' : view === 'responses' ? 'Supplier responses' : view === 'memories' ? 'Memories' : view === 'skills' ? 'Skills' : 'All tools'}</span><a href="/sase/account/">My account</a></header>
       <div className="nf-buying-page">
+        {assistantEnabled && assistantVisited && <div hidden={view !== 'memories' && view !== 'skills'}><BuyerAssistant mode={assistantMode} onCompare={() => navigate('compare')} onProject={() => navigate('project')} /></div>}
         <div hidden={view !== 'project'} className="nf-buying-engine">{children}</div>
         <section hidden={view !== 'compare'} aria-label="Public provider comparison" className="nf-buying-research"><p className="nf-buying-eyebrow">PUBLIC RESEARCH</p><h1>Compare SASE &amp; SD-WAN providers</h1><p>Explore capability differences. Turn your research into an anonymous project when you are ready.</p>{comparison}</section>
         <section hidden={view !== 'responses'} className="nf-buying-responses"><p className="nf-buying-eyebrow">SUPPLIER RESPONSES</p><h1>Bring every response together</h1><p>Open your published project to review supplier submissions, evidence, pricing and clarifications.</p><a className="nf-buying-primary" href="/sase/account/">Open my saved projects →</a><button onClick={() => projectTool('responses')}>View this project’s responses</button><p className="nf-buying-subtle">Still preparing your project? Publish your anonymous brief to invite responses. A full RFP is optional.</p></section>
