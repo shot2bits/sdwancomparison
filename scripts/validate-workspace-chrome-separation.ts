@@ -223,7 +223,7 @@ function main() {
     record(!/const ENGINE_H1\s*=/.test(workspacePage), "8: (workspace)/workspace/page.tsx does not re-declare ENGINE_H1", "");
     record(/from ["']@\/components\/procurement\/ProcurementEntry["']/.test(homePage), "8: (workspace)/home/page.tsx imports from ProcurementEntry.tsx", "");
     record(/from ["']@\/components\/procurement\/ProcurementEntry["']/.test(workspacePage), "8: (workspace)/workspace/page.tsx imports from ProcurementEntry.tsx", "");
-    record(/<ProcurementEntry\s*\/>/.test(homePage), "8: (workspace)/home/page.tsx renders <ProcurementEntry />", "");
+    record(/<ProcurementEntry(?:\s+guidance=|\s*\/>)/.test(homePage), "8: (workspace)/home/page.tsx renders the shared ProcurementEntry (optional server guidance)", "");
     record(/<ProcurementEntry\s*\/>/.test(workspacePage), "8: (workspace)/workspace/page.tsx renders <ProcurementEntry />", "");
   }
 
