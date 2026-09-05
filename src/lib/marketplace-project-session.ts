@@ -45,7 +45,7 @@ export async function startMarketplaceProject(input: { entrance_context: unknown
   const session = SessionSchema.parse({ project_id: saved.id, token_hash: hash(token), revision: 0, created_at: now, expires_at: now + SESSION_TTL_SECONDS * 1000 });
   await persistSession(token, session);
   await recordMarketplaceFunnelEvent({ event: "project_started", project_id: saved.id, source: entrance.source, mode: input.mode, channel: entrance.source === "mcp" ? "mcp" : "web" });
-  return { project_reference: saved.id, project_session_token: token, revision: 0, expires_at: session.expires_at };
+  return { project_reference: saved.id, project_session_token: token, revision: 0, expires_at: session.expires_at, resume_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/?journey=${input.mode}&project=${encodeURIComponent(saved.id)}#project_session=${encodeURIComponent(token)}` };
 }
 
 export async function updateMarketplaceProject(projectId: string, token: string, raw: unknown) {

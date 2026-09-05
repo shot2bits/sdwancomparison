@@ -65,7 +65,7 @@ export async function GET(request: Request) {
           kind: "filter-ui",
           url: `${SITE_URL}/shortlist/`,
           description:
-            "Interactive shortlist builder. Filter state is encoded in URL query parameters, so any scenario URL is shareable and citable.",
+            "Public provider comparison builder. Filter state is encoded in URL query parameters, so any scenario URL is shareable and citable.",
           backingTool: "build_sase_shortlist",
           inputs:
             "service_model, required_features, preferred_features, required_regions, required_clouds, ai_requirements, disaster_recovery_required, max_deployment_speed, weight_preset, shortlist_size",
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
           kind: "mcp",
           url: `${SITE_URL}/api/mcp/`,
           description:
-            "JSON-RPC 2.0 MCP server. tools/list returns available tools; tools/call executes build_sase_shortlist, list_sase_vendors or get_sase_vendor_profile.",
+            "JSON-RPC 2.0 MCP server. tools/list returns available tools; tools/call provides public comparisons and aggregate coverage. Personalised matches require verified project publication.",
         },
         {
           id: "comparison-workspace",

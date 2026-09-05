@@ -99,7 +99,7 @@ type Evaluation = { vendor: string; vendor_slug: string | null; answered: number
 type Benchmark = { available: boolean; total_rfps?: number; top_mandatory_questions?: { name: string; count: number }[]; median_response_completeness?: number | null };
 type ConnMsg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
 type Connection = { vendor_slug: string; vendor_name: string; token: string; status: string; messages: ConnMsg[]; viewed_at?: number };
-type Suggestion = { rank: number; slug: string; name: string; score: number };
+type Suggestion = { rank: number; slug: string; name: string; score?: number };
 type ExtendedBankQuestion = {
   question_id: string;
   category_id: string;
@@ -1026,19 +1026,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     // against any stale ref/race calling it anyway.
     if (!project || !marketUnlocked) return;
     try {
-      const res = await fetch("/sase/api/openapi/build_sase_shortlist", {
-        method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          sector: project.buyer.sector ?? null,
-          organisation_size: project.buyer.organisation_size ?? "any",
-          service_model: project.buyer.operating_model ?? "any",
-          required_regions: project.buyer.regions ?? [],
-          shortlist_size: 6,
-        }),
-      });
+      const res = await fetch(`/sase/api/rfp/${project.id}/report`, { headers: authHeaders() });
       if (res.ok) {
-        const data = (await res.json()) as { shortlist: Suggestion[] };
-        setSuggestions(data.shortlist);
+        const data = await res.json() as { matched_vendors?: { slug: string; name: string }[] | null };
+        setSuggestions((data.matched_vendors ?? []).map((vendor, index) => ({ ...vendor, rank: index + 1 })));
       }
     } catch { /* ignore */ }
   }
@@ -2047,7 +2038,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <div className="flex flex-wrap gap-2">
               {suggestions.filter((s) => !connections.some((c) => c.vendor_slug === s.slug)).map((s) => (
                 <button key={s.slug} onClick={() => inviteSupplier(s.slug, `We are running a SASE and SD-WAN RFP and would like ${s.name} to participate.`)} className="px-3.5 py-1.5 text-sm rounded-full border border-amber-500 bg-amber-50 hover:bg-amber-100 transition-colors">
-                  Invite {s.name} ({s.score})
+                  Invite {s.name}{s.score == null ? "" : ` (${s.score})`}
                 </button>
               ))}
             </div>

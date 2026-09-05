@@ -3,6 +3,7 @@
  * src/lib/shortlist-core.ts; handlers here only validate and dispatch.
  */
 
+import { publicShortlistPreview } from "@/lib/public-shortlist";
 import { FEATURES, FEATURE_NAMES, getVendor, getAllVendorSlugs } from "@/lib/vendors";
 import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
 import { applyComparisonHandoff } from "@/lib/comparison-handoff";
@@ -23,7 +24,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
   const knownShortlistSlugs = shortlist.map((vendor) => vendor.slug);
   switch (name) {
     case "build_sase_shortlist": {
-      const result = buildShortlist(shortlist, args ?? {}, FEATURE_NAMES);
+      const result = publicShortlistPreview(shortlist, args ?? {}, FEATURE_NAMES);
       // The resume address (25 July 2026, machine-layer parity): the same
       // scenario codec the page itself uses to make every state shareable,
       // so this URL lands a human on the live shortlist with these exact
@@ -38,7 +39,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
           resume_url: resumeUrl,
-          note: "Hand resume_url to the human: it opens the live shortlist with these criteria applied and editable, one step from inviting these providers to respond in the workspace.",
+          note: "Public comparison remains available. Use start_project to prepare a short notice; get_unlocked_matches returns personalised results after verified publication. The resume URL carries these criteria into the project entrance.",
         },
       };
     }
@@ -120,7 +121,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
     case "list_exclusions":
       return listExclusions(args);
     case "explain_shortlist":
-      return explainShortlist(args, shortlist);
+      return explainShortlist({ ...((args ?? {}) as Record<string, unknown>), criteria: DEFAULT_INPUT }, shortlist);
 
     default:
       return { error: `Unknown tool: ${name}` };

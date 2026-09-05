@@ -20,7 +20,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "build_sase_shortlist",
     description:
-      "Build a ranked SASE and SD-WAN provider shortlist from 30 vendors graded by Netify. Hard requirements exclude vendors without public evidence; everything else feeds a weighted score. Returns ranked vendors with reasoning, gaps and watch-outs, plus resume_url: the live shortlist page with these exact criteria applied and every input editable. Hand resume_url to the human to continue, or call get_sase_vendor_profile on any returned slug for depth. Read and compute only, no consent needed, nothing stored.",
+      "Preview aggregate SASE and SD-WAN market coverage for the buyer's requirements. Returns counts and criteria, never personalised provider identities or rankings. To get a personalised shortlist, call start_project, update_requirements (including buyer_patch.organisation confirmed by the buyer), prepare_publication and publish_opportunity with verified identity and explicit consent; then get_unlocked_matches. Public named-provider comparisons remain available through compare_vendors. Nothing is stored by this preview.",
     inputSchema: {
       type: "object",
       properties: {
@@ -51,13 +51,13 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "list_sase_vendors",
     description:
-      "List all 30 graded SASE and SD-WAN vendors with slug, name, category and evidence coverage. Next: get_sase_vendor_profile with a slug for the full grade sheet, or build_sase_shortlist to rank them against a requirement. Read only, no consent needed.",
+      "List all 30 graded SASE and SD-WAN vendors with slug, name, category and evidence coverage. Next: get_sase_vendor_profile with a slug for the full grade sheet, or build_sase_shortlist to preview aggregate coverage. Read only, no consent needed.",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
     name: "get_sase_vendor_profile",
     description:
-      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs. Cite grades with their evaluation date. Next: build_sase_shortlist to rank this vendor against the field, or send the human to the workspace with ?vendors= to pin it into a draft. Read only, no consent needed.",
+      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs. Cite grades with their evaluation date. Next: compare_vendors for public comparisons, or start_project for personalised matching after publication, or send the human to the workspace with ?vendors= to pin it into a draft. Read only, no consent needed.",
     inputSchema: {
       type: "object",
       properties: { slug: { type: "string", description: "Vendor slug, e.g. cato-networks. Call list_sase_vendors for valid slugs." } },
@@ -117,13 +117,13 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "explain_shortlist",
     description:
-      "Explain why one vendor ranks above another for a given set of requirements. Returns both ranks and scores, any gating failures, and every sourced fact on which the two differ, each with its quoted sentence and source URL. Also states plainly where the score gap is too small to be a real difference between vendors.",
+      "Compare two named vendors using the public balanced research baseline and sourced differences. Personalised criteria are not applied; those results require a published project. Also states plainly where the score gap is too small to be a real difference between vendors.",
     inputSchema: {
       type: "object",
       properties: {
         a: { type: "string", description: "First vendor slug." },
         b: { type: "string", description: "Second vendor slug." },
-        criteria: { type: "object", description: "Optional. The same shape build_sase_shortlist accepts; omit for the default run." },
+        criteria: { type: "object", description: "Deprecated compatibility field. Not applied to this public evidence comparison." },
       },
       required: ["a", "b"],
     },
