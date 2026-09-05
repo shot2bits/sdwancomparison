@@ -4623,6 +4623,23 @@ export default function ProjectDesk({
   const sendReady = draft.trim().length > 0 && !busy && !resuming;
   const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
 
+  // The shell delegates to existing engine actions; publication gates stay here.
+  useEffect(() => {
+    const receive = (event: Event) => {
+      if (!booted) return;
+      const action = (event as CustomEvent<string>).detail;
+      if (action === "settings") { goToStep("describe"); setDocumentSettingsOpen(true); }
+      if (action === "requirements") goToStep("describe");
+      if (action === "review") goToStep(started ? "review" : "describe");
+      if (action === "responses") goToStep(reachable.has("compare") ? "compare" : "describe");
+      if (action === "tools") {
+        document.querySelectorAll<HTMLDetailsElement>(".nf-calm-project-tools").forEach((panel) => { panel.open = true; panel.scrollIntoView({ block: "nearest" }); });
+      }
+    };
+    window.addEventListener("netify:workspace-action", receive);
+    return () => window.removeEventListener("netify:workspace-action", receive);
+  });
+
   if (!booted) return <div className="pd-root mt-10" />;
 
   const mono: React.CSSProperties = { fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' };
@@ -5224,6 +5241,7 @@ export default function ProjectDesk({
   };
 
   const livingOsRail = (
+    <details className="nf-calm-project-tools"><summary>Project tools · suppliers, evidence &amp; exports</summary>
     <div className="lpos-product-rail" role="navigation" aria-label="Living Procurement OS navigation" data-collapsed={productRailCollapsed}>
       <nav>
         {railItems.map((item) => {
@@ -5253,6 +5271,7 @@ export default function ProjectDesk({
       <button type="button" aria-label="Settings" onClick={() => { goToStep("describe"); setDocumentSettingsOpen(true); }}><span aria-hidden="true">⚙</span><span className="lpos-rail-label">Settings</span></button>
       <button type="button" aria-label={productRailCollapsed ? "Expand navigation" : "Collapse navigation"} aria-expanded={!productRailCollapsed} className="lpos-collapse" onClick={() => setProductRailCollapsed((value) => !value)}><span aria-hidden="true">{productRailCollapsed ? "›" : "‹"}</span><span className="lpos-rail-label">{productRailCollapsed ? "Expand" : "Collapse"}</span></button>
     </div>
+    </details>
   );
 
   if (published?.shortBrief && created) {

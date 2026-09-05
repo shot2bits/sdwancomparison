@@ -1,3 +1,4 @@
+import BuyingWorkspaceShell from "@/components/procurement/BuyingWorkspaceShell";
 import PublicComparison from "@/components/procurement/PublicComparison";
 import { Suspense } from "react";
 import ProjectDesk from "@/components/ProjectDesk";
@@ -118,9 +119,10 @@ export default function ProcurementEntry() {
             heading. The gap before the input is trust mb 12px +
             ProjectDesk's own mt-10 (40px) = 52px, inside his ruled
             44-56px range. */}
-        <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />
-
-        <Suspense fallback={<a href="/sase/shortlist/">Compare SD-WAN and SASE providers</a>}><PublicComparison /></Suspense>
+        <BuyingWorkspaceShell
+          comparison={<Suspense fallback={<a href="/sase/shortlist/">Compare SD-WAN and SASE providers</a>}><PublicComparison expanded /></Suspense>}
+          information={<CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />}
+        >
         <JourneyModeSelector>
 
         {/* State 0 correction (18 Aug 2026): "a blank project must still
@@ -139,6 +141,7 @@ export default function ProcurementEntry() {
             by (workspace)/home/page.tsx directly, after this component. */}
         <ProjectDesk afterPrompt={<><EmptyDocumentFrame /><JourneyStrip /><CapabilityBlock /></>} />
         </JourneyModeSelector>
+        </BuyingWorkspaceShell>
       </div>
     </div>
   );

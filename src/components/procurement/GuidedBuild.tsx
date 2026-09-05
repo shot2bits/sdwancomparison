@@ -145,6 +145,17 @@ export default function GuidedBuild({
   shortlist?: { vendors: { slug: string; name: string }[]; onRemove: (slug: string) => void } | null;
   published: boolean;
 }) {
+  const [workspaceTab, setWorkspaceTab] = useState<"overview" | "requirements" | "pack">("overview");
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [allCaptured, setAllCaptured] = useState(false);
+  useEffect(() => {
+    const onAction = (event: Event) => {
+      const action = (event as CustomEvent<string>).detail;
+      if (action === "requirements") setWorkspaceTab("requirements");
+    };
+    window.addEventListener("netify:workspace-action", onAction);
+    return () => window.removeEventListener("netify:workspace-action", onAction);
+  }, []);
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -246,6 +257,8 @@ export default function GuidedBuild({
   );
 
   const openQuestionManager = (suggest = false) => {
+    setRegisterOpen(true);
+    setWorkspaceTab("requirements");
     setQuestionManagerOpen(true);
     window.requestAnimationFrame(() => questionManagerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
     if (suggest) void askForSuggestions();
@@ -343,10 +356,18 @@ export default function GuidedBuild({
   const displayDocumentTitle = documentTitle === "Sourcing procurement" ? "Your SASE & SD-WAN RFP" : documentTitle;
 
   return (
-    <div className="lpos-builder">
+    <div className="lpos-builder" data-workspace-tab={workspaceTab}>
+      <div className="nf-calm-heading"><div><p>{published ? "PUBLISHED PROJECT" : "YOUR PRIVATE WORKSPACE"}</p><h1>{displayDocumentTitle}</h1><span>Shape your requirements. Publish when you are ready.</span></div><button type="button" className="nf-calm-publish" disabled={!publishReachable} title={publishReachable ? "Review this RFP before publishing" : "Complete the essential requirements, or publish a short brief"} onClick={onPublish}>Review &amp; publish →</button></div>
+      <nav className="nf-calm-tabs" aria-label="Project views">
+        <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
+        <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>
+        <button type="button" aria-current={workspaceTab === "pack" ? "page" : undefined} onClick={() => setWorkspaceTab("pack")}>Supplier pack</button>
+        <button type="button" onClick={() => onSettingsOpenChange(true)}>Preferences</button>
+      </nav>
       <div className="nf-guided-main">
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
-          <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Guided conversation</strong></div>
+          <div className="nf-calm-overview">
+          <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Netify engine</strong></div>
           <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
           <div className="nf-essential-progress" role="status" aria-live="polite">
             <strong>{ready ? "Essential baseline complete" : `${Math.max(0, total - Math.max(0, position - 1))} essential section${Math.max(0, total - Math.max(0, position - 1)) === 1 ? "" : "s"} remaining`}</strong>
@@ -393,10 +414,13 @@ export default function GuidedBuild({
           <div className="lpos-you-said"><small>You said</small><strong>{documentSummary || "Start with what you know about the project."}</strong><time>Now</time></div>
           <div className="lpos-captured">
             <small>Netify captured</small>
-            {(captured.length ? captured.slice(0, 5) : [{ id: "empty", label: "Requirements", answer: "Your confirmed requirements will appear here" }]).map((item) => (
+            {(captured.length ? (allCaptured ? captured : captured.slice(0, 5)) : [{ id: "empty", label: "Requirements", answer: "Your confirmed requirements will appear here" }]).map((item) => (
               <div key={item.id}><span aria-hidden="true">✓</span><p><strong>{item.label}</strong><small>{item.answer}</small></p>{item.id !== "empty" && <button type="button" onClick={() => onEditCaptured(item)}>Edit</button>}</div>
             ))}
           </div>
+          {captured.length > 5 && <button type="button" className="nf-calm-show-facts" onClick={() => setAllCaptured(!allCaptured)}>{allCaptured ? "Show fewer requirements" : `View all ${captured.length} captured requirements`}</button>}
+          </div>
+          <div className="nf-calm-next">
           <div className="nf-guided-focus">
             <div className="lpos-question-heading"><p className="nf-guided-next-label">{ready ? "Essential baseline complete" : sectionComplete ? "Section complete" : "Next essential question"}</p><span>{Math.max(1, position)} of {Math.max(1, total)}</span></div>
             <h2>{visibleQuestion.prompt}</h2>
@@ -500,7 +524,9 @@ export default function GuidedBuild({
 
           <div className="lpos-impact"><span aria-hidden="true">✦</span><div><strong>What your answer changes</strong><p>We update the RFP wording, supplier questions and evidence request together.</p></div><b aria-hidden="true">✓</b></div>
 
-          <section className="nf-guided-register" aria-labelledby="section-question-register">
+          </div>
+          <details className="nf-guided-register" open={registerOpen} onToggle={(event) => setRegisterOpen(event.currentTarget.open)}>
+            <summary>Question bank &amp; answers · {sectionTitle}</summary>
             <div className="nf-guided-register-head">
               <div><p id="section-question-register">Questions in this section</p><span>Every core answer, optional refinement and supplier question in this section. {rfpTarget} core · {additionalCount} additional available · {bespokeCount} bespoke</span></div>
               <strong>{rfpAnswered}/{rfpTarget} core populated</strong>
@@ -559,7 +585,7 @@ export default function GuidedBuild({
                 </div>
               )}
             </details>
-          </section>
+          </details>
 
         </section>
       </div>
