@@ -1954,3 +1954,12 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 .nf-buying-shell .lpos-unlock{grid-template-columns:minmax(0,1fr);gap:10px}.nf-buying-shell .lpos-unlock>span{display:none}.nf-buying-shell .lpos-unlock ul{grid-template-columns:repeat(3,minmax(0,1fr));grid-column:1/-1}
 .nf-buying-shell .lpos-sections li>button{grid-template-columns:24px minmax(0,1fr) auto 12px}.nf-buying-shell .lpos-sections li em{background:transparent!important;color:#697581!important;padding:0;border-radius:0}.nf-buying-shell .lpos-sections li[data-current=true]{box-shadow:inset 2px 0 #526076}.nf-buying-shell .lpos-sections li[data-current=true]>button,.nf-buying-shell .lpos-section-extensions{background:#f9fafb}
 .nf-buying-shell .lpos-architecture{flex-wrap:wrap;gap:12px}.nf-buying-shell .lpos-impact>span{display:none}
+
+.nf-era-wordmark{display:inline-flex;align-items:baseline;white-space:nowrap;line-height:1;color:inherit;letter-spacing:0}
+.nf-era-net{display:inline-block;width:2.4em;height:.8em;align-self:center;overflow:visible;shape-rendering:crispEdges;margin-right:-.08em}
+.nf-era-ify{font-family:system-ui,-apple-system,sans-serif;font-weight:750;letter-spacing:-.065em;font-size:1em}
+.nf-buying-wordmark .nf-era-wordmark,.nf-buying-mobile-logo .nf-era-wordmark{font-size:32px}
+.nf-era-wordmark>sup{font-size:9px!important;align-self:flex-start;position:static!important;margin:2px 0 0 4px!important}
+.nf-buying-shell[data-collapsed=true] .nf-buying-wordmark .nf-era-wordmark{font-size:11px}
+.nf-buying-shell[data-collapsed=true] .nf-era-wordmark>sup{display:none}
+@media(max-width:760px){.nf-buying-mobile-logo .nf-era-wordmark{font-size:27px}}
