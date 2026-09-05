@@ -67,7 +67,6 @@ for (const feature of FEATURES) {
 const agent = readFileSync("src/app/api/agent/route.ts", "utf8");
 const mcp = readFileSync("src/lib/mcp-tools.ts", "utf8");
 const interfaceSource = readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
-const leadRoute = readFileSync("src/app/api/lead/route.ts", "utf8");
 const comparisonCountRoute = readFileSync("src/app/api/comparison-count/route.ts", "utf8");
 assert.match(agent, /comparison_slugs/);
 assert.match(agent, /buildComparison/);

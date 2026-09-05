@@ -1119,6 +1119,7 @@ export default function ProjectDesk({
     totalEvaluatedMarket: number;
     frozen: boolean;
     namesFrozen: boolean;
+    shortBrief?: { outcome: string; timescale: string };
   } | null>(null);
   /** Lifecycle-consistency closure pass (18 Aug 2026), correction D: the
    *  post-publish view used to prove publication and invitation but never
@@ -1502,7 +1503,8 @@ export default function ProjectDesk({
   const opModel = operatingModelOf(facts);
   const securityScope = buying === "managed_security" || buying === null;
   const live = standing(facts);
-  const started = facts.length > 0 || noted.length > 0;
+  // A published short brief has no full-RFP facts, but its matches and responses are an active project.
+  const started = facts.length > 0 || noted.length > 0 || published !== null;
 
   /** One-shot layout snap when the workspace shell first appears.
    *
@@ -1746,6 +1748,9 @@ export default function ProjectDesk({
             // but a real durability gap in "display the frozen matched and
             // invited suppliers from the published snapshot".
             status?: string;
+            journey?: { mode?: string };
+            buyer?: { notes?: string };
+            entrance_context?: { raw_input?: { timescale?: unknown } };
             invited_vendors?: string[];
             // 2030 blueprint, full-unification phase (17 Aug 2026): the
             // durably persisted document from this project's own last
@@ -1783,7 +1788,8 @@ export default function ProjectDesk({
           setProjectHistory(proj.history ?? []);
           const resumeState = resumeStateFromProject(proj);
           const hasCanonicalWorkspaceState = Array.isArray(proj.facts) && proj.facts.length > 0;
-          if (!resumeState && !hasCanonicalWorkspaceState) {
+          const publishedShortProject = ["quick_list", "find_providers"].includes(proj.journey?.mode ?? "") && Boolean(proj.status && hasPublished(proj.status as RfpStatus));
+          if (!resumeState && !hasCanonicalWorkspaceState && !publishedShortProject) {
             say("This project isn't a Security Sourcing engagement yet, so it can't be reopened here -- starting fresh instead.");
             return;
           }
@@ -1932,7 +1938,7 @@ export default function ProjectDesk({
                 // record with truly nothing leaves `published` at null,
                 // same as today.
                 if (frozen || matchedVendors.length > 0 || invited.length > 0) {
-                  setPublished({ invited, boardId: reportBody.board_opportunity_id, matchedVendors, totalEvaluatedMarket, frozen, namesFrozen });
+                  setPublished({ invited, boardId: reportBody.board_opportunity_id, matchedVendors, totalEvaluatedMarket, frozen, namesFrozen, shortBrief: publishedShortProject ? { outcome: proj.buyer?.notes ?? "", timescale: String(proj.entrance_context?.raw_input?.timescale ?? "") } : undefined });
                   // The post-publish matches section lives inside the same
                   // `phase === "fits"` block as the pre-publish locked
                   // panel (see that block's own doc comment); `phase`
@@ -2287,7 +2293,7 @@ export default function ProjectDesk({
      retired along with the ranked panel they existed to serve; see the
      locked pre-publish outcome panel and the command handlers below for
      the corresponding removal. */
-  const marketTotal = fit?.total ?? market?.counts.vendors ?? null;
+  const marketTotal = fit?.total ?? market?.counts?.vendors ?? null;
   const pins = [...new Set(added)].slice(0, 5);
 
   function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
@@ -5197,6 +5203,19 @@ export default function ProjectDesk({
     </div>
   );
 
+  if (published?.shortBrief && created) {
+    return <section className="mx-auto my-6 max-w-4xl rounded-md border border-[#91bb91] bg-white p-6" aria-label="Published project">
+      <h2 className="text-2xl font-semibold">Your project is published</h2>
+      <p className="mt-2">Your anonymous brief is on the opportunity board. Your company and contact details remain private.</p>
+      <p className="mt-5 whitespace-pre-wrap">{published.shortBrief.outcome}</p>
+      {published.shortBrief.timescale && <p className="mt-2"><strong>Timescale:</strong> {published.shortBrief.timescale}</p>}
+      <h3 className="mt-6 text-lg font-semibold">Your matched providers</h3>
+      <p className="mt-1 text-sm">{published.frozen ? 'Saved at publication.' : 'Matches from your project record.'} {published.invited.length} providers invited directly.</p>
+      {published.matchedVendors.length ? <ul className="mt-3 divide-y">{published.matchedVendors.map((vendor) => <li key={vendor.slug} className="py-3"><strong>{vendor.name}</strong>{published.invited.some((invited) => invited.slug === vendor.slug) && <span className="ml-3 text-sm">Invited</span>}</li>)}</ul> : <p className="mt-3">No providers matched these requirements. Your published brief remains available on the board.</p>}
+      <a className="mt-5 inline-block rounded bg-[#a84412] px-5 py-3 font-semibold text-white" href={`/sase/project/${encodeURIComponent(created.id)}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ''}`}>View project and supplier responses</a>
+    </section>;
+  }
+
   return (
     <div
       className="pd-root nf-2030-workspace"
@@ -5240,7 +5259,7 @@ export default function ProjectDesk({
             <div className="lpos-profile">
               <div aria-live="polite" title="This working draft is kept on this device. It is not published and no supplier can access it.">
                 <strong>{localDraftStatus === "error" ? "Draft not saved" : localDraftStatus === "saved" ? "Draft saved" : localDraftSavedAt ? "Saving draft…" : "Private workspace"}</strong>
-                <span>{localDraftStatus === "saved" ? "On this device" : "Not published"}</span>
+                <span>{publishedFlag ? "Published" : localDraftStatus === "saved" ? "On this device" : "Not published"}</span>
               </div>
               <button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><b>PL</b>
             </div>

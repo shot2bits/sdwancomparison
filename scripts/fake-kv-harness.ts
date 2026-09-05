@@ -39,6 +39,7 @@ export const FAKE_KV_TOKEN = "fake-kv-token-not-real";
 
 type Entry =
   | { type: "string"; value: string }
+  | { type: "list"; value: string[] }
   | { type: "set"; value: Set<string> }
   | { type: "hash"; value: Map<string, string> };
 
@@ -89,6 +90,13 @@ export class FakeKvStore {
         if (flags.includes("NX") && this.store.has(String(args[0]))) return null;
         this.store.set(String(args[0]), { type: "string", value: String(args[1]) });
         return "OK";
+      }
+      case "EVAL": {
+        if (String(args[0]).includes("redis.call('get',KEYS[1])") && Number(args[1]) === 1) {
+          const key = String(args[2]);
+          return this.str(key) === String(args[3]) && this.store.delete(key) ? 1 : 0;
+        }
+        throw new Error("Unsupported fixture Lua script");
       }
       case "INCR": {
         const next = Number(this.str(String(args[0])) ?? 0) + 1;
@@ -153,11 +161,28 @@ export class FakeKvStore {
         const keys = Array.from(this.store.keys()).filter((k) => re.test(k));
         return ["0", keys];
       }
-      case "LRANGE":
+      case "LPUSH": {
+        const key = String(args[0]);
+        const current = this.store.get(key);
+        const list = current?.type === "list" ? current.value : [];
+        list.unshift(...args.slice(1).map(String));
+        this.store.set(key, { type: "list", value: list });
+        return list.length;
+      }
+      case "LTRIM": {
+        const key = String(args[0]), current = this.store.get(key);
+        if (current?.type === "list") current.value = current.value.slice(Number(args[1]), Number(args[2]) + 1);
+        return "OK";
+      }
+      case "LRANGE": {
+        const current = this.store.get(String(args[0]));
+        return current?.type === "list" ? current.value.slice(Number(args[1]), Number(args[2]) === -1 ? undefined : Number(args[2]) + 1) : [];
+      }
+      /* Legacy no-list fallback:
         // Not exercised by the flows these fixtures drive (create/
         // re-scope/reload/publish); returning empty lets an incidental
         // call degrade quietly instead of throwing.
-        return [];
+        return []; */
       default:
         throw new Error(`FakeKvStore: unhandled command ${op} (${JSON.stringify(cmd)})`);
     }

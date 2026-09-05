@@ -115,6 +115,14 @@ export function rfpContentSnapshot(p: ProjectDetails): Record<string, unknown> {
     buyer: p.buyer,
     rfp_sections: p.rfp_sections,
     nda: p.nda,
+    // New short projects freeze their matching filters and deadline as well as the brief.
+    // Keep historical event hashes unchanged when this version marker is absent.
+    ...(p.entrance_context?.raw_input.publication_contract === "short-project/1" ? {
+      publication_inputs: {
+        timescale: p.entrance_context.raw_input.timescale ?? null,
+        shortlist: p.entrance_context.raw_input.shortlist ?? p.entrance_context.shortlist_input ?? null,
+      },
+    } : {}),
   };
 }
 

@@ -1,3 +1,4 @@
+import { isShortProject, shortProjectReadiness, shortProjectNotice } from "@/lib/short-project";
 import { createHash, randomBytes } from "node:crypto";
 import { z } from "zod";
 import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
@@ -32,9 +33,20 @@ export async function authenticateMarketplaceProject(projectId: string, token: s
   return parsed.data;
 }
 
+/** Serialize updates, preparation and publication so simultaneous requests cannot overwrite consent or revisions. */
+export async function withMarketplaceMutation<T>(projectId: string, token: string, work: () => Promise<T>): Promise<T> {
+  await authenticateMarketplaceProject(projectId, token);
+  const key = `marketplace:mutation:${projectId}`;
+  const owner = randomBytes(24).toString("hex");
+  if (await kvRaw(["SET", key, owner, "NX", "EX", 120]) !== "OK") throw new MarketplaceProjectConflict("This project is being saved. Please retry shortly.");
+  try { return await work(); }
+  finally { await kvRaw(["EVAL", "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end", 1, key, owner]); }
+}
+
 export async function startMarketplaceProject(input: { entrance_context: unknown; mode: "quick_list" | "find_providers" | "build_rfp" | "validate_rfp"; sector_profile?: unknown; now?: number }) {
   z.enum(PROJECT_JOURNEY_MODES).parse(input.mode);
-  const entrance = ProjectEntranceContextSchema.parse(input.entrance_context);
+  const suppliedEntrance = ProjectEntranceContextSchema.parse(input.entrance_context);
+  const entrance = ProjectEntranceContextSchema.parse({ ...suppliedEntrance, raw_input: { ...suppliedEntrance.raw_input, publication_contract: "short-project/1" } });
   const sectorProfile = input.sector_profile ? SectorProfileStateSchema.parse(input.sector_profile) : undefined;
   const now = input.now ?? Date.now();
   const scope = typeof entrance.raw_input.solution_scope === "string" ? entrance.raw_input.solution_scope.toUpperCase() : "SASE / SD-WAN";
@@ -48,7 +60,7 @@ export async function startMarketplaceProject(input: { entrance_context: unknown
   return { project_reference: saved.id, project_session_token: token, revision: 0, expires_at: session.expires_at, resume_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/?journey=${input.mode}&project=${encodeURIComponent(saved.id)}#project_session=${encodeURIComponent(token)}` };
 }
 
-export async function updateMarketplaceProject(projectId: string, token: string, raw: unknown) {
+async function updateMarketplaceProjectUnlocked(projectId: string, token: string, raw: unknown) {
   const input = UpdateSchema.parse(raw);
   const session = await authenticateMarketplaceProject(projectId, token);
   const prior = await kvGetJson<{ project_reference: string; revision: number; saved_at: number }>(idempotencyKey(projectId, input.idempotency_key));
@@ -69,7 +81,7 @@ export async function updateMarketplaceProject(projectId: string, token: string,
 
 const PreviewRequestSchema = z.object({ base_revision: z.number().int().min(0), input: ProviderMatchInputSchema }).strict();
 
-export async function previewMarketplaceProject(projectId: string, token: string, rawInput: unknown) {
+async function previewMarketplaceProjectUnlocked(projectId: string, token: string, rawInput: unknown) {
   const session = await authenticateMarketplaceProject(projectId, token);
   const request = PreviewRequestSchema.parse(rawInput);
   if (session.revision !== request.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
@@ -113,7 +125,7 @@ export async function previewMarketplaceProject(projectId: string, token: string
 
 const PreparePublicationSchema = z.object({ base_revision: z.number().int().min(0), consent_version: z.literal(MARKETPLACE_PUBLICATION_CONSENT_VERSION), consent_text: z.literal(MARKETPLACE_PUBLICATION_CONSENT_TEXT), marketing_opt_in: z.boolean().default(false) }).strict();
 
-export async function prepareMarketplacePublication(projectId: string, token: string, rawInput: unknown) {
+async function prepareMarketplacePublicationUnlocked(projectId: string, token: string, rawInput: unknown) {
   const session = await authenticateMarketplaceProject(projectId, token);
   const input = PreparePublicationSchema.parse(rawInput);
   if (session.revision !== input.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
@@ -121,6 +133,10 @@ export async function prepareMarketplacePublication(projectId: string, token: st
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   if (project.marketplace_revision !== input.base_revision) throw new MarketplaceProjectConflict("This project has changed. Reload before publishing.");
   if (project.buyer.organisation.trim().length < 2) throw new Error("Confirm your company name before publishing.");
+  if (isShortProject(project)) {
+    const readiness = shortProjectReadiness(project);
+    if (!readiness.allowed) throw new Error(readiness.reasons.join("; "));
+  }
   const nextRevision = session.revision + 1;
   const at = Date.now();
   const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, consent: { version: input.consent_version, agreed_at: at, flow: "marketplace_project" }, pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in, requested_at: at }, marketplace_revision: nextRevision }));
@@ -137,7 +153,20 @@ export async function readMarketplaceProject(projectId: string, token: string) {
   return {
     project_reference: project.id, revision: project.marketplace_revision,
     expires_at: session.expires_at, buyer: project.buyer, entrance_context: project.entrance_context,
+    notice: isShortProject(project) ? shortProjectNotice(project) : null,
     mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION,
     marketplace_state: project.marketplace_state,
   };
+}
+
+export async function updateMarketplaceProject(projectId: string, token: string, input: unknown) {
+  return withMarketplaceMutation(projectId, token, () => updateMarketplaceProjectUnlocked(projectId, token, input));
+}
+
+export async function previewMarketplaceProject(projectId: string, token: string, input: unknown) {
+  return withMarketplaceMutation(projectId, token, () => previewMarketplaceProjectUnlocked(projectId, token, input));
+}
+
+export async function prepareMarketplacePublication(projectId: string, token: string, input: unknown) {
+  return withMarketplaceMutation(projectId, token, () => prepareMarketplacePublicationUnlocked(projectId, token, input));
 }

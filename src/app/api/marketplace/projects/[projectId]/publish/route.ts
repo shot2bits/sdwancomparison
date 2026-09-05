@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { sessionFromRequest } from "@/lib/auth";
-import { authenticateMarketplaceProject, MarketplaceProjectUnauthorised } from "@/lib/marketplace-project-session";
+import { authenticateMarketplaceProject, withMarketplaceMutation, MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "@/lib/marketplace-project-session";
 import { getProject, saveProject } from "@/lib/rfp-store";
 import { executePublish } from "@/lib/rfp-publish";
 import { isMarketUnlocked } from "@/lib/market-unlock";
@@ -24,6 +24,7 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
   const { projectId } = await context.params;
   try {
     const input = BodySchema.parse(await req.json());
+    return await withMarketplaceMutation(projectId, bearer(req), async () => {
     const marketplaceSession = await authenticateMarketplaceProject(projectId, bearer(req));
     if (marketplaceSession.revision !== input.base_revision) return Response.json({ error: `Revision conflict: expected ${marketplaceSession.revision}.` }, { status: 409 });
     const project = await getProject(projectId);
@@ -35,8 +36,9 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
     if (!authorization.allowed) return Response.json({ error: "sign_in_required", auth_required: true, message: "Verify your work email before publishing. The private draft is unchanged." }, { status: 401 });
 
     if (project.buyer.organisation.trim().length < 2) return Response.json({ error: "Confirm your company name before publishing." }, { status: 400 });
-    if (project.consent?.version !== input.consent_version || !project.pending_submit) return Response.json({ error: "Review and prepare this project before publishing." }, { status: 409 });
+    if ((project.consent?.version !== input.consent_version || !project.pending_submit) && !(await isMarketUnlocked(projectId))) return Response.json({ error: "Review and prepare this project before publishing." }, { status: 409 });
 
+    await recordMarketplaceFunnelEvent({ event: "identity_verified", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web" });
     const priorConsent = (project.consents ?? []).find((item) => item.action === "marketplace.publish" && item.granted_by.toLowerCase() === sessionEmail.toLowerCase() && item.text === input.consent_text);
     const at = priorConsent?.at ?? Date.now();
     const consented = await saveProject(ProjectDetailsSchema.parse({
@@ -54,7 +56,9 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
     await saveProject(ProjectDetailsSchema.parse({ ...result.published, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "published", board_opportunity_id: result.board.opportunity_id!, market_unlock_status: "unlocked", server_updated_at: Date.now() } }));
     await recordMarketplaceFunnelEvent({ event: "publication_completed", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web", detail: { board_created: true } });
     return Response.json({ ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION });
+    });
   } catch (error) {
+    if (error instanceof MarketplaceProjectConflict) return Response.json({ error: error.message }, { status: 409 });
     if (error instanceof MarketplaceProjectUnauthorised) return Response.json({ error: "Project not found." }, { status: 404 });
     return Response.json({ error: error instanceof Error ? error.message : "Publication failed." }, { status: 400 });
   }

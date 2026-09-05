@@ -136,6 +136,8 @@ export default function CollapsibleHero({
         </p>
       )}
       {definitions && definitions.length > 0 && (
+        <details className="mx-auto mt-3 max-w-4xl text-left">
+          <summary className="cursor-pointer text-sm text-[#66635e]">What is an SD-WAN or SASE RFP?</summary>
         <dl
           id="rfp-definitions"
           className={compact ? "sr-only" : "mx-auto grid gap-3 text-left sm:grid-cols-2"}
@@ -148,6 +150,7 @@ export default function CollapsibleHero({
             </div>
           ))}
         </dl>
+        </details>
       )}
       {role && (
         <p

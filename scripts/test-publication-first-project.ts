@@ -9,7 +9,7 @@ await withFakeKv(async () => {
   const service = await import('../src/lib/marketplace-project-session');
   const { MARKETPLACE_PUBLICATION_CONSENT_TEXT: consent_text, MARKETPLACE_PUBLICATION_CONSENT_VERSION: consent_version } = await import('../src/lib/publication-policy');
   const { getProject, saveProject } = await import('../src/lib/rfp-store');
-  const entrance_context = { version: 'project-entrance/1.0.0', source: 'shortlist', captured_at: Date.now(), requirement_text: 'Connect our shops with a resilient managed network.', buyer_input: { site_count: 12, sector: 'retail_ecommerce', regions: ['uk_ireland'] }, raw_input: { solution_scope: 'sdwan', timescale: 'six months' } };
+  const entrance_context = { version: 'project-entrance/1.0.0', source: 'shortlist', captured_at: Date.now(), requirement_text: 'Connect our shops with a resilient managed network.', buyer_input: { product_scope: 'sdwan_only', site_count: 12, sector: 'retail_ecommerce', regions: ['uk_ireland'] }, raw_input: { solution_scope: 'sdwan', timescale: 'six months' } };
   const draft = await service.startMarketplaceProject({ entrance_context, mode: 'find_providers' });
   const id = draft.project_reference, token = draft.project_session_token;
   const recovered = await service.readMarketplaceProject(id, token);
@@ -18,6 +18,11 @@ await withFakeKv(async () => {
   assert.equal(JSON.stringify(recovered).includes('manage_token'), false);
   await assert.rejects(service.readMarketplaceProject(id, 'wrong-token'));
   await assert.rejects(service.prepareMarketplacePublication(id, token, { base_revision: 0, consent_text, consent_version }), /company/);
+  let unlock!: () => void;
+  const blocking = service.withMarketplaceMutation(id, token, () => new Promise<void>((resolve) => { unlock = resolve; }));
+  while (!unlock) await new Promise((resolve) => setTimeout(resolve, 1));
+  await assert.rejects(service.prepareMarketplacePublication(id, token, { base_revision: 0, consent_text, consent_version }), /being saved/);
+  unlock(); await blocking;
   const update = { base_revision: 0, idempotency_key: 'company-confirmation', buyer_patch: { organisation: 'Example Retail Ltd' } };
   const saved = await service.updateMarketplaceProject(id, token, update);
   assert.equal(saved.revision, 1);
@@ -30,5 +35,10 @@ await withFakeKv(async () => {
   const project = (await getProject(id))!;
   await saveProject({ ...project, marketplace_revision: 4 });
   await assert.rejects(service.updateMarketplaceProject(id, token, { base_revision: 3, idempotency_key: 'external-edit', buyer_patch: { site_count: 25 } }), /changed/);
+  const { recordMarketplaceFunnelEvent } = await import('../src/lib/marketplace-funnel');
+  const { kvRaw } = await import('../src/lib/rfp-store');
+  for (let i=0; i<2; i++) await recordMarketplaceFunnelEvent({ event: 'publication_completed', project_id: id, channel: 'web' });
+  const events = await kvRaw(['LRANGE', 'marketplace:funnel:events', '0', '-1']) as string[];
+  assert.equal(events.map((v) => JSON.parse(v)).filter((v) => v.event === 'publication_completed').length, 1, 'retries do not inflate conversion totals');
   console.log('PASS project reload, token isolation, company gate, idempotency, stale edits and consent invalidation');
 });

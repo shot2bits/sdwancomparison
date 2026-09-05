@@ -21,7 +21,7 @@ import { SITE_URL } from "@/lib/structured-data";
 import { resolveSupplierResponseAccess, RESPONSE_DENIAL_MESSAGES } from "@/lib/rfp-response-access";
 import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
 import { isMarketUnlocked } from "@/lib/market-unlock";
-import { authenticateMarketplaceProject, prepareMarketplacePublication, previewMarketplaceProject, startMarketplaceProject, updateMarketplaceProject } from "@/lib/marketplace-project-session";
+import { authenticateMarketplaceProject, withMarketplaceMutation, prepareMarketplacePublication, previewMarketplaceProject, startMarketplaceProject, updateMarketplaceProject } from "@/lib/marketplace-project-session";
 import { executePublish } from "@/lib/rfp-publish";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
@@ -272,15 +272,17 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
   }
   if (name === "publish_opportunity") {
     const projectId = String(args.project_id ?? "");
+    return withMarketplaceMutation(projectId, String(args.project_session_token ?? ""), async () => {
     const marketplaceSession = await authenticateMarketplaceProject(projectId, String(args.project_session_token ?? ""));
     const project = await getProject(projectId);
     if (!project) return { error: "Project not found." };
     const email = context.verifiedBuyerEmail ?? "";
     if (project.buyer.organisation.trim().length < 2) return { error: "company_name_required", message: "Confirm the buyer's company using update_requirements buyer_patch.organisation before publishing." };
-    if (project.consent?.version !== args.consent_version || !project.pending_submit) return { error: "publication_not_prepared" };
+    if ((project.consent?.version !== args.consent_version || !project.pending_submit) && !(await isMarketUnlocked(projectId))) return { error: "publication_not_prepared" };
     const authorization = publicationAuthorization({ ownerAuthorized: Boolean(email) && (!project.owner_email || project.owner_email.toLowerCase() === email.toLowerCase()), verifiedSession: Boolean(email), channel: "mcp" });
     if (!authorization.allowed) return { error: "verified_owner_required", publication_policy_version: PUBLICATION_POLICY_VERSION };
     if (marketplaceSession.revision !== args.base_revision || args.consent_version !== MARKETPLACE_PUBLICATION_CONSENT_VERSION || args.consent_text !== MARKETPLACE_PUBLICATION_CONSENT_TEXT) return { error: "stale_revision_or_consent" };
+    await recordMarketplaceFunnelEvent({ event: "identity_verified", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "mcp" });
     const at = Date.now();
     const prior = (project.consents ?? []).some((item) => item.action === "marketplace.publish" && item.granted_by === email && item.text === MARKETPLACE_PUBLICATION_CONSENT_TEXT);
     const consented = await saveProject(ProjectDetailsSchema.parse({ ...project, owner_email: project.owner_email || email, consent: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION ? project.consent : { version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, agreed_at: at, flow: "mcp" }, consents: prior ? project.consents : [...(project.consents ?? []), { at, action: "marketplace.publish", granted_by: email, via: "mcp", text: MARKETPLACE_PUBLICATION_CONSENT_TEXT }] }));
@@ -290,6 +292,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     await saveProject(ProjectDetailsSchema.parse({ ...result.published, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "published", board_opportunity_id: result.board.opportunity_id!, market_unlock_status: "unlocked", server_updated_at: Date.now() } }));
     await recordMarketplaceFunnelEvent({ event: "publication_completed", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "mcp", detail: { board_created: true } });
     return { ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION };
+    });
   }
 
   // Public notice read: works for sample notices even without storage.

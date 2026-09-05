@@ -1,3 +1,4 @@
+import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
 import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
 import { ensureDistinctNoticeTitle } from "@/lib/notice-title";
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
@@ -36,7 +37,6 @@ import {
   invitationsAllowed,
   isPublicationReplay,
   publicationReadiness,
-  quickListingReadiness,
 } from "@/lib/publication-policy";
 
 /**
@@ -185,9 +185,9 @@ export async function listRfpOnBoard(
   const activeSections = p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
   const questionCount = activeSections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
   const sectionCount = activeSections.length;
-  const quickListing = p.journey?.mode === "quick_list";
+  const quickListing = isShortProject(p);
   const summary = quickListing
-    ? `${p.buyer.notes.trim()} The buyer is seeking indicative, comparable responses. Publication is anonymous and non-binding; pricing stays private to the buyer.`
+    ? shortProjectNotice(p).summary
     : `The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, Netify SASE Methodology v${p.methodology_version}). Vendors respond to the RFP question set with evidence; pricing stays private to the buyer.`;
 
   // No two identical open titles on the board (Harry's Section 1 finding,
@@ -221,7 +221,7 @@ export async function listRfpOnBoard(
     regions: p.buyer.regions,
     summary,
     budget_note: existing?.budget_note ?? "",
-    timeline_note: existing?.timeline_note ?? "",
+    timeline_note: quickListing ? shortProjectNotice(p).timeline_note : existing?.timeline_note ?? "",
     status: "open",
     engagement_type: "quote_room",
     auction_format: "open",
@@ -688,12 +688,11 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // (below) so the fixture suite can exercise the REAL gate logic directly,
   // never a hand-duplicated copy that could silently drift from it.
   const activeQuestionCount = minimumContentQuestionCount(project);
-  const quickRaw = project.entrance_context?.raw_input ?? {};
-  const readiness = project.journey?.mode === "quick_list"
-    ? quickListingReadiness({ solutionScope: String(quickRaw.solution_scope ?? ""), sector: project.buyer.sector, siteCount: project.buyer.site_count, regions: project.buyer.regions, operatingModel: project.buyer.operating_model, outcome: String(quickRaw.outcome ?? project.buyer.notes), timescale: String(quickRaw.timescale ?? "") })
+  const readiness = isShortProject(project)
+    ? shortProjectReadiness(project)
     : publicationReadiness({ baselineReady: essentialBaseline.ready, baselineRemaining: essentialBaseline.remaining, activeQuestionCount });
   if (!readiness.allowed) {
-    throw new Error(`Complete the meaningful ${project.journey?.mode === "quick_list" ? "opportunity" : "RFP"} baseline before publishing. Still needed: ${readiness.reasons.join(", ")}. Nothing has been sent.`);
+    throw new Error(`Complete the meaningful ${isShortProject(project) ? "opportunity" : "RFP"} baseline before publishing. Still needed: ${readiness.reasons.join(", ")}. Nothing has been sent.`);
   }
 
   // The automatic business verification chain (Rulings One and Two, 29 Jul
@@ -844,6 +843,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     const statedRegions = (working.buyer.regions ?? []).filter(Boolean);
     const regionHint = statedRegions.length === 0 ? regionHintFromEmail(ownerEmail) : null;
     const matchInput = {
+      ...projectMatchingInput(working),
       sector: working.buyer.sector ?? null,
       organisation_size: working.buyer.organisation_size ?? "any",
       service_model: working.buyer.operating_model ?? "any",
