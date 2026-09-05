@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { z } from "zod";
 import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 import { entranceToProjectDetails } from "@/lib/project-entrance";
-import { ProjectDetailsSchema, SectorProfileStateSchema } from "@/lib/rfp-types";
+import { ProjectDetailsSchema, SectorProfileStateSchema, PROJECT_JOURNEY_MODES } from "@/lib/rfp-types";
 import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION } from "@/lib/publication-policy";
 import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-store";
 import { ProviderMatchInputSchema, PROVIDER_MATCH_METHODOLOGY_VERSION } from "@/lib/provider-matching";
@@ -33,6 +33,7 @@ export async function authenticateMarketplaceProject(projectId: string, token: s
 }
 
 export async function startMarketplaceProject(input: { entrance_context: unknown; mode: "quick_list" | "find_providers" | "build_rfp" | "validate_rfp"; sector_profile?: unknown; now?: number }) {
+  z.enum(PROJECT_JOURNEY_MODES).parse(input.mode);
   const entrance = ProjectEntranceContextSchema.parse(input.entrance_context);
   const sectorProfile = input.sector_profile ? SectorProfileStateSchema.parse(input.sector_profile) : undefined;
   const now = input.now ?? Date.now();
@@ -55,8 +56,10 @@ export async function updateMarketplaceProject(projectId: string, token: string,
   if (session.revision !== input.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
+  if (project.marketplace_revision !== input.base_revision) throw new MarketplaceProjectConflict("This project has changed. Reload before editing.");
+  if (project.marketplace_state?.publication_status === "published" || ["published", "qa", "evaluation"].includes(project.status)) throw new MarketplaceProjectConflict("Open the published project to change requirements.");
   const nextRevision = session.revision + 1;
-  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, buyer: { ...project.buyer, ...input.buyer_patch }, entrance_context: project.entrance_context ? { ...project.entrance_context, buyer_input: { ...project.entrance_context.buyer_input, ...input.buyer_patch }, raw_input: { ...project.entrance_context.raw_input, ...input.raw_input } } : project.entrance_context, sector_profile: input.sector_profile ?? project.sector_profile, marketplace_revision: nextRevision }));
+  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, consent: undefined, pending_submit: undefined, buyer: { ...project.buyer, ...input.buyer_patch }, entrance_context: project.entrance_context ? { ...project.entrance_context, buyer_input: { ...project.entrance_context.buyer_input, ...input.buyer_patch }, raw_input: { ...project.entrance_context.raw_input, ...input.raw_input } } : project.entrance_context, sector_profile: input.sector_profile ?? project.sector_profile, marketplace_revision: nextRevision }));
   const receipt = { project_reference: saved.id, revision: nextRevision, saved_at: saved.updated };
   await kvRaw(["SET", idempotencyKey(projectId, input.idempotency_key), JSON.stringify(receipt), "EX", SESSION_TTL_SECONDS]);
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
@@ -116,10 +119,25 @@ export async function prepareMarketplacePublication(projectId: string, token: st
   if (session.revision !== input.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
+  if (project.marketplace_revision !== input.base_revision) throw new MarketplaceProjectConflict("This project has changed. Reload before publishing.");
+  if (project.buyer.organisation.trim().length < 2) throw new Error("Confirm your company name before publishing.");
   const nextRevision = session.revision + 1;
   const at = Date.now();
   const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, consent: { version: input.consent_version, agreed_at: at, flow: "marketplace_project" }, pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in, requested_at: at }, marketplace_revision: nextRevision }));
   await persistSession(token, { ...session, revision: nextRevision, expires_at: at + SESSION_TTL_SECONDS * 1000 });
   await recordMarketplaceFunnelEvent({ event: "publication_prepared", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision } });
   return { project_reference: saved.id, revision: nextRevision, prepared_at: at };
+}
+
+/** Private draft projection for reloads and email verification returns. Never exposes credentials. */
+export async function readMarketplaceProject(projectId: string, token: string) {
+  const session = await authenticateMarketplaceProject(projectId, token);
+  const project = await getProject(projectId);
+  if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
+  return {
+    project_reference: project.id, revision: project.marketplace_revision,
+    expires_at: session.expires_at, buyer: project.buyer, entrance_context: project.entrance_context,
+    mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION,
+    marketplace_state: project.marketplace_state,
+  };
 }

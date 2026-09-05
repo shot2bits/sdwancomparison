@@ -276,6 +276,8 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     const project = await getProject(projectId);
     if (!project) return { error: "Project not found." };
     const email = context.verifiedBuyerEmail ?? "";
+    if (project.buyer.organisation.trim().length < 2) return { error: "company_name_required", message: "Confirm the buyer's company using update_requirements buyer_patch.organisation before publishing." };
+    if (project.consent?.version !== args.consent_version || !project.pending_submit) return { error: "publication_not_prepared" };
     const authorization = publicationAuthorization({ ownerAuthorized: Boolean(email) && (!project.owner_email || project.owner_email.toLowerCase() === email.toLowerCase()), verifiedSession: Boolean(email), channel: "mcp" });
     if (!authorization.allowed) return { error: "verified_owner_required", publication_policy_version: PUBLICATION_POLICY_VERSION };
     if (marketplaceSession.revision !== args.base_revision || args.consent_version !== MARKETPLACE_PUBLICATION_CONSENT_VERSION || args.consent_text !== MARKETPLACE_PUBLICATION_CONSENT_TEXT) return { error: "stale_revision_or_consent" };

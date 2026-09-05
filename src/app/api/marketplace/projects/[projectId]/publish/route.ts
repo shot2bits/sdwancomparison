@@ -34,6 +34,9 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
     const authorization = publicationAuthorization({ ownerAuthorized: ownsProject, verifiedSession: Boolean(sessionEmail), channel: "web" });
     if (!authorization.allowed) return Response.json({ error: "sign_in_required", auth_required: true, message: "Verify your work email before publishing. The private draft is unchanged." }, { status: 401 });
 
+    if (project.buyer.organisation.trim().length < 2) return Response.json({ error: "Confirm your company name before publishing." }, { status: 400 });
+    if (project.consent?.version !== input.consent_version || !project.pending_submit) return Response.json({ error: "Review and prepare this project before publishing." }, { status: 409 });
+
     const priorConsent = (project.consents ?? []).find((item) => item.action === "marketplace.publish" && item.granted_by.toLowerCase() === sessionEmail.toLowerCase() && item.text === input.consent_text);
     const at = priorConsent?.at ?? Date.now();
     const consented = await saveProject(ProjectDetailsSchema.parse({
