@@ -1669,7 +1669,7 @@ body:has(.nf-2030-workspace) .journey-mode-selector { margin-left: 0; }
 
 /* Approved buying-workspace design. Scoped to the canonical engine only. */
 body:has(.nf-buying-shell) > header, body:has(.nf-buying-shell) header:has(> .nf-mega-nav) { display: none; }
-.nf-buying-shell { --nf-orange-strong: #b44014; --nf-ink-950: #19283d; display:grid; grid-template-columns:224px minmax(0,1fr); background:white; color:#19283d; min-height:100vh; font:14px/1.55 system-ui,-apple-system,sans-serif; }
+.nf-buying-shell { --nf-orange-strong: #334155; --nf-ink-950: #19283d; display:grid; grid-template-columns:224px minmax(0,1fr); background:white; color:#19283d; min-height:100vh; font:14px/1.55 system-ui,-apple-system,sans-serif; }
 .nf-buying-shell [hidden] { display:none!important; }
 .nf-buying-sidebar { background:#f7f8fa; border-right:1px solid #e8ebee; padding:32px 20px; position:sticky; top:0; height:100dvh; display:flex; flex-direction:column; gap:28px; }
 .nf-buying-wordmark { font-size:34px; font-weight:780; letter-spacing:-2px; line-height:1; color:#19283d; text-decoration:none; }
@@ -1692,12 +1692,12 @@ body:has(.nf-buying-shell) > header, body:has(.nf-buying-shell) header:has(> .nf
 .nf-buying-page { max-width:1500px; margin:auto; padding:34px 44px 64px; min-height:calc(100vh - 72px); }
 .nf-buying-information { border-top:1px solid #edf0f3; padding:20px 44px; color:#657082; font-size:12px; }
 .nf-buying-information summary { cursor:pointer; }
-.nf-buying-shell button:focus-visible,.nf-buying-shell a:focus-visible,.nf-buying-shell summary:focus-visible { outline:2px solid #b44014; outline-offset:3px; }
+.nf-buying-shell button:focus-visible,.nf-buying-shell a:focus-visible,.nf-buying-shell summary:focus-visible { outline:2px solid #334155; outline-offset:3px; }
 .nf-buying-shell .nf-brief-toolbar { background:transparent; border:0; padding:0; justify-content:flex-end; margin:0 0 22px; }
 .nf-buying-shell .nf-brief-toolbar > div { margin-right:auto; }
 .nf-buying-shell .nf-brief-toolbar strong { font-size:12px; font-weight:500; color:#677487; }
 .nf-buying-shell .nf-brief-toolbar div > span { font-size:11px; }
-.nf-buying-shell .nf-brief-toolbar button,.nf-buying-primary { border:0; border-radius:6px; padding:12px 18px; background:#c44919; color:white; font-size:12px; text-decoration:none; display:inline-block; }
+.nf-buying-shell .nf-brief-toolbar button,.nf-buying-primary { border:0; border-radius:6px; padding:12px 18px; background:#19283d; color:white; font-size:12px; text-decoration:none; display:inline-block; }
 .nf-buying-shell .pd-root.nf-2030-workspace { margin:0!important; border:0!important; background:white!important; box-shadow:none!important; min-width:0; }
 .nf-buying-shell .lpos-header { display:none!important; }
 .nf-buying-shell .lpos-app-shell { display:block!important; }
@@ -1717,7 +1717,7 @@ body:has(.nf-buying-shell) > header, body:has(.nf-buying-shell) header:has(> .nf
 .nf-buying-shell .nf-calm-heading span { font-size:13px; color:#7a8594; }
 .nf-buying-shell .nf-calm-tabs { display:flex; gap:28px; margin:26px 0 32px; border-bottom:1px solid #e8ebee; }
 .nf-buying-shell .nf-calm-tabs button { border:0; border-bottom:2px solid transparent; background:none; padding:0 0 13px; color:#7a8594; font-size:12px; white-space:nowrap; cursor:pointer; }
-.nf-buying-shell .nf-calm-tabs button[aria-current=page] { border-bottom-color:#c44919; color:#19283d; font-weight:650; }
+.nf-buying-shell .nf-calm-tabs button[aria-current=page] { border-bottom-color:#19283d; color:#19283d; font-weight:650; }
 .nf-buying-shell .nf-calm-tabs button:last-child { margin-left:auto; }
 .nf-buying-shell .lpos-builder > .nf-guided-main { position:static!important; display:block!important; min-width:0!important; width:100%!important; height:auto!important; overflow:visible!important; padding:0!important; background:white!important; border:0!important; }
 .nf-buying-shell .nf-guided-question { display:grid; grid-template-columns:minmax(0,1fr) 288px; gap:30px 42px; padding:0; margin:0; }
@@ -1745,7 +1745,7 @@ body:has(.nf-buying-shell) > header, body:has(.nf-buying-shell) header:has(> .nf
 .nf-buying-shell .lpos-captured > div > span { display:none; }
 .nf-buying-shell .lpos-captured p strong { font-size:11px; color:#7a8594; font-weight:400; }
 .nf-buying-shell .lpos-captured p small { font-size:13px; color:#19283d; }
-.nf-buying-shell .nf-calm-show-facts { font-size:12px; padding:12px 0; background:none; border:0; color:#b44014; }
+.nf-buying-shell .nf-calm-show-facts { font-size:12px; padding:12px 0; background:none; border:0; color:#334155; }
 .nf-buying-shell .nf-calm-next { background:#f7f8fa; border:1px solid #edf0f3; border-radius:8px; padding:22px; align-self:start; min-width:0; }
 .nf-buying-shell .nf-guided-focus { margin:0 0 14px; padding:0; border:0; background:transparent; }
 .nf-buying-shell .nf-guided-next-label { font-size:10px; letter-spacing:.6px; color:#7a8594; }
@@ -1757,7 +1757,7 @@ body:has(.nf-buying-shell) > header, body:has(.nf-buying-shell) header:has(> .nf
 .nf-buying-shell .lpos-adds { font-size:10px; }
 .nf-buying-shell .nf-guided-choices { display:grid; grid-template-columns:1fr; gap:7px; }
 .nf-buying-shell .nf-guided-choices button { min-height:40px; padding:10px 12px; border:1px solid #e0e5eb; border-radius:5px; background:white; font-size:12px; color:#526076; }
-.nf-buying-shell .nf-guided-choices button[data-selected=true] { border-color:#c44919; background:#fff5ef; }
+.nf-buying-shell .nf-guided-choices button[data-selected=true] { border-color:#19283d; background:#eef1f5; }
 .nf-buying-shell .lpos-impact { background:none; border-top:1px solid #e4e8ed; margin:18px 0 0; padding:14px 0 0; }
 .nf-buying-shell .lpos-impact strong,.nf-buying-shell .lpos-impact p { font-size:10px; }
 .nf-buying-shell .nf-guided-register { grid-column:1/-1; border:1px solid #e4e8ed; border-radius:6px; padding:16px; margin:0; }
@@ -1844,10 +1844,10 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 .nf-buying-shell .nf-2030-workspace { --nf-2030-text:#19283d; --nf-2030-muted:#738092; --nf-2030-rule:#e4e8ed; --nf-2030-paper:#fff; --nf-2030-raised:#f7f8fa; color:#19283d; }
 .nf-buying-shell .lpos-app-content:has(.nf-calm-heading) > .nf-2030-project-band { display:none; }
 .nf-buying-shell .nf-calm-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:22px; padding-right:0; }
-.nf-buying-shell .nf-calm-publish { flex:none; margin-top:8px; border:0; padding:12px 18px; border-radius:6px; background:#c44919; color:white; font-size:12px; font-weight:600; }
+.nf-buying-shell .nf-calm-publish { flex:none; margin-top:8px; border:0; padding:12px 18px; border-radius:6px; background:#19283d; color:white; font-size:12px; font-weight:600; }
 .nf-buying-shell .nf-calm-publish:disabled { background:#eef0f3; color:#7a8594; cursor:not-allowed; }
 .nf-buying-engine:has(.nf-calm-heading) .nf-brief-toolbar { top:60px; }
-.nf-buying-engine:has(.nf-calm-heading) .nf-brief-toolbar button { padding:0; background:none; color:#b44014; font-size:11px; }
+.nf-buying-engine:has(.nf-calm-heading) .nf-brief-toolbar button { padding:0; background:none; color:#334155; font-size:11px; }
 .nf-buying-shell .nf-calm-tabs { margin-top:30px; }
 @media(max-width:850px) {
  .nf-buying-shell .nf-calm-heading { flex-direction:column; gap:10px; }
@@ -1858,3 +1858,34 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 .nf-buying-more-tools { margin-top:28px; border-top:1px solid #e4e8ed; padding-top:20px; }
 .nf-buying-more-tools > summary { cursor:pointer; color:#526076; font-size:13px; }
 .nf-buying-more-tools h2 { font-size:16px; font-weight:600; margin:24px 0 14px; }
+
+/* Neutral workspace controls: prevent the legacy engine's orange selection
+   borders and inset rails from leaking into the approved buying UI. */
+.nf-buying-shell .nf-2030-workspace {
+  --lpos-orange: #526076;
+  --lpos-orange-action: #19283d;
+  --nf-2030-accent: #526076;
+  --nf-2030-accent-soft: #eef1f5;
+}
+.nf-buying-shell .lpos-entry-mode > button[data-selected="true"],
+.nf-buying-shell .lpos-depth > button[data-selected="true"],
+.nf-buying-shell .lpos-settings-panel fieldset button[data-selected="true"],
+.nf-buying-shell .nf-guided-choices button[data-selected="true"] {
+  border-color: #aeb9c7;
+  color: #19283d;
+  background: #eef1f5;
+  box-shadow: none;
+}
+.nf-buying-shell .lpos-entry-mode > button:hover,
+.nf-buying-shell .lpos-depth > button:hover,
+.nf-buying-shell .nf-guided-choices button:hover {
+  border-color: #aeb9c7;
+  color: #19283d;
+  background: #f2f4f7;
+  box-shadow: none;
+}
+.nf-buying-shell .lpos-persistent-prompt .nf-2030-composer:focus-within {
+  border-color: #526076 !important;
+  box-shadow: 0 0 0 3px rgba(82,96,118,.12);
+}
+.nf-buying-shell .nf-buying-topbar > a { color: #526076; }
