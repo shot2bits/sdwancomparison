@@ -161,6 +161,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   }
   const shortJourney = selected === 'quick_list' || selected === 'find_providers';
   return <>
+    {ready && children}
     <section className="journey-mode-selector px-5 pb-5 pt-6" aria-label="Start your buying project">
       <div className="mx-auto max-w-[1180px]">
         {!project && !resuming && <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{MODES.map((item) => <button key={item.id} type="button" aria-pressed={selected === item.id} onClick={() => choose(item.id)} className={`rounded-md border p-4 text-left ${selected === item.id ? 'border-[#b64b16] bg-[#fff5ed]' : 'border-[#d8d3cc] bg-white'}`}><strong className="block">{item.title}</strong><span className="mt-1 block text-sm text-[#66635e]">{item.description}</span></button>)}</div>}
@@ -197,6 +198,5 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
         </div>}
       </div>
     </section>
-    {ready && !shortJourney && children}
   </>;
 }
