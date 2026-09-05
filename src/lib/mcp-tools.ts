@@ -33,8 +33,10 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       // this result.
       const scenario = encodeScenario({ ...DEFAULT_INPUT, ...((args ?? {}) as Partial<ShortlistInput>) } as ShortlistInput);
       const resumeUrl = `${SITE_URL}/shortlist/${scenario ? `?${scenario}` : ""}`;
+      const engineUrl = `${new URL("/sase-sd-wan-rfp-builder/", SITE_URL)}?journey=find_providers${scenario ? `&${scenario}` : ""}`;
       return {
         ...result,
+        engine_url: engineUrl,
         resume_url: resumeUrl,
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
@@ -98,8 +100,10 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
         source: "mcp",
       });
       const resumeUrl = `${SITE_URL}/shortlist/?${params.toString()}#comparison-workspace`;
+      const engineUrl = `${new URL("/sase-sd-wan-rfp-builder/", SITE_URL)}?${params.toString()}#comparison-workspace`;
       return {
         ...comparison,
+        engine_url: engineUrl,
         resume_url: resumeUrl,
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
