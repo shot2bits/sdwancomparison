@@ -1,3 +1,5 @@
+import PublicComparison from "@/components/procurement/PublicComparison";
+import { Suspense } from "react";
 import ProjectDesk from "@/components/ProjectDesk";
 import JourneyStrip from "@/components/JourneyStrip";
 import CapabilityBlock from "@/components/CapabilityBlock";
@@ -40,7 +42,7 @@ import { getAllVendors } from "@/lib/vendors";
  * two head terms and the outcome, in the order buyers search. Replaces
  * "Build or validate a procurement-ready SASE or SD-WAN RFP", whose exact
  * phrase "SASE RFP" never appeared in the served HTML. */
-export const ENGINE_H1 = "Build an SD-WAN or SASE RFP and compare vendor responses";
+export const ENGINE_H1 = "Find SASE and SD-WAN providers for your project";
 /* The two definitions shown above the application (Robert, 3 Sep 2026).
  * They exist so an answer engine can read what an SD-WAN RFP and a SASE
  * RFP are from THIS page rather than from a redirected legacy URL: the
@@ -68,7 +70,7 @@ export const ENGINE_ROLE =
 export const RFP_META_DESCRIPTION =
   "Build an SD-WAN RFP or SASE RFP with governed supplier questions, validate it, publish anonymously and run a like-for-like vendor evaluation. Free for buyers.";
 export const ENGINE_PROMISE =
-  "ChatGPT can draft an RFP. Netify checks what is missing, rebuilds it against a governed question bank and prepares an anonymous Opportunity Board listing. Publishing unlocks suitable vendors, downloads and comparable bids.";
+  "Compare providers, describe your requirements and publish a free, anonymous project. Unlock your personalised shortlist and invite supplier responses. A full RFP is optional.";
 export const ENGINE_VALUE =
   `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors. Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson involved.`;
 export const ENGINE_AGENT =
@@ -118,6 +120,7 @@ export default function ProcurementEntry() {
             44-56px range. */}
         <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />
 
+        <Suspense fallback={<a href="/sase/shortlist/">Compare SD-WAN and SASE providers</a>}><PublicComparison /></Suspense>
         <JourneyModeSelector>
 
         {/* State 0 correction (18 Aug 2026): "a blank project must still

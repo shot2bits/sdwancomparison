@@ -1,6 +1,7 @@
+// @ts-expect-error Node 24 runtime API; repository still uses Node 20 type definitions.
 import { registerHooks } from 'node:module';
 // Next supplies this build-time boundary marker; standalone service tests use its empty server implementation.
-registerHooks({ resolve(specifier, context, next) { return specifier === 'server-only' ? { url: 'data:text/javascript,export {};', shortCircuit: true } : next(specifier, context); } });
+registerHooks({ resolve(specifier: string, context: object, next: (s: string, c: object) => { url: string }) { return specifier === 'server-only' ? { url: 'data:text/javascript,export {};', shortCircuit: true } : next(specifier, context); } });
 import assert from 'node:assert/strict';
 import { withFakeKv } from './fake-kv-harness';
 

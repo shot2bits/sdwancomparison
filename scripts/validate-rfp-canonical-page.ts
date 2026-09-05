@@ -76,7 +76,7 @@ function main() {
   /* 2. Title, H1, description */
   record(/title:\s*"Free SD-WAN and SASE RFP Builder and Template"/.test(home), "2: page title is the ruled wording (layout template appends ' | Netify')");
   record("Free SD-WAN and SASE RFP Builder and Template | Netify".length <= 60, "2: full title with suffix is 60 characters or fewer");
-  record(ENGINE_H1 === "Build an SD-WAN or SASE RFP and compare vendor responses", "2: H1 is the ruled wording", ENGINE_H1);
+  record(ENGINE_H1 === "Find SASE and SD-WAN providers for your project", "2: H1 is the ruled wording", ENGINE_H1);
   record(/description:\s*RFP_META_DESCRIPTION/.test(home), "2: metadata description uses the concise RFP_META_DESCRIPTION");
   record(RFP_META_DESCRIPTION.length <= 160, "2: meta description is 160 characters or fewer", String(RFP_META_DESCRIPTION.length));
   for (const term of ["SD-WAN RFP", "SASE RFP", "supplier questions", "evaluation", "anonymously"]) {

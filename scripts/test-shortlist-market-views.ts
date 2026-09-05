@@ -48,16 +48,13 @@ assert.ok(
 assert.ok(
   page.includes('aria-label="Netify RFP Builder"') &&
     page.includes("https://netify.co.uk/sase-sd-wan-rfp-builder/") &&
-    page.includes("Use the free Netify RFP Builder and Marketplace"),
+    page.includes("Start my project"),
   "shortlist page must expose a visible canonical RFP Builder handoff",
 );
 assert.ok(
   page.indexOf('aria-label="Netify RFP Builder"') < page.indexOf("<ShortlistBuilder"),
   "RFP Builder handoff must appear above the comparison workspace",
 );
-assert.match(component, /SHORTLIST_VIEWS\[initialView\]\.eligible/);
-assert.match(component, /function encodedScenarioWithView\(\)/);
-assert.match(component, /params\.set\("view", initialView\)/);
 assert.match(jsonTwin, /market_views/);
 assert.match(csvTwin, /parseShortlistMarketView/);
 assert.match(page, /`\/shortlist\/\$\{view\}\//);

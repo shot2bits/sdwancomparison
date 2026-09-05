@@ -69,7 +69,7 @@ assert.match(securityCreate, /entrance_context: rfpBuilderEntrance/);
 console.log("PASS  all entrances preserve raw inputs and produce canonical ProjectDetails");
 
 const shortlistUi = fs.readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
-assert.match(shortlistUi, /shortlistEntrance\(/);
-assert.match(shortlistUi, /entrance_context: entrance/);
-assert.match(shortlistUi, /journey_mode: "find_providers"/);
+assert.match(shortlistUi, /compared_vendor_slugs: slugs/);
+assert.match(shortlistUi, /COMPARISON_PROJECT_DRAFT_KEY/);
+assert.match(shortlistUi, /journey=find_providers/);
 assert.doesNotMatch(shortlistUi, /function workspaceUrl/);

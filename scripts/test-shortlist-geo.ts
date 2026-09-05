@@ -30,10 +30,8 @@ assert.match(dataRoute, /shortlist_size: vendors\.length/);
 assert.match(dataRoute, /csv: `\$\{SITE_URL\}\/shortlist\/data\.csv`/);
 assert.match(csvRoute, /getLiveShortlistDataset/);
 assert.match(csvRoute, /GOVERNED_SHORTLIST_CONTRACT_VERSION/);
-assert.match(interfaceSource, /\{result\.shortlist\.map\(\(v\) => \(/);
 assert.doesNotMatch(interfaceSource, /isDefaultView \? result\.shortlist\.slice\(0, 10\) : result\.shortlist/);
 assert.doesNotMatch(interfaceSource, /Show the remaining .* ranked providers/);
-assert.match(interfaceSource, /Build from requirements/);
 assert.doesNotMatch(interfaceSource, /Build around your requirements/);
 assert.match(page, /https:\/\/netify\.co\.uk\/sase-sd-wan-rfp-builder\//);
 assert.doesNotMatch(llms, /https:\/\/netify\.co\.uk\/\?q=/);
@@ -43,11 +41,6 @@ assert.match(consolidatedOpenApi, /"\/api\/mcp\/"/);
 assert.match(consolidatedOpenApi, /MCP_RFP_TOOL_DEFINITIONS/);
 assert.match(consolidatedOpenApi, /WORKSPACE_TOOL_DEFINITIONS/);
 assert.match(perToolOpenApi, /`\/api\/openapi\/\$\{def\.name\}\/`/);
-assert.match(shortlistBuilder, /`\/sase\/shortlist\/print\/\$\{qs/);
-assert.match(shortlistBuilder, /aria-label="Main priority"/);
-assert.match(shortlistBuilder, /aria-label="Deployment ceiling"/);
-assert.match(shortlistBuilder, /aria-label="Scoring profile"/);
-assert.match(shortlistBuilder, /aria-label="Work email"/);
 assert.doesNotMatch(nav, /\/resell\/bt-(?:sd-wan|sase)\//);
 assert.doesNotMatch(workspaceTools, /https:\/\/netify\.co\.uk\/\?q=/);
 
@@ -66,3 +59,6 @@ assert.equal(
 );
 
 console.log("shortlist GEO regression tests passed");
+
+assert.match(shortlistBuilder, /CompareTable comparison=\{comparison\}/);
+assert.match(shortlistBuilder, /Find providers for my project/);

@@ -30,11 +30,11 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Can I share or save my shortlist?",
-    a: "Yes absolutely, every filter combination is matched to an associated page URL, enabling you to copy a link to take you (or board directors) straight back to the same filtered list again at a later date, as well as being able to download a PDF version or have the ranked list emailed to you.",
+    a: "You can share a public comparison link. Your personalised shortlist is saved in your project and unlocks after verified anonymous publication.",
   },
   {
     q: "What does Build from requirements do?",
-    a: "Describe your estate in plain language, including site count, regions, security requirements and operating model. Netify maps the description to the same filters and scoring engine used by the manual controls, then explains the resulting shortlist.",
+    a: "Describe your estate, review a short project notice and verify your business identity. Publishing anonymously unlocks a personalised shortlist and supplier responses; a full RFP is optional.",
   },
   {
     q: "Is this comparison vendor neutral?",
@@ -50,5 +50,5 @@ export const SHORTLIST_INTRO = {
   eyebrow: "SD-WAN and SASE shortlist builder",
   h1: "Compare SD-WAN and SASE providers, vendors and managed services",
   subhead:
-    "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Build a ranked shortlist, inspect the evidence, compare two providers directly, then hand your requirements to the Netify RFP Builder.",
+    "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Compare named providers and inspect the evidence. Publish a short anonymous project to unlock personalised matching and supplier responses. A full RFP is optional.",
 };

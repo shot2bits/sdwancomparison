@@ -31,7 +31,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const view = parseShortlistMarketView(typeof query.view === "string" ? query.view : undefined);
   const viewTitle = SHORTLIST_VIEWS[view].title;
   const title = `${viewTitle} (2026): 30-Provider Research Dataset`;
-  const description = `${SHORTLIST_VIEWS[view].answer} Compare governed evidence, build a shortlist and continue to an RFP.`;
+  const description = `${SHORTLIST_VIEWS[view].answer} Compare public evidence and publish a short project to unlock personalised matches.`;
   return {
     title,
     description,
@@ -108,13 +108,13 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         className="mb-6 flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 px-5 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between"
       >
         <p className="font-medium text-zinc-900">
-          Need to create an RFP for your SD-WAN and SASE cybersecurity project?
+          Find providers for your SASE or SD-WAN project. A full RFP is optional.
         </p>
         <a
           href="https://netify.co.uk/sase-sd-wan-rfp-builder/"
           className="inline-flex shrink-0 items-center gap-2 font-semibold text-zinc-950 underline decoration-amber-500 decoration-2 underline-offset-4"
         >
-          Use the free Netify RFP Builder and Marketplace
+          Start my project
           <span aria-hidden="true">→</span>
         </a>
       </aside>
@@ -127,7 +127,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
 
       <div className="mb-8 max-w-4xl">
         <p className="mt-4 text-base leading-7 text-[var(--ink-800)]">
-          <strong>Short answer:</strong> compare 30 SD-WAN providers, SD-WAN vendors, SASE providers, carriers and managed services using one governed research dataset. Build a ranked shortlist, compare two providers feature by feature, or open each evidence profile before issuing an RFP.
+          <strong>Short answer:</strong> compare 30 SD-WAN providers, SD-WAN vendors, SASE providers, carriers and managed services using one governed research dataset. Compare named providers feature by feature or open their evidence profiles. Publish a short anonymous project to unlock personalised matching and supplier responses.
         </p>
         {/* The offer in one glance (Robert, 17 July 2026), server-rendered
             so agents and crawlers read it alongside the ranking data. */}
