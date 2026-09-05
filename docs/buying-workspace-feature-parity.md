@@ -28,6 +28,7 @@ Baseline: production commit 24795b6. Design reference: the approved Netify buyin
 | Board and supplier workspace | Opportunity board / All tools | Existing routes |
 | Cost/TCO, directory, security and market research | All tools | Existing routes |
 | MCP and connected evidence | Connections; existing project document evidence | Existing connector, MCP tools, scopes and approval gates |
+| Draft save status and storage failure warning | Project header | Existing autosave state, checked with simulated quota failure |
 | Saved projects, identity and role-specific administration | My projects & account | Existing account routes and permissions |
 | Searchable HTML, canonical metadata and research content | Public comparison plus buying guidance below workspace | Existing server-rendered content and canonical routes |
 
@@ -39,6 +40,7 @@ Presentation shell, navigation, wordmark, spacing and contextual panels. Engine 
 
 - Full publication-first regression suite (47 commands), type checking and lint.
 - Desktop and mobile browser checks: preserve typed draft across Compare navigation; add a bespoke question and verify it reaches engine state; supplier pack; sector input; preferences; no document overflow or browser exceptions.
+- Draft status browser tests: successful save and simulated local-storage quota failure remain visible.
 - Existing short-brief dialog tests: focus/close/Escape, draft retention and mobile containment.
 - Isolated publication UI: reload, failed publication and retry; comparison handoff; published project reopening with frozen provider identities.
 - Existing source and pipeline tests cover imports, validation, question register, decisions, publication gates, exports and MCP contracts. External supplier messaging, live email delivery and actual live board publication are not exercised by UI smoke checks.

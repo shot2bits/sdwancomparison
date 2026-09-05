@@ -1853,3 +1853,5 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
  .nf-buying-shell .nf-calm-heading { flex-direction:column; gap:10px; }
  .nf-buying-engine:has(.nf-calm-heading) .nf-brief-toolbar { margin-bottom:18px; }
 }
+.nf-buying-shell .nf-calm-save-status { display:block; margin-top:8px; font-size:11px; color:#738092; }
+.nf-buying-shell .nf-calm-save-status[data-error=true] { color:#b42318; font-weight:600; }

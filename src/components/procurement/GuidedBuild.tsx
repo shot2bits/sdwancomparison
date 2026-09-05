@@ -94,6 +94,7 @@ export default function GuidedBuild({
   onSettingsOpenChange,
   published,
   shortlist = null,
+  draftSaveStatus,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
@@ -144,6 +145,7 @@ export default function GuidedBuild({
    *  Netify's computed match, so it may show before publication. */
   shortlist?: { vendors: { slug: string; name: string }[]; onRemove: (slug: string) => void } | null;
   published: boolean;
+  draftSaveStatus?: { label: string; error: boolean };
 }) {
   const [workspaceTab, setWorkspaceTab] = useState<"overview" | "requirements" | "pack">("overview");
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -357,7 +359,7 @@ export default function GuidedBuild({
 
   return (
     <div className="lpos-builder" data-workspace-tab={workspaceTab}>
-      <div className="nf-calm-heading"><div><p>{published ? "PUBLISHED PROJECT" : "YOUR PRIVATE WORKSPACE"}</p><h1>{displayDocumentTitle}</h1><span>Shape your requirements. Publish when you are ready.</span></div><button type="button" className="nf-calm-publish" disabled={!publishReachable} title={publishReachable ? "Review this RFP before publishing" : "Complete the essential requirements, or publish a short brief"} onClick={onPublish}>Review &amp; publish →</button></div>
+      <div className="nf-calm-heading"><div><p>{published ? "PUBLISHED PROJECT" : "YOUR PRIVATE WORKSPACE"}</p><h1>{displayDocumentTitle}</h1><span>Shape your requirements. Publish when you are ready.</span>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" disabled={!publishReachable} title={publishReachable ? "Review this RFP before publishing" : "Complete the essential requirements, or publish a short brief"} onClick={onPublish}>Review &amp; publish →</button></div>
       <nav className="nf-calm-tabs" aria-label="Project views">
         <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
         <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>

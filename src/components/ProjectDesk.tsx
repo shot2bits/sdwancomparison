@@ -5463,6 +5463,7 @@ export default function ProjectDesk({
                 onSettingsOpenChange={setDocumentSettingsOpen}
                 published={publishedFlag}
                 shortlist={pinnedShortlist}
+              draftSaveStatus={{ label: publishedFlag ? "Published project" : localDraftStatus === "error" ? "Draft not saved on this device. Keep this page open." : localDraftStatus === "saved" ? "Draft saved on this device" : localDraftSavedAt ? "Saving draft…" : "Private draft · not published", error: localDraftStatus === "error" }}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -6578,6 +6579,7 @@ export default function ProjectDesk({
               onSettingsOpenChange={setDocumentSettingsOpen}
               published={publishedFlag}
               shortlist={pinnedShortlist}
+              draftSaveStatus={{ label: publishedFlag ? "Published project" : localDraftStatus === "error" ? "Draft not saved on this device. Keep this page open." : localDraftStatus === "saved" ? "Draft saved on this device" : localDraftSavedAt ? "Saving draft…" : "Private draft · not published", error: localDraftStatus === "error" }}
             />
           </div>
           </>}
