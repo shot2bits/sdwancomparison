@@ -30,6 +30,7 @@ Baseline: production commit 24795b6. Design reference: the approved Netify buyin
 | MCP and connected evidence | Connections; existing project document evidence | Existing connector, MCP tools, scopes and approval gates |
 | Draft save status and storage failure warning | Project header | Existing autosave state, checked with simulated quota failure |
 | Saved projects, identity and role-specific administration | My projects & account | Existing account routes and permissions |
+| All 23 previous main-menu links | All tools → More research, sector guides & services | Same MEGA_GROUPS source; desktop/mobile link-count and layout checked |
 | Searchable HTML, canonical metadata and research content | Public comparison plus buying guidance below workspace | Existing server-rendered content and canonical routes |
 
 ## What changed

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from 'react';
+import { MEGA_GROUPS } from '@/lib/nav';
 
 type View = 'project' | 'compare' | 'responses' | 'tools';
 const resources = [
@@ -54,7 +55,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
           <button onClick={() => projectTool('review')}><strong>Supplier pack &amp; project review</strong><span>Review requirements, decisions, architecture and provenance.</span></button>
           <button onClick={() => projectTool('tools')}><strong>Project tools</strong><span>Suppliers, evidence, reports and exports, with publication access controls.</span></button>
           {resources.map(([name, href, description]) => <a key={href} href={href}><strong>{name}</strong><span>{description}</span></a>)}
-        </div></section>
+        </div><details className="nf-buying-more-tools"><summary>More research, sector guides &amp; services</summary>{MEGA_GROUPS.map(group => <section key={group.label}><h2>{group.label}</h2><div className="nf-buying-tool-grid">{group.items.map(item => <a key={item.href} href={item.href}><strong>{item.label}</strong><span>{item.desc}</span></a>)}{group.footerLink && <a href={group.footerLink.href}><strong>{group.footerLink.label}</strong></a>}</div></section>)}</details></section>
       </div>
       <details className="nf-buying-information"><summary>About Netify · SASE and SD-WAN buying guidance</summary>{information}</details>
     </div>
