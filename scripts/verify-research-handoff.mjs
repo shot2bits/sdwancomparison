@@ -4,6 +4,7 @@ const root=process.env.TEST_ORIGIN||'https://netify.co.uk';
 const b=await chromium.launch();
 try{for(const width of [1440,390]){
  const p=await b.newPage({viewport:{width,height:1000}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ if(root.includes('.vercel.app')) await p.route('**/sase-sd-wan-rfp-builder/**',r=>r.continue({url:root+'/sase/home/'+new URL(r.request().url()).search}));
  await p.goto(root+'/sase/shortlist/',{waitUntil:'domcontentloaded'});
  await p.getByLabel('Provider 1',{exact:true}).selectOption('cato-networks');await p.getByLabel('Provider 2',{exact:true}).selectOption('fortinet');
  await p.getByLabel('Your requirement (optional)').fill('Five UK manufacturing sites need resilient connectivity and controlled remote maintenance.');
