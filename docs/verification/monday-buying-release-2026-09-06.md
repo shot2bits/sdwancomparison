@@ -17,3 +17,17 @@ Baseline engine 4f702c5, deployment 665alzhe3, version 0609262114. Main website 
 
 ## Limits
 This validates the changed journeys, not every possible platform action. Google document happy-path retrieval, real supplier fulfilment and real email delivery are not certified by these local tests. Browser publication/quote writes were intercepted. No real buyer opportunity or supplier message was created. No citation increase is claimed. Harry article rewrites are outside this code release.
+
+## Live release receipt
+- Engine code: c17eb85. Deployment: https://sasecomparison-3hcrppl2g-netifymarketplace.vercel.app (dpl_Cmd6oiNFng5p3xvq2ZumeUMQq76M). Public version: 0609262151.
+- Main-site code: f77487e. Deployment: https://v0-broadband-reseller-framework-a1b0ng090-netifymarketplace.vercel.app (dpl_GZ6SDsLLJLSHaGAqwDjeGybaSJPo). Inspect confirmed netify.co.uk targets this deployment.
+- Explicitly set the engine rewrite target alias to the new release and verified the public domain, not just a deployment URL.
+- Live desktop/mobile entry routes, file chooser, pricing discovery, comparison handoffs, version visibility and overflow/page-error checks passed.
+- All five live sector journeys passed: exact counts, draft recovery, Short/Detailed RFP switching, bespoke questions and publication entry. No real project was published.
+- Live publication review copy, consent-disabled button and edit retention passed with draft API intercepted. No email was sent.
+- Main-site research CTA browser test carried the exact edited requirements into the new engine with no page errors. All canonical legacy redirects and HTML checks passed.
+- Zero-, one- and two-provider handoff cases passed across the local/production/live checks. MCP and envelope compatibility tests passed.
+- Error-level log queries for both deployments, covering the checked 10-minute window, returned no logs. This is not a guarantee that every possible action is error-free.
+- React review: reused existing handlers, retained lazy-loaded tools and mounted engine state, semantic navigation controls and visible focus outlines; added no fetching dependency or new publication path.
+
+Rollback references: engine 665alzhe3 (also reset sasecomparison-netifymarketplace.vercel.app explicitly), main site puj6f0m0g. No data migration is involved.
