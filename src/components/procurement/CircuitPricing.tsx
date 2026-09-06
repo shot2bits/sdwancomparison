@@ -33,6 +33,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
     [id, setId] = useState(""),
     [list, setList] = useState<CircuitRecord[]>([]),
     [signed, setSigned] = useState(false),
+    [recoveringRequest,setRecoveringRequest]=useState(false),
     [loaded, setLoaded] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -110,6 +111,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
     setLoaded(true);
     void refresh();
     const request = query.get("request");
+    setRecoveringRequest(Boolean(request));
     if (request)
       fetch(endpoint + "?id=" + encodeURIComponent(request), { cache: "no-store" })
         .then(async (r) => {
@@ -141,6 +143,12 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
     }, 30000);
     return () => clearInterval(poll);
   }, [record]);
+  async function recoverRequest() {
+    await refresh();
+    const request=new URLSearchParams(location.search).get('request');
+    if(!request)return;
+    try {const res=await fetch(endpoint+'?id='+encodeURIComponent(request),{cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error);adopt(data.request);setError('');}catch(e){setError(e instanceof Error?e.message:'Could not reopen the request.');}
+  }
   async function action(action: string, extra: object = {}) {
     setBusy(true);
     setError("");
@@ -232,7 +240,8 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
               : "Build your request once. Netify sources the market; quotes arrive in Market responses."}
           </p>
         </div>
-        {!admin && (
+        {recoveringRequest && !signed && <div className="cp-info"><h2>Sign in to view your private pricing</h2><SignIn role="buyer" prompt="Use the work email attached to this request." onAuthed={()=>void recoverRequest()}/></div>}
+      {!admin && (
           <button
             className="cp-primary"
             disabled={busy || frozen}
