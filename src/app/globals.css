@@ -1954,3 +1954,10 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 .nf-buying-shell .lpos-unlock{grid-template-columns:minmax(0,1fr);gap:10px}.nf-buying-shell .lpos-unlock>span{display:none}.nf-buying-shell .lpos-unlock ul{grid-template-columns:repeat(3,minmax(0,1fr));grid-column:1/-1}
 .nf-buying-shell .lpos-sections li>button{grid-template-columns:24px minmax(0,1fr) auto 12px}.nf-buying-shell .lpos-sections li em{background:transparent!important;color:#697581!important;padding:0;border-radius:0}.nf-buying-shell .lpos-sections li[data-current=true]{box-shadow:inset 2px 0 #526076}.nf-buying-shell .lpos-sections li[data-current=true]>button,.nf-buying-shell .lpos-section-extensions{background:#f9fafb}
 .nf-buying-shell .lpos-architecture{flex-wrap:wrap;gap:12px}.nf-buying-shell .lpos-impact>span{display:none}
+
+/* Compact entry routes share the existing workspace and preserve its state. */
+.nf-buying-start { margin: 0 0 24px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+.nf-buying-start > p { margin: 0 0 12px; line-height: 1.6; }
+.nf-buying-start nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 12px; }
+.nf-buying-start nav button, .nf-buying-start nav a { background: transparent; border: 0; padding: 6px 0; color: #1c2c42; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.nf-buying-start nav :focus-visible { outline: 2px solid #334155; outline-offset: 4px; }

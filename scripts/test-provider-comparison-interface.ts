@@ -73,7 +73,7 @@ assert.match(agent, /buildComparison/);
 assert.match(mcp, /compare_vendors/);
 assert.match(interfaceSource, /Compare every feature across your selected providers/);
 assert.match(interfaceSource, /Compare SD-WAN and SASE providers/);
-assert.match(interfaceSource, /Find providers for my project/);
+assert.match(interfaceSource, /Get proposals for my project/);
 assert.match(interfaceSource, /compared_vendor_slugs: slugs/);
 assert.match(interfaceSource, /pinned_vendors: \[\]/);
 assert.doesNotMatch(interfaceSource, /result\.shortlist\.map/);

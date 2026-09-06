@@ -43,7 +43,7 @@ export default function Continuation({ c, pageUrl }: { c: ContinuationData | nul
       className="max-w-2xl rounded-2xl border border-zinc-200 bg-white px-6 py-5 shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.22),0_2px_12px_-4px_rgba(180,83,9,.07)]"
     >
       {pageUrl && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(continuationJsonLd(c, pageUrl)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(continuationJsonLd({ ...c, label: "Get proposals for my project" }, pageUrl)) }} />
       )}
       <p className="m-0 text-sm text-slate-500">{c.stamp}</p>
       <h3 className="m-0 mt-1.5 text-[19px] font-semibold tracking-[-.01em] text-zinc-900">Use this research in your project</h3>
@@ -67,7 +67,7 @@ export default function Continuation({ c, pageUrl }: { c: ContinuationData | nul
           onClick={go}
           className="rounded-full bg-slate-900 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-slate-700"
         >
-          {c.label} <span aria-hidden="true">&rarr;</span>
+          Get proposals for my project <span aria-hidden="true">&rarr;</span>
         </button>
         <p className="m-0 min-w-[200px] flex-1 text-[11px] leading-relaxed text-zinc-500">
           {c.reassurance}
@@ -78,7 +78,7 @@ export default function Continuation({ c, pageUrl }: { c: ContinuationData | nul
         Opens an editable project. Publish a short brief, build a Short or Detailed RFP,
         or bring your own RFP or RFI. You review the notice and verify your work email before publication.
       </p>
-      <a href={continuationUrl(sentence.trim().length >= 3 ? sentence.trim() : c.sentence, c.pins)} className="mt-3 inline-block text-sm underline underline-offset-4">Open these requirements in the buying workspace</a>
+      <a onClick={() => fireNetifyEvent("continuation_taken", { family: c.family, source: c.source })} href={continuationUrl(sentence.trim().length >= 3 ? sentence.trim() : c.sentence, c.pins)} className="mt-3 inline-block text-sm underline underline-offset-4">Open these requirements in the buying workspace</a>
       <p className="m-0 mt-2.5 border-t border-zinc-100 pt-2 text-[10.5px] leading-relaxed text-zinc-400">
         Working with an assistant? Connect{" "}
         <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[10px]">netify.co.uk/sase/api/mcp/</code> and use{" "}

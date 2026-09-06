@@ -73,7 +73,7 @@ export const RFP_META_DESCRIPTION =
 export const ENGINE_PROMISE =
   "Describe your needs, bring an RFP or RFI, or build a Short or Detailed RFP. Review and publish an anonymous project to invite supplier responses. A full RFP is optional.";
 export const ENGINE_VALUE =
-  "Use Netify's governed question bank and sourced provider comparisons to structure your requirements. Manufacturing guidance covers production uptime, OT access, remote users and service ownership.";
+  "Use Netify's question bank and sourced provider comparisons to structure your requirements. Choose your sector, including retail, manufacturing, healthcare, financial services or government, then review the relevant questions against your business needs.";
 export const ENGINE_AGENT =
   "Use public Netify research through a supported MCP client. Prepare requirements with provenance, then continue in Netify for identity checks and publication approval. Private tools require the credentials described by each tool.";
 export const ENGINE_CONTROL =

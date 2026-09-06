@@ -368,7 +368,7 @@ export default function GuidedBuild({
 
   return (
     <div className="lpos-builder" data-workspace-tab={workspaceTab}>
-      <div className="nf-workspace-intro"><h1>Build your SASE or SD-WAN RFP.<br/>Publish your project.</h1><p>Start with a few requirements or bring your own document. Publish one anonymous project to the Netify Opportunity Board.</p></div>
+      <div className="nf-workspace-intro"><h1>Build your SASE or SD-WAN RFP.<br/>Publish your project.</h1><p>Find suitable providers, bring your shortlist or document, and ask Netify to source proposals. Start with a short brief or a full RFP. You review and approve publication.</p></div>
       <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" title="Review your project and complete the publication details" onClick={onPublish}>Review &amp; publish →</button></div>
       <section className="nf-project-formats" aria-label="Choose your project format"><strong>How would you like to build your project?</strong><div>
         <button aria-pressed={documentPurpose === 'brief'} onClick={()=>{onDocumentPurposeChange?.('brief');requestBrief();}}>Basic requirements<span>A short business brief</span></button>
@@ -409,7 +409,7 @@ export default function GuidedBuild({
               <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Check an existing RFP or RFI</button>
             </div>
             <div className="nf-guided-prompt">{composer}</div>
-            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking procurement readiness against the Netify question bank…" : "Already created an RFP with ChatGPT, Claude or another AI? Paste it above or upload Word, PDF, text or a spreadsheet. Netify finds what is missing and preserves the original wording."}</span><button type="button" onClick={onImportQuestions}>Upload RFP or RFI</button></div>}
+            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking requirement coverage against the Netify question bank…" : "Bring an RFP or RFI from your team, adviser or AI assistant. Paste it above or upload Word, PDF, text or a spreadsheet. Review detected gaps and edit your requirements before publishing. The original wording is retained."}</span><button type="button" onClick={onImportQuestions}>Upload RFP or RFI</button></div>}
             {validationError && <p className="lpos-validation-error" role="alert">{validationError}</p>}
             <div className="lpos-depth" data-depth={rfpDepth}>
               <span>RFP depth</span>

@@ -91,13 +91,13 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     </>}
     <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5">
       <h3 className="text-lg font-semibold">Which providers fit your project?</h3>
-      <p className="mt-2 text-sm">Describe your requirement, review a short anonymous notice and verify your work email and company. Publishing unlocks your personalised shortlist, project-specific comparisons and supplier responses. A full RFP is optional.</p>
+      <p className="mt-2 text-sm">Ask Netify to source proposals against your requirements. Start with a short brief, review the public notice and verify your work email and company before publishing. Supplier participation is developing; responses and prices are not guaranteed. A full RFP is optional.</p>
       <label className="mt-3 block text-sm font-semibold">Your requirement (optional)<textarea value={requirement} onChange={(e) => setRequirement(e.target.value)} maxLength={4000} rows={2} placeholder="What does your business need?" className="mt-2 block w-full rounded border border-slate-200 bg-white p-3 font-normal"/></label>
       <p className="mt-3 text-sm text-slate-600">Your selected providers, comparison question and stated requirements travel with your draft as research context. They do not invite suppliers or publish anything.</p>
-      <button type="button" onClick={startProject} className="mt-4 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold">Find providers for my project</button>
+      <button type="button" onClick={startProject} className="mt-4 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold">Get proposals for my project</button>
       <p className="mt-2 text-xs">Your selections travel with you. Nothing is published without your approval.</p>
     </div>
     {error && <p role="alert" className="mt-3 text-sm text-red-800">{error}</p>}
-    {comparison && <div id="comparison-table" className="mt-8"><h3 className="mb-3 text-lg font-semibold">Public capability comparison</h3><CompareTable comparison={comparison}/><div className="mt-4 flex flex-wrap gap-4">{slugs.map((slug) => { const v = vendors.find((provider) => provider.slug === slug)!; return <a key={slug} href={v.marketplace_url || `/sase/vendors/${slug}/`} className="text-sm underline">{v.name}: evidence and sources</a>; })}</div><button type="button" onClick={startProject} className="mt-5 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold">Find providers for my project</button></div>}
+    {comparison && <div id="comparison-table" className="mt-8"><h3 className="mb-3 text-lg font-semibold">Public capability comparison</h3><CompareTable comparison={comparison}/><div className="mt-4 flex flex-wrap gap-4">{slugs.map((slug) => { const v = vendors.find((provider) => provider.slug === slug)!; return <a key={slug} href={v.marketplace_url || `/sase/vendors/${slug}/`} className="text-sm underline">{v.name}: evidence and sources</a>; })}</div><button type="button" onClick={startProject} className="mt-5 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold">Get proposals for my project</button></div>}
   </section>;
 }
