@@ -38,7 +38,6 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
     if (project.buyer.organisation.trim().length < 2) return Response.json({ error: "Confirm your company name before publishing." }, { status: 400 });
     if ((project.consent?.version !== input.consent_version || !project.pending_submit) && !(await isMarketUnlocked(projectId))) return Response.json({ error: "Review and prepare this project before publishing." }, { status: 409 });
 
-    await recordMarketplaceFunnelEvent({ event: "identity_verified", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web" });
     const priorConsent = (project.consents ?? []).find((item) => item.action === "marketplace.publish" && item.granted_by.toLowerCase() === sessionEmail.toLowerCase() && item.text === input.consent_text);
     const at = priorConsent?.at ?? Date.now();
     const consented = await saveProject(ProjectDetailsSchema.parse({

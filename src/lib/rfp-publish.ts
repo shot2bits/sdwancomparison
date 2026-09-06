@@ -1,3 +1,4 @@
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
 import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
 import { ensureDistinctNoticeTitle } from "@/lib/notice-title";
@@ -728,6 +729,10 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     throw new SavedUnpublishedError(verification, `${SITE_URL}/rfp-builder/${project.id}/`);
   }
 
+  if(!project.test){
+    await recordMarketplaceFunnelEvent({event:"publication_prepared",project_id:project.id,source:project.journey?.source??"rfp_builder",mode:project.journey?.mode??"build_rfp",channel:project.journey?.source==="mcp"?"mcp":"api"});
+    await recordMarketplaceFunnelEvent({event:"identity_verified",project_id:project.id,source:project.journey?.source??"rfp_builder",mode:project.journey?.mode??"build_rfp",channel:project.journey?.source==="mcp"?"mcp":"api"});
+  }
   // Publish is the strongest identity-capture moment: adopt ownership onto
   // the verified account when the RFP has no owner yet, so the RFP appears
   // under the buyer's account.
@@ -1248,6 +1253,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // this function's idempotency contract rather than throwing after the
   // buyer's vendors have already been invited.
 
+  if(!project.test && board.listed && board.opportunity_id && marketUnlockValid) await recordMarketplaceFunnelEvent({event:"publication_completed",project_id:project.id,source:project.journey?.source??"rfp_builder",mode:project.journey?.mode??"build_rfp",channel:project.journey?.source==="mcp"?"mcp":"api",detail:{board_created:true}});
   return { published, invited, criteria: attempt.match_criteria ?? "", board, market_report, matched_vendors: matchedVendorsFrozen };
 }
 

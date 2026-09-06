@@ -122,6 +122,13 @@ export async function saveProject(
     await kv(["EXPIRE", `rfp:${parsed.id}`, "7200"]);
     await kv(["EXPIRE", `rfp:token:${parsed.share_token}`, "7200"]);
   }
+  const requirementChanged = !existing || JSON.stringify([existing.buyer,existing.rfp_sections,existing.facts,existing.procurement_document]) !== JSON.stringify([parsed.buyer,parsed.rfp_sections,parsed.facts,parsed.procurement_document]);
+  if (!parsed.test && requirementChanged) {
+    try {
+      const {recordMarketplaceFunnelEvent}=await import("@/lib/marketplace-funnel");
+      await recordMarketplaceFunnelEvent({event:existing?"requirements_updated":"project_started",project_id:parsed.id,source:parsed.journey?.source??(parsed.source==="mcp"?"mcp":"rfp_builder"),mode:parsed.journey?.mode??"build_rfp",channel:parsed.journey?.source==="mcp"||parsed.source==="mcp"?"mcp":parsed.journey||parsed.source==="wizard"?"web":"api"});
+    } catch { /* Operational reporting cannot break a saved project. */ }
+  }
   return parsed;
 }
 
@@ -267,6 +274,10 @@ export async function saveResponse(r: RfpResponse): Promise<RfpResponse> {
   if (idx >= 0) responses[idx] = parsed;
   else responses.push(parsed);
   await setJson(`rfp:${parsed.rfp_id}:responses`, responses);
+  try {
+    const project=await getProject(parsed.rfp_id);
+    if(project&&!project.test&&parsed.submitted!==null){const {recordMarketplaceFunnelEvent}=await import("@/lib/marketplace-funnel");await recordMarketplaceFunnelEvent({event:"supplier_response",project_id:parsed.rfp_id,channel:"api"});}
+  } catch { /* Reporting cannot break a saved supplier response. */ }
   return parsed;
 }
 

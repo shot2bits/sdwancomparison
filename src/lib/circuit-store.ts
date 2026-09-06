@@ -1,3 +1,4 @@
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { randomBytes, createHash } from "node:crypto";
 import { kvRaw, kvGetJson, kvSetJson, saveOpportunity, newId } from "./rfp-store";
 import { OpportunitySchema } from "./opportunity-types";
@@ -88,7 +89,7 @@ export async function circuitSave(
         );
     } else if (revision !== 0) throw new CircuitError("Request not found.", 404);
     const now = Date.now();
-    return persist({
+    const saved = await persist({
       ...parsed,
       id,
       owner_email: existing?.owner_email ?? session.email,
@@ -99,6 +100,8 @@ export async function circuitSave(
       opportunity_id: null,
       quotes: [],
     });
+    await recordMarketplaceFunnelEvent({event:existing?"requirements_updated":"project_started",project_id:id,source:"circuit_pricing",mode:"circuit",channel:"web"});
+    return saved;
   });
 }
 export async function circuitPublish(
@@ -159,6 +162,7 @@ export async function circuitPublish(
       updated: Date.now(),
       revision: r.revision + 1,
     });
+    for(const event of ["publication_prepared","identity_verified","publication_completed"] as const) await recordMarketplaceFunnelEvent({event,project_id:id,source:"circuit_pricing",mode:"circuit",channel:"web",detail:{board_created:true}});
     return published;
   });
 }
@@ -175,7 +179,7 @@ export async function circuitAddQuote(id: string, input: unknown, session: AuthS
       throw new CircuitError("Select a location from this request.");
     if (Date.parse(q.valid_until + "T23:59:59Z") < Date.now())
       throw new CircuitError("Quote validity must not be in the past.");
-    return persist({
+    const saved = await persist({
       ...r,
       status: "quotes_available",
       revision: r.revision + 1,
@@ -185,6 +189,8 @@ export async function circuitAddQuote(id: string, input: unknown, session: AuthS
         { ...q, created: Date.now(), created_by: session.email, notification: "pending" },
       ],
     });
+    await recordMarketplaceFunnelEvent({event:"supplier_response",project_id:id,source:"circuit_pricing",mode:"circuit",channel:"system"});
+    return saved;
   });
 }
 export async function circuitNotify(id: string, quoteId: string, session: AuthSession) {

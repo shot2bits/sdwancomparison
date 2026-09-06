@@ -103,6 +103,13 @@ export class FakeKvStore {
         return "OK";
       }
       case "EVAL": {
+        if (String(args[0]).includes("netify-funnel-append-once") && Number(args[1]) === 2) {
+          const marker=String(args[2]), key=String(args[3]);
+          if(this.store.has(marker))return 0;
+          const current=this.store.get(key); const list=current?.type==="list" ? [...current.value] : [];
+          list.unshift(String(args[4])); this.store.set(key,{type:"list",value:list.slice(0,10000)});
+          this.store.set(marker,{type:"string",value:"1"}); return 1;
+        }
         if (String(args[0]).includes("redis.call('get',KEYS[1])") && Number(args[1]) === 1) {
           const key = String(args[2]);
           return this.str(key) === String(args[3]) && this.store.delete(key) ? 1 : 0;

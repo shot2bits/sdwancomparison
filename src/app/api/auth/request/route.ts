@@ -1,3 +1,4 @@
+import { analyticsReferrer, analyticsPath } from "@/lib/analytics-privacy";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { createMagicToken, getProject, getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, kvRaw, listAllRfpIds, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
 import { sendMagicLink, resendConfigured } from "@/lib/auth";
@@ -200,9 +201,9 @@ export async function POST(req: Request) {
   // capped; everything optional and best effort.
   const cap = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n) : "");
   const attr = {
-    ref: cap(body.attribution?.ref, 300),
-    landing: cap(body.attribution?.landing, 300),
-    page: cap(req.headers.get("referer"), 300),
+    ref: analyticsReferrer(cap(body.attribution?.ref, 300)),
+    landing: body.attribution?.landing ? analyticsPath(cap(body.attribution.landing, 300)) : "",
+    page: req.headers.get("referer") ? analyticsPath(req.headers.get("referer")!) : "",
     country: cap(req.headers.get("x-vercel-ip-country"), 8),
   };
   const token = await createMagicToken({ role: resolvedRole, email, vendor_slug, rfp_id: rfpIdMatch ? rfpIdMatch[1] : null, attr });

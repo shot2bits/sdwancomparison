@@ -90,7 +90,7 @@ export async function POST(req: Request, ctx: Ctx) {
     body.links ?? [],
     type === "response" ? (body.answers ?? {}) : {},
   );
-  if (opp.source_rfp_id && (type === "interest" || type === "response")) await recordMarketplaceFunnelEvent({ event: type === "interest" ? "supplier_interest" : "supplier_response", project_id: opp.source_rfp_id, channel: "web", detail: { opportunity_id: opp.id } });
+  if (type === "interest" || type === "response" || type === "pricing") await recordMarketplaceFunnelEvent({ event: type === "interest" ? "supplier_interest" : "supplier_response", project_id: opp.source_rfp_id ?? opp.id, channel: "web", detail: { opportunity_id: opp.id } });
   // Same masking as the GET: never return buyer credentials, other
   // suppliers' identities (introduced/invited), or other suppliers'
   // pricing amounts in the post-action snapshot. The introduction object

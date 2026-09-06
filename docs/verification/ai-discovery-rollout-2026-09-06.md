@@ -29,3 +29,9 @@ Release ecbc15b, deployment sasecomparison-d83m34wj2-netifymarketplace.vercel.ap
 
 ## Step 4
 Release a7f128b, deployment sasecomparison-k9yrrl7ol-netifymarketplace.vercel.app. Local lint/types and desktop/mobile checks passed; full build validation and candidate passed. Live pricing three routes, editable handoff and sitemap passed; live circuit form, UK optional add-ons, publication review and notification copy passed with writes intercepted.
+
+## Step 5
+Release c95f573, deployment sasecomparison-lhkoer5k5-netifymarketplace.vercel.app. Corrected homepage/retired-page handoffs and blanket MCP claims; shared pricing catalogue and synthetic manufacturing evidence links. Local lint/types and capability truth passed. Candidate and live actual MCP initialize, 46 tools, comparison question handoff, provisional estimate, valid/invalid circuit input, denied private read, manufacturing resource and HTML/JSON parity passed. Public desktop/mobile live checks passed.
+
+## Step 6 (candidate preparation)
+Added admin-only aggregate reporting, bounded source attribution and atomic per-project outcome deduplication. Connected core RFP saves, verified publication, submitted supplier responses, standalone notices and circuit sourcing. Business identity is measured after its verification gate; draft responses do not count. Client and server attribution remove private URL content; browser analytics is consent-dependent. No project or supplier capability removed. Local report authentication, privacy, retry, storage-failure isolation and response-state tests passed; circuit store and marketplace foundation passed; desktop/mobile report, consent and RFP feature-preservation checks passed. Measurement limitations and baseline are in the companion measurement plan.
