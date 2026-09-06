@@ -79,6 +79,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Pricing and cost tools",
     links: [
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
+      { label: "Request circuit pricing", href: "/sase/circuit-pricing/" },
       { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/" },
       { label: "BTnet leased line costs", href: "/bt-leased-line-cost-calculator-tool/" },
       { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/" },

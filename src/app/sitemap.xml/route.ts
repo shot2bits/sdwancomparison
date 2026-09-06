@@ -7,7 +7,6 @@ import { SITE_URL } from "@/lib/structured-data";
 import { MARKETPLACE_EXAMPLES } from "@/lib/marketplace-examples";
 
 export async function GET() {
-  const today = new Date().toISOString().slice(0, 10);
   // Public notices are crawlable pages; include them best-effort so the
   // sitemap never fails if KV is unavailable. Closed notices are published
   // forever (Robert's ruling, 28 Jul 2026): a notice that entered the public
@@ -51,6 +50,7 @@ export async function GET() {
     { loc: `${SITE_URL}/rfp-builder/questions`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/sample-rfp`, priority: "0.9" },
     { loc: `${SITE_URL}/cost-estimator`, priority: "0.8" },
+    { loc: `${SITE_URL}/circuit-pricing/`, priority: "0.9" },
     { loc: `${SITE_URL}/connector`, priority: "0.8" },
     { loc: `${SITE_URL}/demand`, priority: "0.8" },
     { loc: `${SITE_URL}/opportunities`, priority: "0.9" },
@@ -92,7 +92,7 @@ export async function GET() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
-    (u) => `  <url><loc>${u.loc.endsWith("/") ? u.loc : u.loc + "/"}</loc><lastmod>${today}</lastmod><priority>${u.priority}</priority></url>`,
+    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc><priority>${u.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>`;

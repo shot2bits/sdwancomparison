@@ -140,7 +140,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written and reviewed by the Netify research team. The governed provider records were last updated on {verified}. Comparison contract {GOVERNED_SHORTLIST_CONTRACT_VERSION}. To act on a shortlist, describe the project once at{" "}
           <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">the Netify RFP Builder</a>
-          {", "}raise it to a full RFP and publish to the providers it names, then
+          {", "}review and publish an anonymous brief or RFP to invite supplier responses, then
           compare structured responses, with pricing kept private to the buyer.
           {" "}<a href="/sase/shortlist/research-methodology/" className="underline">Read and cite the research method</a>.
         </p>

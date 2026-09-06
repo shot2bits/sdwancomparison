@@ -102,6 +102,14 @@ const nextConfig: NextConfig = {
         statusCode: 301,
         basePath: false,
       },
+      // Cited public research pages go directly to the final slash URL.
+      ...["best", "compare", "vendors", "alternatives"].map((section) => ({
+        source: `/${section}/:slug`,
+        has: [{ type: "host" as const, value: "sase.netify.co.uk" }],
+        destination: `https://netify.co.uk/sase/${section}/:slug/`,
+        permanent: true,
+        basePath: false as const,
+      })),
       // Retire the sase.netify.co.uk subdomain: 301 every path on the old host
       // to the new canonical home under the main domain. Host-scoped so it only
       // fires on the subdomain, never on netify.co.uk/sase/*. basePath:false

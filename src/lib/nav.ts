@@ -91,6 +91,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Tools",
     items: [
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
+      { label: "Request circuit pricing", href: "/sase/circuit-pricing/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "AI assistant connector", href: "/sase/connector/" },
@@ -181,6 +182,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
       { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/", desc: "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation." },
       { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Score evaluated suppliers against capability and sector requirements." },
       { label: "Cost and TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership for SASE and SD-WAN." },
+      { label: "Request circuit pricing", href: "/sase/circuit-pricing/", desc: "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations." },
       { label: "SD-WAN vendor filter", href: "/sd-wan/vendor-filter/", desc: "Narrow the market by service model, capability and requirement." },
       { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "Reusable questions for SASE and SD-WAN procurement." },
       { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/", desc: "Model users, licences and calling requirements before a formal quote." },
