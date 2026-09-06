@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import CompareTable from '@/components/CompareTable';
 import { buildComparison, decodeScenario, type ShortlistVendor } from '@/lib/shortlist-core';
@@ -17,14 +17,20 @@ type Props = { vendors: ShortlistVendor[]; features: { id: string; name: string;
 export default function ShortlistBuilder({ vendors, features }: Props) {
   const search = useSearchParams();
   const handoff = useMemo(() => parseComparisonHandoff(search.toString(), vendors.map((v) => v.slug)), [search, vendors]);
-  const [selected, setSelected] = useState<string[]>(['', '', '']);
-  const [question, setQuestion] = useState('');
+  const [selected, setSelected] = useState<string[]>(() => [handoff.providers[0] ?? '', handoff.providers[1] ?? '', handoff.providers[2] ?? '']);
+  const appliedHandoff = useRef(JSON.stringify(handoff));
+  const [question, setQuestion] = useState(handoff.question);
   const [requirement, setRequirement] = useState('');
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
+  useEffect(() => { queueMicrotask(() => setReady(true)); }, []);
   const [copied, setCopied] = useState(false);
   useEffect(() => {
+    const signature = JSON.stringify(handoff);
+    if (appliedHandoff.current === signature) return;
+    appliedHandoff.current = signature;
     let active = true;
     queueMicrotask(() => {
       if (!active) return;
@@ -77,7 +83,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   return <section id="comparison-workspace" className="my-6 rounded-xl border border-zinc-300 bg-white p-5 text-zinc-900 md:p-8" aria-labelledby="comparison-title">
     <h2 id="comparison-title" className="text-2xl font-semibold">Compare SD-WAN and SASE providers</h2>
     <p className="mt-2 text-sm text-zinc-600">Compare two or three named vendors and service providers across {features.length} capabilities. Public evidence is free to explore; personalised matching unlocks when you publish a project.</p>
-    <div className="mt-5 grid gap-3 sm:grid-cols-3">{[0, 1, 2].map((index) => <label key={index} className="text-sm font-semibold">Provider {index + 1}{index === 2 ? ' (optional)' : ''}<select aria-label={`Provider ${index + 1}`} value={selected[index]} onChange={(e) => choose(index, e.target.value)} className="mt-2 block w-full rounded border border-zinc-300 bg-white p-3 font-normal"><option value="">Choose a provider</option>{vendors.map((v) => <option key={v.slug} value={v.slug} disabled={selected.some((slug, i) => i !== index && slug === v.slug)}>{v.name}</option>)}</select></label>)}</div>
+    <div className="mt-5 grid gap-3 sm:grid-cols-3">{[0, 1, 2].map((index) => <label key={index} className="text-sm font-semibold">Provider {index + 1}{index === 2 ? ' (optional)' : ''}<select disabled={!ready} aria-label={`Provider ${index + 1}`} value={selected[index]} onChange={(e) => choose(index, e.target.value)} className="mt-2 block w-full rounded border border-zinc-300 bg-white p-3 font-normal"><option value="">Choose a provider</option>{vendors.map((v) => <option key={v.slug} value={v.slug} disabled={selected.some((slug, i) => i !== index && slug === v.slug)}>{v.name}</option>)}</select></label>)}</div>
     {comparison && <>
       <div className="mt-4 flex flex-wrap gap-4"><a href="#comparison-table" className="font-semibold underline">Compare every feature across your selected providers</a><button type="button" onClick={copyComparison} className="text-sm underline">{copied ? 'Link copied' : 'Copy comparison link'}</button></div>
       <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void ask(); }}><label htmlFor="comparison-question" className="text-sm font-semibold">Ask about the comparison</label><div className="mt-2 flex flex-col gap-2 sm:flex-row"><input id="comparison-question" value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={1000} placeholder="How do their security capabilities differ?" className="min-w-0 flex-1 rounded border border-zinc-300 p-3"/><button disabled={busy || !question.trim()} className="rounded bg-zinc-900 px-5 py-3 text-white disabled:opacity-50">{busy ? 'Reading evidence…' : 'Ask Netify AI'}</button></div></form>
@@ -87,7 +93,8 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       <h3 className="text-lg font-semibold">Which providers fit your project?</h3>
       <p className="mt-2 text-sm">Describe your requirement, review a short anonymous notice and verify your work email and company. Publishing unlocks your personalised shortlist, project-specific comparisons and supplier responses. A full RFP is optional.</p>
       <label className="mt-3 block text-sm font-semibold">Your requirement (optional)<textarea value={requirement} onChange={(e) => setRequirement(e.target.value)} maxLength={4000} rows={2} placeholder="What does your business need?" className="mt-2 block w-full rounded border border-slate-200 bg-white p-3 font-normal"/></label>
-      <button type="button" onClick={startProject} className="mt-4 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold text-zinc-950">Find providers for my project</button>
+      <p className="mt-3 text-sm text-slate-600">Your selected providers, comparison question and stated requirements travel with your draft as research context. They do not invite suppliers or publish anything.</p>
+      <button type="button" onClick={startProject} className="mt-4 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold">Find providers for my project</button>
       <p className="mt-2 text-xs">Your selections travel with you. Nothing is published without your approval.</p>
     </div>
     {error && <p role="alert" className="mt-3 text-sm text-red-800">{error}</p>}
