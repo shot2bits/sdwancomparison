@@ -41,4 +41,16 @@ Voice permissions across browsers, real identity/email delivery, authenticated e
 Additional checks: dedicated current-layout coverage review passed against the actual local checker endpoint (eight sections, expandable full findings, no readiness-score headline). Draft storage tests passed both normal saving and injected quota failure with a visible failure message. Targeted ESLint and final TypeScript passed. All these checks preceded production promotion.
 
 ## Candidate rejection and fix
-Candidate 15edd5b was NOT promoted. Live candidate browser checks detected React hydration errors and differing timestamps (1553/1554) between pages: next.config evaluated a new clock separately in build workers. Replaced that with a build wrapper that supplies one inherited NETIFY_BUILD_TIME to validation and Next workers; next.config no longer generates time. Strengthened the header check to require exactly one version across all pages/viewports as well as zero page errors. Replacement candidate must pass before promotion.
+Candidate 15edd5b was not explicitly promoted, but a direct public check later showed it had reached Netify through Vercel’s automatic project alias despite --skip-domain. The automatic alias was explicitly restored to baseline deployment ggiryl9fh; Vercel’s production rollback command alone did not restore it because the formal production pointer was already the baseline. Live candidate browser checks detected React hydration errors and differing timestamps (1553/1554) between pages: next.config evaluated a new clock separately in build workers. Replaced that with a build wrapper that supplies one inherited NETIFY_BUILD_TIME to validation and Next workers; next.config no longer generates time. Strengthened the header check to require exactly one version across all pages/viewports as well as zero page errors. Replacement candidate must pass before promotion.
+
+## Final release receipt
+- Code commit: 104c674 (includes 15edd5b feature changes and shared-clock fix).
+- Deployment: https://sasecomparison-n1j2p7wk6-netifymarketplace.vercel.app
+- Public version: **0609261556** (6 September 2026, 15:56 Europe/London, fixed build-start time).
+- Formal promotion succeeded; automatic proxy alias explicitly assigned to the same deployment.
+- Replacement candidate: full build/validation/TypeScript passed; zero page errors in header and example checks; identical timestamp across 1440/390px workspace, example and circuit pages; full/short/RFI/sidebar layout checks passed; actual checker review passed after waiting for its response before navigating to Supplier pack.
+- Public canonical builder, example and circuit pages: same version at both widths, no horizontal overflow or observed page errors. Live read-only MCP regression passed with 46 tools.
+- Rollback reference: https://sasecomparison-ggiryl9fh-netifymarketplace.vercel.app (bc32503). The proxy alias `sasecomparison-netifymarketplace.vercel.app` must also be explicitly reassigned when rolling back; formal production state alone is insufficient.
+- Future staged releases must not assume `--skip-domain` isolates the public proxy. Inspect/hold this automatic alias separately or change the proxy to a controlled production alias before relying on candidate isolation.
+
+The remaining external-client/identity/email and exhaustive-control acceptance limitations above still apply. This receipt certifies the recorded checks, not a zero-defect platform or OpenAI approval.

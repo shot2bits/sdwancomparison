@@ -8,7 +8,8 @@ try {
   const page=await browser.newPage({viewport:{width,height:1000}});page.setDefaultTimeout(20000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   for(const path of ['/sase/home/','/sase/examples/sase-rfp/','/sase/circuit-pricing/']) {
-   await page.goto(root+path,{waitUntil:'domcontentloaded'});
+   const target=root.includes('netify.co.uk')&&path==='/sase/home/'?'/sase-sd-wan-rfp-builder/':path;
+   await page.goto(root+target,{waitUntil:'domcontentloaded'});
    if(path==='/sase/home/') await page.getByRole('region',{name:'Choose your project format'}).waitFor();
    else await page.locator('h1').first().waitFor();
    const version=page.locator('[data-release-version]:visible');await version.waitFor();
