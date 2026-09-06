@@ -57,6 +57,7 @@ export default function AccountPage() {
         </p>
       </div>
 
+      <p className="mb-6"><a className="underline" href="/sase/circuit-pricing/?view=requests">My circuit pricing requests & market responses →</a></p>
       <MyProcurements />
 
       <div className="mt-4 mb-6">

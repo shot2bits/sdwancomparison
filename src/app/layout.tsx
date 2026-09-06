@@ -1,3 +1,4 @@
+import '@/components/procurement/circuit-pricing.css';
 import type { Metadata } from "next";
 import NetifyEvents from "@/components/NetifyEvents";
 import { BUILD_SHA, BUILD_TIME } from "@/lib/build-info";

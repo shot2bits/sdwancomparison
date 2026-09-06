@@ -41,7 +41,8 @@ type Entry =
   | { type: "string"; value: string }
   | { type: "list"; value: string[] }
   | { type: "set"; value: Set<string> }
-  | { type: "hash"; value: Map<string, string> };
+  | { type: "hash"; value: Map<string, string> }
+  | { type: "zset"; value: Map<string, number> };
 
 export class FakeKvStore {
   private store = new Map<string, Entry>();
@@ -83,6 +84,16 @@ export class FakeKvStore {
     const [name, ...args] = cmd;
     const op = String(name).toUpperCase();
     switch (op) {
+      case "ZADD": {
+        const key=String(args[0]); let e=this.store.get(key);
+        if(!e||e.type!=="zset"){e={type:"zset",value:new Map()};this.store.set(key,e)}
+        const exists=e.value.has(String(args[2]));e.value.set(String(args[2]),Number(args[1]));return exists?0:1;
+      }
+      case "ZRANGE": {
+        const e=this.store.get(String(args[0]));if(!e||e.type!=="zset")return [];
+        const sorted=[...e.value].sort((a,b)=>a[1]-b[1]||a[0].localeCompare(b[0])).map(x=>x[0]);
+        const start=Number(args[1]),end=Number(args[2]);return sorted.slice(start,end===-1?undefined:end<0?sorted.length+end+1:end+1);
+      }
       case "GET":
         return this.str(String(args[0]));
       case "SET": {

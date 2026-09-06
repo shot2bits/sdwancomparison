@@ -1,3 +1,4 @@
+import {CIRCUIT_TOOL_DEFINITIONS,callCircuitTool} from "./circuit-agent";
 /**
  * MCP tools for the SASE cost and TCO capability (Phase 1 of the agentic
  * cost build). Follows the established pattern: tool definitions plus a
@@ -23,6 +24,7 @@ const DISCLAIMER = ESTIMATE_DISCLOSURE;
 const SUPPRESSION_THRESHOLD = 20;
 
 export const MCP_COST_TOOL_DEFINITIONS = [
+ ...CIRCUIT_TOOL_DEFINITIONS,
   {
     name: "netify_estimate_sase_tco",
     description:
@@ -136,6 +138,7 @@ function demandStatsPayload(agg: Awaited<ReturnType<typeof getDemandAggregate>>)
 }
 
 export async function callCostTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+  if (name === "netify_validate_circuit_request" || name === "netify_read_circuit_responses") return callCircuitTool(name,args);
   switch (name) {
     case "netify_estimate_sase_tco": {
       const parsed = EstimateInput.safeParse(args);

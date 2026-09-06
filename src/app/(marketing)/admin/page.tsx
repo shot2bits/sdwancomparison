@@ -15,7 +15,7 @@ export default function AdminPage() {
         <h1 id="page-h1" className="mb-4">Marketplace admin</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Manage signed-in users, vendor email domains, the blocked-domain policy and pending access requests. Visible to Netify admins only.</p>
       </div>
-      <AdminClient />
+      <p className="mb-6"><a href="/sase/admin/circuit-pricing/">Circuit pricing sourcing queue →</a></p><AdminClient />
     </div>
   );
 }
