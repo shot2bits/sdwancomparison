@@ -4,7 +4,6 @@ import { useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 const BuyerAssistant = dynamic(() => import('./BuyerAssistant'));
 import { MEGA_GROUPS } from '@/lib/nav';
-import NetifyWordmark from './NetifyWordmark';
 
 type View = 'project' | 'compare' | 'responses' | 'tools' | 'memories' | 'skills';
 const resources = [
@@ -33,7 +32,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
   }
   return <div className="nf-buying-shell" data-view={view} data-collapsed={collapsed}>
     <aside className="nf-buying-sidebar" data-open={menuOpen}>
-      <a href="/sase/home/" className="nf-buying-wordmark" aria-label="Netify home"><NetifyWordmark /></a>
+      <a href="/sase/home/" className="nf-buying-wordmark" aria-label="Netify home">netify<sup>®</sup></a>
       <div className="nf-buying-project-label"><span>Workspace</span><strong>SASE &amp; SD-WAN procurement</strong></div>
       <nav aria-label="Buying workspace">
         <button onClick={() => navigate('project')} aria-current={view === 'project' ? 'page' : undefined}><span aria-hidden="true">▤</span>Project</button>
@@ -53,7 +52,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <button className="nf-buying-collapse" aria-label={collapsed ? "Expand workspace menu" : "Collapse workspace menu"} aria-expanded={!collapsed} onClick={() => setCollapsed(!collapsed)}>{collapsed ? "→" : "← Collapse menu"}</button><div className="nf-buying-privacy"><strong>Your identity stays private</strong><p>You review and approve what suppliers receive.</p><a href="/sase/account/">My projects &amp; account →</a></div>
     </aside>
     <div className="nf-buying-body">
-      <header className="nf-buying-topbar"><button className="nf-buying-menu" aria-label="Toggle workspace navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button><a className="nf-buying-mobile-logo" href="/sase/home/" aria-label="Netify home"><NetifyWordmark /></a><span className="nf-buying-breadcrumb">Workspace <b>/</b> {view === 'project' ? 'My project' : view === 'compare' ? 'Compare providers' : view === 'responses' ? 'Supplier responses' : view === 'memories' ? 'Memories' : view === 'skills' ? 'Skills' : 'All tools'}</span><a href="/sase/account/">My account</a></header>
+      <header className="nf-buying-topbar"><button className="nf-buying-menu" aria-label="Toggle workspace navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button><a className="nf-buying-mobile-logo" href="/sase/home/" aria-label="Netify home">netify<sup>®</sup></a><span className="nf-buying-breadcrumb">Workspace <b>/</b> {view === 'project' ? 'My project' : view === 'compare' ? 'Compare providers' : view === 'responses' ? 'Supplier responses' : view === 'memories' ? 'Memories' : view === 'skills' ? 'Skills' : 'All tools'}</span><a href="/sase/account/">My account</a></header>
       <div className="nf-buying-page">
         {assistantEnabled && assistantVisited && <div hidden={view !== 'memories' && view !== 'skills'}><BuyerAssistant mode={assistantMode} onCompare={() => navigate('compare')} onProject={() => navigate('project')} /></div>}
         <div hidden={view !== 'project'} className="nf-buying-engine">{children}</div>
