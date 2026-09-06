@@ -98,9 +98,9 @@ try {
   const checkText = `SASE RFP for a UK healthcare organisation operating 30 sites and 4,000 users across three UK regions. Our objective is resilient access to Microsoft 365 and Azure. The existing estate uses MPLS, leased lines, broadband, legacy firewalls, Active Directory and SIEM. Scope includes SD-WAN, ZTNA, CASB, SWG, DLP and FWaaS. Suppliers must describe 99.99% availability, dual circuits, failover, latency and packet loss. Describe Entra ID, MFA, device posture, GDPR, UK data residency and ISO 27001. Provide dated certificates, audit reports and customer references. We require a fully managed 24/7 service desk, NOC and SOC with incident management, escalation, governance, reporting and RACI. Provide a six-month phased migration plan with pilot, cutover, rollback, training and handover. Provide per-site pricing, five-year TCO, licensing, contract term, termination, liability and service credits. Response format: complete a compliance matrix and pricing table. Mandatory requirements are pass/fail and weighted. Describe the architecture? Explain availability evidence? Confirm support and escalation? Provide the migration plan? Demonstrate compliance? State all commercial assumptions?`;
   await startProject(checker, checkText);
   await checker.locator(".lpos-validation-report").waitFor({ timeout: 20_000 });
-  check((await checker.locator(".lpos-validation-report").innerText()).includes("Netify procurement-readiness check"), "the governed RFP report is shown in the living document pane");
+  check((await checker.locator(".lpos-validation-report").innerText()).includes("Review your RFP coverage"), "the governed RFP report is shown in the living document pane");
   check(await checker.locator(".lpos-validation-sections > button").count() === 8, "the report checks all eight RFP sections");
-  check((await checker.locator(".lpos-validation-report").innerText()).includes("386-question bank"), "the report identifies the governed question bank used for validation");
+  check((await checker.locator(".lpos-validation-report").innerText()).includes("386 questions"), "the report identifies the governed question bank used for validation");
   check(await checker.evaluate(() => document.documentElement.scrollWidth === innerWidth), "the validation report does not create desktop overflow");
   await checker.close();
 

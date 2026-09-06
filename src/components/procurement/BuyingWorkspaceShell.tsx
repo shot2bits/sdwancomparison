@@ -1,4 +1,5 @@
 "use client";
+import ReleaseVersion from "@/components/ReleaseVersion";
 
 import {startNewBuyingProject} from './DraftRecovery';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -58,7 +59,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <button className="nf-buying-collapse" aria-label={collapsed ? "Expand workspace menu" : "Collapse workspace menu"} aria-expanded={!collapsed} onClick={() => setCollapsed(!collapsed)}>{collapsed ? "→" : "← Collapse menu"}</button><div className="nf-buying-privacy"><strong>Your identity stays private</strong><p>You review and approve what suppliers receive.</p><a href="/sase/account/">My projects &amp; account →</a></div>
     </aside>
     <div className="nf-buying-body">
-      <header className="nf-buying-topbar"><button className="nf-buying-menu" aria-label="Toggle workspace navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button><a className="nf-buying-mobile-logo" href="/sase/home/" aria-label="Netify home">netify<sup>®</sup></a><span className="nf-buying-breadcrumb">Workspace <b>/</b> {view === 'circuits' ? 'Circuit pricing' : view === 'project' ? 'My project' : view === 'compare' ? 'Compare providers' : view === 'responses' ? 'Supplier responses' : view === 'memories' ? 'Memories' : view === 'skills' ? 'Skills' : 'All tools'}</span><a href="/sase/account/">My account</a></header>
+      <header className="nf-buying-topbar"><button className="nf-buying-menu" aria-label="Toggle workspace navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button><a className="nf-buying-mobile-logo" href="/sase/home/" aria-label="Netify home">netify<sup>®</sup></a><span className="nf-buying-breadcrumb">Workspace <b>/</b> {view === 'circuits' ? 'Circuit pricing' : view === 'project' ? 'My project' : view === 'compare' ? 'Compare providers' : view === 'responses' ? 'Supplier responses' : view === 'memories' ? 'Memories' : view === 'skills' ? 'Skills' : 'All tools'}</span><ReleaseVersion /><a href="/sase/account/">My account</a></header>
       <div className="nf-buying-page">
         {assistantEnabled && assistantVisited && <div hidden={view !== 'memories' && view !== 'skills'}><BuyerAssistant mode={assistantMode} onCompare={() => navigate('compare')} onProject={() => navigate('project')} /></div>}
         <div hidden={view !== 'circuits'}>{circuitVisited && <CircuitPricing />}</div>

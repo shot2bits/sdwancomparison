@@ -55,7 +55,7 @@ async function main() {
   expect(strong.questionCount >= 6, "supplier questions are counted", strong.questionCount);
   expect(strong.bank.totalQuestions === 386, "the report is wired to the 386-question governed bank", strong.bank);
   expect(strong.bank.extendedQuestions === 43, "the extended question bank is represented", strong.bank);
-  expect(strong.assessmentVersion === "2026.2", "the validator publishes a versioned assessment contract", strong.assessmentVersion);
+  expect(strong.assessmentVersion === "2026.3", "the validator publishes a versioned assessment contract", strong.assessmentVersion);
   expect(strong.sector.detected === "healthcare", "sector-specific procurement checks are activated by stated sector", strong.sector);
 
   const shallow = validateRfpText(shallowRfp);

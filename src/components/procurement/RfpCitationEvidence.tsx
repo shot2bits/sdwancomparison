@@ -63,7 +63,7 @@ export default function RfpCitationEvidence() {
           </div>
           <div className="rounded-lg border border-[#e3c7ac] bg-[#fff9f3] p-4">
             <h3 className="text-sm font-semibold">Example Netify output</h3>
-            <p className="mt-2 text-sm leading-6 text-[#5b4636]"><strong>Procurement readiness: {example.score}/100.</strong> {example.missingRequirementCount} important requirements are missing or unclear. Baseline: {example.validBaseline ? "valid" : "incomplete"}. The live checker lists the exact gaps and governed questions needed to improve it.</p>
+            <p className="mt-2 text-sm leading-6 text-[#5b4636]"><strong>Information to confirm:</strong> {example.gaps.slice(0, 2).join(". ")}. The checker identifies topics to review; it does not certify that an RFP is ready to issue.</p>
           </div>
         </div>
 

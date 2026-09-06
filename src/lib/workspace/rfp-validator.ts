@@ -19,7 +19,9 @@ export type RfpValidationQuestion = {
 export type RfpValidationReport = {
   assessmentVersion: string;
   score: number;
-  label: "Needs work" | "Usable foundation" | "Strong" | "Procurement-ready";
+  label: "Limited topic coverage" | "Partial topic coverage" | "Broad topic coverage";
+  assessmentKind: "text_coverage";
+  limitations: string[];
   wordCount: number;
   questionCount: number;
   missingRequirementCount: number;
@@ -34,8 +36,8 @@ export type RfpValidationReport = {
   bank: { version: string; totalQuestions: number; extendedQuestions: number };
 };
 
-export const RFP_VALIDATION_VERSION = "2026.2";
-export const RFP_VALIDATION_REVIEWED = "2026-08-26";
+export const RFP_VALIDATION_VERSION = "2026.3";
+export const RFP_VALIDATION_REVIEWED = "2026-09-06";
 
 type Check = { label: string; pattern: RegExp };
 type SectionDefinition = { key: string; title: string; checks: Check[] };
@@ -110,6 +112,10 @@ const SECTOR_RULES = [
     { label: "IT/OT segmentation and industrial security", pattern: /\b(ot|operational technology|ics|scada|iec 62443|industrial security)\b/i },
     { label: "plant, production or warehouse continuity", pattern: /\b(production continuity|plant resilience|factory uptime|warehouse connectivity|industrial site)\b/i },
   ] },
+  { key: "government", label: "Government and public sector", pattern: /\b(government|public sector|local authority|council|borough|ministry)\b/i, checks: [
+    { label: "public-service continuity and accessibility needs", pattern: /\b(public.service continuity|essential services|accessibility|accessible service)\b/i },
+    { label: "information classification, access and supplier assurance", pattern: /\b(information classification|sensitive information|access control|supplier assurance|security classification)\b/i },
+  ] },
 ] as const;
 
 function countQuestions(text: string): number {
@@ -145,7 +151,7 @@ export function validateRfpText(raw: string): RfpValidationReport {
   const buyerContext = sections[0].score >= 67 && sections[1].score >= 67;
   const sectionAverage = sections.reduce((sum, section) => sum + section.score, 0) / sections.length;
   const score = Math.max(0, Math.min(100, Math.round(sectionAverage * 0.7 + (evidence ? 10 : 0) + (evaluation ? 10 : 0) + (responseStructure ? 5 : 0) + (buyerContext ? 5 : 0))));
-  const label = score >= 85 ? "Procurement-ready" : score >= 70 ? "Strong" : score >= 45 ? "Usable foundation" : "Needs work";
+  const label = score >= 70 ? "Broad topic coverage" : score >= 45 ? "Partial topic coverage" : "Limited topic coverage";
   const coreKeys = ["organisation_scale", "solution_scope", "current_estate", "resilience_availability", "security_identity_data", "operating_model_support", "migration_implementation"];
   const validBaseline = wordCount >= 150 && questionCount >= 5 && coreKeys.every((key) => (sections.find((section) => section.key === key)?.score ?? 0) >= 34);
 
@@ -196,6 +202,8 @@ export function validateRfpText(raw: string): RfpValidationReport {
 
   return {
     assessmentVersion: RFP_VALIDATION_VERSION,
+    assessmentKind: "text_coverage",
+    limitations: ["Topic detection does not verify technical correctness, measurable acceptance criteria or readiness to issue an RFP.", "The legacy score measures text coverage only; overlapping missing checks are not a count of distinct buyer requirements.", "A buyer must confirm unresolved decisions and approve publication separately."],
     score,
     label,
     wordCount,

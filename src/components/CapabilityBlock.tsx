@@ -43,7 +43,7 @@ import { getShortlistFaqSchema } from "@/lib/structured-data";
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Can Netify check an RFP created by ChatGPT, Claude or another AI?",
-    a: "Yes. Paste the text or upload the Word, PDF, text or spreadsheet file. Netify gives it a deterministic procurement-readiness score, identifies missing technical, security, resilience, commercial, implementation, support, evidence, scoring and response-format requirements, and maps the gaps to its governed question bank. Your original wording is preserved and no recommended question is added without your approval.",
+    a: "Yes. Paste the text or upload the Word, PDF, text or spreadsheet file. Netify checks text coverage and identifies potentially missing technical, security, resilience, commercial, implementation, support, evidence, scoring and response-format requirements, and maps the gaps to its governed question bank. This does not certify technical adequacy or readiness to issue an RFP. Your original wording is preserved and no recommended question is added without your approval.",
   },
   {
     q: "What is Netify?",

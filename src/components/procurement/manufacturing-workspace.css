@@ -44,3 +44,4 @@
 .nf-buying-shell .nf-calm-heading[data-started=false] .nf-workspace-title{display:none}
 .nf-buying-shell .nf-calm-heading[data-started=false]{align-items:center;margin-bottom:20px}
 @media(max-width:760px){.nf-buying-shell .nf-calm-heading[data-started=false]{flex-direction:row}.nf-buying-shell .nf-workspace-intro{margin-bottom:18px;padding-bottom:20px}.nf-buying-shell .nf-project-formats{padding:14px}.nf-buying-shell .nf-project-formats>p{font-size:11px}}
+@media(max-width:760px){.nf-buying-shell .nf-buying-topbar{flex-wrap:wrap}.nf-buying-topbar [data-release-version]{order:5;flex-basis:100%;padding-bottom:8px}}

@@ -40,6 +40,8 @@ try {
     await nav('Memories');
     await page.getByText('Our network covers 20 UK sites.', { exact: true }).waitFor();
     await nav('Project');
+    const resume = page.getByRole('button', { name: 'Resume saved project', exact: true });
+    if (await resume.isVisible()) await resume.click();
     await engine.fill('Keep this full RFP draft intact');
     await nav('Skills');
     await page.getByLabel('Your requirements', { exact: true }).fill('We need managed SD-WAN.');
