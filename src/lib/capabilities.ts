@@ -1,3 +1,4 @@
+import { PRICING_ROUTES } from "@/lib/pricing-routes";
 /**
  * The marketplace capability catalogue: a single, agent-readable description of
  * what the tool can do, which surfaces expose it, and the exact boundary of
@@ -50,7 +51,7 @@ export const CAPABILITIES: Capability[] = [
     id: "discover_vendors",
     title: "Discover and compare vendors",
     description: "Read sourced SASE, SSE and SD-WAN provider profiles, capability grades, alternatives and public named-provider comparisons.",
-    access: "open", page: "/vendors", mcp: "list_sase_vendors, get_sase_vendor_profile, compare_vendors, list_sase_features, verify_claim, list_exclusions, explain_shortlist", data: "/shortlist/data.json",
+    access: "open", page: "https://netify.co.uk/marketplace/", mcp: "list_sase_vendors, get_sase_vendor_profile, compare_vendors, list_sase_features, verify_claim, list_exclusions, explain_shortlist", data: "/shortlist/data.json",
     status: "live", capabilityType: "read", accessLevel: "public",
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "none",
@@ -84,7 +85,7 @@ export const CAPABILITIES: Capability[] = [
     title: "Draft a sourcing requirement from one sentence",
     description:
       "The Live Sourcing Workspace: describe an SD-WAN, SASE or managed security need in plain words and the statement of requirements assembles itself, every claim carrying provenance (the buyer's words, a named inference, or a labelled assumption), with a deterministic network diagram, the security rulebook's verdict where in scope, and aggregate market context. A separate review and verified buyer approval are required before an anonymous notice is published.",
-    access: "open", page: "/workspace", api: "/api/workspace/extract, /api/workspace/fit", mcp: "workspace_cycle, workspace_ingest", data: "/methodology.json, /workspace/questions.json",
+    access: "open", page: "https://netify.co.uk/sase-sd-wan-rfp-builder/", api: "/api/workspace/extract, /api/workspace/fit", mcp: "workspace_cycle, workspace_ingest", data: "/methodology.json, /workspace/questions.json",
     status: "live", capabilityType: "draft", accessLevel: "public",
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "none",
@@ -128,7 +129,7 @@ export const CAPABILITIES: Capability[] = [
     id: "publish_rfp",
     title: "Publish an RFP to the curated vendor list",
     description: "Prepare to publish an RFP. The MCP tool validates the project credential and returns a browser sign-in handoff; it does not publish on possession of a token alone.",
-    access: "identified", page: "/rfp-builder", api: "/api/rfp/[id]/publish", mcp: "publish_rfp",
+    access: "identified", page: "https://netify.co.uk/sase-sd-wan-rfp-builder/", api: "/api/rfp/[id]/publish", mcp: "publish_rfp",
     status: "live", capabilityType: "approval-gated-action", accessLevel: "token-gated",
     requiresIdentity: true, requiresApproval: true, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "required",
@@ -165,7 +166,7 @@ export const CAPABILITIES: Capability[] = [
     id: "procurement_goal",
     title: "Set a standing procurement goal",
     description: "Attach a standing outcome to an RFP (must-haves, response deadline, minimum bids). The agent reviews incoming bids against it and the monitoring digest tracks progress.",
-    access: "identified", page: "/rfp-builder", api: "/api/rfp/[id]/goal",
+    access: "identified", page: "https://netify.co.uk/sase-sd-wan-rfp-builder/", api: "/api/rfp/[id]/goal",
     status: "live", capabilityType: "compute", accessLevel: "signed-in",
     requiresIdentity: true, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: false, humanSupervision: "required",
@@ -176,7 +177,7 @@ export const CAPABILITIES: Capability[] = [
     id: "review_supplier_bid",
     title: "Agent review of incoming vendor bids",
     description: "When a vendor submits a bid, the agent reviews it automatically without a buyer prompt: deterministic evidence checks (required-question coverage, hedging detection, compliance must-have coverage via the regulation engine) kept separate from an LLM quality judgement, a cross-check of the claim against Netify's independent vendor grade with overreach flagged, and drafted clarification questions.",
-    access: "identified", page: "/rfp-builder", api: "/api/rfp/[id]/approvals",
+    access: "identified", page: "https://netify.co.uk/sase-sd-wan-rfp-builder/", api: "/api/rfp/[id]/approvals",
     status: "live", capabilityType: "recommend", accessLevel: "signed-in",
     requiresIdentity: true, requiresApproval: true, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: false, humanSupervision: "approval-gated",
@@ -187,7 +188,7 @@ export const CAPABILITIES: Capability[] = [
     id: "monitor_and_digest",
     title: "Monitor live RFPs and recommend next actions",
     description: "The agent reviews live RFPs with an active goal and writes a buyer-only digest of recommended next actions (deadline risk, missing bids, weak answers, pending gaps, stale approvals). Runs on demand now; the scheduled cadence activates once the cron secret is set.",
-    access: "identified", page: "/rfp-builder", api: "/api/agent/run, /api/rfp/[id]/approvals",
+    access: "identified", page: "https://netify.co.uk/sase-sd-wan-rfp-builder/", api: "/api/agent/run, /api/rfp/[id]/approvals",
     status: "live", capabilityType: "monitor", accessLevel: "signed-in",
     requiresIdentity: true, requiresApproval: true, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: false, humanSupervision: "approval-gated",
@@ -215,7 +216,7 @@ export function capabilitiesDocument() {
       "Agent-readable catalogue of what the marketplace can do, with explicit machine-readable boundaries per capability (identity, approval, external send/execution, who may invoke it). Public research and stateless computation are open; private reads and project updates require the credentials stated by each tool. The supervised agentic layer (buyer memory, procurement goal, automatic bid review, monitoring digest) needs a signed-in buyer; the agent remembers, plans, reviews and recommends, but every customer, vendor or BT-facing action is human-approved and never sent automatically. Fully autonomous execution is not claimed.",
     access_model: {
       open: "Public research and stateless computation need no identity. Creating a private draft may return a project credential; posting to the board is not anonymous-agent access.",
-      identified: "Requires a buyer or vendor identity: either push actions that reach named vendors (token or sign-in), or the supervised agentic layer (signed-in buyer).",
+      identified: "Private tools require the exact project, buyer or supplier credentials stated in their definitions. A project token does not establish verified buyer identity or publication consent. Circuit publication and supplier RFP submission use the verified web flows.",
     },
     approval_model: {
       read_and_compute: "Public evidence, comparisons, aggregate coverage and stateless drafting may run without identity. Board publication is a separate verified-buyer approval step.",
@@ -234,6 +235,16 @@ export function capabilitiesDocument() {
       executesExternally: "true if it submits or orders against an external party or system",
       invocableByExternalAgent: "true if an external agent can call it directly (with any stated credential)",
       humanSupervision: "none | required | approval-gated",
+    },
+    pricing_routes: PRICING_ROUTES,
+    public_evidence: {
+      question_bank: "https://netify.co.uk/sase/rfp-builder/questions/",
+      question_data: "https://netify.co.uk/sase/question-bank.json",
+      manufacturing_example: "https://netify.co.uk/sase/examples/manufacturing-rfp/",
+      manufacturing_data: "https://netify.co.uk/sase/examples/manufacturing-rfp/data.json",
+      comparisons: "https://netify.co.uk/sase/shortlist/",
+      pricing_explained: "https://netify.co.uk/sase/pricing/",
+      example_limitations: "Manufacturing output and supplier response comparison are explicitly synthetic, not real quotes or procurement outcomes.",
     },
     mcp_endpoint: `${SITE_URL}/api/mcp/`,
     mcp_access_groups: MCP_ACCESS_GROUPS,

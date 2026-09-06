@@ -69,7 +69,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
           reviewed_at: v.last_verified,
           profile_url: v.marketplace_url,
         })),
-        _meta: { canonicalUrl: `${SITE_URL}/vendors` },
+        _meta: { canonicalUrl: "https://netify.co.uk/marketplace/" },
       };
     case "get_sase_vendor_profile": {
       const slug = (args as { slug?: string })?.slug ?? "";

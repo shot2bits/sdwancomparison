@@ -26,3 +26,6 @@ Step 2 live: context handoff and public discovery checks passed on desktop/mobil
 
 ## Step 3
 Release ecbc15b, deployment sasecomparison-d83m34wj2-netifymarketplace.vercel.app. Full build validation passed; candidate and live example HTML/JSON checks passed at 1440/390. Live RFP four routes, bespoke questions, Short/Detailed, imports, pack and sidebar checks passed.
+
+## Step 4
+Release a7f128b, deployment sasecomparison-k9yrrl7ol-netifymarketplace.vercel.app. Local lint/types and desktop/mobile checks passed; full build validation and candidate passed. Live pricing three routes, editable handoff and sitemap passed; live circuit form, UK optional add-ons, publication review and notification copy passed with writes intercepted.

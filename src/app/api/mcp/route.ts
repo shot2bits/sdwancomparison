@@ -100,7 +100,7 @@ const ESTATE_RESOURCES = [
     name: "sase-cost-model",
     title: "SASE and SD-WAN cost model, machine twin",
     description:
-      "The cost and TCO model behind the estimator: categories, drivers and defensible bands. Same content as the public estimator dataset. CC BY 4.0 with attribution to Netify.",
+      "The cost and TCO model behind the estimator: categories, drivers and provisional illustrative bands. Calibration approval is outstanding; these are not validated market prices or supplier quotes. Same content as the public estimator dataset. CC BY 4.0 with attribution to Netify.",
   },
 ] as const;
 

@@ -80,7 +80,7 @@ function getHomeSchemas() {
       url: BUILDER_URL,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
-      description: `${ENGINE_DESCRIPTION} Provenance on every claim, evidence-graded vendor fit, and one human signature publishes the anonymous notice. Fully agent-accessible via MCP and llms.txt.`,
+      description: `${ENGINE_DESCRIPTION} Provenance on every claim, evidence-graded vendor fit, and one human signature publishes the anonymous notice. Public research and supported drafting tools are available through MCP. Private actions require the credentials and buyer approval stated by each tool.`,
       offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
       provider: { "@id": `${APEX}/#organization` },
     },

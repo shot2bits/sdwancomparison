@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PRICING_ROUTES } from "@/lib/pricing-routes";
 import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tool-definitions";
 import { MCP_RFP_TOOL_DEFINITIONS } from "@/lib/mcp-rfp-tools";
 import { MCP_COST_TOOL_DEFINITIONS } from "@/lib/mcp-cost-tools";
@@ -52,6 +53,12 @@ export default function ConnectorPage() {
           <li><code>build_sase_shortlist</code> previews aggregate coverage. Personalised provider identities are available through <code>get_unlocked_matches</code> only after publication and verified ownership.</li>
         </ul>
         <p className="mt-4 text-sm"><a className="underline" href="/sase/rfp-builder/questions/">Read the question bank</a> · <a className="underline" href="/sase/question-bank.json">Question data</a> · <a className="underline" href="/sase/rfp-validation-methodology.json">Validation method</a> · <a className="underline" href="/sase/shortlist/">Compare providers</a></p>
+      </section>
+
+      <section className="mt-10" aria-labelledby="mcp-pricing">
+        <h2 id="mcp-pricing" className="mb-3 text-xl font-semibold">Pricing and a worked example</h2>
+        <ul className="space-y-4 text-sm leading-6 text-slate-700">{PRICING_ROUTES.map(route => <li key={route.id}><a className="font-semibold underline" href={route.href}>{route.title}</a><p>{route.description}</p></li>)}</ul>
+        <p className="mt-4 text-sm"><a className="underline" href="/sase/examples/manufacturing-rfp/">See the manufacturing RFP walkthrough</a> · <a className="underline" href="/sase/examples/manufacturing-rfp/data.json">Read its machine-readable example</a>. Both label the illustrative supplier responses as fictional.</p>
       </section>
 
       <section className="mt-10" aria-labelledby="mcp-tool-access">
