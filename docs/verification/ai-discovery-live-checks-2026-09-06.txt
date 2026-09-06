@@ -1,0 +1,58 @@
+Final production code: 8667c74
+Deployment: https://sasecomparison-cjr8tlodx-netifymarketplace.vercel.app
+Live canonical builder, pricing overview and admin report returned 200 with netify-build=8667c74.
+All three final browser/test batches exited 0. No real test publications, notifications or analytics collection were delivered.
+
+discovery-step6-live.log
+PASS consent=false: attribution strips query/token, analytics payloads contain no private requirement or identifier
+PASS consent=true: attribution strips query/token, analytics payloads contain no private requirement or identifier
+PASS 1440: admin report layout, no overflow/errors; display fixture only
+PASS 390: admin report layout, no overflow/errors; display fixture only
+PASS live anonymous API denial; no events, buyer records or notifications written by test
+
+discovery-step6-transport-live.log
+PASS real Google loader: clean public page tracked, sensitive history change opts out before automatic events, no private text in intercepted collection. Nothing delivered to analytics.
+
+discovery-step6-mcp-live.log
+PASS initialize, 46 tools, named comparison + handoff, provisional cost, circuit validation, private denial, example resource, HTML/JSON route parity. No project writes or messages.
+
+discovery-step6-rfp-live.log
+PASS 1440px: four routes, initial review, full/short questions, RFI, supplier pack, sidebar tools, no overflow/runtime errors
+PASS 390px: four routes, initial review, full/short questions, RFI, supplier pack, sidebar tools, no overflow/runtime errors
+
+discovery-step6-circuit-live.log
+PASS 1440: add/edit, opt-in UK protection, edge restrictions, reviewed publication, notifications copy, no overflow/errors. Writes intercepted.
+PASS 390: add/edit, opt-in UK protection, edge restrictions, reviewed publication, notifications copy, no overflow/errors. Writes intercepted.
+
+discovery-step6-handoff-live.log
+PASS 1440: live comparison and project handoff retain requirement, chosen providers and question without publishing
+PASS 390: live comparison and project handoff retain requirement, chosen providers and question without publishing
+PASS server-rendered sector continuation links to canonical workspace with context
+
+discovery-step6-pricing-live.log
+PASS 1440: three pricing routes, canonical, no overflow/errors, pricing opens editable project brief
+PASS 390: three pricing routes, canonical, no overflow/errors, pricing opens editable project brief
+PASS pricing included in sitemap
+
+discovery-step6-example-live.log
+PASS 1440: labelled example, usable comparison, no page overflow or runtime errors
+PASS 390: labelled example, usable comparison, no page overflow or runtime errors
+PASS HTML and JSON expose the same labelled demonstration
+
+discovery-step6-discovery-live.log
+PASS https://netify.co.uk: 1440px public discovery pages, canonicals, no overflow/runtime errors
+PASS https://netify.co.uk: 390px public discovery pages, canonicals, no overflow/runtime errors
+PASS sitemap and publication messaging
+
+discovery-final-redirects.log
+[{"status":301,"url":"https://insights.netify.co.uk/"},{"status":200,"url":"https://netify.co.uk/insights/"}]
+[{"status":308,"url":"https://sase.netify.co.uk/best/sd-wan-sase-providers-for-large-global-enterprises"},{"status":200,"url":"https://netify.co.uk/sase/best/sd-wan-sase-providers-for-large-global-enterprises/"}]
+[{"status":308,"url":"https://app.netify.co.uk/"},{"status":200,"url":"https://netify.co.uk/"}]
+[{"status":200,"url":"https://reseller.netify.co.uk/"}]
+[{"status":308,"url":"https://netify.co.uk/sase-rfp-builder-app/"},{"status":200,"url":"https://netify.co.uk/sase-sd-wan-rfp-builder/"}]
+
+discovery-step6-report-tests.log
+PASS atomic deduplication, free-text stripping, admin-only no-store report, stage counts, preserved acquisition source and analytics failure isolation
+
+discovery-step6-circuit-final.log
+PASS circuit privacy, ownership, consent, frozen specs, quote idempotency and honest notification failure.
