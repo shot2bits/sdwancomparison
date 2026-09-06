@@ -36,8 +36,8 @@ function main() {
     "the sha comes from Vercel's own per-deployment commit variable",
   );
   record(
-    /env:\s*\{/.test(config) && /NEXT_PUBLIC_BUILD_TIME:\s*new Date\(\)\.toISOString\(\)/.test(config),
-    "both values are set in next.config's `env` block, which Next INLINES at build time",
+    /env:\s*\{/.test(config) && /NEXT_PUBLIC_BUILD_TIME:\s*process\.env\.NETIFY_BUILD_TIME/.test(config),
+    "both values are inlined from one release environment, shared by every build worker",
   );
   record(
     !/new Date\(\)(?!\.toISOString)/.test(lib) || !/return.*new Date\(\)/.test(lib),

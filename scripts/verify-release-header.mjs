@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 const root=process.env.TEST_ORIGIN||'http://localhost:3107';
 const browser=await chromium.launch();
+const versions=new Set();
 try {
  for(const width of [1440,390]) {
   const page=await browser.newPage({viewport:{width,height:1000}});page.setDefaultTimeout(20000);
@@ -12,6 +13,7 @@ try {
    else await page.locator('h1').first().waitFor();
    const version=page.locator('[data-release-version]:visible');await version.waitFor();
    assert.match(await version.innerText(),/^Version \d{10}$/);
+   versions.add(await version.innerText());assert.equal(versions.size,1,'Every page and client must share one build timestamp');
    assert((await version.boundingBox()).y<1000);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
    await page.screenshot({path:`/tmp/release-${path.split('/').filter(Boolean).at(-1)}-${width}.png`});

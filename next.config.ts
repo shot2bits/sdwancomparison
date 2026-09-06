@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
      honest answer rather than a fabricated hash. */
   env: {
     NEXT_PUBLIC_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NETIFY_BUILD_SHA || "dev",
-    NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
+    NEXT_PUBLIC_BUILD_TIME: process.env.NETIFY_BUILD_TIME || "",
   },
   basePath: "/sase",
   // Keep pdf-parse outside the webpack server bundle. Its PDF.js worker and
