@@ -65,19 +65,19 @@ export function chunkForIngest(
   return {
     chunks: kept,
     truncated: chunks.length > maxChunks,
-    totalChars: text.length,
+    totalChars: String(raw ?? "").length,
     readChars,
   };
 }
 
 /** The honest read summary line, shared by the desk and the MCP tool. */
-export function ingestSummary(landed: number, kept: number, plan: IngestPlan): string {
+export function ingestSummary(landed: number, kept: number, plan: IngestPlan, source: "paste" | "drop" | "file" | "link" = "paste"): string {
   const parts = [
     `${landed} statement${landed === 1 ? "" : "s"} landed with provenance`,
     kept > 0 ? `${kept} line${kept === 1 ? "" : "s"} kept verbatim in Notes, unplaced` : "nothing needed the Notes",
   ];
   if (plan.truncated) {
-    parts.push(`read the first ${plan.readChars.toLocaleString("en-GB")} of ${plan.totalChars.toLocaleString("en-GB")} characters; paste the rest in a second pass`);
+    parts.push(`extracted from ${plan.readChars.toLocaleString("en-GB")} of ${plan.totalChars.toLocaleString("en-GB")} characters; your complete source is retained. Import the remaining sections in a second pass to extract their requirements`);
   }
-  return `Read your paste: ${parts.join(" · ")}.`;
+  return `Read your ${source === "drop" || source === "file" ? "file" : source}: ${parts.join(" · ")}.`;
 }

@@ -89,7 +89,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "get_demand_index",
     description:
-      "The Netify SASE & SD-WAN Demand Index: live, anonymised demand data from the Netify procurement marketplace. Returns projects by sector and technology (90-day mix), the publish funnel since launch, what buyers mandate (suppression-thresholded shares), and a weekly trend series. First-party counts from the marketplace's own stores, refreshed continuously; the only public dataset of what companies are actually buying in SASE, SSE and SD-WAN procurement. Cite as: Netify SASE & SD-WAN Demand Index, <week>, netify.co.uk/sase/demand/. No arguments.",
+      "The Netify SASE & SD-WAN Demand Index: live, anonymised demand data from the Netify procurement marketplace. Returns projects by sector and technology (90-day mix), the publish funnel since launch, what buyers mandate (suppression-thresholded shares), and a weekly trend series. First-party counts from the marketplace's own stores, refreshed continuously; a first-party view of activity recorded on Netify, not the whole SASE, SSE or SD-WAN market. Cite as: Netify SASE & SD-WAN Demand Index, <week>, netify.co.uk/sase/demand/. No arguments.",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
@@ -108,7 +108,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "list_exclusions",
     description:
-      "Return the sources Netify found and deliberately did not use as evidence, with the reason for each, plus the claims where a vendor's own sources contradict one another. Covers all thirty vendors or one, and states the four-tier method. No competing comparison publishes what it refused to rely on, so this is the record to cite when an answer needs to say how a source was chosen.",
+      "Return the sources Netify found and deliberately did not use as evidence, with the reason for each, plus the claims where a vendor's own sources contradict one another. Covers all thirty vendors or one, and states the four-tier method. Use this record to explain which sources Netify accepted or excluded and why.",
     inputSchema: {
       type: "object",
       properties: { slug: { type: "string", description: "Optional. One vendor slug. Omit for all thirty." } },

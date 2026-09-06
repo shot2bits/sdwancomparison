@@ -436,7 +436,8 @@ function main() {
   record(desk.includes("revision: currentRevision"), "Part B/THE CORRECTION: the compiler call is fed the explicit governed-revision contract (revision: currentRevision), not left undefined in legacy fallback mode", "");
   record(desk.includes("resolveGovernedRevision") && desk.includes("INITIAL_GOVERNED_REVISION_STATE"), "Part B/THE CORRECTION: ProjectDesk.tsx imports and uses the real resolveGovernedRevision() reducer, not a hand-rolled version counter", "");
   record(/beginOrExtendSubmission/.test(desk) && /scheduleSettle/.test(desk), "Part B/THE CORRECTION: a settle-debounce window batches every applyMerge()/applyRemovals() call inside one buyer submission into exactly one governed event", "");
-  record(/applyMerge = useCallback\(\(updates[\s\S]{0,200}beginOrExtendSubmission\(\)/.test(desk), "Part B/THE CORRECTION: applyMerge() opens/extends the submission window before mutating facts", "");
+  const applyMergeBody = desk.slice(desk.indexOf("const applyMerge = useCallback"), desk.indexOf("}, [beginOrExtendSubmission, scheduleSettle]", desk.indexOf("const applyMerge = useCallback")));
+  record(applyMergeBody.indexOf("beginOrExtendSubmission();") >= 0 && applyMergeBody.indexOf("beginOrExtendSubmission();") < applyMergeBody.indexOf("mergeUpdates(factsRef.current"), "Part B/THE CORRECTION: applyMerge() opens/extends the submission window before mutating facts", "");
   record(/applyRemovals = useCallback[\s\S]{0,200}beginOrExtendSubmission\(\)/.test(desk), "Part B/THE CORRECTION: applyRemovals() also opens/extends the SAME submission window (a removal is a buyer submission too)", "");
   record(
     /thisCycle !== prevCycle/.test(desk) && /previousProcurementDocumentRef\.current = compiledDocument/.test(desk),

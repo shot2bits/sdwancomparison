@@ -16,8 +16,9 @@ import {
   DELIVERY_MODEL_COMPARISON,
 } from "@/lib/cost-page-copy";
 
-const DISCLAIMER =
-  "Indicative bands from the Netify SASE Methodology v2026.1 calibration, not vendor quotes.";
+import { ESTIMATE_DISCLOSURE, ESTIMATE_USERS_HELP } from "@/lib/estimator/input";
+
+const DISCLAIMER = ESTIMATE_DISCLOSURE;
 
 const SUPPRESSION_THRESHOLD = 20;
 
@@ -29,7 +30,7 @@ export const MCP_COST_TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object",
       properties: {
-        users: { type: "integer", minimum: 50, maximum: 250000 },
+        users: { type: "integer", minimum: 50, maximum: 250000, description: ESTIMATE_USERS_HELP },
         sites: { type: "integer", minimum: 1, maximum: 5000 },
         regions: {
           type: "array",

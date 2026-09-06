@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { EstimateInput, ESTIMATE_DISCLOSURE } from '../src/lib/estimator/input';
+import { estimate } from '../src/lib/estimator/engine';
+const base = {users:50,sites:5,regions:['uk-europe'],securityDepth:'full-sase',deliveryModel:'managed',termYears:3};
+assert(EstimateInput.safeParse(base).success);
+const small = EstimateInput.safeParse({...base,users:30});
+assert(!small.success && small.error.issues[0].message.includes('50 licensed users'));
+assert(!EstimateInput.safeParse({...base,users:250001}).success);
+assert(!EstimateInput.safeParse({...base,sites:0}).success);
+assert(!EstimateInput.safeParse({...base,regions:[]}).success);
+assert(!EstimateInput.safeParse({...base,regions:['uk-europe','uk-europe']}).success);
+assert(EstimateInput.safeParse({...base,users:250000,sites:5000}).success);
+assert.equal(estimate(base).disclaimer,ESTIMATE_DISCLOSURE);
+assert.deepEqual(estimate(base),estimate(base));
+console.log('PASS estimator boundaries, clear errors, provisional disclosure and determinism');

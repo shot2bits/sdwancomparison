@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import NetifyEvents from "@/components/NetifyEvents";
 import { BUILD_SHA, BUILD_TIME } from "@/lib/build-info";
 import "./globals.css";
+import "@/components/procurement/manufacturing-workspace.css";
 
 // 19 Aug 2026: Robert asked to drop the self-hosted Inter webfont entirely
 // and render in the platform's own default system UI font throughout (see

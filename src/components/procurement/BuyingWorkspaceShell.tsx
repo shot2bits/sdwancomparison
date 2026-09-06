@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from 'react';
+import {startNewBuyingProject} from './DraftRecovery';
+import { useEffect, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 const BuyerAssistant = dynamic(() => import('./BuyerAssistant'));
 import { MEGA_GROUPS } from '@/lib/nav';
@@ -25,6 +26,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
   const [assistantMode, setAssistantMode] = useState<'memories' | 'skills'>('memories');
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  useEffect(()=>{const open=()=>setView('project');window.addEventListener('netify:open-brief',open);return()=>window.removeEventListener('netify:open-brief',open);},[]);
   function navigate(next: View) { if (next === 'memories' || next === 'skills') { setAssistantVisited(true); setAssistantMode(next); } setView(next); setMenuOpen(false); }
   function projectTool(action: string) {
     navigate('project');
@@ -33,7 +35,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
   return <div className="nf-buying-shell" data-view={view} data-collapsed={collapsed}>
     <aside className="nf-buying-sidebar" data-open={menuOpen}>
       <a href="/sase/home/" className="nf-buying-wordmark" aria-label="Netify home">netify<sup>®</sup></a>
-      <div className="nf-buying-project-label"><span>Workspace</span><strong>SASE &amp; SD-WAN procurement</strong></div>
+      <button className="nf-buying-new" onClick={()=>{try{startNewBuyingProject()}catch{window.alert("Your draft could not be archived. Nothing was deleted.");}}}>＋ New project</button><div className="nf-buying-project-label"><span>Workspace</span><strong>SASE &amp; SD-WAN procurement</strong></div>
       <nav aria-label="Buying workspace">
         <button onClick={() => navigate('project')} aria-current={view === 'project' ? 'page' : undefined}><span aria-hidden="true">▤</span>Project</button>
         <button onClick={() => navigate('compare')} aria-current={view === 'compare' ? 'page' : undefined}><span aria-hidden="true">⇄</span>Compare</button>

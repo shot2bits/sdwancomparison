@@ -55,9 +55,16 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
    * and North American organisations. Counts keep it truthful. */
   const regionCounts = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of REGIONS) m.set(r.key, opps.filter((o) => o.regions.includes(r.key)).length);
+    const needle = q.trim().toLowerCase();
+    const matchingOtherFilters = opps.filter((o) =>
+      (!scope || o.scope.includes(scope as OppScope)) &&
+      (!sector || Boolean(o.buyer_sector && labelFor(SECTORS, o.buyer_sector) === sector)) &&
+      (!mode || o.response_mode === mode) &&
+      (!needle || `${o.title} ${o.summary} ${o.buyer_org}`.toLowerCase().includes(needle))
+    );
+    for (const r of REGIONS) m.set(r.key, matchingOtherFilters.filter((o) => o.regions.includes(r.key)).length);
     return m;
-  }, [opps]);
+  }, [opps, q, scope, sector, mode]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -78,29 +85,30 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
       {opps.length > 0 && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <input
+            aria-label="Search opportunities"
             value={q}
             onChange={(e) => { setQ(e.target.value); track("opportunity_board_filtered", { field: "search" }); }}
             placeholder="Search opportunities…"
             className={`${inputCls} min-w-48 flex-1`}
           />
-          <select value={scope} onChange={(e) => { setScope(e.target.value); track("opportunity_board_filtered", { field: "scope", value: e.target.value }); }} className={inputCls}>
+          <select aria-label="Scope" value={scope} onChange={(e) => { setScope(e.target.value); track("opportunity_board_filtered", { field: "scope", value: e.target.value }); }} className={inputCls}>
             <option value="">All scopes</option>
             {scopesInUse.map((s) => <option key={s} value={s}>{OPP_SCOPE_LABELS[s] ?? s}</option>)}
           </select>
           {sectorLabelsInUse.length > 0 && (
-            <select value={sector} onChange={(e) => { setSector(e.target.value); track("opportunity_board_filtered", { field: "sector", value: e.target.value }); }} className={inputCls}>
+            <select aria-label="Sector" value={sector} onChange={(e) => { setSector(e.target.value); track("opportunity_board_filtered", { field: "sector", value: e.target.value }); }} className={inputCls}>
               <option value="">All sectors</option>
               {sectorLabelsInUse.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           )}
-          <select value={region} onChange={(e) => { setRegion(e.target.value); track("opportunity_board_filtered", { field: "region", value: e.target.value }); }} className={inputCls}>
+          <select aria-label="Region" value={region} onChange={(e) => { setRegion(e.target.value); track("opportunity_board_filtered", { field: "region", value: e.target.value }); }} className={inputCls}>
             <option value="">All regions</option>
             {REGIONS.map((r) => {
               const n = regionCounts.get(r.key) ?? 0;
-              return <option key={r.key} value={r.key}>{r.label}{n > 0 ? ` (${n})` : ""}</option>;
+              return <option key={r.key} value={r.key}>{r.label} ({n})</option>;
             })}
           </select>
-          <select value={mode} onChange={(e) => { setMode(e.target.value); track("opportunity_board_filtered", { field: "responseMode", value: e.target.value }); }} className={inputCls}>
+          <select aria-label="Response mode" value={mode} onChange={(e) => { setMode(e.target.value); track("opportunity_board_filtered", { field: "responseMode", value: e.target.value }); }} className={inputCls}>
             <option value="">All response modes</option>
             {modesInUse.map((m) => <option key={m} value={m}>{RESPONSE_MODE_LABELS[m as ResponseMode] ?? m}</option>)}
           </select>
@@ -111,6 +119,11 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
           )}
         </div>
       )}
+
+      <p role="status" aria-live="polite" className="mb-4 text-sm text-[var(--ink-600)]">
+        {filtered.length} of {opps.length} open {opps.length === 1 ? "opportunity" : "opportunities"}{anyFilter ? " match your filters" : " shown"}.
+        {anyFilter ? " Region counts reflect the other selected filters." : ""}
+      </p>
 
       {opps.length === 0 ? (
         <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-8 text-center">

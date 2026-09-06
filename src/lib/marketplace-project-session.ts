@@ -1,3 +1,4 @@
+import { preserveMarketplaceWorkspace, marketplaceWorkspacePayload, MarketplaceEnvelopeError } from "./marketplace-workspace-envelope";
 import { isShortProject, shortProjectReadiness, shortProjectNotice } from "@/lib/short-project";
 import { createHash, randomBytes } from "node:crypto";
 import { z } from "zod";
@@ -52,27 +53,37 @@ export async function startMarketplaceProject(input: { entrance_context: unknown
   const scope = typeof entrance.raw_input.solution_scope === "string" ? entrance.raw_input.solution_scope.toUpperCase() : "SASE / SD-WAN";
   const title = input.mode === "quick_list" || input.mode === "find_providers" ? `${scope} opportunity${entrance.sector ? ` for ${entrance.sector}` : ""}` : undefined;
   const project = entranceToProjectDetails({ entrance, ids: { id: newId("rfp"), shareToken: newId("tok"), manageToken: newId("mtok") }, now, title });
-  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, journey: { contract_version: "project-journey/1.0.0", source: entrance.source, mode: input.mode, source_url: entrance.source_url, started_at: now }, sector_profile: sectorProfile, marketplace_revision: 0, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "draft", board_opportunity_id: null, market_unlock_status: "locked", server_updated_at: now } }));
+  const workspace = await preserveWorkspace(null, entrance.raw_input);
+  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, ...workspace, journey: { contract_version: "project-journey/1.0.0", source: entrance.source, mode: input.mode, source_url: entrance.source_url, started_at: now }, sector_profile: sectorProfile, marketplace_revision: 0, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "draft", board_opportunity_id: null, market_unlock_status: "locked", server_updated_at: now } }));
   const token = randomBytes(32).toString("base64url");
   const session = SessionSchema.parse({ project_id: saved.id, token_hash: hash(token), revision: 0, created_at: now, expires_at: now + SESSION_TTL_SECONDS * 1000 });
   await persistSession(token, session);
   await recordMarketplaceFunnelEvent({ event: "project_started", project_id: saved.id, source: entrance.source, mode: input.mode, channel: entrance.source === "mcp" ? "mcp" : "web" });
-  return { project_reference: saved.id, project_session_token: token, revision: 0, expires_at: session.expires_at, resume_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/?journey=${input.mode}&project=${encodeURIComponent(saved.id)}#project_session=${encodeURIComponent(token)}` };
+  return { project_reference: saved.id, project_session_token: token, revision: 0, envelope_revision: saved.envelope_revision, expires_at: session.expires_at, resume_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/?journey=${input.mode}&project=${encodeURIComponent(saved.id)}#project_session=${encodeURIComponent(token)}` };
+}
+
+async function preserveWorkspace(existing: Parameters<typeof preserveMarketplaceWorkspace>[0], raw: Record<string, unknown>) {
+  try { return await preserveMarketplaceWorkspace(existing, raw); }
+  catch (error) {
+    if (error instanceof MarketplaceEnvelopeError && error.status === 409) throw new MarketplaceProjectConflict(error.message);
+    throw error;
+  }
 }
 
 async function updateMarketplaceProjectUnlocked(projectId: string, token: string, raw: unknown) {
   const input = UpdateSchema.parse(raw);
   const session = await authenticateMarketplaceProject(projectId, token);
-  const prior = await kvGetJson<{ project_reference: string; revision: number; saved_at: number }>(idempotencyKey(projectId, input.idempotency_key));
+  const prior = await kvGetJson<{ project_reference: string; revision: number; envelope_revision?: number; saved_at: number }>(idempotencyKey(projectId, input.idempotency_key));
   if (prior) return prior;
   if (session.revision !== input.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   if (project.marketplace_revision !== input.base_revision) throw new MarketplaceProjectConflict("This project has changed. Reload before editing.");
   if (project.marketplace_state?.publication_status === "published" || ["published", "qa", "evaluation"].includes(project.status)) throw new MarketplaceProjectConflict("Open the published project to change requirements.");
+  const workspace = await preserveWorkspace(project, input.raw_input);
   const nextRevision = session.revision + 1;
-  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, consent: undefined, pending_submit: undefined, buyer: { ...project.buyer, ...input.buyer_patch }, entrance_context: project.entrance_context ? { ...project.entrance_context, buyer_input: { ...project.entrance_context.buyer_input, ...input.buyer_patch }, raw_input: { ...project.entrance_context.raw_input, ...input.raw_input } } : project.entrance_context, sector_profile: input.sector_profile ?? project.sector_profile, marketplace_revision: nextRevision }));
-  const receipt = { project_reference: saved.id, revision: nextRevision, saved_at: saved.updated };
+  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, ...workspace, consent: undefined, pending_submit: undefined, buyer: { ...project.buyer, ...input.buyer_patch }, entrance_context: project.entrance_context ? { ...project.entrance_context, buyer_input: { ...project.entrance_context.buyer_input, ...input.buyer_patch }, raw_input: { ...project.entrance_context.raw_input, ...input.raw_input } } : project.entrance_context, sector_profile: input.sector_profile ?? project.sector_profile, marketplace_revision: nextRevision }));
+  const receipt = { project_reference: saved.id, revision: nextRevision, envelope_revision: saved.envelope_revision, saved_at: saved.updated };
   await kvRaw(["SET", idempotencyKey(projectId, input.idempotency_key), JSON.stringify(receipt), "EX", SESSION_TTL_SECONDS]);
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
   await recordMarketplaceFunnelEvent({ event: "requirements_updated", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision } });
@@ -151,7 +162,8 @@ export async function readMarketplaceProject(projectId: string, token: string) {
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   return {
-    project_reference: project.id, revision: project.marketplace_revision,
+    project_reference: project.id, revision: project.marketplace_revision, envelope_revision: project.envelope_revision,
+    workspace_payload: marketplaceWorkspacePayload(project),
     expires_at: session.expires_at, buyer: project.buyer, entrance_context: project.entrance_context,
     notice: isShortProject(project) ? shortProjectNotice(project) : null,
     mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION,

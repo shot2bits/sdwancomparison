@@ -243,11 +243,37 @@ const SITE_NOUN = "sites?|stores?|branch(?:es)?|offices?|locations?|shops?|pract
  * site/user noun) specifically so an unrelated negative or decimal number
  * elsewhere in a longer sentence — "Our budget is -£5,000 and we need 15
  * sites." — can never wrongly reject a genuine, unrelated whole count. */
+/** Explicit noun-before-number correction; never infer remote users from an unlabelled total. */
+function remoteUserCorrection(text: string): RegExpExecArray | null {
+  return /(?:^|[.!?;\n]\s*)(?:please\s+|actually,?\s+)?((?:correct|change|update|set)\s+(?:the\s+)?remote\s+users?(?:\s+count)?\s+to\s+(-?\s?\d[\d,]*(?:\.\d+)?)(?:\s*(k|thousand|m|million)\b)?)(?=\s*(?:$|[.!?;\n]))/i.exec(text);
+}
+
 function rawTextShowsNegativeOrDecimalNear(path: AllowedPath, rawBuyerText: string): boolean {
   const noun = path === "estate.users" ? USER_NOUN : path === "estate.sites" ? SITE_NOUN : null;
   if (!noun) return false;
   const re = new RegExp(`(?:${NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.source})\\s*(?:\\w+\\s+)?(?:${noun})\\b`, "i");
-  return re.test(rawBuyerText);
+  const correction = path === "estate.users" ? remoteUserCorrection(rawBuyerText) : null;
+  return re.test(rawBuyerText) || Boolean(correction && NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.test(correction[2]));
+}
+
+/** Buyer identity and current estate must be anchored to their own clause,
+ * not a technology or service mentioned elsewhere in the same message. */
+function professionalServicesIsBuyerSector(text: string): boolean {
+  return /^\s*professional services[.!?]?\s*$/i.test(text) ||
+    /\b(?:we are|we're|our sector is|sector\s*:)\s+(?:an?\s+)?professional services\b/i.test(text) ||
+    /\b(?:our|we run a)\s+professional services\s+(?:business|firm|company|organisation|organization)\b/i.test(text);
+}
+
+function hasCurrentSdwan(text: string): boolean {
+  return [...text.matchAll(/sd-?wan/gi)].some((match) => {
+    const start = match.index!;
+    const boundary = Math.max(text.lastIndexOf('.', start), text.lastIndexOf(';', start), text.lastIndexOf('\n', start));
+    const before = text.slice(Math.max(boundary + 1, start - 100), start);
+    const after = text.slice(start + match[0].length).split(/[.;\n]/)[0].slice(0, 50);
+    const desired = /\b(?:need|want|require|buy|buying|deploy|introduce|move to|migrate to|replace[^.;]*with)\b[^.;]*$/i.test(before);
+    const current = /\b(?:already|currently|current|existing|today|we (?:run|have|use|are on)|running on|legacy|replacing our|replace our)\b[^.;]*$/i.test(before) || /^(?:\s+\w+){0,2}\s+(?:already|currently|today|in place)\b/i.test(after);
+    return current && !desired;
+  });
 }
 
 function validate(
@@ -833,6 +859,11 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim(), undefined, hitPos(users));
   }
 
+  const remoteCorrection = remoteUserCorrection(text);
+  if (remoteCorrection) {
+    say("estate.users", magnitude(remoteCorrection[2], remoteCorrection[3]?.toLowerCase()), remoteCorrection[1], remoteCorrection[1], text.indexOf(remoteCorrection[1], remoteCorrection.index));
+  }
+
   /* "clinics" joined the noun list 31 Jul 2026 (round 6 dry run: "60
    * clinics" from an NHS buyer landed nothing while "60 shops" landed;
    * same in-lane precedent as the timeline patterns). */
@@ -875,13 +906,14 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
      * clause verbatim — this never computes or invents an actual date. */
     const DATEISH_NO_YEAR =
       "(?:(?:q[1-4]|h[12])\\s*(?:next|this)\\s+year|(?:spring|summer|autumn|winter)\\s+(?:next|this)\\s+year|(?:next|this)\\s+(?:spring|summer|autumn|winter|year|quarter|month)|(?:jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?)";
+    const HORIZON = "(?:\\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|eighteen|twenty-four)";
     const ANY_DATEISH = `(?:${DATEISH}|${DATEISH_NO_YEAR})`;
     const timeline =
       hit(new RegExp(`(?:live|go[- ]?live|in place|delivered|deployed|migrat(?:ed|ing)|rolled out|completed?|operational|finished|cut(?:ting)? over|ready|working|done)[^.,;]{0,25}?(?:by|before|during|in|for)\\s+(?:the\\s+)?(?:end of\\s+)?${ANY_DATEISH}`)) ??
       hit(new RegExp(`(?:contract|term|agreement|mpls|circuits?)[^.,;]{0,30}?(?:ends?|expir(?:es?|y|ing)|renews?|renewal|up)[^.,;]{0,12}?${ANY_DATEISH}`)) ??
       hit(new RegExp(`(?:timeline|deadline|target)[^.,;]{0,12}?(?:is|:)?[^.,;]{0,20}?${ANY_DATEISH}`)) ??
       hit(new RegExp(`(?:by|before|no later than)\\s+(?:the\\s+)?(?:end of\\s+)?${ANY_DATEISH}`)) ??
-      hit(/within\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)/) ??
+      hit(new RegExp(`within\\s+(?:the\\s+next\\s+)?${HORIZON}\\s+(?:weeks?|months?)\\b`)) ??
       /* Fix (correction pass 2, Priority 5 — "We need this live in 3
        * months."): the buyer's own relative target, captured as their
        * own words, exactly like every other timeline shape above — no
@@ -890,7 +922,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
        * specific date. `\bin\b` cannot accidentally match inside
        * "within" (no word boundary sits between its "h" and "i"), so
        * this never double-fires on the "within" case immediately above. */
-      hit(/\bin\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)\b/);
+      hit(new RegExp(`\\bin\\s+(?:the\\s+next\\s+)?${HORIZON}\\s+(?:weeks?|months?)\\b`));
     if (timeline) say("constraints.timeline", timeline[0].trim(), timeline[0].trim(), undefined, hitPos(timeline));
   }
 
@@ -981,7 +1013,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   let sectorStated = false;
   for (const [re, sector] of directSectorMap) {
     const m = hit(re);
-    if (m && sectorReadsAsBuyerIdentity(m, t)) { say("organisation.sector", sector, originalSpan(m).trim(), undefined, hitPos(m)); sectorStated = true; break; }
+    if (m && (sector !== "Professional services" || !/professional services/i.test(text) || professionalServicesIsBuyerSector(text)) && sectorReadsAsBuyerIdentity(m, t)) { say("organisation.sector", sector, originalSpan(m).trim(), undefined, hitPos(m)); sectorStated = true; break; }
   }
 
   /* The sector inference map, widened under Robert's intake-truth ruling
@@ -1035,7 +1067,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
        * never meant to require self-identifying phrasing -- only the
        * "clause is actually about a REQUIREMENT, not the buyer" failure
        * mode needs excluding here. */
-      if (m && !SECTOR_REQUIREMENT_OBJECT_AFTER.test(t.slice(m.index + m[0].length, m.index + m[0].length + 40))) {
+      if (m && (sector !== "Professional services" || !/professional services/i.test(text) || professionalServicesIsBuyerSector(text)) && !SECTOR_REQUIREMENT_OBJECT_AFTER.test(t.slice(m.index + m[0].length, m.index + m[0].length + 40))) {
         infer("organisation.sector", sector, `"${m[0].trim()}" indicates this sector`, m[0].trim(), hitPos(m));
         break;
       }
@@ -1107,7 +1139,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   }
 
   {
-    const m = hit(/microsoft|m365|office ?365|\bo365\b/);
+    const m = hit(/\bmicrosoft\s*365\b|\bm365\b|\boffice\s*365\b|\bo365\b/);
     /* Blocker 3: "Microsoft" is the display label; a bare "M365"/"O365"
      * mention never contains that word, so matchedText carries the real
      * trigger. */
@@ -1139,7 +1171,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   {
     const m = hit(/sd-?wan/);
     // Blocker 3: "SD-WAN" (hyphenated) can mismatch a hyphen-free "sdwan" trigger.
-    if (m && existingEstateSignal.test(t)) say("estate.existingNetwork", ["sdwan"], "SD-WAN", m[0].trim(), hitPos(m));
+    if (m && hasCurrentSdwan(text)) say("estate.existingNetwork", ["sdwan"], "SD-WAN", m[0].trim(), hitPos(m));
   }
   {
     const m = hit(/\bmpls\b/);
@@ -1201,7 +1233,13 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     const m = hit(/\bnis\s?2\b/);
     // Blocker 3: "NIS 2" (with a space) wouldn't literally contain the
     // fixed no-space quote "NIS2".
-    if (m) say("constraints.complianceRequirements", ["nis2"], "NIS2", m[0].trim(), hitPos(m));
+    if (m) {
+      const start = hitPos(m);
+      const left = Math.max(text.lastIndexOf(".", start), text.lastIndexOf(";", start), text.lastIndexOf("\n", start)) + 1;
+      const right = text.slice(start).search(/[.;\n]/);
+      const clause = text.slice(left, right < 0 ? text.length : start + right).trim();
+      say("constraints.complianceRequirements", ["nis2"], clause, m[0].trim(), start);
+    }
   }
   {
     const m = hit(/\bgdpr\b/);
@@ -1484,7 +1522,7 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
      * function's header comment and validate()'s own comment on that
      * case for why the boundary moved here. Every other use of `quote`
      * below this loop is completely unchanged. */
-    const quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
+    let quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
     /* Correction pass 2, Priority 2 (Tests 70/71 — the actual fix): pass
      * `text`, this function's own full raw buyer message, as validate()'s
      * 5th argument. This is the critical wiring — live evidence showed the
@@ -1495,6 +1533,27 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
     const ok = validate(String(f.path ?? ""), f.value, notes, quote || String(f.reason ?? ""), text);
     if (!ok) continue;
     let value = ok.value;
+    if (ok.path === "estate.users") {
+      const correction = remoteUserCorrection(text);
+      if (correction) {
+        const scale = /^(?:k|thousand)$/i.test(correction[3] ?? "") ? 1000 : /^(?:m|million)$/i.test(correction[3] ?? "") ? 1000000 : 1;
+        if (Number(value) !== Number(correction[2].replace(/[,\s]/g, "")) * scale) continue;
+        quote = correction[1];
+      }
+      if (/\b(?:do not|don't|never)\s+(?:correct|change|update|set)\s+(?:the\s+)?remote\s+users?(?:\s+count)?\s+to\s+[\d-]/i.test(text) && !correction) continue;
+    }
+    if (ok.path === "organisation.sector" && value === "Professional services" && /professional services/i.test(text) && !professionalServicesIsBuyerSector(text)) {
+      notes.push("Dropped a sector claim: professional services describe requested delivery work, not the buyer's sector.");
+      continue;
+    }
+    if (ok.path === "estate.cloud" && Array.isArray(value) && !/\b(?:microsoft\s*365|m365|office\s*365|o365)\b/i.test(text)) {
+      value = value.filter((v) => v !== "m365");
+      if (!(value as unknown[]).length) continue;
+    }
+    if (ok.path === "estate.existingNetwork" && Array.isArray(value) && !hasCurrentSdwan(text)) {
+      value = value.filter((v) => v !== "sdwan");
+      if (!(value as unknown[]).length) continue;
+    }
     const stated = quote.length > 2 && lower.includes(quote.toLowerCase());
     /* F-A extension (24 Jul live catch: "across our sites" proposed
      * sites=1): a numeric estate count must trace to a digit in the

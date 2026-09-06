@@ -740,7 +740,8 @@ async function main() {
       res.updates.some((u) => u.path === "organisation.sector" && u.value === "Healthcare & pharma" && u.provenance === "stated") &&
       res.updates.some((u) => u.path === "estate.users" && u.value === 200) &&
       res.updates.some((u) => u.path === "estate.sites" && u.value === 20) &&
-      res.updates.some((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
+      // Requested SD-WAN is preserved in the source receipt, never existing estate.
+      !res.updates.some((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
     const ethernetAvailable = res.unplacedClauses.some((c) => /ethernet/i.test(c));
     const sdwanSaseAvailable = res.unplacedClauses.some((c) => /sd-wan/i.test(c) && /sase/i.test(c));
     record(

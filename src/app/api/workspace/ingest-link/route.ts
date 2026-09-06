@@ -92,11 +92,12 @@ export async function POST(req: Request) {
   }
 
   if (link.kind === "doc") {
-    const text = buf.toString("utf8").slice(0, MAX_TEXT_CHARS);
+    const text = buf.toString("utf8");
+    if (text.length > MAX_TEXT_CHARS) return Response.json({ error: `This document contains ${text.length.toLocaleString("en-GB")} characters; the limit is 200,000 per import. Split it into sections and import each section. Nothing from this file was added.`, original_chars: text.length, retained_chars: 0, truncated: false }, { status: 413, headers: cors });
     if (!text.trim()) {
       return Response.json({ error: "That document looks empty." }, { status: 422, headers: cors });
     }
-    return Response.json({ text, kind: "doc" }, { headers: cors });
+    return Response.json({ text, original_chars: text.length, retained_chars: text.length, truncated: false, kind: "doc" }, { headers: cors });
   }
 
   try {
@@ -106,11 +107,12 @@ export async function POST(req: Request) {
     // structurally incompatible with the root project's; runtime shape is identical.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await wb.xlsx.load(buf as any);
-    const text = flattenWorkbookToText(wb).slice(0, MAX_TEXT_CHARS);
+    const text = flattenWorkbookToText(wb);
+    if (text.length > MAX_TEXT_CHARS) return Response.json({ error: `This document contains ${text.length.toLocaleString("en-GB")} characters; the limit is 200,000 per import. Split it into sections and import each section. Nothing from this file was added.`, original_chars: text.length, retained_chars: 0, truncated: false }, { status: 413, headers: cors });
     if (!text.trim()) {
       return Response.json({ error: "That spreadsheet looks empty." }, { status: 422, headers: cors });
     }
-    return Response.json({ text, kind: "sheet" }, { headers: cors });
+    return Response.json({ text, original_chars: text.length, retained_chars: text.length, truncated: false, kind: "sheet" }, { headers: cors });
   } catch {
     return Response.json({ error: "Could not read that spreadsheet's contents." }, { status: 422, headers: cors });
   }

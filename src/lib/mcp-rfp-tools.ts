@@ -47,7 +47,7 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
   {
     name: "get_rfp_evidence_draft",
     description:
-      "Netify's pre-drafted Evidence Response for an invited supplier: answers drafted from Netify's public-evidence capability grades for that vendor (grade and evaluation date stated in every line), gaps and all pricing questions left blank for the supplier. Provide the share token, the supplier organisation name, and the vendor_token from your invitation link (the per-supplier credential minted at publish time — without it this call is refused, since the share token alone does not prove which vendor you are). Review and edit before submitting via respond_to_rfp.",
+      "Netify's pre-drafted Evidence Response for an invited supplier: answers drafted from Netify's public-evidence capability grades for that vendor (grade and evaluation date stated in every line), gaps and all pricing questions left blank for the supplier. Provide the share token, the supplier organisation name, and the vendor_token from your invitation link (the per-supplier credential minted at publish time — without it this call is refused, since the share token alone does not prove which vendor you are). Review and edit in the invitation’s web response form. MCP response submission is unavailable until verified supplier identity can be established.",
     inputSchema: {
       type: "object",
       properties: {

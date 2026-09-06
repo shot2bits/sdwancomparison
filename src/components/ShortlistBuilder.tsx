@@ -6,6 +6,7 @@ import CompareTable from '@/components/CompareTable';
 import { buildComparison, decodeScenario, type ShortlistVendor } from '@/lib/shortlist-core';
 import { parseComparisonHandoff, applyComparisonHandoff } from '@/lib/comparison-handoff';
 import { PROJECT_ENTRANCE_CONTRACT_VERSION } from '@/lib/project-entrance-contract';
+import {requestBrief} from '@/lib/buying-workspace-project';
 import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY } from '@/lib/buying-entry';
 import { fireNetifyEvent } from '@/components/NetifyEvents';
 import type { ShortlistMarketView } from '@/lib/shortlist-market-views';
@@ -59,7 +60,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       };
       sessionStorage.setItem(COMPARISON_PROJECT_DRAFT_KEY, JSON.stringify(entrance));
       fireNetifyEvent('comparison_start_project', { provider_count: String(slugs.length) });
-      location.assign(buyingPlatformPath('journey=find_providers&from=comparison'));
+      if(!requestBrief('find_providers'))location.assign(buyingPlatformPath('journey=find_providers&from=comparison'));
     } catch { setError('This browser could not save your comparison. Enable browser storage to carry your selections into a project.'); }
   }
   async function ask() {
@@ -82,14 +83,14 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void ask(); }}><label htmlFor="comparison-question" className="text-sm font-semibold">Ask about the comparison</label><div className="mt-2 flex flex-col gap-2 sm:flex-row"><input id="comparison-question" value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={1000} placeholder="How do their security capabilities differ?" className="min-w-0 flex-1 rounded border border-zinc-300 p-3"/><button disabled={busy || !question.trim()} className="rounded bg-zinc-900 px-5 py-3 text-white disabled:opacity-50">{busy ? 'Reading evidence…' : 'Ask Netify AI'}</button></div></form>
       {answer && <p className="mt-4 whitespace-pre-wrap text-sm" role="status">{answer}</p>}
     </>}
-    <div className="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5">
+    <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5">
       <h3 className="text-lg font-semibold">Which providers fit your project?</h3>
       <p className="mt-2 text-sm">Describe your requirement, review a short anonymous notice and verify your work email and company. Publishing unlocks your personalised shortlist, project-specific comparisons and supplier responses. A full RFP is optional.</p>
-      <label className="mt-3 block text-sm font-semibold">Your requirement (optional)<textarea value={requirement} onChange={(e) => setRequirement(e.target.value)} maxLength={4000} rows={2} placeholder="What does your business need?" className="mt-2 block w-full rounded border border-amber-300 bg-white p-3 font-normal"/></label>
-      <button type="button" onClick={startProject} className="mt-4 rounded-full bg-amber-400 px-5 py-3 font-semibold text-zinc-950">Find providers for my project</button>
+      <label className="mt-3 block text-sm font-semibold">Your requirement (optional)<textarea value={requirement} onChange={(e) => setRequirement(e.target.value)} maxLength={4000} rows={2} placeholder="What does your business need?" className="mt-2 block w-full rounded border border-slate-200 bg-white p-3 font-normal"/></label>
+      <button type="button" onClick={startProject} className="mt-4 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold text-zinc-950">Find providers for my project</button>
       <p className="mt-2 text-xs">Your selections travel with you. Nothing is published without your approval.</p>
     </div>
     {error && <p role="alert" className="mt-3 text-sm text-red-800">{error}</p>}
-    {comparison && <div id="comparison-table" className="mt-8"><h3 className="mb-3 text-lg font-semibold">Public capability comparison</h3><CompareTable comparison={comparison}/><div className="mt-4 flex flex-wrap gap-4">{slugs.map((slug) => { const v = vendors.find((provider) => provider.slug === slug)!; return <a key={slug} href={v.marketplace_url || `/sase/vendors/${slug}/`} className="text-sm underline">{v.name}: evidence and sources</a>; })}</div><button type="button" onClick={startProject} className="mt-5 rounded-full bg-amber-400 px-5 py-3 font-semibold">Find providers for my project</button></div>}
+    {comparison && <div id="comparison-table" className="mt-8"><h3 className="mb-3 text-lg font-semibold">Public capability comparison</h3><CompareTable comparison={comparison}/><div className="mt-4 flex flex-wrap gap-4">{slugs.map((slug) => { const v = vendors.find((provider) => provider.slug === slug)!; return <a key={slug} href={v.marketplace_url || `/sase/vendors/${slug}/`} className="text-sm underline">{v.name}: evidence and sources</a>; })}</div><button type="button" onClick={startProject} className="mt-5 rounded-full bg-[#233849] text-white px-5 py-3 font-semibold">Find providers for my project</button></div>}
   </section>;
 }

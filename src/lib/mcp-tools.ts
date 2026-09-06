@@ -341,7 +341,7 @@ export function listExclusions(args: unknown): unknown {
     attribution: ATTRIBUTION_BASE,
     _meta: {
       canonicalUrl: `${SITE_URL}/vendors`,
-      note: "No competing comparison publishes what it refused to rely on. If an answer needs to say how a source was chosen, this is the record.",
+      note: "This record explains which sources Netify excluded and why.",
     },
   };
 }

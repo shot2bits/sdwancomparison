@@ -10,6 +10,8 @@
  * parity; the W0 acceptance criterion).
  */
 
+import { parseWorkspaceContinuation, workspaceContinuation } from "@/lib/mcp-workspace-continuation";
+import { requirementFrom } from "@/lib/workspace/draft";
 import { extractRequirement } from "@/lib/workspace/extract";
 import type { BuyingId, FieldUpdate, OperatingModelId } from "@/lib/workspace/extract";
 import { briefModel, briefText, mergeUpdates, type WorkspaceFact } from "@/lib/workspace/draft";
@@ -24,7 +26,7 @@ import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 const CYCLE_DEFINITION = {
   name: "workspace_cycle",
   description:
-    `Netify Live Sourcing Workspace: run one drafting cycle over a buyer's free-text requirement, exactly as the page at ${SITE_URL}/workspace/ runs it. Input the buyer's words (and the requirement built so far, to iterate); output the validated field updates each carrying provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the merged requirement in the exact shape assess_security_requirement takes, the ${RULEBOOK_VERSION} verdict when the scope is security, the aggregate market context (personalised provider identities unlock after publication) (real evaluation dates from the Netify dataset; for managed-security scope the dataset boundary is stated instead of an invented MSSP ranking), and the assembled statement of requirements as text with provenance marked. Read and compute only; nothing is stored and no vendor is contacted. Iterate by passing the returned requirement back with the buyer's next words; corrections are new cycles. To proceed: create_security_project (consented) for security scope, or send the buyer to ${SITE_URL}/workspace/?q={their sentence} to take over the same draft on the page. Every claim carries provenance; relay inferred and assumed markers to the buyer rather than presenting them as their own words.`,
+    `Netify Live Sourcing Workspace: run one drafting cycle over a buyer's free-text requirement, exactly as the page at ${SITE_URL}/workspace/ runs it. Input the buyer's words (and the requirement built so far, to iterate); output the validated field updates each carrying provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the merged requirement in the exact shape assess_security_requirement takes, the ${RULEBOOK_VERSION} verdict when the scope is security, the aggregate market context (personalised provider identities unlock after publication) (real evaluation dates from the Netify dataset; for managed-security scope the dataset boundary is stated instead of an invented MSSP ranking), and the assembled statement of requirements as text with provenance marked. Read and compute only; nothing is stored and no vendor is contacted. Iterate by passing the returned requirement back with the buyer's next words; corrections are new cycles. To proceed: create_security_project (consented) for security scope, or offer the returned next_call for start_project; only execute it on agreement to save a private draft and use its resume_url for handoff. The workspace_url is an empty entry point, not a saved draft. Every claim carries provenance; relay inferred and assumed markers to the buyer rather than presenting them as their own words.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -41,6 +43,8 @@ const CYCLE_DEFINITION = {
           operatingModel: { type: "string", enum: ["managed", "co_managed", "diy"] },
         },
       },
+      continuation: { type: "object", description: "Pass the previous returned continuation unchanged to preserve the full fact and source ledger." },
+      document_purpose: { type: "string", enum: ["brief", "rfp", "rfi"] },
       include_fit: { type: "boolean", description: "Set false to skip the vendor fit block. Default true." },
     },
     required: ["text"],
@@ -87,7 +91,9 @@ const CYCLE_DEFINITION = {
         },
       },
       brief: { type: "string" },
-      workspace_url: { type: "string" },
+      workspace_url: { type: "string", description: "Application entry only; no draft is saved by this tool." },
+      continuation: { type: "object" },
+      next_call: { type: "object", description: "Complete start_project arguments. Offer to the buyer; call only on agreement to save a private draft, then use its resume_url." },
       notes: { type: "array", items: { type: "string" } },
     },
     required: ["rulebook_version", "engine", "updates", "requirement", "brief", "workspace_url"],
@@ -97,7 +103,7 @@ const CYCLE_DEFINITION = {
 const INGEST_DEFINITION = {
   name: "workspace_ingest",
   description:
-    `Netify Live Sourcing Workspace: read a WHOLE document or conversation into a requirement in one call, where workspace_cycle takes a sentence. Paste the buyer's existing material verbatim: a ChatGPT, Perplexity, Gemini or Claude conversation, an existing SASE or SD-WAN RFP, SSE requirements, meeting notes or an email thread (plain text, up to 14,000 characters; longer material is read to the budget and the summary says so honestly). The text is cut on paragraph boundaries and run through the IDENTICAL extraction cycles the page runs, so every claim lands with provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the same validation and magnitude guards apply, and clauses the engine cannot place are reported rather than dropped. Output: the merged requirement, all provenance-marked updates, the ${RULEBOOK_VERSION} verdict for security scope, aggregate market context (personalised provider identities unlock after publication), the earned follow-up questions to relay, the assembled statement of requirements, and a read_summary to show the buyer. Read and compute only; nothing is stored and no vendor is contacted. Continue with workspace_cycle for corrections, or hand the buyer the workspace_url; a human always signs before anything publishes.`,
+    `Netify Live Sourcing Workspace: read a WHOLE document or conversation into a requirement in one call, where workspace_cycle takes a sentence. Paste the buyer's existing material verbatim: a ChatGPT, Perplexity, Gemini or Claude conversation, an existing SASE or SD-WAN RFP, SSE requirements, meeting notes or an email thread (plain text, up to 14,000 characters; longer material is read to the budget and the summary says so honestly). The text is cut on paragraph boundaries and run through the IDENTICAL extraction cycles the page runs, so every claim lands with provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the same validation and magnitude guards apply, and clauses the engine cannot place are reported rather than dropped. Output: the merged requirement, all provenance-marked updates, the ${RULEBOOK_VERSION} verdict for security scope, aggregate market context (personalised provider identities unlock after publication), the earned follow-up questions to relay, the assembled statement of requirements, and a read_summary to show the buyer. Read and compute only; nothing is stored and no vendor is contacted. Continue with workspace_cycle, passing continuation for corrections. Offer next_call to save a private draft via start_project on buyer agreement; workspace_url alone is only the application entry point; a human always signs before anything publishes.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -111,6 +117,8 @@ const INGEST_DEFINITION = {
           operatingModel: { type: "string", enum: ["managed", "co_managed", "diy"] },
         },
       },
+      continuation: { type: "object", description: "Pass the previous returned continuation unchanged to preserve the full fact and source ledger." },
+      document_purpose: { type: "string", enum: ["brief", "rfp", "rfi"] },
       include_fit: { type: "boolean", description: "Set false to skip the vendor fit block. Default true." },
     },
     required: ["text"],
@@ -135,13 +143,17 @@ const lastValue = (updates: FieldUpdate[], path: string): string | undefined => 
 };
 
 export async function callWorkspaceTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+  if (args.document_purpose !== undefined && !["brief", "rfp", "rfi"].includes(String(args.document_purpose))) return { error: "document_purpose must be brief, rfp or rfi." };
   if (name === "workspace_ingest") return callWorkspaceIngest(args);
   if (name !== "workspace_cycle") return { error: `Unknown workspace tool: ${name}` };
-  const text = String(args?.text ?? "").slice(0, 4000);
+  const text = String(args?.text ?? "");
+  if (text.length > 200000) return { error: "Source exceeds 200,000 characters. Nothing was read or saved." };
+  if (text.length > 4000) return callWorkspaceIngest(args);
   if (text.trim().length < 3) {
     return { error: "text is required: the buyer's words, a sentence or a correction." };
   }
-  const base = (args?.requirement && typeof args.requirement === "object" ? args.requirement : {}) as SecurityRequirementInput;
+  const continuation = parseWorkspaceContinuation(args.continuation);
+  const base = continuation.facts.length ? requirementFrom(continuation.facts) : (args?.requirement && typeof args.requirement === "object" ? args.requirement : {}) as SecurityRequirementInput;
   const carried = (args?.procurement && typeof args.procurement === "object" ? args.procurement : {}) as {
     buying?: BuyingId;
     operatingModel?: OperatingModelId;
@@ -149,9 +161,9 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
 
   const result = await extractRequirement(text, base);
 
-  const buying = (lastValue(result.updates, "procurement.buying") as BuyingId | undefined) ?? carried.buying ?? null;
+  const buying = (lastValue(result.updates, "procurement.buying") as BuyingId | undefined) ?? carried.buying ?? continuation.facts.find(f=>!f.struck&&f.path==="procurement.buying")?.value as BuyingId | undefined ?? null;
   const operatingModel =
-    (lastValue(result.updates, "procurement.operatingModel") as OperatingModelId | undefined) ?? carried.operatingModel ?? null;
+    (lastValue(result.updates, "procurement.operatingModel") as OperatingModelId | undefined) ?? carried.operatingModel ?? continuation.facts.find(f=>!f.struck&&f.path==="procurement.operatingModel")?.value as OperatingModelId | undefined ?? null;
   const securityScope = buying === "managed_security" || buying === null;
 
   const verdict: SecurityScopeVerdict | null = securityScope ? await assessSecurityRequirement(result.requirement) : null;
@@ -165,7 +177,7 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
   if (carried.operatingModel && !lastValue(result.updates, "procurement.operatingModel")) {
     carryUpdates.push({ path: "procurement.operatingModel", value: carried.operatingModel, provenance: "stated", quote: "carried from your earlier turn" });
   }
-  const facts: WorkspaceFact[] = mergeUpdates([], [...result.updates, ...carryUpdates], 1, "extract").facts;
+  const facts: WorkspaceFact[] = mergeUpdates(continuation.facts, [...result.updates, ...carryUpdates], Math.max(0,...continuation.facts.map(f=>f.cycle))+1, "extract").facts;
   const brief = briefText(briefModel({ facts, verdict }));
 
   const includeFit = args?.include_fit !== false;
@@ -211,7 +223,8 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
       evidence: q.evidence,
     })),
     brief,
-    workspace_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/?q=${encodeURIComponent(text.slice(0, 400))}`,
+    workspace_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/`,
+    ...await workspaceContinuation({text, updates:result.updates, base, procurement:carried, continuation:args.continuation, documentPurpose: args.document_purpose as "brief"|"rfp"|"rfi"|undefined}),
     notes: result.notes,
   };
 }
@@ -220,7 +233,8 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
  *  run sequentially, each threading the merged requirement into the next,
  *  so a document reads exactly as a patient buyer typing it would. */
 async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unknown> {
-  const raw = String(args?.text ?? "").slice(0, 14000);
+  const raw = String(args?.text ?? "");
+  if (raw.length > 200000) return { error: "Source exceeds 200,000 characters. Nothing was read or saved." };
   if (raw.trim().length < 20) {
     return { error: "text is required: the buyer's material, at least a few sentences." };
   }
@@ -230,7 +244,9 @@ async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unkno
     operatingModel?: OperatingModelId;
   };
 
-  let requirement = (args?.requirement && typeof args.requirement === "object" ? args.requirement : {}) as SecurityRequirementInput;
+  const continuation = parseWorkspaceContinuation(args.continuation);
+  let requirement = continuation.facts.length ? requirementFrom(continuation.facts) : (args?.requirement && typeof args.requirement === "object" ? args.requirement : {}) as SecurityRequirementInput;
+  const base = requirement;
   const allUpdates: FieldUpdate[] = [];
   const allNotes: string[] = [];
   let engine = "deterministic_fallback";
@@ -242,13 +258,13 @@ async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unkno
     if (r.engine === "model") engine = "model";
   }
 
-  const buying = (lastValue(allUpdates, "procurement.buying") as BuyingId | undefined) ?? carried.buying ?? null;
+  const buying = (lastValue(allUpdates, "procurement.buying") as BuyingId | undefined) ?? carried.buying ?? continuation.facts.find(f=>!f.struck&&f.path==="procurement.buying")?.value as BuyingId | undefined ?? null;
   const operatingModel =
-    (lastValue(allUpdates, "procurement.operatingModel") as OperatingModelId | undefined) ?? carried.operatingModel ?? null;
+    (lastValue(allUpdates, "procurement.operatingModel") as OperatingModelId | undefined) ?? carried.operatingModel ?? continuation.facts.find(f=>!f.struck&&f.path==="procurement.operatingModel")?.value as OperatingModelId | undefined ?? null;
   const securityScope = buying === "managed_security" || buying === null;
   const verdict: SecurityScopeVerdict | null = securityScope ? await assessSecurityRequirement(requirement) : null;
 
-  const facts: WorkspaceFact[] = mergeUpdates([], allUpdates, 1, "extract").facts;
+  const facts: WorkspaceFact[] = mergeUpdates(continuation.facts, allUpdates, Math.max(0,...continuation.facts.map(f=>f.cycle))+1, "extract").facts;
   const brief = briefText(briefModel({ facts, verdict }));
 
   const includeFit = args?.include_fit !== false;
@@ -294,6 +310,7 @@ async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unkno
     brief,
     read_summary,
     workspace_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/`,
+    ...await workspaceContinuation({text:raw, updates:allUpdates, base, procurement:carried, continuation:args.continuation, documentPurpose: args.document_purpose as "brief"|"rfp"|"rfi"|undefined}),
     notes: allNotes,
   };
 }

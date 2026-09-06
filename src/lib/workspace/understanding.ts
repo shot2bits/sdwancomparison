@@ -47,6 +47,8 @@ export const UnderstandingFactSchema = z.object({
   provenance: z.enum(["stated", "inferred"]),
   quote: z.string().optional(),
   reason: z.string().optional(),
+  matchedText: z.string().optional(),
+  matchStart: z.number().optional(),
   struck: z.boolean(),
   source: z.enum(["extract", "answer", "link"]),
   cycle: z.number().int().min(1),

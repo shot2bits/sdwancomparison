@@ -452,6 +452,22 @@ function complianceClauses(facts: WorkspaceFact[]): ClauseDraft[] {
   const out: ClauseDraft[] = [];
   for (const f of standing(facts).filter((x) => x.path === "constraints.complianceRequirements")) {
     const label = COMPLIANCE_CLAUSE_LABEL[String(f.value)] ?? String(f.value);
+    if (f.value === "nis2") {
+      const explicitMandatory = f.provenance === "stated" && /\b(?:must|required|mandatory|shall)\b/i.test(f.quote ?? "") && !/\b(?:not|isn't|is not|need not)\b/i.test(f.quote ?? "");
+      out.push({
+        section: "security",
+        statement: `Suppliers ${explicitMandatory ? "must" : "should"} explain how the proposed service supports the buyer's NIS2 requirements and provide relevant evidence.`,
+        supplierResponse: ["Describe the applicable scope, responsibilities and supporting controls.", "Identify limitations and provide dated evidence for the claims made."],
+        evidence: ["Relevant control and assessment evidence", "Scope and responsibility statement"],
+        acceptanceTest: "The buyer reviews the evidence and confirms applicability and acceptance criteria.",
+        mandatory: explicitMandatory,
+        sourceFactIds: [f.id], origin: f.provenance === "stated" ? "buyer" : "netify",
+        reason: "NIS2 was mentioned; certification or award conditions were not inferred.",
+        quote: f.quote ?? null, sourceTurnIds: [], sourceNotedIds: [],
+        templateKey: "compliance:nis2", templateId: "compliance-requirement",
+      });
+      continue;
+    }
     out.push({
       section: "security",
       statement: `Suppliers must evidence current ${label} compliance for the service they deliver.`,

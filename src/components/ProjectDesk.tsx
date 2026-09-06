@@ -1,5 +1,8 @@
 "use client";
 
+import {requestBrief, confirmedWorkspaceRegions, workspaceUpdatesFromBrief, type BriefFields, type DocumentPurpose, type WorkspaceProject} from "@/lib/buying-workspace-project";
+import {projectTokenKey} from "@/lib/buying-entry";
+import {startNewBuyingProject} from "@/components/procurement/DraftRecovery";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { assessSecurityRequirement, type SecurityScopeVerdict, type SecurityRequirementInput } from "@/lib/security/rulebook";
 import {
@@ -412,6 +415,8 @@ const THREAD_WELCOME =
 
 const LOCAL_DRAFT_POINTER_KEY = "netify_living_rfp_active_draft_v1";
 const LOCAL_DRAFT_PREFIX = "netify_living_rfp_draft_v1_";
+const PROJECT_CHECKPOINT_PREFIX = "netify_project_checkpoint_v1_";
+type ProjectCheckpoint = {schema:1;projectId:string;baseRevision:number;snapshot:LocalWorkingDraft;company:string;notice:string|null};
 
 type LocalWorkingDraft = {
   schema: 1;
@@ -429,6 +434,9 @@ type LocalWorkingDraft = {
   rfpDepth: RfpDepth;
   rfpEntryMode: "build" | "check";
   rfpValidationCorpus: string;
+  documentPurpose?: DocumentPurpose;
+  draftInput?: string;
+  pinnedVendorSlugs?: string[];
 };
 
 function newLocalDraftId(): string {
@@ -460,9 +468,12 @@ function readLocalWorkingDraft(): LocalWorkingDraft | null {
       decisionTurns: Array.isArray(parsed.decisionTurns) ? parsed.decisionTurns : [],
       resumeRemovals: Array.isArray(parsed.resumeRemovals) ? parsed.resumeRemovals : [],
       messages: Array.isArray(parsed.messages) && parsed.messages.length ? parsed.messages : [{ who: "netify", text: THREAD_WELCOME }],
+      draftInput: parsed.draftInput??"",
+      pinnedVendorSlugs: Array.isArray(parsed.pinnedVendorSlugs)?parsed.pinnedVendorSlugs:[],
+      documentPurpose: parsed.documentPurpose ?? "rfp",
       rfpDepth: parsed.rfpDepth === "detailed" ? "detailed" : "short",
       rfpEntryMode: parsed.rfpEntryMode === "check" ? "check" : "build",
-      rfpValidationCorpus: typeof parsed.rfpValidationCorpus === "string" ? parsed.rfpValidationCorpus.slice(0, 200_000) : "",
+      rfpValidationCorpus: typeof parsed.rfpValidationCorpus === "string" ? parsed.rfpValidationCorpus : "",
     };
   } catch {
     return null;
@@ -1251,7 +1262,8 @@ export default function ProjectDesk({
   });
   const changeRfpDepth = useCallback((depth: RfpDepth) => {
     setRfpDepth(depth);
-    window.localStorage.setItem("netify-rfp-depth", depth);
+    try { window.localStorage.setItem("netify-rfp-depth", depth); } catch { /* The current mounted choice remains usable. */ }
+    if (resumedFromUrlRef.current || new URLSearchParams(location.search).has("project")) return;
     /* Persist the choice into the active working draft immediately. The
        normal canonical-draft effect is deliberately debounced, but that
        meant a buyer who selected Detailed RFP and refreshed straight away
@@ -1301,6 +1313,16 @@ export default function ProjectDesk({
    *  unconditionally, unaffected by this -- reviewing the full document
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
+  const [documentPurpose,setDocumentPurpose]=useState<DocumentPurpose>("rfp");
+  const [workspaceNotice,setWorkspaceNotice]=useState<string|null>(null);
+  const [workspaceSessionLoading,setWorkspaceSessionLoading]=useState(false);
+  const [workspaceSessionError,setWorkspaceSessionError]=useState("");
+  const [workspaceEnvelopeId,setWorkspaceEnvelopeId]=useState<string|null>(null);
+  const [projectCheckpoint,setProjectCheckpoint]=useState<{value:ProjectCheckpoint;canRestore:boolean}|null>(null);
+  const [checkpointRevision,setCheckpointRevision]=useState(0);
+  const checkpointBaselineRef=useRef<string|null>(null);
+  const [workspaceCompany,setWorkspaceCompany]=useState("");
+  const [workspaceSessionPublished,setWorkspaceSessionPublished]=useState(false);
   const [workspaceDocumentView, setWorkspaceDocumentView] = useState<WorkspaceDocumentView>("requirement");
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
@@ -1435,6 +1457,7 @@ export default function ProjectDesk({
   }, []);
 
   const applyMerge = useCallback((updates: FieldUpdate[], source: "extract" | "answer" | "link") => {
+    setWorkspaceNotice(null);
     const allowed = updates.filter((u) => !(u.provenance === "inferred" && neverReinfer.current.has(nrKey(u.path, u.value))));
     beginOrExtendSubmission();
     cycleRef.current += 1;
@@ -1606,12 +1629,12 @@ export default function ProjectDesk({
     if (p.get("test") === "1") setTestMode(true);
     const resumeId = p.get("id");
     const resumeManage = p.get("manage");
-    resumedFromUrlRef.current = Boolean(resumeId);
+    resumedFromUrlRef.current = Boolean(resumeId || p.get("project"));
 
     /* Step 1: restore the exact working ledgers before any link-carried
        seed facts are applied. A URL-owned/server-owned project always
        wins and never mixes with a browser draft. */
-    if (!resumeId) {
+    if (!resumeId && !p.has("project")) {
       const local = readLocalWorkingDraft();
       if (local) {
         localDraftIdRef.current = local.id;
@@ -1631,6 +1654,9 @@ export default function ProjectDesk({
         setResumeRemovals(restoredRemovals);
         resumeRemovalsRef.current = restoredRemovals;
         setMsgs(local.messages);
+        setDraft(local.draftInput??"");
+        setAdded(local.pinnedVendorSlugs??[]);
+        setDocumentPurpose(local.documentPurpose ?? "rfp");
         setRfpDepth(local.rfpDepth);
         setRfpEntryMode(local.rfpEntryMode);
         rfpValidationCorpusRef.current = local.rfpValidationCorpus;
@@ -2038,6 +2064,52 @@ export default function ProjectDesk({
     return () => window.removeEventListener("netify:journey-mode", receiveJourney);
   }, []);
 
+  useEffect(()=>{
+    const id=new URLSearchParams(location.search).get('project');
+    if(!id)return;
+    let active=true;
+    queueMicrotask(()=>setWorkspaceSessionLoading(true));
+    let token: string | null = null;
+    try {
+      const fragment = new URLSearchParams(location.hash.slice(1)).get('project_session');
+      token = fragment || localStorage.getItem(projectTokenKey(id));
+      if(fragment)localStorage.setItem(projectTokenKey(id),fragment);
+    } catch { /* Display the private-session recovery message below. */ }
+    if(!token){queueMicrotask(()=>{setWorkspaceSessionError('This private project needs its original resume link. Your saved drafts have not been changed.');setWorkspaceSessionLoading(false);});return;}
+    void fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}`,{headers:{authorization:`Bearer ${token}`},cache:'no-store'}).then(async r=>{if(!r.ok)throw Error('Could not resume this private project. Reopen its private link.');return r.json();}).then(data=>{
+      if(!active)return;
+      setLocalDraftStatus("idle");
+      setWorkspaceEnvelopeId(id);setWorkspaceCompany(data.buyer?.organisation||'');setAdded(data.buyer?.pinned_vendors||[]);
+      setWorkspaceSessionPublished(data.marketplace_state?.publication_status==='published');
+      const payload=data.workspace_payload ?? data.entrance_context?.raw_input?.workspace_payload;
+      if(payload?.position?.rfp_depth)setRfpDepth(payload.position.rfp_depth==="detailed"?"detailed":"short");
+      if(payload?.position?.entry_mode==="check"){setRfpEntryMode("check");rfpValidationCorpusRef.current=(payload.source_turns||[]).map((t:{text:string})=>t.text).join("\n\n");}
+      setDocumentPurpose(data.entrance_context?.raw_input?.document_purpose==='rfi'?'rfi':data.entrance_context?.raw_input?.document_purpose==='brief'?'brief':'rfp');
+      if(payload?.facts){factsRef.current=payload.facts;setFacts(payload.facts);setReceipts(payload.receipts||[]);receiptsRef.current=payload.receipts||[];receiptId.current=(payload.receipts||[]).reduce((max:number,item:Receipt)=>Math.max(max,item.id),0);cycleRef.current=(payload.facts||[]).reduce((max:number,item:WorkspaceFact)=>Math.max(max,item.cycle||0),0);const turns=hydrateSourceTurns(payload.source_turns);setSourceTurns(turns);sourceTurnsRef.current=turns;const decisions=payload.decision_turns||[];setDecisionTurns(decisions);decisionTurnsRef.current=decisions;const replay=replayDecisionLedger(decisions);setNoted(replay.noted);setDismissedQuestionIds(replay.dismissedQuestionIds);setDeclinedSuggestionIds(replay.declinedSuggestionIds);if(payload.compiled_document)previousProcurementDocumentRef.current=payload.compiled_document;}
+      else {
+        const buyer=data.buyer||{}, raw=data.entrance_context?.raw_input||{};
+        const fields:Partial<BriefFields>={sector:buyer.sector,sites:buyer.site_count?String(buyer.site_count):'',scope:raw.solution_scope||(buyer.product_scope==='sdwan_only'?'sdwan':buyer.product_scope==='sse_only'?'sse':buyer.product_scope==='full_sase'?'sase':''),regions:buyer.regions||[],operatingModel:buyer.operating_model,timescale:typeof raw.timescale==='string'?raw.timescale:''};
+        if(buyer.notes)keepSourceTurn(buyer.notes,'typed');
+        applyMerge(workspaceUpdatesFromBrief(fields),'answer');
+      }
+      setWorkspaceNotice(data.buyer?.notes||null);setSaveDirty(false);
+      envelopeRevisionRef.current=data.envelope_revision??payload?.base_revision??0;
+      setCheckpointRevision(envelopeRevisionRef.current);
+      checkpointBaselineRef.current=null;
+      try {
+        const raw=localStorage.getItem(PROJECT_CHECKPOINT_PREFIX+id);
+        if(raw){
+          const cp=JSON.parse(raw) as ProjectCheckpoint;
+          if(cp.schema!==1||cp.projectId!==id||cp.snapshot?.id!==id||!Array.isArray(cp.snapshot.facts)||!Array.isArray(cp.snapshot.sourceTurns)||!Array.isArray(cp.snapshot.decisionTurns))throw Error('invalid checkpoint');
+          setProjectCheckpoint({value:cp,canRestore:cp.baseRevision===envelopeRevisionRef.current&&data.marketplace_state?.publication_status!=='published'});
+        }
+      } catch {setWorkspaceSessionError('The recovery copy for this project could not be read. It has not been overwritten.');}
+    }).catch(e=>{if(active)setWorkspaceSessionError(e.message)}).finally(()=>{if(active)setWorkspaceSessionLoading(false)});
+    return()=>{active=false};
+    // The URL identifies this mount's project; later saves keep the same mounted ledger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+
   /** Harry full-test repair, Step 1: continuously preserve the canonical
    *  working inputs on this device. This intentionally stores inputs and
    *  ledgers, not the derived document: on reopen the document is compiled
@@ -2046,19 +2118,24 @@ export default function ProjectDesk({
    *  so an owner link can never be contaminated by an unrelated local
    *  draft. */
   useEffect(() => {
-    if (!booted || resumedFromUrlRef.current) return;
-    const hasWorkingDraft = facts.length > 0 || noted.length > 0 || receipts.length > 0 || sourceTurns.length > 0 || decisionTurns.length > 0;
+    if (!booted || workspaceSessionLoading || workspaceSessionError || projectCheckpoint || workspaceSessionPublished || published || (resumedFromUrlRef.current && !workspaceEnvelopeId)) return;
+    const hasWorkingDraft = draft.trim().length > 0 || facts.length > 0 || noted.length > 0 || receipts.length > 0 || sourceTurns.length > 0 || decisionTurns.length > 0;
     if (!hasWorkingDraft) return;
+    const checkpointFingerprint=JSON.stringify({facts,noted,dismissedQuestionIds,declinedSuggestionIds,receipts,sourceTurns,decisionTurns,resumeRemovals:[...resumeRemovals],messages:msgs,rfpDepth,rfpEntryMode,rfpValidationCorpus:rfpValidationCorpusRef.current,documentPurpose,pinnedVendorSlugs:added,draftInput:draft,company:workspaceCompany,notice:workspaceNotice});
+    if(workspaceEnvelopeId){
+      if(checkpointBaselineRef.current===null&&!saveDirty&&!draft.trim()){checkpointBaselineRef.current=checkpointFingerprint;return;}
+      if(checkpointBaselineRef.current===checkpointFingerprint&&!draft.trim())return;
+    }
     /* Do not leave the previous "Draft saved" acknowledgement on screen
        while a newer canonical snapshot is waiting to be written. Without
        this transition a fast refresh could trust the stale acknowledgement
        and reopen the earlier source-only snapshot before extracted facts
        had reached localStorage. */
     queueMicrotask(() => setLocalDraftStatus("idle"));
-    const timer = window.setTimeout(() => {
+    const persist = () => {
       try {
-        const id = localDraftIdRef.current ?? newLocalDraftId();
-        localDraftIdRef.current = id;
+        const id = workspaceEnvelopeId ?? localDraftIdRef.current ?? newLocalDraftId();
+        if(!workspaceEnvelopeId)localDraftIdRef.current = id;
         const updatedAt = Date.now();
         const snapshot: LocalWorkingDraft = {
           schema: 1,
@@ -2076,16 +2153,26 @@ export default function ProjectDesk({
           rfpDepth,
           rfpEntryMode,
           rfpValidationCorpus: rfpValidationCorpusRef.current,
+          documentPurpose,
+          pinnedVendorSlugs: added,
+          draftInput: draft,
         };
-        window.localStorage.setItem(`${LOCAL_DRAFT_PREFIX}${id}`, JSON.stringify(snapshot));
-        window.localStorage.setItem(LOCAL_DRAFT_POINTER_KEY, id);
+        if(workspaceEnvelopeId){
+          const checkpoint:ProjectCheckpoint={schema:1,projectId:id,baseRevision:envelopeRevisionRef.current,snapshot,company:workspaceCompany,notice:workspaceNotice};
+          window.localStorage.setItem(PROJECT_CHECKPOINT_PREFIX+id,JSON.stringify(checkpoint));
+        }else{
+          window.localStorage.setItem(`${LOCAL_DRAFT_PREFIX}${id}`, JSON.stringify(snapshot));
+          window.localStorage.setItem(LOCAL_DRAFT_POINTER_KEY, id);
+        }
         setLocalDraftSavedAt(updatedAt);
         setLocalDraftStatus("saved");
       } catch {
         setLocalDraftStatus("error");
       }
-    }, 650);
-    return () => window.clearTimeout(timer);
+    };
+    const timer=window.setTimeout(persist,650);
+    window.addEventListener("pagehide",persist);
+    return () => {window.clearTimeout(timer);window.removeEventListener("pagehide",persist);};
   }, [
     booted,
     facts,
@@ -2100,6 +2187,10 @@ export default function ProjectDesk({
     rfpDepth,
     rfpEntryMode,
     rfpValidation,
+    documentPurpose,
+    draft,
+    added,
+    workspaceEnvelopeId,workspaceSessionLoading,workspaceSessionError,workspaceSessionPublished,published,projectCheckpoint,checkpointRevision,saveDirty,workspaceCompany,workspaceNotice,
   ]);
 
   /* Autofocus, pointer-fine only: on a desktop the caret waits in the
@@ -2464,6 +2555,7 @@ export default function ProjectDesk({
    *  fixture proving either -- so all three are provably one code path,
    *  not three copies that happen to agree today. */
   const dropFact = useCallback((id: string) => {
+    setWorkspaceNotice(null);
     const f = factsRef.current.find((x) => x.id === id);
     if (!f || f.struck) return;
     if (f.provenance === "inferred") neverReinfer.current.add(nrKey(f.path, f.value));
@@ -2499,6 +2591,7 @@ export default function ProjectDesk({
    *  clearNotes(prefix) and wiping every note in the slot, not just the
    *  one the buyer clicked clear on. This is the correct per-item form. */
   const clearNote = useCallback((id: string) => {
+    setWorkspaceNotice(null);
     setNoted((ns) => ns.filter((n) => n.id !== id));
     setChangedSlots([]);
     setSaveDirty(true);
@@ -2520,6 +2613,7 @@ export default function ProjectDesk({
    *  later save of this same turn, unlike the third amendment's numeric
    *  ref counter (see the SourceTurn type comment). */
   const keepSourceTurn = useCallback((text: string, via: SourceLedgerVia) => {
+    setWorkspaceNotice(null);
     setSourceTurns((ts) => [...ts, { id: newSourceTurnId(), text, at: Date.now(), via }]);
     setSaveDirty(true);
   }, []);
@@ -2528,6 +2622,7 @@ export default function ProjectDesk({
    *  row on the statement already has, now that receipts render as their
    *  own "Other requirements" group instead of only in the side sheet. */
   const dropReceipt = useCallback((id: number) => {
+    setWorkspaceNotice(null);
     setReceipts((rs) => rs.filter((r) => r.id !== id));
     setSaveDirty(true);
   }, []);
@@ -3087,6 +3182,7 @@ export default function ProjectDesk({
      extraction and receipts path. ---- */
   const ingestText = useCallback(
     async (raw: string, source: "paste" | "drop" | "file" | "link") => {
+      if(raw.length > 200_000){setPasteSummary(`This source contains ${raw.length.toLocaleString("en-GB")} characters. Split it into sections of up to 200,000 characters and import each section. Nothing from this source was added.`);return;}
       const plan = chunkForIngest(raw);
       if (!plan.chunks.length) return;
       setPasteSummary(null);
@@ -3129,7 +3225,7 @@ export default function ProjectDesk({
       if (rfpEntryMode === "check") await validateExistingRfp(raw, true);
       const landed = Math.max(0, factsRef.current.filter((f) => !f.struck).length - factsBefore);
       const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
-      setPasteSummary(ingestSummary(landed, kept, plan));
+      setPasteSummary(ingestSummary(landed, kept, plan, source));
     },
     [runCycle, keepReceipt, keepSourceTurn, rfpEntryMode, validateExistingRfp],
   );
@@ -3289,9 +3385,7 @@ export default function ProjectDesk({
         setReqOpen(cmd.open);
         return;
       case "reset":
-        clearLocalWorkingDraft(localDraftIdRef.current);
-        localDraftIdRef.current = null;
-        window.location.assign(window.location.pathname);
+        startNewBuyingProject();
         return;
       case "back":
         goToStep("describe");
@@ -3463,6 +3557,8 @@ export default function ProjectDesk({
         : {}),
       position: {
         covered_sections: instrumentCoveredSections,
+        rfp_depth: rfpDepth,
+        entry_mode: rfpEntryMode,
         sector: (requirement.organisation?.sector as string | undefined) ?? null,
       },
       /* Fourth amendment, gaps 2 & 3: the structured ledger, alongside the
@@ -3618,6 +3714,7 @@ export default function ProjectDesk({
      header stays honest either way; nothing is invited and nothing is
      listed until the signature chain runs. ---- */
   async function saveNow() {
+    if(workspaceEnvelopeId){requestBrief();return;}
     // Sixth amendment, item 3: same non-UI guard as send() above.
     if (!started || saveBusy || resuming) return;
     if (securityScope && !consentSave) return;
@@ -3675,6 +3772,7 @@ export default function ProjectDesk({
      changed its face, never its law: consents verbatim, humans sign,
      agents never, publish is the only exit). ---- */
   async function signAndPublish() {
+    if(workspaceEnvelopeId){requestBrief();return;}
     if (signLocked || !consentsOk || signStage) return;
     setSignError(null);
     if (testMode && !securityScope) {
@@ -4315,7 +4413,7 @@ export default function ProjectDesk({
           onConfirmSelection: slot?.selectionMode === "multiple"
             ? (indices: number[]) => landMultipleOptions(slot, indices.map((index) => slot.options[index]).filter(Boolean))
             : undefined,
-          selectAllLabel: slot?.selectionMode === "multiple" ? "Select worldwide" : undefined,
+          selectAllLabel: slot?.path === "organisation.regions" ? "Select worldwide" : undefined,
           hint: slot ? null : "See “Project details” below for the full context.",
           fills,
         };
@@ -4418,7 +4516,7 @@ export default function ProjectDesk({
       onConfirmSelection: slot.selectionMode === "multiple"
         ? (indices: number[]) => landMultipleOptions(slot, indices.map((index) => slot.options[index]).filter(Boolean))
         : undefined,
-      selectAllLabel: slot.selectionMode === "multiple" ? "Select worldwide" : undefined,
+      selectAllLabel: slot.path === "organisation.regions" ? "Select worldwide" : undefined,
       hint: null,
       fills: { title: nextRow.title, position: sectionPosition(sectionOutline, nextRow.title)?.position ?? sectionProgress.nextPosition, total: sectionProgress.total },
     };
@@ -4441,6 +4539,7 @@ export default function ProjectDesk({
   const answeredLog = useMemo(() => buildAnsweredLog({ facts, noted }), [facts, noted]);
 
   const addCustomSupplierQuestion = useCallback((question: string) => {
+    setWorkspaceNotice(null);
     if (!activeRow) return;
     const normalized = `${question.trim().replace(/\s+/g, " ").replace(/[?.!]+$/, "")}?`;
     if (normalized.length < 8) return;
@@ -4623,6 +4722,47 @@ export default function ProjectDesk({
   const sendReady = draft.trim().length > 0 && !busy && !resuming;
   const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
 
+  useEffect(()=>{
+    const read=(event:Event)=>{
+      const detail=(event as CustomEvent<{value:WorkspaceProject|null}>).detail;
+      if(!booted)return;
+      detail.value={id:workspaceEnvelopeId||created?.id||localDraftIdRef.current,legacyProject:!!created&&!workspaceEnvelopeId,documentPurpose,busy:busy||workspaceSessionLoading||!!workspaceSessionError||!!projectCheckpoint,published:!!published||workspaceSessionPublished,fields:{scope:buying==='sdwan'?'sdwan':buying==='sse'?'sse':'sase',sector:wizardSectorKey(requirement.organisation?.sector)||'',sites:requirement.estate?.sites?String(requirement.estate.sites):'',regions:wizardRegions(requirement.organisation?.regions||[]),operatingModel:opModel||'any',outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:''),timescale:requirement.constraints?.timeline||'',company:workspaceCompany},payload:{...rfpPayload(false),document_purpose:documentPurpose}};
+    };
+    const confirm=(event:Event)=>{
+      const detail=(event as CustomEvent<{fields:BriefFields;accepted:boolean;error:string}>).detail;
+      if(!booted||busy||workspaceSessionLoading||workspaceSessionError||projectCheckpoint){detail.error='Wait until your project has finished loading and saving.';return;}
+      if(published||workspaceSessionPublished){detail.error='This project is already published. Open its existing review controls.';return;}
+      const f=detail.fields;
+      const existingRegions=standing(factsRef.current).filter(x=>x.path==='organisation.regions').map(x=>String(x.value));
+      const regions=confirmedWorkspaceRegions(f.regions,existingRegions);
+      const updates=workspaceUpdatesFromBrief(f,existingRegions);
+      for(const fact of standing(factsRef.current).filter(x=>x.path==='organisation.regions'&&!regions.includes(String(x.value))))dropFact(fact.id);
+      if(f.operatingModel==='any')for(const fact of standing(factsRef.current).filter(x=>x.path==='procurement.operatingModel'))dropFact(fact.id);
+      applyMerge(updates,'answer');
+      if(f.outcome!==workspaceNotice&&f.outcome!==canvasDocument.summary)keepSourceTurn(f.outcome,'typed');
+      setWorkspaceNotice(f.outcome);setWorkspaceCompany(f.company);detail.accepted=true;
+    };
+    const revision=(e:Event)=>{
+      const value=(e as CustomEvent<number|{envelopeRevision:number;projectId?:string}>).detail;
+      const n=typeof value==='number'?value:value.envelopeRevision;
+      if(Number.isSafeInteger(n))envelopeRevisionRef.current=n;
+      if(typeof value==='object'&&value.projectId){setWorkspaceEnvelopeId(value.projectId);resumedFromUrlRef.current=true;}
+      const id=typeof value==='object'?value.projectId||workspaceEnvelopeId:workspaceEnvelopeId;
+      if(id){try{localStorage.removeItem(PROJECT_CHECKPOINT_PREFIX+id);}catch{setLocalDraftStatus('error');}}
+      checkpointBaselineRef.current=null;
+      setCheckpointRevision(n);
+      setLocalDraftStatus('idle');
+      setSaveDirty(false);
+    };
+    const purpose=(e:Event)=>{const v=(e as CustomEvent<DocumentPurpose>).detail;if(['brief','rfp','rfi'].includes(v))setDocumentPurpose(v);};
+    const flush=(e:Event)=>{if(resumedFromUrlRef.current||workspaceEnvelopeId){if(saveDirty||draft.trim())(e as CustomEvent<{error:string}>).detail.error='Save or review your current project changes before opening another draft.';return;}try{const id=localDraftIdRef.current??newLocalDraftId();localDraftIdRef.current=id;const snapshot:LocalWorkingDraft={schema:1,id,updatedAt:Date.now(),facts,noted,dismissedQuestionIds,declinedSuggestionIds,receipts,sourceTurns,decisionTurns,resumeRemovals:[...resumeRemovals],messages:msgs,rfpDepth,rfpEntryMode,rfpValidationCorpus:rfpValidationCorpusRef.current,documentPurpose,draftInput:draft,pinnedVendorSlugs:added};localStorage.setItem(LOCAL_DRAFT_PREFIX+id,JSON.stringify(snapshot));localStorage.setItem(LOCAL_DRAFT_POINTER_KEY,id);}catch{(e as CustomEvent<{error:string}>).detail.error='Could not preserve the current draft.';}};
+    const legacyReview=()=>{if(created&&!workspaceEnvelopeId)goToStep('publish');};
+    window.addEventListener('netify:legacy-project-review',legacyReview);
+    window.addEventListener('netify:flush-draft',flush);
+    window.addEventListener('netify:project-read',read);window.addEventListener('netify:project-confirm',confirm);window.addEventListener('netify:project-revision',revision);window.addEventListener('netify:document-purpose',purpose);
+    return()=>{window.removeEventListener('netify:legacy-project-review',legacyReview);window.removeEventListener('netify:flush-draft',flush);window.removeEventListener('netify:project-read',read);window.removeEventListener('netify:project-confirm',confirm);window.removeEventListener('netify:project-revision',revision);window.removeEventListener('netify:document-purpose',purpose);};
+  });
+
   // The shell delegates to existing engine actions; publication gates stay here.
   useEffect(() => {
     const receive = (event: Event) => {
@@ -4630,10 +4770,10 @@ export default function ProjectDesk({
       const action = (event as CustomEvent<string>).detail;
       if (action === "settings") { goToStep("describe"); setDocumentSettingsOpen(true); }
       if (action === "requirements") goToStep("describe");
-      if (action === "short-rfp" || action === "detailed-rfp") { changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
-      if (action === "import") { goToStep("describe"); fileRef.current?.click(); }
+      if (action === "short-rfp" || action === "detailed-rfp") { setDocumentPurpose("rfp"); setRfpEntryMode("build"); changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
+      if (action === "import") { setRfpEntryMode("check"); goToStep("describe"); fileRef.current?.click(); }
       if (action === "review") goToStep(started ? "review" : "describe");
-      if (action === "responses") goToStep(reachable.has("compare") ? "compare" : "describe");
+      if (action === "responses") { if(reachable.has("compare"))goToStep("compare");else {say("Supplier responses become available after you publish and suppliers reply. Review your project to continue.");requestBrief();} }
       if (action === "tools") {
         document.querySelectorAll<HTMLDetailsElement>(".nf-calm-project-tools").forEach((panel) => { panel.open = true; panel.scrollIntoView({ block: "nearest" }); });
       }
@@ -4642,7 +4782,23 @@ export default function ProjectDesk({
     return () => window.removeEventListener("netify:workspace-action", receive);
   });
 
-  if (!booted) return <div className="pd-root mt-10" />;
+  if (!booted || workspaceSessionLoading) return <div className="pd-root mt-10" role="status">Loading your project…</div>;
+  if(workspaceSessionError)return <p role="alert">{workspaceSessionError}</p>;
+  if(projectCheckpoint){
+    const {value:cp,canRestore}=projectCheckpoint;
+    const archive=()=>{localStorage.setItem(PROJECT_CHECKPOINT_PREFIX+cp.projectId+':archive:'+cp.snapshot.updatedAt,JSON.stringify(cp));localStorage.removeItem(PROJECT_CHECKPOINT_PREFIX+cp.projectId);setProjectCheckpoint(null);checkpointBaselineRef.current=null;};
+    const restore=()=>{
+      const local=cp.snapshot;
+      factsRef.current=local.facts;setFacts(local.facts);setNoted(local.noted);setDismissedQuestionIds(local.dismissedQuestionIds);setDeclinedSuggestionIds(local.declinedSuggestionIds);
+      setReceipts(local.receipts);receiptsRef.current=local.receipts;receiptId.current=local.receipts.reduce((max,item)=>Math.max(max,item.id),0);
+      setSourceTurns(local.sourceTurns);sourceTurnsRef.current=local.sourceTurns;setDecisionTurns(local.decisionTurns);decisionTurnsRef.current=local.decisionTurns;
+      const removals=new Set(local.resumeRemovals);setResumeRemovals(removals);resumeRemovalsRef.current=removals;
+      cycleRef.current=Math.max(0,...local.facts.map(f=>f.cycle));setMsgs(local.messages);setDraft(local.draftInput??'');setAdded(local.pinnedVendorSlugs??[]);setDocumentPurpose(local.documentPurpose??'rfp');setRfpDepth(local.rfpDepth);setRfpEntryMode(local.rfpEntryMode);rfpValidationCorpusRef.current=local.rfpValidationCorpus;
+      setWorkspaceCompany(cp.company);setWorkspaceNotice(cp.notice);setSaveDirty(true);setProjectCheckpoint(null);setLocalDraftStatus('saved');setLocalDraftSavedAt(local.updatedAt);
+    };
+    return <section className="nf-draft-recovery" role="status"><h2>{canRestore?'Resume changes saved on this device?':'Your project has changed since this recovery copy'}</h2><p>{canRestore?'Your unsaved requirements, supplier questions and draft text are available. The server project will only change when you review and save.':'This copy belongs to an earlier revision or a published project. It cannot replace the current project. Download it to review its contents; continuing keeps an archived copy on this device.'}</p><p>Saved {new Date(cp.snapshot.updatedAt).toLocaleString('en-GB')}</p>{canRestore&&<button onClick={restore}>Resume device changes</button>}<button onClick={()=>{const blob=new Blob([JSON.stringify(cp,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='netify-project-recovery.json';a.click();URL.revokeObjectURL(url);}}>Download recovery copy</button><button onClick={()=>{try{archive()}catch{setWorkspaceSessionError('Could not archive this recovery copy. Nothing has been deleted.')}}}>Use saved server version</button></section>;
+  }
+
 
   const mono: React.CSSProperties = { fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' };
   const editSlot = edit ? SLOT_BY_ID[edit] ?? null : null;
@@ -4976,7 +5132,7 @@ export default function ProjectDesk({
       sectionsTotal={sectionProgress.total}
       optionalRemaining={materialDecisionsRemaining}
       onReview={() => goToStep("review")}
-      onPublish={() => goToStep("publish")}
+      onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
     />
   ) : null;
 
@@ -5399,12 +5555,15 @@ export default function ProjectDesk({
               publishReachable={reachable.has("publish")}
               publishCompleted={completed.has("publish")}
               compareReachable={reachable.has("compare")}
-              onPublish={() => goToStep("publish")}
+              onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
               onCompare={() => goToStep("compare")}
               questionTarget={rfpQuestionTarget}
             />
             {activeStep === "describe" && (
               <GuidedBuild
+                documentPurpose={documentPurpose}
+                onDocumentPurposeChange={setDocumentPurpose}
+                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
                 card={guidedQuestionCard}
                 ready={contentReady}
                 depthReady={rfpCoverage.ready}
@@ -5445,7 +5604,7 @@ export default function ProjectDesk({
                 materialDecisionsRemaining={materialDecisionsRemaining}
                 publishReachable={reachable.has("publish")}
                 onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
-                onPublish={() => goToStep("publish")}
+                onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
                 entryMode={rfpEntryMode}
                 onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
                 validationReport={rfpValidation}
@@ -6524,6 +6683,9 @@ export default function ProjectDesk({
 
           <div data-workspace-grid className="nf-2030-grid" data-rail-collapsed={productRailCollapsed}>
             <GuidedBuild
+                documentPurpose={documentPurpose}
+                onDocumentPurposeChange={setDocumentPurpose}
+                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
               card={guidedQuestionCard}
               ready={contentReady}
               depthReady={rfpCoverage.ready}
@@ -6562,7 +6724,7 @@ export default function ProjectDesk({
               materialDecisionsRemaining={materialDecisionsRemaining}
               publishReachable={false}
               onSelectSection={(key) => setActiveSection(key)}
-              onPublish={() => undefined}
+              onPublish={() => { if(created&&!workspaceEnvelopeId)goToStep("publish");else requestBrief(); }}
               entryMode={rfpEntryMode}
               onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
               validationReport={rfpValidation}

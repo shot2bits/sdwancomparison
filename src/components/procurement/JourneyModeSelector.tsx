@@ -6,11 +6,13 @@ import { PROJECT_ENTRANCE_CONTRACT_VERSION, type ProjectEntranceContext } from '
 import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION, quickListingReadiness } from '@/lib/publication-policy';
 import { REGION_KEYS, REGION_LABELS, SECTOR_KEYS, SECTOR_LABELS } from '@/lib/shortlist-core';
 import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY, PROJECT_DRAFT_KEY, projectTokenKey } from '@/lib/buying-entry';
+import DraftRecovery from "./DraftRecovery";
+import {readWorkspaceProject,confirmBriefInWorkspace,syncWorkspaceRevision,type BriefFields} from "@/lib/buying-workspace-project";
 import SignIn from '@/components/SignIn';
 
-type Fields = { scope: string; sector: string; sites: string; regions: string[]; operatingModel: string; outcome: string; timescale: string; company: string; requiredFeatures: string[] };
+type Fields = BriefFields;
 const EMPTY: Fields = { scope: 'sase', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '', requiredFeatures: [] };
-type Project = { project_reference: string; revision: number };
+type Project = { project_reference: string; revision: number; envelope_revision?: number };
 const inputClass = 'mt-1 block w-full rounded border border-[#cfc8bf] bg-white p-2 text-sm font-normal';
 
 export default function JourneyModeSelector({ children }: { children?: ReactNode }) {
@@ -43,7 +45,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
         const chosen = params.has('id') || params.has('q') ? 'build_rfp' : PROJECT_JOURNEY_MODES.includes(requested) ? requested : 'quick_list';
         mode.current = chosen; setSelected(chosen); setResuming(params.has('id'));
         const id = params.get('project');
-        if (id || params.get('from') === 'comparison') setPanelOpen(true);
+        if (params.get('from') === 'comparison' || (id && params.get('review') === '1')) setPanelOpen(true);
         const fragment = new URLSearchParams(location.hash.slice(1));
         const incoming = fragment.get('project_session');
         if (id && incoming) {
@@ -59,7 +61,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
           if (!active) return;
           const raw = data.entrance_context?.raw_input ?? {}, buyer = data.buyer;
           setFields({ scope: raw.solution_scope ?? (buyer.product_scope === 'sdwan_only' ? 'sdwan' : buyer.product_scope === 'sse_only' ? 'sse' : 'sase'), sector: buyer.sector ?? '', sites: buyer.site_count == null ? '' : String(buyer.site_count), regions: buyer.regions, operatingModel: buyer.operating_model, outcome: buyer.notes, timescale: raw.timescale ?? '', company: buyer.organisation, requiredFeatures: raw.shortlist?.required_features ?? data.entrance_context?.shortlist_input?.required_features ?? [] });
-          setEntrance(data.entrance_context ?? null); setProject({ project_reference: id, revision: data.revision });
+          setEntrance(data.entrance_context ?? null); setProject({ project_reference: id, revision: data.revision, envelope_revision:data.envelope_revision });
           setPrepared(data.prepared); setReview(true);
           setPublished(data.marketplace_state?.publication_status === 'published' && data.marketplace_state?.market_unlock_status === 'unlocked');
           mode.current = data.mode === 'find_providers' ? 'find_providers' : 'quick_list'; setSelected(mode.current);
@@ -119,11 +121,24 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   }, [panelOpen, ready]);
 
   function choose(next: ProjectJourneyMode) {
+    const workspace=readWorkspaceProject();
+    if(workspace?.legacyProject){setPanelOpen(false);window.dispatchEvent(new Event("netify:legacy-project-review"));return;}
+    if(workspace?.busy){setError('Wait for your requirements to finish loading or saving.');setPanelOpen(true);return;}
+    if(workspace&&(Array.isArray(workspace.payload.facts)&&workspace.payload.facts.length||Array.isArray(workspace?.payload.source_turns)&&workspace.payload.source_turns.length)){
+      setFields(old=>({...old,...workspace.fields,company:workspace.fields.company||old.company,requiredFeatures:old.requiredFeatures}));
+      if(!published){setReview(false);setConsent(false);setPrepared(false);}
+    }
     mode.current = next; setSelected(next);
     const url = new URL(location.href); url.searchParams.set('journey', next);
     history.replaceState(history.state, '', url);
     setPanelOpen(true);
   }
+  useEffect(()=>{
+    const open=(event:Event)=>{const d=(event as CustomEvent<{mode:string;accepted:boolean}>).detail;if(!ready)return;if(d.mode==='find_providers'){try{const raw=sessionStorage.getItem(COMPARISON_PROJECT_DRAFT_KEY);if(raw){const ctx=JSON.parse(raw) as ProjectEntranceContext;setEntrance(ctx);const current=readWorkspaceProject();const hasProject=Array.isArray(current?.payload.facts)&&current.payload.facts.length>0;setFields(old=>({...old,...(!hasProject?{sector:ctx.sector||old.sector,outcome:ctx.requirement_text||old.outcome,regions:Array.isArray(ctx.buyer_input.regions)&&ctx.buyer_input.regions.length?ctx.buyer_input.regions as string[]:old.regions,operatingModel:String(ctx.buyer_input.operating_model||old.operatingModel)}:{}),requiredFeatures:(ctx.shortlist_input?.required_features as string[])??old.requiredFeatures}));}}catch{}}choose(d.mode==='find_providers'?'find_providers':'quick_list');d.accepted=true;};
+    window.addEventListener('netify:open-brief',open);return()=>window.removeEventListener('netify:open-brief',open);
+    // Capture the latest form and engine snapshot when the user opens review.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[ready,published]);
   async function request(path: string, body: unknown, method = 'POST', current = project) {
     const token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
     if (current && !token) throw new Error('Your private session is unavailable. Reload to recover your project.');
@@ -140,22 +155,26 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   }
   async function saveForReview() {
     await action(async () => {
+      if(readWorkspaceProject()?.legacyProject){setPanelOpen(false);window.dispatchEvent(new Event("netify:legacy-project-review"));return;}
       const readiness = quickListingReadiness({ solutionScope: fields.scope, sector: fields.sector, siteCount: Number(fields.sites), regions: fields.regions, operatingModel: fields.operatingModel, outcome: fields.outcome, timescale: fields.timescale });
       if (!readiness.allowed || !Number.isSafeInteger(Number(fields.sites))) throw new Error(`Please complete: ${readiness.reasons.join(', ') || 'a whole-number site count'}.`);
       if (fields.company.trim().length < 2) throw new Error('Enter your company name. It stays private.');
+      const workspace=await confirmBriefInWorkspace(fields);
+      if(!workspace||workspace.busy)throw new Error('Your requirements are still being processed. Try reviewing again shortly.');
       // Fail before creating if this browser cannot retain its private recovery credential.
       localStorage.setItem('netify_storage_check', '1'); localStorage.removeItem('netify_storage_check');
-      const buyer = { ...(entrance?.buyer_input ?? {}), organisation: fields.company.trim(), sector: fields.sector, site_count: Number(fields.sites), regions: fields.regions, operating_model: fields.operatingModel, product_scope: fields.scope === 'sdwan' ? 'sdwan_only' : fields.scope === 'sse' ? 'sse_only' : 'full_sase', notes: fields.outcome.trim(), pinned_vendors: [] };
+      const buyer = { ...(entrance?.buyer_input ?? {}), organisation: fields.company.trim(), sector: fields.sector, site_count: Number(fields.sites), regions: fields.regions, operating_model: fields.operatingModel, product_scope: fields.scope === 'sdwan' ? 'sdwan_only' : fields.scope === 'sse' ? 'sse_only' : 'full_sase', notes: fields.outcome.trim(), pinned_vendors: Array.isArray((workspace.payload.buyer as {pinned_vendors?:string[]})?.pinned_vendors) ? (workspace.payload.buyer as {pinned_vendors:string[]}).pinned_vendors : (entrance?.buyer_input?.pinned_vendors ?? []) };
       const shortlist = { ...(entrance?.shortlist_input ?? {}), required_features: fields.requiredFeatures };
-      const raw = { ...(entrance?.raw_input ?? {}), shortlist, solution_scope: fields.scope, outcome: fields.outcome.trim(), timescale: fields.timescale.trim() };
+      const raw = { ...(entrance?.raw_input ?? {}), workspace_payload:{...workspace.payload,base_revision:project?.envelope_revision??0},document_purpose:workspace.documentPurpose, shortlist, solution_scope: fields.scope, outcome: fields.outcome.trim(), timescale: fields.timescale.trim() };
       let saved: Project;
       if (project) saved = await request(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}`, { base_revision: project.revision, idempotency_key: crypto.randomUUID(), buyer_patch: buyer, raw_input: raw }, 'PATCH');
       else {
         const context = { version: PROJECT_ENTRANCE_CONTRACT_VERSION, source: entrance?.source ?? 'rfp_builder', source_url: entrance?.source_url ?? location.href, captured_at: entrance?.captured_at ?? Date.now(), requirement_text: fields.outcome.trim(), sector: fields.sector, marketplace_slug: null, vendor_slugs: [], buyer_input: buyer, shortlist_input: shortlist, raw_input: raw };
         const data = await request('/sase/api/marketplace/projects', { mode: selected, entrance_context: context });
         localStorage.setItem(projectTokenKey(data.project_reference), data.project_session_token);
-        saved = { project_reference: data.project_reference, revision: data.revision };
+        saved = { project_reference: data.project_reference, revision: data.revision, envelope_revision:data.envelope_revision };
       }
+      if(saved.envelope_revision!==undefined)syncWorkspaceRevision(saved.envelope_revision,saved.project_reference);
       setProject(saved); setReview(true); setPrepared(false); setConsent(false); setCoverage(null);
       const url = new URL(location.href); url.searchParams.set('project', saved.project_reference); url.searchParams.delete('from');
       history.replaceState(history.state, '', url);
@@ -190,9 +209,9 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
         {project ? 'Return to my project brief' : 'Publish a short brief'} <span aria-hidden="true">↗</span>
       </button>
     </div>}
-    {ready && children}
+    {ready && <DraftRecovery>{children}</DraftRecovery>}
     <dialog ref={dialogRef} className="nf-brief-dialog" aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
-      <header className="nf-brief-panel-header"><span>NETIFY · PROJECT BRIEF</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
+      <header className="nf-brief-panel-header"><span>Netify · Project review</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
       <div className="nf-brief-panel-body">
           <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Publish a short project brief'}</h2>
           <p className="mt-2 text-sm text-[#66635e]">Describe what you need, review the anonymous notice, then verify your work email to publish. A full RFP is optional.</p>
@@ -208,10 +227,10 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
             <button type="button" disabled={busy || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
           </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void saveForReview(); }}>
             <fieldset disabled={busy} className="grid gap-4 sm:grid-cols-2">
-              <label className="text-sm font-semibold">Solution<select className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
-              <label className="text-sm font-semibold">Sector<select required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
+              <label className="text-sm font-semibold">Solution<select aria-label="Solution" className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
+              <label className="text-sm font-semibold">Sector<select aria-label="Sector" required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
               <label className="text-sm font-semibold">Number of sites<input required type="number" min="1" step="1" className={inputClass} value={fields.sites} onChange={(e) => setField('sites', e.target.value)}/></label>
-              <label className="text-sm font-semibold">Operating model<select className={inputClass} value={fields.operatingModel} onChange={(e) => setField('operatingModel', e.target.value)}><option value="any">Not decided</option><option value="managed">Fully managed</option><option value="co_managed">Co-managed</option><option value="diy">Self-managed</option></select></label>
+              <label className="text-sm font-semibold">Operating model<select aria-label="Operating model" className={inputClass} value={fields.operatingModel} onChange={(e) => setField('operatingModel', e.target.value)}><option value="any">Not decided</option><option value="managed">Fully managed</option><option value="co_managed">Co-managed</option><option value="diy">Self-managed</option></select></label>
               <label className="text-sm font-semibold">Buying timescale<input required maxLength={200} placeholder="e.g. within six months" className={inputClass} value={fields.timescale} onChange={(e) => setField('timescale', e.target.value)}/></label>
               <label className="text-sm font-semibold">Company name (private)<input required minLength={2} maxLength={200} autoComplete="organization" className={inputClass} value={fields.company} onChange={(e) => setField('company', e.target.value)}/></label>
               <fieldset className="sm:col-span-2"><legend className="mb-2 text-sm font-semibold">Regions to cover</legend><div className="flex flex-wrap gap-3">{REGION_KEYS.map((r) => <label key={r} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fields.regions.includes(r)} onChange={(e) => setField('regions', e.target.checked ? [...fields.regions, r] : fields.regions.filter((v) => v !== r))}/>{REGION_LABELS[r]}</label>)}</div></fieldset>

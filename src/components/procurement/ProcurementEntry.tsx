@@ -8,7 +8,6 @@ import CapabilityBlock from "@/components/CapabilityBlock";
 import CollapsibleHero from "@/components/CollapsibleHero";
 import EmptyDocumentFrame from "@/components/procurement/EmptyDocumentFrame";
 import JourneyModeSelector from "@/components/procurement/JourneyModeSelector";
-import { getAllVendors } from "@/lib/vendors";
 
 /**
  * The canonical product entry (2030 living-procurement workspace
@@ -44,7 +43,7 @@ import { getAllVendors } from "@/lib/vendors";
  * two head terms and the outcome, in the order buyers search. Replaces
  * "Build or validate a procurement-ready SASE or SD-WAN RFP", whose exact
  * phrase "SASE RFP" never appeared in the served HTML. */
-export const ENGINE_H1 = "Find SASE and SD-WAN providers for your project";
+export const ENGINE_H1 = "Build a SASE RFP or SD-WAN RFP, or start with a short brief";
 /* The two definitions shown above the application (Robert, 3 Sep 2026).
  * They exist so an answer engine can read what an SD-WAN RFP and a SASE
  * RFP are from THIS page rather than from a redirected legacy URL: the
@@ -72,13 +71,13 @@ export const ENGINE_ROLE =
 export const RFP_META_DESCRIPTION =
   "Build an SD-WAN RFP or SASE RFP with governed supplier questions, validate it, publish anonymously and run a like-for-like vendor evaluation. Free for buyers.";
 export const ENGINE_PROMISE =
-  "Compare providers, describe your requirements and publish a free, anonymous project. Unlock your personalised shortlist and invite supplier responses. A full RFP is optional.";
+  "Describe your needs, bring an RFP or RFI, or build a Short or Detailed RFP. Review and publish an anonymous project to invite supplier responses. A full RFP is optional.";
 export const ENGINE_VALUE =
-  `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors. Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson involved.`;
+  "Use Netify's governed question bank and sourced provider comparisons to structure your requirements. Manufacturing guidance covers production uptime, OT access, remote users and service ownership.";
 export const ENGINE_AGENT =
-  "Use Netify directly, or connect your organisation's approved AI agent through MCP. Agents research, draft, compare and monitor. Your team publishes, selects and awards.";
+  "Use public Netify research through a supported MCP client. Prepare requirements with provenance, then continue in Netify for identity checks and publication approval. Private tools require the credentials described by each tool.";
 export const ENGINE_CONTROL =
-  "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. Only vetted vendors and service providers can respond.";
+  "Free for buyers. Review the anonymous notice before publishing. Your identity and contact details remain private. Publishing does not require you to buy, speak to a supplier or accept a response.";
 export const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 // State-0 height correction (18 Aug 2026 Constitution): a short, real

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import PublicationPreview from "./PublicationPreview";
+import {requestBrief,type BriefFields,type DocumentPurpose} from "@/lib/buying-workspace-project";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
@@ -95,7 +97,13 @@ export default function GuidedBuild({
   published,
   shortlist = null,
   draftSaveStatus,
+  briefFields = {},
+  documentPurpose = "rfp",
+  onDocumentPurposeChange,
 }: {
+  briefFields?: Partial<BriefFields>;
+  documentPurpose?: DocumentPurpose;
+  onDocumentPurposeChange?: (purpose: DocumentPurpose) => void;
   card: NextQuestionCard | null;
   ready: boolean;
   depthReady: boolean;
@@ -360,7 +368,15 @@ export default function GuidedBuild({
 
   return (
     <div className="lpos-builder" data-workspace-tab={workspaceTab}>
-      <div className="nf-calm-heading"><div><div className="nf-workspace-title"><h1>{displayDocumentTitle}</h1><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" disabled={!publishReachable} title={publishReachable ? "Review this RFP before publishing" : "Complete the essential requirements, or publish a short brief"} onClick={onPublish}>Review &amp; publish →</button></div>
+      <div className="nf-workspace-intro"><h1>Build your SASE or SD-WAN RFP.<br/>Get comparable supplier responses.</h1><p>Start with a few requirements or bring your own document. Publish one anonymous project to the Netify Opportunity Board.</p></div>
+      <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" title="Review your project and complete the publication details" onClick={onPublish}>Review &amp; publish →</button></div>
+      <section className="nf-project-formats" aria-label="Choose your project format"><strong>How would you like to build your project?</strong><div>
+        <button aria-pressed={documentPurpose === 'brief'} onClick={()=>{onDocumentPurposeChange?.('brief');requestBrief();}}>Basic requirements<span>A short business brief</span></button>
+        <button aria-pressed={documentPurpose === 'rfp' && entryMode === 'build' && rfpDepth === 'short'} onClick={()=>{onDocumentPurposeChange?.('rfp');onEntryModeChange('build');onRfpDepthChange('short');setWorkspaceTab('requirements');}}>Short RFP<span>Core supplier questions</span></button>
+        <button aria-pressed={documentPurpose === 'rfp' && entryMode === 'build' && rfpDepth === 'detailed'} onClick={()=>{onDocumentPurposeChange?.('rfp');onEntryModeChange('build');onRfpDepthChange('detailed');setWorkspaceTab('requirements');}}>Detailed RFP<span>Full question bank and evidence</span></button>
+        <button aria-pressed={entryMode === 'check'} onClick={()=>{onEntryModeChange('check');setWorkspaceTab('overview');}}>Bring an RFP or RFI<span>Keep your original wording</span></button>
+      </div><p>One project throughout. Switching keeps your answers, source material and bespoke questions.</p>
+      {entryMode === 'check' && <label className="nf-document-purpose">Your document type <select value={documentPurpose==='rfi'?'rfi':'rfp'} onChange={e=>onDocumentPurposeChange?.(e.target.value as DocumentPurpose)}><option value="rfp">Request for proposal (RFP)</option><option value="rfi">Request for information (RFI)</option></select></label>}</section>
       <nav className="nf-calm-tabs" aria-label="Project views">
         <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
         <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>
@@ -390,10 +406,10 @@ export default function GuidedBuild({
             <div className="lpos-entry-mode" role="group" aria-label="How do you want to start?">
               <span>Start from</span>
               <button type="button" data-selected={entryMode === "build"} onClick={() => onEntryModeChange("build")}>New requirements</button>
-              <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Check an AI-generated RFP</button>
+              <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Check an existing RFP or RFI</button>
             </div>
             <div className="nf-guided-prompt">{composer}</div>
-            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking procurement readiness against the Netify question bank…" : "Already created an RFP with ChatGPT, Claude or another AI? Paste it above or upload Word, PDF, text or a spreadsheet. Netify finds what is missing and preserves the original wording."}</span><button type="button" onClick={onImportQuestions}>Upload RFP</button></div>}
+            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking procurement readiness against the Netify question bank…" : "Already created an RFP with ChatGPT, Claude or another AI? Paste it above or upload Word, PDF, text or a spreadsheet. Netify finds what is missing and preserves the original wording."}</span><button type="button" onClick={onImportQuestions}>Upload RFP or RFI</button></div>}
             {validationError && <p className="lpos-validation-error" role="alert">{validationError}</p>}
             <div className="lpos-depth" data-depth={rfpDepth}>
               <span>RFP depth</span>
@@ -449,7 +465,7 @@ export default function GuidedBuild({
             <div className="nf-guided-choices" role={multipleChoice ? "group" : "radiogroup"} aria-label={card.nq.question}>
               {multipleChoice && (
                 <div className="nf-guided-multi-help">
-                  <span>Select every country or region in scope.</span>
+                  <span>{card.selectAllLabel === "Select worldwide" ? "Select every country or region in scope." : "Select every capability you require."}</span>
                   <button
                     type="button"
                     onClick={() => setSelection({ questionId: card.nq.id, indices: card.buttons.map((_, index) => index) })}
@@ -593,6 +609,7 @@ export default function GuidedBuild({
         </section>
       </div>
 
+      {workspaceTab === "overview" && !published && <PublicationPreview fields={briefFields} onReview={onPublish}/> }
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
           <div><h2>{displayDocumentTitle}</h2><span>{progress.ready} of {progress.total} essential sections ready</span></div>
@@ -616,12 +633,13 @@ export default function GuidedBuild({
             </div>
           </section>
         )}
-        <div className="lpos-metrics">
+        <details className="nf-document-progress"><summary>Document detail and readiness</summary><p>These measures describe RFP depth. A short project brief has its own publication requirements.</p><div className="lpos-metrics">
           <div className="lpos-completeness"><span>Document completeness</span><p><i><b style={{ width: `${Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%` }} /></i><strong>{Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%</strong></p></div>
           <div><strong>{clauses.length}</strong><span>Requirements<br/>confirmed</span></div>
           <div><strong>{sectionQuestions.length}</strong><span>Supplier questions<br/>prepared</span></div>
           <div><strong>{Math.max(0, materialDecisionsRemaining)}</strong><span>Open decisions<br/>remaining</span></div>
         </div>
+        </details>
         <div className="lpos-architecture" role="region" tabIndex={0} aria-label="Solution architecture. Scroll horizontally to see every element.">
           <div><strong>Sites</strong><span>your estate</span></div><b>→</b><div><strong>SD-WAN</strong><span>secure connectivity</span></div><b>→</b><div><strong>SASE</strong><span>security &amp; access</span></div><b>→</b><div><strong>Cloud apps</strong><span>apps and data</span></div>
         </div>

@@ -30,7 +30,7 @@ export const SDWAN_SAMPLE_RFP_URL = "https://netify.co.uk/sd-wan/sample-rfp/";
  *  FAQs), distinct from the validator's own reviewed date in
  *  rfp-validator.ts, which dates the scoring method and is shown by
  *  RfpCitationEvidence. Update this when the content below changes. */
-export const RFP_CONTENT_REVIEWED = "2026-09-03";
+export const RFP_CONTENT_REVIEWED = "2026-09-06";
 
 /** What an SD-WAN or SASE RFP covers. Eight areas (Robert's list), each
  *  with the SD-WAN emphasis, the SASE emphasis and the evidence a buyer
@@ -98,15 +98,15 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is the difference between an RFI and an RFP?",
-    a: "An RFI (request for information) asks suppliers to describe their capabilities so a buyer can learn the market and build a shortlist; it carries no scoring or pricing commitment. An RFP (request for proposal) sets out defined requirements, evaluation criteria and a pricing structure so suppliers return comparable, priced proposals. Netify can produce either from the same project, depending on how far the requirement has been developed.",
+    a: "An RFI (request for information) asks suppliers to describe their capabilities so a buyer can learn the market and build a shortlist; it usually explores capabilities before detailed proposals; buyers may also request indicative pricing. An RFP (request for proposal) sets out defined requirements, evaluation criteria and a pricing structure so suppliers return comparable, priced proposals. Netify can produce either from the same project, depending on how far the requirement has been developed.",
   },
   {
     q: "How should SD-WAN and SASE vendors be evaluated?",
-    a: "Score each supplier against the same weighted criteria: capability fit against the stated requirements, security efficacy, performance and PoP coverage in your regions, resilience and SLA, operating model fit, implementation approach, total cost over the contract term and the quality of evidence provided. Netify grades 30 vendors and service providers on 40 capabilities, and supplier responses to a published RFP land side by side against the questions you asked.",
+    a: "Score each supplier against the same weighted criteria: capability fit against the stated requirements, security efficacy, performance and PoP coverage in your regions, resilience and SLA, operating model fit, implementation approach, total cost over the contract term and the quality of evidence provided. Netify compares providers against a common evidence-based capability methodology, and supplier responses to a published RFP land side by side against the questions you asked.",
   },
   {
     q: "Is the Netify RFP Builder free?",
-    a: "Yes. Building, validating and downloading an SD-WAN or SASE RFP is free for buyers. Publishing is anonymous, pricing returned by suppliers is private to you, and nothing is published without your signature.",
+    a: "Yes. Building and validating an SD-WAN or SASE RFP is free for buyers. Final downloads and personalised matches unlock after anonymous publication. Review the notice and confirm publication with a verified work email; supplier pricing is permission-controlled.",
   },
 ];
 

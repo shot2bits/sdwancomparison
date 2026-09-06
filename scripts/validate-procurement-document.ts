@@ -105,7 +105,7 @@ function main() {
     record(req.organisation?.regions?.includes("uk") === true, "14.4: UK remains a structured fact", JSON.stringify(req.organisation?.regions));
     record(req.estate?.sites === 20, "14.4: 20 sites remains a structured fact", `sites=${req.estate?.sites}`);
     record(req.estate?.users === 200, "14.4: 200 remote users remains a structured fact", `users=${req.estate?.users}`);
-    record(req.estate?.existingNetwork?.includes("sdwan") === true, "14.4: SD-WAN remains a structured fact", JSON.stringify(req.estate?.existingNetwork));
+    record(req.estate?.existingNetwork?.includes("sdwan") !== true, "14.4: requested SD-WAN is not falsely recorded as existing estate", JSON.stringify(req.estate?.existingNetwork));
 
     const scopeClause = clauseByTemplate(doc, "network-architecture-scope");
     record(Boolean(scopeClause), "14.4: the SASE/SD-WAN scope sentence becomes a real network clause, not just a receipt", `found=${Boolean(scopeClause)}`);
