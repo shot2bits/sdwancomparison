@@ -49,6 +49,7 @@ export async function GET() {
     // the serving research surfaces below remain.
     { loc: `${SITE_URL}/rfp-builder/questions`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/sample-rfp`, priority: "0.9" },
+    { loc: `${SITE_URL}/examples/sase-rfp/`, priority: "0.9" },
     { loc: `${SITE_URL}/pricing/`, priority: "0.9" },
     { loc: `${SITE_URL}/cost-estimator`, priority: "0.8" },
     { loc: `${SITE_URL}/circuit-pricing/`, priority: "0.9" },

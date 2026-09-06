@@ -204,7 +204,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   }
   return <>
     {!resuming && <div className="nf-brief-toolbar">
-      <div><strong>Your buying workspace</strong><span>Build a SASE or SD-WAN RFP, or publish a short project brief. <a href="/sase/examples/manufacturing-rfp/" className="underline">See a manufacturing example</a></span></div>
+      <div><strong>Your buying workspace</strong><span>Build a SASE or SD-WAN RFP, or publish a short project brief. <a href="/sase/examples/sase-rfp/" className="underline">See a SASE RFP worked example</a></span></div>
       <button type="button" disabled={!ready} onClick={() => choose(selected === 'find_providers' ? 'find_providers' : 'quick_list')}>
         {project ? 'Return to my project brief' : 'Publish a short brief'} <span aria-hidden="true">↗</span>
       </button>

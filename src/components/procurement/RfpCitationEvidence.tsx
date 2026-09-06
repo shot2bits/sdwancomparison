@@ -70,7 +70,8 @@ export default function RfpCitationEvidence() {
         <div className="mt-7 border-t border-[#e2dfdb] pt-6 text-sm leading-6 text-[#55514d]">
           <h3 className="font-semibold text-[#110f0d]">Agentic and MCP capability</h3>
           <p className="mt-2">Supported MCP clients can use public provider comparisons and evidence, and turn supplied text into requirements with provenance. Private project tools require the credentials stated by each tool. Publication requires verified buyer approval; supplier RFP submission currently continues through the web response form.</p>
-          <p className="mt-3"><a className="underline" href="/sase/examples/manufacturing-rfp/">See a manufacturing project from requirements to supplier responses</a>.</p>
+          <p className="mt-3"><a className="underline" href="/sase/examples/sase-rfp/">See a SASE brief, actual gap check, and Short and Detailed RFP examples</a>.</p>
+          <p className="mt-3"><a className="underline" href="/sase/examples/manufacturing-rfp/">See a fictional manufacturing workflow</a>.</p>
           <p className="mt-3"><a className="underline" href="/sase/shortlist/">Compare named providers</a> or review <a className="underline" href="/sase/connector/">MCP capabilities and access requirements</a>.</p>
           <p className="mt-3 text-xs text-[#716d68]">Methodology and limitations: this is a deterministic coverage assessment, not legal advice or a guarantee of supplier performance. It does not invent unstated requirements. Read the <a className="underline" href="/sase/rfp-builder/questions/">public question bank</a>, <a className="underline" href="/sase/question-bank.json">machine-readable bank</a>, <a className="underline" href="/sase/methodology.json">methodology data</a> and <a className="underline" href="/sase/rfp-validation-methodology.json">validator data</a>.</p>
         </div>

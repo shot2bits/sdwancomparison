@@ -163,7 +163,12 @@ export function validateRfpText(raw: string): RfpValidationReport {
     ...(!responseStructure ? ["Specify a common response and pricing format so bids can be compared"] : []),
   ];
 
-  const detectedSector = SECTOR_RULES.find((sector) => sector.pattern.test(text)) ?? null;
+  // Prefer the first stated sector, not the hard-coded order of the rules.
+  // Later generic question-bank explanations can mention other sectors.
+  const detectedSector = SECTOR_RULES
+    .map((sector) => ({ sector, index: text.search(sector.pattern) }))
+    .filter((match) => match.index >= 0)
+    .sort((a, b) => a.index - b.index)[0]?.sector ?? null;
   const sectorGaps = detectedSector
     ? detectedSector.checks.filter((check) => !check.pattern.test(text)).map((check) => `${detectedSector.label}: add ${check.label}`)
     : ["State the buyer's sector so Netify can apply sector-specific procurement checks"];

@@ -1662,6 +1662,8 @@ export default function ProjectDesk({
         rfpValidationCorpusRef.current = local.rfpValidationCorpus;
         setLocalDraftSavedAt(local.updatedAt);
         setLocalDraftStatus("saved");
+      } else if (requestedJourney === "validate_rfp") {
+        setRfpEntryMode("check");
       }
     }
     const scopeParam = p.get("scope");
