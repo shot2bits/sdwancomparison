@@ -37,3 +37,16 @@ Final recovery follow-up: per-project revision-bound checkpoints, explicit recov
 
 Release gate: optimized production build passed (next build --webpack); changed-production-file eslint passed across 40 files; full validation and marketplace foundation passed. Production build browser checks run against localhost3113. Deployment will use Vercel production environment with --skip-domain, then exact-candidate promotion after smoke tests.
 Verified pre-release aliased deployment: dpl_EdmUkJb3rFGVhWtM3rdKVNz87Gbq / sasecomparison-laru3ult0-netifymarketplace.vercel.app. Aliases include sasecomparison-netifymarketplace.vercel.app, app.netify.co.uk and sase.netify.co.uk.
+
+
+## Published release
+
+Published 6 September 2026. Application commit: `146221d85d5040390cacc12189a5c7425d4c9e09` (implementation `61b252f`, explicit CLI build identifier `146221d`).
+
+Final deployment: `dpl_Am42AUL2LY32x8oiQiTYXPdoaQyc` — https://sasecomparison-kir1ib0bd-netifymarketplace.vercel.app. Built with production environment and `--skip-domain`; promoted this exact verified artifact with `vercel promote`.
+
+Candidate passed desktop1440/mobile390 layout and all four formats, bespoke questions, RFI purpose, supplier pack/sidebar, exact TXT import and oversized rejection, comparison handoff, and intercepted browser project-save preservation. Connector and capabilities endpoints returned200. An initial browser attempt reached Vercel's temporary “Deployment is building” page; rerun after Ready passed.
+
+Canonical https://netify.co.uk/sase-sd-wan-rfp-builder/ verified without cache-busting: `netify-build=146221d`, build time `2026-09-06T11:17:26.381Z`. Desktop1440/mobile390 smoke tests repeated on that canonical URL passed with no overflow or uncaught browser errors. Public connector and capabilities endpoints returned200 through netify.co.uk. Vercel error-level logs for this deployment over the last15minutes returned no entries; this is a bounded release check, not proof of no future errors.
+
+No real opportunities, supplier invitations or email were sent by release tests. Publication writes were intercepted or tested using fake KV. Existing authenticated web supplier submission remains supported; universal supplier OAuth/MCP submission is not claimed.
