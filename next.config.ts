@@ -14,11 +14,12 @@ const nextConfig: NextConfig = {
      so a stale page is visibly stale. A request-time value (a header, a
      runtime clock) would read fresh on months-old HTML and prove nothing.
 
-     VERCEL_GIT_COMMIT_SHA is set by Vercel on every deployment. Locally
+     Git deployments provide VERCEL_GIT_COMMIT_SHA; CLI releases pass the
+     verified commit as NETIFY_BUILD_SHA. Locally
      there is no build to identify and nothing is cached, so "dev" is the
      honest answer rather than a fabricated hash. */
   env: {
-    NEXT_PUBLIC_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA || "dev",
+    NEXT_PUBLIC_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NETIFY_BUILD_SHA || "dev",
     NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
   },
   basePath: "/sase",
