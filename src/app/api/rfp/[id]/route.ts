@@ -1,3 +1,7 @@
+import { sessionFromRequest, supplierCredentialFromRequest } from "@/lib/auth";
+import { resolveSupplierPrincipal } from "@/lib/supplier-capability-access";
+import { matchVendorSlug } from "@/lib/rfp-evaluation";
+import { vendorName } from "@/lib/opportunity";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 import { livingDocumentToRfpSections } from "@/lib/rfp-document";
 import { corsHeaders, preflight } from "@/lib/cors";
@@ -98,7 +102,14 @@ export async function GET(req: Request, ctx: Ctx) {
       return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
     }
     const vendor = (url.searchParams.get("vendor") ?? "").trim();
-    const accepted = project.nda.required ? await hasAcceptedNda(project, vendor) : true;
+    let accepted = !project.nda.required;
+    if (project.nda.required) {
+      const principal = await resolveSupplierPrincipal(await sessionFromRequest(req), id, supplierCredentialFromRequest(req, id), vendor);
+      if (principal.established) {
+        const lookup = vendor && matchVendorSlug(vendor) === principal.vendorSlug ? vendor : vendorName(principal.vendorSlug) ?? principal.vendorSlug;
+        accepted = await hasAcceptedNda(project, lookup);
+      }
+    }
     const snapshot = await getLatestPublishedSnapshot(id);
     const document = snapshot?.frozen_content.living_document;
     const supplierProject = snapshot ? { ...project, title: snapshot.frozen_content.title, rfp_sections: document ? livingDocumentToRfpSections(document) : snapshot.frozen_content.rfp_sections } : project;
