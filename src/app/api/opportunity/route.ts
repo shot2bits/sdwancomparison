@@ -1,4 +1,4 @@
-import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveOpportunity, kvConfigured, newId, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem } from "@/lib/opportunity";

@@ -1,4 +1,4 @@
-import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
 import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
 import { ensureDistinctNoticeTitle } from "@/lib/notice-title";

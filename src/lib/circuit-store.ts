@@ -1,4 +1,4 @@
-import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { randomBytes, createHash } from "node:crypto";
 import { kvRaw, kvGetJson, kvSetJson, saveOpportunity, newId } from "./rfp-store";
 import { OpportunitySchema } from "./opportunity-types";

@@ -11,7 +11,7 @@ try{
   await p.waitForFunction(()=>sessionStorage.getItem('netify_first_touch'));
   const result=await p.evaluate(()=>({touch:sessionStorage.getItem('netify_first_touch'),ga:window.__ga,va:window.__va,filtered:window.__beforeSend?.({type:'pageview',url:'https://netify.co.uk/sase/rfp-builder/PRIVATE_ID/?q=PRIVATE_REQUIREMENT#PRIVATE_TOKEN'})}));
   assert(!JSON.stringify(result).includes('PRIVATE_'));assert.equal(JSON.parse(result.touch).landing,'/sase/circuit-pricing/');
-  if(consent){assert(result.ga.some(e=>e[0]==='event'&&e[1]==='buying_entry'));assert.equal(result.filtered.url,'https://netify.co.uk/sase/rfp-builder/');}
+  if(consent){assert.equal(result.ga.length,0,'Google automatic tracking disabled on private workspace');assert(result.va.some(e=>e[0]==='event'&&e[1].name==='buying_entry'));assert.equal(result.filtered.url,'https://netify.co.uk/sase/rfp-builder/');}
   else{assert.equal(result.ga.length,0);assert.equal(result.va.length,0);assert.equal(await p.locator('script[data-netify-ga],script[data-netify-va]').count(),0);}
   assert.equal(errors.length,0);await p.close();console.log(`PASS consent=${consent}: attribution strips query/token, analytics payloads contain no private requirement or identifier`);
  }

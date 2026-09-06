@@ -16,6 +16,7 @@ declare global {
   interface Window {
     va?: VaFn;
     vaq?: unknown[];
+    "ga-disable-G-XNL6HY3BQX"?: boolean;
   }
 }
 
@@ -34,6 +35,34 @@ function readConsent(): { analytics: boolean; marketing: boolean } {
   } catch {
     return { analytics: false, marketing: false };
   }
+}
+
+// Enhanced Measurement reads raw search parameters independently of page_location.
+// Use Google's documented opt-out for private/query-bearing pages. Once entered,
+// stay opted out for this document lifetime so queued private events cannot flush.
+let googlePrivateSeen=false;
+let googleGuardInstalled=false;
+function googleAllowed(target=window.location.href):boolean {
+  try {
+    const url=new URL(target,window.location.href);
+    googlePrivateSeen ||= Boolean(url.search||url.hash) || /^\/sase-sd-wan-rfp-builder(?:\/|$)/.test(url.pathname) || /^\/sase\/(home|workspace|circuit-pricing|account|admin|rfp-builder|opportunities)(?:\/|$)/.test(url.pathname);
+  } catch {googlePrivateSeen=true;}
+  window['ga-disable-G-XNL6HY3BQX']=googlePrivateSeen||!readConsent().analytics;
+  return !window['ga-disable-G-XNL6HY3BQX'];
+}
+function installGooglePrivacyGuard(){
+  googleAllowed();
+  if(googleGuardInstalled)return;
+  googleGuardInstalled=true;
+  for(const method of ['pushState','replaceState'] as const){
+    const original=window.history[method].bind(window.history);
+    window.history[method]=(...args:Parameters<History['pushState']>)=>{
+      if(args[2]!=null)googleAllowed(String(args[2]));
+      return original(...args);
+    };
+  }
+  window.addEventListener('popstate',()=>googleAllowed(),true);
+  window.addEventListener('hashchange',()=>googleAllowed(),true);
 }
 
 /**
@@ -76,7 +105,7 @@ function fire(name: string, data: Record<string, string> = {}): void {
   try {
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void })
       .gtag;
-    gtag?.('event', name, { event_category: 'commercial', ...payload, page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
+    if(googleAllowed())gtag?.('event', name, { event_category: 'commercial', ...payload, page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
   } catch {
     /* ignore */
   }
@@ -85,6 +114,7 @@ function fire(name: string, data: Record<string, string> = {}): void {
 export default function NetifyEvents() {
   const pathname=usePathname();
   useEffect(() => {
+    installGooglePrivacyGuard();
     // First-touch attribution capture, once per browser session (see
     // firstTouch above). Must run before anything else so a visitor who
     // signs in on their landing page still gets attributed.
@@ -115,7 +145,7 @@ export default function NetifyEvents() {
 
     // GA4 loader with Consent Mode (default denied; upgrade from the shared
     // netify_consent cookie).
-    if (readConsent().analytics && !document.querySelector('script[data-netify-ga]')) {
+    if (googleAllowed() && !document.querySelector('script[data-netify-ga]')) {
       const w = window as unknown as {
         dataLayer?: unknown[];
         gtag?: (...args: unknown[]) => void;
@@ -154,8 +184,7 @@ export default function NetifyEvents() {
 
     if(readConsent().analytics){
       const safePage={page_location:analyticsLocation(window.location.href),page_referrer:analyticsReferrer(document.referrer),page_title:'Netify buying platform'};
-      window.gtag?.('set',safePage);
-      window.gtag?.('event','page_view',safePage);
+      if(googleAllowed()){window.gtag?.('set',safePage);window.gtag?.('event','page_view',safePage);}
       const params=new URLSearchParams(window.location.search);
       fire('buying_entry',{intent:params.get('intent')==='pricing'?'pricing':'project',channel:params.get('source')==='mcp'?'mcp':'web'});
     }
