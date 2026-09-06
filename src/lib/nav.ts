@@ -90,6 +90,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Tools",
     items: [
+      { label: "Pricing options", href: "/sase/pricing/" },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "Request circuit pricing", href: "/sase/circuit-pricing/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },

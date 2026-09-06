@@ -21,3 +21,8 @@ Step 1 live: public pages at 1440/390, RFP four routes/bespoke questions/supplie
 ## Step 2
 
 Keeps research/category/provider pages. Adds an explicit crawlable context-carrying workspace link and short/full/import publication explanation to existing continuations; clarifies comparison handoff. Browser testing exposed a hydration selection race; controls now wait for hydration and initial URL parsing cannot reset user selections. Local 1440/390 handoff checks retain exact selected provider slugs, comparison question and requirement as research context with no automatic supplier pins/publication. TypeScript, scoped lint and comparison/entrance/journey tests passed. Release 8894caa.
+
+Step 2 live: context handoff and public discovery checks passed on desktop/mobile.
+
+## Step 3
+Release ecbc15b, deployment sasecomparison-d83m34wj2-netifymarketplace.vercel.app. Full build validation passed; candidate and live example HTML/JSON checks passed at 1440/390. Live RFP four routes, bespoke questions, Short/Detailed, imports, pack and sidebar checks passed.

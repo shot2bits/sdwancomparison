@@ -45,7 +45,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
         const chosen = params.has('id') || params.has('q') ? 'build_rfp' : PROJECT_JOURNEY_MODES.includes(requested) ? requested : 'quick_list';
         mode.current = chosen; setSelected(chosen); setResuming(params.has('id'));
         const id = params.get('project');
-        if (params.get('from') === 'comparison' || (id && params.get('review') === '1')) setPanelOpen(true);
+        if (params.get('from') === 'comparison' || params.get('intent') === 'pricing' || (id && params.get('review') === '1')) setPanelOpen(true);
         const fragment = new URLSearchParams(location.hash.slice(1));
         const incoming = fragment.get('project_session');
         if (id && incoming) {

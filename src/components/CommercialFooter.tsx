@@ -78,6 +78,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
   {
     title: "Pricing and cost tools",
     links: [
+      { label: "Pricing options", href: "/sase/pricing/" },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "Request circuit pricing", href: "/sase/circuit-pricing/" },
       { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/" },
