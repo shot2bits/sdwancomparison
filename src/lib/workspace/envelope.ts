@@ -170,13 +170,15 @@ export function envelopeContentHash(value: unknown): string {
   return crypto.createHash("sha256").update(stableStringify(value)).digest("hex");
 }
 
-/** Strips the client-substituted, non-canonical `readiness` field before a
- *  cross-check comparison -- see this file's own top-of-file "HONESTY NOTE
- *  ON `readiness`". */
+/** Compare requirement content, not presentation or history relative to a local
+ * draft. The browser can make several edits before its first durable save.
+ * Version and changeSet are recomputed against the server's saved baseline;
+ * they must not make otherwise identical content impossible to save. The
+ * persisted document below is always the server compilation. */
 function withoutReadiness(doc: unknown): unknown {
   if (!doc || typeof doc !== "object") return doc;
   return Object.fromEntries(
-    Object.entries(doc as Record<string, unknown>).filter(([key]) => key !== "readiness"),
+    Object.entries(doc as Record<string, unknown>).filter(([key]) => !["readiness", "version", "changeSet"].includes(key)),
   );
 }
 

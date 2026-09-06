@@ -59,6 +59,19 @@ export async function startFakeKv() {
         if (exIndex >= 0) expiries.set(args[0], Date.now() + Number(args[exIndex + 3]) * 1000);
         return "OK";
       }
+      case "EVAL": {
+        if (String(args[0]).includes("redis.call('get',KEYS[1])") && Number(args[1]) === 1) {
+          const key = String(args[2]);
+          return get(key)?.value === String(args[3]) && store.delete(key) ? 1 : 0;
+        }
+        if (String(args[0]).includes("netify-funnel-append-once") && Number(args[1]) === 2) {
+          const marker=String(args[2]), key=String(args[3]);
+          if(get(marker)) return 0;
+          const list=ensure(key,"list",()=>[]);list.value.unshift(String(args[4]));list.value=list.value.slice(0,10000);
+          store.set(marker,{type:"string",value:"1"});return 1;
+        }
+        throw new Error("Unsupported fixture Lua script");
+      }
       case "INCR": {
         const next = Number(get(args[0])?.value ?? 0) + 1;
         store.set(args[0], { type: "string", value: String(next) });

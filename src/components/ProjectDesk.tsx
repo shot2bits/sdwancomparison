@@ -1,5 +1,6 @@
 "use client";
 
+import { isUnrelatedBuyingInput } from "@/lib/workspace/extract";
 import {requestBrief, confirmedWorkspaceRegions, workspaceUpdatesFromBrief, type BriefFields, type DocumentPurpose, type WorkspaceProject} from "@/lib/buying-workspace-project";
 import {projectTokenKey} from "@/lib/buying-entry";
 import {startNewBuyingProject} from "@/components/procurement/DraftRecovery";
@@ -1172,6 +1173,10 @@ export default function ProjectDesk({
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const guidedCustomQuestionRef = useRef<NextQuestion | null>(null);
+  const [noteEditor, setNoteEditor] = useState<NotedItem | null>(null);
+  const [removedNote, setRemovedNote] = useState<NotedItem | null>(null);
+  const noteDialogRef = useRef<HTMLDialogElement | null>(null);
+  useEffect(() => { if (noteEditor && !noteDialogRef.current?.open) noteDialogRef.current?.showModal(); }, [noteEditor]);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const threadRef = useRef<HTMLDivElement | null>(null);
   const firstKeyAt = useRef<number | null>(null);
@@ -1258,7 +1263,7 @@ export default function ProjectDesk({
   const [documentSettingsOpen, setDocumentSettingsOpen] = useState(false);
   const [rfpDepth, setRfpDepth] = useState<RfpDepth>(() => {
     if (typeof window === "undefined") return "short";
-    return window.localStorage.getItem("netify-rfp-depth") === "detailed" ? "detailed" : "short";
+    try { return window.localStorage.getItem("netify-rfp-depth") === "detailed" ? "detailed" : "short"; } catch { return "short"; }
   });
   const changeRfpDepth = useCallback((depth: RfpDepth) => {
     setRfpDepth(depth);
@@ -2865,6 +2870,7 @@ export default function ProjectDesk({
         id: guidedCustomAnswerNoteId(question.id),
         label: text,
         section: question.target,
+        own: true,
       };
       beginOrExtendSubmission();
       if (resultingFactPaths.length === 0) {
@@ -3186,7 +3192,7 @@ export default function ProjectDesk({
     async (raw: string, source: "paste" | "drop" | "file" | "link") => {
       if(raw.length > 200_000){setPasteSummary(`This source contains ${raw.length.toLocaleString("en-GB")} characters. Split it into sections of up to 200,000 characters and import each section. Nothing from this source was added.`);return;}
       const plan = chunkForIngest(raw);
-      if (!plan.chunks.length) return;
+      if (!plan.chunks.length) { setPasteSummary("This file or pasted text is empty. Add some text and try again. Your existing draft is unchanged."); return; }
       setPasteSummary(null);
       const factsBefore = factsRef.current.filter((f) => !f.struck).length;
       const receiptsBefore = receiptsRef.current.length;
@@ -3258,6 +3264,7 @@ export default function ProjectDesk({
     // non-UI half, since Enter-to-send calls send() directly and does not
     // go through the button's `disabled` attribute at all).
     if (!text || busy || resuming) return;
+    if (isUnrelatedBuyingInput(text)) { setCycleError("Describe a network or security buying requirement, such as your sites, users or required service. Nothing was added to your project."); return; }
     const guidedQuestion = guidedCustomQuestionRef.current;
     setDraft("");
     if (!firstKeyAt.current) firstKeyAt.current = Date.now();
@@ -4543,7 +4550,7 @@ export default function ProjectDesk({
   const addCustomSupplierQuestion = useCallback((question: string) => {
     setWorkspaceNotice(null);
     if (!activeRow) return;
-    const normalized = `${question.trim().replace(/\s+/g, " ").replace(/[?.!]+$/, "")}?`;
+    const normalized = question.trim();
     if (normalized.length < 8) return;
     const item: NotedItem = {
       id: `${CUSTOM_SUPPLIER_QUESTION_PREFIX}${activeRow.key}:${stableQuestionSuffix(normalized.toLowerCase())}`,
@@ -4560,6 +4567,18 @@ export default function ProjectDesk({
     });
     say(`Added your supplier question to ${activeRow.title}.`);
   }, [activeRow, recordDecision, say]);
+
+  function saveNoteEdit(item: NotedItem, remove = false) {
+    beginOrExtendSubmission();
+    setNoted((items) => remove ? items.filter((n) => n.id !== item.id) : [...items.filter((n) => n.id !== item.id), item]);
+    recordDecision(item.id, remove ? "Remove question" : "Edit question", {
+      action: "note", optionId: remove ? "remove" : "edit", resultingFactPaths: [],
+      resultingNoted: remove ? [] : [item], clearedNotedIds: [item.id],
+    });
+    if (remove) setRemovedNote(item);
+    setNoteEditor(null);
+    scheduleSettle();
+  }
 
   const sectionQuestionItemsByKey = useMemo(() => {
     const openCards: NextQuestionCard[] = [...allNextQuestionCards];
@@ -4582,7 +4601,7 @@ export default function ProjectDesk({
         });
       }
     }
-    return buildSectionQuestionRegister({
+    const register = buildSectionQuestionRegister({
       rows: sectionOutline,
       evidence: [...evidenceByPath.values()].map((entry) => ({
         id: entry.id,
@@ -4601,6 +4620,13 @@ export default function ProjectDesk({
         text: item.label,
       }] : []),
     });
+    for (const items of Object.values(register)) {
+      for (const item of items) {
+        const answer = noted.find((note) => note.id === guidedCustomAnswerNoteId(item.id.replace(/^open:/, "")));
+        if (answer) { item.status = "completed"; item.answer = answer.label; }
+      }
+    }
+    return register;
   }, [sectionOutline, answeredLog.stated, allNextQuestionCards, guidedQuestionCard, noted, rfpDepth]);
 
   const activeSectionQuestionItems = activeRow ? sectionQuestionItemsByKey[activeRow.key] ?? [] : [];
@@ -5455,6 +5481,14 @@ export default function ProjectDesk({
       onDragOver={(e) => { e.preventDefault(); }}
       onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
     >
+      {noteEditor && <dialog ref={noteDialogRef} aria-label="Edit supplier question" className="fixed inset-0 z-[100] m-auto rounded-xl p-0 backdrop:bg-black/30" onCancel={() => setNoteEditor(null)}>
+        <form className="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl" onSubmit={(e) => { e.preventDefault(); if(noteEditor.label.trim()) saveNoteEdit({...noteEditor,label:noteEditor.label.trim()}); }}>
+          <h2 className="mb-4 text-xl font-semibold">Edit supplier question</h2>
+          <textarea autoFocus aria-label="Supplier question wording" className="min-h-40 w-full rounded border p-3" value={noteEditor.label} onChange={(e)=>setNoteEditor({...noteEditor,label:e.target.value})}/>
+          <div className="mt-4 flex flex-wrap gap-4"><button type="submit" disabled={!noteEditor.label.trim()}>Save question</button><button type="button" onClick={()=>setNoteEditor(null)}>Cancel</button><button type="button" onClick={()=>saveNoteEdit(noteEditor,true)}>Remove question</button></div>
+        </form>
+      </dialog>}
+      {removedNote && <div role="status" className="p-4">Question removed. <button type="button" onClick={()=>{saveNoteEdit(removedNote);setRemovedNote(null);}}>Undo removal</button></div>}
       {started ? (
         /* ============================================================ */
         /* THE WORKSPACE (a real project exists).                        */
@@ -5584,6 +5618,7 @@ export default function ProjectDesk({
                 onEditCaptured={(item) => {
                   const slotId = item.path ? SLOT_BY_PATH[item.path] : undefined;
                   if (slotId) setEdit(slotId);
+                  else if (noted.some((n) => n.id === item.id)) setNoteEditor(noted.find((n) => n.id === item.id)!);
                   else {
                     setDraft(item.answer);
                     window.requestAnimationFrame(() => inputRef.current?.focus());
@@ -5595,6 +5630,7 @@ export default function ProjectDesk({
                 sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Your requirement"}
                 sectionQuestions={activeSectionQuestionItems}
                 onAddSupplierQuestion={addCustomSupplierQuestion}
+                onEditSupplierQuestion={(id) => setNoteEditor(noted.find((n) => n.id === id.replace(/^custom:/, "")) ?? null)}
                 onImportQuestions={() => fileRef.current?.click()}
                 onGoToNextSection={() => {
                   if (sectionProgress.next) setActiveSection(sectionProgress.next.key);
@@ -6706,6 +6742,7 @@ export default function ProjectDesk({
               onEditCaptured={(item) => {
                 const slotId = item.path ? SLOT_BY_PATH[item.path] : undefined;
                 if (slotId) setEdit(slotId);
+                else if (noted.some((n) => n.id === item.id)) setNoteEditor(noted.find((n) => n.id === item.id)!);
                 else {
                   setDraft(item.answer);
                   window.requestAnimationFrame(() => inputRef.current?.focus());
@@ -6717,6 +6754,7 @@ export default function ProjectDesk({
               sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Project overview"}
               sectionQuestions={activeSectionQuestionItems}
               onAddSupplierQuestion={addCustomSupplierQuestion}
+                onEditSupplierQuestion={(id) => setNoteEditor(noted.find((n) => n.id === id.replace(/^custom:/, "")) ?? null)}
               onImportQuestions={() => fileRef.current?.click()}
               onGoToNextSection={() => { if (sectionProgress.next) setActiveSection(sectionProgress.next.key); }}
               onOpenDocument={() => inputRef.current?.focus()}

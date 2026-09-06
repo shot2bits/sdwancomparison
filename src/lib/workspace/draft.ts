@@ -105,6 +105,24 @@ export function mergeUpdates(
       }
     }
   }
+  // A whole-estate phrase must follow an explicitly corrected estate total.
+  // Preserve the old fact as struck history, and preserve its capability text.
+  const oldSites = prev.find((f) => !f.struck && f.path === "estate.sites");
+  const newSites = facts.find((f) => !f.struck && f.path === "estate.sites");
+  if (oldSites && newSites && oldSites.value !== newSites.value && changed.includes(newSites.id)) {
+    const totalPhrase = new RegExp(`\\bacross ${oldSites.value} sites?\\b`, "i");
+    for (const fact of facts.slice()) {
+      if (fact.struck || fact.path !== "requirements.bespoke" || typeof fact.value !== "string" || !totalPhrase.test(fact.value)) continue;
+      const value = fact.value.replace(totalPhrase, `across ${newSites.value} sites`);
+      fact.struck = true;
+      changed.push(fact.id);
+      const id = factId(fact.path, value);
+      if (!facts.some((f) => f.id === id && !f.struck)) {
+        facts.push({ ...fact, value, id, struck: false, cycle, provenance: "inferred", reason: "Whole-estate scope updated after the buyer corrected the site total." });
+        changed.push(id);
+      }
+    }
+  }
   return { facts, changed };
 }
 

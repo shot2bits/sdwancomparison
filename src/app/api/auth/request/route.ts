@@ -1,3 +1,4 @@
+import { authReturnPath, publicationProjectFromReturn } from "@/lib/auth-return";
 import { analyticsReferrer, analyticsPath } from "@/lib/analytics-privacy";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { createMagicToken, getProject, getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, kvRaw, listAllRfpIds, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
   // the verify page can send the person straight back afterwards. Same-app
   // absolute paths only (basePath /sase), so the link can never point off-site.
   const rawReturn = typeof body.return_to === "string" ? body.return_to : "";
-  const returnTo = rawReturn.length <= 400 && /^\/sase\/[\w\-/.~%?=&]*$/.test(rawReturn) ? rawReturn : "";
+  const returnTo = authReturnPath(rawReturn);
 
   const admin = isAdminEmail(email);
 
@@ -112,7 +113,7 @@ export async function POST(req: Request) {
   // buyers may sign in only when they already own a market-unlocked RFP.
   // Merely requesting a link can therefore never create an empty account.
   if (role === "buyer" && !admin) {
-    const rfpId = returnTo.match(/\/rfp-builder\/(rfp_[a-z0-9]+)/i)?.[1] ?? null;
+    const rfpId = publicationProjectFromReturn(returnTo);
     let publicationBound = false;
     if (rfpId) {
       const project = await getProject(rfpId);
@@ -172,7 +173,7 @@ export async function POST(req: Request) {
   // survive the common cross-device pattern: build on the desktop, open the
   // sign-in email on the phone, where localStorage-based claiming cannot see
   // the draft.
-  const rfpIdMatch = returnTo.match(/\/rfp-builder\/(rfp_[a-z0-9]+)/i);
+  const rfpId = publicationProjectFromReturn(returnTo);
 
   // Known-bad address (11 Aug 2026): Resend accepts a send synchronously and
   // only discovers a bounce later, via the webhook that feeds this flag —
@@ -206,7 +207,7 @@ export async function POST(req: Request) {
     page: req.headers.get("referer") ? analyticsPath(req.headers.get("referer")!) : "",
     country: cap(req.headers.get("x-vercel-ip-country"), 8),
   };
-  const token = await createMagicToken({ role: resolvedRole, email, vendor_slug, rfp_id: rfpIdMatch ? rfpIdMatch[1] : null, attr });
+  const token = await createMagicToken({ role: resolvedRole, email, vendor_slug, rfp_id: rfpId, attr });
   // Optional marketing consent from the wizard agreement step: explicit,
   // unticked by default, recorded only when the sign-in link actually goes
   // out to a domain that passed the business-only policy.
@@ -236,7 +237,7 @@ export async function POST(req: Request) {
   // (which only ever carries that id, never any of this app's own context)
   // can trace a later bounce back to this exact attempt. Best effort: see
   // email-bounces.ts, a failure here only means one send goes untraced.
-  await recordResendSend(sent.emailId, { to: email, kind: "magic_link", ts: Date.now(), rfp_id: rfpIdMatch ? rfpIdMatch[1] : null });
+  await recordResendSend(sent.emailId, { to: email, kind: "magic_link", ts: Date.now(), rfp_id: rfpId });
   // In preview without Resend configured, return the link so it is testable.
   // Fix, 11 Aug 2026: this used to key off `!sent`, which also fired on a
   // genuine production send failure now that sendMagicLink checks Resend's

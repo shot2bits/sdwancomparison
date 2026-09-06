@@ -419,7 +419,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
                             (l) => l.country === "United Kingdom" && l.kind === "Ethernet",
                           ).length
                         }{" "}
-                        UK Ethernet sites will change. This replaces their current resilience
+                        UK Ethernet site{input.lines.filter((l) => l.country === "United Kingdom" && l.kind === "Ethernet").length === 1 ? "" : "s"} will change. This replaces their current resilience
                         requirement.
                       </p>
                       <button
@@ -484,7 +484,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
           <aside className="cp-summary">
             <p>Your private pricing request</p>
             <h2>
-              {locations} locations. {remote} remote connections. One market request.
+              {locations} location{locations === 1 ? "" : "s"}. {remote} remote connection{remote === 1 ? "" : "s"}. One market request.
             </h2>
             <Field label="Company name (private)">
               <input
@@ -901,7 +901,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
           <>
             <h2>Review your pricing request</h2>
             <p>
-              {locations} locations. {remote} remote connections.
+              {locations} location{locations === 1 ? "" : "s"}. {remote} remote connection{remote === 1 ? "" : "s"}.
             </p>
             <p>
               Netify will source your requirements. Your company, service addresses and local

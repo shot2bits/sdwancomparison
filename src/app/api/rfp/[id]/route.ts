@@ -1,3 +1,5 @@
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
+import { livingDocumentToRfpSections } from "@/lib/rfp-document";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, saveProject, publicProject, hasAcceptedNda, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
@@ -20,7 +22,9 @@ export async function OPTIONS(req: Request) {
 
 /** The supplier projection: what a share-token holder may see. */
 function supplierView(project: ProjectDetails, ndaAccepted: boolean) {
-  const pub = publicProject(project);
+  // Supplier responses need only the approved document, never private buyer fields,
+  // draft ledgers, consent identities or recovery credentials.
+  const pub = { id: project.id, title: project.title, status: project.status, rfp_sections: project.rfp_sections };
   if (project.nda.required && !ndaAccepted) {
     return {
       ...pub,
@@ -95,7 +99,10 @@ export async function GET(req: Request, ctx: Ctx) {
     }
     const vendor = (url.searchParams.get("vendor") ?? "").trim();
     const accepted = project.nda.required ? await hasAcceptedNda(project, vendor) : true;
-    return Response.json(supplierView(project, accepted), { headers: cors });
+    const snapshot = await getLatestPublishedSnapshot(id);
+    const document = snapshot?.frozen_content.living_document;
+    const supplierProject = snapshot ? { ...project, title: snapshot.frozen_content.title, rfp_sections: document ? livingDocumentToRfpSections(document) : snapshot.frozen_content.rfp_sections } : project;
+    return Response.json(supplierView(supplierProject, accepted), { headers: cors });
   }
 
   return ownerRequired("Reading this RFP workspace", cors);

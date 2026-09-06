@@ -72,6 +72,7 @@ export default function GuidedBuild({
   sectionTitle,
   sectionQuestions,
   onAddSupplierQuestion,
+  onEditSupplierQuestion,
   onImportQuestions,
   onGoToNextSection,
   onOpenDocument,
@@ -126,6 +127,7 @@ export default function GuidedBuild({
   sectionTitle: string;
   sectionQuestions: SectionQuestionItem[];
   onAddSupplierQuestion: (question: string) => void;
+  onEditSupplierQuestion: (id: string) => void;
   onImportQuestions: () => void;
   onGoToNextSection: () => void;
   onOpenDocument: () => void;
@@ -555,7 +557,7 @@ export default function GuidedBuild({
                 <li key={item.id} data-status={item.status}>
                   <span aria-hidden="true">{item.status === "completed" ? "✓" : item.status === "custom" ? "+" : "○"}</span>
                   <div>
-                    <strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}
+                    <strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}{item.status === "custom" && <button type="button" onClick={()=>onEditSupplierQuestion(item.id)}>Edit question</button>}
                     {item.status === "required" && (
                       <div className="nf-guided-inline-answer">
                         <input

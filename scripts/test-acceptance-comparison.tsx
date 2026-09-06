@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {renderToStaticMarkup} from 'react-dom/server';
+import React from 'react';
+import ComparisonAnswer from '../src/components/ComparisonAnswer';
+import {buildComparison} from '../src/lib/shortlist-core';
+import {getShortlistDataset,FEATURES} from '../src/lib/vendors';
+const v=getShortlistDataset();const c=buildComparison(v,[v[0].slug,v[0].slug,v[1].slug],FEATURES);assert(c);assert.equal(c.slugs.length,2);
+const html=renderToStaticMarkup(<ComparisonAnswer text={'## Comparison\n**Evidence**\n- One\n- Two\n[Unsafe](javascript:alert)\n<script>alert(1)</script>'}/>);
+assert(html.includes('<h3'));assert(html.includes('<strong>Evidence</strong>'));assert(html.includes('<ul'));assert(!html.includes('<script>'));assert(!html.includes('href="javascript:'));
+console.log('PASS unique columns; structured answer; script and unsafe link not executed');

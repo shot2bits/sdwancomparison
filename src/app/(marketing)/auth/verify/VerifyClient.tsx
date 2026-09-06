@@ -1,5 +1,6 @@
 "use client";
 
+import { authReturnPath } from "@/lib/auth-return";
 import { useEffect, useState } from "react";
 
 /**
@@ -26,7 +27,7 @@ import { useEffect, useState } from "react";
 /** Same-app absolute paths only (basePath /sase), so the redirect can never leave the app. */
 function safeReturnPath(): string | null {
   const r = new URLSearchParams(window.location.search).get("return");
-  return r && r.length <= 400 && /^\/sase\/[\w\-/.~%?=&]*$/.test(r) ? r : null;
+  return authReturnPath(r) || null;
 }
 
 /** Draft manage tokens saved by the builder in this browser (netify_mtok_{id}). */

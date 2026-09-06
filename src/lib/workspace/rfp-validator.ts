@@ -45,7 +45,7 @@ type SectionDefinition = { key: string; title: string; checks: Check[] };
 const SECTIONS: SectionDefinition[] = [
   { key: "organisation_scale", title: "Organisation and scale", checks: [
     { label: "sector or operating context", pattern: /\b(health|nhs|clinic|hospital|manufactur|factory|retail|store|financial|bank|insurance|education|government|sector|industry)\w*/i },
-    { label: "sites, users or devices", pattern: /\b\d[\d,]*\s*(sites?|locations?|branches?|stores?|offices?|users?|employees?|devices?)\b/i },
+    { label: "sites, users or devices", pattern: /\b(?:\d[\d,]*|one|two|three|four|five|six|seven|eight|nine|ten|fifteen|twenty|thirty)(?:\s+(?:uk|remote|retail|global|international|branch)){0,3}\s+(sites?|locations?|branches?|stores?|offices?|users?|employees?|devices?)\b/i },
     { label: "regions or countries", pattern: /\b(uk|united kingdom|europe|emea|global|region|countr|geograph|location)\w*/i },
   ] },
   { key: "solution_scope", title: "Solution scope", checks: [

@@ -1,3 +1,4 @@
+import { livingDocumentToRfpSections } from './rfp-document';
 import { z } from 'zod';
 import type { ProjectDetails } from './rfp-types';
 import { buildEnvelopeUpdate } from './workspace/envelope';
@@ -50,6 +51,7 @@ export async function preserveMarketplaceWorkspace(existing: ProjectDetails | nu
   if (!outcome.ok) throw new MarketplaceEnvelopeError(outcome.error, outcome.status);
   return {
     source_ledger, decision_ledger, facts: outcome.facts, receipts: outcome.receipts,
+    rfp_sections: livingDocumentToRfpSections(outcome.procurement_document),
     procurement_document: outcome.procurement_document, envelope_revision: outcome.envelope_revision, envelope: outcome.envelope,
   };
 }

@@ -224,6 +224,21 @@ const VAGUE_QUANTITY_HEDGE =
  * vocabulary rather than duplicating or drifting from it. */
 const USER_NOUN = "users?|staff|employees?|people|seats?|heads";
 const SITE_NOUN = "sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?|clinics?";
+const WRITTEN_COUNTS: Record<string, number> = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90};
+const WRITTEN_NUMBER = `(?:${Object.keys(WRITTEN_COUNTS).join("|")})(?:[ -](?:one|two|three|four|five|six|seven|eight|nine))?`;
+function countValue(value: string): number {
+  if (/^\d/.test(value)) return Number(value.replace(/,/g, ""));
+  return value.toLowerCase().split(/[ -]/).reduce((n,word)=>n+(WRITTEN_COUNTS[word]??0),0);
+}
+function uncertainCount(path: string, text: string): boolean {
+  const noun=path === "estate.sites" ? SITE_NOUN : USER_NOUN;
+  const number=`(?:\\d[\\d,]*|${WRITTEN_NUMBER})`;
+  return text.split(/[.!?;\n]/).some(clause => new RegExp(`\\b(?:${noun})\\b`,"i").test(clause) && (
+    new RegExp(`${number}\\s*(?:or|to)\\s*${number}\\s*(?:[a-z]+\\s+){0,3}(?:${noun})\\b`,"i").test(clause) ||
+    new RegExp(`\\b(?:might have|may have|not sure|uncertain)\\b`,"i").test(clause)
+  ));
+}
+
 
 /* Fix (correction pass 2, Priority 2 — Tests 70/71, the actual mechanism):
  * live evidence this pass showed the MODEL itself already strips a
@@ -320,6 +335,10 @@ function validate(
        * the evidence. The earlier ledger value, if any, is left
        * completely alone; nothing here writes a corrected/rounded
        * number in its place. */
+      if (p === "estate.sites" && rawBuyerText && /\b(?:at|only|including)\b/i.test(rawBuyerText) && /\b(?:critical|production-critical|priority)\s+sites?\b/i.test(sourceText ?? "")) {
+        notes.push("A critical-site subset was retained in your wording; it does not replace the total estate size.");
+        return null;
+      }
       const raw = Number(value);
       const sourceShowsNegativeOrDecimal = sourceText ? NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.test(sourceText) : false;
       const valueShowsNegativeOrDecimal = Number.isFinite(raw) && (raw < 0 || !Number.isInteger(raw));
@@ -350,7 +369,7 @@ function validate(
         );
         return null;
       }
-      const sourceIsVagueEstimate = sourceText ? VAGUE_QUANTITY_HEDGE.test(sourceText) : false;
+      const sourceIsVagueEstimate = (sourceText ? VAGUE_QUANTITY_HEDGE.test(sourceText) : false) || Boolean(rawBuyerText && uncertainCount(p, rawBuyerText));
       if (sourceIsVagueEstimate) {
         notes.push(
           `${QUANTITY_NOT_RECORDED_PREFIX}"${clean(sourceText || String(value), 60)}" reads as an estimate rather than a precise count, so nothing precise was recorded. The earlier value, if any, is unchanged — restate a specific whole number to set it.`,
@@ -778,9 +797,9 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
    * (validate()'s 20,000/500,000 ceilings, untouched, still reject it) --
    * it only lets an obviously-too-large typed number reach that existing
    * check instead of silently vanishing before it. */
-  const NUM = "(\\d{1,3}(?:,\\d{3})+|\\d{1,9})\\s*(k\\b|thousand\\b|m\\b|million\\b)?";
+  const NUM = `(\\d{1,3}(?:,\\d{3})+|\\d{1,9}|\\b${WRITTEN_NUMBER})\\s*(k\\b|thousand\\b|m\\b|million\\b)?`;
   const magnitude = (digits: string, mag: string | undefined): number =>
-    Math.round(Number(digits.replace(/,/g, "")) * (mag ? (mag.startsWith("k") || mag.startsWith("t") ? 1e3 : 1e6) : 1));
+    Math.round(countValue(digits) * (mag ? (mag.startsWith("k") || mag.startsWith("t") ? 1e3 : 1e6) : 1));
 
   /* Fix (negative/decimal counts silently mangled, not omitted — the
    * externally reported gap this closes): NUM above is digits-only, so
@@ -2128,6 +2147,8 @@ export function notesWithSourceTurns(baseNotes: string, sourceTurns: string[] | 
   return [baseNotes, line].filter(Boolean).join(" ");
 }
 
+export function isUnrelatedBuyingInput(text: string): boolean { return /\b(?:cook|recipe|pasta|write (?:a )?(?:poem|song)|weather forecast)\b/i.test(text) && !/\b(?:sase|sd[ -]?wan|network|security|connectivity|supplier|procurement|firewall)\b/i.test(text); }
+
 export async function extractRequirement(text: string, base: SecurityRequirementInput = {}): Promise<ExtractResult> {
   const notes: string[] = [];
   /* Fix (correction pass 2, Priority 1 — Tests 21, 22, 23, 24, 26, 31,
@@ -2165,6 +2186,9 @@ export async function extractRequirement(text: string, base: SecurityRequirement
   if (explanationForInput(text)) {
     notes.push("Recognised as a glossary question; no extraction was attempted so the answer can't be read as a new project fact.");
     return { requirement: base, updates: [], engine: "deterministic_fallback", notes, unplacedClauses: [], removals: [] };
+  }
+  if (isUnrelatedBuyingInput(text)) {
+    return { requirement: base, updates: [], engine: "deterministic_fallback", notes: ["This does not describe a network or security buying requirement. Describe your sites, users or the service you need."], unplacedClauses: [], removals: [] };
   }
   const det = deterministicExtract(text, notes);
   const modelUpdates = await modelExtract(text, notes);

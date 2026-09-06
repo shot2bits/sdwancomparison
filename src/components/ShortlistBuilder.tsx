@@ -1,5 +1,6 @@
 "use client";
 
+import ComparisonAnswer from './ComparisonAnswer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import CompareTable from '@/components/CompareTable';
@@ -42,7 +43,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   const slugs = selected.filter(Boolean);
   const comparison = useMemo(() => buildComparison(vendors, selected.filter(Boolean), features), [vendors, selected, features]);
   function choose(index: number, slug: string) {
-    setSelected((current) => current.map((value, i) => i === index ? slug : value));
+    setSelected((current) => current.some((value, i) => i !== index && slug && value === slug) ? current : current.map((value, i) => i === index ? slug : value));
     setAnswer(''); setCopied(false);
   }
   async function copyComparison() {
@@ -87,7 +88,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     {comparison && <>
       <div className="mt-4 flex flex-wrap gap-4"><a href="#comparison-table" className="font-semibold underline">Compare every feature across your selected providers</a><button type="button" onClick={copyComparison} className="text-sm underline">{copied ? 'Link copied' : 'Copy comparison link'}</button></div>
       <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void ask(); }}><label htmlFor="comparison-question" className="text-sm font-semibold">Ask about the comparison</label><div className="mt-2 flex flex-col gap-2 sm:flex-row"><input id="comparison-question" value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={1000} placeholder="How do their security capabilities differ?" className="min-w-0 flex-1 rounded border border-zinc-300 p-3"/><button disabled={busy || !question.trim()} className="rounded bg-zinc-900 px-5 py-3 text-white disabled:opacity-50">{busy ? 'Reading evidence…' : 'Ask Netify AI'}</button></div></form>
-      {answer && <p className="mt-4 whitespace-pre-wrap text-sm" role="status">{answer}</p>}
+      {answer && <ComparisonAnswer text={answer} />}
     </>}
     <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5">
       <h3 className="text-lg font-semibold">Which providers fit your project?</h3>

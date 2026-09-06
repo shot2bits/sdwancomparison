@@ -833,7 +833,7 @@ export function buildComparison(
   slugs: string[],
   featureMeta: { id: string; name: string; category: string; description?: string }[],
 ): ComparisonResult | null {
-  const chosen = slugs
+  const chosen = [...new Set(slugs)]
     .map((s) => vendors.find((v) => v.slug === s))
     .filter((v): v is ShortlistVendor => Boolean(v));
   if (chosen.length < 2) return null;

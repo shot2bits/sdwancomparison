@@ -61,7 +61,9 @@ export async function POST(req: Request) {
       }
       if (
         project &&
+        // The workspace asks for a separate final publication click after verification.
         project.pending_submit &&
+        project.consent?.flow !== "marketplace_project" &&
         project.status !== "published" &&
         project.owner_email === payload.email
       ) {
