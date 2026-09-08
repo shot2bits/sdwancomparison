@@ -18,6 +18,32 @@ import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/
 // Re-exported here so every existing import site is unaffected.
 export { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tool-definitions";
 
+
+/** Shape of the sector_evidence block in a netify.co.uk sector page JSON twin. */
+type SectorEvidenceTwin = {
+  contract: string;
+  sector: string;
+  summary: Record<string, unknown>;
+  status_vocabulary: unknown[];
+  evidence_rules: string[];
+  requirements: { code: string; label: string; explanation: string; evidence_rule: string; display_order: number }[];
+  providers: {
+    slug: string;
+    name: string;
+    marketplace_url: string;
+    research_status: string;
+    overall_confidence: string;
+    fit_conclusion: string | null;
+    gaps_and_unknowns: string | null;
+    reviewed_by: string | null;
+    reviewed_date: string | null;
+    source_count: number;
+    accepted_source_count: number;
+    requirements: { code: string; label: string; state: string; evidence_source_ids: string[]; verified_date: string | null }[];
+    sources: { id: string; requirement_codes: string[]; [key: string]: unknown }[];
+  }[];
+};
+
 export async function callMcpTool(name: string, args: unknown): Promise<unknown> {
   const live = await getLiveShortlistDataset();
   const shortlist = live.vendors;
@@ -127,6 +153,80 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
     case "explain_shortlist":
       return explainShortlist({ ...((args ?? {}) as Record<string, unknown>), criteria: DEFAULT_INPUT }, shortlist);
 
+    case "get_sector_evidence": {
+      // Sector evidence layer (8 Sep 2026). The rows live in the netify.co.uk
+      // Neon store and are published as the sector page's JSON twin, so this
+      // tool reads the same document the page renders from: one status per
+      // provider per requirement, each with its reviewed source rows. No
+      // second copy of the research is kept here.
+      const input = (args ?? {}) as { sector?: string; provider?: string; requirement?: string; include_sources?: boolean };
+      const sectorPaths: Record<string, string> = {
+        manufacturing: "sd-wan-sase-for-manufacturing",
+        retail: "sd-wan-sase-for-retail",
+        "financial-services": "sd-wan-sase-for-financial-services",
+        healthcare: "sd-wan-for-healthcare",
+      };
+      const path = sectorPaths[input.sector ?? ""];
+      if (!path) return { error: "Unknown sector. Use manufacturing, retail, financial-services or healthcare." };
+      const pageUrl = `https://netify.co.uk/${path}/`;
+      let twin: { sector_evidence?: SectorEvidenceTwin | null } | null = null;
+      try {
+        const res = await fetch(`${pageUrl}data.json`, { next: { revalidate: 3600 } });
+        if (res.ok) twin = (await res.json()) as { sector_evidence?: SectorEvidenceTwin | null };
+      } catch {
+        twin = null;
+      }
+      const layer = twin?.sector_evidence ?? null;
+      if (!layer) {
+        return { sector: input.sector, has_evidence_layer: false, page_url: pageUrl, note: "No sector evidence review has been published for this sector yet. The manufacturing review is the first." };
+      }
+      const includeSources = input.include_sources !== false;
+      const requirementFilter = input.requirement?.trim().toLowerCase();
+      const providerFilter = input.provider?.trim().toLowerCase();
+      if (requirementFilter && !layer.requirements.some((r) => r.code === requirementFilter)) {
+        return { error: `Unknown requirement code for ${input.sector}. Valid codes: ${layer.requirements.map((r) => r.code).join(", ")}.` };
+      }
+      const providers = layer.providers
+        .filter((p) => !providerFilter || p.slug === providerFilter)
+        .map((p) => {
+          const requirements = p.requirements.filter((r) => !requirementFilter || r.code === requirementFilter);
+          const sourceIds = new Set(requirements.flatMap((r) => r.evidence_source_ids));
+          const sources = includeSources
+            ? p.sources.filter((s) => (requirementFilter ? s.requirement_codes.includes(requirementFilter) || sourceIds.has(s.id) : true))
+            : undefined;
+          return {
+            slug: p.slug,
+            name: p.name,
+            marketplace_url: p.marketplace_url,
+            research_status: p.research_status,
+            overall_confidence: p.overall_confidence,
+            fit_conclusion: p.fit_conclusion,
+            gaps_and_unknowns: p.gaps_and_unknowns,
+            reviewed_by: p.reviewed_by,
+            reviewed_date: p.reviewed_date,
+            accepted_source_count: p.accepted_source_count,
+            requirements,
+            ...(sources ? { sources } : {}),
+          };
+        });
+      if (providerFilter && providers.length === 0) {
+        return { error: "Unknown provider slug for this sector. Call list_sase_vendors for valid values." };
+      }
+      return {
+        sector: layer.sector,
+        has_evidence_layer: true,
+        summary: layer.summary,
+        status_vocabulary: layer.status_vocabulary,
+        evidence_rules: layer.evidence_rules,
+        requirements: requirementFilter ? layer.requirements.filter((r) => r.code === requirementFilter) : layer.requirements,
+        providers,
+        _meta: {
+          canonicalUrl: pageUrl,
+          dataset_url: `${pageUrl}data.json`,
+          note: "Statuses are research decisions with dated sources, not scores. To review means the review of that provider has not been completed; Not found means credible sources were checked and nothing defensible was found, which does not prove the capability is absent.",
+        },
+      };
+    }
     default:
       return { error: `Unknown tool: ${name}` };
   }

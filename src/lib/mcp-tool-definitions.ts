@@ -128,4 +128,19 @@ export const MCP_TOOL_DEFINITIONS = [
       required: ["a", "b"],
     },
   },
+  {
+    name: "get_sector_evidence",
+    description:
+      "Return Netify's sector evidence review for SD-WAN and SASE providers: one status per provider per sector requirement (Proven, Partial, Not found, Not applicable or To review), each backed by reviewed source rows carrying the exact supporting wording, the named manufacturer or customer, estate, countries, any industrial standard named, the source URL, publication and checked dates and what the source does not prove. Proven is only recorded when an accepted source names the capability. Filter by provider slug and by requirement code. Read only, nothing stored. Manufacturing is the first sector published; other sectors return has_evidence_layer=false until their review is imported.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        sector: { type: "string", enum: ["manufacturing", "retail", "financial-services", "healthcare"], description: "Sector slug. Manufacturing is live first." },
+        provider: { type: "string", description: "Optional provider slug (marketplace slug, for example aryaka, cato-networks, bt-business). Call list_sase_vendors for valid values." },
+        requirement: { type: "string", description: "Optional requirement code, for example ot_and_it_segmentation, multi_site_production, industrial_security_standards, remote_engineer_access, managed_operations, global_delivery. Omit to list every requirement." },
+        include_sources: { type: "boolean", description: "Include the reviewed source rows (default true). Set false for a compact status table." },
+      },
+      required: ["sector"],
+    },
+  },
 ] as const;
