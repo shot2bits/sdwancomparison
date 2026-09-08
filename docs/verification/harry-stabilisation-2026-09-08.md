@@ -40,3 +40,19 @@ Harry's 157 rows were reconciled against the 158-case plan, including missing S0
 Not certified by this run: delivery into a real inbox; physical iOS/Android and assistive-technology checks; each external AI application's installed-MCP consent interface; real supplier participation; AI citation or OpenAI directory acceptance. The app cannot guarantee supplier responses or citations.
 
 Production deployment and final live results are recorded below after promotion.
+
+## Production result
+
+- Runtime commit: 7cea3b0.
+- Version displayed: 0809261609 (UK DDMMYYHHmm).
+- Deployment: https://sasecomparison-3kruc694f-netifymarketplace.vercel.app
+- Deployment ID: dpl_AU8JxG4zS8abTL8Yz4Ax3mYQDa3L, READY.
+- Production promotion succeeded; explicit sasecomparison-netifymarketplace.vercel.app proxy alias assigned to this deployment.
+- Builder, shortlist, circuit pricing and board returned HTTP 200 at their final netify.co.uk URLs, all containing the new version.
+- Candidate browser: government 15-site extraction into Basic review, all eight RFP sections, anonymous circuit loading, 390px no-overflow layout, input before notice.
+- Live browser: version confirmed; existing manufacturing draft resumed; bespoke QA-APPENDIX-731 retained; 15 sites retained in review; summary correctly labels users in scope; circuit loading and comparison columns work; All tools opens.
+- No browser errors observed in the final builder/circuit/comparison checks. Vercel returned zero runtime-error records for this deployment in the requested 15-minute post-deployment inspection window. This is a bounded observation, not a zero-defect guarantee.
+- Connected Netify MCP read returned 30 distinct vendors, and the Cato profile returned all 40 capability fields from runtime source neon, contract neon-shortlist/2.0.0. This confirms this connected read path, not every external client's installation/approval UI.
+- Both local RFP and circuit-only browser flows completed identity verification and publication. Local operator flow denied buyer access, accepted a valid quote and exposed failed-notification retry without duplicating that quote. Local native calendar entry was used after automation text entry did not populate the date field.
+
+Release is deployed. Full 158-case manual acceptance sign-off is not represented as complete; the remaining certification limits above still apply.
