@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { firstTouch } from "@/components/NetifyEvents";
+import type {CircuitSignupIntent} from "@/lib/circuit-schema";
 import CodeEntry from "@/components/CodeEntry";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null };
@@ -21,7 +22,7 @@ type Session = { authenticated: boolean; role?: string; email?: string; vendor_s
  * caller passed one (the publish gates auto-continue), otherwise a full
  * reload so server-rendered surfaces pick up the session.
  */
-export default function SignIn({ role, prompt, onAuthed, publishRfpId }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void; publishRfpId?: string }) {
+export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIntent }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void; publishRfpId?: string; circuitIntent?: CircuitSignupIntent }) {
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState<string | null>(null);
@@ -61,8 +62,8 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId }: { role:
     try {
       // Where sign-in was requested from: carried through the magic link so
       // the verify page can send the person straight back here afterwards.
-      const return_to = publishRfpId ? `/sase/rfp-builder/${publishRfpId}/?welcome=submitting` : window.location.pathname + window.location.search;
-      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, attribution: firstTouch(), ...(role === "buyer" ? { bot_proof: { challenge, website } } : {}) }) });
+      const return_to = circuitIntent ? `/sase/circuit-pricing/?request=${encodeURIComponent(circuitIntent.id)}` : publishRfpId ? `/sase/rfp-builder/${publishRfpId}/?welcome=submitting` : window.location.pathname + window.location.search;
+      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, ...(circuitIntent ? {circuit_intent:circuitIntent} : {}), attribution: firstTouch(), ...(role === "buyer" ? { bot_proof: { challenge, website } } : {}) }) });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error ?? "Could not send a link.");

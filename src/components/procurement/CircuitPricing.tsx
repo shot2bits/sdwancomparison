@@ -4,6 +4,7 @@ import SignIn from "@/components/SignIn";
 import {
   CIRCUIT_CONSENT,
   CircuitInputSchema,
+  CircuitLineSchema,
   newCircuitLine,
   type CircuitLine,
   type CircuitInput,
@@ -80,6 +81,10 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
   }, []);
   const refresh = useCallback(async () => {
     try {
+      const sessionResponse = await fetch('/sase/api/auth/session', { cache: "no-store" });
+      if (!sessionResponse.ok) throw Error("Could not check your sign-in status. Please retry.");
+      const session = await sessionResponse.json();
+      if (!session.authenticated) { setSigned(false); setIsAdmin(false); setList([]); return; }
       const res = await fetch(endpoint + (admin ? "?admin=1" : ""), { cache: "no-store" });
       if (res.status === 401) {
         setSigned(false);
@@ -95,7 +100,9 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
     }
   }, [admin]);
   useEffect(() => {
-    const saved = localStorage.getItem(DRAFT);
+    let saved: string | null = null;
+    try { saved = localStorage.getItem(DRAFT); }
+    catch { setError("This browser cannot save your draft on this device. Enable site storage before leaving this page."); }
     const query = new URLSearchParams(location.search);
     if (["quotes","requests"].includes(query.get("view")??"")) setView(query.get("view")!);
     if (!query.get("request") && !admin && saved) {
@@ -122,8 +129,10 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
         .catch((e) => setError(e.message));
   }, [admin,refresh,adopt]); // initial URL/draft hydration only
   useEffect(() => {
-    if (loaded && !frozen && !admin)
-      localStorage.setItem(DRAFT, JSON.stringify({ id, input, record }));
+    if (loaded && !frozen && !admin) {
+      try { localStorage.setItem(DRAFT, JSON.stringify({ id, input, record })); }
+      catch { setError("Your latest changes could not be saved on this device. Keep this page open and enable site storage."); }
+    }
   }, [input, id, loaded, frozen, admin, record]);
   useEffect(() => {
     if (modal || edit) {
@@ -179,6 +188,10 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
     return action("save", { revision: record?.revision ?? 0, input: parsed.data });
   }
   function updateLine(l: CircuitLine) {
+    const parsed = CircuitLineSchema.safeParse(l);
+    if (!parsed.success) { setError(parsed.error.issues.map(issue => issue.message).join(" ")); return; }
+    setError("");
+    l = parsed.data;
     setInput((i) => ({
       ...i,
       lines: i.lines.some((x) => x.id === l.id)
@@ -484,7 +497,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
           <aside className="cp-summary">
             <p>Your private pricing request</p>
             <h2>
-              {locations} location{locations === 1 ? "" : "s"}. {remote} remote connection{remote === 1 ? "" : "s"}. One market request.
+              {`${locations} location${locations === 1 ? "" : "s"}. ${remote} remote connection${remote === 1 ? "" : "s"}. One market request.`}
             </h2>
             <Field label="Company name (private)">
               <input
@@ -901,7 +914,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
           <>
             <h2>Review your pricing request</h2>
             <p>
-              {locations} location{locations === 1 ? "" : "s"}. {remote} remote connection{remote === 1 ? "" : "s"}.
+              {`${locations} location${locations === 1 ? "" : "s"}. ${remote} remote connection${remote === 1 ? "" : "s"}.`}
             </p>
             <p>
               Netify will source your requirements. Your company, service addresses and local
@@ -910,7 +923,8 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
             </p>
             <p>We’ll email your verified work address when pricing appears in Market responses.</p>
             {!signed ? (
-              <SignIn role="buyer" onAuthed={() => void refresh()} />
+              <><label className="cp-check"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>{CIRCUIT_CONSENT}</label>
+              {consent && <SignIn role="buyer" circuitIntent={{id,input,consent:CIRCUIT_CONSENT}} prompt="Verify your work email to save this private request. You will approve publication after signing in." onAuthed={async () => {await refresh(); await recoverRequest();}} />}</>
             ) : (
               <>
                 <label className="cp-check">
@@ -944,7 +958,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
                           consent: CIRCUIT_CONSENT,
                         });
                         if (result) {
-                          localStorage.removeItem(DRAFT);
+                          try { localStorage.removeItem(DRAFT); } catch { setError("Your request is published, but this browser could not clear its old local draft. Reopen the saved request from My pricing requests."); }
                           history.replaceState(null, "", "?request=" + id);
                           setView("quotes");
                           setModal("");

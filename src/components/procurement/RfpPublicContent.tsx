@@ -216,7 +216,7 @@ export default function RfpPublicContent() {
       <div className="mt-3 divide-y divide-[#e2dfdb] rounded-xl border border-[#d6d4d0] bg-[#fefdfc]">
         {FAQS.map((f) => (
           <details key={f.q} className="group px-5 py-4">
-            <summary className="cursor-pointer list-none text-[15px] font-semibold marker:hidden">
+            <summary className="cursor-pointer text-[15px] font-semibold">
               <h3 className="inline">{f.q}</h3>
             </summary>
             <p className="mt-2 text-sm leading-6 text-[#55514d]">{f.a}</p>

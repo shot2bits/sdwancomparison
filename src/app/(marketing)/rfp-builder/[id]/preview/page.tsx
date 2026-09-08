@@ -161,7 +161,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
           {from === "project" ? (
             <Link href={`/project/${id}${manage ? `?manage=${encodeURIComponent(manage)}` : ""}`} className="underline">← Back to your project</Link>
           ) : (
-            <Link href={`/rfp-builder/${id}`} className="underline">← Back to the builder</Link>
+            <a href={`/sase/home/?id=${encodeURIComponent(id)}${manage ? `&manage=${encodeURIComponent(manage)}` : ""}`} className="underline">← Back to your workspace</a>
           )}
         </nav>
       )}
@@ -402,15 +402,15 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               <div className="rounded-sm border-2 border-amber-400 bg-amber-50/40 p-5">
                 <p className="mb-1 text-sm font-semibold">Get responses, not just a document</p>
                 <p className="mb-3 text-sm text-[var(--ink-700)]">
-                  Submitting to the marketplace turns this document into competing bids: structured vendor
-                  responses side by side, pricing private to you, and your Netify Market Report the moment you
-                  submit. Downloading alone ends the process here.
+                  Publish an anonymous project notice for Netify to use when sourcing supplier responses.
+                  Any responses and pricing will be available privately in your project.
+                  Publication does not guarantee a supplier response or quote.
                 </p>
                 <Link
-                  href={`/rfp-builder/${id}${keyQs}`}
+                  href={`/home/?id=${encodeURIComponent(id)}${manage ? `&manage=${encodeURIComponent(manage)}` : ""}`}
                   className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400"
                 >
-                  Submit to your matched vendors
+                  Review & publish your project
                 </Link>
               </div>
             )}
@@ -442,7 +442,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               <p className="eyebrow mb-2">Next steps</p>
               <ul className="space-y-1.5">
                 <li><Link href={`/project/${id}${keyQs}`} className="underline">Project home</Link></li>
-                <li><Link href={`/rfp-builder/${id}${keyQs}`} className="underline">Keep editing in the builder</Link></li>
+                <li><Link href={`/home/?id=${encodeURIComponent(id)}${manage ? `&manage=${encodeURIComponent(manage)}` : ""}`} className="underline">Keep editing in the builder</Link></li>
                 <li><Link href={`/rfp-builder/${id}/review${keyQs}`} className="underline">Agent review and approvals</Link></li>
                 <li><Link href="/opportunities/new" className="underline">Publish a companion project notice</Link></li>
               </ul>

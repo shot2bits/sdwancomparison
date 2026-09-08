@@ -1,3 +1,5 @@
+import {CircuitSignupIntentSchema} from "@/lib/circuit-schema";
+import {prepareCircuitBuyer, circuitBuyerCanSignIn} from "@/lib/circuit-store";
 import { authReturnPath, publicationProjectFromReturn } from "@/lib/auth-return";
 import { analyticsReferrer, analyticsPath } from "@/lib/analytics-privacy";
 import { corsHeaders, preflight } from "@/lib/cors";
@@ -33,7 +35,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
 export async function POST(req: Request) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
-  let body: { email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean; attribution?: { ref?: unknown; landing?: unknown } | null; bot_proof?: { challenge?: unknown; website?: unknown } | null };
+  let body: { circuit_intent?: unknown; email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean; attribution?: { ref?: unknown; landing?: unknown } | null; bot_proof?: { challenge?: unknown; website?: unknown } | null };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const email = (body.email ?? "").trim().toLowerCase();
   const role = body.role === "supplier" ? "supplier" : "buyer";
@@ -47,6 +49,8 @@ export async function POST(req: Request) {
   const returnTo = authReturnPath(rawReturn);
 
   const admin = isAdminEmail(email);
+  const circuitIntent = body.circuit_intent === undefined ? null : CircuitSignupIntentSchema.safeParse(body.circuit_intent);
+  if (circuitIntent && (!circuitIntent.success || role !== "buyer")) return Response.json({error:"Complete your connection requirements and approve the pricing request before verifying your work email."},{status:422,headers:cors});
 
   // Invisible browser proof: a signed, short-lived challenge must have
   // spent at least a moment in the page, may be used once, and carries a
@@ -114,11 +118,11 @@ export async function POST(req: Request) {
   // Merely requesting a link can therefore never create an empty account.
   if (role === "buyer" && !admin) {
     const rfpId = publicationProjectFromReturn(returnTo);
-    let publicationBound = false;
+    let publicationBound = Boolean(circuitIntent?.success);
     if (rfpId) {
       const project = await getProject(rfpId);
       const belongsToEmail = Boolean(project && (!project.owner_email || project.owner_email.toLowerCase() === email));
-      publicationBound = Boolean(
+      publicationBound = publicationBound || Boolean(
         project && belongsToEmail &&
         ((project.pending_submit?.list_on_board === true) || (await isMarketUnlocked(project.id)))
       );
@@ -128,9 +132,10 @@ export async function POST(req: Request) {
         if (await isMarketUnlocked(project.id)) { publicationBound = true; break; }
       }
     }
+    if (!publicationBound) publicationBound = await circuitBuyerCanSignIn(email);
     if (!publicationBound) {
       return Response.json(
-        { error: "Buyer access is created when you publish an RFP to the Netify Opportunity Board. Build and preview your RFP first, then publish to continue.", publish_required: true },
+        { error: "Prepare an RFP, short project brief or circuit-pricing request and approve its review before verifying your work email.", publish_required: true },
         { status: 403, headers: cors },
       );
     }
@@ -173,6 +178,10 @@ export async function POST(req: Request) {
   // survive the common cross-device pattern: build on the desktop, open the
   // sign-in email on the phone, where localStorage-based claiming cannot see
   // the draft.
+  if (circuitIntent?.success) {
+    try { await prepareCircuitBuyer(circuitIntent.data, email); }
+    catch { return Response.json({error:"Could not prepare this pricing request. Reopen its original draft or start a new request; nothing has been published."},{status:409,headers:cors}); }
+  }
   const rfpId = publicationProjectFromReturn(returnTo);
 
   // Known-bad address (11 Aug 2026): Resend accepts a send synchronously and

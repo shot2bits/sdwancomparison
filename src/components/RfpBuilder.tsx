@@ -20,6 +20,7 @@ import {
   type ProductScope,
 } from "@/lib/rfp-types";
 import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
+import { publicationReceipt } from "@/lib/publication-receipt";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
@@ -1069,7 +1070,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               sessionStorage.removeItem("netify_pending_email");
             } catch { /* ignore */ }
             setPublishAuthNeeded(false);
-            setPublishMsg("Submitted. Your RFP is with your matched vendors now; their responses will appear under \"Evaluate vendor responses\" below.");
+            setPublishMsg(publicationReceipt(true));
             refreshConnections();
             loadMarketReport();
             return;
@@ -1123,7 +1124,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         localStorage.removeItem(`rfp_publish_opts_${project.id}`);
         sessionStorage.removeItem("netify_pending_email");
       } catch { /* ignore */ }
-      setPublishMsg(`Submitted to ${data.invited?.length ?? 0} matched vendors. What happens next: they appear under "Vendors and service providers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate vendor responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
+      setPublishMsg(publicationReceipt(Boolean(data.market_unlocked)));
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }

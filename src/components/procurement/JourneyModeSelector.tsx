@@ -31,6 +31,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   const [prepared, setPrepared] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [published, setPublished] = useState(false);
+  const [workspaceWaiting, setWorkspaceWaiting] = useState(false);
   const [coverage, setCoverage] = useState<number | null>(null);
   const inFlight = useRef(false);
   const mode = useRef<ProjectJourneyMode>('quick_list');
@@ -123,12 +124,13 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   function choose(next: ProjectJourneyMode) {
     const workspace=readWorkspaceProject();
     if(workspace?.legacyProject){setPanelOpen(false);window.dispatchEvent(new Event("netify:legacy-project-review"));return;}
-    if(workspace?.busy){setError('Wait for your requirements to finish loading or saving.');setPanelOpen(true);return;}
+    mode.current = next; setSelected(next);
+    if(workspace?.busy){setError('');setWorkspaceWaiting(true);setPanelOpen(true);return;}
+    setWorkspaceWaiting(false); setError('');
     if(workspace&&(Array.isArray(workspace.payload.facts)&&workspace.payload.facts.length||Array.isArray(workspace?.payload.source_turns)&&workspace.payload.source_turns.length)){
       setFields(old=>({...old,...workspace.fields,company:workspace.fields.company||old.company,requiredFeatures:old.requiredFeatures}));
       if(!published){setReview(false);setConsent(false);setPrepared(false);}
     }
-    mode.current = next; setSelected(next);
     const url = new URL(location.href); url.searchParams.set('journey', next);
     history.replaceState(history.state, '', url);
     setPanelOpen(true);
@@ -139,6 +141,23 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
     // Capture the latest form and engine snapshot when the user opens review.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[ready,published]);
+  // Review opened during extraction must pick up the completed facts rather
+  // than leaving an empty form and a permanent loading message.
+  useEffect(() => {
+    if (!panelOpen || !workspaceWaiting) return;
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      const current = readWorkspaceProject();
+      if (current && !current.busy) {
+        setFields(old => ({ ...old, ...current.fields, company: current.fields.company || old.company, requiredFeatures: old.requiredFeatures }));
+        setWorkspaceWaiting(false); setError(''); setReview(false); setConsent(false); setPrepared(false);
+      } else if (Date.now() - started >= 20000) {
+        setWorkspaceWaiting(false);
+        setError('Your requirements are not ready for review yet. Close this panel and check the workspace for a loading, save or recovery message, then open review again. Your draft has not been deleted.');
+      }
+    }, 250);
+    return () => window.clearInterval(timer);
+  }, [panelOpen, workspaceWaiting]);
   async function request(path: string, body: unknown, method = 'POST', current = project) {
     const token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
     if (current && !token) throw new Error('Your private session is unavailable. Reload to recover your project.');
@@ -215,18 +234,19 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
       <div className="nf-brief-panel-body">
           <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Publish a short project brief'}</h2>
           <p className="mt-2 text-sm text-[#66635e]">Describe what you need, review the anonymous notice, then verify your work email to publish. A full RFP is optional.</p>
+          {workspaceWaiting && <p role="status" className="mt-4">Finishing your requirements. This review will update automatically.</p>}
           {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
           {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your board listing is live. Open your project to review matches and any supplier responses. Publication does not guarantee a response or quote.</p><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
             <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
             <section className="mt-4 rounded border border-slate-200 bg-slate-50 p-4 text-sm" aria-label="What publication means"><h3 className="font-semibold">What happens after publication?</h3><p className="mt-2">Your anonymous notice appears on the Opportunity Board. Netify can use your requirements to source proposals. Open your project to review matches and any responses received.</p><p className="mt-2"><strong>Private:</strong> your company name, work email and pricing. <strong>Public:</strong> the project notice you approve. Remove names, addresses and contact details from the requirement text.</p><p className="mt-2">Supplier participation is developing. Responses, prices and response times are not guaranteed. Publishing is not an order.</p></section>
-            <button type="button" disabled={busy} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
-            {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
+            <button type="button" disabled={busy || workspaceWaiting} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
+            {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy || workspaceWaiting} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
             {coverage !== null && <p className="mt-3 text-sm">{coverage} providers meet the filters checked so far. This is market coverage, not confirmation of every requirement. Personalised matches unlock after publication.</p>}
-            <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} disabled={busy} onChange={(e) => setConsent(e.target.checked)} className="mt-1"/><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label>
+            <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} disabled={busy || workspaceWaiting} onChange={(e) => setConsent(e.target.checked)} className="mt-1"/><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label>
             {prepared && !signedIn && <div className="mt-4"><SignIn role="buyer" prompt="Verify your work email, then return here to publish. Your company stays private." onAuthed={() => setSignedIn(true)} /></div>}
-            <button type="button" disabled={busy || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
+            <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
           </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void saveForReview(); }}>
-            <fieldset disabled={busy} className="grid gap-4 sm:grid-cols-2">
+            <fieldset disabled={busy || workspaceWaiting} className="grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold">Solution<select aria-label="Solution" className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
               <label className="text-sm font-semibold">Sector<select aria-label="Sector" required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
               <label className="text-sm font-semibold">Number of sites<input required type="number" min="1" step="1" className={inputClass} value={fields.sites} onChange={(e) => setField('sites', e.target.value)}/></label>
@@ -239,7 +259,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
               ].map(([id, label]) => <label key={id} className="flex gap-2 text-sm"><input type="checkbox" checked={fields.requiredFeatures.includes(id)} onChange={(e) => setField('requiredFeatures', e.target.checked ? [...fields.requiredFeatures, id] : fields.requiredFeatures.filter((v) => v !== id))}/>{label}</label>)}</div></details>
               <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea aria-label="What do you need to achieve?" required minLength={20} maxLength={4000} rows={4} placeholder="Describe your sites, users, security needs and what should improve. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
             </fieldset>
-            <button disabled={busy} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Review my project'}</button>
+            <button disabled={busy || workspaceWaiting} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Review my project'}</button>
             <p className="mt-3 text-xs text-[#66635e]">Nothing is published until you verify your work email and approve the notice.</p>
           </form>}
       </div>

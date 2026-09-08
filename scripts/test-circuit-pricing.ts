@@ -25,6 +25,12 @@ const input = {
   ],
 };
 assert(CircuitInputSchema.safeParse(input).success);
+for (const bandwidth of ["10003 months", "36 months", "3 years"]) {
+  assert(!CircuitInputSchema.safeParse({...input, lines:[{...input.lines[0], bandwidth}]}).success);
+}
+for (const bandwidth of ["100 Mbps", "1 Gbps", "best available mobile speed", "Not sure", "1 Gbps for 36 months"]) {
+  assert(CircuitInputSchema.safeParse({...input, lines:[{...input.lines[0], bandwidth}]}).success);
+}
 for (const patch of [
   { country: "Germany", router: "Meraki SD-WAN edge" },
   { remote: true, protect: true, devices: 10 },
@@ -35,6 +41,30 @@ for (const patch of [
   );
 await withFakeKv(async () => {
   const s = await import("../src/lib/circuit-store");
+  const intent = {id:crypto.randomUUID(),input,consent:CIRCUIT_CONSENT};
+  const firstEmail = "circuit-acceptance@netify.co.uk";
+  assert.equal(await s.circuitBuyerCanSignIn(firstEmail), false);
+  await assert.rejects(()=>s.prepareCircuitBuyer({...intent,consent:""},firstEmail));
+  const pending = await s.prepareCircuitBuyer(intent,firstEmail);
+  assert.equal(pending.status,"draft"); assert.equal(pending.opportunity_id,null);
+  assert.equal((await s.prepareCircuitBuyer(intent,firstEmail)).revision,1);
+  await assert.rejects(()=>s.prepareCircuitBuyer(intent,"different@netify.co.uk"));
+  await assert.rejects(()=>s.prepareCircuitBuyer({...intent,input:{...input,timescale:"Changed"}},firstEmail));
+  assert.equal(await s.circuitBuyerCanSignIn(firstEmail),true);
+  assert.equal(await s.circuitBuyerCanSignIn("different@netify.co.uk"),false);
+  const authRequest = await import("../src/app/api/auth/request/route");
+  const {issueAuthChallenge} = await import("../src/lib/auth-challenge");
+  const now = Date.now;
+  let challenge;
+  try { Date.now = ()=>now()-1000; challenge=issueAuthChallenge(); } finally { Date.now=now; }
+  const freshIntent={...intent,id:crypto.randomUUID()};
+  const signup = await authRequest.POST(new Request("https://netify.co.uk/sase/api/auth/request",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:"new-circuit-buyer@netify.co.uk",role:"buyer",return_to:"/sase/circuit-pricing/?request="+freshIntent.id,circuit_intent:freshIntent,bot_proof:{challenge,website:""}})}));
+  assert.equal(signup.status,200);
+  const signupBody = await signup.json(); assert(signupBody.dev_link);
+  const {consumeMagicToken} = await import("../src/lib/rfp-store");
+  const signedIdentity=await consumeMagicToken(new URL(signupBody.dev_link).searchParams.get("token")!);
+  assert.equal(signedIdentity?.email,"new-circuit-buyer@netify.co.uk");
+  console.log("PASS first-time circuit buyer verification; no RFP prerequisite; unverified draft remains private; ownership and retries preserved");
   const { getOpportunity } = await import("../src/lib/rfp-store");
   const { toPublicOpportunity } = await import("../src/lib/opportunity-types");
   const buyer = {

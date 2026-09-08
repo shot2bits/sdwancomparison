@@ -11,7 +11,10 @@ export const CircuitLineSchema = z
     kind: z.enum(["Ethernet", "Broadband", "4G / 5G SIM only", "4G / 5G with router"]),
     remote: z.boolean(),
     quantity: z.number().int().min(1).max(100000),
-    bandwidth: text(150).min(1),
+    bandwidth: text(150).min(1).refine(
+      value => !/\b(?:months?|years?|weeks?|days?)\b/i.test(value) || /\b(?:[kmgt]bps|[kmgt]bit|mb\/s|gb\/s)\b/i.test(value),
+      "Enter bandwidth, such as 100 Mbps or 1 Gbps, rather than a contract duration. Use Not sure if you need advice.",
+    ),
     data: text(300),
     resilience: z.enum([
       "Single connection",
@@ -65,6 +68,12 @@ export const CircuitInputSchema = z
     if (new Set(v.lines.map((l) => l.id)).size !== v.lines.length)
       c.addIssue({ code: "custom", message: "Each location needs a unique ID." });
   });
+export const CircuitSignupIntentSchema = z.object({
+  id: z.string().uuid(),
+  input: CircuitInputSchema,
+  consent: z.literal(CIRCUIT_CONSENT),
+}).strict();
+export type CircuitSignupIntent = z.infer<typeof CircuitSignupIntentSchema>;
 export type CircuitLine = z.infer<typeof CircuitLineSchema>;
 export type CircuitInput = z.infer<typeof CircuitInputSchema>;
 export const CircuitQuoteSchema = z

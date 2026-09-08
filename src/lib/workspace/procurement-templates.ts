@@ -2310,7 +2310,7 @@ export function buildArchitecture(input: {
   const edges: ArchitectureEdge[] = [];
 
   if (requirement.estate?.sites) nodes.push({ id: "sites", label: `${requirement.estate.sites} sites`, kind: "site", sourceFactIds: [], sourceClauseIds: [] });
-  if (requirement.estate?.users) nodes.push({ id: "remote-users", label: `${requirement.estate.users} remote users`, kind: "user", sourceFactIds: [], sourceClauseIds: [] });
+  if (requirement.estate?.users) nodes.push({ id: "remote-users", label: `${requirement.estate.users} users in scope`, kind: "user", sourceFactIds: [], sourceClauseIds: [] });
 
   /** Stage A closure pass, item 2 reproduction: this node used to exist
    *  ONLY when the buyer stated an EXISTING network (estate.

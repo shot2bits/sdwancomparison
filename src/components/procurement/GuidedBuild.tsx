@@ -382,8 +382,8 @@ export default function GuidedBuild({
       <nav className="nf-calm-tabs" aria-label="Project views">
         <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
         <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>
-        <button type="button" aria-current={workspaceTab === "pack" ? "page" : undefined} onClick={() => setWorkspaceTab("pack")}>Supplier pack</button>
-        <button type="button" onClick={() => onSettingsOpenChange(true)}>Preferences</button>
+        <button type="button" aria-current={workspaceTab === "pack" ? "page" : undefined} onClick={() => setWorkspaceTab("pack")}>Supplier document</button>
+        <button type="button" onClick={() => onSettingsOpenChange(true)}>Document settings</button>
       </nav>
       <div className="nf-guided-main">
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
@@ -656,7 +656,7 @@ export default function GuidedBuild({
           <div className="lpos-captured lpos-shortlist" aria-label="Your shortlist">
             <small>Your shortlist</small>
             {shortlist.vendors.map((vendor, index) => (
-              <div key={vendor.slug}><span aria-hidden="true">{index + 1}</span><p><strong>{vendor.name}</strong><small>Pinned from your comparison. Invited when you publish.</small></p><button type="button" onClick={() => shortlist.onRemove(vendor.slug)} aria-label={`Remove ${vendor.name} from your shortlist`}>Remove</button></div>
+              <div key={vendor.slug}><span aria-hidden="true">{index + 1}</span><p><strong>{vendor.name}</strong><small>Pinned from your comparison for supplier review.</small></p><button type="button" onClick={() => shortlist.onRemove(vendor.slug)} aria-label={`Remove ${vendor.name} from your shortlist`}>Remove</button></div>
             ))}
             <p className="lpos-shortlist-note">These are your own picks. Netify&apos;s evaluated match across the whole market is computed the moment you publish, never before.</p>
           </div>

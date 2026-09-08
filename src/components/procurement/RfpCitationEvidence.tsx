@@ -31,7 +31,7 @@ export default function RfpCitationEvidence() {
     <section className="mx-auto w-full max-w-[1180px] px-5 pb-12 pt-5 lg:px-8" aria-labelledby="rfp-validation-methodology">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }} />
       <details className="rounded-xl border border-[#d6d4d0] bg-[#fefdfc] p-5 open:shadow-sm lg:p-7">
-        <summary className="cursor-pointer list-none marker:hidden">
+        <summary className="cursor-pointer">
           <span className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#9a4600]">Evidence and method</span>
           <h2 id="rfp-validation-methodology" className="mt-2 text-[clamp(22px,3vw,34px)] font-semibold tracking-[-0.025em] text-[#110f0d]">From requirements to comparable supplier responses.</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[#66635e]">Open the validation method, factual capabilities and worked example. Last reviewed {RFP_VALIDATION_REVIEWED}.</p>

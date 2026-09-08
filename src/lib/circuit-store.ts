@@ -4,6 +4,7 @@ import { kvRaw, kvGetJson, kvSetJson, saveOpportunity, newId } from "./rfp-store
 import { OpportunitySchema } from "./opportunity-types";
 import {
   CircuitInputSchema,
+  CircuitSignupIntentSchema,
   CircuitQuoteSchema,
   CIRCUIT_CONSENT,
   circuitPublicSummary,
@@ -66,6 +67,34 @@ async function persist(r: CircuitRecord) {
   await kvRaw(["ZADD", "circuits:all", r.created, r.id]);
   return r;
 }
+/** Save only the explicitly approved private draft before email verification.
+ * This does not create a session, publish a notice or modify an existing request. */
+export async function prepareCircuitBuyer(raw: unknown, email: string) {
+  const intent = CircuitSignupIntentSchema.parse(raw);
+  return circuitLock(intent.id, async () => {
+    const existing = await kvGetJson<CircuitRecord>("circuits:record:" + intent.id);
+    if (existing) {
+      const sameInput = (Object.keys(intent.input) as Array<keyof typeof intent.input>)
+        .every(key => JSON.stringify(existing[key]) === JSON.stringify(intent.input[key]));
+      if (existing.owner_email !== email || existing.status !== "draft" || !sameInput)
+        throw new CircuitError("This request already exists. Sign in with its original work email to reopen it.", 409);
+      return persist(existing);
+    }
+    const now = Date.now();
+    return persist({...intent.input, id:intent.id, owner_email:email, created:now, updated:now,
+      status:"draft", revision:1, opportunity_id:null, quotes:[], consent:{text:intent.consent,at:now}});
+  });
+}
+
+export async function circuitBuyerCanSignIn(email: string): Promise<boolean> {
+  const ids = await kvRaw(["ZRANGE", index(email), 0, -1]) as string[];
+  for (const id of ids.slice(-500)) {
+    const record = await kvGetJson<CircuitRecord>("circuits:record:" + id);
+    if (record?.owner_email === email && (record.status !== "draft" || record.consent?.text === CIRCUIT_CONSENT)) return true;
+  }
+  return false;
+}
+
 export async function circuitSave(
   id: string,
   input: unknown,
