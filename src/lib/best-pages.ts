@@ -125,7 +125,14 @@ export const BEST_PAGES: BestPage[] = [
   sectorPage("healthcare", "healthcare", "Typical drivers include clinical application performance, site resilience for 24x7 care settings and patient data protection."),
   sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
   sectorPage("retail_ecommerce", "retail", "Typical drivers include rapid store rollout, PCI segmentation, cellular backup and centralised management at scale."),
-  sectorPage("manufacturing", "manufacturing", "Typical drivers include OT and IoT security, plant connectivity, global site coverage and MPLS migration."),
+  {
+    ...sectorPage("manufacturing", "manufacturing", "Typical drivers include OT and IoT security, plant connectivity, global site coverage and MPLS migration."),
+    // Full manufacturing buyer guide on the main site carries the sector
+    // evidence layer, shortlist tool and RFP hand-off (Sep 2026). This page
+    // remains its live ranking source; search equity consolidates there, the
+    // same arrangement as the hybrid and remote work page below.
+    canonicalOverride: "https://netify.co.uk/sd-wan-sase-for-manufacturing/",
+  },
   sectorPage("energy_utilities", "energy-and-utilities", "Typical drivers include remote site coverage, OT security and high-resilience designs for critical infrastructure."),
   sectorPage("government_public_sector", "government", "Typical drivers include sovereignty and data residency, certified security and framework procurement routes."),
   // UK-specific public sector page (16 July 2026): the general government
