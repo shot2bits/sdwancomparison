@@ -87,7 +87,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
     }
   }, [rfpId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { queueMicrotask(() => void load()); }, [load]);
 
   // Saved confirmation (Harry's QA F12: pressing "Set goal" gave no visible
   // acknowledgement, so the buyer could not tell the goal was active).
@@ -236,7 +236,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
       {/* Bid reviews */}
       <section className={card}>
         <h3 className="font-semibold mb-1">Bid reviews</h3>
-        <p className="text-sm text-[var(--ink-600)] mb-3">Each review separates deterministic, evidence-based checks from the AI's qualitative second opinion. Netify&apos;s independent grade is shown distinctly from the vendor&apos;s own claim.</p>
+        <p className="text-sm text-[var(--ink-600)] mb-3">Each review separates deterministic, evidence-based checks from the AI&apos;s qualitative second opinion. Netify&apos;s independent grade is shown distinctly from the vendor&apos;s own claim.</p>
         {reviews.length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No bids reviewed yet.</p>
         ) : (

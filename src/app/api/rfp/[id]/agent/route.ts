@@ -8,12 +8,12 @@ import {
   questionForFeature,
   synthesiseSections,
 } from "@/lib/rfp-methodology";
-import { buildShortlist } from "@/lib/shortlist-core";
 import { inviteSupplier } from "@/lib/rfp-connect";
-import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { sessionFromRequest } from "@/lib/auth";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { getBuyerMemory, learnBuyerMemory, memoryBrief, type BuyerMemory } from "@/lib/buyer-memory";
+import { isMarketUnlocked } from "@/lib/market-unlock";
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -306,18 +306,24 @@ export async function POST(req: Request, ctx: Ctx) {
             dirty = true;
             out = { ok: true, added_custom: true, category: cat };
           } else if (tu.name === "suggest_vendors") {
-            const size = Number(input.shortlist_size ?? 6);
-            const result = buildShortlist(getShortlistDataset(), {
-              sector: project.buyer.sector ?? null,
-              organisation_size: project.buyer.organisation_size ?? "any",
-              service_model: project.buyer.operating_model ?? "any",
-              required_regions: project.buyer.regions ?? [],
-              shortlist_size: size,
-            }, FEATURE_NAMES);
-            out = { ok: true, shortlist: result.shortlist.map((v) => `${v.rank}. ${v.name} (${v.score})`), criteria: result.criteria_summary };
+            const snapshot = await getLatestPublishedSnapshot(project.id);
+            if (!(await isMarketUnlocked(project.id)) || !snapshot) {
+              out = { ok: false, error: "market_locked", message: "Provider identities become available after successful publication and MarketUnlock." };
+            } else {
+              const size = Number(input.shortlist_size ?? 6);
+              const providers = (snapshot.matched_vendors ?? snapshot.matched_vendor_ids.map((slug) => ({ slug, name: slug }))).slice(0, size);
+              out = { ok: true, shortlist: providers.map((provider, index) => `${index + 1}. ${provider.name}`), criteria: snapshot.match_criteria, published_revision_id: snapshot.id };
+            }
           } else if (tu.name === "engage_supplier") {
-            const r = await inviteSupplier(project.id, String(input.vendor_slug), String(input.intro ?? ""));
-            out = "error" in r ? { ok: false, error: r.error } : { ok: true, invited: r.vendor_name, status: r.status };
+            const snapshot = await getLatestPublishedSnapshot(project.id);
+            if (!(await isMarketUnlocked(project.id)) || !snapshot) {
+              out = { ok: false, error: "market_locked", message: "Supplier invitations require successful publication and MarketUnlock." };
+            } else {
+              const slug = String(input.vendor_slug);
+              const frozen = snapshot.provider_evidence?.find((provider) => provider.slug === slug)?.record;
+              const r = await inviteSupplier(project.id, slug, String(input.intro ?? ""), frozen);
+              out = "error" in r ? { ok: false, error: r.error } : { ok: true, invited: r.vendor_name, status: r.status };
+            }
           } else if (tu.name === "set_status") {
             const st = String(input.status);
             if ((RFP_STATUSES as readonly string[]).includes(st)) {

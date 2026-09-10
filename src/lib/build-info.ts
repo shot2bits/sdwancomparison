@@ -40,3 +40,14 @@ export function buildStamp(): string {
   });
   return `build ${BUILD_SHA} · ${stamp} UTC`;
 }
+
+/** Deployed release date/time in London: DDMMYYHHmm. Never uses request time. */
+export function releaseVersion(iso = BUILD_TIME): string {
+  const date = new Date(iso);
+  if (!iso || Number.isNaN(date.getTime())) return "development";
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London", day: "2-digit", month: "2-digit", year: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(date);
+  return ["day", "month", "year", "hour", "minute"].map(type => parts.find(part => part.type === type)?.value ?? "").join("");
+}

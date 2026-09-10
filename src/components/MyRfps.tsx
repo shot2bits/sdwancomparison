@@ -57,32 +57,40 @@ function localDrafts(): { id: string; manage_token: string }[] {
 }
 
 export default function MyRfps() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [rfps, setRfps] = useState<Rfp[] | null>(null);
 
   useEffect(() => {
-    const load = () =>
-      fetch("/sase/api/rfp/mine")
-        .then((r) => (r.ok ? r.json() : null))
-        .then((d) => {
-          if (!d?.rfps) return;
-          setRfps(d.rfps as Rfp[]);
-          // Tell listeners (the sidebar Your projects badge) the list moved.
-          try { window.dispatchEvent(new Event("netify:rfps-changed")); } catch { /* ignore */ }
-        })
-        .catch(() => {});
-    // Claim any anonymous drafts this browser built before listing, so a
-    // buyer who drafted first and signed in later still sees their work here.
-    const drafts = localDrafts();
-    if (drafts.length > 0) {
-      fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) })
-        .catch(() => {})
-        .then(load);
-    } else {
-      load();
+    let active = true;
+    async function load() {
+      try {
+        const sessionResponse = await fetch("/sase/api/auth/session", { cache: "no-store" });
+        if (!sessionResponse.ok) return;
+        const session = await sessionResponse.json();
+        if (!active || !session.authenticated) return;
+        setAuthenticated(true);
+        const drafts = localDrafts();
+        if (drafts.length > 0) {
+          await fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) }).catch(() => {});
+        }
+        if (!active) return;
+        const response = await fetch("/sase/api/rfp/mine", { cache: "no-store" });
+        if (!response.ok) throw new Error("Projects unavailable");
+        const data = await response.json();
+        if (!Array.isArray(data.rfps)) throw new Error("Projects unavailable");
+        if (!active) return;
+        setRfps(data.rfps as Rfp[]);
+        window.dispatchEvent(new Event("netify:rfps-changed"));
+      } catch { if (active) setLoadError(true); }
     }
+    void load();
+    return () => { active = false; };
   }, []);
 
   // Signed out (or still loading): render nothing, as before.
+  if (!authenticated) return null;
+  if (loadError) return <p role="alert">Your projects could not be loaded. Refresh the page to try again.</p>;
   if (!rfps) return null;
 
   // Signed in with an empty account: the launchpad, not an empty room.
@@ -95,24 +103,24 @@ export default function MyRfps() {
         <h2 className="text-xl mb-1">Your account is ready. Here is what it does.</h2>
         <p className="text-sm text-[var(--ink-700)] mb-3 max-w-2xl">
           Describe your project once and Netify builds it into a living Statement of Requirements you can
-          raise to an RFI or a full RFP. Publishing is free and pays out instantly: an indicative market price
-          band for your estate, your document as Word and PDF, and structured responses from your matched
-          vendors, side by side, with pricing private to you. You stay anonymous until you reply, and only
-          vetted vendors and service providers can respond.
+          raise to an RFI or a full RFP. Publishing is free and unlocks supplier matching and your Word and PDF documents.
+          Suppliers can then submit structured responses for you to compare, with pricing private to you.
+          Responses arrive when suppliers submit them; they are not instant or guaranteed.
+          Your identity stays private until you choose to share it. Only vetted vendors and service providers can respond.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           {/* The One Door (Harry, 24 July 2026): this button used to hand a
               brand-new signup into the legacy wizard at /rfp-builder/new,
               undoing the front-door friction work one click later. The
               desk at the apex is the only buyer entrance. */}
-          <a href="https://netify.co.uk/" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
+          <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
             Describe your first project
           </a>
           <Link href="/shortlist" className="text-sm underline text-[var(--ink-700)]">
             Not ready? Compare the market first
           </Link>
         </div>
-        <p className="mt-2 text-xs text-[var(--ink-600,#555)]">No obligation to award and no sales calls until you reply.</p>
+        <p className="mt-2 text-xs text-[var(--ink-600,#555)]">No obligation to award. You control when to share your contact details.</p>
       </div>
     );
   }

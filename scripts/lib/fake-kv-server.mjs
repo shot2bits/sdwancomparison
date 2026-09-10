@@ -59,6 +59,32 @@ export async function startFakeKv() {
         if (exIndex >= 0) expiries.set(args[0], Date.now() + Number(args[exIndex + 3]) * 1000);
         return "OK";
       }
+      case "EVAL": {
+        if (String(args[0]).includes("redis.call('get',KEYS[1])") && Number(args[1]) === 1) {
+          const key = String(args[2]);
+          return get(key)?.value === String(args[3]) && store.delete(key) ? 1 : 0;
+        }
+        if (String(args[0]).includes("netify-funnel-append-once") && Number(args[1]) === 2) {
+          const marker=String(args[2]), key=String(args[3]);
+          if(get(marker)) return 0;
+          const list=ensure(key,"list",()=>[]);list.value.unshift(String(args[4]));list.value=list.value.slice(0,10000);
+          store.set(marker,{type:"string",value:"1"});return 1;
+        }
+        throw new Error("Unsupported fixture Lua script");
+      }
+      case "ZADD": {
+        const e = ensure(args[0], "zset", () => new Map());
+        let added = 0;
+        for (let i=1;i<args.length;i+=2) { const member=String(args[i+1]); if(!e.value.has(member)) added++; e.value.set(member,Number(args[i])); }
+        return added;
+      }
+      case "ZRANGE": {
+        const e=get(args[0]); if(!e)return [];
+        const rows=Array.from(e.value.entries()).sort((a,b)=>a[1]-b[1]||a[0].localeCompare(b[0])).map(row=>row[0]);
+        const start=Number(args[1])<0?Math.max(0,rows.length+Number(args[1])):Number(args[1]);
+        const stop=Number(args[2])<0?rows.length+Number(args[2]):Number(args[2]);
+        return rows.slice(start,stop+1);
+      }
       case "INCR": {
         const next = Number(get(args[0])?.value ?? 0) + 1;
         store.set(args[0], { type: "string", value: String(next) });

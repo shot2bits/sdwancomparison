@@ -10,6 +10,7 @@
  * appear only inside the estimator output (editorial rule).
  */
 import type { Metadata } from "next";
+import { ESTIMATE_DISCLOSURE } from "@/lib/estimator/input";
 import { CostEstimator } from "@/components/CostEstimator";
 import { SITE_URL, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -34,7 +35,7 @@ const WEB_APP_SCHEMA = {
   operatingSystem: "Web browser",
   offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
   description:
-    "Free interactive estimator producing indicative SASE monthly cost and three year TCO bands with a per-driver breakdown, calibrated to the Netify SASE Methodology v2026.1. Hands the validated inputs directly into the Netify RFP Builder.",
+    "Free interactive estimator producing indicative SASE monthly cost and three year TCO bands with a per-driver breakdown, using provisional Netify SASE Methodology v2026.1 assumptions. Hands the validated inputs directly into the Netify RFP Builder.",
   publisher: { "@type": "Organization", name: "Netify", url: "https://netify.co.uk/" },
 };
 
@@ -52,7 +53,7 @@ export default function Page() {
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(SPEAKABLE_SCHEMA) }} />
 
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mx-auto max-w-3xl px-4 py-10">
         <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
           SASE Cost and TCO Estimator
         </h1>
@@ -62,9 +63,11 @@ export default function Page() {
           The Netify SASE cost estimator models the seven drivers of SASE spend (users and devices,
           security depth, sites and regions, bandwidth, delivery model, implementation, and hidden
           recurring costs) and returns an indicative monthly band and three year TCO band for your
-          profile, calibrated to the Netify SASE Methodology v2026.1. It is free, needs no sign-in,
+          profile, using provisional Netify SASE Methodology v2026.1 assumptions. It is free, needs no sign-in,
           and the output is a band rather than a vendor quote.
         </p>
+
+        <p className="mt-3 text-sm text-zinc-700">{ESTIMATE_DISCLOSURE}</p>
 
         <div className="mt-8">
           <CostEstimator />
@@ -73,8 +76,8 @@ export default function Page() {
         <section className="mt-12">
           <h2 className="text-xl font-semibold text-zinc-950">How the estimator works</h2>
           <p className="mt-3 text-zinc-700 leading-relaxed">
-            Set your user count, site count, regions in scope, security depth, delivery model and
-            contract term. The engine applies the Netify SASE Methodology v2026.1 calibration and
+            Set your total licensed user count (on-site and remote), site count, regions in scope, security depth, delivery model and
+            contract term. The engine applies the provisional Netify SASE Methodology v2026.1 assumptions and
             returns deliberately wide bands with a per-driver breakdown, so you can see which lever
             moves your cost most. Every response carries the methodology version and a disclaimer:
             these are indicative bands, never vendor quotes.
@@ -82,19 +85,13 @@ export default function Page() {
         </section>
 
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-zinc-950">Turn the estimate into an RFP</h2>
+          <h2 className="text-xl font-semibold text-zinc-950">Take your budget to market</h2>
           <p className="mt-3 text-zinc-700 leading-relaxed">
-            An AI assistant can estimate SASE costs and draft requirements. It cannot invite
-            vendors, collect structured comparable responses, manage NDAs or score submissions. The
-            Netify platform does: one click carries your estimator inputs into the{" "}
-            <a
-              href="https://netify.co.uk/"
-              className="font-medium text-amber-700 underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600"
-            >
-              SASE and SD-WAN RFP Builder
-            </a>
-            , which builds a structured RFP from 115+ pre-written questions and publishes it to 30+
-            vetted vendors. Free, with no sign-in to build.
+            Use your estimate to prepare a short brief, a Short or Detailed RFP, or bring your own RFP or RFI.
+            The <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="font-medium underline underline-offset-2">Netify buying workspace</a>{" "}
+            helps you review and publish an anonymous project, then compare supplier responses privately.
+            A full RFP is optional. Publication requires your verified work email and approval;
+            supplier participation and quotations are not guaranteed.
           </p>
         </section>
 
@@ -115,7 +112,7 @@ export default function Page() {
             with reuse permitted with attribution to Netify (netify.co.uk).
           </p>
         </section>
-      </main>
+      </div>
     </>
   );
 }

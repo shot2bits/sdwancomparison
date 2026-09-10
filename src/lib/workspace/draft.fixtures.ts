@@ -14,7 +14,6 @@ import {
   meterOf,
   productScopeFor,
   requirementFrom,
-  standing,
   usersBandLabel,
   wizardRegions,
   wizardSectorKey,
@@ -652,7 +651,7 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
   await ok("click grammar: strike on second touch, restore by touch (a stated act), never by re-inference", () => {
     let m = mergeUpdates([], [{ path: "procurement.operatingModel", value: "managed", provenance: "stated", quote: "Fully managed" }], 1, "answer");
     // second touch strikes (the desk calls toggleFact)
-    let facts2 = m.facts.map((f) => ({ ...f, struck: true }));
+    const facts2 = m.facts.map((f) => ({ ...f, struck: true }));
     // a model re-inference must not resurrect
     m = mergeUpdates(facts2, [{ path: "procurement.operatingModel", value: "managed", provenance: "inferred", reason: "again" }], 2, "extract");
     expect(m.facts.find((f) => f.id === "procurement.operatingModel")!.struck === true, "re-inference never resurrects");

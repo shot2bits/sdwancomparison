@@ -39,6 +39,7 @@
  */
 
 import { corsHeaders, preflight } from "@/lib/cors";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { workspaceFit } from "@/lib/workspace/fit";
 
 export const runtime = "nodejs";
@@ -50,6 +51,7 @@ export async function OPTIONS(req: Request) {
 export async function GET(req: Request) {
   const cors = corsHeaders(req);
   const url = new URL(req.url);
+  const live = await getLiveShortlistDataset();
   const result = workspaceFit({
     buying: url.searchParams.get("buying") ?? "",
     regions: (url.searchParams.get("regions") ?? "").split(".").filter(Boolean),
@@ -59,11 +61,11 @@ export async function GET(req: Request) {
     clouds: (url.searchParams.get("clouds") ?? "").split(".").filter(Boolean),
     mplsEstate: url.searchParams.get("mpls") === "1",
     wants: (url.searchParams.get("wants") ?? "").split(".").filter(Boolean),
-  });
+  }, live.vendors);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { suppliers, directory, count, ...safe } = result as typeof result & { count?: number };
   return Response.json(
-    { ok: true, ...safe },
+    { ok: true, runtime_provider_source: live.source, provider_contract_version: live.providerContractVersion, ...safe },
     { headers: { ...cors, "cache-control": "public, max-age=300, stale-while-revalidate=3600" } },
   );
 }

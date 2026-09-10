@@ -1,0 +1,69 @@
+{
+  "version": "independent-provider-evidence/1.0.0",
+  "reviewed_at": "2026-09-01",
+  "sources": {
+    "att-business": [
+      {
+        "url": "https://www.lightreading.com/security/at-t-adds-cisco-to-managed-sd-wan-menu",
+        "title": "AT&T adds Cisco to managed SD-WAN menu",
+        "publisher": "Light Reading",
+        "publication_date": "2020-07-08",
+        "supports": "Managed Cisco and VMware SD-WAN options, security functions and service management."
+      }
+    ],
+    "bt-business": [
+      {
+        "url": "https://www.computerweekly.com/news/366616338/BT-unveils-managed-SASE-service",
+        "title": "BT unveils managed SASE service",
+        "publisher": "Computer Weekly",
+        "publication_date": "2024-11-25",
+        "supports": "BT managed SASE based on Fortinet, including FWaaS, SWG, CASB and ZTNA."
+      }
+    ],
+    "colt-technology-services": [
+      {
+        "url": "https://www.lightreading.com/sd-wan/colt-launches-multi-cloud-connectivity-underpinned-by-its-award-winning-sd-wan-offering",
+        "title": "Colt launches multi-cloud connectivity underpinned by its SD-WAN offering",
+        "publisher": "Light Reading",
+        "publication_date": "2020-06-25",
+        "supports": "Multi-cloud access, application recognition and traffic steering over Colt SD-WAN."
+      }
+    ],
+    "comcast-business": [
+      {
+        "url": "https://www.fierce-network.com/telecom/comcast-business-sd-wan-customers-want-more-nerd-knobs-to-better-track-their-networks",
+        "title": "Comcast Business SD-WAN customers want more controls to track their networks",
+        "publisher": "Fierce Network",
+        "publication_date": "2018-10-17",
+        "supports": "Comcast Business SD-WAN architecture, APIs and customer management controls."
+      }
+    ],
+    "lumen": [
+      {
+        "url": "https://thectoclub.com/tools/lumen-sd-wan-review/",
+        "title": "Lumen SD-WAN review",
+        "publisher": "The CTO Club",
+        "publication_date": "2026-08-01",
+        "supports": "Independent review of Lumen SD-WAN features, service fit and limitations."
+      }
+    ],
+    "orange-business": [
+      {
+        "url": "https://www.lightreading.com/sd-wan/orange-s-isch-on-keeping-sd-wan-secure-simple",
+        "title": "Orange on keeping SD-WAN secure and simple",
+        "publisher": "Light Reading",
+        "publication_date": "2019-07-18",
+        "supports": "Orange managed SD-WAN operating model and customer deployment evidence."
+      }
+    ],
+    "virgin-media-o2": [
+      {
+        "url": "https://telcomagazine.com/wireless-networks/sd-wan-a-lifeline-for-global-business-connectivity",
+        "title": "SD-WAN: a lifeline for global business connectivity",
+        "publisher": "Telco Magazine",
+        "publication_date": "2024-08-02",
+        "supports": "Virgin Media O2 Business SD-WAN positioning and managed service use cases."
+      }
+    ]
+  }
+}

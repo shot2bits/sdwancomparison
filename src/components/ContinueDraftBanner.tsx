@@ -35,7 +35,7 @@ export default function ContinueDraftBanner() {
       if (!raw) return;
       const d = JSON.parse(raw) as LastDraft;
       // Only surface drafts the builder can actually reopen (its token key).
-      if (d?.id && localStorage.getItem(`netify_mtok_${d.id}`)) setDraft(d);
+      if (d?.id && localStorage.getItem(`netify_mtok_${d.id}`)) queueMicrotask(() => setDraft(d));
     } catch {
       /* private mode or malformed pointer: no banner */
     }

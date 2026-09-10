@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import ProcurementEntry, {
   ENGINE_PROMISE,
   ENGINE_DESCRIPTION,
+  RFP_META_DESCRIPTION,
 } from "@/components/procurement/ProcurementEntry";
+import RfpPublicContent from "@/components/procurement/RfpPublicContent";
+import RfpCitationEvidence from "@/components/procurement/RfpCitationEvidence";
 import { getOrganizationSchema } from "@/lib/structured-data";
 
 /**
@@ -40,14 +43,19 @@ import { getOrganizationSchema } from "@/lib/structured-data";
 const APEX = "https://netify.co.uk";
 const BUILDER_URL = `${APEX}/sase-sd-wan-rfp-builder/`;
 
+/* Title, description (Robert, 3 Sep 2026, "sd-wan rfp" / "sase rfp"
+ * citation work; title shortened on his review the same day from
+ * "SD-WAN and SASE RFP Builder, Template and Vendor Evaluation", 68
+ * characters with the suffix, which truncates in results). The root
+ * layout's template appends " | Netify": 52 characters in total. */
 export const metadata: Metadata = {
-  title: "SASE & SD-WAN RFP Validator and Procurement-Ready Builder",
-  description: ENGINE_DESCRIPTION,
+  title: "Free SD-WAN and SASE RFP Builder and Template",
+  description: RFP_META_DESCRIPTION,
   alternates: { canonical: BUILDER_URL },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Netify | SASE & SD-WAN RFP Validator and Builder",
-    description: ENGINE_DESCRIPTION,
+    title: "Free SD-WAN and SASE RFP Builder and Template | Netify",
+    description: RFP_META_DESCRIPTION,
     url: BUILDER_URL,
     type: "website",
     locale: "en_GB",
@@ -72,7 +80,7 @@ function getHomeSchemas() {
       url: BUILDER_URL,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
-      description: `${ENGINE_DESCRIPTION} Provenance on every claim, evidence-graded vendor fit, and one human signature publishes the anonymous notice. Fully agent-accessible via MCP and llms.txt.`,
+      description: `${ENGINE_DESCRIPTION} Provenance on every claim, evidence-graded vendor fit, and one human signature publishes the anonymous notice. Public research and supported drafting tools are available through MCP. Private actions require the credentials and buyer approval stated by each tool.`,
       offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
       provider: { "@id": `${APEX}/#organization` },
     },
@@ -168,7 +176,9 @@ export default function Page() {
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
-      <ProcurementEntry />
+      {/* Server-rendered guidance stays in the initial HTML, inside the
+          workspace's single accessible, collapsed buying guide. */}
+      <ProcurementEntry guidance={<><RfpPublicContent /><RfpCitationEvidence /></>} />
     </>
   );
 }

@@ -145,6 +145,7 @@ export const ALLOWED_PATHS = [
   "organisation.sizeBand",
   "organisation.regions",
   "estate.users",
+  "estate.remoteUsers",
   "estate.sites",
   "estate.cloud",
   "estate.existingSecurity",
@@ -224,6 +225,21 @@ const VAGUE_QUANTITY_HEDGE =
  * vocabulary rather than duplicating or drifting from it. */
 const USER_NOUN = "users?|staff|employees?|people|seats?|heads";
 const SITE_NOUN = "sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?|clinics?";
+const WRITTEN_COUNTS: Record<string, number> = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90};
+const WRITTEN_NUMBER = `(?:${Object.keys(WRITTEN_COUNTS).join("|")})(?:[ -](?:one|two|three|four|five|six|seven|eight|nine))?`;
+function countValue(value: string): number {
+  if (/^\d/.test(value)) return Number(value.replace(/,/g, ""));
+  return value.toLowerCase().split(/[ -]/).reduce((n,word)=>n+(WRITTEN_COUNTS[word]??0),0);
+}
+function uncertainCount(path: string, text: string): boolean {
+  const noun=path === "estate.sites" ? SITE_NOUN : USER_NOUN;
+  const number=`(?:\\d[\\d,]*|${WRITTEN_NUMBER})`;
+  return text.split(/[.!?;\n]/).some(clause => new RegExp(`\\b(?:${noun})\\b`,"i").test(clause) && (
+    new RegExp(`${number}\\s*(?:or|to)\\s*${number}\\s*(?:[a-z]+\\s+){0,3}(?:${noun})\\b`,"i").test(clause) ||
+    new RegExp(`\\b(?:might have|may have|not sure|uncertain)\\b`,"i").test(clause)
+  ));
+}
+
 
 /* Fix (correction pass 2, Priority 2 — Tests 70/71, the actual mechanism):
  * live evidence this pass showed the MODEL itself already strips a
@@ -243,11 +259,37 @@ const SITE_NOUN = "sites?|stores?|branch(?:es)?|offices?|locations?|shops?|pract
  * site/user noun) specifically so an unrelated negative or decimal number
  * elsewhere in a longer sentence — "Our budget is -£5,000 and we need 15
  * sites." — can never wrongly reject a genuine, unrelated whole count. */
+/** Explicit noun-before-number correction; never infer remote users from an unlabelled total. */
+function remoteUserCorrection(text: string): RegExpExecArray | null {
+  return /(?:^|[.!?;\n]\s*)(?:please\s+|actually,?\s+)?((?:correct|change|update|set)\s+(?:the\s+)?remote\s+users?(?:\s+count)?\s+to\s+(-?\s?\d[\d,]*(?:\.\d+)?)(?:\s*(k|thousand|m|million)\b)?)(?=\s*(?:$|[.!?;\n]))/i.exec(text);
+}
+
 function rawTextShowsNegativeOrDecimalNear(path: AllowedPath, rawBuyerText: string): boolean {
-  const noun = path === "estate.users" ? USER_NOUN : path === "estate.sites" ? SITE_NOUN : null;
+  const noun = (path === "estate.users" || path === "estate.remoteUsers") ? USER_NOUN : path === "estate.sites" ? SITE_NOUN : null;
   if (!noun) return false;
   const re = new RegExp(`(?:${NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.source})\\s*(?:\\w+\\s+)?(?:${noun})\\b`, "i");
-  return re.test(rawBuyerText);
+  const correction = path === "estate.remoteUsers" ? remoteUserCorrection(rawBuyerText) : null;
+  return re.test(rawBuyerText) || Boolean(correction && NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.test(correction[2]));
+}
+
+/** Buyer identity and current estate must be anchored to their own clause,
+ * not a technology or service mentioned elsewhere in the same message. */
+function professionalServicesIsBuyerSector(text: string): boolean {
+  return /^\s*professional services[.!?]?\s*$/i.test(text) ||
+    /\b(?:we are|we're|our sector is|sector\s*:)\s+(?:an?\s+)?professional services\b/i.test(text) ||
+    /\b(?:our|we run a)\s+professional services\s+(?:business|firm|company|organisation|organization)\b/i.test(text);
+}
+
+function hasCurrentSdwan(text: string): boolean {
+  return [...text.matchAll(/sd-?wan/gi)].some((match) => {
+    const start = match.index!;
+    const boundary = Math.max(text.lastIndexOf('.', start), text.lastIndexOf(';', start), text.lastIndexOf('\n', start));
+    const before = text.slice(Math.max(boundary + 1, start - 100), start);
+    const after = text.slice(start + match[0].length).split(/[.;\n]/)[0].slice(0, 50);
+    const desired = /\b(?:need|want|require|buy|buying|deploy|introduce|move to|migrate to|replace[^.;]*with)\b[^.;]*$/i.test(before);
+    const current = /\b(?:already|currently|current|existing|today|we (?:run|have|use|are on)|running on|legacy|replacing our|replace our)\b[^.;]*$/i.test(before) || /^(?:\s+\w+){0,2}\s+(?:already|currently|today|in place)\b/i.test(after);
+    return current && !desired;
+  });
 }
 
 function validate(
@@ -270,6 +312,7 @@ function validate(
   };
   switch (p) {
     case "estate.users":
+    case "estate.remoteUsers":
     case "estate.sites": {
       /* Fix (correction pass 2, Priority 2 — Tests 70/71): the first
        * fix only touched deterministicExtract()'s own regex match, but
@@ -294,6 +337,10 @@ function validate(
        * the evidence. The earlier ledger value, if any, is left
        * completely alone; nothing here writes a corrected/rounded
        * number in its place. */
+      if (p === "estate.sites" && rawBuyerText && /\b(?:at|only|including)\b/i.test(rawBuyerText) && /\b(?:critical|production-critical|priority)\s+sites?\b/i.test(sourceText ?? "")) {
+        notes.push("A critical-site subset was retained in your wording; it does not replace the total estate size.");
+        return null;
+      }
       const raw = Number(value);
       const sourceShowsNegativeOrDecimal = sourceText ? NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.test(sourceText) : false;
       const valueShowsNegativeOrDecimal = Number.isFinite(raw) && (raw < 0 || !Number.isInteger(raw));
@@ -306,7 +353,7 @@ function validate(
        * sign/decimal reliably still exists, so check that directly as a
        * third, independent signal. */
       const rawTextShowsIt = rawBuyerText ? rawTextShowsNegativeOrDecimalNear(p, rawBuyerText) : false;
-      const what = p === "estate.users" ? "user" : "site";
+      const what = p !== "estate.sites" ? "user" : "site";
       if (sourceShowsNegativeOrDecimal || valueShowsNegativeOrDecimal || rawTextShowsIt) {
         /* Quote whichever text actually shows the negative/decimal shape,
          * preferring the buyer's own original words (rawBuyerText) when
@@ -324,7 +371,7 @@ function validate(
         );
         return null;
       }
-      const sourceIsVagueEstimate = sourceText ? VAGUE_QUANTITY_HEDGE.test(sourceText) : false;
+      const sourceIsVagueEstimate = (sourceText ? VAGUE_QUANTITY_HEDGE.test(sourceText) : false) || Boolean(rawBuyerText && uncertainCount(p, rawBuyerText));
       if (sourceIsVagueEstimate) {
         notes.push(
           `${QUANTITY_NOT_RECORDED_PREFIX}"${clean(sourceText || String(value), 60)}" reads as an estimate rather than a precise count, so nothing precise was recorded. The earlier value, if any, is unchanged — restate a specific whole number to set it.`,
@@ -332,7 +379,7 @@ function validate(
         return null;
       }
       const n = Math.round(raw);
-      if (!Number.isFinite(n) || n < 1 || n > (p === "estate.users" ? 500000 : 20000)) {
+      if (!Number.isFinite(n) || n < 1 || n > (p !== "estate.sites" ? 500000 : 20000)) {
         notes.push(
           `${QUANTITY_NOT_RECORDED_PREFIX}"${clean(sourceText || String(value), 60)}" isn't a plausible ${what} count, so nothing precise was recorded. The earlier value, if any, is unchanged.`,
         );
@@ -452,6 +499,7 @@ export function applyUpdates(base: SecurityRequirementInput, updates: FieldUpdat
       case "organisation.sizeBand": r.organisation!.sizeBand = u.value as "small" | "medium" | "large"; break;
       case "organisation.regions": r.organisation!.regions = uniq([...(r.organisation!.regions ?? []), ...(u.value as string[])]); break;
       case "estate.users": r.estate!.users = u.value as number; break;
+      case "estate.remoteUsers": r.estate!.remoteUsers = u.value as number; break;
       case "estate.sites": r.estate!.sites = u.value as number; break;
       case "estate.cloud": r.estate!.cloud = uniq([...(r.estate!.cloud ?? []), ...(u.value as string[])]); break;
       case "estate.existingSecurity": r.estate!.existingSecurity = uniq([...(r.estate!.existingSecurity ?? []), ...(u.value as string[])]); break;
@@ -752,9 +800,9 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
    * (validate()'s 20,000/500,000 ceilings, untouched, still reject it) --
    * it only lets an obviously-too-large typed number reach that existing
    * check instead of silently vanishing before it. */
-  const NUM = "(\\d{1,3}(?:,\\d{3})+|\\d{1,9})\\s*(k\\b|thousand\\b|m\\b|million\\b)?";
+  const NUM = `(\\d{1,3}(?:,\\d{3})+|\\d{1,9}|\\b${WRITTEN_NUMBER})\\s*(k\\b|thousand\\b|m\\b|million\\b)?`;
   const magnitude = (digits: string, mag: string | undefined): number =>
-    Math.round(Number(digits.replace(/,/g, "")) * (mag ? (mag.startsWith("k") || mag.startsWith("t") ? 1e3 : 1e6) : 1));
+    Math.round(countValue(digits) * (mag ? (mag.startsWith("k") || mag.startsWith("t") ? 1e3 : 1e6) : 1));
 
   /* Fix (negative/decimal counts silently mangled, not omitted — the
    * externally reported gap this closes): NUM above is digits-only, so
@@ -829,8 +877,17 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
      * off this exact prefix) picks it up here too. */
     sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negUserMatch[0].trim(), 60)}" is negative or not a whole number, so no user count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
   } else {
-    const users = hit(new RegExp(`${NUM}\\s*${qualifierRun(SITE_NOUN)}(?:${USER_NOUN})\\b`));
-    if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim(), undefined, hitPos(users));
+    const users = [...t.matchAll(new RegExp(`${NUM}\\s*${qualifierRun(SITE_NOUN)}(?:${USER_NOUN})\\b`, "g"))].find(match => !/\bremote\b/i.test(match[0]));
+    if (users && !/\bremote\b/i.test(users[0])) say("estate.users", magnitude(users[1], users[2]), users[0].trim(), undefined, hitPos(users));
+    const remote = hit(new RegExp(`${NUM}\\s+remote\\s+(?:${USER_NOUN})\\b`));
+    if (remote) say("estate.remoteUsers", magnitude(remote[1], remote[2]), remote[0].trim(), undefined, hitPos(remote));
+    const remoteAfter = hit(new RegExp(`remote\\s+users?\\s+(?:remain|are|total|number)\\s+${NUM}`));
+    if (remoteAfter) say("estate.remoteUsers", magnitude(remoteAfter[1], remoteAfter[2]), remoteAfter[0].trim(), undefined, hitPos(remoteAfter));
+  }
+
+  const remoteCorrection = remoteUserCorrection(text);
+  if (remoteCorrection) {
+    say("estate.remoteUsers", magnitude(remoteCorrection[2], remoteCorrection[3]?.toLowerCase()), remoteCorrection[1], remoteCorrection[1], text.indexOf(remoteCorrection[1], remoteCorrection.index));
   }
 
   /* "clinics" joined the noun list 31 Jul 2026 (round 6 dry run: "60
@@ -875,13 +932,14 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
      * clause verbatim — this never computes or invents an actual date. */
     const DATEISH_NO_YEAR =
       "(?:(?:q[1-4]|h[12])\\s*(?:next|this)\\s+year|(?:spring|summer|autumn|winter)\\s+(?:next|this)\\s+year|(?:next|this)\\s+(?:spring|summer|autumn|winter|year|quarter|month)|(?:jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?)";
+    const HORIZON = "(?:\\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|eighteen|twenty-four)";
     const ANY_DATEISH = `(?:${DATEISH}|${DATEISH_NO_YEAR})`;
     const timeline =
       hit(new RegExp(`(?:live|go[- ]?live|in place|delivered|deployed|migrat(?:ed|ing)|rolled out|completed?|operational|finished|cut(?:ting)? over|ready|working|done)[^.,;]{0,25}?(?:by|before|during|in|for)\\s+(?:the\\s+)?(?:end of\\s+)?${ANY_DATEISH}`)) ??
       hit(new RegExp(`(?:contract|term|agreement|mpls|circuits?)[^.,;]{0,30}?(?:ends?|expir(?:es?|y|ing)|renews?|renewal|up)[^.,;]{0,12}?${ANY_DATEISH}`)) ??
       hit(new RegExp(`(?:timeline|deadline|target)[^.,;]{0,12}?(?:is|:)?[^.,;]{0,20}?${ANY_DATEISH}`)) ??
       hit(new RegExp(`(?:by|before|no later than)\\s+(?:the\\s+)?(?:end of\\s+)?${ANY_DATEISH}`)) ??
-      hit(/within\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)/) ??
+      hit(new RegExp(`within\\s+(?:the\\s+next\\s+)?${HORIZON}\\s+(?:weeks?|months?)\\b`)) ??
       /* Fix (correction pass 2, Priority 5 — "We need this live in 3
        * months."): the buyer's own relative target, captured as their
        * own words, exactly like every other timeline shape above — no
@@ -890,7 +948,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
        * specific date. `\bin\b` cannot accidentally match inside
        * "within" (no word boundary sits between its "h" and "i"), so
        * this never double-fires on the "within" case immediately above. */
-      hit(/\bin\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)\b/);
+      hit(new RegExp(`\\bin\\s+(?:the\\s+next\\s+)?${HORIZON}\\s+(?:weeks?|months?)\\b`));
     if (timeline) say("constraints.timeline", timeline[0].trim(), timeline[0].trim(), undefined, hitPos(timeline));
   }
 
@@ -981,7 +1039,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   let sectorStated = false;
   for (const [re, sector] of directSectorMap) {
     const m = hit(re);
-    if (m && sectorReadsAsBuyerIdentity(m, t)) { say("organisation.sector", sector, originalSpan(m).trim(), undefined, hitPos(m)); sectorStated = true; break; }
+    if (m && (sector !== "Professional services" || !/professional services/i.test(text) || professionalServicesIsBuyerSector(text)) && sectorReadsAsBuyerIdentity(m, t)) { say("organisation.sector", sector, originalSpan(m).trim(), undefined, hitPos(m)); sectorStated = true; break; }
   }
 
   /* The sector inference map, widened under Robert's intake-truth ruling
@@ -1035,7 +1093,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
        * never meant to require self-identifying phrasing -- only the
        * "clause is actually about a REQUIREMENT, not the buyer" failure
        * mode needs excluding here. */
-      if (m && !SECTOR_REQUIREMENT_OBJECT_AFTER.test(t.slice(m.index + m[0].length, m.index + m[0].length + 40))) {
+      if (m && (sector !== "Professional services" || !/professional services/i.test(text) || professionalServicesIsBuyerSector(text)) && !SECTOR_REQUIREMENT_OBJECT_AFTER.test(t.slice(m.index + m[0].length, m.index + m[0].length + 40))) {
         infer("organisation.sector", sector, `"${m[0].trim()}" indicates this sector`, m[0].trim(), hitPos(m));
         break;
       }
@@ -1107,7 +1165,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   }
 
   {
-    const m = hit(/microsoft|m365|office ?365|\bo365\b/);
+    const m = hit(/\bmicrosoft\s*365\b|\bm365\b|\boffice\s*365\b|\bo365\b/);
     /* Blocker 3: "Microsoft" is the display label; a bare "M365"/"O365"
      * mention never contains that word, so matchedText carries the real
      * trigger. */
@@ -1139,7 +1197,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   {
     const m = hit(/sd-?wan/);
     // Blocker 3: "SD-WAN" (hyphenated) can mismatch a hyphen-free "sdwan" trigger.
-    if (m && existingEstateSignal.test(t)) say("estate.existingNetwork", ["sdwan"], "SD-WAN", m[0].trim(), hitPos(m));
+    if (m && hasCurrentSdwan(text)) say("estate.existingNetwork", ["sdwan"], "SD-WAN", m[0].trim(), hitPos(m));
   }
   {
     const m = hit(/\bmpls\b/);
@@ -1201,7 +1259,13 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     const m = hit(/\bnis\s?2\b/);
     // Blocker 3: "NIS 2" (with a space) wouldn't literally contain the
     // fixed no-space quote "NIS2".
-    if (m) say("constraints.complianceRequirements", ["nis2"], "NIS2", m[0].trim(), hitPos(m));
+    if (m) {
+      const start = hitPos(m);
+      const left = Math.max(text.lastIndexOf(".", start), text.lastIndexOf(";", start), text.lastIndexOf("\n", start)) + 1;
+      const right = text.slice(start).search(/[.;\n]/);
+      const clause = text.slice(left, right < 0 ? text.length : start + right).trim();
+      say("constraints.complianceRequirements", ["nis2"], clause, m[0].trim(), start);
+    }
   }
   {
     const m = hit(/\bgdpr\b/);
@@ -1461,6 +1525,7 @@ Rules:
 - Mobile connectivity (4G, 5G) is not "broadband". If the estate runs on mobile and no listed network id fits, omit the field rather than approximating.
 - procurement.vendorsUnderConsideration is a vendor or product the buyer is evaluating or thinking about -- never one already in place or already chosen. Never propose this path for a vendor the buyer describes as already deployed or already selected (use estate.namedTechnologies / estate.existingProviders instead), and never imply selection just because a vendor is named.
 - estate.namedLocations, estate.locationCriticality and estate.siteResilience must each be scoped to the specific location or group of locations the buyer names -- copy their scoping words in full (a named site, or an exclusion like "other sites" or "the rest of our sites"). Never generalise a statement about one location to the whole estate, and never let a clause about one location apply to a different named location the buyer did not include in it.
+- estate.users is the total or unqualified user count. estate.remoteUsers is a separately stated remote-user count; never replace the total with a subset.
 - requirements.bespoke is for a concrete requirement in the buyer's own words that does not fit any other allowed path. Only propose it when the text states a real requirement with no better home; never invent one.
 - "quote": if the buyer literally said it, copy their exact words (a short verbatim substring). If you inferred it, set quote to null and give a one-line "reason".
 - Never invent facts. Omit what the text does not support. Fewer, correct fields beat many guesses.`;
@@ -1484,7 +1549,7 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
      * function's header comment and validate()'s own comment on that
      * case for why the boundary moved here. Every other use of `quote`
      * below this loop is completely unchanged. */
-    const quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
+    let quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
     /* Correction pass 2, Priority 2 (Tests 70/71 — the actual fix): pass
      * `text`, this function's own full raw buyer message, as validate()'s
      * 5th argument. This is the critical wiring — live evidence showed the
@@ -1492,15 +1557,37 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
      * f.quote before this line ever runs, so sourceText (from `quote`
      * above) can no longer be trusted alone; only the buyer's original,
      * unprocessed text still shows the original shape. */
-    const ok = validate(String(f.path ?? ""), f.value, notes, quote || String(f.reason ?? ""), text);
+    const proposedPath = f.path === "estate.users" && /\bremote\b/i.test(quote) && deterministicExtract(text).some(update => update.path === "estate.remoteUsers" && update.value === f.value) ? "estate.remoteUsers" : String(f.path ?? "");
+    const ok = validate(proposedPath, f.value, notes, quote || String(f.reason ?? ""), text);
     if (!ok) continue;
     let value = ok.value;
+    if (ok.path === "estate.remoteUsers") {
+      const correction = remoteUserCorrection(text);
+      if (correction) {
+        const scale = /^(?:k|thousand)$/i.test(correction[3] ?? "") ? 1000 : /^(?:m|million)$/i.test(correction[3] ?? "") ? 1000000 : 1;
+        if (Number(value) !== Number(correction[2].replace(/[,\s]/g, "")) * scale) continue;
+        quote = correction[1];
+      }
+      if (/\b(?:do not|don't|never)\s+(?:correct|change|update|set)\s+(?:the\s+)?remote\s+users?(?:\s+count)?\s+to\s+[\d-]/i.test(text) && !correction) continue;
+    }
+    if (ok.path === "organisation.sector" && value === "Professional services" && /professional services/i.test(text) && !professionalServicesIsBuyerSector(text)) {
+      notes.push("Dropped a sector claim: professional services describe requested delivery work, not the buyer's sector.");
+      continue;
+    }
+    if (ok.path === "estate.cloud" && Array.isArray(value) && !/\b(?:microsoft\s*365|m365|office\s*365|o365)\b/i.test(text)) {
+      value = value.filter((v) => v !== "m365");
+      if (!(value as unknown[]).length) continue;
+    }
+    if (ok.path === "estate.existingNetwork" && Array.isArray(value) && !hasCurrentSdwan(text)) {
+      value = value.filter((v) => v !== "sdwan");
+      if (!(value as unknown[]).length) continue;
+    }
     const stated = quote.length > 2 && lower.includes(quote.toLowerCase());
     /* F-A extension (24 Jul live catch: "across our sites" proposed
      * sites=1): a numeric estate count must trace to a digit in the
      * words it cites, or in the buyer's text at all. Otherwise OMIT:
      * the receipt keeps the clause verbatim, and no count is invented. */
-    if ((ok.path === "estate.sites" || ok.path === "estate.users") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
+    if ((ok.path === "estate.sites" || ok.path === "estate.users" || ok.path === "estate.remoteUsers") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
       /* Correction pass 2, Priority 3 (Test 73 — "quite a few sites,
        * maybe a dozen or so"): same QUANTITY_NOT_RECORDED_PREFIX marker
        * as validate()'s own rejections, so the client can surface a
@@ -2069,6 +2156,8 @@ export function notesWithSourceTurns(baseNotes: string, sourceTurns: string[] | 
   return [baseNotes, line].filter(Boolean).join(" ");
 }
 
+export function isUnrelatedBuyingInput(text: string): boolean { return /\b(?:cook|recipe|pasta|write (?:a )?(?:poem|song)|weather forecast)\b/i.test(text) && !/\b(?:sase|sd[ -]?wan|network|security|connectivity|supplier|procurement|firewall)\b/i.test(text); }
+
 export async function extractRequirement(text: string, base: SecurityRequirementInput = {}): Promise<ExtractResult> {
   const notes: string[] = [];
   /* Fix (correction pass 2, Priority 1 — Tests 21, 22, 23, 24, 26, 31,
@@ -2106,6 +2195,9 @@ export async function extractRequirement(text: string, base: SecurityRequirement
   if (explanationForInput(text)) {
     notes.push("Recognised as a glossary question; no extraction was attempted so the answer can't be read as a new project fact.");
     return { requirement: base, updates: [], engine: "deterministic_fallback", notes, unplacedClauses: [], removals: [] };
+  }
+  if (isUnrelatedBuyingInput(text)) {
+    return { requirement: base, updates: [], engine: "deterministic_fallback", notes: ["This does not describe a network or security buying requirement. Describe your sites, users or the service you need."], unplacedClauses: [], removals: [] };
   }
   const det = deterministicExtract(text, notes);
   const modelUpdates = await modelExtract(text, notes);

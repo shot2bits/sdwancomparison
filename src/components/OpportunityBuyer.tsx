@@ -46,7 +46,6 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   const [closeReason, setCloseReason] = useState("");
   const lastTs = useRef(0);
 
-  useEffect(() => { if (initialId) load(initialId); /* eslint-disable-next-line */ }, [initialId]);
   // Prefill the post form from the guided start (query carry-through).
   useEffect(() => {
     if (initialId) return;
@@ -58,31 +57,32 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     const engagement = p.get("engagement") === "auction" ? "auction" : "quote_room";
     const summary = p.get("summary") ?? "";
     const scopeLabel = scope.map((k) => SCOPES.find((x) => x.key === k)?.label ?? k).join(", ");
-    setForm((f) => ({
-      ...f,
-      scope: scope.length ? scope : f.scope,
-      regions: regions.length ? regions : f.regions,
-      sites: p.get("sites") ?? f.sites,
-      summary: summary || f.summary,
-      budget_note: p.get("budget") ?? f.budget_note,
-      title: summary ? summary.slice(0, 80) : scopeLabel ? `${scopeLabel} opportunity` : f.title,
-      engagement_type: engagement,
-    }));
-    /* eslint-disable-next-line */
-  }, []);
+    queueMicrotask(() => setForm((f) => ({
+        ...f,
+        scope: scope.length ? scope : f.scope,
+        regions: regions.length ? regions : f.regions,
+        sites: p.get("sites") ?? f.sites,
+        summary: summary || f.summary,
+        budget_note: p.get("budget") ?? f.budget_note,
+        title: summary ? summary.slice(0, 80) : scopeLabel ? `${scopeLabel} opportunity` : f.title,
+        engagement_type: engagement,
+      })));
+  }, [initialId]);
+  const opportunityId = opp?.id;
+  const buyerToken = opp?.buyer_token;
   useEffect(() => {
-    if (!opp) return;
+    if (!opportunityId) return;
     const poll = setInterval(async () => {
       try {
         // Owners include their token so pricing amounts stay visible to them;
         // viewers poll without it and receive the masked feed.
-        const btok = opp.buyer_token ? `&buyer_token=${encodeURIComponent(opp.buyer_token)}` : "";
-        const res = await fetch(`/sase/api/opportunity/${opp.id}/feed?since=${lastTs.current}${btok}`);
+        const btok = buyerToken ? `&buyer_token=${encodeURIComponent(buyerToken)}` : "";
+        const res = await fetch(`/sase/api/opportunity/${opportunityId}/feed?since=${lastTs.current}${btok}`);
         if (res.ok) { const d = await res.json(); if (d.items?.length) { setFeed((prev) => [...prev, ...d.items]); lastTs.current = Math.max(lastTs.current, ...d.items.map((f: FeedItem) => f.created)); } }
       } catch { /* ignore */ }
     }, 5000);
     return () => clearInterval(poll);
-  }, [opp?.id]);
+  }, [opportunityId, buyerToken]);
 
   async function load(id: string) {
     // Prove ownership with the locally stored buyer token (set at publish
@@ -110,6 +110,10 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     }
     catch { setError("Could not load."); }
   }
+
+  useEffect(() => {
+    if (initialId) queueMicrotask(() => void load(initialId));
+  }, [initialId]);
 
   async function postOpportunity() {
     setError(null);
@@ -246,6 +250,11 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     );
   }
 
+  const engagedSuppliers = [...new Set([
+    ...opp.invited,
+    ...feed.filter((item) => item.actor_type === "supplier" && item.actor_slug).map((item) => String(item.actor_slug)),
+  ])];
+
   // Buyer controls only render for the owner (real buyer_token present).
   const isOwner = Boolean(opp.buyer_token);
 
@@ -312,18 +321,12 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
             receive their contact details, and when; nothing passes until
             they choose here. Engaged suppliers = anyone invited or active
             in the feed. WORDING PROVISIONAL pending Harry. */}
-        {opp.status === "open" && (() => {
-          const engaged = [...new Set([
-            ...opp.invited,
-            ...feed.filter((f) => f.actor_type === "supplier" && f.actor_slug).map((f) => String(f.actor_slug)),
-          ])];
-          if (engaged.length === 0) return null;
-          return (
+        {opp.status === "open" && engagedSuppliers.length > 0 && (
             <div className="mt-4">
               <p className="eyebrow mb-1">Introductions</p>
               <p className="text-xs text-[var(--ink-500)] mb-2">Your contact details pass to a vendor only when you accept an introduction here. Until then, they reach you only through this room.</p>
               <div className="flex flex-wrap gap-1.5">
-                {engaged.map((slug) => {
+                {engagedSuppliers.map((slug) => {
                   const done = (opp.introduced ?? []).includes(slug);
                   return (
                     <button
@@ -338,8 +341,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
                 })}
               </div>
             </div>
-          );
-        })()}
+        )}
         <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a vendor copies their private room link. They reply live with comments and pricing.</p>
         {inviteError && <p className="text-xs text-red-700 mt-2">{inviteError}</p>}
         {opp.status === "open" && (

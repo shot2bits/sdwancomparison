@@ -35,7 +35,7 @@ export async function GET() {
 
   sections.push("## All 30 vendor profiles");
   for (const v of vendors) {
-    sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; evidence coverage ${Math.round(v.evidence_coverage_pct * 100)}%)`);
+    sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; verified capability coverage ${Math.round(v.evidence_coverage_pct * 100)}%; cited sources ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
   }
   sections.push("");
   sections.push(`Netify Demand Index (live, anonymised marketplace demand by sector and technology): ${SITE_URL}/demand?utm_source=ai_assistant&utm_medium=llms · twin: ${SITE_URL}/demand/data.json`);

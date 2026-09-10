@@ -135,7 +135,7 @@ function minimalProjectDetails(overrides: Record<string, unknown> = {}) {
   };
 }
 
-const PROMPT_A = "UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.";
+const PROMPT_A = "UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 users.";
 
 async function main() {
   const ext1 = deterministicExtract(PROMPT_A, []);

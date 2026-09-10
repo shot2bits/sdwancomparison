@@ -3,6 +3,7 @@ import { getProject, listConnections, getConnection, kvConfigured } from "@/lib/
 import { inviteSupplier, addMessage } from "@/lib/rfp-connect";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { isMarketUnlocked } from "@/lib/market-unlock";
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -68,7 +69,9 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!body.vendor_slug) return Response.json({ error: "vendor_slug is required." }, { status: 422, headers: cors });
 
   if (!body.action) {
-    const conn = await inviteSupplier(id, body.vendor_slug, body.intro ?? "");
+    const snapshot = await getLatestPublishedSnapshot(id);
+    const frozen = snapshot?.provider_evidence?.find((provider) => provider.slug === body.vendor_slug)?.record;
+    const conn = await inviteSupplier(id, body.vendor_slug, body.intro ?? "", frozen);
     if ("error" in conn) return Response.json(conn, { status: 422, headers: cors });
     return Response.json(conn, { headers: cors });
   }

@@ -47,6 +47,8 @@ export const UnderstandingFactSchema = z.object({
   provenance: z.enum(["stated", "inferred"]),
   quote: z.string().optional(),
   reason: z.string().optional(),
+  matchedText: z.string().optional(),
+  matchStart: z.number().optional(),
   struck: z.boolean(),
   source: z.enum(["extract", "answer", "link"]),
   cycle: z.number().int().min(1),
@@ -111,7 +113,7 @@ export type UnderstandingSectionKey = (typeof UNDERSTANDING_SECTIONS)[number]["k
  *  computeCompleteness below). */
 const SECTION_PATHS: Record<Exclude<UnderstandingSectionKey, "objective">, string[]> = {
   drivers: ["drivers"],
-  estate: ["estate.users", "estate.sites", "estate.cloud", "estate.existingSecurity", "estate.existingNetwork"],
+  estate: ["estate.users", "estate.remoteUsers", "estate.sites", "estate.cloud", "estate.existingSecurity", "estate.existingNetwork"],
   geography: ["organisation.regions", "estate.namedLocations"],
   timescale: ["constraints.timeline"],
   existingSuppliers: ["estate.existingProviders"],

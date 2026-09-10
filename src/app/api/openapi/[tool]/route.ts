@@ -24,7 +24,7 @@ export async function GET(_req: Request, ctx: Ctx) {
     },
     servers: [{ url: SITE_URL }],
     paths: {
-      [`/api/openapi/${def.name}`]: {
+      [`/api/openapi/${def.name}/`]: {
         post: {
           operationId: def.name,
           description: def.description,
@@ -60,5 +60,5 @@ export async function POST(req: Request, ctx: Ctx) {
   } catch {
     // empty body is acceptable for zero-argument tools
   }
-  return Response.json(callMcpTool(tool, args), { headers: corsHeaders(req) });
+  return Response.json(await callMcpTool(tool, args), { headers: corsHeaders(req) });
 }

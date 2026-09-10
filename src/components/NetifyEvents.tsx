@@ -1,49 +1,22 @@
 'use client';
 
-// Netify commercial event tracking for the SASE app - mounted once in
-// src/app/layout.tsx.
-//
-// This app previously shipped NO analytics, so the RFP builder and shortlist
-// (two of the six commercial actions) were invisible. This component sends
-// events to TWO sinks:
-//   1. Vercel Web Analytics (cookieless - no PECR consent needed). The
-//      script is same-origin (/_vercel/insights/) so events land in the main
-//      netify.co.uk project dashboard alongside apex events.
-//   2. GA4 (same property as the main site, G-XNL6HY3BQX). This app has no
-//      cookie banner of its own: consent is the shared first-party
-//      'netify_consent' cookie written by the main app's banner (Path=/,
-//      same origin, so readable here). Consent Mode defaults to denied and
-//      upgrades at load if the visitor already opted in on the main site.
-//
-// DELEGATED listeners - no page component changes needed.
-// Events: rfp_start, shortlist_build, shortlist_download, provider_compare,
-//         costed_view, contact_click, go_cta, form_start / form_submit.
-//
-// EXPLICIT calls (fireNetifyEvent, exported below) - added where the
-// delegated listeners can't tell one form/CTA apart from another. 11 Aug
-// 2026: audited after Robert flagged the site had moved on since this was
-// set up - found the "Start a project" nav CTA (href="/") doesn't match the
-// rfp_start text patterns above (it only fires later, on RfpBuilder's own
-// "Start my RFP" button), the shortlist page's "Get competing bids" link was
-// never matched by any pattern, and ShortlistBuilder's lead-capture form had
-// a `fireNetifyEvent` import that was never actually called. The generic
-// form_start/form_submit pair still fires for that form (any <form> on the
-// site trips it), but can't distinguish it from every other form, or a
-// submit attempt from a confirmed send - these fill that gap:
-// shortlist_lead_submit / shortlist_lead_sent / shortlist_lead_error,
-// shortlist_get_bids_click.
+// Consent-dependent commercial events. Only route categories and bounded
+// operational properties are sent; server-confirmed outcomes are reported separately.
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { analyticsPath, analyticsReferrer, analyticsLocation, analyticsProps } from '@/lib/analytics-privacy';
 
-type VaFn = (
-  event: 'event',
-  props: { name: string; data?: Record<string, string> },
-) => void;
+type VaFn = {
+ (event: 'event', props: {name:string;data?:Record<string,string>}):void;
+ (event: 'beforeSend', callback:(event:{type:string;url:string;[key:string]:unknown})=>unknown):void;
+};
 
 declare global {
   interface Window {
     va?: VaFn;
     vaq?: unknown[];
+    "ga-disable-G-XNL6HY3BQX"?: boolean;
   }
 }
 
@@ -64,6 +37,34 @@ function readConsent(): { analytics: boolean; marketing: boolean } {
   }
 }
 
+// Enhanced Measurement reads raw search parameters independently of page_location.
+// Use Google's documented opt-out for private/query-bearing pages. Once entered,
+// stay opted out for this document lifetime so queued private events cannot flush.
+let googlePrivateSeen=false;
+let googleGuardInstalled=false;
+function googleAllowed(target=window.location.href):boolean {
+  try {
+    const url=new URL(target,window.location.href);
+    googlePrivateSeen ||= Boolean(url.search||url.hash) || /^\/sase-sd-wan-rfp-builder(?:\/|$)/.test(url.pathname) || /^\/sase\/(home|workspace|circuit-pricing|account|admin|rfp-builder|opportunities)(?:\/|$)/.test(url.pathname);
+  } catch {googlePrivateSeen=true;}
+  window['ga-disable-G-XNL6HY3BQX']=googlePrivateSeen||!readConsent().analytics;
+  return !window['ga-disable-G-XNL6HY3BQX'];
+}
+function installGooglePrivacyGuard(){
+  googleAllowed();
+  if(googleGuardInstalled)return;
+  googleGuardInstalled=true;
+  for(const method of ['pushState','replaceState'] as const){
+    const original=window.history[method].bind(window.history);
+    window.history[method]=(...args:Parameters<History['pushState']>)=>{
+      if(args[2]!=null)googleAllowed(String(args[2]));
+      return original(...args);
+    };
+  }
+  window.addEventListener('popstate',()=>googleAllowed(),true);
+  window.addEventListener('hashchange',()=>googleAllowed(),true);
+}
+
 /**
  * Fire a named commercial event into both sinks (Vercel Web Analytics +
  * GA4). Exported so flow components (Describe wizard, builder, publish)
@@ -78,8 +79,7 @@ export function fireNetifyEvent(name: string, data: Record<string, string> = {})
  * First-touch attribution for sign-up quality: the original referrer and
  * landing path, captured once per browser session (16 July 2026, Robert's
  * question about whether sign-ups are mistaken-identity traffic).
- * sessionStorage only: no cookie, nothing persistent, nothing
- * consent-bearing. Read by the sign-in flows and carried through the magic
+ * sessionStorage only; queries, fragments and private path identifiers are excluded. Read by the sign-in flows and carried through the magic
  * link so the new-sign-up alert can say where the person actually arrived
  * from.
  */
@@ -88,17 +88,15 @@ export function firstTouch(): { ref: string; landing: string } | null {
     const raw = sessionStorage.getItem("netify_first_touch");
     if (!raw) return null;
     const t = JSON.parse(raw) as { ref?: string; landing?: string };
-    return { ref: t.ref ?? "", landing: t.landing ?? "" };
+    return { ref: analyticsReferrer(t.ref ?? ""), landing: analyticsPath(t.landing ?? "") };
   } catch {
     return null;
   }
 }
 
 function fire(name: string, data: Record<string, string> = {}): void {
-  const payload: Record<string, string> = {
-    path: window.location.pathname,
-    ...data,
-  };
+  if (!readConsent().analytics) return;
+  const payload = { ...analyticsProps(data), path: analyticsPath(window.location.href) };
   try {
     window.va?.('event', { name, data: payload });
   } catch {
@@ -107,14 +105,16 @@ function fire(name: string, data: Record<string, string> = {}): void {
   try {
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void })
       .gtag;
-    gtag?.('event', name, { event_category: 'commercial', ...payload });
+    if(googleAllowed())gtag?.('event', name, { event_category: 'commercial', ...payload, page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
   } catch {
     /* ignore */
   }
 }
 
 export default function NetifyEvents() {
+  const pathname=usePathname();
   useEffect(() => {
+    installGooglePrivacyGuard();
     // First-touch attribution capture, once per browser session (see
     // firstTouch above). Must run before anything else so a visitor who
     // signs in on their landing page still gets attributed.
@@ -122,19 +122,20 @@ export default function NetifyEvents() {
       if (!sessionStorage.getItem("netify_first_touch")) {
         sessionStorage.setItem(
           "netify_first_touch",
-          JSON.stringify({ ref: document.referrer || "", landing: window.location.pathname + window.location.search, at: Date.now() }),
+          JSON.stringify({ ref: analyticsReferrer(document.referrer), landing: analyticsPath(window.location.href), at: Date.now() }),
         );
       }
     } catch { /* private mode */ }
 
     // Vercel Web Analytics: official queue shim + script, idempotent.
-    if (!document.querySelector('script[data-netify-va]')) {
+    if (readConsent().analytics && !document.querySelector('script[data-netify-va]')) {
       if (typeof window.va !== 'function') {
         window.va = function () {
           // eslint-disable-next-line prefer-rest-params
           (window.vaq = window.vaq || []).push(arguments);
         } as unknown as VaFn;
       }
+      window.va?.('beforeSend', event => readConsent().analytics ? {...event,url:analyticsLocation(event.url)} : null);
       const s = document.createElement('script');
       s.defer = true;
       s.src = '/_vercel/insights/script.js';
@@ -144,7 +145,7 @@ export default function NetifyEvents() {
 
     // GA4 loader with Consent Mode (default denied; upgrade from the shared
     // netify_consent cookie).
-    if (!document.querySelector('script[data-netify-ga]')) {
+    if (googleAllowed() && !document.querySelector('script[data-netify-ga]')) {
       const w = window as unknown as {
         dataLayer?: unknown[];
         gtag?: (...args: unknown[]) => void;
@@ -172,7 +173,8 @@ export default function NetifyEvents() {
         });
       }
       w.gtag('js', new Date());
-      w.gtag('config', 'G-XNL6HY3BQX');
+      w.gtag('set', { page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
+      w.gtag('config', 'G-XNL6HY3BQX', { send_page_view: false });
       const g = document.createElement('script');
       g.async = true;
       g.src = 'https://www.googletagmanager.com/gtag/js?id=G-XNL6HY3BQX';
@@ -180,6 +182,12 @@ export default function NetifyEvents() {
       document.head.appendChild(g);
     }
 
+    if(readConsent().analytics){
+      const safePage={page_location:analyticsLocation(window.location.href),page_referrer:analyticsReferrer(document.referrer),page_title:'Netify buying platform'};
+      if(googleAllowed()){window.gtag?.('set',safePage);window.gtag?.('event','page_view',safePage);}
+      const params=new URLSearchParams(window.location.search);
+      fire('buying_entry',{intent:params.get('intent')==='pricing'?'pricing':'project',channel:params.get('source')==='mcp'?'mcp':'web'});
+    }
     const startedForms = new WeakSet<Element>();
 
     const onClick = (e: MouseEvent) => {
@@ -248,7 +256,7 @@ export default function NetifyEvents() {
       document.removeEventListener('focusin', onFocusIn, true);
       document.removeEventListener('submit', onSubmit, true);
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {mergeUpdates,standing} from '../src/lib/workspace/draft';
+const update=(path:any,value:any)=>({path,value,provenance:'stated' as const,quote:'buyer input'});
+const before=mergeUpdates([],[update('estate.sites',15),update('requirements.bespoke',['Resilient connectivity across 15 sites','OT protection at 3 sites'])],1).facts;
+const result=mergeUpdates(before,[update('estate.sites',18)],2);
+assert(standing(result.facts).some(f=>f.value==='Resilient connectivity across 18 sites'));
+assert(!standing(result.facts).some(f=>f.value==='Resilient connectivity across 15 sites'));
+assert(standing(result.facts).some(f=>f.value==='OT protection at 3 sites'));
+assert(result.facts.some(f=>f.struck&&f.value==='Resilient connectivity across 15 sites'));
+console.log('PASS corrected total, preserved capability and original history, unchanged subset requirement');

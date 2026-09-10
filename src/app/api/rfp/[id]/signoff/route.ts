@@ -39,7 +39,10 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   if (!access.ok) return ownerRequired("Reading approval requests", cors);
   const signoffs = await listSignoffs(id);
   return Response.json(
-    { approvals: signoffs.map(({ token: _token, ...rest }) => rest) },
+    { approvals: signoffs.map(({ token: _token, ...rest }) => {
+      void _token;
+      return rest;
+    }) },
     { headers: cors },
   );
 }

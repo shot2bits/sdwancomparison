@@ -52,13 +52,13 @@ export function getShortlistWebApplicationSchema() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "Interactive tool that builds a bespoke SASE and SD-WAN provider shortlist from 30 graded vendors. Filter by operating model, region, cloud support, AI capability, resilience and 40 capability features, or describe requirements in plain language to the AI advisor.",
+      "Interactive tool that builds an SD-WAN and SASE provider shortlist from 30 graded vendors. Filter by operating model, region, cloud support, AI capability, resilience and 40 capability features, or describe requirements in plain language.",
     offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
     provider: { "@id": `${SITE_URL}/#organization` },
   };
 }
 
-export function getShortlistDatasetSchema(vendorCount: number, featureCount: number) {
+export function getShortlistDatasetSchema(vendorCount: number, featureCount: number, dateModified?: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Dataset",
@@ -66,6 +66,12 @@ export function getShortlistDatasetSchema(vendorCount: number, featureCount: num
     name: "Netify SASE and SD-WAN vendor capability matrix",
     description: `Capability grades for ${vendorCount} SASE and SD-WAN vendors across ${featureCount} features plus regional coverage, cloud support, AI capability, resilience and deployment speed. Grades reflect public source evidence reviewed by Netify.`,
     url: SHORTLIST_URL,
+    identifier: "governed-shortlist/1.0.0",
+    version: "1.0.0",
+    dateModified,
+    isAccessibleForFree: true,
+    keywords: ["SD-WAN providers", "SD-WAN vendors", "SASE providers", "SASE vendors", "SD-WAN comparison", "SASE comparison"],
+    citation: `${SHORTLIST_URL}cite.bib`,
     license: "https://netify.co.uk/terms-conditions/",
     creator: { "@id": `${SITE_URL}/#organization` },
     distribution: [

@@ -45,7 +45,7 @@ export function projectHealth(p: ProjectDetails, ctx: HealthContext = {}): Proje
   if (phase === "published") {
     return responses > 0
       ? { tone: "green", label: "Responses arriving", detail: `${responses} response${responses === 1 ? "" : "s"} so far.` }
-      : { tone: "blue", label: "Awaiting vendor responses", detail: "Published; invited vendors have the response link." };
+      : { tone: "blue", label: "Awaiting vendor responses", detail: "Your project is published. No supplier responses have been received yet." };
   }
 
   // Pre-publication: the engine states that need the buyer's attention.

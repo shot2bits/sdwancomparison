@@ -1,5 +1,9 @@
 "use client";
 
+import { isUnrelatedBuyingInput } from "@/lib/workspace/extract";
+import {requestBrief, confirmedWorkspaceRegions, workspaceUpdatesFromBrief, type BriefFields, type DocumentPurpose, type WorkspaceProject} from "@/lib/buying-workspace-project";
+import {projectTokenKey} from "@/lib/buying-entry";
+import {startNewBuyingProject} from "@/components/procurement/DraftRecovery";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { assessSecurityRequirement, type SecurityScopeVerdict, type SecurityRequirementInput } from "@/lib/security/rulebook";
 import {
@@ -22,7 +26,7 @@ import {
   type FieldRemoval,
 } from "@/lib/workspace/extract";
 import type { SourceLedgerEntry, SourceLedgerVia } from "@/lib/workspace/source-ledger";
-import type { RfpStatus } from "@/lib/rfp-types";
+import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode, type RfpStatus } from "@/lib/rfp-types";
 import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeStateFromProject } from "@/lib/workspace/source-ledger";
 import type { DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
 import { mergeDecisionLedger, replayDecisionLedger, resumeDecisionsFromProject } from "@/lib/workspace/decision-ledger";
@@ -59,7 +63,6 @@ import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
-import ConstellationScene from "@/components/ConstellationScene";
 import { hasPublished } from "@/lib/project-machine";
 /** Living Procurement OS · Phase 3 Stage A (14 Aug 2026): wires the
  *  existing, pure `compileProcurementDocument()` compiler into this real
@@ -109,16 +112,17 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
  *  strip, per Robert's explicit framing, not a parallel rail. */
 import SectionNav from "@/components/procurement/SectionNav";
 import GuidedBuild, { type RfpDepth } from "@/components/procurement/GuidedBuild";
-import SectionBuildPanel from "@/components/procurement/SectionBuildPanel";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
+import SupplierPackView from "@/components/procurement/SupplierPackView";
 import DecisionRail2030 from "@/components/procurement/DecisionRail2030";
 import { buildAnsweredLog } from "@/lib/workspace/answered-log";
 import CapturedList from "@/components/procurement/CapturedList";
 import RfpReady from "@/components/procurement/RfpReady";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 import { persistedEssentialBaselineChecklist } from "@/lib/workspace/publish-checklist";
+import { publicationFailureMessage } from "@/lib/publication-error";
 import { buildRfpCoverage, RFP_SECTION_QUESTION_TARGET, SHORT_RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 import { buildSectionQuestionRegister, questionProgressBySection, type SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
@@ -262,7 +266,7 @@ const GUIDED_CUSTOM_ANSWER_PREFIX = "guided-answer:";
 const guidedCustomAnswerNoteId = (questionId: string) => `${GUIDED_CUSTOM_ANSWER_PREFIX}${questionId}`;
 
 function outlineKeyForPath(path: string): string {
-  if (["organisation.sector", "organisation.sizeBand", "organisation.regions", "estate.users", "estate.sites"].includes(path)) return "organisation_scale";
+  if (["organisation.sector", "organisation.sizeBand", "organisation.regions", "estate.users", "estate.remoteUsers", "estate.sites"].includes(path)) return "organisation_scale";
   if (path === "procurement.buying") return "solution_scope";
   if (["estate.existingNetwork", "estate.cloud", "estate.existingSecurity", "estate.namedTechnologies", "estate.existingProviders"].includes(path)) return "current_estate";
   if (["estate.siteResilience", "estate.locationCriticality", "estate.namedLocations"].includes(path)) return "resilience_availability";
@@ -353,7 +357,8 @@ const PATH_LABELS: Record<string, string> = {
   "organisation.sector": "Sector",
   "organisation.sizeBand": "Size",
   "organisation.regions": "Regions",
-  "estate.users": "People",
+  "estate.users": "Users in scope",
+  "estate.remoteUsers": "Remote users",
   "estate.sites": "Sites",
   "estate.cloud": "Cloud",
   "estate.existingSecurity": "Existing security",
@@ -412,6 +417,8 @@ const THREAD_WELCOME =
 
 const LOCAL_DRAFT_POINTER_KEY = "netify_living_rfp_active_draft_v1";
 const LOCAL_DRAFT_PREFIX = "netify_living_rfp_draft_v1_";
+const PROJECT_CHECKPOINT_PREFIX = "netify_project_checkpoint_v1_";
+type ProjectCheckpoint = {schema:1;projectId:string;baseRevision:number;snapshot:LocalWorkingDraft;company:string;notice:string|null};
 
 type LocalWorkingDraft = {
   schema: 1;
@@ -429,6 +436,9 @@ type LocalWorkingDraft = {
   rfpDepth: RfpDepth;
   rfpEntryMode: "build" | "check";
   rfpValidationCorpus: string;
+  documentPurpose?: DocumentPurpose;
+  draftInput?: string;
+  pinnedVendorSlugs?: string[];
 };
 
 function newLocalDraftId(): string {
@@ -460,9 +470,12 @@ function readLocalWorkingDraft(): LocalWorkingDraft | null {
       decisionTurns: Array.isArray(parsed.decisionTurns) ? parsed.decisionTurns : [],
       resumeRemovals: Array.isArray(parsed.resumeRemovals) ? parsed.resumeRemovals : [],
       messages: Array.isArray(parsed.messages) && parsed.messages.length ? parsed.messages : [{ who: "netify", text: THREAD_WELCOME }],
+      draftInput: parsed.draftInput??"",
+      pinnedVendorSlugs: Array.isArray(parsed.pinnedVendorSlugs)?parsed.pinnedVendorSlugs:[],
+      documentPurpose: parsed.documentPurpose ?? "rfp",
       rfpDepth: parsed.rfpDepth === "detailed" ? "detailed" : "short",
       rfpEntryMode: parsed.rfpEntryMode === "check" ? "check" : "build",
-      rfpValidationCorpus: typeof parsed.rfpValidationCorpus === "string" ? parsed.rfpValidationCorpus.slice(0, 200_000) : "",
+      rfpValidationCorpus: typeof parsed.rfpValidationCorpus === "string" ? parsed.rfpValidationCorpus : "",
     };
   } catch {
     return null;
@@ -913,6 +926,7 @@ export default function ProjectDesk({
    *  DOES already have the data (e.g. a server-rendered resume page). */
   initialSourceLedger,
 }: { afterPrompt?: ReactNode; initialSourceLedger?: SourceLedgerEntry[] }) {
+  const [journeyMode, setJourneyMode] = useState<ProjectJourneyMode>("build_rfp");
   const [phase, setPhase] = useState<"live" | "fits">("live");
   const [market, setMarket] = useState<Market | null>(null);
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
@@ -993,7 +1007,7 @@ export default function ProjectDesk({
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
-  const [promptQuestionId, setPromptQuestionId] = useState<string | null>(null);
+  const [promptQuestionId] = useState<string | null>(null);
   // The RFP Builder is the product, so a new buyer lands in the builder
   // immediately. The older promotional start panel remains available only as
   // a transitional code path while the started-project flow is migrated.
@@ -1118,6 +1132,7 @@ export default function ProjectDesk({
     totalEvaluatedMarket: number;
     frozen: boolean;
     namesFrozen: boolean;
+    shortBrief?: { outcome: string; timescale: string };
   } | null>(null);
   /** Lifecycle-consistency closure pass (18 Aug 2026), correction D: the
    *  post-publish view used to prove publication and invitation but never
@@ -1159,6 +1174,10 @@ export default function ProjectDesk({
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const guidedCustomQuestionRef = useRef<NextQuestion | null>(null);
+  const [noteEditor, setNoteEditor] = useState<NotedItem | null>(null);
+  const [removedNote, setRemovedNote] = useState<NotedItem | null>(null);
+  const noteDialogRef = useRef<HTMLDialogElement | null>(null);
+  useEffect(() => { if (noteEditor && !noteDialogRef.current?.open) noteDialogRef.current?.showModal(); }, [noteEditor]);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const threadRef = useRef<HTMLDivElement | null>(null);
   const firstKeyAt = useRef<number | null>(null);
@@ -1245,11 +1264,12 @@ export default function ProjectDesk({
   const [documentSettingsOpen, setDocumentSettingsOpen] = useState(false);
   const [rfpDepth, setRfpDepth] = useState<RfpDepth>(() => {
     if (typeof window === "undefined") return "short";
-    return window.localStorage.getItem("netify-rfp-depth") === "detailed" ? "detailed" : "short";
+    try { return window.localStorage.getItem("netify-rfp-depth") === "detailed" ? "detailed" : "short"; } catch { return "short"; }
   });
   const changeRfpDepth = useCallback((depth: RfpDepth) => {
     setRfpDepth(depth);
-    window.localStorage.setItem("netify-rfp-depth", depth);
+    try { window.localStorage.setItem("netify-rfp-depth", depth); } catch { /* The current mounted choice remains usable. */ }
+    if (resumedFromUrlRef.current || new URLSearchParams(location.search).has("project")) return;
     /* Persist the choice into the active working draft immediately. The
        normal canonical-draft effect is deliberately debounced, but that
        meant a buyer who selected Detailed RFP and refreshed straight away
@@ -1299,6 +1319,16 @@ export default function ProjectDesk({
    *  unconditionally, unaffected by this -- reviewing the full document
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
+  const [documentPurpose,setDocumentPurpose]=useState<DocumentPurpose>("rfp");
+  const [workspaceNotice,setWorkspaceNotice]=useState<string|null>(null);
+  const [workspaceSessionLoading,setWorkspaceSessionLoading]=useState(false);
+  const [workspaceSessionError,setWorkspaceSessionError]=useState("");
+  const [workspaceEnvelopeId,setWorkspaceEnvelopeId]=useState<string|null>(null);
+  const [projectCheckpoint,setProjectCheckpoint]=useState<{value:ProjectCheckpoint;canRestore:boolean}|null>(null);
+  const [checkpointRevision,setCheckpointRevision]=useState(0);
+  const checkpointBaselineRef=useRef<string|null>(null);
+  const [workspaceCompany,setWorkspaceCompany]=useState("");
+  const [workspaceSessionPublished,setWorkspaceSessionPublished]=useState(false);
   const [workspaceDocumentView, setWorkspaceDocumentView] = useState<WorkspaceDocumentView>("requirement");
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
@@ -1433,6 +1463,7 @@ export default function ProjectDesk({
   }, []);
 
   const applyMerge = useCallback((updates: FieldUpdate[], source: "extract" | "answer" | "link") => {
+    setWorkspaceNotice(null);
     const allowed = updates.filter((u) => !(u.provenance === "inferred" && neverReinfer.current.has(nrKey(u.path, u.value))));
     beginOrExtendSubmission();
     cycleRef.current += 1;
@@ -1501,7 +1532,8 @@ export default function ProjectDesk({
   const opModel = operatingModelOf(facts);
   const securityScope = buying === "managed_security" || buying === null;
   const live = standing(facts);
-  const started = facts.length > 0 || noted.length > 0;
+  // A published short brief has no full-RFP facts, but its matches and responses are an active project.
+  const started = facts.length > 0 || noted.length > 0 || published !== null;
 
   /** One-shot layout snap when the workspace shell first appears.
    *
@@ -1597,15 +1629,18 @@ export default function ProjectDesk({
       .catch(() => {});
 
     const p = new URLSearchParams(window.location.search);
+    const requestedJourney = p.get("journey");
+    queueMicrotask(() => {
+    if (PROJECT_JOURNEY_MODES.includes(requestedJourney as ProjectJourneyMode)) setJourneyMode(requestedJourney as ProjectJourneyMode);
     if (p.get("test") === "1") setTestMode(true);
     const resumeId = p.get("id");
     const resumeManage = p.get("manage");
-    resumedFromUrlRef.current = Boolean(resumeId);
+    resumedFromUrlRef.current = Boolean(resumeId || p.get("project"));
 
     /* Step 1: restore the exact working ledgers before any link-carried
        seed facts are applied. A URL-owned/server-owned project always
        wins and never mixes with a browser draft. */
-    if (!resumeId) {
+    if (!resumeId && !p.has("project")) {
       const local = readLocalWorkingDraft();
       if (local) {
         localDraftIdRef.current = local.id;
@@ -1625,11 +1660,16 @@ export default function ProjectDesk({
         setResumeRemovals(restoredRemovals);
         resumeRemovalsRef.current = restoredRemovals;
         setMsgs(local.messages);
+        setDraft(local.draftInput??"");
+        setAdded(local.pinnedVendorSlugs??[]);
+        setDocumentPurpose(local.documentPurpose ?? "rfp");
         setRfpDepth(local.rfpDepth);
         setRfpEntryMode(local.rfpEntryMode);
         rfpValidationCorpusRef.current = local.rfpValidationCorpus;
         setLocalDraftSavedAt(local.updatedAt);
         setLocalDraftStatus("saved");
+      } else if (requestedJourney === "validate_rfp") {
+        setRfpEntryMode("check");
       }
     }
     const scopeParam = p.get("scope");
@@ -1742,6 +1782,7 @@ export default function ProjectDesk({
             // but a real durability gap in "display the frozen matched and
             // invited suppliers from the published snapshot".
             status?: string;
+            journey?: { mode?: string };
             invited_vendors?: string[];
             // 2030 blueprint, full-unification phase (17 Aug 2026): the
             // durably persisted document from this project's own last
@@ -1775,11 +1816,44 @@ export default function ProjectDesk({
             // was already arriving in this exact response -- simply never read
             // out of it until now. See McpEvidencePanel.tsx.
             history?: ProjectHistoryEvent[];
+            // Shortlist to engine handoff (3 Sep 2026): a record minted by
+            // an older /shortlist "Use current top five" link carries the
+            // buyer's providers here and nowhere the desk used to read.
+            buyer?: { pinned_vendors?: string[]; notes?: string };
+            entrance_context?: { source?: string; vendor_slugs?: string[]; requirement_text?: string; raw_input?: { timescale?: unknown } } | null;
           };
           setProjectHistory(proj.history ?? []);
           const resumeState = resumeStateFromProject(proj);
           const hasCanonicalWorkspaceState = Array.isArray(proj.facts) && proj.facts.length > 0;
-          if (!resumeState && !hasCanonicalWorkspaceState) {
+          const publishedShortProject = ["quick_list", "find_providers"].includes(proj.journey?.mode ?? "") && Boolean(proj.status && hasPublished(proj.status as RfpStatus));
+          if (!resumeState && !hasCanonicalWorkspaceState && !publishedShortProject) {
+            /* Shortlist to engine handoff (3 Sep 2026): links issued by the
+               old top-five handoff (POST /api/rfp, then ?id=) reach a
+               record with no engine and no facts. Before this branch the
+               desk said "starting fresh" and the buyer's five providers
+               stayed in KV, invisible. New handoffs travel by ?vendors=
+               and ?q= instead (engine-handoff.ts), but an old link in an
+               inbox or a browser history must still land with its match:
+               pin the carried providers and feed the carried requirement
+               text through the same extractor a typed sentence uses. The
+               desk does not adopt the record's id: nothing here was saved
+               by this surface, so a later Save mints the project properly. */
+            const carriedPins = [...new Set([...(proj.entrance_context?.vendor_slugs ?? []), ...(proj.buyer?.pinned_vendors ?? [])])]
+              .filter((slug) => /^[a-z0-9-]{2,60}$/.test(slug))
+              .slice(0, 5);
+            const carriedText = (proj.entrance_context?.requirement_text || proj.buyer?.notes || "").trim();
+            if (carriedPins.length || carriedText) {
+              if (carriedPins.length) setAdded((current) => [...new Set([...current, ...carriedPins])].slice(0, 5));
+              say(carriedPins.length
+                ? `Your shortlist of ${carriedPins.length} provider${carriedPins.length === 1 ? "" : "s"} is pinned to this project. Describe the project, then publish anonymously so they can respond.`
+                : "Your shortlist requirements are carried into this project. Review them, then publish anonymously to the opportunity board.");
+              if (carriedText && !q) {
+                firstKeyAt.current = Date.now();
+                setResuming(false);
+                void send(carriedText.slice(0, 1200));
+              }
+              return;
+            }
             say("This project isn't a Security Sourcing engagement yet, so it can't be reopened here -- starting fresh instead.");
             return;
           }
@@ -1928,7 +2002,7 @@ export default function ProjectDesk({
                 // record with truly nothing leaves `published` at null,
                 // same as today.
                 if (frozen || matchedVendors.length > 0 || invited.length > 0) {
-                  setPublished({ invited, boardId: reportBody.board_opportunity_id, matchedVendors, totalEvaluatedMarket, frozen, namesFrozen });
+                  setPublished({ invited, boardId: reportBody.board_opportunity_id, matchedVendors, totalEvaluatedMarket, frozen, namesFrozen, shortBrief: publishedShortProject ? { outcome: proj.buyer?.notes ?? "", timescale: String(proj.entrance_context?.raw_input?.timescale ?? "") } : undefined });
                   // The post-publish matches section lives inside the same
                   // `phase === "fits"` block as the pre-publish locked
                   // panel (see that block's own doc comment); `phase`
@@ -1967,14 +2041,82 @@ export default function ProjectDesk({
       const m = applyMerge(seedFacts, "link");
       if (m.changed.length) markChanged(m.changed, m.facts);
     }
+    /* Shortlist to engine handoff (3 Sep 2026, Robert's ruling that every
+       path ends on the opportunity board): ?vendors= is honoured on its own,
+       not only alongside ?q=. The comparison workspace on /shortlist now
+       sends every tab through this door (src/lib/engine-handoff.ts), and
+       the pinned providers must be visible on arrival whether or not the
+       sentence extracted anything. Pins are the buyer's own selection, so
+       showing them pre-publish stays inside the product rule that hides
+       Netify's computed ranking until publication. */
+    if (vendorsParam.length) setAdded(vendorsParam);
     if (q) {
       firstKeyAt.current = Date.now();
-      if (vendorsParam.length) setAdded(vendorsParam);
       void send(q);
     }
     setBooted(true);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const receiveJourney = (event: Event) => {
+      const mode = (event as CustomEvent<{ mode?: string }>).detail?.mode;
+      if (PROJECT_JOURNEY_MODES.includes(mode as ProjectJourneyMode)) {
+        setJourneyMode(mode as ProjectJourneyMode);
+        if (mode === "validate_rfp") setPrestartSurface("intro");
+        window.requestAnimationFrame(() => inputRef.current?.focus());
+      }
+    };
+    window.addEventListener("netify:journey-mode", receiveJourney);
+    return () => window.removeEventListener("netify:journey-mode", receiveJourney);
+  }, []);
+
+  useEffect(()=>{
+    const id=new URLSearchParams(location.search).get('project');
+    if(!id)return;
+    let active=true;
+    queueMicrotask(()=>setWorkspaceSessionLoading(true));
+    let token: string | null = null;
+    try {
+      const fragment = new URLSearchParams(location.hash.slice(1)).get('project_session');
+      token = fragment || localStorage.getItem(projectTokenKey(id));
+      if(fragment)localStorage.setItem(projectTokenKey(id),fragment);
+    } catch { /* Display the private-session recovery message below. */ }
+    if(!token){queueMicrotask(()=>{setWorkspaceSessionError('This private project needs its original resume link. Your saved drafts have not been changed.');setWorkspaceSessionLoading(false);});return;}
+    void fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}`,{headers:{authorization:`Bearer ${token}`},cache:'no-store'}).then(async r=>{if(!r.ok)throw Error('Could not resume this private project. Reopen its private link.');return r.json();}).then(data=>{
+      if(!active)return;
+      setLocalDraftStatus("idle");
+      setWorkspaceEnvelopeId(id);setWorkspaceCompany(data.buyer?.organisation||'');setAdded(data.buyer?.pinned_vendors||[]);
+      setWorkspaceSessionPublished(data.marketplace_state?.publication_status==='published');
+      const payload=data.workspace_payload ?? data.entrance_context?.raw_input?.workspace_payload;
+      if(payload?.position?.rfp_depth)setRfpDepth(payload.position.rfp_depth==="detailed"?"detailed":"short");
+      if(payload?.position?.entry_mode==="check"){setRfpEntryMode("check");rfpValidationCorpusRef.current=(payload.source_turns||[]).map((t:{text:string})=>t.text).join("\n\n");}
+      setDocumentPurpose(data.entrance_context?.raw_input?.document_purpose==='rfi'?'rfi':data.entrance_context?.raw_input?.document_purpose==='brief'?'brief':'rfp');
+      if(payload?.facts){factsRef.current=payload.facts;setFacts(payload.facts);setReceipts(payload.receipts||[]);receiptsRef.current=payload.receipts||[];receiptId.current=(payload.receipts||[]).reduce((max:number,item:Receipt)=>Math.max(max,item.id),0);cycleRef.current=(payload.facts||[]).reduce((max:number,item:WorkspaceFact)=>Math.max(max,item.cycle||0),0);const turns=hydrateSourceTurns(payload.source_turns);setSourceTurns(turns);sourceTurnsRef.current=turns;const decisions=payload.decision_turns||[];setDecisionTurns(decisions);decisionTurnsRef.current=decisions;const replay=replayDecisionLedger(decisions);setNoted(replay.noted);setDismissedQuestionIds(replay.dismissedQuestionIds);setDeclinedSuggestionIds(replay.declinedSuggestionIds);if(payload.compiled_document)previousProcurementDocumentRef.current=payload.compiled_document;}
+      else {
+        const buyer=data.buyer||{}, raw=data.entrance_context?.raw_input||{};
+        const fields:Partial<BriefFields>={sector:buyer.sector,sites:buyer.site_count?String(buyer.site_count):'',scope:raw.solution_scope||(buyer.product_scope==='sdwan_only'?'sdwan':buyer.product_scope==='sse_only'?'sse':buyer.product_scope==='full_sase'?'sase':''),regions:buyer.regions||[],operatingModel:buyer.operating_model,timescale:typeof raw.timescale==='string'?raw.timescale:''};
+        if(buyer.notes)keepSourceTurn(buyer.notes,'typed');
+        applyMerge(workspaceUpdatesFromBrief(fields),'answer');
+      }
+      setWorkspaceNotice(data.buyer?.notes||null);setSaveDirty(false);
+      envelopeRevisionRef.current=data.envelope_revision??payload?.base_revision??0;
+      setCheckpointRevision(envelopeRevisionRef.current);
+      checkpointBaselineRef.current=null;
+      try {
+        const raw=localStorage.getItem(PROJECT_CHECKPOINT_PREFIX+id);
+        if(raw){
+          const cp=JSON.parse(raw) as ProjectCheckpoint;
+          if(cp.schema!==1||cp.projectId!==id||cp.snapshot?.id!==id||!Array.isArray(cp.snapshot.facts)||!Array.isArray(cp.snapshot.sourceTurns)||!Array.isArray(cp.snapshot.decisionTurns))throw Error('invalid checkpoint');
+          setProjectCheckpoint({value:cp,canRestore:cp.baseRevision===envelopeRevisionRef.current&&data.marketplace_state?.publication_status!=='published'});
+        }
+      } catch {setWorkspaceSessionError('The recovery copy for this project could not be read. It has not been overwritten.');}
+    }).catch(e=>{if(active)setWorkspaceSessionError(e.message)}).finally(()=>{if(active)setWorkspaceSessionLoading(false)});
+    return()=>{active=false};
+    // The URL identifies this mount's project; later saves keep the same mounted ledger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
 
   /** Harry full-test repair, Step 1: continuously preserve the canonical
    *  working inputs on this device. This intentionally stores inputs and
@@ -1984,19 +2126,24 @@ export default function ProjectDesk({
    *  so an owner link can never be contaminated by an unrelated local
    *  draft. */
   useEffect(() => {
-    if (!booted || resumedFromUrlRef.current) return;
-    const hasWorkingDraft = facts.length > 0 || noted.length > 0 || receipts.length > 0 || sourceTurns.length > 0 || decisionTurns.length > 0;
+    if (!booted || workspaceSessionLoading || workspaceSessionError || projectCheckpoint || workspaceSessionPublished || published || (resumedFromUrlRef.current && !workspaceEnvelopeId)) return;
+    const hasWorkingDraft = draft.trim().length > 0 || facts.length > 0 || noted.length > 0 || receipts.length > 0 || sourceTurns.length > 0 || decisionTurns.length > 0;
     if (!hasWorkingDraft) return;
+    const checkpointFingerprint=JSON.stringify({facts,noted,dismissedQuestionIds,declinedSuggestionIds,receipts,sourceTurns,decisionTurns,resumeRemovals:[...resumeRemovals],messages:msgs,rfpDepth,rfpEntryMode,rfpValidationCorpus:rfpValidationCorpusRef.current,documentPurpose,pinnedVendorSlugs:added,draftInput:draft,company:workspaceCompany,notice:workspaceNotice});
+    if(workspaceEnvelopeId){
+      if(checkpointBaselineRef.current===null&&!saveDirty&&!draft.trim()){checkpointBaselineRef.current=checkpointFingerprint;return;}
+      if(checkpointBaselineRef.current===checkpointFingerprint&&!draft.trim())return;
+    }
     /* Do not leave the previous "Draft saved" acknowledgement on screen
        while a newer canonical snapshot is waiting to be written. Without
        this transition a fast refresh could trust the stale acknowledgement
        and reopen the earlier source-only snapshot before extracted facts
        had reached localStorage. */
-    setLocalDraftStatus("idle");
-    const timer = window.setTimeout(() => {
+    queueMicrotask(() => setLocalDraftStatus("idle"));
+    const persist = () => {
       try {
-        const id = localDraftIdRef.current ?? newLocalDraftId();
-        localDraftIdRef.current = id;
+        const id = workspaceEnvelopeId ?? localDraftIdRef.current ?? newLocalDraftId();
+        if(!workspaceEnvelopeId)localDraftIdRef.current = id;
         const updatedAt = Date.now();
         const snapshot: LocalWorkingDraft = {
           schema: 1,
@@ -2014,16 +2161,26 @@ export default function ProjectDesk({
           rfpDepth,
           rfpEntryMode,
           rfpValidationCorpus: rfpValidationCorpusRef.current,
+          documentPurpose,
+          pinnedVendorSlugs: added,
+          draftInput: draft,
         };
-        window.localStorage.setItem(`${LOCAL_DRAFT_PREFIX}${id}`, JSON.stringify(snapshot));
-        window.localStorage.setItem(LOCAL_DRAFT_POINTER_KEY, id);
+        if(workspaceEnvelopeId){
+          const checkpoint:ProjectCheckpoint={schema:1,projectId:id,baseRevision:envelopeRevisionRef.current,snapshot,company:workspaceCompany,notice:workspaceNotice};
+          window.localStorage.setItem(PROJECT_CHECKPOINT_PREFIX+id,JSON.stringify(checkpoint));
+        }else{
+          window.localStorage.setItem(`${LOCAL_DRAFT_PREFIX}${id}`, JSON.stringify(snapshot));
+          window.localStorage.setItem(LOCAL_DRAFT_POINTER_KEY, id);
+        }
         setLocalDraftSavedAt(updatedAt);
         setLocalDraftStatus("saved");
       } catch {
         setLocalDraftStatus("error");
       }
-    }, 650);
-    return () => window.clearTimeout(timer);
+    };
+    const timer=window.setTimeout(persist,650);
+    window.addEventListener("pagehide",persist);
+    return () => {window.clearTimeout(timer);window.removeEventListener("pagehide",persist);};
   }, [
     booted,
     facts,
@@ -2038,6 +2195,10 @@ export default function ProjectDesk({
     rfpDepth,
     rfpEntryMode,
     rfpValidation,
+    documentPurpose,
+    draft,
+    added,
+    workspaceEnvelopeId,workspaceSessionLoading,workspaceSessionError,workspaceSessionPublished,published,projectCheckpoint,checkpointRevision,saveDirty,workspaceCompany,workspaceNotice,
   ]);
 
   /* Autofocus, pointer-fine only: on a desktop the caret waits in the
@@ -2057,7 +2218,7 @@ export default function ProjectDesk({
   /* ---- Assess (the rulebook, client side, one truth) ---- */
   useEffect(() => {
     if (!securityScope || live.length === 0) {
-      setVerdict(null);
+      queueMicrotask(() => setVerdict(null));
       return;
     }
     let cancelled = false;
@@ -2158,33 +2319,35 @@ export default function ProjectDesk({
   );
   useEffect(() => {
     if (!pack || assertedPacks.current.has(pack.id)) return;
-    assertedPacks.current = new Set([...assertedPacks.current, pack.id]);
-    const sugs = visibleSuggestions(pack, packFlavours, factsRef.current, noted.map((n) => n.id), []);
-    const compliance: Array<{ sg: PackSuggestion; item: TaxonomyItem }> = [];
-    for (const sg of sugs) {
-      if (sg.accept.kind !== "items") continue;
-      for (const id of sg.accept.itemIds) {
-        const e = ITEM_BY_ID[id];
-        if (e && e.item.path === "constraints.complianceRequirements") compliance.push({ sg, item: e.item });
+    queueMicrotask(() => {
+      assertedPacks.current = new Set([...assertedPacks.current, pack.id]);
+      const sugs = visibleSuggestions(pack, packFlavours, factsRef.current, noted.map((n) => n.id), []);
+      const compliance: Array<{ sg: PackSuggestion; item: TaxonomyItem }> = [];
+      for (const sg of sugs) {
+        if (sg.accept.kind !== "items") continue;
+        for (const id of sg.accept.itemIds) {
+          const e = ITEM_BY_ID[id];
+          if (e && e.item.path === "constraints.complianceRequirements") compliance.push({ sg, item: e.item });
+        }
       }
-    }
-    if (!compliance.length) return;
-    const updates: FieldUpdate[] = compliance.map(({ sg, item }) => ({
-      path: item.path as AllowedPath,
-      value: item.value,
-      provenance: "inferred",
-      reason: sg.reason,
-    }));
-    const merged = applyMerge(updates, "extract");
-    if (!merged.changed.length) return;
-    const landed = compliance.filter(({ item }) => merged.changed.includes(factId(item.path as AllowedPath, item.value)));
-    const shown = landed.length ? landed : compliance;
-    for (const { sg } of shown) ev("workspace_pack_suggestion", { id: sg.id, verdict: "asserted" });
-    /* The change carries the marker AND one thread line (round 6): the
-       rules are already written in when the line appears. */
-    setChangedSlots((prev) => [...new Set([...prev, ...merged.changed.map((id) => `rule:${id}`)])]);
-    const n = merged.changed.length;
-    say(`Your sector writes ${numWord(n)} rule${n === 1 ? "" : "s"} into the statement; they are in already, each with its reason, and any one can be dropped.`);
+      if (!compliance.length) return;
+      const updates: FieldUpdate[] = compliance.map(({ sg, item }) => ({
+        path: item.path as AllowedPath,
+        value: item.value,
+        provenance: "inferred",
+        reason: sg.reason,
+      }));
+      const merged = applyMerge(updates, "extract");
+      if (!merged.changed.length) return;
+      const landed = compliance.filter(({ item }) => merged.changed.includes(factId(item.path as AllowedPath, item.value)));
+      const shown = landed.length ? landed : compliance;
+      for (const { sg } of shown) ev("workspace_pack_suggestion", { id: sg.id, verdict: "asserted" });
+      /* The change carries the marker AND one thread line (round 6): the
+         rules are already written in when the line appears. */
+      setChangedSlots((prev) => [...new Set([...prev, ...merged.changed.map((id) => `rule:${id}`)])]);
+      const n = merged.changed.length;
+      say(`Your sector writes ${numWord(n)} rule${n === 1 ? "" : "s"} into the statement; they are in already, each with its reason, and any one can be dropped.`);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack, packFlavours]);
 
@@ -2193,13 +2356,14 @@ export default function ProjectDesk({
   const coreFive = useMemo(() => {
     const stands = (path: string) => facts.some((f) => !f.struck && f.path === path);
     return {
+      journey_mode: journeyMode,
       sector: stands("organisation.sector"),
       sites: stands("estate.sites"),
       regions: stands("organisation.regions"),
       scope: stands("procurement.buying"),
       timeline: stands("constraints.timeline"),
     };
-  }, [facts]);
+  }, [facts, journeyMode]);
   const missingCore = useMemo(() => {
     const out: string[] = [];
     if (!coreFive.sector) out.push("your sector");
@@ -2266,36 +2430,22 @@ export default function ProjectDesk({
      retired along with the ranked panel they existed to serve; see the
      locked pre-publish outcome panel and the command handlers below for
      the corresponding removal. */
-  const marketTotal = fit?.total ?? market?.counts.vendors ?? null;
+  const marketTotal = fit?.total ?? market?.counts?.vendors ?? null;
   const pins = [...new Set(added)].slice(0, 5);
-
-  /** Vendors the buyer has NAMED in their own retained words (quotes,
-   *  receipts). A tag for the Constellation, never a rank change: naming
-   *  is not evidence. Restored 1 Aug 2026 alongside the Constellation
-   *  itself (see ConstellationScene.tsx). */
-  const namedSlugs = useMemo(() => {
-    const text = [
-      ...facts.map((f) => `${f.quote ?? ""} ${f.reason ?? ""}`),
-      ...receipts.map((r) => r.text),
-    ].join(" ").toLowerCase();
-    const out = new Set<string>();
-    if (text.trim())
-      for (const v of market?.vendors ?? []) {
-        const full = v.name.toLowerCase();
-        const first = full.split(/[\s/]+/)[0];
-        const hit = text.includes(full) || (first.length >= 4 && !["check", "orange"].includes(first) && new RegExp(`\\b${first}\\b`).test(text));
-        if (hit) out.add(v.slug);
-      }
-    return out;
-  }, [facts, receipts, market]);
-  const narrowedBy = [
-    buying ? "what you are buying" : null,
-    opModel ? "who runs it" : null,
-    buying && (requirement.organisation?.regions ?? []).length ? "where it runs" : null,
-  ].filter((x): x is string => Boolean(x));
-  const marketNote = narrowedBy.length
-    ? `Narrowed by ${listJoin(narrowedBy)}. Never by what anyone pays.`
-    : "The whole evaluated market, until you tell it more. Never narrowed by what anyone pays.";
+  /* Shortlist to engine handoff (3 Sep 2026): the buyer's own pinned
+     providers, named from the live market directory, rendered pre-publish
+     by GuidedBuild as "Your shortlist". Removable one by one; the same
+     `added` list feeds pinned_vendors at publish, so what the buyer sees is
+     exactly what is invited. */
+  const pinnedShortlist = useMemo(() => {
+    if (!pins.length) return null;
+    const names = new Map((market?.vendors ?? []).map((vendor) => [vendor.slug, vendor.name]));
+    return {
+      vendors: pins.map((slug) => ({ slug, name: names.get(slug) ?? slug.replace(/-/g, " ") })),
+      onRemove: (slug: string) => setAdded((current) => current.filter((item) => item !== slug)),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pins.join(","), market]);
 
   function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
   const unansweredGaps = brief.openGaps;
@@ -2413,6 +2563,7 @@ export default function ProjectDesk({
    *  fixture proving either -- so all three are provably one code path,
    *  not three copies that happen to agree today. */
   const dropFact = useCallback((id: string) => {
+    setWorkspaceNotice(null);
     const f = factsRef.current.find((x) => x.id === id);
     if (!f || f.struck) return;
     if (f.provenance === "inferred") neverReinfer.current.add(nrKey(f.path, f.value));
@@ -2448,6 +2599,7 @@ export default function ProjectDesk({
    *  clearNotes(prefix) and wiping every note in the slot, not just the
    *  one the buyer clicked clear on. This is the correct per-item form. */
   const clearNote = useCallback((id: string) => {
+    setWorkspaceNotice(null);
     setNoted((ns) => ns.filter((n) => n.id !== id));
     setChangedSlots([]);
     setSaveDirty(true);
@@ -2469,6 +2621,7 @@ export default function ProjectDesk({
    *  later save of this same turn, unlike the third amendment's numeric
    *  ref counter (see the SourceTurn type comment). */
   const keepSourceTurn = useCallback((text: string, via: SourceLedgerVia) => {
+    setWorkspaceNotice(null);
     setSourceTurns((ts) => [...ts, { id: newSourceTurnId(), text, at: Date.now(), via }]);
     setSaveDirty(true);
   }, []);
@@ -2477,6 +2630,7 @@ export default function ProjectDesk({
    *  row on the statement already has, now that receipts render as their
    *  own "Other requirements" group instead of only in the side sheet. */
   const dropReceipt = useCallback((id: number) => {
+    setWorkspaceNotice(null);
     setReceipts((rs) => rs.filter((r) => r.id !== id));
     setSaveDirty(true);
   }, []);
@@ -2717,6 +2871,7 @@ export default function ProjectDesk({
         id: guidedCustomAnswerNoteId(question.id),
         label: text,
         section: question.target,
+        own: true,
       };
       beginOrExtendSubmission();
       if (resultingFactPaths.length === 0) {
@@ -3036,8 +3191,9 @@ export default function ProjectDesk({
      extraction and receipts path. ---- */
   const ingestText = useCallback(
     async (raw: string, source: "paste" | "drop" | "file" | "link") => {
+      if(raw.length > 200_000){setPasteSummary(`This source contains ${raw.length.toLocaleString("en-GB")} characters. Split it into sections of up to 200,000 characters and import each section. Nothing from this source was added.`);return;}
       const plan = chunkForIngest(raw);
-      if (!plan.chunks.length) return;
+      if (!plan.chunks.length) { setPasteSummary("This file or pasted text is empty. Add some text and try again. Your existing draft is unchanged."); return; }
       setPasteSummary(null);
       const factsBefore = factsRef.current.filter((f) => !f.struck).length;
       const receiptsBefore = receiptsRef.current.length;
@@ -3078,7 +3234,7 @@ export default function ProjectDesk({
       if (rfpEntryMode === "check") await validateExistingRfp(raw, true);
       const landed = Math.max(0, factsRef.current.filter((f) => !f.struck).length - factsBefore);
       const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
-      setPasteSummary(ingestSummary(landed, kept, plan));
+      setPasteSummary(ingestSummary(landed, kept, plan, source));
     },
     [runCycle, keepReceipt, keepSourceTurn, rfpEntryMode, validateExistingRfp],
   );
@@ -3109,6 +3265,7 @@ export default function ProjectDesk({
     // non-UI half, since Enter-to-send calls send() directly and does not
     // go through the button's `disabled` attribute at all).
     if (!text || busy || resuming) return;
+    if (isUnrelatedBuyingInput(text)) { setCycleError("Describe a network or security buying requirement, such as your sites, users or required service. Nothing was added to your project."); return; }
     const guidedQuestion = guidedCustomQuestionRef.current;
     setDraft("");
     if (!firstKeyAt.current) firstKeyAt.current = Date.now();
@@ -3238,9 +3395,7 @@ export default function ProjectDesk({
         setReqOpen(cmd.open);
         return;
       case "reset":
-        clearLocalWorkingDraft(localDraftIdRef.current);
-        localDraftIdRef.current = null;
-        window.location.assign(window.location.pathname);
+        startNewBuyingProject();
         return;
       case "back":
         goToStep("describe");
@@ -3412,6 +3567,8 @@ export default function ProjectDesk({
         : {}),
       position: {
         covered_sections: instrumentCoveredSections,
+        rfp_depth: rfpDepth,
+        entry_mode: rfpEntryMode,
         sector: (requirement.organisation?.sector as string | undefined) ?? null,
       },
       /* Fourth amendment, gaps 2 & 3: the structured ledger, alongside the
@@ -3567,6 +3724,7 @@ export default function ProjectDesk({
      header stays honest either way; nothing is invited and nothing is
      listed until the signature chain runs. ---- */
   async function saveNow() {
+    if(workspaceEnvelopeId){requestBrief();return;}
     // Sixth amendment, item 3: same non-UI guard as send() above.
     if (!started || saveBusy || resuming) return;
     if (securityScope && !consentSave) return;
@@ -3624,6 +3782,7 @@ export default function ProjectDesk({
      changed its face, never its law: consents verbatim, humans sign,
      agents never, publish is the only exit). ---- */
   async function signAndPublish() {
+    if(workspaceEnvelopeId){requestBrief();return;}
     if (signLocked || !consentsOk || signStage) return;
     setSignError(null);
     if (testMode && !securityScope) {
@@ -3749,10 +3908,10 @@ export default function ProjectDesk({
         setNeedAuth(true);
         ev("workspace_auth_required", { scope: buying ?? "security" });
       } else {
-        throw new Error(data.error || "The opportunity was not listed on the board. Nothing was sent; review the RFP and try again.");
+        throw new Error(publicationFailureMessage(data, res.status));
       }
     } catch (e) {
-      setSignError(e instanceof Error ? e.message : "Something failed; nothing has been sent to vendors or service providers. Try again.");
+      setSignError(e instanceof Error ? e.message : publicationFailureMessage(null));
     } finally {
       setSignStage(null);
     }
@@ -3762,7 +3921,7 @@ export default function ProjectDesk({
      so a spoken command works exactly like a typed one). ---- */
   useEffect(() => {
     const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
-    if (w.SpeechRecognition || w.webkitSpeechRecognition) setVoiceSupported(true);
+    if (w.SpeechRecognition || w.webkitSpeechRecognition) queueMicrotask(() => setVoiceSupported(true));
     return () => { try { voiceRec.current?.stop(); } catch { /* gone */ } };
   }, []);
   const startVoice = () => {
@@ -4014,7 +4173,7 @@ export default function ProjectDesk({
       !coreFive.sector && "sector",
       !coreFive.sites && "site count",
       !coreFive.regions && "regions",
-      !hasFact("estate.users") && "user count",
+      !hasFact("estate.users") && !hasFact("estate.remoteUsers") && "user count",
     ].filter((x): x is string => typeof x === "string");
     /* Reported even when the row reads Confirmed: ANY ONE of these three
        satisfies `estateSignal`, so "Confirmed" has never meant all three
@@ -4026,7 +4185,7 @@ export default function ProjectDesk({
       !hasFact("estate.existingSecurity") && "security estate",
     ].filter((x): x is string => typeof x === "string");
     const outline = buildSectionOutline({
-      orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && hasFact("estate.users"),
+      orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && (hasFact("estate.users") || hasFact("estate.remoteUsers")),
       orgScaleDetail: coreFive.sector && coreFive.sites ? `${cap(String(standingAt("organisation.sector")[0]?.value ?? ""))}, ${standingAt("estate.sites").slice(-1)[0]?.value ?? "?"} sites` : "Sector, sites and regions not yet all stated.",
       orgScaleMissing,
       scopeComplete: coreFive.scope,
@@ -4264,7 +4423,7 @@ export default function ProjectDesk({
           onConfirmSelection: slot?.selectionMode === "multiple"
             ? (indices: number[]) => landMultipleOptions(slot, indices.map((index) => slot.options[index]).filter(Boolean))
             : undefined,
-          selectAllLabel: slot?.selectionMode === "multiple" ? "Select worldwide" : undefined,
+          selectAllLabel: slot?.path === "organisation.regions" ? "Select worldwide" : undefined,
           hint: slot ? null : "See “Project details” below for the full context.",
           fills,
         };
@@ -4367,7 +4526,7 @@ export default function ProjectDesk({
       onConfirmSelection: slot.selectionMode === "multiple"
         ? (indices: number[]) => landMultipleOptions(slot, indices.map((index) => slot.options[index]).filter(Boolean))
         : undefined,
-      selectAllLabel: slot.selectionMode === "multiple" ? "Select worldwide" : undefined,
+      selectAllLabel: slot.path === "organisation.regions" ? "Select worldwide" : undefined,
       hint: null,
       fills: { title: nextRow.title, position: sectionPosition(sectionOutline, nextRow.title)?.position ?? sectionProgress.nextPosition, total: sectionProgress.total },
     };
@@ -4390,8 +4549,9 @@ export default function ProjectDesk({
   const answeredLog = useMemo(() => buildAnsweredLog({ facts, noted }), [facts, noted]);
 
   const addCustomSupplierQuestion = useCallback((question: string) => {
+    setWorkspaceNotice(null);
     if (!activeRow) return;
-    const normalized = `${question.trim().replace(/\s+/g, " ").replace(/[?.!]+$/, "")}?`;
+    const normalized = question.trim();
     if (normalized.length < 8) return;
     const item: NotedItem = {
       id: `${CUSTOM_SUPPLIER_QUESTION_PREFIX}${activeRow.key}:${stableQuestionSuffix(normalized.toLowerCase())}`,
@@ -4408,6 +4568,18 @@ export default function ProjectDesk({
     });
     say(`Added your supplier question to ${activeRow.title}.`);
   }, [activeRow, recordDecision, say]);
+
+  function saveNoteEdit(item: NotedItem, remove = false) {
+    beginOrExtendSubmission();
+    setNoted((items) => remove ? items.filter((n) => n.id !== item.id) : [...items.filter((n) => n.id !== item.id), item]);
+    recordDecision(item.id, remove ? "Remove question" : "Edit question", {
+      action: "note", optionId: remove ? "remove" : "edit", resultingFactPaths: [],
+      resultingNoted: remove ? [] : [item], clearedNotedIds: [item.id],
+    });
+    if (remove) setRemovedNote(item);
+    setNoteEditor(null);
+    scheduleSettle();
+  }
 
   const sectionQuestionItemsByKey = useMemo(() => {
     const openCards: NextQuestionCard[] = [...allNextQuestionCards];
@@ -4430,7 +4602,7 @@ export default function ProjectDesk({
         });
       }
     }
-    return buildSectionQuestionRegister({
+    const register = buildSectionQuestionRegister({
       rows: sectionOutline,
       evidence: [...evidenceByPath.values()].map((entry) => ({
         id: entry.id,
@@ -4449,6 +4621,13 @@ export default function ProjectDesk({
         text: item.label,
       }] : []),
     });
+    for (const items of Object.values(register)) {
+      for (const item of items) {
+        const answer = noted.find((note) => note.id === guidedCustomAnswerNoteId(item.id.replace(/^open:/, "")));
+        if (answer) { item.status = "completed"; item.answer = answer.label; }
+      }
+    }
+    return register;
   }, [sectionOutline, answeredLog.stated, allNextQuestionCards, guidedQuestionCard, noted, rfpDepth]);
 
   const activeSectionQuestionItems = activeRow ? sectionQuestionItemsByKey[activeRow.key] ?? [] : [];
@@ -4572,7 +4751,83 @@ export default function ProjectDesk({
   const sendReady = draft.trim().length > 0 && !busy && !resuming;
   const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
 
-  if (!booted) return <div className="pd-root mt-10" />;
+  useEffect(()=>{
+    const read=(event:Event)=>{
+      const detail=(event as CustomEvent<{value:WorkspaceProject|null}>).detail;
+      if(!booted)return;
+      detail.value={id:workspaceEnvelopeId||created?.id||localDraftIdRef.current,legacyProject:!!created&&!workspaceEnvelopeId,documentPurpose,busy:busy||workspaceSessionLoading||!!workspaceSessionError||!!projectCheckpoint,published:!!published||workspaceSessionPublished,fields:{scope:buying==='sdwan'?'sdwan':buying==='sse'?'sse':'sase',sector:wizardSectorKey(requirement.organisation?.sector)||'',sites:requirement.estate?.sites?String(requirement.estate.sites):'',regions:wizardRegions(requirement.organisation?.regions||[]),operatingModel:opModel||'any',outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:''),timescale:requirement.constraints?.timeline||'',company:workspaceCompany},payload:{...rfpPayload(false),document_purpose:documentPurpose}};
+    };
+    const confirm=(event:Event)=>{
+      const detail=(event as CustomEvent<{fields:BriefFields;accepted:boolean;error:string}>).detail;
+      if(!booted||busy||workspaceSessionLoading||workspaceSessionError||projectCheckpoint){detail.error='Wait until your project has finished loading and saving.';return;}
+      if(published||workspaceSessionPublished){detail.error='This project is already published. Open its existing review controls.';return;}
+      const f=detail.fields;
+      const existingRegions=standing(factsRef.current).filter(x=>x.path==='organisation.regions').map(x=>String(x.value));
+      const regions=confirmedWorkspaceRegions(f.regions,existingRegions);
+      const updates=workspaceUpdatesFromBrief(f,existingRegions);
+      for(const fact of standing(factsRef.current).filter(x=>x.path==='organisation.regions'&&!regions.includes(String(x.value))))dropFact(fact.id);
+      if(f.operatingModel==='any')for(const fact of standing(factsRef.current).filter(x=>x.path==='procurement.operatingModel'))dropFact(fact.id);
+      applyMerge(updates,'answer');
+      if(f.outcome!==workspaceNotice&&f.outcome!==canvasDocument.summary)keepSourceTurn(f.outcome,'typed');
+      setWorkspaceNotice(f.outcome);setWorkspaceCompany(f.company);detail.accepted=true;
+    };
+    const revision=(e:Event)=>{
+      const value=(e as CustomEvent<number|{envelopeRevision:number;projectId?:string}>).detail;
+      const n=typeof value==='number'?value:value.envelopeRevision;
+      if(Number.isSafeInteger(n))envelopeRevisionRef.current=n;
+      if(typeof value==='object'&&value.projectId){setWorkspaceEnvelopeId(value.projectId);resumedFromUrlRef.current=true;}
+      const id=typeof value==='object'?value.projectId||workspaceEnvelopeId:workspaceEnvelopeId;
+      if(id){try{localStorage.removeItem(PROJECT_CHECKPOINT_PREFIX+id);}catch{setLocalDraftStatus('error');}}
+      checkpointBaselineRef.current=null;
+      setCheckpointRevision(n);
+      setLocalDraftStatus('idle');
+      setSaveDirty(false);
+    };
+    const purpose=(e:Event)=>{const v=(e as CustomEvent<DocumentPurpose>).detail;if(['brief','rfp','rfi'].includes(v))setDocumentPurpose(v);};
+    const flush=(e:Event)=>{if(resumedFromUrlRef.current||workspaceEnvelopeId){if(saveDirty||draft.trim())(e as CustomEvent<{error:string}>).detail.error='Save or review your current project changes before opening another draft.';return;}try{const id=localDraftIdRef.current??newLocalDraftId();localDraftIdRef.current=id;const snapshot:LocalWorkingDraft={schema:1,id,updatedAt:Date.now(),facts,noted,dismissedQuestionIds,declinedSuggestionIds,receipts,sourceTurns,decisionTurns,resumeRemovals:[...resumeRemovals],messages:msgs,rfpDepth,rfpEntryMode,rfpValidationCorpus:rfpValidationCorpusRef.current,documentPurpose,draftInput:draft,pinnedVendorSlugs:added};localStorage.setItem(LOCAL_DRAFT_PREFIX+id,JSON.stringify(snapshot));localStorage.setItem(LOCAL_DRAFT_POINTER_KEY,id);}catch{(e as CustomEvent<{error:string}>).detail.error='Could not preserve the current draft.';}};
+    const legacyReview=()=>{if(created&&!workspaceEnvelopeId)goToStep('publish');};
+    window.addEventListener('netify:legacy-project-review',legacyReview);
+    window.addEventListener('netify:flush-draft',flush);
+    window.addEventListener('netify:project-read',read);window.addEventListener('netify:project-confirm',confirm);window.addEventListener('netify:project-revision',revision);window.addEventListener('netify:document-purpose',purpose);
+    return()=>{window.removeEventListener('netify:legacy-project-review',legacyReview);window.removeEventListener('netify:flush-draft',flush);window.removeEventListener('netify:project-read',read);window.removeEventListener('netify:project-confirm',confirm);window.removeEventListener('netify:project-revision',revision);window.removeEventListener('netify:document-purpose',purpose);};
+  });
+
+  // The shell delegates to existing engine actions; publication gates stay here.
+  useEffect(() => {
+    const receive = (event: Event) => {
+      if (!booted) return;
+      const action = (event as CustomEvent<string>).detail;
+      if (action === "settings") { goToStep("describe"); setDocumentSettingsOpen(true); }
+      if (action === "requirements") goToStep("describe");
+      if (action === "short-rfp" || action === "detailed-rfp") { setDocumentPurpose("rfp"); setRfpEntryMode("build"); changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
+      if (action === "import") { setRfpEntryMode("check"); goToStep("describe"); fileRef.current?.click(); }
+      if (action === "review") goToStep(started ? "review" : "describe");
+      if (action === "responses") { if(reachable.has("compare"))goToStep("compare");else {say("Supplier responses become available after you publish and suppliers reply. Review your project to continue.");requestBrief();} }
+      if (action === "tools") {
+        document.querySelectorAll<HTMLDetailsElement>(".nf-calm-project-tools").forEach((panel) => { panel.open = true; panel.scrollIntoView({ block: "nearest" }); });
+      }
+    };
+    window.addEventListener("netify:workspace-action", receive);
+    return () => window.removeEventListener("netify:workspace-action", receive);
+  });
+
+  if (!booted || workspaceSessionLoading) return <div className="pd-root mt-10" role="status">Loading your project…</div>;
+  if(workspaceSessionError)return <p role="alert">{workspaceSessionError}</p>;
+  if(projectCheckpoint){
+    const {value:cp,canRestore}=projectCheckpoint;
+    const archive=()=>{localStorage.setItem(PROJECT_CHECKPOINT_PREFIX+cp.projectId+':archive:'+cp.snapshot.updatedAt,JSON.stringify(cp));localStorage.removeItem(PROJECT_CHECKPOINT_PREFIX+cp.projectId);setProjectCheckpoint(null);checkpointBaselineRef.current=null;};
+    const restore=()=>{
+      const local=cp.snapshot;
+      factsRef.current=local.facts;setFacts(local.facts);setNoted(local.noted);setDismissedQuestionIds(local.dismissedQuestionIds);setDeclinedSuggestionIds(local.declinedSuggestionIds);
+      setReceipts(local.receipts);receiptsRef.current=local.receipts;receiptId.current=local.receipts.reduce((max,item)=>Math.max(max,item.id),0);
+      setSourceTurns(local.sourceTurns);sourceTurnsRef.current=local.sourceTurns;setDecisionTurns(local.decisionTurns);decisionTurnsRef.current=local.decisionTurns;
+      const removals=new Set(local.resumeRemovals);setResumeRemovals(removals);resumeRemovalsRef.current=removals;
+      cycleRef.current=Math.max(0,...local.facts.map(f=>f.cycle));setMsgs(local.messages);setDraft(local.draftInput??'');setAdded(local.pinnedVendorSlugs??[]);setDocumentPurpose(local.documentPurpose??'rfp');setRfpDepth(local.rfpDepth);setRfpEntryMode(local.rfpEntryMode);rfpValidationCorpusRef.current=local.rfpValidationCorpus;
+      setWorkspaceCompany(cp.company);setWorkspaceNotice(cp.notice);setSaveDirty(true);setProjectCheckpoint(null);setLocalDraftStatus('saved');setLocalDraftSavedAt(local.updatedAt);
+    };
+    return <section className="nf-draft-recovery" role="status"><h2>{canRestore?'Resume changes saved on this device?':'Your project has changed since this recovery copy'}</h2><p>{canRestore?'Your unsaved requirements, supplier questions and draft text are available. The server project will only change when you review and save.':'This copy belongs to an earlier revision or a published project. It cannot replace the current project. Download it to review its contents; continuing keeps an archived copy on this device.'}</p><p>Saved {new Date(cp.snapshot.updatedAt).toLocaleString('en-GB')}</p>{canRestore&&<button onClick={restore}>Resume device changes</button>}<button onClick={()=>{const blob=new Blob([JSON.stringify(cp,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='netify-project-recovery.json';a.click();URL.revokeObjectURL(url);}}>Download recovery copy</button><button onClick={()=>{try{archive()}catch{setWorkspaceSessionError('Could not archive this recovery copy. Nothing has been deleted.')}}}>Use saved server version</button></section>;
+  }
+
 
   const mono: React.CSSProperties = { fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' };
   const editSlot = edit ? SLOT_BY_ID[edit] ?? null : null;
@@ -4765,6 +5020,7 @@ export default function ProjectDesk({
               right, which is not how any chat surface reads. */}
           <div className="nf-2030-composer flex items-end gap-2 rounded-[4px] border border-[#d3d0cd] bg-white py-2 pl-[18px] pr-2">
             <textarea
+              aria-label="Describe your requirements"
               ref={inputRef}
               value={draft}
               onChange={(e) => { setDraft(e.target.value); if (!firstKeyAt.current) firstKeyAt.current = Date.now(); }}
@@ -4815,6 +5071,7 @@ export default function ProjectDesk({
                 </svg>
               </button>
               <input
+                aria-label="Attach an RFP or requirements document"
                 ref={fileRef}
                 type="file"
                 accept=".txt,.md,.csv,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,application/pdf,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -4904,7 +5161,7 @@ export default function ProjectDesk({
       sectionsTotal={sectionProgress.total}
       optionalRemaining={materialDecisionsRemaining}
       onReview={() => goToStep("review")}
-      onPublish={() => goToStep("publish")}
+      onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
     />
   ) : null;
 
@@ -5171,6 +5428,7 @@ export default function ProjectDesk({
   };
 
   const livingOsRail = (
+    <details className="nf-calm-project-tools"><summary>Project tools · suppliers, evidence &amp; exports</summary>
     <div className="lpos-product-rail" role="navigation" aria-label="Living Procurement OS navigation" data-collapsed={productRailCollapsed}>
       <nav>
         {railItems.map((item) => {
@@ -5181,9 +5439,9 @@ export default function ProjectDesk({
             type="button"
             aria-label={item.disabled ? `${item.label}, locked. ${item.disabledReason}` : item.label}
             aria-disabled={item.disabled || undefined}
-            aria-description={item.disabled ? item.disabledReason : undefined}
             aria-describedby={item.disabled ? tooltipId : undefined}
             aria-current={item.current ? "page" : undefined}
+            disabled={item.disabled}
             data-current={item.current}
             data-locked={item.disabled || undefined}
             data-disabled-reason={item.disabled ? item.disabledReason : undefined}
@@ -5200,7 +5458,21 @@ export default function ProjectDesk({
       <button type="button" aria-label="Settings" onClick={() => { goToStep("describe"); setDocumentSettingsOpen(true); }}><span aria-hidden="true">⚙</span><span className="lpos-rail-label">Settings</span></button>
       <button type="button" aria-label={productRailCollapsed ? "Expand navigation" : "Collapse navigation"} aria-expanded={!productRailCollapsed} className="lpos-collapse" onClick={() => setProductRailCollapsed((value) => !value)}><span aria-hidden="true">{productRailCollapsed ? "›" : "‹"}</span><span className="lpos-rail-label">{productRailCollapsed ? "Expand" : "Collapse"}</span></button>
     </div>
+    </details>
   );
+
+  if (published?.shortBrief && created) {
+    return <section className="mx-auto my-6 max-w-4xl rounded-md border border-[#91bb91] bg-white p-6" aria-label="Published project">
+      <h2 className="text-2xl font-semibold">Your project is published</h2>
+      <p className="mt-2">Your anonymous brief is on the opportunity board. Your company and contact details remain private.</p>
+      <p className="mt-5 whitespace-pre-wrap">{published.shortBrief.outcome}</p>
+      {published.shortBrief.timescale && <p className="mt-2"><strong>Timescale:</strong> {published.shortBrief.timescale}</p>}
+      <h3 className="mt-6 text-lg font-semibold">Your matched providers</h3>
+      <p className="mt-1 text-sm">{published.frozen ? 'Saved at publication.' : 'Matches from your project record.'} {published.invited.length} providers invited directly.</p>
+      {published.matchedVendors.length ? <ul className="mt-3 divide-y">{published.matchedVendors.map((vendor) => <li key={vendor.slug} className="py-3"><strong>{vendor.name}</strong>{published.invited.some((invited) => invited.slug === vendor.slug) && <span className="ml-3 text-sm">Invited</span>}</li>)}</ul> : <p className="mt-3">No providers matched these requirements. Your published brief remains available on the board.</p>}
+      <a className="mt-5 inline-block rounded bg-[#a84412] px-5 py-3 font-semibold text-white" href={`/sase/project/${encodeURIComponent(created.id)}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ''}`}>View project and supplier responses</a>
+    </section>;
+  }
 
   return (
     <div
@@ -5210,6 +5482,14 @@ export default function ProjectDesk({
       onDragOver={(e) => { e.preventDefault(); }}
       onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
     >
+      {noteEditor && <dialog ref={noteDialogRef} aria-label="Edit supplier question" className="fixed inset-0 z-[100] m-auto rounded-xl p-0 backdrop:bg-black/30" onCancel={() => setNoteEditor(null)}>
+        <form className="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl" onSubmit={(e) => { e.preventDefault(); if(noteEditor.label.trim()) saveNoteEdit({...noteEditor,label:noteEditor.label.trim()}); }}>
+          <h2 className="mb-4 text-xl font-semibold">Edit supplier question</h2>
+          <textarea autoFocus aria-label="Supplier question wording" className="min-h-40 w-full rounded border p-3" value={noteEditor.label} onChange={(e)=>setNoteEditor({...noteEditor,label:e.target.value})}/>
+          <div className="mt-4 flex flex-wrap gap-4"><button type="submit" disabled={!noteEditor.label.trim()}>Save question</button><button type="button" onClick={()=>setNoteEditor(null)}>Cancel</button><button type="button" onClick={()=>saveNoteEdit(noteEditor,true)}>Remove question</button></div>
+        </form>
+      </dialog>}
+      {removedNote && <div role="status" className="p-4">Question removed. <button type="button" onClick={()=>{saveNoteEdit(removedNote);setRemovedNote(null);}}>Undo removal</button></div>}
       {started ? (
         /* ============================================================ */
         /* THE WORKSPACE (a real project exists).                        */
@@ -5219,7 +5499,7 @@ export default function ProjectDesk({
         /* ============================================================ */
         <>
           <header className="nf-2030-header nf-2030-journey lpos-header">
-            <div className="lpos-brand"><span>N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
+            <div className="lpos-brand" role="img" aria-label="Netify Living Procurement OS"><span aria-hidden="true">N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
               <button type="button" data-complete="true" onClick={() => goToStep("describe")}><b>✓</b><span>Describe project</span></button>
               <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}><b>2</b><span>Complete essentials</span></button>
@@ -5245,13 +5525,15 @@ export default function ProjectDesk({
             <div className="lpos-profile">
               <div aria-live="polite" title="This working draft is kept on this device. It is not published and no supplier can access it.">
                 <strong>{localDraftStatus === "error" ? "Draft not saved" : localDraftStatus === "saved" ? "Draft saved" : localDraftSavedAt ? "Saving draft…" : "Private workspace"}</strong>
-                <span>{localDraftStatus === "saved" ? "On this device" : "Not published"}</span>
+                <span>{publishedFlag ? "Published" : localDraftStatus === "saved" ? "On this device" : "Not published"}</span>
               </div>
               <button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><b>PL</b>
             </div>
           </header>
 
+          <div className="lpos-app-shell">
           {livingOsRail}
+          <div className="lpos-app-content">
 
           {activeStep !== "describe" && <section className="nf-2030-command-zone" aria-label="Describe or change the procurement">
             <div className="nf-2030-command-title">
@@ -5310,12 +5592,15 @@ export default function ProjectDesk({
               publishReachable={reachable.has("publish")}
               publishCompleted={completed.has("publish")}
               compareReachable={reachable.has("compare")}
-              onPublish={() => goToStep("publish")}
+              onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
               onCompare={() => goToStep("compare")}
               questionTarget={rfpQuestionTarget}
             />
             {activeStep === "describe" && (
               <GuidedBuild
+                documentPurpose={documentPurpose}
+                onDocumentPurposeChange={setDocumentPurpose}
+                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
                 card={guidedQuestionCard}
                 ready={contentReady}
                 depthReady={rfpCoverage.ready}
@@ -5334,6 +5619,7 @@ export default function ProjectDesk({
                 onEditCaptured={(item) => {
                   const slotId = item.path ? SLOT_BY_PATH[item.path] : undefined;
                   if (slotId) setEdit(slotId);
+                  else if (noted.some((n) => n.id === item.id)) setNoteEditor(noted.find((n) => n.id === item.id)!);
                   else {
                     setDraft(item.answer);
                     window.requestAnimationFrame(() => inputRef.current?.focus());
@@ -5345,6 +5631,7 @@ export default function ProjectDesk({
                 sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Your requirement"}
                 sectionQuestions={activeSectionQuestionItems}
                 onAddSupplierQuestion={addCustomSupplierQuestion}
+                onEditSupplierQuestion={(id) => setNoteEditor(noted.find((n) => n.id === id.replace(/^custom:/, "")) ?? null)}
                 onImportQuestions={() => fileRef.current?.click()}
                 onGoToNextSection={() => {
                   if (sectionProgress.next) setActiveSection(sectionProgress.next.key);
@@ -5356,7 +5643,7 @@ export default function ProjectDesk({
                 materialDecisionsRemaining={materialDecisionsRemaining}
                 publishReachable={reachable.has("publish")}
                 onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
-                onPublish={() => goToStep("publish")}
+                onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
                 entryMode={rfpEntryMode}
                 onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
                 validationReport={rfpValidation}
@@ -5375,6 +5662,8 @@ export default function ProjectDesk({
                 settingsOpen={documentSettingsOpen}
                 onSettingsOpenChange={setDocumentSettingsOpen}
                 published={publishedFlag}
+                shortlist={pinnedShortlist}
+              draftSaveStatus={{ label: publishedFlag ? "Published project" : localDraftStatus === "error" ? "Draft not saved on this device. Keep this page open." : localDraftStatus === "saved" ? "Draft saved on this device" : localDraftSavedAt ? "Saving draft…" : "Private draft · not published", error: localDraftStatus === "error" }}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -5548,9 +5837,40 @@ export default function ProjectDesk({
                       Review before publishing
                     </h2>
                     <p className="m-0 mb-6 mt-2 max-w-[62ch] text-[13.5px] leading-[1.55]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
-                      Suppliers will see everything below. Nothing about price or preferred vendors is shared.
+                      Check the publication baseline and the supplier question schedule. Buyer identity, pricing preferences and preferred vendors are never included.
                     </p>
-                    {canvasBlock}
+                    <section className="nf-publication-checklist" aria-labelledby="nf-publication-checklist-title">
+                      <div className="nf-publication-checklist-heading">
+                        <div>
+                          <p>Publication readiness</p>
+                          <h3 id="nf-publication-checklist-title">Publication checklist</h3>
+                        </div>
+                        <strong>{publishChecklist.doneCount} of {publishChecklist.total} essential sections complete</strong>
+                      </div>
+                      <ul>
+                        {publishChecklist.items.map((item) => (
+                          <li key={item.key} data-complete={item.done ? "true" : "false"}>
+                            <span aria-hidden="true">{item.done ? "✓" : "○"}</span>
+                            {item.label}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="nf-publication-checklist-note">
+                        The two acknowledgements are on the next step, Publish, and unlock when the baseline is complete.
+                      </p>
+                      <button type="button" disabled={!publishChecklist.ready} onClick={() => goToStep("publish")}>
+                        {publishChecklist.ready
+                          ? "Continue to publication"
+                          : `Complete ${publishChecklist.total - publishChecklist.doneCount} more ${publishChecklist.total - publishChecklist.doneCount === 1 ? "section" : "sections"} to continue`}
+                      </button>
+                    </section>
+                    <section className="nf-supplier-projection" data-testid="supplier-projection" aria-labelledby="nf-supplier-projection-title">
+                      <p>Supplier-facing preview</p>
+                      <h3 id="nf-supplier-projection-title">What suppliers will receive</h3>
+                      <h4>{canvasDocument.title}</h4>
+                      <div className="nf-supplier-projection-summary">{canvasDocument.summary}</div>
+                      <SupplierPackView groups={canvasDocument.responseGroups} />
+                    </section>
                     {/* ── THE LIVING STATEMENT ── one document card, five ruled
                         sections of labelled rows, from the very first paint (Robert's
                         ruling: the empty project IS the door): every empty line
@@ -6343,6 +6663,8 @@ export default function ProjectDesk({
               </div>
             </div>
           </div>
+          </div>
+          </div>
         </>
       ) : (
         /* A blank project is already a project. It uses the same product
@@ -6350,7 +6672,7 @@ export default function ProjectDesk({
            they are building, how complete it is and where it will go. */
         <>
           <header className="nf-2030-header nf-2030-journey lpos-header">
-            <div className="lpos-brand"><span>N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
+            <div className="lpos-brand" role="img" aria-label="Netify Living Procurement OS"><span aria-hidden="true">N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
               <button type="button" data-current="true" onClick={() => inputRef.current?.focus()}><b>1</b><span>Describe project</span></button>
               <button type="button" disabled><b>2</b><span>Complete essentials</span></button>
@@ -6361,7 +6683,9 @@ export default function ProjectDesk({
             <div className="lpos-profile"><button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><div><strong>Procurement lead</strong><span>Private workspace</span></div><b>PL</b></div>
           </header>
 
+          <div className="lpos-app-shell">
           {livingOsRail}
+          <div className="lpos-app-content">
 
           {prestartSurface === "intro" ? <section className="nf-2030-command-zone nf-2030-command-zone-empty" aria-label="Start the procurement">
             <div className="nf-2030-command-inner">
@@ -6398,6 +6722,9 @@ export default function ProjectDesk({
 
           <div data-workspace-grid className="nf-2030-grid" data-rail-collapsed={productRailCollapsed}>
             <GuidedBuild
+                documentPurpose={documentPurpose}
+                onDocumentPurposeChange={setDocumentPurpose}
+                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
               card={guidedQuestionCard}
               ready={contentReady}
               depthReady={rfpCoverage.ready}
@@ -6416,6 +6743,7 @@ export default function ProjectDesk({
               onEditCaptured={(item) => {
                 const slotId = item.path ? SLOT_BY_PATH[item.path] : undefined;
                 if (slotId) setEdit(slotId);
+                else if (noted.some((n) => n.id === item.id)) setNoteEditor(noted.find((n) => n.id === item.id)!);
                 else {
                   setDraft(item.answer);
                   window.requestAnimationFrame(() => inputRef.current?.focus());
@@ -6427,6 +6755,7 @@ export default function ProjectDesk({
               sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Project overview"}
               sectionQuestions={activeSectionQuestionItems}
               onAddSupplierQuestion={addCustomSupplierQuestion}
+                onEditSupplierQuestion={(id) => setNoteEditor(noted.find((n) => n.id === id.replace(/^custom:/, "")) ?? null)}
               onImportQuestions={() => fileRef.current?.click()}
               onGoToNextSection={() => { if (sectionProgress.next) setActiveSection(sectionProgress.next.key); }}
               onOpenDocument={() => inputRef.current?.focus()}
@@ -6436,7 +6765,7 @@ export default function ProjectDesk({
               materialDecisionsRemaining={materialDecisionsRemaining}
               publishReachable={false}
               onSelectSection={(key) => setActiveSection(key)}
-              onPublish={() => undefined}
+              onPublish={() => { if(created&&!workspaceEnvelopeId)goToStep("publish");else requestBrief(); }}
               entryMode={rfpEntryMode}
               onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
               validationReport={rfpValidation}
@@ -6454,9 +6783,13 @@ export default function ProjectDesk({
               settingsOpen={documentSettingsOpen}
               onSettingsOpenChange={setDocumentSettingsOpen}
               published={publishedFlag}
+              shortlist={pinnedShortlist}
+              draftSaveStatus={{ label: publishedFlag ? "Published project" : localDraftStatus === "error" ? "Draft not saved on this device. Keep this page open." : localDraftStatus === "saved" ? "Draft saved on this device" : localDraftSavedAt ? "Saving draft…" : "Private draft · not published", error: localDraftStatus === "error" }}
             />
           </div>
           </>}
+          </div>
+          </div>
         </>
       )}
 
@@ -6538,7 +6871,7 @@ export default function ProjectDesk({
                 below are a fast pick, not the only path. Count-type slots
                 (Sites, People) get a real number field so a known figure
                 never has to be approximated into a bucket. */}
-            {(editSlot.path === "estate.sites" || editSlot.path === "estate.users") && (
+            {(editSlot.path === "estate.sites" || editSlot.path === "estate.users" || editSlot.path === "estate.remoteUsers") && (
               <form
                 className="mb-2.5 flex items-center gap-2"
                 onSubmit={(e) => {

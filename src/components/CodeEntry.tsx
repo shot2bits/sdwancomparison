@@ -8,14 +8,13 @@
  * types the address the code was sent to.
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function CodeEntry({ defaultEmail = "", onVerified }: { defaultEmail?: string; onVerified: () => void }) {
   const [addr, setAddr] = useState(defaultEmail);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  useEffect(() => { if (defaultEmail && !addr) setAddr(defaultEmail); /* eslint-disable-next-line */ }, [defaultEmail]);
   async function submit() {
     const c = code.trim();
     const e = addr.trim();

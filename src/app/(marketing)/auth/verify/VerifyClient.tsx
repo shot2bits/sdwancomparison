@@ -1,5 +1,6 @@
 "use client";
 
+import { authReturnPath } from "@/lib/auth-return";
 import { useEffect, useState } from "react";
 
 /**
@@ -26,7 +27,7 @@ import { useEffect, useState } from "react";
 /** Same-app absolute paths only (basePath /sase), so the redirect can never leave the app. */
 function safeReturnPath(): string | null {
   const r = new URLSearchParams(window.location.search).get("return");
-  return r && r.length <= 400 && /^\/sase\/[\w\-/.~%?=&]*$/.test(r) ? r : null;
+  return authReturnPath(r) || null;
 }
 
 /** Draft manage tokens saved by the builder in this browser (netify_mtok_{id}). */
@@ -48,16 +49,16 @@ const BTN = "inline-flex items-center px-5 py-2.5 bg-amber-500 text-zinc-950 fon
 const BTN_GHOST = "inline-flex items-center px-5 py-2.5 border border-[var(--ink-900)] rounded-full text-[var(--ink-900)] no-underline hover:bg-[var(--ink-900)] hover:text-white transition-colors";
 
 export default function VerifyClient() {
-  const [token, setToken] = useState<string | null>(null);
+  const [token] = useState<string | null>(() => (
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("token")
+  ));
   const [state, setState] = useState<"loading" | "ready" | "working" | "done" | "signed_in" | "already" | "error">("loading");
   const [info, setInfo] = useState<{ role?: string; vendor_slug?: string | null; email?: string }>({});
   const [claimedCount, setClaimedCount] = useState(0);
   const [dest, setDest] = useState<string>("/sase/account/");
 
   useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get("token");
-    if (t) {
-      setToken(t);
+    if (token) {
       // A valid token AND an existing session (Harry, 24 July 2026: signed
       // in with the 6-digit code, then clicked the same email's link and
       // was asked to confirm sign-in a third time). Recognise the session
@@ -80,7 +81,7 @@ export default function VerifyClient() {
         if (d?.authenticated) { setInfo(d); setState("signed_in"); } else { setState("error"); }
       })
       .catch(() => setState("error"));
-  }, []);
+  }, [token]);
 
   async function confirm() {
     if (!token) return;

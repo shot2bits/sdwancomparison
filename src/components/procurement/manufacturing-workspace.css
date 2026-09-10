@@ -1,0 +1,47 @@
+/* Approved manufacturing layout applied to the existing production engine. */
+.nf-buying-shell .nf-workspace-intro{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:40px;padding:0 0 28px;margin-bottom:28px;border-bottom:1px solid #e5e9ec}
+.nf-buying-shell .nf-workspace-intro h1{font-size:clamp(25px,2.5vw,35px);line-height:1.25;letter-spacing:-1px;font-weight:650;margin:0;color:#233849}
+.nf-buying-shell .nf-workspace-intro p{max-width:310px;font-size:13px;line-height:1.8;color:#526574;margin:0}
+.nf-buying-shell .nf-workspace-title h2{font-size:23px;font-weight:600;line-height:1.35;letter-spacing:-.5px;margin:0;color:#233849}
+.nf-buying-shell .nf-calm-heading{align-items:flex-start;margin-bottom:22px}
+.nf-buying-shell .nf-calm-publish{background:#233849;color:white;border:0;border-radius:5px;font-size:13px;padding:12px 17px}
+.nf-buying-shell .nf-project-formats{grid-column:1/-1;border:1px solid #e0e7ec;padding:18px 22px;border-radius:6px}
+.nf-project-formats>strong{font-size:13px;font-weight:600;color:#334958}
+.nf-project-formats>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.nf-project-formats button{border:1px solid #dce4e9;border-radius:4px;padding:10px 12px;text-align:left;font-size:13px;font-weight:600;background:white;color:#334958;cursor:pointer}
+.nf-project-formats button span{display:block;font-weight:400;font-size:11px;color:#526574;margin-top:4px}
+.nf-project-formats button[aria-pressed=true]{background:#edf2f5;border-color:#b9cbd7;color:#233849}
+.nf-project-formats>p{font-size:12px;color:#526574;margin:0;line-height:1.7}
+.nf-document-purpose{display:flex;align-items:center;gap:12px;font-size:13px;margin-top:14px;color:#526d80;flex-wrap:wrap}
+.nf-document-purpose select{border:1px solid #d6e0e7;background:white;padding:8px;border-radius:4px}
+.nf-buying-shell .lpos-builder[data-workspace-tab=overview]>.nf-guided-document{display:none!important}
+.nf-buying-shell .nf-notice-preview{background:#f7f9fa;border:1px solid #e3e9ed;border-radius:6px;padding:26px;align-self:start;min-width:0;grid-column:2}
+.nf-notice-preview>span{font-size:12px;color:#526574}.nf-notice-preview h2{font-size:22px;line-height:1.4;font-weight:600;letter-spacing:-.5px;margin:18px 0;color:#233849}
+.nf-notice-preview p{font-size:13px;line-height:1.8;color:#526574;overflow-wrap:anywhere;white-space:pre-wrap}
+.nf-notice-preview dl{margin:20px 0}.nf-notice-preview dl>div{display:flex;justify-content:space-between;gap:16px;padding:9px 0;font-size:12px;border-bottom:1px solid #e1e8ed}
+.nf-notice-preview dt{color:#526574}.nf-notice-preview dd{text-align:right;color:#334958;overflow-wrap:anywhere;max-width:70%}
+.nf-notice-preview button{width:100%;display:flex;justify-content:space-between;align-items:center;background:#233849!important;color:white!important;padding:13px 16px;border:0;border-radius:5px;font-size:13px;margin:18px 0 12px}
+.nf-notice-preview small{display:block;font-size:11px;line-height:1.7;color:#526574}.nf-notice-preview>a{display:inline-block;margin-top:18px;font-size:12px;color:#3a596f}
+.nf-notice-next{border-top:1px solid #dce6ec;padding-top:18px}.nf-notice-next strong{font-size:13px;color:#334958}.nf-notice-next p{margin:8px 0 0}
+.nf-document-progress{margin:18px 0}.nf-document-progress>summary{font-size:13px;cursor:pointer;color:#526d80}.nf-document-progress>p{font-size:12px;color:#526574;margin-top:10px}
+.nf-buying-shell .nf-guided-prompt textarea{background:#fcfdfd!important;min-height:160px!important;line-height:1.75!important;font-size:14px!important}
+.nf-buying-shell .nf-guided-prompt .nf-2030-composer{background:#fcfdfd!important;border-color:#dce4ea!important;box-shadow:none!important;border-radius:5px!important}
+.nf-buying-shell .nf-calm-tabs{margin:24px 0}.nf-buying-shell .nf-calm-tabs button{font-size:13px}
+.nf-buying-shell .nf-buying-topbar{height:65px}.nf-buying-shell .nf-buying-sidebar{background:#fbfcfc;border-color:#e5e9ec}
+.nf-buying-shell .nf-buying-new{padding:8px 10px;text-align:left;font-size:12px;border:1px solid #dce5eb;border-radius:4px;color:#526d80;background:white}
+.nf-buying-shell .nf-brief-toolbar{display:none}
+.nf-buying-shell .nf-draft-recovery{max-width:640px;margin:36px auto;padding:32px;border:1px solid #dce5eb;border-radius:6px;background:#fbfcfd}.nf-draft-recovery h2{font-size:26px;font-weight:600;color:#233849}.nf-draft-recovery p{font-size:14px;color:#526574;margin:16px 0}.nf-draft-recovery button{padding:11px 15px;border:1px solid #dce5eb;border-radius:4px;margin:8px 10px 0 0;color:#233849}.nf-draft-recovery button:first-of-type{background:#233849;color:white}
+.nf-draft-archives{margin:26px 0;font-size:12px;color:#526574}.nf-draft-archives button{display:block;padding:10px 0}
+.nf-buying-shell .nf-brief-dialog{border-radius:7px;border-color:#d6e0e7;color:#233849}.nf-brief-dialog button.bg-\[\#b64b16\]{background:#233849!important;border-radius:5px}
+@media(max-width:1150px){.nf-buying-shell .nf-notice-preview{grid-column:1}.nf-buying-shell .nf-workspace-intro{gap:24px}.nf-project-formats>div{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.nf-buying-shell .nf-workspace-intro{display:block;padding-bottom:24px}.nf-buying-shell .nf-workspace-intro p{max-width:none;margin-top:16px}.nf-buying-shell .nf-calm-heading{flex-direction:column;gap:14px}.nf-buying-shell .nf-project-formats{padding:15px}.nf-project-formats button{padding:10px;font-size:12px}.nf-buying-shell .nf-notice-preview{padding:22px;margin-top:24px}.nf-buying-shell .nf-workspace-title h2{font-size:22px}.nf-project-formats button span{line-height:1.5}.nf-buying-shell .nf-buying-topbar{height:auto;min-height:60px}}
+/* Format selection lives once, above the working canvas. The underlying
+   depth and import actions are unchanged and remain available there. */
+.nf-buying-shell .lpos-builder .lpos-entry-mode,.nf-buying-shell .lpos-builder .lpos-depth,.nf-buying-shell .lpos-builder .lpos-depth-contract{display:none}
+.nf-buying-shell .nf-guided-builder-label{margin-bottom:14px;font-size:16px}
+.nf-buying-shell .nf-buying-research button.bg-amber-400{background:#233849;color:#fff;border-radius:5px}
+.nf-buying-shell .nf-public-comparison #comparison-title{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.nf-buying-shell .nf-calm-heading[data-started=false] .nf-workspace-title{display:none}
+.nf-buying-shell .nf-calm-heading[data-started=false]{align-items:center;margin-bottom:20px}
+@media(max-width:760px){.nf-buying-shell .nf-calm-heading[data-started=false]{flex-direction:row}.nf-buying-shell .nf-workspace-intro{margin-bottom:18px;padding-bottom:20px}.nf-buying-shell .nf-project-formats{padding:14px}.nf-buying-shell .nf-project-formats>p{font-size:11px}}
+@media(max-width:760px){.nf-buying-shell .nf-buying-topbar{flex-wrap:wrap}.nf-buying-topbar [data-release-version]{order:5;flex-basis:100%;padding-bottom:8px}}

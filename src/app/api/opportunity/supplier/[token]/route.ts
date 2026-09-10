@@ -3,6 +3,8 @@ import { resolveOpportunityToken, getOpportunity, kvConfigured } from "@/lib/rfp
 import { addFeedItem, vendorName, maskedFeed } from "@/lib/opportunity";
 import type { Pricing } from "@/lib/opportunity-types";
 import { sessionFromRequest, requireClaimedSupplierFor } from "@/lib/auth";
+import { isMarketUnlocked } from "@/lib/market-unlock";
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ token: string }> };
@@ -24,6 +26,7 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!ref) return Response.json({ error: "Invalid token." }, { status: 404, headers: cors });
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
+  if (opp.source_rfp_id && !(await isMarketUnlocked(opp.source_rfp_id))) return Response.json({ error: "Market access is locked." }, { status: 403, headers: cors });
   // Fix (supplier-isolation leak, found 5 Aug 2026 during Base44 build
   // scoping): `introduced` and `invited` are both full arrays of vendor
   // slugs -- competitor identity, not this supplier's own business. The
@@ -39,6 +42,10 @@ export async function GET(req: Request, ctx: Ctx) {
   // here the same way buyer_token/owner_email already are, so it can
   // never leak by accident again.
   const { buyer_token: _bt, owner_email: _oe, introduced: _in, invited: _inv, ...rest } = opp;
+  void _bt;
+  void _oe;
+  void _in;
+  void _inv;
   // Contact details pass only after the buyer accepts an introduction
   // (Robert's E4 ruling, 29 Jul 2026). The spread above strips
   // owner_email unconditionally so it can never leak by accident; the
@@ -67,6 +74,7 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!ref) return Response.json({ error: "Invalid token." }, { status: 404, headers: cors });
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
+  if (opp.source_rfp_id && !(await isMarketUnlocked(opp.source_rfp_id))) return Response.json({ error: "Market access is locked." }, { status: 403, headers: cors });
   if (opp.status !== "open") return Response.json({ error: "This opportunity is not open." }, { status: 409, headers: cors });
   const session = await sessionFromRequest(req);
   const gate = await requireClaimedSupplierFor(session, ref.vendor_slug, cors);
@@ -82,11 +90,16 @@ export async function POST(req: Request, ctx: Ctx) {
     body.links ?? [],
     type === "response" ? (body.answers ?? {}) : {},
   );
+  if (type === "interest" || type === "response" || type === "pricing") await recordMarketplaceFunnelEvent({ event: type === "interest" ? "supplier_interest" : "supplier_response", project_id: opp.source_rfp_id ?? opp.id, channel: "web", detail: { opportunity_id: opp.id } });
   // Same masking as the GET: never return buyer credentials, other
   // suppliers' identities (introduced/invited), or other suppliers'
   // pricing amounts in the post-action snapshot. The introduction object
   // mirrors the GET so the room state never flickers.
   const { buyer_token: _bt2, owner_email: _oe2, introduced: _in2, invited: _inv2, ...rest2 } = updated;
+  void _bt2;
+  void _oe2;
+  void _in2;
+  void _inv2;
   const introducedNow = (updated.introduced ?? []).includes(ref.vendor_slug);
   return Response.json({
     ...rest2,

@@ -1,3 +1,4 @@
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveOpportunity, kvConfigured, newId, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem } from "@/lib/opportunity";
@@ -116,5 +117,6 @@ export async function POST(req: Request) {
   // state precedes it), so it is also the only correct moment to alert the
   // team — see notify.ts's notifyOpportunityPublishedLead for the reasoning.
   try { await notifyOpportunityPublishedLead(opp); } catch { /* best effort */ }
+  if(opp.visibility==="public") await recordMarketplaceFunnelEvent({event:"publication_completed",project_id:opp.id,source:"notice_builder",mode:"notice",channel:"web",detail:{board_created:true}});
   return Response.json(opp, { headers: cors });
 }

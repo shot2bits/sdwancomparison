@@ -1,0 +1,318 @@
+.cp-app {
+  color: #213748;
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 1500px;
+  margin: auto;
+}
+.cp-app h1 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  font-weight: 600;
+  margin: 8px 0 15px;
+}
+.cp-app h2 {
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0 0 14px;
+}
+.cp-app h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.cp-app p {
+  margin: 8px 0 15px;
+  color: #586d7e;
+}
+.cp-app button,
+.cp-app a {
+  cursor: pointer;
+}
+.cp-app button {
+  border: 1px solid #ccd8e1;
+  padding: 10px 15px;
+  border-radius: 5px;
+  background: white;
+  color: #234055;
+  font-size: 14px;
+}
+.cp-app button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.cp-app .cp-primary {
+  background: #203b4c;
+  color: white;
+  border-color: #203b4c;
+}
+.cp-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+.cp-heading p {
+  font-size: 15px;
+}
+.cp-progress {
+  display: flex;
+  gap: 28px;
+  padding: 20px 0;
+  margin: 20px 0;
+  border-block: 1px solid #dde5eb;
+  color: #6d7f8e;
+}
+.cp-progress .active {
+  font-weight: 600;
+  color: #203b4c;
+}
+.cp-tabs {
+  display: flex;
+  gap: 20px;
+  border-bottom: 1px solid #dde5eb;
+  margin: 0 0 28px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cp-tabs button {
+  border: 0;
+  border-radius: 0;
+  padding: 12px 0;
+}
+.cp-tabs button[aria-selected="true"] {
+  border-bottom: 2px solid #203b4c;
+  font-weight: 600;
+}
+.cp-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(290px, 1fr);
+  gap: 32px;
+}
+.cp-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+.cp-section-title p {
+  font-size: 14px;
+}
+.cp-app .cp-row {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #dce5ec;
+  padding: 23px;
+  margin: 12px 0;
+}
+.cp-row p {
+  font-size: 14px;
+  margin: 5px 0;
+}
+.cp-row span {
+  font-size: 13px;
+}
+.cp-summary {
+  background: #f3f6f8;
+  border: 1px solid #dce5ec;
+  border-radius: 6px;
+  padding: 25px;
+  align-self: start;
+}
+.cp-summary h2 {
+  font-size: 27px;
+}
+.cp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 17px 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.cp-app input:not([type="checkbox"]),
+.cp-app select,
+.cp-app textarea {
+  width: 100%;
+  min-height: 44px;
+  background: white;
+  border: 1px solid #cbd8e1;
+  border-radius: 4px;
+  padding: 10px 12px;
+  color: #213748;
+  font-size: 16px;
+}
+.cp-app textarea {
+  min-height: 100px;
+}
+.cp-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0;
+}
+.cp-check input {
+  margin-top: 6px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.cp-info {
+  background: #eef3f7;
+  padding: 18px;
+  border-left: 3px solid #718fa5;
+  margin: 20px 0;
+  font-size: 14px;
+}
+.cp-error {
+  background: #fff1ee;
+  border-left: 3px solid #b84b38;
+  padding: 16px;
+  color: #733e32 !important;
+}
+.cp-small {
+  font-size: 13px;
+}
+.cp-inline {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.cp-inline a {
+  font-size: 14px;
+  text-decoration: underline;
+}
+.cp-empty {
+  border: 1px solid #dce5ec;
+  padding: 45px 25px;
+  text-align: center;
+  border-radius: 6px;
+}
+.cp-assistant {
+  border: 1px solid #dce5ec;
+  padding: 24px;
+  margin-top: 25px;
+}
+.cp-quote {
+  border: 1px solid #dce5ec;
+  padding: 28px;
+  margin: 22px 0;
+  border-radius: 6px;
+}
+.cp-quote dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 25px 0;
+}
+.cp-quote dt {
+  font-size: 13px;
+  color: #607484;
+}
+.cp-quote dd {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.cp-price {
+  font-size: 34px;
+  font-weight: 500;
+}
+.cp-price small {
+  font-size: 14px;
+  font-weight: 400;
+}
+.cp-dialog {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(650px, 100vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100vw;
+  overflow-y: auto;
+  border: 0;
+  border-left: 1px solid #dce5ec;
+  padding: 35px;
+  background: white;
+  color: #213748;
+}
+.cp-dialog::backdrop {
+  background: #152c4155;
+  backdrop-filter: blur(2px);
+}
+.cp-dialog .cp-close {
+  float: right;
+  border: 0;
+  font-size: 25px;
+  padding: 0 8px;
+}
+.cp-dialog h2 {
+  padding-right: 40px;
+}
+.cp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.cp-app a {
+  color: #294d68;
+  text-decoration: underline;
+}
+.cp-app :focus-visible {
+  outline: 2px solid #406885;
+  outline-offset: 3px;
+}
+.cp-app fieldset:disabled {
+  opacity: 0.85;
+}
+@media (max-width: 1000px) {
+  .cp-columns {
+    grid-template-columns: 1fr;
+  }
+  .cp-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cp-heading h1 {
+    font-size: 30px;
+  }
+}
+@media (max-width: 550px) {
+  .cp-dialog {
+    padding: 24px 18px;
+  }
+  .cp-progress {
+    font-size: 13px;
+    gap: 12px;
+  }
+  .cp-tabs {
+    gap: 16px;
+  }
+  .cp-quote dl,
+  .cp-grid {
+    grid-template-columns: 1fr;
+  }
+  .cp-app .cp-row {
+    padding: 18px;
+  }
+  .cp-summary {
+    padding: 20px;
+  }
+  .cp-quote {
+    padding: 20px;
+  }
+  .cp-app h1 {
+    font-size: 28px;
+  }
+  .cp-tabs button {
+    font-size: 13px;
+  }
+}

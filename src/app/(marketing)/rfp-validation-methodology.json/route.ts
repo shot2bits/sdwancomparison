@@ -7,7 +7,7 @@ const exampleInput = "Create an SD-WAN RFP for 20 sites. Suppliers should descri
 export async function GET() {
   const totalQuestions = QUESTION_BANK.canonical.length + Object.values(QUESTION_BANK.sector_packs).reduce((sum, pack) => sum + pack.count, 0);
   return Response.json({
-    name: "Netify SASE and SD-WAN RFP procurement-readiness validator",
+    name: "Netify SASE and SD-WAN RFP text-coverage checker",
     canonical_url: "https://netify.co.uk/sase-sd-wan-rfp-builder/",
     assessment_version: RFP_VALIDATION_VERSION,
     question_bank_version: BANK_VERSION,
@@ -24,11 +24,11 @@ export async function GET() {
       "commercial and contractual", "supplier evidence", "evaluation and scoring", "response comparability",
       "vendor neutrality", "sector-specific considerations",
     ],
-    sectors: ["healthcare", "financial services", "retail", "manufacturing"],
+    sectors: ["healthcare", "financial services", "retail", "manufacturing", "government and public sector"],
     input: "RFP text supplied by the user. Word, PDF, text and spreadsheet files are converted to text before assessment.",
-    output: "A deterministic 0-100 readiness score, valid-baseline decision, missing-requirement count, section coverage, comparability warnings and canonical question-bank recommendations.",
+    output: "Topic coverage, information to confirm, comparability warnings and question-bank recommendations. Legacy score and missingRequirementCount fields remain for compatibility; they measure heuristic coverage and overlapping checks, not procurement readiness or unique requirements.",
     limitations: [
-      "Coverage assessment is not legal advice or a guarantee of supplier performance.",
+      "Coverage assessment does not verify technical correctness, measurable targets, or readiness to issue an RFP.",
       "The validator does not invent unstated buyer requirements.",
       "Recommendations require buyer approval before inclusion.",
       "Provider matching, downloads and structured responses unlock only after anonymous publication to the Netify Opportunity Board.",

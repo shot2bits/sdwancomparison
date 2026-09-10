@@ -8,6 +8,7 @@
 import { getConnection, saveConnection, newId } from "@/lib/rfp-store";
 import { getShortlistDataset } from "@/lib/vendors";
 import { MESSAGE_TYPES, type ConnectionMessage, type MessageType, type SupplierConnection } from "@/lib/rfp-types";
+import type { ShortlistVendor } from "@/lib/shortlist-core";
 
 export function vendorBySlug(slug: string) {
   return getShortlistDataset().find((v) => v.slug === slug) ?? null;
@@ -23,8 +24,13 @@ function statusFor(type: MessageType, from: "buyer" | "supplier", current: Suppl
 }
 
 /** Invite a graded vendor to an RFP (idempotent) with an optional intro message. */
-export async function inviteSupplier(rfpId: string, vendorSlug: string, intro: string): Promise<SupplierConnection | { error: string }> {
-  const vendor = vendorBySlug(vendorSlug);
+export async function inviteSupplier(
+  rfpId: string,
+  vendorSlug: string,
+  intro: string,
+  frozenVendor?: Pick<ShortlistVendor, "slug" | "name">,
+): Promise<SupplierConnection | { error: string }> {
+  const vendor = frozenVendor?.slug === vendorSlug ? frozenVendor : vendorBySlug(vendorSlug);
   if (!vendor) return { error: `Unknown vendor slug: ${vendorSlug}` };
   const existing = await getConnection(rfpId, vendorSlug);
   if (existing) return existing;

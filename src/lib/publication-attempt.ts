@@ -38,6 +38,7 @@
  */
 
 import { kvGetJson, kvSetJson } from "@/lib/rfp-store";
+import type { ShortlistInput, ShortlistVendor } from "@/lib/shortlist-core";
 
 export type PublicationAttempt = {
   id: string;
@@ -50,6 +51,25 @@ export type PublicationAttempt = {
    *  after a crash mid-invite-loop replays the SAME list rather than
    *  recomputing against a shortlist engine/dataset that may have moved on. */
   invitation_plan: { slug: string; name: string }[] | null;
+  /** Provider evidence sealed before any board write. Optional so attempts
+   *  created before the Neon catalogue contract remain readable. */
+  provider_evidence?: Array<{
+    slug: string;
+    name: string;
+    provider_id: string | null;
+    revision_id: string | null;
+    dataset_version: string | null;
+    record: ShortlistVendor;
+  }>;
+  provider_provenance?: {
+    shortlist_contract_version: string;
+    provider_contract_version: string;
+    dataset_versions: string[];
+    loaded_at: string;
+  };
+  matched_provider_slugs?: string[];
+  match_input?: ShortlistInput;
+  match_criteria?: string;
   /** Idempotent invite outbox: slugs actually invited so far (saga step G).
    *  Grows monotonically; a resume never re-invites an already-invited slug. */
   invited_slugs: string[];

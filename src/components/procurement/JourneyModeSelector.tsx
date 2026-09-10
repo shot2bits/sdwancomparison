@@ -1,0 +1,268 @@
+"use client";
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode } from '@/lib/rfp-types';
+import { PROJECT_ENTRANCE_CONTRACT_VERSION, type ProjectEntranceContext } from '@/lib/project-entrance-contract';
+import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION, quickListingReadiness } from '@/lib/publication-policy';
+import { REGION_KEYS, REGION_LABELS, SECTOR_KEYS, SECTOR_LABELS } from '@/lib/shortlist-core';
+import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY, PROJECT_DRAFT_KEY, projectTokenKey } from '@/lib/buying-entry';
+import DraftRecovery from "./DraftRecovery";
+import {readWorkspaceProject,confirmBriefInWorkspace,syncWorkspaceRevision,type BriefFields} from "@/lib/buying-workspace-project";
+import SignIn from '@/components/SignIn';
+
+type Fields = BriefFields;
+const EMPTY: Fields = { scope: 'sase', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '', requiredFeatures: [] };
+type Project = { project_reference: string; revision: number; envelope_revision?: number };
+const inputClass = 'mt-1 block w-full rounded border border-[#cfc8bf] bg-white p-2 text-sm font-normal';
+
+export default function JourneyModeSelector({ children }: { children?: ReactNode }) {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [selected, setSelected] = useState<ProjectJourneyMode>('quick_list');
+  const [fields, setFields] = useState<Fields>(EMPTY);
+  const [project, setProject] = useState<Project | null>(null);
+  const [entrance, setEntrance] = useState<ProjectEntranceContext | null>(null);
+  const [review, setReview] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [resuming, setResuming] = useState(false);
+  const [error, setError] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [prepared, setPrepared] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [workspaceWaiting, setWorkspaceWaiting] = useState(false);
+  const [coverage, setCoverage] = useState<number | null>(null);
+  const inFlight = useRef(false);
+  const mode = useRef<ProjectJourneyMode>('quick_list');
+  function setField<K extends keyof Fields>(key: K, value: Fields[K]) { setFields((old) => ({ ...old, [key]: value })); }
+
+  useEffect(() => {
+    let active = true;
+    async function restore() {
+      try {
+        const params = new URLSearchParams(location.search);
+        const requested = params.get('journey') as ProjectJourneyMode;
+        const chosen = params.has('id') || params.has('q') ? 'build_rfp' : PROJECT_JOURNEY_MODES.includes(requested) ? requested : 'quick_list';
+        mode.current = chosen; setSelected(chosen); setResuming(params.has('id'));
+        const id = params.get('project');
+        if (params.get('from') === 'comparison' || params.get('intent') === 'pricing' || (id && params.get('review') === '1')) setPanelOpen(true);
+        const fragment = new URLSearchParams(location.hash.slice(1));
+        const incoming = fragment.get('project_session');
+        if (id && incoming) {
+          localStorage.setItem(projectTokenKey(id), incoming);
+          history.replaceState(history.state, '', location.pathname + location.search);
+        }
+        if (id) {
+          const token = localStorage.getItem(projectTokenKey(id));
+          if (!token) throw new Error('Open this project on the browser where you started it, or use your assistant’s private resume link.');
+          const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
+          const data = await response.json();
+          if (!response.ok) throw new Error('This private project session has expired or is unavailable. Your saved project has not been deleted.');
+          if (!active) return;
+          const raw = data.entrance_context?.raw_input ?? {}, buyer = data.buyer;
+          setFields({ scope: raw.solution_scope ?? (buyer.product_scope === 'sdwan_only' ? 'sdwan' : buyer.product_scope === 'sse_only' ? 'sse' : 'sase'), sector: buyer.sector ?? '', sites: buyer.site_count == null ? '' : String(buyer.site_count), regions: buyer.regions, operatingModel: buyer.operating_model, outcome: buyer.notes, timescale: raw.timescale ?? '', company: buyer.organisation, requiredFeatures: raw.shortlist?.required_features ?? data.entrance_context?.shortlist_input?.required_features ?? [] });
+          setEntrance(data.entrance_context ?? null); setProject({ project_reference: id, revision: data.revision, envelope_revision:data.envelope_revision });
+          setPrepared(data.prepared); setReview(true);
+          setPublished(data.marketplace_state?.publication_status === 'published' && data.marketplace_state?.market_unlock_status === 'unlocked');
+          mode.current = data.mode === 'find_providers' ? 'find_providers' : 'quick_list'; setSelected(mode.current);
+        } else if (!params.has('id') && !params.has('q')) {
+          const handoff = params.get('from') === 'comparison' ? sessionStorage.getItem(COMPARISON_PROJECT_DRAFT_KEY) : null;
+          if (handoff) {
+            const context = JSON.parse(handoff) as ProjectEntranceContext;
+            setEntrance(context);
+            const buyer = context.buyer_input;
+            setFields({ ...EMPTY, outcome: context.requirement_text, sector: context.sector ?? '', regions: Array.isArray(buyer.regions) && buyer.regions.length ? buyer.regions as string[] : EMPTY.regions, operatingModel: String(buyer.operating_model ?? 'any'), requiredFeatures: (context.shortlist_input?.required_features as string[]) ?? [] });
+          } else {
+            const cached = localStorage.getItem(PROJECT_DRAFT_KEY);
+            if (cached) setFields({ ...EMPTY, ...JSON.parse(cached) });
+          }
+        }
+      } catch (reason) { if (active) setError(reason instanceof Error ? reason.message : 'Could not restore the project.'); }
+      finally { if (active) setReady(true); }
+    }
+    void restore();
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (!ready || project) return;
+    try { localStorage.setItem(PROJECT_DRAFT_KEY, JSON.stringify(fields)); } catch { /* Saving on the server reports storage errors separately. */ }
+  }, [fields, ready, project]);
+  useEffect(() => {
+    const refresh = () => { void fetch('/sase/api/auth/session', { cache: 'no-store' }).then((r) => r.json()).then((s) => setSignedIn(Boolean(s.authenticated && ['buyer', 'netify'].includes(s.role)))).catch(() => {}); };
+    refresh(); window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+
+  useEffect(() => {
+    const accept = (event: Event) => {
+      const detail = (event as CustomEvent<{ text: string; accepted: boolean; error: string }>).detail;
+      if (!detail || typeof detail.text !== 'string' || detail.text.length > 4000) return;
+      if (!ready || busy || inFlight.current) { detail.error = 'Wait for the current project operation to finish.'; return; }
+      if (published || resuming) { detail.error = 'This project is already published or opened in the full engine. Use its existing review and amendment controls.'; return; }
+      if (fields.outcome.length + detail.text.length + (fields.outcome.trim() ? 2 : 0) > 4000) { detail.error = 'Your existing brief is too long to append these requirements. Review it in the project first.'; return; }
+      setFields(old => ({ ...old, outcome: old.outcome.trim() ? old.outcome.trim() + '\n\n' + detail.text : detail.text }));
+      setReview(false); setPrepared(false); setConsent(false); setError('');
+      mode.current = 'quick_list'; setSelected('quick_list'); setPanelOpen(true);
+      detail.accepted = true;
+    };
+    window.addEventListener('netify:assistant-brief', accept);
+    return () => window.removeEventListener('netify:assistant-brief', accept);
+  }, [ready, busy, published, resuming, fields.outcome]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || !ready) return;
+    if (panelOpen && !dialog.open) dialog.showModal();
+    if (!panelOpen && dialog.open) dialog.close();
+    if (!panelOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [panelOpen, ready]);
+
+  function choose(next: ProjectJourneyMode) {
+    const workspace=readWorkspaceProject();
+    if(workspace?.legacyProject){setPanelOpen(false);window.dispatchEvent(new Event("netify:legacy-project-review"));return;}
+    mode.current = next; setSelected(next);
+    if(workspace?.busy){setError('');setWorkspaceWaiting(true);setPanelOpen(true);return;}
+    setWorkspaceWaiting(false); setError('');
+    if(workspace&&(Array.isArray(workspace.payload.facts)&&workspace.payload.facts.length||Array.isArray(workspace?.payload.source_turns)&&workspace.payload.source_turns.length)){
+      setFields(old=>({...old,...workspace.fields,company:workspace.fields.company||old.company,requiredFeatures:old.requiredFeatures}));
+      if(!published){setReview(false);setConsent(false);setPrepared(false);}
+    }
+    const url = new URL(location.href); url.searchParams.set('journey', next);
+    history.replaceState(history.state, '', url);
+    setPanelOpen(true);
+  }
+  useEffect(()=>{
+    const open=(event:Event)=>{const d=(event as CustomEvent<{mode:string;accepted:boolean}>).detail;if(!ready)return;if(d.mode==='find_providers'){try{const raw=sessionStorage.getItem(COMPARISON_PROJECT_DRAFT_KEY);if(raw){const ctx=JSON.parse(raw) as ProjectEntranceContext;setEntrance(ctx);const current=readWorkspaceProject();const hasProject=Array.isArray(current?.payload.facts)&&current.payload.facts.length>0;setFields(old=>({...old,...(!hasProject?{sector:ctx.sector||old.sector,outcome:ctx.requirement_text||old.outcome,regions:Array.isArray(ctx.buyer_input.regions)&&ctx.buyer_input.regions.length?ctx.buyer_input.regions as string[]:old.regions,operatingModel:String(ctx.buyer_input.operating_model||old.operatingModel)}:{}),requiredFeatures:(ctx.shortlist_input?.required_features as string[])??old.requiredFeatures}));}}catch{}}choose(d.mode==='find_providers'?'find_providers':'quick_list');d.accepted=true;};
+    window.addEventListener('netify:open-brief',open);return()=>window.removeEventListener('netify:open-brief',open);
+    // Capture the latest form and engine snapshot when the user opens review.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[ready,published]);
+  // Review opened during extraction must pick up the completed facts rather
+  // than leaving an empty form and a permanent loading message.
+  useEffect(() => {
+    if (!panelOpen || !workspaceWaiting) return;
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      const current = readWorkspaceProject();
+      if (current && !current.busy) {
+        setFields(old => ({ ...old, ...current.fields, company: current.fields.company || old.company, requiredFeatures: old.requiredFeatures }));
+        setWorkspaceWaiting(false); setError(''); setReview(false); setConsent(false); setPrepared(false);
+      } else if (Date.now() - started >= 20000) {
+        setWorkspaceWaiting(false);
+        setError('Your requirements are not ready for review yet. Close this panel and check the workspace for a loading, save or recovery message, then open review again. Your draft has not been deleted.');
+      }
+    }, 250);
+    return () => window.clearInterval(timer);
+  }, [panelOpen, workspaceWaiting]);
+  async function request(path: string, body: unknown, method = 'POST', current = project) {
+    const token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
+    if (current && !token) throw new Error('Your private session is unavailable. Reload to recover your project.');
+    const response = await fetch(path, { method, headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || data.error || 'The request did not complete. Your project is still saved.');
+    return data;
+  }
+  async function action(work: () => Promise<void>) {
+    if (inFlight.current) return;
+    inFlight.current = true; setBusy(true); setError('');
+    try { await work(); } catch (reason) { setError(reason instanceof Error ? reason.message : 'The request did not complete.'); }
+    finally { inFlight.current = false; setBusy(false); }
+  }
+  async function saveForReview() {
+    await action(async () => {
+      if(readWorkspaceProject()?.legacyProject){setPanelOpen(false);window.dispatchEvent(new Event("netify:legacy-project-review"));return;}
+      const readiness = quickListingReadiness({ solutionScope: fields.scope, sector: fields.sector, siteCount: Number(fields.sites), regions: fields.regions, operatingModel: fields.operatingModel, outcome: fields.outcome, timescale: fields.timescale });
+      if (!readiness.allowed || !Number.isSafeInteger(Number(fields.sites))) throw new Error(`Please complete: ${readiness.reasons.join(', ') || 'a whole-number site count'}.`);
+      if (fields.company.trim().length < 2) throw new Error('Enter your company name. It stays private.');
+      const workspace=await confirmBriefInWorkspace(fields);
+      if(!workspace||workspace.busy)throw new Error('Your requirements are still being processed. Try reviewing again shortly.');
+      // Fail before creating if this browser cannot retain its private recovery credential.
+      localStorage.setItem('netify_storage_check', '1'); localStorage.removeItem('netify_storage_check');
+      const buyer = { ...(entrance?.buyer_input ?? {}), organisation: fields.company.trim(), sector: fields.sector, site_count: Number(fields.sites), regions: fields.regions, operating_model: fields.operatingModel, product_scope: fields.scope === 'sdwan' ? 'sdwan_only' : fields.scope === 'sse' ? 'sse_only' : 'full_sase', notes: fields.outcome.trim(), pinned_vendors: Array.isArray((workspace.payload.buyer as {pinned_vendors?:string[]})?.pinned_vendors) ? (workspace.payload.buyer as {pinned_vendors:string[]}).pinned_vendors : (entrance?.buyer_input?.pinned_vendors ?? []) };
+      const shortlist = { ...(entrance?.shortlist_input ?? {}), required_features: fields.requiredFeatures };
+      const raw = { ...(entrance?.raw_input ?? {}), workspace_payload:{...workspace.payload,base_revision:project?.envelope_revision??0},document_purpose:workspace.documentPurpose, shortlist, solution_scope: fields.scope, outcome: fields.outcome.trim(), timescale: fields.timescale.trim() };
+      let saved: Project;
+      if (project) saved = await request(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}`, { base_revision: project.revision, idempotency_key: crypto.randomUUID(), buyer_patch: buyer, raw_input: raw }, 'PATCH');
+      else {
+        const context = { version: PROJECT_ENTRANCE_CONTRACT_VERSION, source: entrance?.source ?? 'rfp_builder', source_url: entrance?.source_url ?? location.href, captured_at: entrance?.captured_at ?? Date.now(), requirement_text: fields.outcome.trim(), sector: fields.sector, marketplace_slug: null, vendor_slugs: [], buyer_input: buyer, shortlist_input: shortlist, raw_input: raw };
+        const data = await request('/sase/api/marketplace/projects', { mode: selected, entrance_context: context });
+        localStorage.setItem(projectTokenKey(data.project_reference), data.project_session_token);
+        saved = { project_reference: data.project_reference, revision: data.revision, envelope_revision:data.envelope_revision };
+      }
+      if(saved.envelope_revision!==undefined)syncWorkspaceRevision(saved.envelope_revision,saved.project_reference);
+      setProject(saved); setReview(true); setPrepared(false); setConsent(false); setCoverage(null);
+      const url = new URL(location.href); url.searchParams.set('project', saved.project_reference); url.searchParams.delete('from');
+      history.replaceState(history.state, '', url);
+      localStorage.removeItem(PROJECT_DRAFT_KEY);
+    });
+  }
+  async function publish() {
+    if (!project || !consent) return;
+    await action(async () => {
+      let current = project;
+      if (!prepared) {
+        const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(current.project_reference)}/prepare-publication`, { base_revision: current.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT });
+        current = { ...current, revision: data.revision }; setProject(current); setPrepared(true);
+      }
+      if (!signedIn) return;
+      const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(current.project_reference)}/publish`, { base_revision: current.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT }, 'POST', current);
+      if (!data.ok || !data.market_unlocked || !data.opportunity_id) throw new Error('The board listing is not complete. Please retry.');
+      setPublished(true);
+    });
+  }
+  async function previewCoverage() {
+    if (!project) return;
+    await action(async () => {
+      const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}/match-preview`, { base_revision: project.revision, input: { mandatory_capabilities: fields.requiredFeatures, preferred_capabilities: [], required_regions: fields.regions, service_model: fields.operatingModel === 'managed' ? 'fully_managed' : fields.operatingModel === 'any' ? null : fields.operatingModel === 'diy' ? 'self_managed' : fields.operatingModel, sector: fields.sector, provider_scope: 'both' } });
+      setProject({ ...project, revision: data.revision }); setCoverage(data.preview.meets_all_mandatory_count);
+    });
+  }
+  return <>
+    {!resuming && <div className="nf-brief-toolbar">
+      <div><strong>Your buying workspace</strong><span>Describe your needs, review your project and approve publication. A full RFP is optional. <a href="/sase/examples/sase-rfp/" className="underline">See a SASE RFP worked example</a></span></div>
+      <button type="button" disabled={!ready} onClick={() => choose(selected === 'find_providers' ? 'find_providers' : 'quick_list')}>
+        {project ? 'Return to my project brief' : 'Publish a short brief'} <span aria-hidden="true">↗</span>
+      </button>
+    </div>}
+    {ready && <DraftRecovery>{children}</DraftRecovery>}
+    <dialog ref={dialogRef} className="nf-brief-dialog" aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
+      <header className="nf-brief-panel-header"><span>Netify · Project review</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
+      <div className="nf-brief-panel-body">
+          <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Publish a short project brief'}</h2>
+          <p className="mt-2 text-sm text-[#66635e]">Describe what you need, review the anonymous notice, then verify your work email to publish. A full RFP is optional.</p>
+          {workspaceWaiting && <p role="status" className="mt-4">Finishing your requirements. This review will update automatically.</p>}
+          {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+          {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your board listing is live. Open your project to review matches and any supplier responses. Publication does not guarantee a response or quote.</p><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
+            <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
+            <section className="mt-4 rounded border border-slate-200 bg-slate-50 p-4 text-sm" aria-label="What publication means"><h3 className="font-semibold">What happens after publication?</h3><p className="mt-2">Your anonymous notice appears on the Opportunity Board. Netify can use your requirements to source proposals. Open your project to review matches and any responses received.</p><p className="mt-2"><strong>Private:</strong> your company name, work email and pricing. <strong>Public:</strong> the project notice you approve. Remove names, addresses and contact details from the requirement text.</p><p className="mt-2">Supplier participation is developing. Responses, prices and response times are not guaranteed. Publishing is not an order.</p></section>
+            <button type="button" disabled={busy || workspaceWaiting} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
+            {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy || workspaceWaiting} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
+            {coverage !== null && <p className="mt-3 text-sm">{coverage} providers meet the filters checked so far. This is market coverage, not confirmation of every requirement. Personalised matches unlock after publication.</p>}
+            <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} disabled={busy || workspaceWaiting} onChange={(e) => setConsent(e.target.checked)} className="mt-1"/><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label>
+            {prepared && !signedIn && <div className="mt-4"><SignIn role="buyer" prompt="Verify your work email, then return here to publish. Your company stays private." onAuthed={() => setSignedIn(true)} /></div>}
+            <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
+          </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void saveForReview(); }}>
+            <fieldset disabled={busy || workspaceWaiting} className="grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-semibold">Solution<select aria-label="Solution" className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
+              <label className="text-sm font-semibold">Sector<select aria-label="Sector" required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
+              <label className="text-sm font-semibold">Number of sites<input required type="number" min="1" step="1" className={inputClass} value={fields.sites} onChange={(e) => setField('sites', e.target.value)}/></label>
+              <label className="text-sm font-semibold">Operating model<select aria-label="Operating model" className={inputClass} value={fields.operatingModel} onChange={(e) => setField('operatingModel', e.target.value)}><option value="any">Not decided</option><option value="managed">Fully managed</option><option value="co_managed">Co-managed</option><option value="diy">Self-managed</option></select></label>
+              <label className="text-sm font-semibold">Buying timescale<input required maxLength={200} placeholder="e.g. within six months" className={inputClass} value={fields.timescale} onChange={(e) => setField('timescale', e.target.value)}/></label>
+              <label className="text-sm font-semibold">Company name (private)<input required minLength={2} maxLength={200} autoComplete="organization" className={inputClass} value={fields.company} onChange={(e) => setField('company', e.target.value)}/></label>
+              <fieldset className="sm:col-span-2"><legend className="mb-2 text-sm font-semibold">Regions to cover</legend><div className="flex flex-wrap gap-3">{REGION_KEYS.map((r) => <label key={r} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fields.regions.includes(r)} onChange={(e) => setField('regions', e.target.checked ? [...fields.regions, r] : fields.regions.filter((v) => v !== r))}/>{REGION_LABELS[r]}</label>)}</div></fieldset>
+              <details className="sm:col-span-2"><summary className="cursor-pointer text-sm font-semibold">Required capabilities (optional)</summary><p className="my-2 text-xs">Select only essentials. These filters determine your personalised matches; other details in your brief are for suppliers to confirm.</p><div className="grid gap-2 sm:grid-cols-2">{[
+                ['f30_zero_trust_network_access', 'Zero Trust Network Access'], ['f31_secure_web_gateway', 'Secure web gateway'], ['f32_casb_capability', 'CASB'], ['f33_data_loss_prevention', 'Data loss prevention'], ['f16_mpls_coexistence_and_migration', 'MPLS migration'], ['f17_cellular_and_5g_support', 'Cellular and 5G'], ['f25_high_availability_design', 'High availability'], ['f28_full_sase_platform', 'Full SASE platform'],
+              ].map(([id, label]) => <label key={id} className="flex gap-2 text-sm"><input type="checkbox" checked={fields.requiredFeatures.includes(id)} onChange={(e) => setField('requiredFeatures', e.target.checked ? [...fields.requiredFeatures, id] : fields.requiredFeatures.filter((v) => v !== id))}/>{label}</label>)}</div></details>
+              <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea aria-label="What do you need to achieve?" required minLength={20} maxLength={4000} rows={4} placeholder="Describe your sites, users, security needs and what should improve. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
+            </fieldset>
+            <button disabled={busy || workspaceWaiting} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Review my project'}</button>
+            <p className="mt-3 text-xs text-[#66635e]">Nothing is published until you verify your work email and approve the notice.</p>
+          </form>}
+      </div>
+    </dialog>
+  </>;
+}

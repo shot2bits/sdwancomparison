@@ -69,10 +69,10 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       // The sector doors carry their prefill sentence straight to the desk
       // (the same destinations the 301s serve, without the hop).
-      { label: "Create Healthcare RFP", href: "https://netify.co.uk/?q=We%20are%20a%20healthcare%20provider%20replacing%20legacy%20connectivity%20with%20managed%20SD-WAN%20and%20SASE." },
-      { label: "Create Retail RFP", href: "https://netify.co.uk/?q=We%20are%20a%20retailer%20needing%20a%20PCI%20DSS%20compliant%20network." },
-      { label: "Create Manufacturing RFP", href: "https://netify.co.uk/?q=We%20are%20a%20manufacturer%20securing%20IT%20and%20OT%20with%20managed%20SASE." },
-      { label: "Create Financial Services RFP", href: "https://netify.co.uk/?q=We%20are%20a%20financial%20services%20firm%20consolidating%20network%20and%20security%20into%20SASE." },
+      { label: "Create Healthcare RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20healthcare%20provider%20replacing%20legacy%20connectivity%20with%20managed%20SD-WAN%20and%20SASE." },
+      { label: "Create Retail RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20retailer%20needing%20a%20PCI%20DSS%20compliant%20network." },
+      { label: "Create Manufacturing RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20manufacturer%20securing%20IT%20and%20OT%20with%20managed%20SASE." },
+      { label: "Create Financial Services RFP", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?q=We%20are%20a%20financial%20services%20firm%20consolidating%20network%20and%20security%20into%20SASE." },
       { label: "All sector guides", href: "/sase/best/" },
     ],
   },
@@ -90,7 +90,9 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Tools",
     items: [
+      { label: "Pricing options", href: "/sase/pricing/" },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
+      { label: "Request circuit pricing", href: "/sase/circuit-pricing/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "AI assistant connector", href: "/sase/connector/" },
@@ -168,7 +170,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
     label: "By Sector",
     columns: 2,
     items: [
-      { label: "Healthcare", href: "/sd-wan-for-healthcare/", desc: "Clinical resilience, DSPT, patient data and secure multi-site access." },
+      { label: "BT for healthcare", href: "/sd-wan-for-healthcare/", desc: "BT SD-WAN and SASE for NHS and healthcare organisations." },
       { label: "Manufacturing", href: "/sd-wan-sase-for-manufacturing/", desc: "OT segmentation, plant uptime, failover and brownfield estates." },
       { label: "Retail", href: "/sd-wan-sase-for-retail/", desc: "Store rollout, POS, PCI, guest Wi-Fi and resilient connectivity." },
       { label: "Financial services", href: "/sd-wan-sase-for-financial-services/", desc: "DORA, auditability, resilience and supplier due diligence." },
@@ -178,9 +180,10 @@ export const MEGA_GROUPS: MegaGroup[] = [
     label: "Tools",
     columns: 2,
     items: [
-      { label: "SASE and SD-WAN RFP Builder", href: "/sase-sd-wan-rfp-builder/", desc: "Build requirements, shortlist providers and manage a structured procurement workflow." },
+      { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/", desc: "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation." },
       { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Score evaluated suppliers against capability and sector requirements." },
       { label: "Cost and TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership for SASE and SD-WAN." },
+      { label: "Request circuit pricing", href: "/sase/circuit-pricing/", desc: "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations." },
       { label: "SD-WAN vendor filter", href: "/sd-wan/vendor-filter/", desc: "Narrow the market by service model, capability and requirement." },
       { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "Reusable questions for SASE and SD-WAN procurement." },
       { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/", desc: "Model users, licences and calling requirements before a formal quote." },
@@ -199,8 +202,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
       { label: "Resell BT Business Broadband", href: "/resell/bt-business-broadband/", desc: "BT products, eligibility, commission and the application route." },
       { label: "BT Business Internet", href: "/resell/bt-business-internet/", desc: "BTnet leased lines and associated managed services." },
       { label: "BT Cloud Voice", href: "/resell/bt-hosted-voip/", desc: "Hosted voice for organisations and the BT reseller route." },
-      { label: "BT SD-WAN", href: "/resell/bt-sd-wan/", desc: "Managed SD-WAN sourcing and reseller information." },
-      { label: "BT SASE", href: "/resell/bt-sase/", desc: "Managed SASE sourcing and reseller information." },
+      { label: "BT SD-WAN and SASE databank", href: "/bt-sase-sd-wan/", desc: "Query sourced BT evidence and turn requirements into a buying brief." },
       { label: "Virgin Media Business profile", href: "/marketplace/virgin-media/", desc: "Connectivity, SD-WAN capabilities and buying fit." },
       { label: "Virgin reseller route", href: "/resell/virgin-media-business/", desc: "Current status and reseller interest registration." },
     ],

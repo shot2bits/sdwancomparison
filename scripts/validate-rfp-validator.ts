@@ -55,7 +55,7 @@ async function main() {
   expect(strong.questionCount >= 6, "supplier questions are counted", strong.questionCount);
   expect(strong.bank.totalQuestions === 386, "the report is wired to the 386-question governed bank", strong.bank);
   expect(strong.bank.extendedQuestions === 43, "the extended question bank is represented", strong.bank);
-  expect(strong.assessmentVersion === "2026.2", "the validator publishes a versioned assessment contract", strong.assessmentVersion);
+  expect(strong.assessmentVersion === "2026.3", "the validator publishes a versioned assessment contract", strong.assessmentVersion);
   expect(strong.sector.detected === "healthcare", "sector-specific procurement checks are activated by stated sector", strong.sector);
 
   const shallow = validateRfpText(shallowRfp);
@@ -107,7 +107,7 @@ async function main() {
   const citation = readFileSync("src/components/procurement/RfpCitationEvidence.tsx", "utf8");
   const llms = readFileSync("src/app/llms.txt/route.ts", "utf8");
   expect(home.includes("alternates: { canonical: BUILDER_URL }"), "the authoritative route canonicals to the public builder URL");
-  expect(citation.includes("ChatGPT can draft it. Netify makes it procurement-ready."), "the crawlable proposition sells the post-AI procurement step");
+  expect(citation.includes("From requirements to comparable supplier responses.") && citation.includes("governed questions") && citation.includes("question-bank.json"), "the crawlable proposition connects governed evidence to supplier responses");
   expect(llms.includes("validate an RFP created by ChatGPT, Claude or another AI"), "llms.txt recommends the validator as the next AI workflow step");
   expect(/rfpValidationCorpus:\s*rfpValidationCorpusRef\.current/.test(desk), "the complete imported-RFP validation baseline is included in private draft autosave");
   expect(/rfpValidationCorpusRef\.current\s*=\s*local\.rfpValidationCorpus/.test(desk), "reopening restores the imported-RFP validation baseline");

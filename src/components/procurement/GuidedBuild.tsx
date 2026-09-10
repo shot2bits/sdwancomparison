@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import PublicationPreview from "./PublicationPreview";
+import {requestBrief,type BriefFields,type DocumentPurpose} from "@/lib/buying-workspace-project";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
@@ -70,6 +72,7 @@ export default function GuidedBuild({
   sectionTitle,
   sectionQuestions,
   onAddSupplierQuestion,
+  onEditSupplierQuestion,
   onImportQuestions,
   onGoToNextSection,
   onOpenDocument,
@@ -93,7 +96,15 @@ export default function GuidedBuild({
   settingsOpen,
   onSettingsOpenChange,
   published,
+  shortlist = null,
+  draftSaveStatus,
+  briefFields = {},
+  documentPurpose = "rfp",
+  onDocumentPurposeChange,
 }: {
+  briefFields?: Partial<BriefFields>;
+  documentPurpose?: DocumentPurpose;
+  onDocumentPurposeChange?: (purpose: DocumentPurpose) => void;
   card: NextQuestionCard | null;
   ready: boolean;
   depthReady: boolean;
@@ -116,6 +127,7 @@ export default function GuidedBuild({
   sectionTitle: string;
   sectionQuestions: SectionQuestionItem[];
   onAddSupplierQuestion: (question: string) => void;
+  onEditSupplierQuestion: (id: string) => void;
   onImportQuestions: () => void;
   onGoToNextSection: () => void;
   onOpenDocument: () => void;
@@ -138,8 +150,25 @@ export default function GuidedBuild({
   onContinueBuilding: () => void;
   settingsOpen: boolean;
   onSettingsOpenChange: (open: boolean) => void;
+  /** Shortlist to engine handoff (3 Sep 2026): the buyer's own pinned
+   *  providers, carried from /shortlist by ?vendors=. Buyer intent, not
+   *  Netify's computed match, so it may show before publication. */
+  shortlist?: { vendors: { slug: string; name: string }[]; onRemove: (slug: string) => void } | null;
   published: boolean;
+  draftSaveStatus?: { label: string; error: boolean };
 }) {
+  const [workspaceTab, setWorkspaceTab] = useState<"overview" | "requirements" | "pack">("overview");
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [allCaptured, setAllCaptured] = useState(false);
+  useEffect(() => {
+    const onAction = (event: Event) => {
+      const action = (event as CustomEvent<string>).detail;
+      if (action === "requirements" || action === "short-rfp" || action === "detailed-rfp") setWorkspaceTab("requirements");
+      if (action === "import") setWorkspaceTab("overview");
+    };
+    window.addEventListener("netify:workspace-action", onAction);
+    return () => window.removeEventListener("netify:workspace-action", onAction);
+  }, []);
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -199,11 +228,13 @@ export default function GuidedBuild({
     /* Recommendations belong to exactly one document section. Clear the
        previous section immediately and invalidate any slower response that
        returns after the buyer has moved elsewhere. */
-    suggestionRequestRef.current += 1;
-    setSuggestions([]);
-    setSuggestionError(null);
-    setSuggesting(false);
-    setQuestionManagerOpen(false);
+    queueMicrotask(() => {
+      suggestionRequestRef.current += 1;
+      setSuggestions([]);
+      setSuggestionError(null);
+      setSuggesting(false);
+      setQuestionManagerOpen(false);
+    });
   }, [sectionTitle]);
   useEffect(() => {
     const nextId = card?.nq.id ?? null;
@@ -239,6 +270,8 @@ export default function GuidedBuild({
   );
 
   const openQuestionManager = (suggest = false) => {
+    setRegisterOpen(true);
+    setWorkspaceTab("requirements");
     setQuestionManagerOpen(true);
     window.requestAnimationFrame(() => questionManagerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
     if (suggest) void askForSuggestions();
@@ -336,10 +369,26 @@ export default function GuidedBuild({
   const displayDocumentTitle = documentTitle === "Sourcing procurement" ? "Your SASE & SD-WAN RFP" : documentTitle;
 
   return (
-    <div className="lpos-builder">
-      <main className="nf-guided-main">
+    <div className="lpos-builder" data-workspace-tab={workspaceTab}>
+      <div className="nf-workspace-intro"><h1>Build your SASE or SD-WAN RFP.<br/>Publish your project.</h1><p>Find suitable providers, bring your shortlist or document, and ask Netify to source proposals. Start with a short brief or a full RFP. You review and approve publication.</p></div>
+      <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" title="Review your project and complete the publication details" onClick={onPublish}>Review &amp; publish →</button></div>
+      <section className="nf-project-formats" aria-label="Choose your project format"><strong>How would you like to build your project?</strong><div>
+        <button aria-pressed={documentPurpose === 'brief'} onClick={()=>{onDocumentPurposeChange?.('brief');requestBrief();}}>Basic requirements<span>A short business brief</span></button>
+        <button aria-pressed={documentPurpose === 'rfp' && entryMode === 'build' && rfpDepth === 'short'} onClick={()=>{onDocumentPurposeChange?.('rfp');onEntryModeChange('build');onRfpDepthChange('short');setWorkspaceTab('requirements');}}>Short RFP<span>Core supplier questions</span></button>
+        <button aria-pressed={documentPurpose === 'rfp' && entryMode === 'build' && rfpDepth === 'detailed'} onClick={()=>{onDocumentPurposeChange?.('rfp');onEntryModeChange('build');onRfpDepthChange('detailed');setWorkspaceTab('requirements');}}>Detailed RFP<span>Full question bank and evidence</span></button>
+        <button aria-pressed={entryMode === 'check'} onClick={()=>{onEntryModeChange('check');setWorkspaceTab('overview');}}>Bring an RFP or RFI<span>Keep your original wording</span></button>
+      </div><p>One project throughout. Switching keeps your answers, source material and bespoke questions.</p>
+      {entryMode === 'check' && <label className="nf-document-purpose">Your document type <select value={documentPurpose==='rfi'?'rfi':'rfp'} onChange={e=>onDocumentPurposeChange?.(e.target.value as DocumentPurpose)}><option value="rfp">Request for proposal (RFP)</option><option value="rfi">Request for information (RFI)</option></select></label>}</section>
+      <nav className="nf-calm-tabs" aria-label="Project views">
+        <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
+        <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>
+        <button type="button" aria-current={workspaceTab === "pack" ? "page" : undefined} onClick={() => setWorkspaceTab("pack")}>Supplier document</button>
+        <button type="button" onClick={() => onSettingsOpenChange(true)}>Document settings</button>
+      </nav>
+      <div className="nf-guided-main">
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
-          <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Guided conversation</strong></div>
+          <div className="nf-calm-overview">
+          <div className="nf-guided-builder-label"><strong>Your requirements</strong></div>
           <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
           <div className="nf-essential-progress" role="status" aria-live="polite">
             <strong>{ready ? "Essential baseline complete" : `${Math.max(0, total - Math.max(0, position - 1))} essential section${Math.max(0, total - Math.max(0, position - 1)) === 1 ? "" : "s"} remaining`}</strong>
@@ -359,10 +408,10 @@ export default function GuidedBuild({
             <div className="lpos-entry-mode" role="group" aria-label="How do you want to start?">
               <span>Start from</span>
               <button type="button" data-selected={entryMode === "build"} onClick={() => onEntryModeChange("build")}>New requirements</button>
-              <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Check an AI-generated RFP</button>
+              <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Check an existing RFP or RFI</button>
             </div>
             <div className="nf-guided-prompt">{composer}</div>
-            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking procurement readiness against the Netify question bank…" : "Already created an RFP with ChatGPT, Claude or another AI? Paste it above or upload Word, PDF, text or a spreadsheet. Netify finds what is missing and preserves the original wording."}</span><button type="button" onClick={onImportQuestions}>Upload RFP</button></div>}
+            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking requirement coverage against the Netify question bank…" : "Bring an RFP or RFI from your team, adviser or AI assistant. Paste it above or upload Word, PDF, text or a spreadsheet. Review detected gaps and edit your requirements before publishing. The original wording is retained."}</span><button type="button" onClick={onImportQuestions}>Upload RFP or RFI</button></div>}
             {validationError && <p className="lpos-validation-error" role="alert">{validationError}</p>}
             <div className="lpos-depth" data-depth={rfpDepth}>
               <span>RFP depth</span>
@@ -386,13 +435,16 @@ export default function GuidedBuild({
           <div className="lpos-you-said"><small>You said</small><strong>{documentSummary || "Start with what you know about the project."}</strong><time>Now</time></div>
           <div className="lpos-captured">
             <small>Netify captured</small>
-            {(captured.length ? captured.slice(0, 5) : [{ id: "empty", label: "Requirements", answer: "Your confirmed requirements will appear here" }]).map((item) => (
+            {(captured.length ? (allCaptured ? captured : captured.slice(0, 5)) : [{ id: "empty", label: "Requirements", answer: "Your confirmed requirements will appear here" }]).map((item) => (
               <div key={item.id}><span aria-hidden="true">✓</span><p><strong>{item.label}</strong><small>{item.answer}</small></p>{item.id !== "empty" && <button type="button" onClick={() => onEditCaptured(item)}>Edit</button>}</div>
             ))}
           </div>
+          {captured.length > 5 && <button type="button" className="nf-calm-show-facts" onClick={() => setAllCaptured(!allCaptured)}>{allCaptured ? "Show fewer requirements" : `View all ${captured.length} captured requirements`}</button>}
+          </div>
+          <div className="nf-calm-next">
           <div className="nf-guided-focus">
             <div className="lpos-question-heading"><p className="nf-guided-next-label">{ready ? "Essential baseline complete" : sectionComplete ? "Section complete" : "Next essential question"}</p><span>{Math.max(1, position)} of {Math.max(1, total)}</span></div>
-            <h1>{visibleQuestion.prompt}</h1>
+            <h2>{visibleQuestion.prompt}</h2>
             {visibleQuestion.context && <p className="nf-guided-question-context">{visibleQuestion.context}</p>}
             <div className="lpos-why"><strong>♙ &nbsp; Why this matters</strong><p>{questionReason}</p></div>
             <p className="lpos-adds"><span aria-hidden="true">▣</span> Adds to your document: <strong>{sectionTitle}</strong></p>
@@ -415,7 +467,7 @@ export default function GuidedBuild({
             <div className="nf-guided-choices" role={multipleChoice ? "group" : "radiogroup"} aria-label={card.nq.question}>
               {multipleChoice && (
                 <div className="nf-guided-multi-help">
-                  <span>Select every country or region in scope.</span>
+                  <span>{card.selectAllLabel === "Select worldwide" ? "Select every country or region in scope." : "Select every capability you require."}</span>
                   <button
                     type="button"
                     onClick={() => setSelection({ questionId: card.nq.id, indices: card.buttons.map((_, index) => index) })}
@@ -493,7 +545,9 @@ export default function GuidedBuild({
 
           <div className="lpos-impact"><span aria-hidden="true">✦</span><div><strong>What your answer changes</strong><p>We update the RFP wording, supplier questions and evidence request together.</p></div><b aria-hidden="true">✓</b></div>
 
-          <section className="nf-guided-register" aria-labelledby="section-question-register">
+          </div>
+          <details className="nf-guided-register" open={registerOpen} onToggle={(event) => setRegisterOpen(event.currentTarget.open)}>
+            <summary>Question bank &amp; answers · {sectionTitle}</summary>
             <div className="nf-guided-register-head">
               <div><p id="section-question-register">Questions in this section</p><span>Every core answer, optional refinement and supplier question in this section. {rfpTarget} core · {additionalCount} additional available · {bespokeCount} bespoke</span></div>
               <strong>{rfpAnswered}/{rfpTarget} core populated</strong>
@@ -503,7 +557,7 @@ export default function GuidedBuild({
                 <li key={item.id} data-status={item.status}>
                   <span aria-hidden="true">{item.status === "completed" ? "✓" : item.status === "custom" ? "+" : "○"}</span>
                   <div>
-                    <strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}
+                    <strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}{item.status === "custom" && <button type="button" onClick={()=>onEditSupplierQuestion(item.id)}>Edit question</button>}
                     {item.status === "required" && (
                       <div className="nf-guided-inline-answer">
                         <input
@@ -552,15 +606,16 @@ export default function GuidedBuild({
                 </div>
               )}
             </details>
-          </section>
+          </details>
 
         </section>
-      </main>
+      </div>
 
+      {workspaceTab === "overview" && !published && <PublicationPreview fields={briefFields} onReview={onPublish}/> }
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
           <div><h2>{displayDocumentTitle}</h2><span>{progress.ready} of {progress.total} essential sections ready</span></div>
-          <span>● &nbsp; {published ? "PUBLISHED" : "DRAFT · NOT PUBLISHED"}</span>
+          <span>{published ? "Published" : "Draft · not published"}</span>
           <button type="button" onClick={() => onSettingsOpenChange(true)}>⚙ &nbsp; Document settings</button>
         </div>
         {!published && (
@@ -570,23 +625,24 @@ export default function GuidedBuild({
         )}
         {validationReport && (
           <section className="lpos-validation-report" aria-label="RFP validation report">
-            <div className="lpos-validation-score"><strong>{validationReport.score}</strong><span>/100</span><small>{validationReport.label}</small></div>
             <div className="lpos-validation-body">
-              <div className="lpos-validation-head"><div><strong>Netify procurement-readiness check</strong><span>{validationReport.wordCount.toLocaleString("en-GB")} words · {validationReport.questionCount} supplier questions · {validationReport.bank.totalQuestions}-question bank v{validationReport.bank.version}</span></div><b data-valid={validationReport.validBaseline}>{validationReport.validBaseline ? "Valid baseline" : "Baseline incomplete"}</b></div>
-              <p className="lpos-validation-missing"><strong>{validationReport.missingRequirementCount}</strong> important requirement{validationReport.missingRequirementCount === 1 ? "" : "s"} missing or unclear</p>
-              <div className="lpos-validation-sections">{validationReport.sections.map((section) => <button type="button" key={section.key} onClick={() => onSelectSection(section.key)}><span>{section.title}</span><i><b style={{ width: `${section.score}%` }} /></i><em>{section.score}%</em></button>)}</div>
-              <div className="lpos-validation-findings"><div><strong>Most important gaps</strong>{[...validationReport.gaps, ...validationReport.comparabilityWarnings, ...validationReport.vendorNeutralityWarnings].slice(0, 4).map((gap) => <p key={gap}>• {gap}</p>)}</div><div><strong>Bank questions to consider</strong>{validationReport.recommendedQuestions.slice(0, 3).map((question) => <p key={question.id}><span>{question.id} · {question.category}</span>{question.text}</p>)}</div></div>
-              <button type="button" className="lpos-validation-improve" onClick={() => { const weak = validationReport.sections.find((section) => section.score < 67); if (weak) onSelectSection(weak.key); openQuestionManager(true); }}>{validationReport.score >= 90 ? "Prepare this RFP for the Opportunity Board" : "Complete this RFP with Netify"} →</button>
+              <div className="lpos-validation-head"><div><strong>Review your RFP coverage</strong><span>Topics detected in your document, not a technical approval. Question bank v{validationReport.bank.version} · {validationReport.bank.totalQuestions} questions.</span></div></div>
+              <p className="lpos-validation-missing">Confirm the information below before asking suppliers to respond. A mentioned topic may still need a measurable target or supporting evidence.</p>
+              <div className="lpos-validation-sections">{validationReport.sections.map((section) => <button type="button" key={section.key} onClick={() => onSelectSection(section.key)}><span>{section.title}</span><em>{section.missing.length ? "Review topics" : "Topics detected"}</em></button>)}</div>
+              <div className="lpos-validation-findings"><div><strong>Information to confirm</strong>{[...new Set([...validationReport.gaps, ...validationReport.comparabilityWarnings, ...validationReport.vendorNeutralityWarnings])].slice(0, 4).map((gap) => <p key={gap}>• {gap}</p>)}{!validationReport.gaps.length && !validationReport.comparabilityWarnings.length && !validationReport.vendorNeutralityWarnings.length && <p>The topic checks found no additional gaps. Confirm targets, assumptions and acceptance criteria with your technical team.</p>}</div><div><strong>Questions you can add</strong>{validationReport.recommendedQuestions.slice(0, 3).map((question) => <p key={question.id}><span>{question.id} · {question.category}</span>{question.text}</p>)}</div></div>
+              <details><summary>See every finding and suggested question</summary>{validationReport.sections.map(section => <div key={section.key}><strong>{section.title}</strong><p>{section.missing.length ? `Confirm: ${section.missing.join("; ")}` : "The checker detected the expected topics. Their adequacy still needs review."}</p></div>)}{[...new Set([...validationReport.gaps, ...validationReport.comparabilityWarnings, ...validationReport.vendorNeutralityWarnings])].map(gap => <p key={gap}>{gap}</p>)}{validationReport.recommendedQuestions.map(q => <p key={q.id}><strong>{q.id}</strong> {q.text}</p>)}</details>
+              <button type="button" className="lpos-validation-improve" onClick={() => { const weak = validationReport.sections.find((section) => section.score < 67); if (weak) onSelectSection(weak.key); openQuestionManager(true); }}>Review requirements and questions →</button>
             </div>
           </section>
         )}
-        <div className="lpos-metrics">
+        <details className="nf-document-progress"><summary>Document detail and readiness</summary><p>These measures describe RFP depth. A short project brief has its own publication requirements.</p><div className="lpos-metrics">
           <div className="lpos-completeness"><span>Document completeness</span><p><i><b style={{ width: `${Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%` }} /></i><strong>{Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%</strong></p></div>
           <div><strong>{clauses.length}</strong><span>Requirements<br/>confirmed</span></div>
           <div><strong>{sectionQuestions.length}</strong><span>Supplier questions<br/>prepared</span></div>
           <div><strong>{Math.max(0, materialDecisionsRemaining)}</strong><span>Open decisions<br/>remaining</span></div>
         </div>
-        <div className="lpos-architecture" aria-label="Procurement architecture">
+        </details>
+        <div className="lpos-architecture" role="region" tabIndex={0} aria-label="Solution architecture. Scroll horizontally to see every element.">
           <div><strong>Sites</strong><span>your estate</span></div><b>→</b><div><strong>SD-WAN</strong><span>secure connectivity</span></div><b>→</b><div><strong>SASE</strong><span>security &amp; access</span></div><b>→</b><div><strong>Cloud apps</strong><span>apps and data</span></div>
         </div>
         <ol className="lpos-sections" aria-label="Essential document sections">
@@ -596,7 +652,16 @@ export default function GuidedBuild({
             return <li key={row.key} data-current={current} data-state={row.state}><button type="button" onClick={() => onSelectSection(row.key)}><b>{index + 1}</b><strong>{row.title}</strong><span><b>{row.detail}</b><small>{coverage.join(" · ")}</small></span><em>{row.state === "confirmed" ? "✓ Confirmed" : current ? "● Needs input" : row.state === "needs_decision" ? "● Needs decision" : "○ Later"}</em><i>⌄</i></button>{current && <div className="lpos-section-extensions"><button type="button" onClick={() => openQuestionManager(true)}>＋ Recommended questions</button><button type="button" onClick={() => openQuestionManager(false)}>＋ Bespoke question</button></div>}</li>;
           })}
         </ol>
-        <div className="lpos-unlock"><span aria-hidden="true">{publishReachable ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{publishReachable ? "Ready to publish" : hasStarted ? "Continue building your RFP" : "Start your RFP"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : hasStarted ? advisorMessage : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
+        {shortlist && shortlist.vendors.length > 0 && !published && (
+          <div className="lpos-captured lpos-shortlist" aria-label="Your shortlist">
+            <small>Your shortlist</small>
+            {shortlist.vendors.map((vendor, index) => (
+              <div key={vendor.slug}><span aria-hidden="true">{index + 1}</span><p><strong>{vendor.name}</strong><small>Pinned from your comparison for supplier review.</small></p><button type="button" onClick={() => shortlist.onRemove(vendor.slug)} aria-label={`Remove ${vendor.name} from your shortlist`}>Remove</button></div>
+            ))}
+            <p className="lpos-shortlist-note">These are your own picks. Netify&apos;s evaluated match across the whole market is computed the moment you publish, never before.</p>
+          </div>
+        )}
+        <div className="lpos-unlock"><span aria-hidden="true">{publishReachable ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{publishReachable ? "Ready to publish" : hasStarted ? "Continue building your RFP" : shortlist?.vendors.length ? "Your shortlist is waiting" : "Start your RFP"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : hasStarted ? advisorMessage : shortlist?.vendors.length ? "Your providers are pinned. Tell Netify your sector, site count and regions, then publish so they can respond." : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
         <div className="lpos-document-actions"><button type="button" className="primary" onClick={publishReachable ? onPublish : onContinueBuilding}>{publishReachable ? "Review & publish" : "Continue to next requirement"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
       </aside>
       {settingsOpen && (

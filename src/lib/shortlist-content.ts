@@ -5,16 +5,36 @@
 
 export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   {
+    q: "Which SD-WAN vendor is best?",
+    a: "There is no single best vendor for every estate. The right shortlist depends on operating model, regions, applications, security requirements and the evidence a supplier can provide for the project.",
+  },
+  {
+    q: "Who are the leading SD-WAN providers?",
+    a: "The SD-WAN vendor view ranks the current governed records using network-led criteria. The order changes when a buyer adds required regions, managed service delivery, cloud platforms or individual capabilities.",
+  },
+  {
+    q: "Is SD-WAN obsolete?",
+    a: "No. SD-WAN remains the network layer in many SASE designs. SASE adds cloud-delivered security and access controls rather than removing the need to control WAN traffic.",
+  },
+  {
+    q: "Should a business choose SD-WAN or MPLS?",
+    a: "Many estates use both during migration. SD-WAN can use internet, cellular and MPLS underlays, while the RFP should define application performance, resilience and any sites that must retain private circuits.",
+  },
+  {
+    q: "Who are the leading SASE vendors?",
+    a: "The SASE vendor view ranks providers with public SASE, ZTNA or secure web gateway evidence. Buyers should compare the networking and security components separately before accepting a single-vendor claim.",
+  },
+  {
     q: "How does the shortlist builder rank vendors?",
     a: "The Netify shortlist builder ranks each and every provider based on their capabilities to deliver 40 different in-built features, alongside the likes of regional coverage, cloud support, AI capabilities, resilience and deployment speed, all of which is drawn from information we've been able to publicly source or find evidence for.",
   },
   {
     q: "Can I share or save my shortlist?",
-    a: "Yes absolutely, every filter combination is matched to an associated page URL, enabling you to copy a link to take you (or board directors) straight back to the same filtered list again at a later date, as well as being able to download a PDF version or have the ranked list emailed to you.",
+    a: "You can share a public comparison link. Your personalised shortlist is saved in your project and unlocks after verified anonymous publication.",
   },
   {
-    q: "What does the AI advisor do?",
-    a: "We've built our AI advisor to make everything easier for you: you describe your estate in plain language (for example site count, regions, security requirements and operating model) and the advisor will take your instructions to map them onto the same filters and scoring engine used by the manual controls, then the advisor will explain the resulting shortlist to you.",
+    q: "What does Build from requirements do?",
+    a: "Describe your estate, review a short project notice and verify your business identity. Publishing anonymously unlocks a personalised shortlist and supplier responses; a full RFP is optional.",
   },
   {
     q: "Is this comparison vendor neutral?",
@@ -27,8 +47,8 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
 ];
 
 export const SHORTLIST_INTRO = {
-  eyebrow: "SASE and SD-WAN shortlist builder",
-  h1: "Compare the SASE & SD-WAN UK and North American market",
+  eyebrow: "SD-WAN and SASE shortlist builder",
+  h1: "Compare SD-WAN and SASE providers, vendors and managed services",
   subhead:
-    "Publish an RFP within minutes. Build your bespoke shortlist from 30 graded providers by filtering on operating model, region, cloud support, security features, AI capability and resilience, or describe your requirements in plain language and the AI advisor builds it for you. Then send one brief and your shortlisted vendors respond with structured answers and pricing that stays private to you.",
+    "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Compare named providers and inspect the evidence. Publish a short anonymous project to unlock personalised matching and supplier responses. A full RFP is optional.",
 };

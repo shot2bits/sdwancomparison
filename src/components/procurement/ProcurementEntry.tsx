@@ -1,10 +1,13 @@
+import { buyerAssistantEnabled } from "@/lib/buyer-assistant";
+import BuyingWorkspaceShell from "@/components/procurement/BuyingWorkspaceShell";
+import PublicComparison from "@/components/procurement/PublicComparison";
+import { Suspense, type ReactNode } from "react";
 import ProjectDesk from "@/components/ProjectDesk";
 import JourneyStrip from "@/components/JourneyStrip";
 import CapabilityBlock from "@/components/CapabilityBlock";
 import CollapsibleHero from "@/components/CollapsibleHero";
 import EmptyDocumentFrame from "@/components/procurement/EmptyDocumentFrame";
-import RfpCitationEvidence from "@/components/procurement/RfpCitationEvidence";
-import { getAllVendors } from "@/lib/vendors";
+import JourneyModeSelector from "@/components/procurement/JourneyModeSelector";
 
 /**
  * The canonical product entry (2030 living-procurement workspace
@@ -36,15 +39,45 @@ import { getAllVendors } from "@/lib/vendors";
  * page.tsx for the full per-line ruling provenance.
  */
 
-export const ENGINE_H1 = "Build or validate a procurement-ready SASE or SD-WAN RFP";
+/* H1 (Robert, 3 Sep 2026, "sd-wan rfp" / "sase rfp" citation work): the
+ * two head terms and the outcome, in the order buyers search. Replaces
+ * "Build or validate a procurement-ready SASE or SD-WAN RFP", whose exact
+ * phrase "SASE RFP" never appeared in the served HTML. */
+export const ENGINE_H1 = "Build a SASE RFP or SD-WAN RFP, or start with a short brief";
+/* The two definitions shown above the application (Robert, 3 Sep 2026).
+ * They exist so an answer engine can read what an SD-WAN RFP and a SASE
+ * RFP are from THIS page rather than from a redirected legacy URL: the
+ * AI Overview sentence Google was quoting lived only in the old
+ * /sase-rfp-builder-app/ copy. Keep them short, factual and separable. */
+export const RFP_DEFINITIONS: { term: string; article: string; text: string }[] = [
+  {
+    term: "SD-WAN RFP",
+    article: "an",
+    text: "An SD-WAN RFP is a request for proposal that sets out an organisation's sites, underlay circuits, application performance targets, failover, security integration and managed service needs so that SD-WAN vendors and service providers can respond with comparable, priced bids.",
+  },
+  {
+    term: "SASE RFP",
+    article: "a",
+    text: "A SASE RFP is a request for proposal for converged networking and security delivered from the cloud: SD-WAN plus ZTNA, SWG, CASB, FWaaS and DLP, with identity, data residency, logging and operating model requirements stated so that SASE vendors can be evaluated on the same criteria.",
+  },
+];
+/* One sentence on what Netify does with either document, for the intro. */
+export const ENGINE_ROLE =
+  "Netify builds the document from your answers, validates the requirements against a governed question bank, and compares supplier responses side by side after you publish anonymously.";
+/* The meta description (Robert, 3 Sep 2026): one concise summary under
+ * 160 characters carrying SD-WAN RFP, SASE RFP, supplier questions,
+ * evaluation and anonymous publication. The former description was the
+ * whole ENGINE_DESCRIPTION paragraph stack (984 characters). */
+export const RFP_META_DESCRIPTION =
+  "Build an SD-WAN RFP or SASE RFP with governed supplier questions, validate it, publish anonymously and run a like-for-like vendor evaluation. Free for buyers.";
 export const ENGINE_PROMISE =
-  "ChatGPT can draft an RFP. Netify checks what is missing, rebuilds it against a governed question bank and prepares an anonymous Opportunity Board listing. Publishing unlocks suitable vendors, downloads and comparable bids.";
+  "Describe your needs, bring an RFP or RFI, or build a Short or Detailed RFP. Review and publish an anonymous project to invite supplier responses. A full RFP is optional.";
 export const ENGINE_VALUE =
-  `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors. Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson involved.`;
+  "Use Netify's question bank and sourced provider comparisons to structure your requirements. Choose your sector, including retail, manufacturing, healthcare, financial services or government, then review the relevant questions against your business needs.";
 export const ENGINE_AGENT =
-  "Use Netify directly, or connect your organisation's approved AI agent through MCP. Agents research, draft, compare and monitor. Your team publishes, selects and awards.";
+  "Use public Netify research through a supported MCP client. Prepare requirements with provenance, then continue in Netify for identity checks and publication approval. Private tools require the credentials described by each tool.";
 export const ENGINE_CONTROL =
-  "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. Only vetted vendors and service providers can respond.";
+  "Free for buyers. Review the anonymous notice before publishing. Your identity and contact details remain private. Publishing does not require you to buy, speak to a supplier or accept a response.";
 export const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 // State-0 height correction (18 Aug 2026 Constitution): a short, real
@@ -54,7 +87,7 @@ export const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALU
 // ready procurement asset), not invented marketing filler.
 export const ENGINE_EYEBROW = "SASE and SD-WAN procurement, from requirement to bids";
 
-export default function ProcurementEntry() {
+export default function ProcurementEntry({ guidance }: { guidance?: ReactNode } = {}) {
   return (
     // .procurement-2030 activates the scoped 2030 design tokens (see
     // globals.css) for everything inside this component and nothing
@@ -86,7 +119,12 @@ export default function ProcurementEntry() {
             heading. The gap before the input is trust mb 12px +
             ProjectDesk's own mt-10 (40px) = 52px, inside his ruled
             44-56px range. */}
-        <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} />
+        <BuyingWorkspaceShell
+          assistantEnabled={buyerAssistantEnabled()}
+          comparison={<Suspense fallback={<a href="/sase/shortlist/">Compare SD-WAN and SASE providers</a>}><PublicComparison expanded /></Suspense>}
+          information={<><CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} definitions={RFP_DEFINITIONS} role={ENGINE_ROLE} />{guidance}</>}
+        >
+        <JourneyModeSelector>
 
         {/* State 0 correction (18 Aug 2026): "a blank project must still
             show a compelling empty living document -- not a huge
@@ -97,7 +135,14 @@ export default function ProcurementEntry() {
             native <details>, collapsed by default, not a rendered wall
             of text) follow beneath it rather than being the first thing
             in view. */}
-        <ProjectDesk afterPrompt={<><EmptyDocumentFrame /><JourneyStrip /><CapabilityBlock /><RfpCitationEvidence /></>} />
+        {/* NOTE (3 Sep 2026): ProjectDesk accepts `afterPrompt` for
+            compatibility and does not render it, so nothing passed here
+            reaches the page. The citable public content for the canonical
+            builder page (RfpPublicContent, RfpCitationEvidence) is supplied
+            by (workspace)/home/page.tsx through the guidance slot above. */}
+        <ProjectDesk afterPrompt={<><EmptyDocumentFrame /><JourneyStrip /><CapabilityBlock /></>} />
+        </JourneyModeSelector>
+        </BuyingWorkspaceShell>
       </div>
     </div>
   );

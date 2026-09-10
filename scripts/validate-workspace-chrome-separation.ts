@@ -199,7 +199,7 @@ function main() {
       "layout.tsx", "not-found.tsx", "globals.css",
       "robots.txt", "sitemap.xml", ".well-known", "llms.txt",
       "llms-full.txt", "capabilities.json", "question-bank.json",
-      "methodology.json", "indexnow.txt", "favicon.ico",
+      "methodology.json", "openapi.json", "indexnow.txt", "favicon.ico",
     ]);
     const unexpected = entries.filter((e) => !allowedTopLevel.has(e));
     record(unexpected.length === 0, "7: no unexpected top-level entries remain directly under src/app/ (no stray pre-move route)", `unexpected=${JSON.stringify(unexpected)}`);
@@ -223,7 +223,7 @@ function main() {
     record(!/const ENGINE_H1\s*=/.test(workspacePage), "8: (workspace)/workspace/page.tsx does not re-declare ENGINE_H1", "");
     record(/from ["']@\/components\/procurement\/ProcurementEntry["']/.test(homePage), "8: (workspace)/home/page.tsx imports from ProcurementEntry.tsx", "");
     record(/from ["']@\/components\/procurement\/ProcurementEntry["']/.test(workspacePage), "8: (workspace)/workspace/page.tsx imports from ProcurementEntry.tsx", "");
-    record(/<ProcurementEntry\s*\/>/.test(homePage), "8: (workspace)/home/page.tsx renders <ProcurementEntry />", "");
+    record(/<ProcurementEntry(?:\s+guidance=|\s*\/>)/.test(homePage), "8: (workspace)/home/page.tsx renders the shared ProcurementEntry (optional server guidance)", "");
     record(/<ProcurementEntry\s*\/>/.test(workspacePage), "8: (workspace)/workspace/page.tsx renders <ProcurementEntry />", "");
   }
 

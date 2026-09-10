@@ -181,8 +181,7 @@ export async function acquireLock(key: string, ttlMs: number): Promise<string | 
  *  lock that already expired and was re-acquired by another run. */
 export async function releaseLock(key: string, token: string): Promise<void> {
   if (!kvConfigured()) return;
-  const current = (await kvRaw(["GET", key])) as string | null;
-  if (current === token) await kvRaw(["DEL", key]);
+  await kvRaw(["EVAL", "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end", 1, key, token]);
 }
 
 /** Force-clear a lock (admin escape hatch). */

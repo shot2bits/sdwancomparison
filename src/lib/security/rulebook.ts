@@ -92,6 +92,7 @@ export const SecurityRequirementInputSchema = z
     estate: z
       .object({
         users: z.number().optional(),
+        remoteUsers: z.number().int().min(1).max(500000).optional(),
         sites: z.number().optional(),
         devices: z
           .object({

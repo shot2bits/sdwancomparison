@@ -14,14 +14,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   NETIFY_NDA_TEMPLATE,
   type ProjectDetails,
-  type BuyerContext,
-  type RfpSection,
   type RfpQuestion,
   type NdaConfig,
   type NdaAcceptance,
   type ProductScope,
 } from "@/lib/rfp-types";
 import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
+import { publicationReceipt } from "@/lib/publication-receipt";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
@@ -101,7 +100,7 @@ type Evaluation = { vendor: string; vendor_slug: string | null; answered: number
 type Benchmark = { available: boolean; total_rfps?: number; top_mandatory_questions?: { name: string; count: number }[]; median_response_completeness?: number | null };
 type ConnMsg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
 type Connection = { vendor_slug: string; vendor_name: string; token: string; status: string; messages: ConnMsg[]; viewed_at?: number };
-type Suggestion = { rank: number; slug: string; name: string; score: number };
+type Suggestion = { rank: number; slug: string; name: string; score?: number };
 type ExtendedBankQuestion = {
   question_id: string;
   category_id: string;
@@ -256,7 +255,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     } catch { /* non-fatal */ }
   }
 
-  useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
+  useEffect(() => {
+    if (initialId) queueMicrotask(() => void loadProject(initialId));
+    // loadProject is intentionally tied to the route id, not to its changing closure.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialId]);
 
   // Publish auto-resume (Harry's feedback, 06/07/2026). Two paths back from
   // the sign-in round trip: (a) the amber panel is still on screen because the
@@ -268,7 +271,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project) return;
     let flagged = false;
     try { flagged = localStorage.getItem(`rfp_pending_publish_${project.id}`) === "1"; } catch { /* ignore */ }
-    if (flagged && project.status !== "published" && !publishAuthNeeded) setPublishAuthNeeded(true);
+    if (flagged && project.status !== "published" && !publishAuthNeeded) queueMicrotask(() => setPublishAuthNeeded(true));
     /* eslint-disable-next-line */
   }, [project?.id]);
   useEffect(() => {
@@ -309,7 +312,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // Sticky-bar dismissal persists for the session only.
   useEffect(() => {
     if (!project) return;
-    try { setStickyGone(sessionStorage.getItem(`rfp_publish_bar_${project.id}`) === "1"); } catch { /* ignore */ }
+    try {
+      const gone = sessionStorage.getItem(`rfp_publish_bar_${project.id}`) === "1";
+      queueMicrotask(() => setStickyGone(gone));
+    } catch { /* ignore */ }
     /* eslint-disable-next-line */
   }, [project?.id]);
 
@@ -344,16 +350,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     const p = new URLSearchParams(window.location.search);
     const w = p.get("welcome");
     if (w !== "generated" && w !== "submitting") return;
-    if (w === "generated") setGeneratedWelcome(true);
+    let email = "";
     if (w === "submitting") {
-      setSubmitFlow(true);
-      try { setPendingEmail(sessionStorage.getItem("netify_pending_email") ?? ""); } catch { /* ignore */ }
+      try { email = sessionStorage.getItem("netify_pending_email") ?? ""; } catch { /* ignore */ }
     }
-    setMode("manual");
-    fireNetifyEvent("rfp_generated", { flow: w === "submitting" ? "submit" : "review" });
-    p.delete("welcome");
-    const qs = p.toString();
-    window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    queueMicrotask(() => {
+      if (w === "generated") setGeneratedWelcome(true);
+      if (w === "submitting") {
+        setSubmitFlow(true);
+        setPendingEmail(email);
+      }
+      setMode("manual");
+      fireNetifyEvent("rfp_generated", { flow: w === "submitting" ? "submit" : "review" });
+      p.delete("welcome");
+      const qs = p.toString();
+      window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    });
   }, []);
 
   // Sign-in confirmation carried over the verify redirect (sessionStorage,
@@ -366,7 +378,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       if (!raw) return;
       sessionStorage.removeItem("netify_signin_note");
       const d = JSON.parse(raw) as { claimed?: number };
-      setSigninNote(typeof d.claimed === "number" ? d.claimed : 0);
+      const claimed = typeof d.claimed === "number" ? d.claimed : 0;
+      queueMicrotask(() => setSigninNote(claimed));
     } catch { /* ignore */ }
   }, []);
 
@@ -415,7 +428,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         }
       } catch { /* private mode */ }
     }
-  }, [project?.id]);
+  }, [project?.id, project?.status, project?.title]);
   const previewSeen = useRef(false);
   useEffect(() => {
     if (marketReport && project && project.status !== "published" && !previewSeen.current) {
@@ -424,7 +437,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     }
     /* eslint-disable-next-line */
   }, [marketReport, project?.status]);
-  useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
+  const complianceKey = project?.buyer.compliance?.join(",") ?? "";
+  useEffect(() => {
+    if (project) queueMicrotask(() => void refreshCoverage());
+    // The project id and compliance values are the refresh boundary.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, complianceKey]);
   useEffect(() => { fetch("/sase/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   // Row-8 hotfix (16 Aug 2026): only poll for supplier connections once the
   // project has actually published. Pre-publish there is nothing legitimate
@@ -434,8 +452,16 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // refreshConnections() calls elsewhere (after invite/message/publish) are
   // unaffected — they read the fresh publish result directly, not this
   // status-gated mount effect.
-  useEffect(() => { if (project && marketUnlocked) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id, marketUnlocked]);
-  useEffect(() => { if (project?.nda?.required) refreshNdaAccepts(); /* eslint-disable-next-line */ }, [project?.id, project?.nda?.required, project?.nda?.version]);
+  useEffect(() => {
+    if (project && marketUnlocked) queueMicrotask(() => void refreshConnections());
+    // Connections refresh only when project identity or unlock state changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, marketUnlocked]);
+  useEffect(() => {
+    if (project?.nda?.required) queueMicrotask(() => void refreshNdaAccepts());
+    // NDA acceptances refresh only when the project or NDA version changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, project?.nda?.required, project?.nda?.version]);
   useEffect(() => { fetch("/sase/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
@@ -706,8 +732,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           notes: "Prefilled from the SASE cost estimator (Netify SASE Methodology v2026.1).",
         };
         prefilled.current = true;
-        setMode("manual");
-        startRfp(buyer);
+        queueMicrotask(() => {
+          setMode("manual");
+          void startRfp(buyer);
+        });
       } catch {
         /* malformed prefill payloads are ignored; the builder starts clean */
       }
@@ -725,9 +753,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       site_count: p.get("sites") ? Number(p.get("sites")) : null,
       notes: p.get("notes") || "",
     };
-    setMode("manual");
-    startRfp(buyer);
-    /* eslint-disable-next-line */
+    queueMicrotask(() => {
+      setMode("manual");
+      void startRfp(buyer);
+    });
+    // This prefill is a one-time mount handoff from the URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function persist(updated: ProjectDetails, regenerate = false) {
@@ -996,19 +1027,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     // against any stale ref/race calling it anyway.
     if (!project || !marketUnlocked) return;
     try {
-      const res = await fetch("/sase/api/openapi/build_sase_shortlist", {
-        method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          sector: project.buyer.sector ?? null,
-          organisation_size: project.buyer.organisation_size ?? "any",
-          service_model: project.buyer.operating_model ?? "any",
-          required_regions: project.buyer.regions ?? [],
-          shortlist_size: 6,
-        }),
-      });
+      const res = await fetch(`/sase/api/rfp/${project.id}/report`, { headers: authHeaders() });
       if (res.ok) {
-        const data = (await res.json()) as { shortlist: Suggestion[] };
-        setSuggestions(data.shortlist);
+        const data = await res.json() as { matched_vendors?: { slug: string; name: string }[] | null };
+        setSuggestions((data.matched_vendors ?? []).map((vendor, index) => ({ ...vendor, rank: index + 1 })));
       }
     } catch { /* ignore */ }
   }
@@ -1048,7 +1070,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               sessionStorage.removeItem("netify_pending_email");
             } catch { /* ignore */ }
             setPublishAuthNeeded(false);
-            setPublishMsg("Submitted. Your RFP is with your matched vendors now; their responses will appear under \"Evaluate vendor responses\" below.");
+            setPublishMsg(publicationReceipt(true));
             refreshConnections();
             loadMarketReport();
             return;
@@ -1102,7 +1124,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         localStorage.removeItem(`rfp_publish_opts_${project.id}`);
         sessionStorage.removeItem("netify_pending_email");
       } catch { /* ignore */ }
-      setPublishMsg(`Submitted to ${data.invited?.length ?? 0} matched vendors. What happens next: they appear under "Vendors and service providers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate vendor responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
+      setPublishMsg(publicationReceipt(Boolean(data.market_unlocked)));
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
@@ -2017,7 +2039,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <div className="flex flex-wrap gap-2">
               {suggestions.filter((s) => !connections.some((c) => c.vendor_slug === s.slug)).map((s) => (
                 <button key={s.slug} onClick={() => inviteSupplier(s.slug, `We are running a SASE and SD-WAN RFP and would like ${s.name} to participate.`)} className="px-3.5 py-1.5 text-sm rounded-full border border-amber-500 bg-amber-50 hover:bg-amber-100 transition-colors">
-                  Invite {s.name} ({s.score})
+                  Invite {s.name}{s.score == null ? "" : ` (${s.score})`}
                 </button>
               ))}
             </div>
@@ -2276,7 +2298,6 @@ function CodeEntry({ defaultEmail, onVerified }: { defaultEmail: string; onVerif
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  useEffect(() => { if (defaultEmail && !addr) setAddr(defaultEmail); /* eslint-disable-next-line */ }, [defaultEmail]);
   async function submit() {
     const c = code.trim();
     const e = addr.trim();

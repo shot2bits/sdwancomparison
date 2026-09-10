@@ -1,0 +1,41 @@
+// @ts-expect-error Node 24 provides registerHooks.
+import { registerHooks } from 'node:module';
+registerHooks({resolve(s:string,c:object,n:(s:string,c:object)=>{url:string}){return s==='server-only'?{url:'data:text/javascript,export {};',shortCircuit:true}:n(s,c);}});
+import assert from 'node:assert/strict';
+import {withFakeKv} from './fake-kv-harness';
+import {aggregateFunnel} from '../src/lib/marketplace-funnel-report';
+import {analyticsPath,analyticsReferrer,analyticsProps} from '../src/lib/analytics-privacy';
+assert.equal(analyticsPath('https://netify.co.uk/sase/rfp-builder/private-id/?token=secret'),'\/sase/rfp-builder/');
+assert.equal(analyticsReferrer('https://example.test/private?secret=1'),'https://example.test');
+assert.deepEqual(analyticsProps({token:'secret',requirement:'Private text',source:'mcp',provider_count:'2'}),{source:'mcp',provider_count:'2'});
+await withFakeKv(async()=>{
+ const {recordMarketplaceFunnelEvent}=await import('../src/lib/marketplace-funnel');
+ const {kvRaw,createSession}=await import('../src/lib/rfp-store');
+ const {GET}=await import('../src/app/api/admin/buying-funnel/route');
+ for(let i=0;i<2;i++)await recordMarketplaceFunnelEvent({event:'publication_completed',project_id:'test_project',source:'private@example.test',mode:'Secret requirements',channel:'web',detail:{company:'Private Ltd',token:'secret',revision:2,board_created:true}});
+ const raw=await kvRaw(['LRANGE','marketplace:funnel:events',0,-1]) as string[];
+ assert.equal(raw.length,1);assert(!raw[0].includes('Private'));assert(!raw[0].includes('secret'));assert(!raw[0].includes('@'));assert.equal(JSON.parse(raw[0]).source,'unknown');
+ assert.equal((await GET(new Request('https://example.test'))).status,401);
+ const buyer=await createSession({role:'buyer',email:'buyer@example.test',vendor_slug:null});
+ assert.equal((await GET(new Request('https://example.test',{headers:{cookie:'netify_session='+buyer.token}}))).status,403);
+ const admin=await createSession({role:'netify',email:'support@netify.com',vendor_slug:null});
+ const response=await GET(new Request('https://example.test',{headers:{cookie:'netify_session='+admin.token}}));assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'private, no-store');
+ const text=await response.text();assert(!text.includes('test_project'));assert(!text.includes('secret'));assert.equal(JSON.parse(text).counts.publication_completed,1);
+ const now=Date.now();const stage={at:now-1000,event:'project_started',project_id:'one',source:'shortlist',mode:'quick_list',channel:'mcp'};
+ const report=aggregateFunnel([stage,stage,{...stage,event:'publication_completed',source:'unknown'},{...stage,event:'supplier_response',channel:'web'},{...stage,at:now-29*86400000,project_id:'old'},'broken'],now);
+ assert.equal(report.counts.project_started,1);assert.equal(report.counts.publication_completed,1);assert.equal(report.rows[0].source,'shortlist');assert.equal(report.rows[0].channel,'mcp');assert.equal(report.rows[0].counts.supplier_response,1);assert(!JSON.stringify(report).includes('project_id'));
+ const service=await import('../src/lib/marketplace-project-session');
+ const {saveResponse}=await import('../src/lib/rfp-store');
+ const {RfpResponseSchema}=await import('../src/lib/rfp-types');
+ const draft=await service.startMarketplaceProject({entrance_context:{version:'project-entrance/1.0.0',source:'shortlist',raw_input:{},captured_at:Date.now(),requirement_text:'Connect five manufacturing sites.',buyer_input:{product_scope:'sdwan_only',site_count:5,sector:'manufacturing',regions:['uk_ireland']}},mode:'quick_list'});
+ const reply=RfpResponseSchema.parse({id:'reply_fixture',rfp_id:draft.project_reference,vendor:'Synthetic supplier',created:Date.now(),answers:{}});
+ await saveResponse(reply);
+ let stored=await kvRaw(['LRANGE','marketplace:funnel:events',0,-1]) as string[];
+ assert.equal(stored.map(x=>JSON.parse(x)).filter(x=>x.project_id===draft.project_reference&&x.event==='supplier_response').length,0,'draft responses are not counted as submitted');
+ await saveResponse({...reply,submitted:Date.now()});await saveResponse({...reply,submitted:Date.now()});
+ stored=await kvRaw(['LRANGE','marketplace:funnel:events',0,-1]) as string[];
+ assert.equal(stored.map(x=>JSON.parse(x)).filter(x=>x.project_id===draft.project_reference&&x.event==='supplier_response').length,1,'submitted responses count once');
+ const before=global.fetch;global.fetch=async()=>{throw new Error('Storage unavailable');};
+ try {await recordMarketplaceFunnelEvent({event:'project_started',project_id:'failure',channel:'web'});}finally{global.fetch=before;}
+ console.log('PASS atomic deduplication, free-text stripping, admin-only no-store report, stage counts, preserved acquisition source and analytics failure isolation');
+});

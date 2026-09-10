@@ -5,6 +5,8 @@ import { SECURITY_TOOL_DEFINITIONS_ALL, SECURITY_TOOL_NAMES, callSecurityTool } 
 import { WORKSPACE_TOOL_DEFINITIONS, WORKSPACE_TOOL_NAMES, callWorkspaceTool } from "@/lib/mcp-workspace-tools";
 import { TOOL_ANNOTATIONS, SERVER_INSTRUCTIONS } from "@/lib/mcp-annotations";
 import { SITE_URL } from "@/lib/structured-data";
+import { mcpToolResult } from "@/lib/mcp-tool-result";
+import { sessionFromRequest } from "@/lib/auth";
 
 const PLAIN_TOOL_NAMES = new Set<string>(MCP_TOOL_DEFINITIONS.map((t) => t.name));
 
@@ -98,12 +100,19 @@ const ESTATE_RESOURCES = [
     name: "sase-cost-model",
     title: "SASE and SD-WAN cost model, machine twin",
     description:
-      "The cost and TCO model behind the estimator: categories, drivers and defensible bands. Same content as the public estimator dataset. CC BY 4.0 with attribution to Netify.",
+      "The cost and TCO model behind the estimator: categories, drivers and provisional illustrative bands. Calibration approval is outstanding; these are not validated market prices or supplier quotes. Same content as the public estimator dataset. CC BY 4.0 with attribution to Netify.",
   },
 ] as const;
 
 /** Templated twins: any curated comparison or ranking page as data. */
 const RESOURCE_TEMPLATES = [
+  {
+    uriTemplate: `${SITE_URL}/examples/{slug}/data.json`,
+    name: "sase-marketplace-example",
+    title: "Permanent synthetic marketplace example",
+    description: "A quick-list, sector, RFP or provider-comparison example with methodology versions and explicit limitations. Synthetic; never private buyer data.",
+    mimeType: "application/json",
+  },
   {
     uriTemplate: `${SITE_URL}/compare/{pair}/data.json`,
     name: "sase-vendor-comparison",
@@ -123,6 +132,7 @@ const RESOURCE_TEMPLATES = [
 ] as const;
 
 const TEMPLATE_PATTERNS: Array<{ re: RegExp; toPath: (m: RegExpMatchArray) => string }> = [
+  { re: new RegExp(`^${SITE_URL}/examples/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/examples/${m[1]}/data.json` },
   { re: new RegExp(`^${SITE_URL}/compare/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/compare/${m[1]}/data.json` },
   { re: new RegExp(`^${SITE_URL}/best/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/best/${m[1]}/data.json` },
 ];
@@ -160,6 +170,13 @@ export async function POST(req: Request) {
     return rpcError(null, -32700, "Parse error");
   }
 
+  if (!body || typeof body !== "object" || Array.isArray(body) || body.jsonrpc !== "2.0" || typeof body.method !== "string") {
+    return rpcError(null, -32600, "Invalid Request");
+  }
+  if (body.params !== undefined && (!body.params || typeof body.params !== "object" || Array.isArray(body.params))) {
+    return rpcError(body.id, -32602, "Invalid params: expected an object.");
+  }
+
   // Negotiate: honour the client's requested protocol when we support it.
   const requested = String(body.params?.protocolVersion ?? req.headers.get("mcp-protocol-version") ?? "");
   const protocol = SUPPORTED_PROTOCOLS.includes(requested) ? requested : SUPPORTED_PROTOCOLS[0];
@@ -188,6 +205,8 @@ export async function POST(req: Request) {
       if (!COST_TOOL_NAMES.has(name) && !RFP_TOOL_NAMES.has(name) && !PLAIN_TOOL_NAMES.has(name) && !SECURITY_TOOL_NAMES.has(name) && !WORKSPACE_TOOL_NAMES.has(name)) {
         return rpcError(body.id, -32602, `Unknown tool: ${name}`);
       }
+      if (!args || typeof args !== "object" || Array.isArray(args)) return rpcError(body.id, -32602, "Tool arguments must be an object.");
+      try {
       const result = WORKSPACE_TOOL_NAMES.has(name)
         ? await callWorkspaceTool(name, args)
         : SECURITY_TOOL_NAMES.has(name)
@@ -195,15 +214,13 @@ export async function POST(req: Request) {
           : COST_TOOL_NAMES.has(name)
             ? await callCostTool(name, args)
             : RFP_TOOL_NAMES.has(name)
-              ? await callRfpTool(name, args)
+              ? await callRfpTool(name, args, { verifiedBuyerEmail: await sessionFromRequest(req).then((session) => session && (session.role === "buyer" || session.role === "netify") ? session.email : undefined), requestKey: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous" })
               : await callMcpTool(name, args);
-      // Audit fix (19 July 2026): handlers signal failure as { error: ... }.
-      // Surface that as isError so agents can branch without parsing prose.
-      const failed = !!result && typeof result === "object" && (result as Record<string, unknown>).error != null;
-      return rpcResult(body.id, {
-        content: [{ type: "text", text: JSON.stringify(result) }],
-        ...(failed ? { isError: true } : {}),
-      }, protocol);
+      return rpcResult(body.id, mcpToolResult(result), protocol);
+      } catch {
+        // Execution errors belong to the tool result. Do not leak storage or credential details.
+        return rpcResult(body.id, mcpToolResult({ error: "Tool execution failed. Check the input and try again." }), protocol);
+      }
     }
     case "resources/list":
       return rpcResult(body.id, {

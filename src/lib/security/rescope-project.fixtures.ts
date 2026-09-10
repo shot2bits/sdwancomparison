@@ -8,12 +8,10 @@
 
 import { buildRescopedProject, confirmationSentence, rescopeConsentText, documentEdited } from "./rescope-project";
 import { buildSecurityProject } from "./create-project";
-import { SECURITY_FIXTURES } from "./fixtures";
 import { assertEngineArtefactsIntact } from "./generate-rfp";
 import { openSecurityGaps } from "@/lib/project-machine";
 import { buildStory } from "@/lib/project-story";
 import type { SecurityRequirementInput } from "./rulebook";
-import type { ProjectDetails } from "@/lib/rfp-types";
 
 export interface RescopeTestResult { pass: number; fail: number; failures: string[] }
 

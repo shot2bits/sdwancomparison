@@ -5,6 +5,7 @@ const root = process.cwd();
 const read = (file: string) => fs.readFileSync(path.join(root, file), "utf8");
 const route = read("src/app/api/rfp/[id]/publish/route.ts");
 const desk = read("src/components/ProjectDesk.tsx");
+const publicationError = read("src/lib/publication-error.ts");
 const board = read("src/app/(marketing)/opportunities/board/page.tsx");
 
 let failed = 0;
@@ -15,7 +16,7 @@ function check(name: string, condition: boolean) {
 
 check(
   "the publish API refuses to report success without a real board opportunity id",
-  route.includes("if (!board.opportunity_id)") && route.includes('code: "board_publication_incomplete"'),
+  route.includes("publicationCompleted({ publicBoardOpportunityId: board.opportunity_id, marketUnlockValid: marketUnlocked })") && route.includes('code: "board_publication_incomplete"'),
 );
 check(
   "an incomplete board publication is a non-2xx response and remains market locked",
@@ -23,7 +24,7 @@ check(
 );
 check(
   "the successful API contract states MarketUnlock only after the board-id guard",
-  route.includes("market_unlocked: true"),
+  route.includes("market_unlocked: marketUnlocked") && route.indexOf("market_unlocked: marketUnlocked") > route.indexOf('code: "board_publication_incomplete"'),
 );
 check(
   "the builder requires both MarketUnlock and a board id before showing publication success",
@@ -31,7 +32,9 @@ check(
 );
 check(
   "the builder has an explicit safe failure message when the board listing is absent",
-  desk.includes("The opportunity was not listed on the board. Nothing was sent"),
+  desk.includes("publicationFailureMessage(data, res.status)")
+    && publicationError.includes('code === "board_publication_incomplete"')
+    && publicationError.includes("The opportunity board entry was not created. Nothing was published or sent."),
 );
 check(
   "the success state links directly to the buyer's public notice",

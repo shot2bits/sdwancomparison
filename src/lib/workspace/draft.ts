@@ -105,6 +105,24 @@ export function mergeUpdates(
       }
     }
   }
+  // A whole-estate phrase must follow an explicitly corrected estate total.
+  // Preserve the old fact as struck history, and preserve its capability text.
+  const oldSites = prev.find((f) => !f.struck && f.path === "estate.sites");
+  const newSites = facts.find((f) => !f.struck && f.path === "estate.sites");
+  if (oldSites && newSites && oldSites.value !== newSites.value && changed.includes(newSites.id)) {
+    const totalPhrase = new RegExp(`\\bacross ${oldSites.value} sites?\\b`, "i");
+    for (const fact of facts.slice()) {
+      if (fact.struck || fact.path !== "requirements.bespoke" || typeof fact.value !== "string" || !totalPhrase.test(fact.value)) continue;
+      const value = fact.value.replace(totalPhrase, `across ${newSites.value} sites`);
+      fact.struck = true;
+      changed.push(fact.id);
+      const id = factId(fact.path, value);
+      if (!facts.some((f) => f.id === id && !f.struck)) {
+        facts.push({ ...fact, value, id, struck: false, cycle, provenance: "inferred", reason: "Whole-estate scope updated after the buyer corrected the site total." });
+        changed.push(id);
+      }
+    }
+  }
   return { facts, changed };
 }
 
@@ -211,6 +229,7 @@ export function mergeRequirementBase(
     },
     estate: {
       users: addition.estate?.users ?? base.estate?.users,
+      remoteUsers: addition.estate?.remoteUsers ?? base.estate?.remoteUsers,
       sites: addition.estate?.sites ?? base.estate?.sites,
       devices: addition.estate?.devices ?? base.estate?.devices,
       specialDevices: unionField(base.estate?.specialDevices, addition.estate?.specialDevices),
@@ -662,7 +681,7 @@ const MODEL_OPTIONS = (Object.keys(OPERATING_MODEL_LABELS) as OperatingModelId[]
 /** Map a verdict gap onto an inline answer control. */
 function gapControl(field: string, question: string, whyItMatters?: string): BriefGap | null {
   const base = { key: field, question, whyItMatters };
-  if (field === "estate.users" || field === "estate.sites") {
+  if (field === "estate.users" || field === "estate.remoteUsers" || field === "estate.sites") {
     return { ...base, path: field as AllowedPath, control: "number" };
   }
   if (field === "constraints.inHouseSocCapacity") {
@@ -719,7 +738,6 @@ export function briefModel(opts: {
   const liveOne = (path: AllowedPath) => live.filter((f) => f.path === path).slice(-1)[0];
 
   const buying = buyingOf(facts);
-  const opModel = operatingModelOf(facts);
   const securityScope = buying === "managed_security" || buying === null;
   const networkScope = buying === "sase" || buying === "sdwan" || buying === "sse";
 
@@ -763,6 +781,8 @@ export function briefModel(opts: {
       const g = gapSeg("estate.users");
       if (g) p.push(t(" with "), g, t(" staff"));
     }
+    const remoteUsers = one("estate.remoteUsers");
+    if (remoteUsers) p.push(t("; "), fs(remoteUsers), t(" remote users"));
     const regions = at("organisation.regions");
     if (regions.length) p.push(t(" across "), ...joinSegs(regions.map((r) => fs(r))));
     p.push(t("."));

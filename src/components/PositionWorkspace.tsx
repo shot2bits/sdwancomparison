@@ -173,6 +173,7 @@ export default function PositionWorkspace() {
   const firstVerdictSent = useRef(false);
   const lastRunText = useRef("");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const busyRef = useRef(false);
   const acceptedGaps = useRef<Set<string>>(new Set());
   const cycleRef = useRef(0);
   const moteId = useRef(0);
@@ -200,7 +201,7 @@ export default function PositionWorkspace() {
   const brief = useMemo(() => briefModel({ facts, verdict }), [facts, verdict]);
   const diagram = useMemo(() => diagramModel(requirement, verdict, buying), [requirement, verdict, buying]);
 
-  /* ---- Arrival: market, params, restored draft, session ---- */
+  /* ---- Arrival: market and session ---- */
   useEffect(() => {
     fetch("/sase/api/workspace/market")
       .then((r) => (r.ok ? r.json() : null))
@@ -219,45 +220,6 @@ export default function PositionWorkspace() {
       .then((s: { authenticated?: boolean }) => setSignedIn(Boolean(s.authenticated)))
       .catch(() => {});
 
-    const p = new URLSearchParams(window.location.search);
-    if (p.get("test") === "1") setTestMode(true);
-    const scopeParam = p.get("scope");
-    const seedFacts: FieldUpdate[] = [];
-    if (scopeParam && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scopeParam)) {
-      seedFacts.push({
-        path: "procurement.buying",
-        value: scopeParam === "security" ? "managed_security" : scopeParam,
-        provenance: "inferred",
-        reason: "from the link you arrived on; strike it out if wrong",
-      });
-    }
-    const q = p.get("q");
-    let base: WorkspaceFact[] = [];
-    if (!q) {
-      try {
-        const raw = window.localStorage.getItem(DRAFT_KEY);
-        if (raw) {
-          const saved = JSON.parse(raw) as { facts?: WorkspaceFact[]; added?: string[]; removed?: string[]; ts?: number };
-          if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && Array.isArray(saved.facts) && saved.facts.length) {
-            base = saved.facts;
-            setAdded(saved.added ?? []);
-            setRemoved(saved.removed ?? []);
-            setRestored(true);
-          }
-        }
-      } catch { /* a broken draft never blocks the scene */ }
-    }
-    if (base.length) {
-      factsRef.current = base;
-      setFacts(base);
-    }
-    if (seedFacts.length) applyMerge(seedFacts, "link");
-    if (q) {
-      setInput(q);
-      firstKeyAt.current = Date.now();
-      void runCycle(q, { fromLink: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ---- Persist the draft ---- */
@@ -272,7 +234,8 @@ export default function PositionWorkspace() {
   const runCycle = useCallback(
     async (text: string, opts: { fromEnter?: boolean; fromLink?: boolean } = {}) => {
       const trimmed = text.trim();
-      if (trimmed.length < 3 || busy) return;
+      if (trimmed.length < 3 || busyRef.current) return;
+      busyRef.current = true;
       lastRunText.current = trimmed;
       setBusy(true);
       setCycleError(null);
@@ -314,11 +277,61 @@ export default function PositionWorkspace() {
       } catch {
         setCycleError("The extraction service could not be reached. Your words are kept; press Enter to try again.");
       } finally {
+        busyRef.current = false;
         setBusy(false);
       }
     },
-    [busy, applyMerge, crewLog],
+    [applyMerge, crewLog],
   );
+
+  /* ---- Arrival: params and restored draft ---- */
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const test = p.get("test") === "1";
+    const scopeParam = p.get("scope");
+    const seedFacts: FieldUpdate[] = [];
+    if (scopeParam && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scopeParam)) {
+      seedFacts.push({
+        path: "procurement.buying",
+        value: scopeParam === "security" ? "managed_security" : scopeParam,
+        provenance: "inferred",
+        reason: "from the link you arrived on; strike it out if wrong",
+      });
+    }
+    const q = p.get("q");
+    let base: WorkspaceFact[] = [];
+    let savedAdded: string[] = [];
+    let savedRemoved: string[] = [];
+    if (!q) {
+      try {
+        const raw = window.localStorage.getItem(DRAFT_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw) as { facts?: WorkspaceFact[]; added?: string[]; removed?: string[]; ts?: number };
+          if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && Array.isArray(saved.facts) && saved.facts.length) {
+            base = saved.facts;
+            savedAdded = saved.added ?? [];
+            savedRemoved = saved.removed ?? [];
+          }
+        }
+      } catch { /* a broken draft never blocks the scene */ }
+    }
+    queueMicrotask(() => {
+      if (test) setTestMode(true);
+      if (base.length) {
+        factsRef.current = base;
+        setFacts(base);
+        setAdded(savedAdded);
+        setRemoved(savedRemoved);
+        setRestored(true);
+      }
+      if (seedFacts.length) applyMerge(seedFacts, "link");
+      if (q) {
+        setInput(q);
+        firstKeyAt.current = Date.now();
+        void runCycle(q, { fromLink: true });
+      }
+    });
+  }, [applyMerge, runCycle]);
 
   /* ---- Debounce per pause ---- */
   useEffect(() => {
@@ -334,7 +347,7 @@ export default function PositionWorkspace() {
   /* ---- Assess (the rulebook, client side, one truth) ---- */
   useEffect(() => {
     if (!securityScope || live.length === 0) {
-      setVerdict(null);
+      queueMicrotask(() => setVerdict(null));
       return;
     }
     let cancelled = false;
@@ -389,8 +402,10 @@ export default function PositionWorkspace() {
   useEffect(() => {
     if (saveLite !== "hidden" || signedIn || published || created) return;
     if (started && (Boolean(verdict) || live.length >= 3)) {
-      setSaveLite("shown");
-      ev("workspace_save_lite_shown", { facts: live.length });
+      queueMicrotask(() => {
+        setSaveLite("shown");
+        ev("workspace_save_lite_shown", { facts: live.length });
+      });
     }
   }, [saveLite, signedIn, published, created, verdict, live.length, started]);
 
@@ -425,8 +440,11 @@ export default function PositionWorkspace() {
   );
 
   /* ---- Fit sets, pins, readiness ---- */
-  const fitSlugs = (fit?.mode === "graded" ? fit.suppliers.map((s) => s.slug) : []).filter((s) => !removed.includes(s));
-  const shownFit = new Set([...fitSlugs, ...added].slice(0, 8));
+  const fitSlugs = useMemo(
+    () => (fit?.mode === "graded" ? fit.suppliers.map((supplier) => supplier.slug) : []).filter((slug) => !removed.includes(slug)),
+    [fit, removed],
+  );
+  const shownFit = useMemo(() => new Set([...fitSlugs, ...added].slice(0, 8)), [fitSlugs, added]);
   const pins = [...new Set([...added, ...fitSlugs])].slice(0, 5);
   const unansweredGaps = brief.openGaps;
 
@@ -437,7 +455,7 @@ export default function PositionWorkspace() {
   const ready = !signLocked && started && (securityScope ? Boolean(verdict) : true);
 
   /* ---- The signature chain (identical organs to W0) ---- */
-  async function signAndPublish() {
+  async function signAndPublish(agreedAt: number) {
     if (signLocked || !consentsOk || signStage) return;
     setSignError(null);
     if (testMode && !securityScope) {
@@ -481,7 +499,7 @@ export default function PositionWorkspace() {
                 pinned_vendors: pins,
                 notes: notesLine,
               },
-              consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" },
+              consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: agreedAt, flow: "workspace" },
             }),
           });
           const data = await res.json().catch(() => ({}));
@@ -548,7 +566,7 @@ export default function PositionWorkspace() {
   /* Scene derivations                                                   */
   /* ------------------------------------------------------------------ */
 
-  const vendors = market?.vendors ?? [];
+  const vendors = useMemo(() => market?.vendors ?? [], [market]);
   const latestEval = market?.latest_evaluation ?? "";
   const scopeForFit = fitBuying === "sse" || fitBuying === "sase" || fitBuying === "sdwan" ? fitBuying : null;
 
@@ -560,8 +578,7 @@ export default function PositionWorkspace() {
       const p = pt(a, r);
       return { v, a, p, isFit, bright: v.last_verified === latestEval && latestEval !== "" };
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vendors, latestEval, Array.from(shownFit).join(","), scopeForFit]);
+  }, [vendors, latestEval, shownFit]);
 
   const noticeLayout = useMemo(
     () =>
@@ -935,7 +952,7 @@ export default function PositionWorkspace() {
               )}
               <button
                 type="button"
-                onClick={() => void signAndPublish()}
+                onClick={() => void signAndPublish(Date.now())}
                 disabled={!consentsOk || Boolean(signStage)}
                 className="mt-1 w-full rounded-full bg-amber-500 px-5 py-2.5 text-[13px] font-bold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -974,6 +991,10 @@ export default function PositionWorkspace() {
 /* The dossier: everything answers "why"                               */
 /* ------------------------------------------------------------------ */
 
+function DossierLabel({ children }: { children: React.ReactNode }) {
+  return <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">{children}</p>;
+}
+
 function Dossier(props: {
   selection: NonNullable<Selection>;
   facts: WorkspaceFact[];
@@ -990,9 +1011,6 @@ function Dossier(props: {
 }) {
   const { selection } = props;
   const [gapVal, setGapVal] = useState("");
-  const K = ({ children }: { children: React.ReactNode }) => (
-    <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">{children}</p>
-  );
   const close = (
     <button type="button" onClick={props.onClose} className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-900">✕</button>
   );
@@ -1003,7 +1021,7 @@ function Dossier(props: {
     return (
       <div className="relative">
         {close}
-        <K>Evaluated vendor · live: dataset</K>
+        <DossierLabel>Evaluated vendor · live: dataset</DossierLabel>
         <p className="m-0 text-[13.5px] font-semibold text-zinc-900">{v.name}</p>
         <p className="m-0 mt-0.5 text-[10.5px] text-zinc-500">{v.category}</p>
         <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-zinc-600">
@@ -1028,7 +1046,7 @@ function Dossier(props: {
     return (
       <div className="relative">
         {close}
-        <K>Open on the board · live</K>
+        <DossierLabel>Open on the board · live</DossierLabel>
         <p className="m-0 text-[13px] font-semibold text-zinc-900">{n.title}</p>
         <p className="m-0 mt-1 text-[10.5px] text-zinc-500">
           {n.scope.join(", ")}
@@ -1043,7 +1061,7 @@ function Dossier(props: {
     return (
       <div className="relative">
         {close}
-        <K>Only you can answer this</K>
+        <DossierLabel>Only you can answer this</DossierLabel>
         <p className="pw-serif m-0 mb-2 text-[13px] italic leading-relaxed text-zinc-900">{g.question}</p>
         {g.path && g.control === "chips" && g.options ? (
           <div className="flex flex-wrap gap-1.5">
@@ -1078,7 +1096,7 @@ function Dossier(props: {
     return (
       <div className="relative">
         {close}
-        <K>The artefact · a printout of your position</K>
+        <DossierLabel>The artefact · a printout of your position</DossierLabel>
         <pre className="m-0 max-h-64 overflow-auto whitespace-pre-wrap text-[10px] leading-relaxed text-zinc-700">{props.briefTextValue()}</pre>
         <p className="m-0 mt-1.5 text-[9.5px] text-zinc-400">The published document is generated by the engine at your signature; this is the position as it stands now.</p>
       </div>
@@ -1088,7 +1106,7 @@ function Dossier(props: {
   return (
     <div className="relative">
       {close}
-      <K>Your position · {props.meter.percent}% in your own words</K>
+      <DossierLabel>Your position · {props.meter.percent}% in your own words</DossierLabel>
       <div className="max-h-56 space-y-1 overflow-auto">
         {props.facts.map((f) => (
           <div key={f.id} className="flex items-baseline justify-between gap-2 border-t border-zinc-100 pt-1 text-[11px]">

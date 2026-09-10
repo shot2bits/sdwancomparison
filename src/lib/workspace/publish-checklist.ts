@@ -101,7 +101,7 @@ export function persistedEssentialBaselineChecklist(input: {
       {
         key: "organisation_scale",
         label: "Organisation and scale",
-        done: hasFact("organisation.sector") && hasFact("estate.sites") && hasFact("organisation.regions") && hasFact("estate.users"),
+        done: hasFact("organisation.sector") && hasFact("estate.sites") && hasFact("organisation.regions") && (hasFact("estate.users") || hasFact("estate.remoteUsers")),
       },
       { key: "solution_scope", label: "Solution scope", done: Boolean(buying) },
       {

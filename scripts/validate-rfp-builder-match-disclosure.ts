@@ -290,20 +290,22 @@ function partB9() {
   const stepIndex = (label: string) => publishLibSrc.indexOf(label);
   const idxGate = stepIndex("if (gate.blocked) throw new DeclinedApprovalError(gate.confirmationText);");
   const idxStepB = stepIndex("// STEP B (Robert's lettering): compile and persist an immutable frozen");
+  const idxProviderSeal = stepIndex("// Seal the exact published Neon provider revisions");
   const idxStepC = stepIndex("// STEP C: create the PUBLIC Opportunities Board listing bound to that");
   const idxListOnBoardFalse = stepIndex("if (opts.list_on_board === false) {");
-  const idxStepD = stepIndex("// STEP D: persist the matching basis and invitation plan for");
+  const idxStepD = stepIndex("// STEP D was sealed before the board write.");
   const idxStepE = stepIndex("// STEP E: atomically/finally commit MarketUnlock -- the ONLY step that");
   const idxCommitCall = stepIndex("await commitMarketUnlock({");
   const idxStepF = stepIndex("// STEP F: transition the project to published -- ONLY NOW, strictly");
   const idxStepG = stepIndex("// STEP G: create invitations idempotently from the frozen invitation");
   const idxInviteSupplierCall = stepIndex("const r = await inviteSupplier(");
 
-  expect([idxGate, idxStepB, idxStepC, idxStepD, idxStepE, idxStepF, idxStepG].every((i) => i >= 0), "[B9] every lettered saga step (B-G) is present in executePublish()'s source, in addition to the unchanged D5 gate");
+  expect([idxGate, idxStepB, idxProviderSeal, idxStepC, idxStepD, idxStepE, idxStepF, idxStepG].every((i) => i >= 0), "[B9] every lettered saga step (B-G) and the provider evidence seal are present in executePublish()'s source, in addition to the unchanged D5 gate");
   expect(idxGate < idxStepB, "[B9] the D5 declined-approval gate runs BEFORE step B (freezing the revision) -- moved up, still ahead of every market-facing effect");
-  expect(idxStepB < idxStepC, "[B9] step B (freeze the FrozenRevision) runs BEFORE step C (create the board Opportunity)");
-  expect(idxStepC < idxListOnBoardFalse && idxListOnBoardFalse < idxStepD, "[B9] the list_on_board:false branch is decided AS PART OF step C, before step D ever runs -- no Opportunity, no matching basis computed for a request that never asked to list");
-  expect(idxStepD < idxStepE, "[B9] step D (persist the invitation plan) runs BEFORE step E (commit MarketUnlock)");
+  expect(idxStepB < idxProviderSeal && idxProviderSeal < idxStepC, "[B9] the FrozenRevision and exact provider evidence are persisted BEFORE step C creates the board Opportunity");
+  expect(idxStepC < idxListOnBoardFalse && idxListOnBoardFalse < idxStepD, "[B9] the list_on_board:false branch is decided AS PART OF step C before the sealed plan is consumed");
+  expect(idxStepD < idxStepE, "[B9] step D verifies the sealed invitation plan BEFORE step E commits MarketUnlock");
+  expect(stepIndex("getStrictLiveShortlistDataset()") < stepIndex("listRfpOnBoard(working, sessionEmail"), "[B9] the strict Neon provider source is loaded before any public board write");
   expect(idxStepE < idxCommitCall && idxCommitCall < idxStepF, "[B9] the ACTUAL commitMarketUnlock() call sits inside step E, strictly BEFORE step F (the project's status transition) -- round 2's literal fix for finding 4: status never moves before the unlock verifies");
   expect(idxStepF < idxStepG && idxStepG < idxInviteSupplierCall, "[B9] step F (status transition) runs BEFORE step G's real inviteSupplier() calls -- invitations are the LAST supplier-facing effect, never earlier");
   expect(!/listRfpOnBoard\(working, sessionEmail, \{ publishedRevisionId \}\);\s*\n\s*board = \{ listed: true/.test(publishLibSrc.slice(0, idxListOnBoardFalse)), "[B9] listRfpOnBoard() is never called before the list_on_board:false decision -- the skip is unconditional, not a post-hoc discard of a real listing");
@@ -556,7 +558,7 @@ async function partD(kvServer: { outage: () => Promise<void>; restore: () => Pro
   const { GET: ndaRoute } = await import("../src/app/api/rfp/[id]/nda/route");
   const { listRfpOnBoard, BoardQualityGateError } = await import("../src/lib/rfp-publish");
   const { commitMarketUnlock, getMarketUnlock, isMarketUnlocked, MarketUnlockBindingError } = await import("../src/lib/market-unlock");
-  const { getProject, saveProject, saveOpportunity, getOpportunity, listPublicOpportunities, kvGetJson, kvSetJson, newId, createSession } = await import("../src/lib/rfp-store");
+  const { getProject, saveProject, saveOpportunity, getOpportunity, listPublicOpportunities, kvGetJson, newId, createSession } = await import("../src/lib/rfp-store");
   const { rfpContentSnapshot, contentHash, saveFrozenRevision, getFrozenRevision } = await import("../src/lib/published-snapshot");
   const { OpportunitySchema } = await import("../src/lib/opportunity-types");
 

@@ -8,7 +8,8 @@
  * resolved in favour of honesty).
  */
 
-import { getAllVendors, getVendorGroup, type VendorGroup } from "@/lib/vendors";
+import type { ShortlistVendor } from "@/lib/shortlist-core";
+import { getShortlistDataset, getVendorGroup, type VendorGroup } from "@/lib/vendors";
 
 export type MatchResult = {
   count: number;
@@ -51,12 +52,15 @@ function regionCovered(value: unknown): boolean {
   return v !== "" && v !== "no" && v !== "none" && v !== "unknown";
 }
 
-export function matchSuppliers(opts: { scope?: string; regions?: string[]; model?: string; preferred_regions?: string[] }): MatchResult {
+export function matchSuppliers(
+  opts: { scope?: string; regions?: string[]; model?: string; preferred_regions?: string[] },
+  vendors: ShortlistVendor[] = getShortlistDataset(),
+): MatchResult {
   const scope = normaliseScope(opts.scope ?? "any");
   const regions = (opts.regions ?? []).filter(Boolean);
   const model = (opts.model ?? "any").toLowerCase();
 
-  const all = getAllVendors();
+  const all = vendors;
   const matched = all.filter((v) => {
     const group = getVendorGroup(v);
     if (!scopeMatches(scope, v.category, group)) return false;

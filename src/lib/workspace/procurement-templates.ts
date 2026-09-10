@@ -314,7 +314,7 @@ export function receiptIsExplainedByClauses(receipt: ReceiptLike, clauses: Claus
  *  a sentence that mixes in a genuine, separate requirement alongside the
  *  buyer's identity/scale keeps enough uncovered words to survive and
  *  still reach the ordinary Additional-requirements path. */
-const ORG_IDENTITY_SCALE_PATHS = new Set(["organisation.sector", "organisation.regions", "organisation.name", "estate.sites", "estate.users"]);
+const ORG_IDENTITY_SCALE_PATHS = new Set(["organisation.sector", "organisation.regions", "organisation.name", "estate.sites", "estate.users", "estate.remoteUsers"]);
 
 function receiptIsOrgIdentityAndScale(receipt: ReceiptLike, facts: WorkspaceFact[]): boolean {
   const words = significantWords(receipt.text);
@@ -452,6 +452,22 @@ function complianceClauses(facts: WorkspaceFact[]): ClauseDraft[] {
   const out: ClauseDraft[] = [];
   for (const f of standing(facts).filter((x) => x.path === "constraints.complianceRequirements")) {
     const label = COMPLIANCE_CLAUSE_LABEL[String(f.value)] ?? String(f.value);
+    if (f.value === "nis2") {
+      const explicitMandatory = f.provenance === "stated" && /\b(?:must|required|mandatory|shall)\b/i.test(f.quote ?? "") && !/\b(?:not|isn't|is not|need not)\b/i.test(f.quote ?? "");
+      out.push({
+        section: "security",
+        statement: `Suppliers ${explicitMandatory ? "must" : "should"} explain how the proposed service supports the buyer's NIS2 requirements and provide relevant evidence.`,
+        supplierResponse: ["Describe the applicable scope, responsibilities and supporting controls.", "Identify limitations and provide dated evidence for the claims made."],
+        evidence: ["Relevant control and assessment evidence", "Scope and responsibility statement"],
+        acceptanceTest: "The buyer reviews the evidence and confirms applicability and acceptance criteria.",
+        mandatory: explicitMandatory,
+        sourceFactIds: [f.id], origin: f.provenance === "stated" ? "buyer" : "netify",
+        reason: "NIS2 was mentioned; certification or award conditions were not inferred.",
+        quote: f.quote ?? null, sourceTurnIds: [], sourceNotedIds: [],
+        templateKey: "compliance:nis2", templateId: "compliance-requirement",
+      });
+      continue;
+    }
     out.push({
       section: "security",
       statement: `Suppliers must evidence current ${label} compliance for the service they deliver.`,
@@ -2294,7 +2310,7 @@ export function buildArchitecture(input: {
   const edges: ArchitectureEdge[] = [];
 
   if (requirement.estate?.sites) nodes.push({ id: "sites", label: `${requirement.estate.sites} sites`, kind: "site", sourceFactIds: [], sourceClauseIds: [] });
-  if (requirement.estate?.users) nodes.push({ id: "remote-users", label: `${requirement.estate.users} remote users`, kind: "user", sourceFactIds: [], sourceClauseIds: [] });
+  if (requirement.estate?.users) nodes.push({ id: "remote-users", label: `${requirement.estate.users} users in scope`, kind: "user", sourceFactIds: [], sourceClauseIds: [] });
 
   /** Stage A closure pass, item 2 reproduction: this node used to exist
    *  ONLY when the buyer stated an EXISTING network (estate.

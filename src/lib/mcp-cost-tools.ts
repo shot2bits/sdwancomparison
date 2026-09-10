@@ -1,3 +1,4 @@
+import {CIRCUIT_TOOL_DEFINITIONS,callCircuitTool} from "./circuit-agent";
 /**
  * MCP tools for the SASE cost and TCO capability (Phase 1 of the agentic
  * cost build). Follows the established pattern: tool definitions plus a
@@ -16,12 +17,14 @@ import {
   DELIVERY_MODEL_COMPARISON,
 } from "@/lib/cost-page-copy";
 
-const DISCLAIMER =
-  "Indicative bands from the Netify SASE Methodology v2026.1 calibration, not vendor quotes.";
+import { ESTIMATE_DISCLOSURE, ESTIMATE_USERS_HELP } from "@/lib/estimator/input";
+
+const DISCLAIMER = ESTIMATE_DISCLOSURE;
 
 const SUPPRESSION_THRESHOLD = 20;
 
 export const MCP_COST_TOOL_DEFINITIONS = [
+ ...CIRCUIT_TOOL_DEFINITIONS,
   {
     name: "netify_estimate_sase_tco",
     description:
@@ -29,7 +32,7 @@ export const MCP_COST_TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object",
       properties: {
-        users: { type: "integer", minimum: 50, maximum: 250000 },
+        users: { type: "integer", minimum: 50, maximum: 250000, description: ESTIMATE_USERS_HELP },
         sites: { type: "integer", minimum: 1, maximum: 5000 },
         regions: {
           type: "array",
@@ -135,6 +138,7 @@ function demandStatsPayload(agg: Awaited<ReturnType<typeof getDemandAggregate>>)
 }
 
 export async function callCostTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+  if (name === "netify_validate_circuit_request" || name === "netify_read_circuit_responses") return callCircuitTool(name,args);
   switch (name) {
     case "netify_estimate_sase_tco": {
       const parsed = EstimateInput.safeParse(args);

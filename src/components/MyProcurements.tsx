@@ -88,44 +88,63 @@ type Row = {
 };
 
 export default function MyProcurements() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [rfps, setRfps] = useState<Rfp[] | null>(null);
   const [opps, setOpps] = useState<MineOpp[] | null>(null);
 
   useEffect(() => {
+    let active = true;
     const loadRfps = () =>
       fetch("/sase/api/rfp/mine")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (!d?.rfps) return;
+          if (!active) return;
+          if (!d?.rfps) { setLoadError(true); return; }
           setRfps(d.rfps as Rfp[]);
           try { window.dispatchEvent(new Event("netify:rfps-changed")); } catch { /* ignore */ }
         })
-        .catch(() => {});
+        .catch(() => { if (active) setLoadError(true); });
     const loadOpps = () =>
       fetch("/sase/api/opportunity/mine")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (!d?.opportunities) { setOpps([]); return; }
+          if (!active) return;
+          if (!d?.opportunities) { setLoadError(true); return; }
           const list = d.opportunities as MineOpp[];
           for (const o of list) {
             try { localStorage.setItem(`opp_btok_${o.id}`, o.buyer_token); } catch { /* ignore */ }
           }
           setOpps(list);
         })
-        .catch(() => setOpps([]));
-    const drafts = localDrafts();
-    if (drafts.length > 0) {
-      fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) })
-        .catch(() => {})
-        .then(() => { loadRfps(); loadOpps(); });
-    } else {
-      loadRfps();
-      loadOpps();
-    }
+        .catch(() => { if (active) setLoadError(true); });
+
+    const loadPrivateRecords = async () => {
+      const session = await fetch("/sase/api/auth/session", { cache: "no-store" })
+        .then((response) => response.ok ? response.json() as Promise<{ authenticated?: boolean }> : { authenticated: false })
+        .catch(() => ({ authenticated: false }));
+      if (!active) return;
+      if (!session.authenticated) {
+        return;
+      }
+
+      setAuthenticated(true);
+      const drafts = localDrafts();
+      if (drafts.length > 0) {
+        await fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) }).catch(() => {});
+        if (!active) return;
+      }
+      await Promise.all([loadRfps(), loadOpps()]);
+    };
+
+    void loadPrivateRecords();
+    return () => { active = false; };
   }, []);
 
   // Signed out (or still loading the projects list): render nothing.
-  if (!rfps) return null;
+  if (!authenticated) return null;
+  if (loadError) return <p role="alert">Your projects could not be loaded. Refresh the page to try again.</p>;
+  if (!rfps || !opps) return null;
 
   // Signed in with an empty account: the launchpad, not an empty room
   // (r.wade@dadesigngroup.com, 18 July 2026, signed in and left a blank page).
@@ -135,22 +154,22 @@ export default function MyProcurements() {
         <h2 className="text-xl mb-1">Your account is ready. Here is what it does.</h2>
         <p className="text-sm text-[var(--ink-700)] mb-3 max-w-2xl">
           Describe your project once and Netify builds it into a living Statement of Requirements you can
-          raise to an RFI or a full RFP. Publishing is free and pays out instantly: an indicative market price
-          band for your estate, your document as Word and PDF, and structured responses from your matched
-          vendors, side by side, with pricing private to you. You stay anonymous until you reply, and only
-          vetted vendors and service providers can respond.
+          raise to an RFI or a full RFP. Publishing is free and unlocks supplier matching and your Word and PDF documents.
+          Suppliers can then submit structured responses for you to compare, with pricing private to you.
+          Responses arrive when suppliers submit them; they are not instant or guaranteed.
+          Your identity stays private until you choose to share it. Only vetted vendors and service providers can respond.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           {/* The One Door (Harry, 24 July 2026): the desk at the apex is the
               only buyer entrance. */}
-          <a href="https://netify.co.uk/" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
+          <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
             Describe your first project
           </a>
           <Link href="/shortlist" className="text-sm underline text-[var(--ink-700)]">
             Not ready? Compare the market first
           </Link>
         </div>
-        <p className="mt-2 text-xs text-[var(--ink-600,#555)]">No obligation to award and no sales calls until you reply.</p>
+        <p className="mt-2 text-xs text-[var(--ink-600,#555)]">No obligation to award. You control when to share your contact details.</p>
       </div>
     );
   }

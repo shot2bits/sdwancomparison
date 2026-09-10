@@ -26,16 +26,17 @@ const record = (pass: boolean, label: string, detail = "") => {
 };
 
 /** What the real extractor landed for the two count paths. */
-function counts(text: string): { sites?: number; users?: number } {
-  const out: { sites?: number; users?: number } = {};
+function counts(text: string): { sites?: number; users?: number; remoteUsers?: number } {
+  const out: { sites?: number; users?: number; remoteUsers?: number } = {};
   for (const u of deterministicExtract(text)) {
     if (u.path === "estate.sites") out.sites = u.value as number;
     if (u.path === "estate.users") out.users = u.value as number;
+    if (u.path === "estate.remoteUsers") out.remoteUsers = u.value as number;
   }
   return out;
 }
 
-type Case = { text: string; sites?: number; users?: number; why: string };
+type Case = { text: string; sites?: number; users?: number; remoteUsers?: number; why: string };
 
 /* Every expectation below is the reading a human gives the sentence. */
 const CASES: Case[] = [
@@ -50,7 +51,7 @@ const CASES: Case[] = [
   { text: "220 small regional branch offices in the UK", sites: 220, why: "three qualifiers" },
 
   // --- STILL WORKS (the one-qualifier and bare forms that always did) ---
-  { text: "50 remote users", users: 50, why: "one qualifier, the original sizing" },
+  { text: "50 remote users", remoteUsers: 50, why: "one qualifier, the original sizing" },
   { text: "38 stores", sites: 38, why: "bare noun" },
   { text: "12 sites", sites: 12, why: "bare noun" },
   { text: "60 clinics", sites: 60, why: "the 31 Jul clinics addition" },
@@ -93,8 +94,8 @@ const CASES: Case[] = [
 function main() {
   for (const c of CASES) {
     const got = counts(c.text);
-    const want = { sites: c.sites, users: c.users };
-    const ok = got.sites === want.sites && got.users === want.users;
+    const want = { sites: c.sites, users: c.users, remoteUsers: c.remoteUsers };
+    const ok = got.sites === want.sites && got.users === want.users && got.remoteUsers === want.remoteUsers;
     record(ok, `${c.why}`, `"${c.text}" -> ${JSON.stringify(got)} (want ${JSON.stringify(want)})`);
   }
 

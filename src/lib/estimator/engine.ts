@@ -4,27 +4,10 @@
  * All economics live in data/estimator-bands-2026-1.json; nothing is priced in code.
  * Output is a band [low, high], never a point figure, and never a vendor quote.
  */
-import { z } from "zod";
 import bands from "./data/estimator-bands-2026-1.json";
-
-export const RegionEnum = z.enum([
-  "uk-europe",
-  "north-america",
-  "apac",
-  "middle-east-africa",
-  "latam",
-]);
-
-export const EstimateInput = z.object({
-  users: z.number().int().min(50).max(250000),
-  sites: z.number().int().min(1).max(5000),
-  regions: z.array(RegionEnum).nonempty().max(5)
-    .refine((r) => new Set(r).size === r.length, "regions must be unique"),
-  securityDepth: z.enum(["sse-only", "full-sase", "full-sase-plus-advanced"]),
-  deliveryModel: z.enum(["managed", "co-managed", "diy"]),
-  termYears: z.union([z.literal(1), z.literal(3), z.literal(5)]),
-});
-export type EstimateInputT = z.infer<typeof EstimateInput>;
+import { EstimateInput, ESTIMATE_DISCLOSURE, type EstimateInputT } from "./input";
+export { EstimateInput, RegionEnum } from "./input";
+export type { EstimateInputT } from "./input";
 
 export type Band = [number, number];
 
@@ -46,7 +29,7 @@ export interface EstimateResult {
   notes: string[];
 }
 
-const B = bands as any;
+const B = bands;
 
 function volumeMultiplier(users: number): Band {
   for (const tier of B.volumeMultiplierByUsers) {
@@ -69,7 +52,8 @@ const band = (o: { low: number; high: number }): Band => [o.low, o.high];
 /** Core estimate at a given term (used for both the chosen-term monthly view and the fixed 3-year TCO). */
 function coreMonthly(input: EstimateInputT, termYears: 1 | 3 | 5) {
   const vol = volumeMultiplier(input.users);
-  const term = band(B.termMultiplier[String(termYears)]);
+  const termKey = String(termYears) as "1" | "3" | "5";
+  const term = band(B.termMultiplier[termKey]);
 
   // Per-user licensing, split so the driver attribution is honest
   const network = scale(mul(band(B.perUserMonthly.baseNetworking), vol), input.users);
@@ -155,7 +139,7 @@ export function estimate(raw: unknown): EstimateResult {
     },
     oneOffImplementationBandGBP: roundBand(chosen.oneOff, rT),
     methodologyVersion: B.methodologyVersion,
-    disclaimer: B.disclaimer,
+    disclaimer: B.assumptionReviewRequired ? ESTIMATE_DISCLOSURE : B.disclaimer,
     notes,
   };
 }

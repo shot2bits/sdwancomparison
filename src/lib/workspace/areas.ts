@@ -21,7 +21,7 @@
  * responses) and derives from the sign chain's real state.
  */
 
-import type { BriefGap, WorkspaceFact } from "@/lib/workspace/draft";
+import type { WorkspaceFact } from "@/lib/workspace/draft";
 import { TAXONOMY } from "@/lib/workspace/taxonomy";
 
 export type AreaState = "example" | "stated" | "confirmed" | "suggested" | "needs_attention" | "excluded";

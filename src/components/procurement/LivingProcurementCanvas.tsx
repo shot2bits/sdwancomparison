@@ -147,7 +147,6 @@ export default function LivingProcurementCanvas({
      as SectionOutline a few hundred lines below, so the headline fraction
      and the list it summarises are the same data by construction. */
   const progress = outline && outline.length > 0 ? outlineProgress(outline) : null;
-  const circumference = 2 * Math.PI * 27;
   const tabRefs = useRef<Partial<Record<ProcurementView, HTMLButtonElement | null>>>({});
 
   /** Full WAI-ARIA tabs keyboard pattern (correction round, Robert, 14

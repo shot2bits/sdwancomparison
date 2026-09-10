@@ -114,7 +114,6 @@ export default function VendorsPage() {
               {vendors.map((v) => {
                 const yesCount = v.score_summary.yes_count;
                 const totalFeatures = 40;
-                const yesPct = Math.round((yesCount / totalFeatures) * 100);
                 return (
                   <Link
                     key={v.slug}

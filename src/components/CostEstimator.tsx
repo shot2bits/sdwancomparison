@@ -12,9 +12,11 @@
  * following the established cross-repo widget mechanism.
  */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Continuation from "@/components/Continuation";
 import { deriveContinuationCost } from "@/lib/continuation/derive";
+
+import { EstimateInput, ESTIMATE_DISCLOSURE, ESTIMATE_USERS_HELP } from "@/lib/estimator/input";
 
 type Band = [number, number];
 
@@ -54,11 +56,8 @@ function band(b: Band): string {
   return `${gbp(b[0])} to ${gbp(b[1])}`;
 }
 
-function base64url(obj: unknown): string {
-  return btoa(JSON.stringify(obj)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
 export function CostEstimator() {
+  const requestVersion = useRef(0);
   const [users, setUsers] = useState(1000);
   const [sites, setSites] = useState(20);
   const [regions, setRegions] = useState<string[]>(["uk-europe"]);
@@ -72,6 +71,13 @@ export function CostEstimator() {
   const inputs = { users, sites, regions, securityDepth, deliveryModel, termYears };
 
   async function run() {
+    const parsed = EstimateInput.safeParse(inputs);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Check the estimate inputs.");
+      setResult(null);
+      return;
+    }
+    const version = ++requestVersion.current;
     setBusy(true);
     setError(null);
     try {
@@ -81,6 +87,7 @@ export function CostEstimator() {
         body: JSON.stringify(inputs),
       });
       const data = await res.json();
+      if (version !== requestVersion.current) return;
       if (!res.ok) {
         setError(data?.error ?? "The estimate could not be calculated. Check the inputs.");
         setResult(null);
@@ -88,13 +95,17 @@ export function CostEstimator() {
         setResult(data as EstimateResult);
       }
     } catch {
+      if (version !== requestVersion.current) return;
       setError("The estimator is unavailable right now. Try again shortly.");
     } finally {
       setBusy(false);
     }
   }
 
+  function clearEstimate() { requestVersion.current += 1; setResult(null); setError(null); }
+
   function toggleRegion(key: string) {
+    clearEstimate();
     setRegions((r) => (r.includes(key) ? r.filter((x) => x !== key) : [...r, key]));
   }
 
@@ -102,20 +113,22 @@ export function CostEstimator() {
     <section id="estimator" aria-label="SASE cost and TCO estimator" className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6">
       <h3 className="text-lg font-semibold text-zinc-900">SASE cost and TCO estimator</h3>
       <p className="mt-1 text-sm text-zinc-600">
-        Indicative bands from the Netify SASE Methodology v2026.1 calibration, not vendor quotes.
+        {ESTIMATE_DISCLOSURE}
       </p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="font-medium text-zinc-800">Users</span>
+          <span className="font-medium text-zinc-800">Licensed users</span>
           <input
             type="number"
+            aria-describedby="estimate-users-help"
             min={50}
             max={250000}
             value={users}
-            onChange={(e) => setUsers(Number(e.target.value))}
+            onChange={(e) => { clearEstimate(); setUsers(Number(e.target.value)); }}
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
           />
+          <span id="estimate-users-help" className="mt-1 block text-xs text-zinc-600">{ESTIMATE_USERS_HELP}</span>
         </label>
         <label className="block text-sm">
           <span className="font-medium text-zinc-800">Sites</span>
@@ -124,7 +137,7 @@ export function CostEstimator() {
             min={1}
             max={5000}
             value={sites}
-            onChange={(e) => setSites(Number(e.target.value))}
+            onChange={(e) => { clearEstimate(); setSites(Number(e.target.value)); }}
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
           />
         </label>
@@ -147,7 +160,7 @@ export function CostEstimator() {
           <span className="font-medium text-zinc-800">Security depth</span>
           <select
             value={securityDepth}
-            onChange={(e) => setSecurityDepth(e.target.value)}
+            onChange={(e) => { clearEstimate(); setSecurityDepth(e.target.value); }}
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 bg-white"
           >
             <option value="sse-only">SSE only</option>
@@ -159,7 +172,7 @@ export function CostEstimator() {
           <span className="font-medium text-zinc-800">Delivery model</span>
           <select
             value={deliveryModel}
-            onChange={(e) => setDeliveryModel(e.target.value)}
+            onChange={(e) => { clearEstimate(); setDeliveryModel(e.target.value); }}
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 bg-white"
           >
             <option value="managed">Managed</option>
@@ -171,7 +184,7 @@ export function CostEstimator() {
           <span className="font-medium text-zinc-800">Term</span>
           <select
             value={termYears}
-            onChange={(e) => setTermYears(Number(e.target.value))}
+            onChange={(e) => { clearEstimate(); setTermYears(Number(e.target.value)); }}
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 bg-white"
           >
             <option value={1}>1 year</option>
@@ -190,7 +203,7 @@ export function CostEstimator() {
         {busy ? "Calculating…" : "Estimate cost bands"}
       </button>
 
-      {error && <p className="mt-3 text-sm text-red-700">{error}</p>}
+      {error && <div role="alert" className="mt-3 text-sm text-red-700"><p>{error}</p>{users < 50 && <a className="underline" href="/sase-sd-wan-rfp-builder/?journey=quick_list">Start a project brief for supplier pricing</a>}</div>}
 
       {result && (
         <div className="mt-5 border-t border-zinc-200 pt-4">

@@ -10,6 +10,7 @@ import { SourceLedgerEntrySchema } from "@/lib/workspace/source-ledger";
 import { DecisionLedgerEntrySchema } from "@/lib/workspace/decision-ledger";
 import { LivingProcurementDocumentSchema } from "@/lib/workspace/procurement-document";
 import { WorkspaceFactSchema, ReceiptLikeSchema } from "@/lib/workspace/envelope-schemas";
+import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -189,6 +190,49 @@ export const ProjectConsentSchema = z.object({
 }).strict();
 export type ProjectConsent = z.infer<typeof ProjectConsentSchema>;
 
+export const PROJECT_JOURNEY_MODES = ["quick_list", "find_providers", "build_rfp", "validate_rfp"] as const;
+export type ProjectJourneyMode = (typeof PROJECT_JOURNEY_MODES)[number];
+
+export const ProjectJourneySchema = z.object({
+  contract_version: z.literal("project-journey/1.0.0"),
+  source: z.enum(["rfp_builder", "shortlist", "marketplace", "sector", "mcp"]),
+  mode: z.enum(PROJECT_JOURNEY_MODES),
+  source_url: z.string(),
+  started_at: z.number(),
+}).strict();
+
+export const SectorProfileStateSchema = z.object({
+  profile_version: z.string(),
+  sector: z.string(),
+  source_url: z.string(),
+  recommendations: z.array(z.object({
+    requirement_code: z.string(),
+    state: z.enum(["recommended", "confirmed", "rejected", "deferred"]),
+    reason: z.string(),
+  }).strict()),
+}).strict();
+
+export const ProviderMatchPreviewSchema = z.object({
+  methodology_version: z.string(),
+  dataset_versions: z.array(z.string()),
+  considered_count: z.number().int().min(0),
+  eligible_technology_count: z.number().int().min(0),
+  eligible_managed_provider_count: z.number().int().min(0),
+  meets_all_mandatory_count: z.number().int().min(0),
+  capability_coverage: z.array(z.object({ code: z.string(), supported_provider_count: z.number().int().min(0) }).strict()),
+  unresolved_requirements: z.array(z.string()),
+  calculated_at: z.number(),
+  project_revision: z.number().int().min(0),
+}).strict();
+
+export const ProjectMarketplaceStateSchema = z.object({
+  contract_version: z.literal("project-marketplace-state/1.0.0"),
+  publication_status: z.enum(["draft", "prepared", "publishing", "published", "failed", "withdrawn"]),
+  board_opportunity_id: z.string().nullable(),
+  market_unlock_status: z.enum(["locked", "eligible", "unlocked"]),
+  server_updated_at: z.number(),
+}).strict();
+
 export const ProjectDetailsSchema = z.object({
   id: z.string(),
   created: z.number(),
@@ -203,6 +247,23 @@ export const ProjectDetailsSchema = z.object({
   // Creation source (20 July 2026): segments the funnel honestly. "wizard"
   // = the UI, "mcp" = agent-created via tools, "unknown" = pre-stamp records.
   source: z.string().default("unknown"),
+  /**
+   * Step 2 marketplace foundation: lossless, versioned provenance for the
+   * input that originated this Project. Optional so every historic KV row
+   * remains readable without migration. The loose legacy `source` string
+   * stays unchanged for compatibility; new readers prefer this block.
+   */
+  entrance_context: ProjectEntranceContextSchema.optional(),
+  /** Versioned journey attribution shared by every discovery entrance. */
+  journey: ProjectJourneySchema.optional(),
+  /** Sector recommendations remain unconfirmed until the buyer decides each one. */
+  sector_profile: SectorProfileStateSchema.optional(),
+  /** Aggregate-only server projection. It can never contain provider identities. */
+  match_preview: ProviderMatchPreviewSchema.optional(),
+  /** Server-owned publication/unlock projection; write routes strip client copies. */
+  marketplace_state: ProjectMarketplaceStateSchema.optional(),
+  /** Optimistic revision for shared marketplace/shortlist/sector autosave. */
+  marketplace_revision: z.number().int().min(0).default(0),
   owner_email: z.string().default(""), // buyer account that owns this RFP (private, never in public projection); empty for anonymous drafts
   methodology_version: z.string().default("2026.1"),
   nda: NdaConfigSchema.default({ required: false, source: "template", text: "", link: "", version: 1, updated: 0 }), // defaulted so RFPs created before NDAs still validate

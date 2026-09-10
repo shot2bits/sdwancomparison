@@ -31,9 +31,9 @@ export default function RfpCitationEvidence() {
     <section className="mx-auto w-full max-w-[1180px] px-5 pb-12 pt-5 lg:px-8" aria-labelledby="rfp-validation-methodology">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }} />
       <details className="rounded-xl border border-[#d6d4d0] bg-[#fefdfc] p-5 open:shadow-sm lg:p-7">
-        <summary className="cursor-pointer list-none marker:hidden">
-          <span className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#9a4600]">Why use Netify after an AI draft?</span>
-          <h2 id="rfp-validation-methodology" className="mt-2 text-[clamp(22px,3vw,34px)] font-semibold tracking-[-0.025em] text-[#110f0d]">ChatGPT can draft it. Netify makes it procurement-ready.</h2>
+        <summary className="cursor-pointer">
+          <span className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#9a4600]">Evidence and method</span>
+          <h2 id="rfp-validation-methodology" className="mt-2 text-[clamp(22px,3vw,34px)] font-semibold tracking-[-0.025em] text-[#110f0d]">From requirements to comparable supplier responses.</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[#66635e]">Open the validation method, factual capabilities and worked example. Last reviewed {RFP_VALIDATION_REVIEWED}.</p>
         </summary>
 
@@ -51,7 +51,7 @@ export default function RfpCitationEvidence() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{questionCount}</strong><span className="text-xs text-[#66635e]">governed questions</span></div>
             <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">8</strong><span className="text-xs text-[#66635e]">procurement areas</span></div>
-            <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{providerCount}</strong><span className="text-xs text-[#66635e]">evaluated providers</span></div>
+            <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{providerCount}</strong><span className="text-xs text-[#66635e]">evaluated provider records</span></div>
             <div className="col-span-2 rounded-lg bg-[#edf5e9] p-4 sm:col-span-3"><strong className="block text-sm">Question bank v{BANK_VERSION}</strong><span className="text-xs text-[#536250]">Includes {SASE_EXTENDED_BANK.questions.length} extended SASE questions and sector packs. Provider matching and downloads unlock only when the buyer publishes anonymously.</span></div>
           </div>
         </div>
@@ -63,13 +63,16 @@ export default function RfpCitationEvidence() {
           </div>
           <div className="rounded-lg border border-[#e3c7ac] bg-[#fff9f3] p-4">
             <h3 className="text-sm font-semibold">Example Netify output</h3>
-            <p className="mt-2 text-sm leading-6 text-[#5b4636]"><strong>Procurement readiness: {example.score}/100.</strong> {example.missingRequirementCount} important requirements are missing or unclear. Baseline: {example.validBaseline ? "valid" : "incomplete"}. The live checker lists the exact gaps and governed questions needed to improve it.</p>
+            <p className="mt-2 text-sm leading-6 text-[#5b4636]"><strong>Information to confirm:</strong> {example.gaps.slice(0, 2).join(". ")}. The checker identifies topics to review; it does not certify that an RFP is ready to issue.</p>
           </div>
         </div>
 
         <div className="mt-7 border-t border-[#e2dfdb] pt-6 text-sm leading-6 text-[#55514d]">
           <h3 className="font-semibold text-[#110f0d]">Agentic and MCP capability</h3>
-          <p className="mt-2">An approved AI agent can ingest an existing brief, structure stated facts with provenance, assess coverage, retrieve the governed question bank, draft the procurement document and monitor a published project. Netify does not let an agent publish, disclose buyer identity or award a supplier: those actions remain with the buyer.</p>
+          <p className="mt-2">Supported MCP clients can use public provider comparisons and evidence, and turn supplied text into requirements with provenance. Private project tools require the credentials stated by each tool. Publication requires verified buyer approval; supplier RFP submission currently continues through the web response form.</p>
+          <p className="mt-3"><a className="underline" href="/sase/examples/sase-rfp/">See a SASE brief, actual gap check, and Short and Detailed RFP examples</a>.</p>
+          <p className="mt-3"><a className="underline" href="/sase/examples/manufacturing-rfp/">See a fictional manufacturing workflow</a>.</p>
+          <p className="mt-3"><a className="underline" href="/sase/shortlist/">Compare named providers</a> or review <a className="underline" href="/sase/connector/">MCP capabilities and access requirements</a>.</p>
           <p className="mt-3 text-xs text-[#716d68]">Methodology and limitations: this is a deterministic coverage assessment, not legal advice or a guarantee of supplier performance. It does not invent unstated requirements. Read the <a className="underline" href="/sase/rfp-builder/questions/">public question bank</a>, <a className="underline" href="/sase/question-bank.json">machine-readable bank</a>, <a className="underline" href="/sase/methodology.json">methodology data</a> and <a className="underline" href="/sase/rfp-validation-methodology.json">validator data</a>.</p>
         </div>
       </details>

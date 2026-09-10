@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {confirmedWorkspaceRegions,workspaceUpdatesFromBrief} from '../src/lib/buying-workspace-project';
+assert.deepEqual(confirmedWorkspaceRegions(['uk_ireland'],['uk']),['uk']);
+assert.deepEqual(confirmedWorkspaceRegions(['uk_ireland'],['ie']),['ie']);
+assert.deepEqual(confirmedWorkspaceRegions(['uk_ireland','europe'],['uk']),['uk','eu']);
+assert.deepEqual(confirmedWorkspaceRegions(['europe'],['uk','eu']),['eu']);
+assert.deepEqual(confirmedWorkspaceRegions(['uk_ireland'],[]),['uk','ie']);
+const updates=workspaceUpdatesFromBrief({sector:'manufacturing',sites:'15',scope:'sdwan',regions:['uk_ireland','europe'],operatingModel:'co_managed',timescale:'Within six months'},['uk']);
+for(const path of ['organisation.sector','estate.sites','procurement.buying','organisation.regions','procurement.operatingModel','constraints.timeline'])assert(updates.some(u=>u.path===path),path);
+assert.equal(updates.find(u=>u.path==='organisation.sector')?.value,'Manufacturing');
+assert(!workspaceUpdatesFromBrief({sites:'-5',scope:'not_stated'}).length);
+console.log('PASS workspace bridge: precise regions retained, explicit removal/new groups, complete short-project hydration and invalid inputs');

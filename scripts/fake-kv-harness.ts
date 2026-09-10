@@ -39,8 +39,10 @@ export const FAKE_KV_TOKEN = "fake-kv-token-not-real";
 
 type Entry =
   | { type: "string"; value: string }
+  | { type: "list"; value: string[] }
   | { type: "set"; value: Set<string> }
-  | { type: "hash"; value: Map<string, string> };
+  | { type: "hash"; value: Map<string, string> }
+  | { type: "zset"; value: Map<string, number> };
 
 export class FakeKvStore {
   private store = new Map<string, Entry>();
@@ -82,6 +84,16 @@ export class FakeKvStore {
     const [name, ...args] = cmd;
     const op = String(name).toUpperCase();
     switch (op) {
+      case "ZADD": {
+        const key=String(args[0]); let e=this.store.get(key);
+        if(!e||e.type!=="zset"){e={type:"zset",value:new Map()};this.store.set(key,e)}
+        const exists=e.value.has(String(args[2]));e.value.set(String(args[2]),Number(args[1]));return exists?0:1;
+      }
+      case "ZRANGE": {
+        const e=this.store.get(String(args[0]));if(!e||e.type!=="zset")return [];
+        const sorted=[...e.value].sort((a,b)=>a[1]-b[1]||a[0].localeCompare(b[0])).map(x=>x[0]);
+        const start=Number(args[1]),end=Number(args[2]);return sorted.slice(start,end===-1?undefined:end<0?sorted.length+end+1:end+1);
+      }
       case "GET":
         return this.str(String(args[0]));
       case "SET": {
@@ -89,6 +101,20 @@ export class FakeKvStore {
         if (flags.includes("NX") && this.store.has(String(args[0]))) return null;
         this.store.set(String(args[0]), { type: "string", value: String(args[1]) });
         return "OK";
+      }
+      case "EVAL": {
+        if (String(args[0]).includes("netify-funnel-append-once") && Number(args[1]) === 2) {
+          const marker=String(args[2]), key=String(args[3]);
+          if(this.store.has(marker))return 0;
+          const current=this.store.get(key); const list=current?.type==="list" ? [...current.value] : [];
+          list.unshift(String(args[4])); this.store.set(key,{type:"list",value:list.slice(0,10000)});
+          this.store.set(marker,{type:"string",value:"1"}); return 1;
+        }
+        if (String(args[0]).includes("redis.call('get',KEYS[1])") && Number(args[1]) === 1) {
+          const key = String(args[2]);
+          return this.str(key) === String(args[3]) && this.store.delete(key) ? 1 : 0;
+        }
+        throw new Error("Unsupported fixture Lua script");
       }
       case "INCR": {
         const next = Number(this.str(String(args[0])) ?? 0) + 1;
@@ -153,11 +179,28 @@ export class FakeKvStore {
         const keys = Array.from(this.store.keys()).filter((k) => re.test(k));
         return ["0", keys];
       }
-      case "LRANGE":
+      case "LPUSH": {
+        const key = String(args[0]);
+        const current = this.store.get(key);
+        const list = current?.type === "list" ? current.value : [];
+        list.unshift(...args.slice(1).map(String));
+        this.store.set(key, { type: "list", value: list });
+        return list.length;
+      }
+      case "LTRIM": {
+        const key = String(args[0]), current = this.store.get(key);
+        if (current?.type === "list") current.value = current.value.slice(Number(args[1]), Number(args[2]) + 1);
+        return "OK";
+      }
+      case "LRANGE": {
+        const current = this.store.get(String(args[0]));
+        return current?.type === "list" ? current.value.slice(Number(args[1]), Number(args[2]) === -1 ? undefined : Number(args[2]) + 1) : [];
+      }
+      /* Legacy no-list fallback:
         // Not exercised by the flows these fixtures drive (create/
         // re-scope/reload/publish); returning empty lets an incidental
         // call degrade quietly instead of throwing.
-        return [];
+        return []; */
       default:
         throw new Error(`FakeKvStore: unhandled command ${op} (${JSON.stringify(cmd)})`);
     }

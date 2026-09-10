@@ -23,7 +23,7 @@ import { assessSecurityRequirement, type SecurityScopeVerdict } from "@/lib/secu
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { ACCEPT_GAP_PREFIX } from "@/components/GapActions";
-import type { AllowedPath, BuyingId, FieldUpdate } from "@/lib/workspace/extract";
+import type { BuyingId, FieldUpdate } from "@/lib/workspace/extract";
 import {
   briefModel,
   buyingOf,
@@ -273,7 +273,7 @@ function GapControl({ gap, onAnswer }: { gap: BriefGap; onAnswer: (gap: BriefGap
 export default function LiveWorkspace() {
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
   const [input, setInput] = useState("");
-  const [cycle, setCycle] = useState(0);
+  const [, setCycle] = useState(0);
   const [busy, setBusy] = useState(false);
   const [notes, setNotes] = useState<string[]>([]);
   const [engineUsed, setEngineUsed] = useState<string | null>(null);
@@ -303,6 +303,7 @@ export default function LiveWorkspace() {
   const firstVerdictSent = useRef(false);
   const lastRunText = useRef("");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const busyRef = useRef(false);
   const acceptedGaps = useRef<Set<string>>(new Set());
   const cycleRef = useRef(0);
 
@@ -326,49 +327,6 @@ export default function LiveWorkspace() {
   const live = standing(facts);
   const started = facts.length > 0;
 
-  /* ---- Arrival: query params and the restored draft ---- */
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search);
-    if (p.get("test") === "1") setTestMode(true);
-    const scope = p.get("scope");
-    const seedFacts: FieldUpdate[] = [];
-    if (scope && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scope)) {
-      seedFacts.push({
-        path: "procurement.buying",
-        value: scope === "security" ? "managed_security" : scope,
-        provenance: "inferred",
-        reason: "from the link you arrived on; strike it out if wrong",
-      });
-    }
-    const q = p.get("q");
-    let base: WorkspaceFact[] = [];
-    if (!q) {
-      try {
-        const raw = window.localStorage.getItem(DRAFT_KEY);
-        if (raw) {
-          const saved = JSON.parse(raw) as { facts?: WorkspaceFact[]; added?: string[]; removed?: string[]; ts?: number };
-          if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && Array.isArray(saved.facts) && saved.facts.length) {
-            base = saved.facts;
-            setAdded(saved.added ?? []);
-            setRemoved(saved.removed ?? []);
-            setRestored(true);
-          }
-        }
-      } catch { /* a broken draft never blocks the page */ }
-    }
-    if (base.length) {
-      factsRef.current = base;
-      setFacts(base);
-    }
-    if (seedFacts.length) applyMerge(seedFacts, "link");
-    if (q) {
-      setInput(q);
-      firstKeyAt.current = Date.now();
-      void runCycle(q, { fromLink: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   /* ---- Persist the draft locally; save-lite adds the account claim ---- */
   useEffect(() => {
     if (!started || published) return;
@@ -390,8 +348,10 @@ export default function LiveWorkspace() {
     if (saveLite !== "hidden" || signedIn || published || created) return;
     const useful = Boolean(verdict) || standing(facts).length >= 3;
     if (started && useful) {
-      setSaveLite("shown");
-      ev("workspace_save_lite_shown", { facts: standing(facts).length });
+      queueMicrotask(() => {
+        setSaveLite("shown");
+        ev("workspace_save_lite_shown", { facts: standing(facts).length });
+      });
     }
   }, [saveLite, signedIn, published, created, verdict, facts, started]);
 
@@ -399,7 +359,8 @@ export default function LiveWorkspace() {
   const runCycle = useCallback(
     async (text: string, opts: { fromEnter?: boolean; fromLink?: boolean } = {}) => {
       const trimmed = text.trim();
-      if (trimmed.length < 3 || busy) return;
+      if (trimmed.length < 3 || busyRef.current) return;
+      busyRef.current = true;
       lastRunText.current = trimmed;
       setBusy(true);
       setCycleError(null);
@@ -425,11 +386,61 @@ export default function LiveWorkspace() {
       } catch {
         setCycleError("The extraction service could not be reached. Your words are kept; press Enter to try again.");
       } finally {
+        busyRef.current = false;
         setBusy(false);
       }
     },
-    [busy, applyMerge],
+    [applyMerge],
   );
+
+  /* ---- Arrival: query params and the restored draft ---- */
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const test = p.get("test") === "1";
+    const scope = p.get("scope");
+    const seedFacts: FieldUpdate[] = [];
+    if (scope && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scope)) {
+      seedFacts.push({
+        path: "procurement.buying",
+        value: scope === "security" ? "managed_security" : scope,
+        provenance: "inferred",
+        reason: "from the link you arrived on; strike it out if wrong",
+      });
+    }
+    const q = p.get("q");
+    let base: WorkspaceFact[] = [];
+    let savedAdded: string[] = [];
+    let savedRemoved: string[] = [];
+    if (!q) {
+      try {
+        const raw = window.localStorage.getItem(DRAFT_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw) as { facts?: WorkspaceFact[]; added?: string[]; removed?: string[]; ts?: number };
+          if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && Array.isArray(saved.facts) && saved.facts.length) {
+            base = saved.facts;
+            savedAdded = saved.added ?? [];
+            savedRemoved = saved.removed ?? [];
+          }
+        }
+      } catch { /* a broken draft never blocks the page */ }
+    }
+    queueMicrotask(() => {
+      if (test) setTestMode(true);
+      if (base.length) {
+        factsRef.current = base;
+        setFacts(base);
+        setAdded(savedAdded);
+        setRemoved(savedRemoved);
+        setRestored(true);
+      }
+      if (seedFacts.length) applyMerge(seedFacts, "link");
+      if (q) {
+        setInput(q);
+        firstKeyAt.current = Date.now();
+        void runCycle(q, { fromLink: true });
+      }
+    });
+  }, [applyMerge, runCycle]);
 
   /* ---- Debounce: a cycle per pause, not per keystroke ---- */
   useEffect(() => {
@@ -445,7 +456,7 @@ export default function LiveWorkspace() {
   /* ---- Assess: the rulebook recomputes on every correction ---- */
   useEffect(() => {
     if (!securityScope || live.length === 0) {
-      setVerdict(null);
+      queueMicrotask(() => setVerdict(null));
       return;
     }
     let cancelled = false;
@@ -538,7 +549,7 @@ export default function LiveWorkspace() {
     : consentCreate;
 
   /* ---- Sign to publish ---- */
-  async function signAndPublish() {
+  async function signAndPublish(agreedAt: number) {
     if (signLocked || !consentsOk || signStage) return;
     setSignError(null);
     if (testMode && !securityScope) {
@@ -591,7 +602,7 @@ export default function LiveWorkspace() {
                 pinned_vendors: pins,
                 notes: notesLine,
               },
-              consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" },
+              consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: agreedAt, flow: "workspace" },
             }),
           });
           const data = await res.json().catch(() => ({}));
@@ -1041,7 +1052,7 @@ export default function LiveWorkspace() {
 
                 <button
                   type="button"
-                  onClick={() => void signAndPublish()}
+                  onClick={() => void signAndPublish(Date.now())}
                   disabled={signLocked || !consentsOk || Boolean(signStage)}
                   className="mt-4 inline-flex items-center rounded-full bg-amber-500 px-6 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >

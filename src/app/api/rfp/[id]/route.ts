@@ -1,3 +1,9 @@
+import { sessionFromRequest, supplierCredentialFromRequest } from "@/lib/auth";
+import { resolveSupplierPrincipal } from "@/lib/supplier-capability-access";
+import { matchVendorSlug } from "@/lib/rfp-evaluation";
+import { vendorName } from "@/lib/opportunity";
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
+import { livingDocumentToRfpSections } from "@/lib/rfp-document";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, saveProject, publicProject, hasAcceptedNda, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
@@ -20,7 +26,9 @@ export async function OPTIONS(req: Request) {
 
 /** The supplier projection: what a share-token holder may see. */
 function supplierView(project: ProjectDetails, ndaAccepted: boolean) {
-  const pub = publicProject(project);
+  // Supplier responses need only the approved document, never private buyer fields,
+  // draft ledgers, consent identities or recovery credentials.
+  const pub = { id: project.id, title: project.title, status: project.status, rfp_sections: project.rfp_sections };
   if (project.nda.required && !ndaAccepted) {
     return {
       ...pub,
@@ -94,8 +102,18 @@ export async function GET(req: Request, ctx: Ctx) {
       return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
     }
     const vendor = (url.searchParams.get("vendor") ?? "").trim();
-    const accepted = project.nda.required ? await hasAcceptedNda(project, vendor) : true;
-    return Response.json(supplierView(project, accepted), { headers: cors });
+    let accepted = !project.nda.required;
+    if (project.nda.required) {
+      const principal = await resolveSupplierPrincipal(await sessionFromRequest(req), id, supplierCredentialFromRequest(req, id), vendor);
+      if (principal.established) {
+        const lookup = vendor && matchVendorSlug(vendor) === principal.vendorSlug ? vendor : vendorName(principal.vendorSlug) ?? principal.vendorSlug;
+        accepted = await hasAcceptedNda(project, lookup);
+      }
+    }
+    const snapshot = await getLatestPublishedSnapshot(id);
+    const document = snapshot?.frozen_content.living_document;
+    const supplierProject = snapshot ? { ...project, title: snapshot.frozen_content.title, rfp_sections: document ? livingDocumentToRfpSections(document) : snapshot.frozen_content.rfp_sections } : project;
+    return Response.json(supplierView(supplierProject, accepted), { headers: cors });
   }
 
   return ownerRequired("Reading this RFP workspace", cors);
@@ -186,6 +204,11 @@ export async function PUT(req: Request, ctx: Ctx) {
   // bytes were trusted outright); closing it here, not just in the new
   // `facts`-bearing path, so an old field name can never resurrect it.
   delete body.procurement_document;
+  // Server-owned marketplace projections can only be changed by their
+  // dedicated matching/publication services, never by a whole-project PUT.
+  delete body.match_preview;
+  delete body.marketplace_state;
+  delete body.marketplace_revision;
   if (envelopeOutcome.participates && !envelopeOutcome.ok) {
     return Response.json({ error: envelopeOutcome.error }, { status: envelopeOutcome.status, headers: cors });
   }

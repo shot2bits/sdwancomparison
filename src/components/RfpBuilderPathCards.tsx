@@ -20,7 +20,7 @@ export default function RfpBuilderPathCards({ children }: { children: React.Reac
     const onActive = () => setCollapsed(true);
     window.addEventListener("netify:rfp-active", onActive);
     // Covers the reload case: the builder rewrites the URL to /rfp-builder/{rfp id}.
-    if (/\/rfp-builder\/rfp_/.test(window.location.pathname)) setCollapsed(true);
+    if (/\/rfp-builder\/rfp_/.test(window.location.pathname)) queueMicrotask(() => setCollapsed(true));
     return () => window.removeEventListener("netify:rfp-active", onActive);
   }, []);
 

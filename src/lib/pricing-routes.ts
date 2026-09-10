@@ -1,0 +1,6 @@
+/** Public pricing choices shared by the website and assistant discovery. */
+export const PRICING_ROUTES = [
+  { id: "budget", title: "Explore an indicative budget", description: "Model SASE and SD-WAN costs before approaching suppliers. These provisional estimates are not supplier quotes; market calibration remains outstanding.", href: "https://netify.co.uk/sase/cost-estimator/", action: "Explore budget estimates" },
+  { id: "project", title: "Request supplier project pricing", description: "Describe your requirements, then review and publish an anonymous project notice using your company name and verified work email. Use a short brief, Short RFP, Detailed RFP or your own RFP or RFI. Supplier participation and response times are not guaranteed.", href: "https://netify.co.uk/sase-sd-wan-rfp-builder/?journey=quick_list&intent=pricing", action: "Start a supplier pricing request" },
+  { id: "circuits", title: "Get sourced circuit quotes", description: "Request Ethernet, broadband or remote SIM connectivity for UK and international locations. Netify goes to market and adds available quotes to your private Market responses. You are notified when pricing is available; this is not an instant price calculator.", href: "https://netify.co.uk/sase/circuit-pricing/", action: "Request circuit pricing" },
+] as const;

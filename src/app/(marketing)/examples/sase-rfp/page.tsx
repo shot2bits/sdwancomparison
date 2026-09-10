@@ -1,0 +1,47 @@
+import type { Metadata } from "next";
+import { saseDemoData, saseDemoSections, SASE_DEMO_URL, SASE_DEMO_BESPOKE } from "@/lib/sase-rfp-demonstration";
+
+export const metadata: Metadata = {
+  title: "SASE RFP worked example: brief, gap check and supplier questions | Netify",
+  description: "See a fictional manufacturing SASE brief checked by Netify’s actual validator, then inspect Short and Detailed RFP examples with evidence requests and a bespoke question.",
+  alternates: { canonical: SASE_DEMO_URL, types: { "application/json": `${SASE_DEMO_URL}data.json/` } },
+};
+const build = "/sase-sd-wan-rfp-builder/?journey=build_rfp";
+const check = "/sase-sd-wan-rfp-builder/?journey=validate_rfp";
+const link = "inline-flex items-center justify-center rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-4";
+
+export default function Page() {
+  const demo = saseDemoData();
+  const report = demo.initialAssessment;
+  const schema = { "@context": "https://schema.org", "@type": "TechArticle", headline: "SASE RFP worked example for a manufacturer", description: metadata.description, url: SASE_DEMO_URL, datePublished: demo.dateCreated, author: { "@type": "Organization", name: "Netify", url: "https://netify.co.uk/" }, isAccessibleForFree: true, isBasedOn: "https://netify.co.uk/sase/question-bank.json" };
+  return <article className="mx-auto max-w-5xl px-5 py-12 text-slate-800 sm:px-8 sm:py-16">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+    <a className="text-sm underline underline-offset-4" href="/sase-sd-wan-rfp-builder/">Back to the RFP builder</a>
+    <header className="mt-8 max-w-3xl">
+      <p className="text-sm text-slate-600">Worked example · Created 6 September 2026</p>
+      <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">A SASE RFP, from first brief to supplier questions.</h1>
+      <p className="mt-6 text-lg leading-8">Follow a manufacturer with 15 sites and 600 users. See what Netify’s checker flags, which decisions a buyer still needs to make, and how Short and Detailed RFPs request evidence.</p>
+      <div className="mt-6 flex flex-wrap gap-3"><a className={`${link} bg-slate-900 text-white hover:bg-slate-700`} href={build}>Build your SASE RFP</a><a className={link} href={check}>Check your existing RFP</a></div>
+    </header>
+    <p className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5 text-sm leading-6">{demo.disclosure} Read and download both examples freely. They are assembled from Netify’s question bank and the explicit example decisions below; the checker does not invent those decisions.</p>
+    <nav aria-label="Example contents" className="my-8 flex flex-wrap gap-x-6 gap-y-3 text-sm underline underline-offset-4"><a href="#brief">Buyer brief</a><a href="#gaps">Checker findings</a><a href="#decisions">Buyer decisions</a><a href="#short">Short RFP</a><a href="#detailed">Detailed RFP</a></nav>
+    <section id="brief" className="scroll-mt-24 border-t border-slate-200 py-8"><h2 className="text-2xl font-semibold">1. The original buyer brief</h2><blockquote className="mt-5 border-l-2 border-slate-400 pl-5 text-lg leading-8">{demo.input}</blockquote><p className="mt-4 leading-7">This is useful starting context. It leaves important security, operational and procurement decisions unstated.</p></section>
+    <section id="gaps" className="scroll-mt-24 border-t border-slate-200 py-8"><h2 className="text-2xl font-semibold">2. What the actual checker finds</h2><p className="mt-4 leading-7">The production checker assessed the exact brief above. <strong>Confirm the following information</strong> before developing it into supplier instructions.</p>
+      <p className="mt-3 text-sm leading-6 text-slate-600">This is a deterministic text-coverage check. Some checks overlap. Mentioning a topic can satisfy a check without specifying an adequate design or measurable target. The score is not certification that an RFP is ready to issue.</p>
+      <ul className="mt-5 list-disc space-y-3 pl-5">{report.gaps.map(gap => <li key={gap}>{gap}</li>)}</ul>
+      <details className="mt-5 rounded-lg border border-slate-200 p-5"><summary className="cursor-pointer font-semibold">All section checks and comparison warnings</summary><div className="mt-5 space-y-5">{report.sections.map(section => <div key={section.key}><h3 className="font-semibold">{section.title}</h3><p className="mt-1 text-sm leading-6">Not detected: {section.missing.join("; ") || "No missing topic checks"}.</p></div>)}<ul className="list-disc space-y-2 pl-5">{report.comparabilityWarnings.map(w => <li key={w}>{w}</li>)}</ul></div></details>
+    </section>
+    <section id="decisions" className="scroll-mt-24 border-t border-slate-200 py-8"><h2 className="text-2xl font-semibold">3. Decisions supplied by the example buyer</h2><p className="mt-4 leading-7">These additions are illustrative choices, not facts extracted from the original brief. A real buyer must confirm their own requirements.</p><ol className="mt-5 list-decimal space-y-4 pl-5 leading-7">{demo.buyerDecisions.map(decision => <li key={decision}>{decision}</li>)}</ol></section>
+    <section className="border-t border-slate-200 py-8"><h2 className="text-2xl font-semibold">4. Inspect the resulting RFPs</h2><p className="mt-4 leading-7">The Short example selects one bank question per area. The Detailed example includes all {saseDemoSections("detailed").reduce((sum,s) => sum+s.questions.length,0)} extended SASE questions. Both retain the same buyer context, decisions and bespoke question. These are example selections; you control the questions and depth in your own project.</p>
+      {(["short", "detailed"] as const).map(depth => <details id={depth} key={depth} className="mt-6 scroll-mt-24 rounded-lg border border-slate-200 p-5 sm:p-7" open={depth === "short"}>
+        <summary className="cursor-pointer text-xl font-semibold">{depth === "short" ? "Short" : "Detailed"} SASE RFP</summary>
+        <div className="mt-5"><p className="text-sm leading-6">Includes the original brief and all example buyer decisions above. The expected topics are covered by these example questions and decisions. Technical adequacy and the open decisions below still require buyer review.</p><a className="mt-4 inline-block underline underline-offset-4" href={`${SASE_DEMO_URL}document.txt/?depth=${depth}`}>Download the complete {depth === "short" ? "Short" : "Detailed"} example (text)</a>
+          {saseDemoSections(depth).map(section => <section className="mt-7 border-t border-slate-200 pt-5" key={section.title}><h3 className="text-lg font-semibold">{section.title}</h3><ol className="mt-4 space-y-6">{section.questions.map(q => <li key={q.question_id}><p className="font-medium">{q.question}</p><p className="mt-2 text-sm leading-6"><strong>Evidence:</strong> {q.evidence_required.join("; ")}.</p><p className="mt-1 text-sm leading-6"><strong>Why it matters:</strong> {q.why_it_matters}</p><p className="mt-1 text-xs text-slate-500">Question bank reference: {q.question_id}</p></li>)}</ol></section>)}
+          <section className="mt-7 border-t border-slate-200 pt-5"><h3 className="text-lg font-semibold">Bespoke buyer question</h3><p className="mt-3 leading-7">{SASE_DEMO_BESPOKE.question}</p><p className="mt-2 text-sm leading-6"><strong>Evidence:</strong> {SASE_DEMO_BESPOKE.evidence_required.join("; ")}.</p><p className="mt-2 text-sm leading-6">{SASE_DEMO_BESPOKE.why_it_matters}</p><p className="mt-1 text-xs text-slate-500">Buyer reference: {SASE_DEMO_BESPOKE.question_id}</p></section>
+          <p className="mt-6 rounded-lg bg-slate-50 p-4 text-sm leading-6"><strong>Still to confirm:</strong> site bandwidths, application inventory, outage tolerances, retention periods, acceptance thresholds and approved migration dates. No supplier capabilities or prices have been verified.</p>
+        </div></details>)}
+    </section>
+    <section className="rounded-lg bg-slate-50 p-6 sm:p-8"><h2 className="text-2xl font-semibold">Create your own SASE project</h2><p className="mt-4 leading-7">Build a Short or Detailed RFP, bring your own RFP or RFI, or start with a basic statement of requirements. Add your own questions, then review the anonymous notice and verify your work email and company before publishing to the Opportunity Board.</p><p className="mt-3 text-sm leading-6">Publication records your requirement for supplier discovery as participation develops. It does not guarantee responses, quotations or an award. You approve publication; reading this example creates no project.</p><div className="mt-5 flex flex-wrap gap-3"><a className={`${link} bg-slate-900 text-white hover:bg-slate-700`} href={build}>Build your SASE RFP</a><a className={link} href={check}>Check your existing RFP</a></div></section>
+    <footer className="mt-8 text-sm leading-7 text-slate-600">Reproducible evidence: <a className="underline" href={`${SASE_DEMO_URL}data.json/`}>exact inputs, documents and checker results (JSON)</a>. Validator {demo.methodology.validator}; bank {demo.methodology.questionBank}. <a className="underline" href="/sase/rfp-builder/questions/">Read the question bank</a> and <a className="underline" href="/sase/rfp-validation-methodology.json">coverage methodology</a>.</footer>
+  </article>;
+}

@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   const parsed = EstimateInput.safeParse(body);
   if (!parsed.success) {
     return Response.json(
-      { error: "Invalid estimate input.", issues: parsed.error.issues.slice(0, 10) },
+      { error: parsed.error.issues[0]?.message ?? "Check the estimate inputs.", issues: parsed.error.issues.slice(0, 10) },
       { status: 400, headers: cors },
     );
   }

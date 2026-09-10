@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {withFakeKv} from './fake-kv-harness';
+await withFakeKv(async()=>{
+ const store=await import('../src/lib/rfp-store');
+ const {ProjectDetailsSchema,NdaAcceptanceSchema}=await import('../src/lib/rfp-types');
+ const {OpportunitySchema}=await import('../src/lib/opportunity-types');
+ const {saveFrozenRevision}=await import('../src/lib/published-snapshot');
+ const {commitMarketUnlock}=await import('../src/lib/market-unlock');
+ const {GET}=await import('../src/app/api/rfp/[id]/route');
+ const id='rfp_acceptance',revision='snap_acceptance',opportunity='opp_acceptance';
+ const project=await store.saveProject(ProjectDetailsSchema.parse({id,created:1,updated:1,status:'published',buyer:{organisation:'PRIVATE COMPANY'},owner_email:'private@example.com',share_token:'share-fixture',manage_token:'private-fixture',nda:{required:true,version:1},rfp_sections:[{category:'Network',included:true,questions:[{id:'q1',feature_id:'custom',text:'Approved requirement',source:'custom',priority:'required'}]}]}));
+ await saveFrozenRevision({id:revision,project_id:id,content_hash:'fixture',frozen_content:{title:project.title,buyer:project.buyer,rfp_sections:project.rfp_sections},created_at:1});
+ await store.saveOpportunity(OpportunitySchema.parse({id:opportunity,created:1,updated:1,title:'Public notice',scope:['sase'],buyer_token:'private',visibility:'public',source_rfp_id:id,source_published_revision_id:revision}));
+ await commitMarketUnlock({project_id:id,published_revision_id:revision,board_opportunity_id:opportunity});
+ await store.saveNdaAcceptance(NdaAcceptanceSchema.parse({id:'nda_fixture',rfp_id:id,vendor:'Aryaka',vendor_slug:'aryaka',signatory_name:'Fixture signer',email:'supplier@aryaka.com',nda_version:1,accepted:Date.now(),ip:'',user_agent:''}));
+ const read=async(cookie='')=>(await GET(new Request(`https://netify.co.uk/sase/api/rfp/${id}?token=share-fixture&vendor=Aryaka`,{headers:{cookie}}),{params:Promise.resolve({id})})).json();
+ const anonymous=await read();assert.equal(anonymous.nda_required,true);assert.equal(anonymous.rfp_sections.length,0);
+ for(const field of ['buyer','owner_email','manage_token','source_ledger','decision_ledger','consents'])assert(!(field in anonymous),field);
+ const supplier=await store.createSession({role:'supplier',email:'qa@aryaka.com',vendor_slug:'aryaka'});
+ const allowed=await read(`netify_session=${supplier.token}`);assert.equal(allowed.rfp_sections[0].questions[0].text,'Approved requirement');assert(!('buyer' in allowed));
+ const stranger=await store.createSession({role:'supplier',email:'qa@fortinet.com',vendor_slug:'fortinet'});
+ assert.equal((await read(`netify_session=${stranger.token}`)).rfp_sections.length,0);
+});
+console.log('PASS actual supplier route: anonymous and wrong-vendor NDA bypass denied, verified supplier allowed, private fields excluded');

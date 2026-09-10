@@ -53,6 +53,7 @@ import { kvGetJson, kvSetJson } from "@/lib/rfp-store";
 import type { ProjectDetails, BuyerContext, RfpSection } from "@/lib/rfp-types";
 import type { MarketReport } from "@/lib/market-report";
 import type { LivingProcurementDocument } from "@/lib/workspace/procurement-document";
+import type { ShortlistInput, ShortlistVendor } from "@/lib/shortlist-core";
 import crypto from "node:crypto";
 
 /** Deterministic JSON stringify: object keys sorted recursively, so the
@@ -114,6 +115,14 @@ export function rfpContentSnapshot(p: ProjectDetails): Record<string, unknown> {
     buyer: p.buyer,
     rfp_sections: p.rfp_sections,
     nda: p.nda,
+    // New short projects freeze their matching filters and deadline as well as the brief.
+    // Keep historical event hashes unchanged when this version marker is absent.
+    ...(p.entrance_context?.raw_input.publication_contract === "short-project/1" ? {
+      publication_inputs: {
+        timescale: p.entrance_context.raw_input.timescale ?? null,
+        shortlist: p.entrance_context.raw_input.shortlist ?? p.entrance_context.shortlist_input ?? null,
+      },
+    } : {}),
   };
 }
 
@@ -184,6 +193,23 @@ export type PublishedSnapshot = {
    *  honestly rather than claiming it is frozen. */
   matched_vendors?: { slug: string; name: string }[];
   invited_vendors?: { slug: string; name: string; supplier_url: string }[];
+  /** Exact provider records and revision identities used for this
+   *  publication. Optional for snapshots written before this contract. */
+  provider_evidence?: Array<{
+    slug: string;
+    name: string;
+    provider_id: string | null;
+    revision_id: string | null;
+    dataset_version: string | null;
+    record: ShortlistVendor;
+  }>;
+  provider_provenance?: {
+    shortlist_contract_version: string;
+    provider_contract_version: string;
+    dataset_versions: string[];
+    loaded_at: string;
+  };
+  provider_match_input?: ShortlistInput;
   accepted_assumptions: string[];
   open_decisions: string[];
   /** Cached at publish time so every later read (the report route, a

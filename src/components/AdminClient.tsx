@@ -98,7 +98,9 @@ export default function AdminClient() {
     setEdits(Object.fromEntries(d.vendors.map((v) => [v.slug, v.domains.join(", ")])));
   }, []);
 
-  useEffect(() => { if (session?.authenticated && session.admin) load(); }, [session, load]);
+  useEffect(() => {
+    if (session?.authenticated && session.admin) queueMicrotask(() => void load());
+  }, [session, load]);
 
   async function act(payload: Record<string, unknown>) {
     setBusy(true); setError(null); setNotice(null);

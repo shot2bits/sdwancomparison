@@ -57,17 +57,23 @@ export default function OpportunitySupplier({ token }: { token: string }) {
         setFeed(data.opportunity.feed); lastTs.current = Math.max(0, ...data.opportunity.feed.map((f: FeedItem) => f.created));
       } catch { setError("Could not load the opportunity."); }
     })();
+    return () => { active = false; };
+  }, [token]);
+
+  const opportunityId = opp?.id;
+  useEffect(() => {
+    if (!opportunityId) return;
     const poll = setInterval(async () => {
       try {
-        const res = await fetch(`/sase/api/opportunity/${opp?.id ?? ""}/feed?since=${lastTs.current}`);
-        if (res.ok && opp) {
+        const res = await fetch(`/sase/api/opportunity/${opportunityId}/feed?since=${lastTs.current}`);
+        if (res.ok) {
           const d = await res.json();
           if (d.items?.length) { setFeed((prev) => [...prev, ...d.items]); lastTs.current = Math.max(lastTs.current, ...d.items.map((f: FeedItem) => f.created)); }
         }
       } catch { /* ignore */ }
     }, 5000);
-    return () => { active = false; clearInterval(poll); };
-  }, [token, opp?.id]);
+    return () => clearInterval(poll);
+  }, [opportunityId]);
 
   async function post(type: string, body: string, pricing?: object, answers?: Record<string, string>) {
     setError(null);

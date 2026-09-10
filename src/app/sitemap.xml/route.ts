@@ -4,9 +4,9 @@ import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
+import { MARKETPLACE_EXAMPLES } from "@/lib/marketplace-examples";
 
 export async function GET() {
-  const today = new Date().toISOString().slice(0, 10);
   // Public notices are crawlable pages; include them best-effort so the
   // sitemap never fails if KV is unavailable. Closed notices are published
   // forever (Robert's ruling, 28 Jul 2026): a notice that entered the public
@@ -39,12 +39,20 @@ export async function GET() {
     { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
     { loc: `${SITE_URL}/for-suppliers`, priority: "0.8" },
     { loc: `${SITE_URL}/shortlist/`, priority: "1.0" },
+    { loc: `${SITE_URL}/shortlist/cite.bib`, priority: "0.5" },
+    { loc: `${SITE_URL}/shortlist/research-methodology/`, priority: "0.7" },
+    { loc: `${SITE_URL}/shortlist/sd-wan-vendors/`, priority: "0.9" },
+    { loc: `${SITE_URL}/shortlist/sase-vendors/`, priority: "0.9" },
+    { loc: `${SITE_URL}/shortlist/managed-sd-wan/`, priority: "0.9" },
     // /workspace/ and the wizard's entry surfaces 301 now (One Door,
     // 23 Jul 2026): a sitemap must never list redirecting URLs, so only
     // the serving research surfaces below remain.
     { loc: `${SITE_URL}/rfp-builder/questions`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/sample-rfp`, priority: "0.9" },
+    { loc: `${SITE_URL}/examples/sase-rfp/`, priority: "0.9" },
+    { loc: `${SITE_URL}/pricing/`, priority: "0.9" },
     { loc: `${SITE_URL}/cost-estimator`, priority: "0.8" },
+    { loc: `${SITE_URL}/circuit-pricing/`, priority: "0.9" },
     { loc: `${SITE_URL}/connector`, priority: "0.8" },
     { loc: `${SITE_URL}/demand`, priority: "0.8" },
     { loc: `${SITE_URL}/opportunities`, priority: "0.9" },
@@ -60,17 +68,14 @@ export async function GET() {
     })),
     ...liveNotices,
     ...archivedNotices,
-    { loc: `${SITE_URL}/vendors`, priority: "0.9" },
+    { loc: "https://netify.co.uk/marketplace/", priority: "0.9" },
+    ...Object.keys(MARKETPLACE_EXAMPLES).map((slug) => ({ loc: `${SITE_URL}/examples/${slug}`, priority: "0.8" })),
     // The /best/ INDEX was missing while all 20 children were listed
     // (25 Jul): it is the hub Bing cites most from, so it belongs here.
     { loc: `${SITE_URL}/best`, priority: "0.9" },
     ...BEST_PAGES.map((p) => ({
       loc: `${SITE_URL}/best/${p.slug}`,
       priority: "0.9",
-    })),
-    ...getAllVendorSlugs().map((slug) => ({
-      loc: `${SITE_URL}/vendors/${slug}`,
-      priority: "0.8",
     })),
     ...getAllVendorSlugs().map((slug) => ({
       loc: `${SITE_URL}/alternatives/${slug}`,
@@ -89,7 +94,7 @@ export async function GET() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
-    (u) => `  <url><loc>${u.loc.endsWith("/") ? u.loc : u.loc + "/"}</loc><lastmod>${today}</lastmod><priority>${u.priority}</priority></url>`,
+    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc><priority>${u.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>`;

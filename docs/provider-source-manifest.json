@@ -1,0 +1,259 @@
+{
+  "manifest_version": "provider-source-manifest/1.0.0",
+  "source_version": "sha256-0f697fc7fc4690bb",
+  "ingested_at": "2026-09-01T00:00:00.000Z",
+  "reviewer": "Robert Sturt / Netify",
+  "archive": {
+    "supplied_filename": "VendorMegaDataset.zip",
+    "sha256": "0f697fc7fc4690bb05ea5f6cfe92657b3b6e83ef50a67d7c48348786bf902f9b",
+    "bytes": 3611168,
+    "private_relative_path": ".private/provider-source/sha256-0f697fc7fc4690bb/source.zip"
+  },
+  "inventory": {
+    "substantive_profile_count": 30,
+    "excluded_metadata_count": 30,
+    "total_archive_entries": 61
+  },
+  "documents": [
+    {
+      "source_document_id": "provider-source:aryaka-sase-profile",
+      "supplied_filename": "Aryaka_SASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Aryaka_SASE_Profile.docx",
+      "sha256": "fa77dbbe7c278f3dd5e9cf7624701f60a3e66ce05424b817df1db2d0be91dc80",
+      "bytes": 123302,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:att-managedsase-profile",
+      "supplied_filename": "ATT_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/ATT_ManagedSASE_Profile.docx",
+      "sha256": "26436904ce720b95d88e19801ee883f38fffade8b8a30d128a53639533e98cca",
+      "bytes": 115062,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:barracuda-secureedge-profile",
+      "supplied_filename": "Barracuda_SecureEdge_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Barracuda_SecureEdge_Profile.docx",
+      "sha256": "e6bc1a776b8c56f6a71c7f49be38d9d322d5230f0e8491973435f9d085c4349a",
+      "bytes": 120621,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:bt-managedsase-profile",
+      "supplied_filename": "BT_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/BT_ManagedSASE_Profile.docx",
+      "sha256": "0489ff6960aec560d4da636b2874baf57e6e168b61e1f8d04ec0179bdb615f2d",
+      "bytes": 119775,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:cato-networks-profile",
+      "supplied_filename": "Cato_Networks_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Cato_Networks_Profile.docx",
+      "sha256": "42776f317535bb78b25b53a1ed47c12d30203bf36ed31f84250b088e1efaa30e",
+      "bytes": 132674,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:checkpoint-sase-profile",
+      "supplied_filename": "CheckPoint_SASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/CheckPoint_SASE_Profile.docx",
+      "sha256": "8f009c24b9c43f8cd900e6756ab31577b514e20bf0761764c26ff1e8784168fe",
+      "bytes": 125234,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:cisco-sase-profile",
+      "supplied_filename": "Cisco_SASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Cisco_SASE_Profile.docx",
+      "sha256": "8fcf1064288e3796e01da74ffde22deb78f7db43461543167bab9fdfd7ac202b",
+      "bytes": 138202,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:cloudflare-one-profile",
+      "supplied_filename": "Cloudflare_One_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Cloudflare_One_Profile.docx",
+      "sha256": "de835569d200666d4d7a012faf1ec79b37e5f00451a999ee46f93b059fead40f",
+      "bytes": 134205,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:colt-managedsase-profile",
+      "supplied_filename": "Colt_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Colt_ManagedSASE_Profile.docx",
+      "sha256": "85dd097981030839c1a2d0f032ef6f9519f264a3686df74bab15dc58c50e1659",
+      "bytes": 111201,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:comcastbusiness-managedsase-profile",
+      "supplied_filename": "ComcastBusiness_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/ComcastBusiness_ManagedSASE_Profile.docx",
+      "sha256": "4d407f19f2ef5245eabf651c5ceb78435be62d3766882c74a230f956688cfbba",
+      "bytes": 103638,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:ericssoncradlepoint-sase-profile",
+      "supplied_filename": "EricssonCradlepoint_SASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/EricssonCradlepoint_SASE_Profile.docx",
+      "sha256": "786024b764f079c80a2b95d8a1d7bcbc2a89c787f6c1bd2f874e994d3a2ef5c3",
+      "bytes": 122771,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:expereo-managedsase-profile",
+      "supplied_filename": "Expereo_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Expereo_ManagedSASE_Profile.docx",
+      "sha256": "b39c3d3dd65be3395572321bc8f470805f59d7f80d3aaa1ffb1a08b7ba1ef798",
+      "bytes": 111226,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:forcepoint-profile",
+      "supplied_filename": "Forcepoint_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Forcepoint_Profile.docx",
+      "sha256": "de38f5cbd2a3c0ae1c6ae1b4e94168337cb5c68b0b744bbc7583a9a24ff82bfd",
+      "bytes": 133785,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:fortinet-fortisase-profile",
+      "supplied_filename": "Fortinet_FortiSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Fortinet_FortiSASE_Profile.docx",
+      "sha256": "636ed55b4048037f591938e1220628199ad6740a69d66dd436263ba34fa35b2f",
+      "bytes": 133018,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:gtt-managedsase-profile",
+      "supplied_filename": "GTT_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/GTT_ManagedSASE_Profile.docx",
+      "sha256": "2ae38e3d9b054270d4687bf320995c013388677ba8fb8dd5dc29f5dae1e53c0e",
+      "bytes": 114580,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:hpe-aruba-edgeconnect-profile",
+      "supplied_filename": "HPE_Aruba_EdgeConnect_Profile.docx",
+      "archive_entry": "VendorMegaDataset/HPE_Aruba_EdgeConnect_Profile.docx",
+      "sha256": "07a3bb87d50d005a403234e81ad03067cb1cac57713f0cdf8eee06207db3d854",
+      "bytes": 131371,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:juniper-sase-profile",
+      "supplied_filename": "Juniper_SASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Juniper_SASE_Profile.docx",
+      "sha256": "b12095faf41877cc042cdd4f9a968441d761d50b59f30e1bc79b526064df7399",
+      "bytes": 124185,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:lumen-managedsase-profile",
+      "supplied_filename": "Lumen_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Lumen_ManagedSASE_Profile.docx",
+      "sha256": "55fa9db769fe1536ce3b591866b708aabc7efb9728acfb88aaedf931c9563364",
+      "bytes": 118742,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:netskope-profile",
+      "supplied_filename": "Netskope_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Netskope_Profile.docx",
+      "sha256": "3e8c31dc23f5e6f7c005428f7f108a0c8ea77036b08c285375a6cce18c2a5606",
+      "bytes": 131556,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:nttdata-managedsase-profile",
+      "supplied_filename": "NTTDATA_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/NTTDATA_ManagedSASE_Profile.docx",
+      "sha256": "34cb0a15004d5b90322bc9f6831ff5271ca3e5558f080826fe50caa5a635b476",
+      "bytes": 113961,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:opensystems-sase-profile",
+      "supplied_filename": "OpenSystems_SASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/OpenSystems_SASE_Profile.docx",
+      "sha256": "992a51cd4882208b22b53edc748559c06f88046d0e5226dd4ef693eb9ddae1a3",
+      "bytes": 121837,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:orangebusiness-managedsase-profile",
+      "supplied_filename": "OrangeBusiness_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/OrangeBusiness_ManagedSASE_Profile.docx",
+      "sha256": "1a42f1d850ba631beea502a88b8f4b5ce2d575d4cf994c5beaecc300a0e40b0c",
+      "bytes": 113150,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:paloalto-prisma-sase-profile",
+      "supplied_filename": "PaloAlto_Prisma_SASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/PaloAlto_Prisma_SASE_Profile.docx",
+      "sha256": "327637e9454b7e4b0311038d1cc0a3c29ec343370260567dbaf7c4c77d067c73",
+      "bytes": 135023,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:sonicwall-cse-profile",
+      "supplied_filename": "SonicWall_CSE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/SonicWall_CSE_Profile.docx",
+      "sha256": "cfe8dfdb9c78db5f3b1c2b65a6b7c651e8ae5bcb17705aedc7725f75d8e9fca5",
+      "bytes": 120880,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:velocloud-profile",
+      "supplied_filename": "VeloCloud_Profile.docx",
+      "archive_entry": "VendorMegaDataset/VeloCloud_Profile.docx",
+      "sha256": "9daec9279c68bde99e9ad6389be9e4d0d4f2db6c43824f1430f154c6d29b6c99",
+      "bytes": 118326,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:verizon-managedsase-profile",
+      "supplied_filename": "Verizon_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Verizon_ManagedSASE_Profile.docx",
+      "sha256": "6715aadc516d77bcacb8d6e0a22d39cd178b5ccb1a43bd7c765f76f4e0e9776f",
+      "bytes": 118627,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:versa-networks-profile",
+      "supplied_filename": "Versa_Networks_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Versa_Networks_Profile.docx",
+      "sha256": "6e5eb605e5368d8d59b5ef2ac36c45caa18330ec42a32d13515c4e365540a24c",
+      "bytes": 127711,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:vmo2-managedsase-profile",
+      "supplied_filename": "VMO2_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/VMO2_ManagedSASE_Profile.docx",
+      "sha256": "d08598d503726300fb41df7a09921ae049a90f7915d9c74b11dde3e6c242e5d6",
+      "bytes": 113192,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:vodafone-managedsase-profile",
+      "supplied_filename": "Vodafone_ManagedSASE_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Vodafone_ManagedSASE_Profile.docx",
+      "sha256": "3a3ffb90ff296951cd1dd08596797816026af2b2744b34af511228472e4a93f8",
+      "bytes": 118436,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    },
+    {
+      "source_document_id": "provider-source:zscaler-profile",
+      "supplied_filename": "Zscaler_Profile.docx",
+      "archive_entry": "VendorMegaDataset/Zscaler_Profile.docx",
+      "sha256": "473669d79a1e0a2346290d89339d7404f44ed601b64f4f508c13241d6311f281",
+      "bytes": 136211,
+      "source_version": "sha256-0f697fc7fc4690bb"
+    }
+  ]
+}

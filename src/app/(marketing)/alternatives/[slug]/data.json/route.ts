@@ -1,11 +1,11 @@
-import { FEATURE_NAMES, getAllVendorSlugs, getShortlistDataset } from "@/lib/vendors";
+import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const dynamic = "force-static";
 
 export function generateStaticParams() {
-  return getAllVendorSlugs().map((slug) => ({ slug }));
+  return getShortlistDataset().map(({ slug }) => ({ slug }));
 }
 
 type Ctx = { params: Promise<{ slug: string }> };

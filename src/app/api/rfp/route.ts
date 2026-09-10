@@ -1,7 +1,9 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
-import { BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
+import { BuyerContextSchema, PROJECT_JOURNEY_MODES, ProjectDetailsSchema, SectorProfileStateSchema, type ProjectJourneyMode } from "@/lib/rfp-types";
+import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
+import { rfpBuilderEntrance } from "@/lib/project-entrance";
 import { recordProjectEvent } from "@/lib/project-machine";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { deriveRfiQuestionSet, bankRfpSections } from "@/lib/workspace/instrument";
@@ -95,6 +97,9 @@ export async function POST(req: Request) {
      *  security_sourcing project (resumeDecisionsFromProject's own
      *  documented scope, matching resumeStateFromProject's). */
     decision_turns?: unknown;
+    entrance_context?: unknown;
+    journey_mode?: unknown;
+    sector_profile?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -151,6 +156,14 @@ export async function POST(req: Request) {
   const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
   const createSourceLedger = mergeSourceLedger([], parseIncomingSourceTurns(body.source_turns));
   const createDecisionLedger = mergeDecisionLedger([], parseIncomingDecisionTurns(body.decision_turns));
+  const suppliedEntrance = ProjectEntranceContextSchema.safeParse(body.entrance_context);
+  const entranceContext = suppliedEntrance.success
+    ? suppliedEntrance.data
+    : rfpBuilderEntrance({ rawInput: body as Record<string, unknown>, sourceUrl: req.url });
+  const journeyMode = PROJECT_JOURNEY_MODES.includes(body.journey_mode as ProjectJourneyMode)
+    ? body.journey_mode as ProjectJourneyMode
+    : entranceContext.source === "rfp_builder" ? "build_rfp" : "find_providers";
+  const sectorProfile = SectorProfileStateSchema.safeParse(body.sector_profile);
   // Full-unification CLOSURE pass (17 Aug 2026): a first save can already
   // carry a canonical envelope (Living Procurement Canvas's own first
   // Save, via ProjectDesk.tsx) -- ONE shared verifier for every writer
@@ -180,6 +193,15 @@ export async function POST(req: Request) {
     share_token: newId("tok"),
     manage_token: newId("mtok"),
     source: "wizard",
+    entrance_context: entranceContext,
+    journey: {
+      contract_version: "project-journey/1.0.0",
+      source: entranceContext.source,
+      mode: journeyMode,
+      source_url: entranceContext.source_url,
+      started_at: entranceContext.captured_at,
+    },
+    ...(sectorProfile.success ? { sector_profile: sectorProfile.data } : {}),
     owner_email: ownerEmail,
     methodology_version: "2026.1",
     consent,

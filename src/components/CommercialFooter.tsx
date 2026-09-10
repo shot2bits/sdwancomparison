@@ -40,7 +40,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Marketplace and procurement",
     links: [
       { label: "How It Works", href: "/sase/how-it-works/" },
-      { label: "SASE & SD-WAN RFP Builder", href: "/sase-sd-wan-rfp-builder/" },
+      { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/" },
       { label: "Publish a project notice", href: "/sase/opportunities/new/" },
       { label: "Opportunities board", href: "/sase/opportunities/board/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
@@ -53,9 +53,8 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Providers and comparisons",
     links: [
       { label: "Build your shortlist", href: "/sase/shortlist/" },
-      { label: "Evaluated providers", href: "/sase/vendors/" },
-      { label: "All listed suppliers", href: "/marketplace/" },
-      { label: "Provider comparisons", href: "/vendor-comparison/" },
+      { label: "Provider research directory", href: "/marketplace/" },
+      { label: "Provider comparison engine", href: "/sase/shortlist/#comparison-workspace" },
       { label: "Best providers by sector", href: "/sase/best/" },
       { label: "What the market is buying", href: "/sase/demand/" },
       { label: "AI assistant connector", href: "/sase/connector/" },
@@ -79,7 +78,9 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
   {
     title: "Pricing and cost tools",
     links: [
+      { label: "Pricing options", href: "/sase/pricing/" },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
+      { label: "Request circuit pricing", href: "/sase/circuit-pricing/" },
       { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/" },
       { label: "BTnet leased line costs", href: "/bt-leased-line-cost-calculator-tool/" },
       { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/" },

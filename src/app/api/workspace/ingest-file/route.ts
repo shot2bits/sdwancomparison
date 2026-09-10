@@ -76,11 +76,12 @@ export async function POST(req: Request) {
     try {
       const mammoth = await import("mammoth");
       const { value } = await mammoth.extractRawText({ buffer: buf });
-      const text = value.slice(0, MAX_TEXT_CHARS);
+      const text = value;
+      if (text.length > MAX_TEXT_CHARS) return Response.json({ error: `This document contains ${text.length.toLocaleString("en-GB")} characters; the limit is 200,000 per import. Split it into sections and import each section. Nothing from this file was added.`, original_chars: text.length, retained_chars: 0, truncated: false }, { status: 413, headers: cors });
       if (!text.trim()) {
         return Response.json({ error: "That document looks empty." }, { status: 422, headers: cors });
       }
-      return Response.json({ text }, { headers: cors });
+      return Response.json({ text, original_chars: text.length, retained_chars: text.length, truncated: false }, { headers: cors });
     } catch {
       return Response.json({ error: "Could not read that Word document — it may be corrupt or password-protected." }, { status: 422, headers: cors });
     }
@@ -94,11 +95,12 @@ export async function POST(req: Request) {
       // structurally incompatible with the root project's; runtime shape is identical.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await wb.xlsx.load(buf as any);
-      const text = flattenWorkbookToText(wb).slice(0, MAX_TEXT_CHARS);
+      const text = flattenWorkbookToText(wb);
+      if (text.length > MAX_TEXT_CHARS) return Response.json({ error: `This document contains ${text.length.toLocaleString("en-GB")} characters; the limit is 200,000 per import. Split it into sections and import each section. Nothing from this file was added.`, original_chars: text.length, retained_chars: 0, truncated: false }, { status: 413, headers: cors });
       if (!text.trim()) {
         return Response.json({ error: "That spreadsheet looks empty." }, { status: 422, headers: cors });
       }
-      return Response.json({ text }, { headers: cors });
+      return Response.json({ text, original_chars: text.length, retained_chars: text.length, truncated: false }, { headers: cors });
     } catch {
       return Response.json({ error: "Could not read that spreadsheet — it may be corrupt or password-protected." }, { status: 422, headers: cors });
     }
@@ -118,9 +120,10 @@ export async function POST(req: Request) {
       const { PDFParse } = await import("pdf-parse");
       parser = new PDFParse({ data: buf });
       const result = await parser.getText();
-      const text = cleanPdfText(result.text).slice(0, MAX_TEXT_CHARS);
+      const text = cleanPdfText(result.text);
+      if (text.length > MAX_TEXT_CHARS) return Response.json({ error: `This document contains ${text.length.toLocaleString("en-GB")} characters; the limit is 200,000 per import. Split it into sections and import each section. Nothing from this file was added.`, original_chars: text.length, retained_chars: 0, truncated: false }, { status: 413, headers: cors });
       if (!text.trim()) return Response.json({ error: "That PDF contains no selectable text. It appears to be scanned; use a searchable PDF or paste the relevant text instead." }, { status: 422, headers: cors });
-      return Response.json({ text }, { headers: cors });
+      return Response.json({ text, original_chars: text.length, retained_chars: text.length, truncated: false }, { headers: cors });
     } catch (error) {
       // Keep the real parser exception in server logs so a deployment-only
       // packaging failure cannot be hidden behind a generic buyer message.

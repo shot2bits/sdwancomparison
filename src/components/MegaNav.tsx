@@ -1,4 +1,5 @@
 "use client";
+import ReleaseVersion from "@/components/ReleaseVersion";
 
 /**
  * The 2026 top navigation (Robert's spec, 24 Jul; his verdicts: one header
@@ -156,6 +157,7 @@ export default function MegaNav() {
           <span>Netify</span>
         </a>
 
+        <ReleaseVersion />
         {/* Desktop groups */}
         <nav aria-label="Primary" className="hidden min-w-0 items-center gap-1 lg:flex">
           {MEGA_GROUPS.map((group, gi) => {
