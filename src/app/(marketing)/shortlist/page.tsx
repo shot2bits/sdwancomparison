@@ -53,6 +53,9 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
   // Market-view pages lead with the list-shaped blocks answer engines lift;
   // the all-providers page keeps the builder first.
   const listFirst = selectedView !== "all";
+  // Mid-sentence form of a view label: "All providers" becomes "all providers"
+  // while SD-WAN and SASE keep their capitals.
+  const inSentence = (label: string) => label.split(" ").map((word) => (/^[A-Z][a-z]+$/.test(word) ? word.toLowerCase() : word)).join(" ");
   const sourceBySlug = new Map(vendors.map((provider) => [provider.slug, provider]));
 
   const schemas = [
@@ -107,11 +110,11 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
       <section className="mb-10 overflow-hidden rounded-lg border border-[var(--ink-300,#d5d9df)]" aria-labelledby="comparison-summary-title">
         <div className="border-b border-[var(--ink-200,#e8ebef)] bg-white px-5 py-4">
           <p className="eyebrow mb-1">Comparison summary</p>
-          <h2 id="comparison-summary-title" className="text-xl">Leading {SHORTLIST_VIEWS[selectedView].label.toLowerCase()} at a glance</h2>
+          <h2 id="comparison-summary-title" className="text-xl">Leading {inSentence(SHORTLIST_VIEWS[selectedView].label)} at a glance</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
-            <caption className="sr-only">Comparative overview of {viewRanking.length} {SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, updated {verified}</caption>
+            <caption className="sr-only">Comparative overview of {viewRanking.length} {inSentence(SHORTLIST_VIEWS[selectedView].label)}, updated {verified}</caption>
             <thead className="bg-[var(--ink-50,#f6f8fa)]">
               <tr>{["Rank and provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
             </thead>
@@ -226,7 +229,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
       {!listFirst && listBlocks}
 
       <figure className="mb-10 rounded-lg border border-[var(--ink-200,#e8ebef)] p-4">
-        <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Comparison chart for the leading ${SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, ranked by the Netify governed evidence score`} className="h-auto w-full" />
+        <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Comparison chart for the leading ${inSentence(SHORTLIST_VIEWS[selectedView].label)}, ranked by the Netify governed evidence score`} className="h-auto w-full" />
         <figcaption className="mt-2 text-xs text-[var(--ink-600)]">Leading providers by the selected governed evidence score. Use the table above for the underlying decision fields.</figcaption>
       </figure>
 
