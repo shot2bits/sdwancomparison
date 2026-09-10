@@ -29,3 +29,7 @@ Tests that previously mapped explicitly remote users into the generic count were
 No real public test notice, supplier message, quote email or order was created. Real inbox delivery, supplier response and NDA accounts, physical devices, full file-format manual coverage and installed external MCP clients still need their designated fixtures. These remain unverified, not passed. No claim that all 168 cases are complete or that every reported issue has been independently reproduced.
 
 Production build: npm run build:nonmutating passed (optimized Next.js build, TypeScript and page generation). Production Branch verified as main. This branch is not deployed to production.
+
+## Live release supersedes the preceding not-deployed status
+
+10 September: main 1e54d7b, version 1009261313, Git-built production deployment dpl_CSvrVYSJzWa7q3kQdoJT8SG3aufQ. Claude's 47c0d4d shortlist change preserved. Public proxy alias explicitly moved to this deployment after it remained on an older build. Actual netify.co.uk browser checks passed for count capture/correction, inline bandwidth feedback and shortlist loading. No browser errors observed in checked sessions. See HANDOFF.md for alias coordination.
