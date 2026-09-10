@@ -50,6 +50,9 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
   const verified = vendors.map((v) => v.last_verified).sort().slice(-1)[0] ?? "";
   const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
   const viewRanking = buildShortlistMarketView(vendors, selectedView);
+  // Market-view pages lead with the list-shaped blocks answer engines lift;
+  // the all-providers page keeps the builder first.
+  const listFirst = selectedView !== "all";
   const sourceBySlug = new Map(vendors.map((provider) => [provider.slug, provider]));
 
   const schemas = [
@@ -85,6 +88,54 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
     },
   ];
 
+  const listBlocks = (
+    <>
+      <section className="mb-10" aria-labelledby="leading-providers-title">
+        <p className="eyebrow mb-2">Leading providers</p>
+        <h2 id="leading-providers-title" className="text-xl">Provider, product and differentiator</h2>
+        <ul className="mt-4 grid list-none gap-3 p-0 md:grid-cols-2">
+          {viewRanking.slice(0, 10).map((provider) => {
+            const source = sourceBySlug.get(provider.slug)!;
+            return <li key={provider.slug} className="rounded-lg border border-[var(--ink-200,#e8ebef)] p-4 text-sm leading-6">
+              <a className="font-semibold underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a>
+              {source.product_focus ? ` (${source.product_focus})` : ""}: {provider.key_differentiators[0] || provider.shortlist_summary}
+            </li>;
+          })}
+        </ul>
+      </section>
+
+      <section className="mb-10 overflow-hidden rounded-lg border border-[var(--ink-300,#d5d9df)]" aria-labelledby="comparison-summary-title">
+        <div className="border-b border-[var(--ink-200,#e8ebef)] bg-white px-5 py-4">
+          <p className="eyebrow mb-1">Comparison summary</p>
+          <h2 id="comparison-summary-title" className="text-xl">Leading {SHORTLIST_VIEWS[selectedView].label.toLowerCase()} at a glance</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
+            <caption className="sr-only">Comparative overview of {viewRanking.length} {SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, updated {verified}</caption>
+            <thead className="bg-[var(--ink-50,#f6f8fa)]">
+              <tr>{["Rank and provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
+            </thead>
+            <tbody>
+              {viewRanking.slice(0, 10).map((provider) => {
+                const source = sourceBySlug.get(provider.slug)!;
+                return <tr key={provider.slug} className="align-top even:bg-[var(--ink-50,#f8f9fa)]">
+                  <td className="border-b px-4 py-3 font-medium"><span className="mr-2 text-[var(--ink-500)]">{provider.rank}</span><a className="underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a></td>
+                  <td className="border-b px-4 py-3">{provider.category}</td>
+                  <td className="border-b px-4 py-3">{source.product_focus || "Product names are listed in the full profile."}</td>
+                  <td className="border-b px-4 py-3">{provider.best_fit_for[0] || provider.shortlist_summary}</td>
+                  <td className="border-b px-4 py-3">{provider.key_differentiators[0] || provider.shortlist_summary}</td>
+                  <td className="border-b px-4 py-3">{firstUnconfirmedDecision(source)}</td>
+                  <td className="border-b px-4 py-3 whitespace-nowrap">{provider.last_verified}</td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="px-5 py-3 text-xs text-[var(--ink-600,#555)]">The table uses governed provider records. Unknown evidence is shown as a point to confirm, not a negative score.</p>
+      </section>
+    </>
+  );
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
       {schemas.map((s, i) => (
@@ -97,9 +148,12 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
 
       <div className="mb-8 max-w-4xl fade-rise">
         <p className="eyebrow mb-3">{SHORTLIST_INTRO.eyebrow}</p>
-        <h1 id="page-h1" className="mb-4">{SHORTLIST_INTRO.h1}</h1>
+        {/* Each market view is its own page for search: the H1 names the view
+            (the eyebrow keeps SD-WAN and SASE together) and the view's answer
+            is the subhead, so the page reads as the list it is. */}
+        <h1 id="page-h1" className="mb-4">{selectedView === "all" ? SHORTLIST_INTRO.h1 : `${SHORTLIST_VIEWS[selectedView].title} (2026)`}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          {SHORTLIST_INTRO.subhead}
+          {selectedView === "all" ? SHORTLIST_INTRO.subhead : SHORTLIST_VIEWS[selectedView].answer}
         </p>
       </div>
 
@@ -121,6 +175,8 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
 
       {/* The comparison, requirements and RFP routes are the primary user
           task, so they appear before the supporting research content. */}
+      {listFirst && listBlocks}
+
       <Suspense fallback={null}>
         <ShortlistBuilder vendors={vendors} features={features} initialView={selectedView} />
       </Suspense>
@@ -167,49 +223,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         </div>
       </section>
 
-      <section className="mb-10" aria-labelledby="leading-providers-title">
-        <p className="eyebrow mb-2">Leading providers</p>
-        <h2 id="leading-providers-title" className="text-xl">Provider, product and differentiator</h2>
-        <ul className="mt-4 grid list-none gap-3 p-0 md:grid-cols-2">
-          {viewRanking.slice(0, 10).map((provider) => {
-            const source = sourceBySlug.get(provider.slug)!;
-            return <li key={provider.slug} className="rounded-lg border border-[var(--ink-200,#e8ebef)] p-4 text-sm leading-6">
-              <a className="font-semibold underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a>
-              {source.product_focus ? ` (${source.product_focus})` : ""}: {provider.key_differentiators[0] || provider.shortlist_summary}
-            </li>;
-          })}
-        </ul>
-      </section>
-
-      <section className="mb-10 overflow-hidden rounded-lg border border-[var(--ink-300,#d5d9df)]" aria-labelledby="comparison-summary-title">
-        <div className="border-b border-[var(--ink-200,#e8ebef)] bg-white px-5 py-4">
-          <p className="eyebrow mb-1">Comparison summary</p>
-          <h2 id="comparison-summary-title" className="text-xl">Leading {SHORTLIST_VIEWS[selectedView].label.toLowerCase()} at a glance</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
-            <caption className="sr-only">Comparative overview of {viewRanking.length} {SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, updated {verified}</caption>
-            <thead className="bg-[var(--ink-50,#f6f8fa)]">
-              <tr>{["Rank and provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
-            </thead>
-            <tbody>
-              {viewRanking.slice(0, 10).map((provider) => {
-                const source = sourceBySlug.get(provider.slug)!;
-                return <tr key={provider.slug} className="align-top even:bg-[var(--ink-50,#f8f9fa)]">
-                  <td className="border-b px-4 py-3 font-medium"><span className="mr-2 text-[var(--ink-500)]">{provider.rank}</span><a className="underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a></td>
-                  <td className="border-b px-4 py-3">{provider.category}</td>
-                  <td className="border-b px-4 py-3">{source.product_focus || "Product names are listed in the full profile."}</td>
-                  <td className="border-b px-4 py-3">{provider.best_fit_for[0] || provider.shortlist_summary}</td>
-                  <td className="border-b px-4 py-3">{provider.key_differentiators[0] || provider.shortlist_summary}</td>
-                  <td className="border-b px-4 py-3">{firstUnconfirmedDecision(source)}</td>
-                  <td className="border-b px-4 py-3 whitespace-nowrap">{provider.last_verified}</td>
-                </tr>;
-              })}
-            </tbody>
-          </table>
-        </div>
-        <p className="px-5 py-3 text-xs text-[var(--ink-600,#555)]">The table uses governed provider records. Unknown evidence is shown as a point to confirm, not a negative score.</p>
-      </section>
+      {!listFirst && listBlocks}
 
       <figure className="mb-10 rounded-lg border border-[var(--ink-200,#e8ebef)] p-4">
         <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Comparison chart for the leading ${SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, ranked by the Netify governed evidence score`} className="h-auto w-full" />
