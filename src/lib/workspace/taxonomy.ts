@@ -61,7 +61,7 @@ export const TAXONOMY: TaxonomySection[] = [
     key: "organisation",
     title: "Organisation",
     exampleNote: "example content",
-    paths: ["organisation.sector", "estate.users", "estate.sites", "organisation.regions", "organisation.sizeBand"],
+    paths: ["organisation.sector", "estate.users", "estate.remoteUsers", "estate.sites", "organisation.regions", "organisation.sizeBand"],
     items: [], // rendered as fields, not options
   },
   {
@@ -254,7 +254,7 @@ export const ORGANISATION_EXAMPLES: Array<{ k: string; v: string; was?: string }
 /** Which section an open question (gap) belongs to: questions render in
  *  place, inside the conversation they interrupt (13.6). */
 export function sectionForGapKey(key: string): string {
-  if (key.startsWith("organisation.") || key === "estate.users" || key === "estate.sites") return "organisation";
+  if (key.startsWith("organisation.") || key === "estate.users" || key === "estate.remoteUsers" || key === "estate.sites") return "organisation";
   if (key === "drivers") return "drivers";
   if (key === "procurement.buying") return "objectives";
   if (key === "procurement.operatingModel") return "model";

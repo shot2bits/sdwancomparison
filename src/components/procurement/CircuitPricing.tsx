@@ -39,6 +39,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
+    [bandwidthTouched, setBandwidthTouched] = useState(false),
     [view, setView] = useState(admin ? "requests" : "requirements"),
     [modal, setModal] = useState(""),
     [edit, setEdit] = useState<CircuitLine | null>(null),
@@ -765,11 +766,19 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
                 <Field label="Bandwidth required">
                   <input
                     value={edit.bandwidth}
+                    aria-invalid={bandwidthTouched && !CircuitLineSchema.shape.bandwidth.safeParse(edit.bandwidth).success}
+                    aria-describedby="circuit-bandwidth-help"
+                    onBlur={() => setBandwidthTouched(true)}
                     onChange={(e) => setEdit({ ...edit, bandwidth: e.target.value })}
                     placeholder="e.g. 1 Gbps or best available mobile speed"
                   />
                 </Field>
               </div>
+              <p id="circuit-bandwidth-help" className={bandwidthTouched && !CircuitLineSchema.shape.bandwidth.safeParse(edit.bandwidth).success ? "cp-error" : "cp-note"} role={bandwidthTouched && !CircuitLineSchema.shape.bandwidth.safeParse(edit.bandwidth).success ? "alert" : undefined}>
+                {bandwidthTouched && !CircuitLineSchema.shape.bandwidth.safeParse(edit.bandwidth).success
+                  ? "Enter bandwidth such as 100 Mbps or 1 Gbps. Use Not sure if you need advice. Contract duration belongs in Contract term."
+                  : "Use Mbps or Gbps, best available mobile speed, or Not sure."}
+              </p>
               {(edit.kind.includes("4G") || edit.resilience === "Cellular backup") && (
                 <Field label="Data allowance & coverage requirements">
                   <input

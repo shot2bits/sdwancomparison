@@ -877,6 +877,7 @@ function buildTitleAndSummary(requirement: SecurityRequirementInput, clauses: Pr
   if (requirement.organisation?.regions?.length) bits.push(requirement.organisation.regions.join("/").toUpperCase());
   if (sites) bits.push(`${sites} sites`);
   if (requirement.estate?.users) bits.push(`${requirement.estate.users} users in scope`);
+  if (requirement.estate?.remoteUsers) bits.push(`${requirement.estate.remoteUsers} remote users`);
   const cloud = requirement.estate?.cloud ?? [];
   if (cloud.length) bits.push(cloud.join(", "));
 

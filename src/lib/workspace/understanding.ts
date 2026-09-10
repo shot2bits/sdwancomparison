@@ -113,7 +113,7 @@ export type UnderstandingSectionKey = (typeof UNDERSTANDING_SECTIONS)[number]["k
  *  computeCompleteness below). */
 const SECTION_PATHS: Record<Exclude<UnderstandingSectionKey, "objective">, string[]> = {
   drivers: ["drivers"],
-  estate: ["estate.users", "estate.sites", "estate.cloud", "estate.existingSecurity", "estate.existingNetwork"],
+  estate: ["estate.users", "estate.remoteUsers", "estate.sites", "estate.cloud", "estate.existingSecurity", "estate.existingNetwork"],
   geography: ["organisation.regions", "estate.namedLocations"],
   timescale: ["constraints.timeline"],
   existingSuppliers: ["estate.existingProviders"],

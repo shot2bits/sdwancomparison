@@ -145,6 +145,7 @@ export const ALLOWED_PATHS = [
   "organisation.sizeBand",
   "organisation.regions",
   "estate.users",
+  "estate.remoteUsers",
   "estate.sites",
   "estate.cloud",
   "estate.existingSecurity",
@@ -264,10 +265,10 @@ function remoteUserCorrection(text: string): RegExpExecArray | null {
 }
 
 function rawTextShowsNegativeOrDecimalNear(path: AllowedPath, rawBuyerText: string): boolean {
-  const noun = path === "estate.users" ? USER_NOUN : path === "estate.sites" ? SITE_NOUN : null;
+  const noun = (path === "estate.users" || path === "estate.remoteUsers") ? USER_NOUN : path === "estate.sites" ? SITE_NOUN : null;
   if (!noun) return false;
   const re = new RegExp(`(?:${NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.source})\\s*(?:\\w+\\s+)?(?:${noun})\\b`, "i");
-  const correction = path === "estate.users" ? remoteUserCorrection(rawBuyerText) : null;
+  const correction = path === "estate.remoteUsers" ? remoteUserCorrection(rawBuyerText) : null;
   return re.test(rawBuyerText) || Boolean(correction && NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.test(correction[2]));
 }
 
@@ -311,6 +312,7 @@ function validate(
   };
   switch (p) {
     case "estate.users":
+    case "estate.remoteUsers":
     case "estate.sites": {
       /* Fix (correction pass 2, Priority 2 — Tests 70/71): the first
        * fix only touched deterministicExtract()'s own regex match, but
@@ -351,7 +353,7 @@ function validate(
        * sign/decimal reliably still exists, so check that directly as a
        * third, independent signal. */
       const rawTextShowsIt = rawBuyerText ? rawTextShowsNegativeOrDecimalNear(p, rawBuyerText) : false;
-      const what = p === "estate.users" ? "user" : "site";
+      const what = p !== "estate.sites" ? "user" : "site";
       if (sourceShowsNegativeOrDecimal || valueShowsNegativeOrDecimal || rawTextShowsIt) {
         /* Quote whichever text actually shows the negative/decimal shape,
          * preferring the buyer's own original words (rawBuyerText) when
@@ -377,7 +379,7 @@ function validate(
         return null;
       }
       const n = Math.round(raw);
-      if (!Number.isFinite(n) || n < 1 || n > (p === "estate.users" ? 500000 : 20000)) {
+      if (!Number.isFinite(n) || n < 1 || n > (p !== "estate.sites" ? 500000 : 20000)) {
         notes.push(
           `${QUANTITY_NOT_RECORDED_PREFIX}"${clean(sourceText || String(value), 60)}" isn't a plausible ${what} count, so nothing precise was recorded. The earlier value, if any, is unchanged.`,
         );
@@ -497,6 +499,7 @@ export function applyUpdates(base: SecurityRequirementInput, updates: FieldUpdat
       case "organisation.sizeBand": r.organisation!.sizeBand = u.value as "small" | "medium" | "large"; break;
       case "organisation.regions": r.organisation!.regions = uniq([...(r.organisation!.regions ?? []), ...(u.value as string[])]); break;
       case "estate.users": r.estate!.users = u.value as number; break;
+      case "estate.remoteUsers": r.estate!.remoteUsers = u.value as number; break;
       case "estate.sites": r.estate!.sites = u.value as number; break;
       case "estate.cloud": r.estate!.cloud = uniq([...(r.estate!.cloud ?? []), ...(u.value as string[])]); break;
       case "estate.existingSecurity": r.estate!.existingSecurity = uniq([...(r.estate!.existingSecurity ?? []), ...(u.value as string[])]); break;
@@ -874,13 +877,17 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
      * off this exact prefix) picks it up here too. */
     sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negUserMatch[0].trim(), 60)}" is negative or not a whole number, so no user count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
   } else {
-    const users = hit(new RegExp(`${NUM}\\s*${qualifierRun(SITE_NOUN)}(?:${USER_NOUN})\\b`));
-    if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim(), undefined, hitPos(users));
+    const users = [...t.matchAll(new RegExp(`${NUM}\\s*${qualifierRun(SITE_NOUN)}(?:${USER_NOUN})\\b`, "g"))].find(match => !/\bremote\b/i.test(match[0]));
+    if (users && !/\bremote\b/i.test(users[0])) say("estate.users", magnitude(users[1], users[2]), users[0].trim(), undefined, hitPos(users));
+    const remote = hit(new RegExp(`${NUM}\\s+remote\\s+(?:${USER_NOUN})\\b`));
+    if (remote) say("estate.remoteUsers", magnitude(remote[1], remote[2]), remote[0].trim(), undefined, hitPos(remote));
+    const remoteAfter = hit(new RegExp(`remote\\s+users?\\s+(?:remain|are|total|number)\\s+${NUM}`));
+    if (remoteAfter) say("estate.remoteUsers", magnitude(remoteAfter[1], remoteAfter[2]), remoteAfter[0].trim(), undefined, hitPos(remoteAfter));
   }
 
   const remoteCorrection = remoteUserCorrection(text);
   if (remoteCorrection) {
-    say("estate.users", magnitude(remoteCorrection[2], remoteCorrection[3]?.toLowerCase()), remoteCorrection[1], remoteCorrection[1], text.indexOf(remoteCorrection[1], remoteCorrection.index));
+    say("estate.remoteUsers", magnitude(remoteCorrection[2], remoteCorrection[3]?.toLowerCase()), remoteCorrection[1], remoteCorrection[1], text.indexOf(remoteCorrection[1], remoteCorrection.index));
   }
 
   /* "clinics" joined the noun list 31 Jul 2026 (round 6 dry run: "60
@@ -1518,6 +1525,7 @@ Rules:
 - Mobile connectivity (4G, 5G) is not "broadband". If the estate runs on mobile and no listed network id fits, omit the field rather than approximating.
 - procurement.vendorsUnderConsideration is a vendor or product the buyer is evaluating or thinking about -- never one already in place or already chosen. Never propose this path for a vendor the buyer describes as already deployed or already selected (use estate.namedTechnologies / estate.existingProviders instead), and never imply selection just because a vendor is named.
 - estate.namedLocations, estate.locationCriticality and estate.siteResilience must each be scoped to the specific location or group of locations the buyer names -- copy their scoping words in full (a named site, or an exclusion like "other sites" or "the rest of our sites"). Never generalise a statement about one location to the whole estate, and never let a clause about one location apply to a different named location the buyer did not include in it.
+- estate.users is the total or unqualified user count. estate.remoteUsers is a separately stated remote-user count; never replace the total with a subset.
 - requirements.bespoke is for a concrete requirement in the buyer's own words that does not fit any other allowed path. Only propose it when the text states a real requirement with no better home; never invent one.
 - "quote": if the buyer literally said it, copy their exact words (a short verbatim substring). If you inferred it, set quote to null and give a one-line "reason".
 - Never invent facts. Omit what the text does not support. Fewer, correct fields beat many guesses.`;
@@ -1549,10 +1557,11 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
      * f.quote before this line ever runs, so sourceText (from `quote`
      * above) can no longer be trusted alone; only the buyer's original,
      * unprocessed text still shows the original shape. */
-    const ok = validate(String(f.path ?? ""), f.value, notes, quote || String(f.reason ?? ""), text);
+    const proposedPath = f.path === "estate.users" && /\bremote\b/i.test(quote) && deterministicExtract(text).some(update => update.path === "estate.remoteUsers" && update.value === f.value) ? "estate.remoteUsers" : String(f.path ?? "");
+    const ok = validate(proposedPath, f.value, notes, quote || String(f.reason ?? ""), text);
     if (!ok) continue;
     let value = ok.value;
-    if (ok.path === "estate.users") {
+    if (ok.path === "estate.remoteUsers") {
       const correction = remoteUserCorrection(text);
       if (correction) {
         const scale = /^(?:k|thousand)$/i.test(correction[3] ?? "") ? 1000 : /^(?:m|million)$/i.test(correction[3] ?? "") ? 1000000 : 1;
@@ -1578,7 +1587,7 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
      * sites=1): a numeric estate count must trace to a digit in the
      * words it cites, or in the buyer's text at all. Otherwise OMIT:
      * the receipt keeps the clause verbatim, and no count is invented. */
-    if ((ok.path === "estate.sites" || ok.path === "estate.users") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
+    if ((ok.path === "estate.sites" || ok.path === "estate.users" || ok.path === "estate.remoteUsers") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
       /* Correction pass 2, Priority 3 (Test 73 — "quite a few sites,
        * maybe a dozen or so"): same QUANTITY_NOT_RECORDED_PREFIX marker
        * as validate()'s own rejections, so the client can surface a

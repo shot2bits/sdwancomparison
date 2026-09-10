@@ -314,7 +314,7 @@ export function receiptIsExplainedByClauses(receipt: ReceiptLike, clauses: Claus
  *  a sentence that mixes in a genuine, separate requirement alongside the
  *  buyer's identity/scale keeps enough uncovered words to survive and
  *  still reach the ordinary Additional-requirements path. */
-const ORG_IDENTITY_SCALE_PATHS = new Set(["organisation.sector", "organisation.regions", "organisation.name", "estate.sites", "estate.users"]);
+const ORG_IDENTITY_SCALE_PATHS = new Set(["organisation.sector", "organisation.regions", "organisation.name", "estate.sites", "estate.users", "estate.remoteUsers"]);
 
 function receiptIsOrgIdentityAndScale(receipt: ReceiptLike, facts: WorkspaceFact[]): boolean {
   const words = significantWords(receipt.text);

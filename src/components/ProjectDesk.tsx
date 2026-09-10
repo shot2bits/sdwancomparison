@@ -266,7 +266,7 @@ const GUIDED_CUSTOM_ANSWER_PREFIX = "guided-answer:";
 const guidedCustomAnswerNoteId = (questionId: string) => `${GUIDED_CUSTOM_ANSWER_PREFIX}${questionId}`;
 
 function outlineKeyForPath(path: string): string {
-  if (["organisation.sector", "organisation.sizeBand", "organisation.regions", "estate.users", "estate.sites"].includes(path)) return "organisation_scale";
+  if (["organisation.sector", "organisation.sizeBand", "organisation.regions", "estate.users", "estate.remoteUsers", "estate.sites"].includes(path)) return "organisation_scale";
   if (path === "procurement.buying") return "solution_scope";
   if (["estate.existingNetwork", "estate.cloud", "estate.existingSecurity", "estate.namedTechnologies", "estate.existingProviders"].includes(path)) return "current_estate";
   if (["estate.siteResilience", "estate.locationCriticality", "estate.namedLocations"].includes(path)) return "resilience_availability";
@@ -357,7 +357,8 @@ const PATH_LABELS: Record<string, string> = {
   "organisation.sector": "Sector",
   "organisation.sizeBand": "Size",
   "organisation.regions": "Regions",
-  "estate.users": "People",
+  "estate.users": "Users in scope",
+  "estate.remoteUsers": "Remote users",
   "estate.sites": "Sites",
   "estate.cloud": "Cloud",
   "estate.existingSecurity": "Existing security",
@@ -4172,7 +4173,7 @@ export default function ProjectDesk({
       !coreFive.sector && "sector",
       !coreFive.sites && "site count",
       !coreFive.regions && "regions",
-      !hasFact("estate.users") && "user count",
+      !hasFact("estate.users") && !hasFact("estate.remoteUsers") && "user count",
     ].filter((x): x is string => typeof x === "string");
     /* Reported even when the row reads Confirmed: ANY ONE of these three
        satisfies `estateSignal`, so "Confirmed" has never meant all three
@@ -4184,7 +4185,7 @@ export default function ProjectDesk({
       !hasFact("estate.existingSecurity") && "security estate",
     ].filter((x): x is string => typeof x === "string");
     const outline = buildSectionOutline({
-      orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && hasFact("estate.users"),
+      orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && (hasFact("estate.users") || hasFact("estate.remoteUsers")),
       orgScaleDetail: coreFive.sector && coreFive.sites ? `${cap(String(standingAt("organisation.sector")[0]?.value ?? ""))}, ${standingAt("estate.sites").slice(-1)[0]?.value ?? "?"} sites` : "Sector, sites and regions not yet all stated.",
       orgScaleMissing,
       scopeComplete: coreFive.scope,
@@ -6870,7 +6871,7 @@ export default function ProjectDesk({
                 below are a fast pick, not the only path. Count-type slots
                 (Sites, People) get a real number field so a known figure
                 never has to be approximated into a bucket. */}
-            {(editSlot.path === "estate.sites" || editSlot.path === "estate.users") && (
+            {(editSlot.path === "estate.sites" || editSlot.path === "estate.users" || editSlot.path === "estate.remoteUsers") && (
               <form
                 className="mb-2.5 flex items-center gap-2"
                 onSubmit={(e) => {

@@ -1184,8 +1184,8 @@ function main() {
     // fixturesBCD-round3.png reads 30 after B and D, 33 after C, read
     // live from the aria-label during capture).
     record(
-      readinessA.readiness.score === 24 && readinessB.readiness.score === 30 && readinessC.readiness.score === 33 && readinessD.readiness.score === 30,
-      "Fixture L/defect 5, correction pass round 3: the RECALCULATED A->B->C->D score progression (24 -> 30 -> 33 -> 30) matches empirical reproduction against the real production functions AND a freshly rendered live UI run captured this round -- a pinned regression value, not just a directional check, and not a stale pre-fix progression",
+      readinessA.readiness.score === 21 && readinessB.readiness.score === 27 && readinessC.readiness.score === 30 && readinessD.readiness.score === 27,
+      "Fixture L: remote users remain a subset, not a supplied total; progression 21 -> 27 -> 30 -> 27 retains correction and reversal behaviour",
       `A=${readinessA.readiness.score} B=${readinessB.readiness.score} C=${readinessC.readiness.score} D=${readinessD.readiness.score}`,
     );
     record(

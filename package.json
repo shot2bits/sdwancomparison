@@ -49,7 +49,7 @@
     "validate:ui:row8": "node scripts/validate-row8-vendor-disclosure-ui.mjs",
     "validate:ui:setup": "playwright install chromium",
     "test:buying-funnel": "tsx scripts/test-buying-funnel.ts",
-    "test:acceptance-fixes": "tsx scripts/test-acceptance-save-history.ts && tsx scripts/test-acceptance-correction.ts && tsx scripts/test-acceptance-input.ts && tsx scripts/test-acceptance-comparison.tsx && tsx scripts/test-acceptance-auth-return.ts && tsx scripts/test-acceptance-supplier-access.ts"
+    "test:acceptance-fixes": "tsx scripts/test-acceptance-save-history.ts && tsx scripts/test-acceptance-correction.ts && tsx scripts/test-acceptance-input.ts && tsx scripts/test-acceptance-comparison.tsx && tsx scripts/test-acceptance-auth-return.ts && tsx scripts/test-acceptance-supplier-access.ts && tsx scripts/test-harry-retest-users.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

@@ -229,6 +229,7 @@ export function mergeRequirementBase(
     },
     estate: {
       users: addition.estate?.users ?? base.estate?.users,
+      remoteUsers: addition.estate?.remoteUsers ?? base.estate?.remoteUsers,
       sites: addition.estate?.sites ?? base.estate?.sites,
       devices: addition.estate?.devices ?? base.estate?.devices,
       specialDevices: unionField(base.estate?.specialDevices, addition.estate?.specialDevices),
@@ -680,7 +681,7 @@ const MODEL_OPTIONS = (Object.keys(OPERATING_MODEL_LABELS) as OperatingModelId[]
 /** Map a verdict gap onto an inline answer control. */
 function gapControl(field: string, question: string, whyItMatters?: string): BriefGap | null {
   const base = { key: field, question, whyItMatters };
-  if (field === "estate.users" || field === "estate.sites") {
+  if (field === "estate.users" || field === "estate.remoteUsers" || field === "estate.sites") {
     return { ...base, path: field as AllowedPath, control: "number" };
   }
   if (field === "constraints.inHouseSocCapacity") {
@@ -780,6 +781,8 @@ export function briefModel(opts: {
       const g = gapSeg("estate.users");
       if (g) p.push(t(" with "), g, t(" staff"));
     }
+    const remoteUsers = one("estate.remoteUsers");
+    if (remoteUsers) p.push(t("; "), fs(remoteUsers), t(" remote users"));
     const regions = at("organisation.regions");
     if (regions.length) p.push(t(" across "), ...joinSegs(regions.map((r) => fs(r))));
     p.push(t("."));

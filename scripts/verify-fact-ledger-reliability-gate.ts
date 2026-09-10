@@ -121,7 +121,7 @@ async function main() {
       sdwanSasePreserved &&
       noSpuriousBespoke &&
       res.unplacedClauses.length === 2 &&
-      res.updates.some((u) => u.path === "estate.users" && u.value === 200) &&
+      res.updates.some((u) => u.path === "estate.remoteUsers" && u.value === 200) &&
       res.updates.some((u) => u.path === "estate.sites" && u.value === 20);
     record(
       ok,
@@ -169,7 +169,7 @@ async function main() {
       clauses.length === 5 &&
       landedPaths.has("organisation.sector") &&
       landedPaths.has("estate.sites") &&
-      landedPaths.has("estate.users") &&
+      landedPaths.has("estate.remoteUsers") &&
       landedPaths.has("procurement.buying") &&
       res.unplacedClauses.length === 1 &&
       res.unplacedClauses[0].includes("account manager");
@@ -738,7 +738,7 @@ async function main() {
     const res = await extractRequirement(text, {});
     const everyStructuredFactPresent =
       res.updates.some((u) => u.path === "organisation.sector" && u.value === "Healthcare & pharma" && u.provenance === "stated") &&
-      res.updates.some((u) => u.path === "estate.users" && u.value === 200) &&
+      res.updates.some((u) => u.path === "estate.remoteUsers" && u.value === 200) &&
       res.updates.some((u) => u.path === "estate.sites" && u.value === 20) &&
       // Requested SD-WAN is preserved in the source receipt, never existing estate.
       !res.updates.some((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
