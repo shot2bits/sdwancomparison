@@ -123,7 +123,14 @@ const FLAGSHIP_PAGES: BestPage[] = [
 export const BEST_PAGES: BestPage[] = [
   ...FLAGSHIP_PAGES,
   sectorPage("healthcare", "healthcare", "Typical drivers include clinical application performance, site resilience for 24x7 care settings and patient data protection."),
-  sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
+  {
+    ...sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
+    // Financial services evidence page on the main site (Sep 2026): 28
+    // requirements, UK and North American regimes kept separate, regime
+    // filter and regulation map. This page stays its live ranking source and
+    // canonicalises there, as manufacturing and hybrid work do.
+    canonicalOverride: "https://netify.co.uk/sd-wan-sase-for-financial-services/",
+  },
   sectorPage("retail_ecommerce", "retail", "Typical drivers include rapid store rollout, PCI segmentation, cellular backup and centralised management at scale."),
   {
     ...sectorPage("manufacturing", "manufacturing", "Typical drivers include OT and IoT security, plant connectivity, global site coverage and MPLS migration."),

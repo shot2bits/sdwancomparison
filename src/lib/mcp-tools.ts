@@ -26,7 +26,8 @@ type SectorEvidenceTwin = {
   summary: Record<string, unknown>;
   status_vocabulary: unknown[];
   evidence_rules: string[];
-  requirements: { code: string; label: string; explanation: string; evidence_rule: string; display_order: number }[];
+  requirements: { code: string; label: string; explanation: string; evidence_rule: string; display_order: number; regimes?: string[] | "all" }[];
+  regulation_map?: unknown;
   providers: {
     slug: string;
     name: string;
@@ -159,7 +160,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       // tool reads the same document the page renders from: one status per
       // provider per requirement, each with its reviewed source rows. No
       // second copy of the research is kept here.
-      const input = (args ?? {}) as { sector?: string; provider?: string; requirement?: string; include_sources?: boolean };
+      const input = (args ?? {}) as { sector?: string; provider?: string; requirement?: string; regime?: string; include_sources?: boolean };
       const sectorPaths: Record<string, string> = {
         manufacturing: "sd-wan-sase-for-manufacturing",
         retail: "sd-wan-sase-for-retail",
@@ -169,18 +170,26 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       const path = sectorPaths[input.sector ?? ""];
       if (!path) return { error: "Unknown sector. Use manufacturing, retail, financial-services or healthcare." };
       const pageUrl = `https://netify.co.uk/${path}/`;
-      let twin: { sector_evidence?: SectorEvidenceTwin | null } | null = null;
+      let twin: { sector_evidence?: SectorEvidenceTwin | null; regulation_map?: unknown } | null = null;
       try {
         const res = await fetch(`${pageUrl}data.json`, { next: { revalidate: 3600 } });
-        if (res.ok) twin = (await res.json()) as { sector_evidence?: SectorEvidenceTwin | null };
+        if (res.ok) twin = (await res.json()) as { sector_evidence?: SectorEvidenceTwin | null; regulation_map?: unknown };
       } catch {
         twin = null;
       }
       const layer = twin?.sector_evidence ?? null;
       if (!layer) {
-        return { sector: input.sector, has_evidence_layer: false, page_url: pageUrl, note: "No sector evidence review has been published for this sector yet. The manufacturing review is the first." };
+        return { sector: input.sector, has_evidence_layer: false, page_url: pageUrl, note: "No sector evidence review has been published for this sector yet. Manufacturing and financial-services are published." };
       }
       const includeSources = input.include_sources !== false;
+      // Financial services: requirements carry the regimes they belong to and
+      // source rows carry regulatory_regime, so a UK question never gets a US
+      // bank case study as its evidence. Sectors without regimes ignore this.
+      const regime = input.regime?.trim().toLowerCase();
+      const regimeWord: Record<string, string> = { uk: "UK", eu: "EU", us: "US", canada: "Canada" };
+      if (regime && !regimeWord[regime]) return { error: "Unknown regime. Use uk, eu, us or canada." };
+      const inRegime = (r: { regimes?: string[] | "all" }) => !regime || !r.regimes || r.regimes === "all" || r.regimes.includes(regime);
+      const sourceInRegime = (s: { [key: string]: unknown }) => !regime || !s.regulatory_regime || ["Multiple", "Not stated", regimeWord[regime]].includes(String(s.regulatory_regime));
       const requirementFilter = input.requirement?.trim().toLowerCase();
       const providerFilter = input.provider?.trim().toLowerCase();
       if (requirementFilter && !layer.requirements.some((r) => r.code === requirementFilter)) {
@@ -189,10 +198,11 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       const providers = layer.providers
         .filter((p) => !providerFilter || p.slug === providerFilter)
         .map((p) => {
-          const requirements = p.requirements.filter((r) => !requirementFilter || r.code === requirementFilter);
+          const regimeCodes = new Set(layer.requirements.filter(inRegime).map((r) => r.code));
+          const requirements = p.requirements.filter((r) => (!requirementFilter || r.code === requirementFilter) && regimeCodes.has(r.code));
           const sourceIds = new Set(requirements.flatMap((r) => r.evidence_source_ids));
           const sources = includeSources
-            ? p.sources.filter((s) => (requirementFilter ? s.requirement_codes.includes(requirementFilter) || sourceIds.has(s.id) : true))
+            ? p.sources.filter((s) => sourceInRegime(s) && (requirementFilter ? s.requirement_codes.includes(requirementFilter) || sourceIds.has(s.id) : true))
             : undefined;
           return {
             slug: p.slug,
@@ -218,7 +228,9 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
         summary: layer.summary,
         status_vocabulary: layer.status_vocabulary,
         evidence_rules: layer.evidence_rules,
-        requirements: requirementFilter ? layer.requirements.filter((r) => r.code === requirementFilter) : layer.requirements,
+        requirements: layer.requirements.filter((r) => inRegime(r) && (!requirementFilter || r.code === requirementFilter)),
+        ...(regime ? { regime } : {}),
+        ...(twin?.regulation_map ? { regulation_map: twin.regulation_map } : {}),
         providers,
         _meta: {
           canonicalUrl: pageUrl,
