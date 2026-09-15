@@ -11,18 +11,19 @@
  * follow-up list, and no response time is promised anywhere.
  */
 
-import { currentBuyerFacts } from "./current-buyer-facts";
+import { currentBuyerFacts, projectWithCurrentBuyerFacts, currentDocumentCounts } from "./current-buyer-facts";
 import { estimate, type EstimateResult } from "@/lib/estimator/engine";
 import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
 import { matchSuppliers } from "@/lib/supplier-match";
 import { regionHintFromEmail } from "@/lib/region-hint";
 import { includedSections } from "@/lib/rfp-document";
-import { USERS_BANDS } from "@/lib/notice-options";
+import { ESTIMATE_DISCLOSURE } from "./estimator/input";
 import type { ShortlistVendor } from "@/lib/shortlist-core";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
 export type MarketReport = {
   generated_at: number;
+  buyer_facts?: ReturnType<typeof currentBuyerFacts>;
   /** Matched supplier names/count from the dataset (same engine as the wizard panel).
    *  Phase 2 (14 Aug 2026): `total_evaluated_market` is the size of the
    *  WHOLE vendor dataset (matchSuppliers()'s own `total`, never
@@ -38,12 +39,18 @@ export type MarketReport = {
     three_year_tco_band_gbp: [number, number];
     methodology_version: string;
     disclaimer: string;
+    source: string;
+    source_date: string | null;
+    generated_at: number;
+    inclusions: string[];
+    exclusions: string[];
+    uncertainty: string;
   } | null;
   /** Every inference made to produce the band, stated plainly. */
   assumptions: string[];
   /** Deterministic completeness checks on the RFP document itself. */
   gaps: string[];
-  document: { sections: number; questions: number };
+  document: { sections: number; questions: number; requirements?: number };
   /** The uncommitted human layer, stated once so every surface says the same thing. */
   analyst_note: string;
 };
@@ -60,108 +67,26 @@ const REGION_MAP: Record<string, "uk-europe" | "north-america" | "apac" | "middl
   latin_america: "latam",
 };
 
-/** Representative user counts per wizard band (band midpoints, floored to the engine minimum). */
-const USERS_FOR_BAND: Record<string, number> = {
-  under_100: 75,
-  "100-500": 300,
-  "500-2500": 1200,
-  "2500-10000": 5000,
-  "10000+": 15000,
-};
-
-/**
- * The wizard stores the users band only in buyer.notes ("Users: 100–500
- * users."), so recover it from the label. Returns the band key or null.
- */
-function usersBandFromNotes(notes: string): string | null {
-  const m = notes.match(/Users:\s*([^.]+)\./);
-  if (!m) return null;
-  const label = m[1].trim();
-  const band = USERS_BANDS.find((b) => b.label === label);
-  return band ? band.key : null;
-}
-
 function estimateForProject(p: ProjectDetails): { result: EstimateResult | null; assumptions: string[] } {
-  const assumptions: string[] = [];
-  const facts = currentBuyerFacts(p);
-
-  // Users, in order of evidence quality (Harry's QA, RFP Builder F4: two
-  // unrelated projects produced byte-identical bands because both fell to
-  // the same defaults while the report was billed as "yours"):
-  // 1. the security engine's stated estate, 2. a "Staff: N." note from
-  // engine creation, 3. the wizard's users band in notes, 4. an assumed
-  // default that is now loudly labelled as the market baseline.
-  const engineEstate = (p.engine_data as unknown as { requirement?: { estate?: { users?: number } } } | undefined)?.requirement?.estate;
-  const staffNote = (p.buyer.notes ?? "").match(/Staff:\s*(\d+)\./);
-  const bandKey = usersBandFromNotes(p.buyer.notes ?? "");
-  let users: number;
-  let usersAssumed = false;
-  if (facts.users !== undefined) {
-    users = facts.users;
-    assumptions.push(`User count taken from your current project document (${users} users).`);
-  } else if (facts.canonical) {
-    return { result: null, assumptions: ["No confirmed user count in the current project document; add it to obtain a modelled band."] };
-  } else if (typeof engineEstate?.users === "number" && engineEstate.users > 0) {
-    users = engineEstate.users;
-    assumptions.push(`User count taken from your security assessment (${users} users).`);
-  } else if (staffNote) {
-    users = Number(staffNote[1]);
-    assumptions.push(`User count taken from your stated staff figure (${users} users).`);
-  } else if (bandKey && USERS_FOR_BAND[bandKey]) {
-    users = USERS_FOR_BAND[bandKey];
-    assumptions.push(`User count banded as ${bandKey.replace(/_/g, " ")} (modelled at ${users} users).`);
-  } else {
-    users = 250;
-    usersAssumed = true;
-    assumptions.push("User count not provided; the band assumes 250 users. Rerun with your own numbers in the cost estimator.");
-  }
-
-  // Sites: the wizard already stores a representative count.
-  const statedSites = facts.canonical ? facts.sites : p.buyer.site_count;
-  const sites = statedSites && statedSites > 0 ? statedSites : 5;
-  const sitesAssumed = !statedSites;
-  if (users < 50 || users > 250000) {
-    assumptions.push(`Your stated ${users} users are outside the model’s supported range of 50–250,000 users. Request supplier pricing for this estate.`);
-    return { result: null, assumptions };
-  }
-  if (sitesAssumed) assumptions.push("Site count not provided; the band assumes 5 sites.");
-
-  // When both estate dimensions are assumed, the figures are the Netify
-  // market baseline, not a project-specific estimate; say so first and
-  // plainly rather than letting identical bands masquerade as personal.
-  if (usersAssumed && sitesAssumed) {
-    assumptions.unshift(
-      "Baseline band: no estate size was provided, so these figures are the Netify market baseline for a typical mid-market estate (250 users, 5 sites), not an estimate of your project. Add your users and sites for a band of your own.",
-    );
-  }
-
-  // Regions: mapped; unmapped or empty falls back to UK & Europe.
-  const mapped = Array.from(new Set((p.buyer.regions ?? []).map((r) => REGION_MAP[r]).filter(Boolean)));
-  const regions = (mapped.length > 0 ? mapped : ["uk-europe" as const]).slice(0, 5);
-  if (mapped.length === 0) assumptions.push("No regions provided; the band assumes UK & Europe.");
-
-  // Security depth from product scope. SD-WAN-only estates are banded on the
-  // lightest security profile the methodology models; stated, not hidden.
-  let securityDepth: "sse-only" | "full-sase" | "full-sase-plus-advanced";
-  if (p.buyer.product_scope === "sse_only") securityDepth = "sse-only";
-  else if (p.buyer.product_scope === "sdwan_only") {
-    securityDepth = "sse-only";
-    assumptions.push("SD-WAN-only scope banded on the methodology's lightest security profile; treat the security share of the band as optional.");
-  } else securityDepth = "full-sase";
-
-  // Delivery model; "any" is banded co-managed as the neutral middle.
-  const om = p.buyer.operating_model;
-  const deliveryModel: "managed" | "co-managed" | "diy" = om === "managed" ? "managed" : om === "diy" ? "diy" : om === "co_managed" ? "co-managed" : "co-managed";
-  if (om !== "managed" && om !== "diy" && om !== "co_managed") assumptions.push("No delivery model preference; the band assumes co-managed.");
-
-  assumptions.push("Banded at a 3 year term.");
-
-  try {
-    const result = estimate({ users, sites, regions, securityDepth, deliveryModel, termYears: 3 });
-    return { result, assumptions };
-  } catch {
-    return { result: null, assumptions };
-  }
+  const f = currentBuyerFacts(p);
+  const assumptions = [`Buyer facts source: ${f.source}.`];
+  if (f.users === undefined) return {result:null, assumptions:[...assumptions,"No confirmed user count is available. Confirm your licensed users or request supplier pricing; no population has been assumed."]};
+  assumptions.push(`Current project population: ${f.users} users.`);
+  if (f.users < 50 || f.users > 250000) return {result:null, assumptions:[...assumptions,`Your stated ${f.users} users are outside the model’s supported range of 50–250,000 users. Request supplier pricing for this estate.`]};
+  if (!f.sites) return {result:null, assumptions:[...assumptions,"No current site count is available. Confirm your sites or request supplier pricing."]};
+  const aliases: Record<string,string> = {uk:'uk_ireland',ie:'uk_ireland',eu:'europe',us:'north_america',apac:'asia_pacific',china:'asia_pacific',me:'middle_east_africa',latam:'latin_america'};
+  const mapped = f.regions.map(r => REGION_MAP[aliases[r] ?? r]);
+  if (!mapped.length || mapped.some(r => !r)) return {result:null, assumptions:[...assumptions,"Confirm the regions supported by this model or request supplier pricing; no region has been assumed."]};
+  const regions = [...new Set(mapped)];
+  if (f.scope === 'not_stated' || f.operating_model === 'any') return {result:null, assumptions:[...assumptions,"Confirm solution scope and delivery model before estimating."]};
+  const securityDepth = f.scope === 'sse_only' || f.scope === 'sdwan_only' ? 'sse-only' : 'full-sase';
+  if (f.scope === 'sdwan_only') assumptions.push("SD-WAN-only scope is modelled with the lightest security profile; security is an optional model component, not a confirmed requirement.");
+  const deliveryModel = f.operating_model === 'co_managed' ? 'co-managed' : f.operating_model;
+  assumptions.push("Provisional budget at a three-year term, not a supplier quote.", ESTIMATE_DISCLOSURE,
+    "Source: Netify SASE Methodology 2026.1; a calibration source date is not recorded. Estimate date is the report generation date.",
+    "Model includes licensing, site/regional loading, managed-service loading, implementation/migration and recurring overhead assumptions. Supplier-specific tariffs, actual connectivity circuit quotes and tax treatment require supplier confirmation.");
+  try { return {result:estimate({users:f.users,sites:f.sites,regions,securityDepth,deliveryModel,termYears:3}),assumptions}; }
+  catch { return {result:null, assumptions:[...assumptions,"This estate is outside the model input constraints. Request supplier pricing."]}; }
 }
 
 /** Deterministic completeness checks: facts about the document, no AI. */
@@ -181,8 +106,9 @@ function gapChecks(p: ProjectDetails): string[] {
 }
 
 export function buildMarketReport(p: ProjectDetails, vendors?: ShortlistVendor[]): MarketReport {
+  p = projectWithCurrentBuyerFacts(p);
   const statedRegions = (p.buyer.regions ?? []).filter(Boolean);
-  const regionHint = statedRegions.length === 0 ? regionHintFromEmail(p.owner_email) : null;
+  const regionHint = !currentBuyerFacts(p).canonical && statedRegions.length === 0 ? regionHintFromEmail(p.owner_email) : null;
   const matched = matchSuppliers({
     scope: p.buyer.product_scope,
     regions: statedRegions,
@@ -190,9 +116,9 @@ export function buildMarketReport(p: ProjectDetails, vendors?: ShortlistVendor[]
     ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
   }, vendors);
   const { result, assumptions } = estimateForProject(p);
-  const sections = includedSections(p);
   return {
     generated_at: Date.now(),
+    buyer_facts: currentBuyerFacts(p),
     matched: {
       count: matched.count,
       names: matched.names,
@@ -205,14 +131,17 @@ export function buildMarketReport(p: ProjectDetails, vendors?: ShortlistVendor[]
           three_year_tco_band_gbp: result.threeYearTcoBandGBP,
           methodology_version: result.methodologyVersion,
           disclaimer: result.disclaimer,
+          source: "Netify SASE Methodology 2026.1 (provisional assumptions)",
+          source_date: null,
+          generated_at: Date.now(),
+          inclusions: ["Licence and site/regional cost assumptions", "Delivery/support loading", "Implementation and migration amortised over three years", "Recurring overhead assumptions"],
+          exclusions: ["Supplier-specific quotes and negotiated tariffs", "Confirmed access-circuit prices", "Confirmed tax treatment"],
+          uncertainty: ESTIMATE_DISCLOSURE,
         }
       : null,
     assumptions,
     gaps: gapChecks(p),
-    document: {
-      sections: p.procurement_document ? new Set(p.procurement_document.clauses.map(c => c.section)).size : sections.length,
-      questions: p.procurement_document?.counts.questions ?? sections.reduce((n, s) => n + s.questions.length, 0),
-    },
+    document: currentDocumentCounts(p),
     analyst_note: ANALYST_NOTE,
   };
 }

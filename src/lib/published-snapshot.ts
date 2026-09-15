@@ -49,6 +49,7 @@
  * did not.
  */
 
+import { projectWithCurrentBuyerFacts, currentBuyerFacts } from "./current-buyer-facts";
 import { kvGetJson, kvSetJson } from "@/lib/rfp-store";
 import type { ProjectDetails, BuyerContext, RfpSection } from "@/lib/rfp-types";
 import type { MarketReport } from "@/lib/market-report";
@@ -97,29 +98,23 @@ export function contentHash(value: unknown): string {
  * exists to support. Exported so both the publish core and the governed-
  * revision layer hash/diff the exact same shape.
  *
- * DELIBERATELY EXCLUDES `procurement_document` (17 Aug 2026, full-
- * unification phase): that field is a settled OUTPUT of the same
- * source_ledger/decision_ledger/rfp_sections content already hashed here,
- * recompiled client-side on every relevant render -- including it would
- * make the idempotent-replay/MarketUnlock machinery (rfp-governed-
- * revision.ts, market-unlock.ts) sensitive to float rounding or key
- * ordering in a derived recompute rather than to the buyer's own governed
- * content actually changing, which is precisely the risk this whole
- * engagement has repeatedly protected against. The living document is
- * frozen alongside this hash (see frozen_content.living_document), never
- * folded into what defines "the same publish event".
+ * Current publications include ledger identities, decisions and semantic saved
+ * document content. An owner correction must not replay the preceding revision.
+ * Document version/timestamps alone remain excluded; unchanged content is idempotent.
  */
 export function rfpContentSnapshot(p: ProjectDetails): Record<string, unknown> {
   return {
     title: p.title,
-    buyer: p.buyer,
+    buyer: projectWithCurrentBuyerFacts(p).buyer,
+    ...(p.facts.length || p.envelope ? { facts: p.facts } : p.procurement_document ? { legacy_document_facts: p.procurement_document.factSnapshot } : {}),
     rfp_sections: p.rfp_sections,
+    ...(p.procurement_document ? {document_content:{facts:p.procurement_document.factSnapshot,clauses:p.procurement_document.clauses,response_groups:p.procurement_document.responseGroups}, source_ledger:p.source_ledger, decision_ledger:p.decision_ledger} : {}),
     nda: p.nda,
     // New short projects freeze their matching filters and deadline as well as the brief.
     // Keep historical event hashes unchanged when this version marker is absent.
     ...(p.entrance_context?.raw_input.publication_contract === "short-project/1" ? {
       publication_inputs: {
-        timescale: p.entrance_context.raw_input.timescale ?? null,
+        timescale: currentBuyerFacts(p).canonical ? currentBuyerFacts(p).timeline : p.entrance_context.raw_input.timescale ?? null,
         shortlist: p.entrance_context.raw_input.shortlist ?? p.entrance_context.shortlist_input ?? null,
       },
     } : {}),
@@ -164,8 +159,8 @@ export type PublishedSnapshot = {
    *  one. `rfp_sections`/`buyer` remain the legacy fields, kept for every
    *  existing reader and for honest fallback when no living document was
    *  frozen. */
-  frozen_content: { title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null };
-  public_projection: { opportunity_id: string | null; url: string | null };
+  frozen_content: { title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null; facts?: ProjectDetails["facts"] };
+  public_projection: { opportunity_id: string | null; url: string | null; notice?: ReturnType<typeof import("./opportunity-types").toPublicOpportunity> | null };
   private_requirement: { rfp_id: string };
   /** `buildShortlist()`'s own criteria_summary -- the SAME ranking engine
    *  executePublish() already used to select invitees, never a second,
@@ -250,7 +245,7 @@ export type FrozenRevision = {
   content_hash: string;
   /** See PublishedSnapshot.frozen_content's own comment -- `living_document`
    *  added 17 Aug 2026, same optional/fallback treatment. */
-  frozen_content: { title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null };
+  frozen_content: { title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null; facts?: ProjectDetails["facts"] };
   created_at: number;
 };
 

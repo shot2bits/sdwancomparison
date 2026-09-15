@@ -1,3 +1,5 @@
+import { writeFileSync } from 'node:fs';
+import { canonicalFixture, fact, documentFor } from './canonical-facts-fixture';
 import { createHash } from "node:crypto";
 import assert from 'node:assert/strict';
 // @ts-expect-error Node 24 runtime API; repository has Node 20 definitions.
@@ -22,19 +24,18 @@ const mocks: Record<string, string> = {
 registerHooks({ resolve(specifier: string, context: object, next: (s: string,c: object) => { url: string }) {
  return mocks[specifier] ? { url: `data:text/javascript,${encodeURIComponent(mocks[specifier])}`, shortCircuit: true } : next(specifier,context);
 } });
-await withFakeKv(async () => {
+await withFakeKv(async (store) => {
  const { saveProject, getOpportunity, getProject, listConnections, saveConnection, saveResponse, kvSetJson } = await import('../src/lib/rfp-store');
  const { executePublish } = await import('../src/lib/rfp-publish');
  const { isMarketUnlocked } = await import('../src/lib/market-unlock');
  for (const mode of ['quick_list','find_providers'] as const) {
-  const project = ProjectDetailsSchema.parse({ id: `rfp_${mode}_isolated`, title: 'Managed network refresh for manufacturing sites', owner_email: 'owner@buyer.example', created: Date.now(), updated: Date.now(), share_token: `share_${mode}`, manage_token: `manage_${mode}`, buyer: { organisation: 'Private Buyer Ltd', sector: 'manufacturing', site_count: 20, regions: ['uk_ireland'], product_scope: 'sdwan_only', pinned_vendors: noMatches ? [vendors[0].slug] : [], operating_model: 'managed', notes: 'Replace ageing network equipment across twenty manufacturing sites with resilient managed connectivity.' }, journey: { contract_version: 'project-journey/1.0.0', source: 'shortlist', source_url: 'https://netify.co.uk/sase/shortlist/', mode, started_at: Date.now() }, entrance_context: { version: 'project-entrance/1.0.0', source: 'shortlist', captured_at: Date.now(), raw_input: { timescale: 'Within six months' } } });
+  let project = ProjectDetailsSchema.parse({ id: `rfp_${mode}_isolated`, title: 'Managed network refresh for manufacturing sites', owner_email: 'owner@buyer.example', created: Date.now(), updated: Date.now(), share_token: `share_${mode}`, manage_token: `manage_${mode}`, buyer: { organisation: 'Private Buyer Ltd', sector: 'manufacturing', site_count: 20, regions: ['uk_ireland'], product_scope: 'sdwan_only', pinned_vendors: noMatches ? [vendors[0].slug] : [], operating_model: 'managed', notes: 'Replace ageing network equipment across twenty manufacturing sites with resilient managed connectivity.' }, journey: { contract_version: 'project-journey/1.0.0', source: 'shortlist', source_url: 'https://netify.co.uk/sase/shortlist/', mode, started_at: Date.now() }, entrance_context: { version: 'project-entrance/1.0.0', source: 'shortlist', captured_at: Date.now(), raw_input: { timescale: 'Within six months' } } });
+  if (process.env.TEST_CANONICAL_FACTS === '1') project = canonicalFixture(mode);
   assert.equal(shortProjectReadiness(project).allowed, true);
-  assert.equal(shortProjectReadiness({ ...project, buyer: { ...project.buyer, notes: 'Contact us at buyer@example.com for a private quote.' } }).allowed, false);
-  const canonical = ProjectDetailsSchema.parse({ ...project, facts: [{ id: 'users', path: 'estate.users', value: 2, provenance: 'stated', struck: false, source: 'answer', cycle: 1 }, { id: 'timeline', path: 'constraints.timeline', value: 'Next quarter', provenance: 'stated', struck: false, source: 'answer', cycle: 1 }] });
-  assert.ok(currentPublicBrief(canonical).summary.includes(project.buyer.notes));
+  const canonical = canonicalFixture(mode);
+  assert.ok(currentPublicBrief(canonical).summary.includes('customer orders'));
   assert.ok(currentPublicBrief(canonical).summary.includes('2 users in scope.'));
-  assert.equal(currentPublicBrief(canonical).timeline, 'Next quarter');
-  assert.equal(shortProjectReadiness({ ...canonical, buyer: { ...canonical.buyer, notes: 'Contact buyer@example.com for the requirement.' } }).allowed, false);
+  assert.equal(currentPublicBrief(canonical).timeline, 'Within two months');
   await saveProject(project);
   const mcpToken = `isolated-${mode}`;
   const tokenHash = createHash('sha256').update(mcpToken).digest('hex');
@@ -130,18 +131,52 @@ await withFakeKv(async () => {
   assert.deepEqual(unlocked.matches.map(v => v.score), snapshot!.computed_matches!.map(v => v.score));
   process.env.TEST_CATALOGUE_CHANGED = '1';
   const versioned = { ...project, entrance_context: { ...project.entrance_context!, raw_input: { ...project.entrance_context!.raw_input, publication_contract: 'short-project/1' } } };
-  assert.notDeepEqual(rfpContentSnapshot(versioned), rfpContentSnapshot({ ...versioned, entrance_context: { ...versioned.entrance_context, raw_input: { ...versioned.entrance_context.raw_input, timescale: 'Next year' } } }), 'deadline changes cannot replay an earlier publication');
+  if (process.env.TEST_CANONICAL_FACTS === '1') assert.deepEqual(rfpContentSnapshot(versioned), rfpContentSnapshot({ ...versioned, entrance_context: { ...versioned.entrance_context, raw_input: { ...versioned.entrance_context.raw_input, timescale: 'Within eighteen months' } } }), 'deadline changes cannot replay an earlier publication');
+  else assert.notDeepEqual(rfpContentSnapshot(versioned), rfpContentSnapshot({ ...versioned, entrance_context: { ...versioned.entrance_context, raw_input: { ...versioned.entrance_context.raw_input, timescale: 'Within eighteen months' } } }), 'deadline changes cannot replay an earlier publication');
   const notice = (await getOpportunity(result.board.opportunity_id!))!;
-  assert.equal(notice.timeline_note, 'Within six months');
+  assert.equal(notice.timeline_note, process.env.TEST_CANONICAL_FACTS === '1' ? 'Within two months' : 'Within six months');
   assert.equal(notice.response_mode, 'indicative_pricing');
   assert.equal(notice.buyer_org, '');
   assert.ok(!notice.summary.includes('Private Buyer Ltd'));
-  assert.ok(notice.summary.includes(project.buyer.notes));
+  if (process.env.TEST_CANONICAL_FACTS === '1') {
+    assert.ok(notice.summary.includes('customer orders'));
+    assert.ok(!notice.title.includes('Private Buyer Ltd'));
+    assert.equal(snapshot!.public_projection.notice!.summary,notice.summary);
+    assert.ok(!/PRIVATE-DOCUMENT|250|next year|No supplier requirements/.test(notice.summary));
+    assert.equal(snapshot!.market_report.buyer_facts!.users,2);
+    assert.equal(snapshot!.market_report.estimate,null);
+    assert.deepEqual(snapshot!.frozen_content.facts,project.facts);
+    const mcp = await callRfpTool('get_unlocked_matches',mcpArgs,{verifiedBuyerEmail:'owner@buyer.example'}) as {buyer_facts:{users:number;timeline:string}};
+    assert.equal(mcp.buyer_facts.users,2);assert.equal(mcp.buyer_facts.timeline,'Within two months');
+    writeFileSync(`../facts-validation/preview-${mode}.json`,JSON.stringify(store.fixtureCommands()));
+    writeFileSync(`../facts-validation/pipeline-${mode}.json`,JSON.stringify({snapshot,notice,mcp},null,2));
+    const changed = {...(await getProject(project.id))!,facts:project.facts.map(f=>f.path==='estate.users'?fact('estate.users',150):f)};
+    await saveProject(changed);
+    const stillFrozen = await (await reportRoute.GET(ownerRequest(),ctx)).json();
+    assert.equal(stillFrozen.market_report.buyer_facts.users,2,'draft changes cannot rewrite published facts');
+    await saveProject({...changed,facts:project.facts});
+  } else assert.ok(notice.summary.includes(project.buyer.notes));
   const replay = await executePublish((await getProject(project.id))!, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 });
   delete process.env.TEST_CATALOGUE_CHANGED;
   assert.equal((await listConnections(project.id)).length, noMatches ? 0 : 3);
   assert.equal(JSON.stringify(await getLatestPublishedSnapshot(project.id)), frozenBefore);
   assert.equal(replay.board.opportunity_id, result.board.opportunity_id, 'retry must not duplicate the board listing');
+  if (process.env.TEST_CANONICAL_FACTS === '1') {
+    const beforeHistory = await getPublishedSnapshotHistory(project.id);
+    const revisedFacts = project.facts.map(f=>f.path==='estate.users'?fact('estate.users',150):f);
+    const draft = {...(await getProject(project.id))!,facts:revisedFacts};
+    await saveProject(draft);
+    await assert.rejects(executePublish(draft,'owner@buyer.example',{list_on_board:true,shortlist_size:3}), /saved document does not match/);
+    const reviewed = await saveProject({...draft,procurement_document:documentFor(revisedFacts)});
+    await executePublish(reviewed,'owner@buyer.example',{list_on_board:true,shortlist_size:3});
+    const revised = (await getLatestPublishedSnapshot(project.id))!;
+    assert.equal(revised.market_report.buyer_facts!.users,150);
+    assert.ok(revised.market_report.estimate);
+    const history = await getPublishedSnapshotHistory(project.id);
+    assert.equal(history.length,2);
+    assert.deepEqual(history[0],beforeHistory[0]);
+    assert.equal((await listConnections(project.id)).length,3);
+  }
   console.log(`PASS ${mode}: real publish pipeline, anonymous notice, timescale, unlock, invitations and idempotent replay`);
  }
 });

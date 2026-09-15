@@ -1,3 +1,5 @@
+import { livingDocumentToRfpSections } from "./rfp-document";
+import { currentBuyerFacts, projectWithCurrentBuyerFacts } from "./current-buyer-facts";
 /**
  * Agent-to-agent RFP tools for the MCP server. These let a supplier's AI
  * agent fetch a published RFP and submit responses, and let any agent check
@@ -176,8 +178,14 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
 
 export const RFP_TOOL_NAMES: Set<string> = new Set(MCP_RFP_TOOL_DEFINITIONS.map((t) => t.name as string));
 
+async function projectForDocumentRead(project: NonNullable<Awaited<ReturnType<typeof getProjectByToken>>>) {
+  const snapshot = await getLatestPublishedSnapshot(project.id);
+  if (!snapshot) return projectWithCurrentBuyerFacts(project);
+  return {...project,buyer:snapshot.frozen_content.buyer,rfp_sections:snapshot.frozen_content.rfp_sections,procurement_document:snapshot.frozen_content.living_document ?? undefined,facts:snapshot.frozen_content.facts ?? []};
+}
+
 function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProjectByToken>>>) {
-  return project.rfp_sections
+  return (project.procurement_document ? livingDocumentToRfpSections(project.procurement_document) : project.rfp_sections)
     .filter((s) => s.included)
     .map((s) => ({
       category: s.category,
@@ -236,7 +244,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     if (!project) return { error: "Project not found." };
     const owner = context.verifiedBuyerEmail && project.owner_email.toLowerCase() === context.verifiedBuyerEmail.toLowerCase();
     if (!owner) return { error: "verified_owner_required" };
-    return { project_id: project.id, journey: project.journey, status: project.status, marketplace_state: project.marketplace_state, marketplace_revision: project.marketplace_revision, market_unlocked: await isMarketUnlocked(project.id), response_count: (await listResponses(project.id)).length };
+    return { buyer_facts_scope: "current_draft", buyer_facts: currentBuyerFacts(project), project_id: project.id, journey: project.journey, status: project.status, marketplace_state: project.marketplace_state, marketplace_revision: project.marketplace_revision, market_unlocked: await isMarketUnlocked(project.id), response_count: (await listResponses(project.id)).length };
   }
   if (name === "get_unlocked_matches") {
     const projectId = String(args.project_id ?? "");
@@ -251,6 +259,8 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     const matched = snapshot.matched_vendors ?? snapshot.matched_vendor_ids.map((slug) => ({ slug, name: evidence.get(slug)?.name ?? slug }));
     return {
       published_revision_id: snapshot.id,
+      buyer_facts: snapshot.market_report.buyer_facts ?? null,
+      market_report: snapshot.market_report,
       match_criteria: snapshot.match_criteria,
       provider_provenance: snapshot.provider_provenance ?? null,
       provider_match_input: snapshot.provider_match_input ?? null,
@@ -429,7 +439,8 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
   if (!token) return { error: "token is required." };
 
   if (name === "get_rfp") {
-    const p = await getProjectByToken(token);
+    const stored = await getProjectByToken(token);
+    const p = stored ? await projectForDocumentRead(stored) : null;
     if (!p) return { error: "RFP not found for that token." };
     return {
       id: p.id, title: p.title, status: p.status, methodology_version: p.methodology_version,
@@ -441,12 +452,14 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     };
   }
   if (name === "list_rfp_questions") {
-    const p = await getProjectByToken(token);
+    const stored = await getProjectByToken(token);
+    const p = stored ? await projectForDocumentRead(stored) : null;
     if (!p) return { error: "RFP not found for that token." };
     return { sections: activeQuestions(p) };
   }
   if (name === "get_rfp_evidence_draft") {
-    const p = await getProjectByToken(token);
+    const stored = await getProjectByToken(token);
+    const p = stored ? await projectForDocumentRead(stored) : null;
     if (!p) return { error: "RFP not found for that token." };
     const vendorRef = String(args.vendor ?? "").trim();
     if (!vendorRef) return { error: "vendor is required (organisation name or Netify vendor slug)." };

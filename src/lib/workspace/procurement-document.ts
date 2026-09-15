@@ -1,3 +1,4 @@
+import { confirmedBuyerLedger } from "@/lib/current-buyer-facts";
 /**
  * Living Procurement Canvas -- Phase 1: the pure compiler (Netify Living
  * Procurement Canvas brief, Version 2.0, Sections 6, 7 and 14).
@@ -37,7 +38,7 @@
 
 import { z } from "zod";
 import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/security/rulebook";
-import { buyingOf, operatingModelOf, standing, type WorkspaceFact } from "@/lib/workspace/draft";
+import { requirementFrom, buyingOf, operatingModelOf, standing, type WorkspaceFact } from "@/lib/workspace/draft";
 import type { RfiQuestionSet, EarnedInstrument } from "@/lib/workspace/instrument";
 import type { SourceLedgerEntry } from "@/lib/workspace/source-ledger";
 import type { BankCanonicalQuestion } from "@/lib/rfp-question-bank";
@@ -1246,16 +1247,20 @@ export function resolveGovernedRevision(state: GovernedRevisionState, event: Gov
 /* ------------------------------------------------------------------ */
 
 export function compileProcurementDocument(input: ProcurementCompilerInput): LivingProcurementDocument {
-  const { facts, requirement, verdict, rfiSet, instrument, previousDocument } = input;
+  const { verdict, rfiSet, instrument, previousDocument } = input;
+  const facts = confirmedBuyerLedger(input.facts);
+  const requirement = input.facts.length ? requirementFrom(facts) : input.requirement;
   const buying = buyingOf(facts);
-  const sourceTurns = input.sourceTurns ?? [];
+  const withheld = input.facts.filter(f => f.struck || f.provenance !== 'stated').flatMap(f => [f.value, f.quote]).filter((v): v is string => typeof v === 'string' && v.length >= 8);
+  const currentText = (text: string) => !withheld.some(v => text.toLowerCase().includes(v.toLowerCase()));
+  const sourceTurns = (input.sourceTurns ?? []).filter(t => currentText(t.text));
 
   // Phase 1 checkpoint correction, item 2 (13 Aug 2026): the durable
   // canonical wording input. `sourceTurns` defaults to `[]`, so every
   // EXISTING caller that has not been updated to pass it (every Phase 1
   // fixture) degrades to exactly `receipts`, unchanged -- see
   // mergeReceiptsWithSourceLedger()'s own comment for the merge rule.
-  const receipts = mergeReceiptsWithSourceLedger(sourceTurns, input.receipts);
+  const receipts = mergeReceiptsWithSourceLedger(sourceTurns, input.receipts.filter(r => currentText(r.text)));
 
   // Widened to include RAW source-turn text, not just unplaced-clause
   // receipts: the extractor's own deterministic rules "structurally
@@ -1275,7 +1280,7 @@ export function compileProcurementDocument(input: ProcurementCompilerInput): Liv
   // test to fix.
   const history = chronologicalHistory(sourceTurns, receipts);
   const historyModel = operatingModelFromHistory(history);
-  const opModel = operatingModelOf(facts) ?? historyModel.model;
+  const opModel = operatingModelOf(facts) ?? (input.facts.length ? null : historyModel.model);
   // Phase 2 (14 Aug 2026): the canonical support-coverage state (24x7 /
   // business_hours / other_stated / unresolved), converging the buyer's
   // retained wording AND any explicit noted 24x7 selection into ONE

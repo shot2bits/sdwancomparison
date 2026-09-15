@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmedBuyerLedger } from "@/lib/current-buyer-facts";
 import { isUnrelatedBuyingInput } from "@/lib/workspace/extract";
 import {requestBrief, confirmedWorkspaceRegions, workspaceUpdatesFromBrief, type BriefFields, type DocumentPurpose, type WorkspaceProject} from "@/lib/buying-workspace-project";
 import {projectTokenKey} from "@/lib/buying-entry";
@@ -979,6 +980,7 @@ export default function ProjectDesk({
    *  combine into the `requirement` this component actually sends. State
    *  (not a bare ref) so the requirement memo below re-derives the instant
    *  resume finishes, even if `facts` itself hasn't changed yet. */
+  const [canonicalLedgerLoaded, setCanonicalLedgerLoaded] = useState(false);
   const [resumeRequirementBase, setResumeRequirementBase] = useState<SecurityRequirementInput | null>(null);
   const resumeRequirementBaseRef = useRef<SecurityRequirementInput | null>(null);
   useEffect(() => { resumeRequirementBaseRef.current = resumeRequirementBase; }, [resumeRequirementBase]);
@@ -1523,14 +1525,15 @@ export default function ProjectDesk({
    *  here, once, fixes every one of them together. Seventh amendment: now
    *  also carries `resumeRemovals`, the tombstones applyRemovals above
    *  maintains, so an explicit retraction actually leaves the base. */
+  const confirmedFacts = useMemo(() => confirmedBuyerLedger(facts), [facts]);
   const requirement = useMemo(
-    () => mergeRequirementBase(resumeRequirementBase, requirementFrom(facts), resumeRemovals),
-    [facts, resumeRequirementBase, resumeRemovals],
+    () => facts.length || canonicalLedgerLoaded ? requirementFrom(confirmedFacts) : mergeRequirementBase(resumeRequirementBase, {}, resumeRemovals),
+    [facts.length, confirmedFacts, canonicalLedgerLoaded, resumeRequirementBase, resumeRemovals],
   );
-  const buying = buyingOf(facts);
-  const opModel = operatingModelOf(facts);
+  const buying = buyingOf(confirmedFacts);
+  const opModel = operatingModelOf(confirmedFacts);
   const securityScope = buying === "managed_security" || buying === null;
-  const live = standing(facts);
+  const live = confirmedFacts;
   // A published short brief has no full-RFP facts, but its matches and responses are an active project.
   const started = facts.length > 0 || noted.length > 0 || published !== null;
 
@@ -1919,6 +1922,7 @@ export default function ProjectDesk({
             setReceipts(proj.receipts);
           }
           envelopeRevisionRef.current = proj.envelope_revision ?? 0;
+          setCanonicalLedgerLoaded(Boolean(proj.envelope_revision));
           /* Round 3 correction, item 6: rehydrate `published` durably for
            * an already-published project, from the SAME frozen sources the
            * report route and every export already read from -- never a
@@ -2102,6 +2106,7 @@ export default function ProjectDesk({
       setWorkspaceNotice(data.buyer?.notes||null);setSaveDirty(false);
       envelopeRevisionRef.current=data.envelope_revision??payload?.base_revision??0;
       setCheckpointRevision(envelopeRevisionRef.current);
+      setCanonicalLedgerLoaded(envelopeRevisionRef.current > 0);
       checkpointBaselineRef.current=null;
       try {
         const raw=localStorage.getItem(PROJECT_CHECKPOINT_PREFIX+id);
@@ -3085,7 +3090,7 @@ export default function ProjectDesk({
           // never sees a value this session has already retracted.
           body: JSON.stringify({
             text: trimmed,
-            requirement: mergeRequirementBase(resumeRequirementBaseRef.current, requirementFrom(factsRef.current), resumeRemovalsRef.current),
+            requirement: factsRef.current.length || envelopeRevisionRef.current > 0 ? requirementFrom(confirmedBuyerLedger(factsRef.current)) : mergeRequirementBase(resumeRequirementBaseRef.current, {}, resumeRemovalsRef.current),
           }),
         });
         if (!res.ok) throw new Error(`extract ${res.status}`);

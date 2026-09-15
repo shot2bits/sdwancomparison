@@ -109,6 +109,7 @@ export async function GET(req: Request, ctx: Ctx) {
     frozen: snapshot !== null,
     publication_outcomes: await publicationOutcomes(id, snapshot),
     evaluation: snapshot?.provider_provenance ?? null,
+    published_notice: snapshot?.public_projection.notice ?? null,
     computed_matches: snapshot?.computed_matches ?? null,
     market_report: snapshot ? { ...snapshot.market_report, matched: { ...snapshot.market_report.matched, total_evaluated_market: snapshot.provider_provenance?.evaluated_provider_count ?? null } } : { ...buildMarketReport(project), matched: { count: 0, names: [], total_evaluated_market: null } },
     // Round 4, findings 4/5: the REAL matched/invited selection, always

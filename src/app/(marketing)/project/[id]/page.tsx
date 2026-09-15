@@ -1,3 +1,4 @@
+import { projectWithCurrentBuyerFacts } from "@/lib/current-buyer-facts";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -70,8 +71,9 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
   const { id } = await params;
   const { manage } = await searchParams;
   if (!kvConfigured()) notFound();
-  const project = await getProject(id);
-  if (!project) notFound();
+  const stored = await getProject(id);
+  if (!stored) notFound();
+  const project = projectWithCurrentBuyerFacts(stored);
 
   const jar = await cookies();
   const session = await getSession(jar.get(SESSION_COOKIE)?.value ?? null);

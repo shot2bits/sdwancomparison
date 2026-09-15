@@ -47,6 +47,19 @@ type Entry =
 export class FakeKvStore {
   private store = new Map<string, Entry>();
 
+  /** Export synthetic fixtures for the local, read-only preview server. */
+  fixtureCommands(): (string | number)[][] {
+    const commands: (string | number)[][] = [];
+    for (const [key, entry] of this.store) {
+      if (entry.type === 'string') commands.push(['SET',key,entry.value]);
+      if (entry.type === 'list' && entry.value.length) commands.push(['RPUSH',key,...entry.value]);
+      if (entry.type === 'set' && entry.value.size) commands.push(['SADD',key,...entry.value]);
+      if (entry.type === 'hash' && entry.value.size) commands.push(['HSET',key,...[...entry.value].flat()]);
+      if (entry.type === 'zset') for (const [member,score] of entry.value) commands.push(['ZADD',key,score,member]);
+    }
+    return commands;
+  }
+
   private str(key: string): string | null {
     const e = this.store.get(key);
     return e && e.type === "string" ? e.value : null;

@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import {writeFileSync} from 'node:fs';
+import {canonicalFixture,fact,documentFor} from './canonical-facts-fixture';
+import {currentBuyerFacts,currentPublicBrief,currentDocumentCounts} from '../src/lib/current-buyer-facts';
+import {shortProjectReadiness,projectMatchingInput} from '../src/lib/short-project';
+import {buildMarketReport} from '../src/lib/market-report';
+import {rfpContentSnapshot} from '../src/lib/published-snapshot';
+const p=canonicalFixture();
+const f=currentBuyerFacts(p), report=buildMarketReport(p), brief=currentPublicBrief(p);
+assert.equal(f.users,2);assert.equal(f.sites,2);assert.equal(f.timeline,'Within two months');
+assert.equal(report.estimate,null);assert.ok(report.assumptions.some(s=>s.includes('50–250,000')));
+assert.ok(!report.gaps.some(s=>s.includes('No timeline')));
+assert.ok(p.procurement_document!.summary.includes('2 users'));
+assert.equal(p.procurement_document!.factSnapshot['constraints.timeline'],f.timeline);
+assert.equal(shortProjectReadiness(p).allowed,true);
+assert.equal(projectMatchingInput(p).sector,'manufacturing');
+assert.equal(projectMatchingInput({...p,facts:p.facts.map(f=>f.path==='organisation.sector'?{...f,value:'Manufacturing'}:f)}).sector,'manufacturing');assert.deepEqual(projectMatchingInput(p).required_regions,['uk_ireland']);
+assert.ok(brief.summary.includes('customer orders'));assert.ok(!/PRIVATE-DOCUMENT|250|next year|No supplier requirements/.test(brief.summary));
+assert.deepEqual(report.document,currentDocumentCounts(p));
+const changed={...p,facts:p.facts.map(x=>x.path==='estate.users'?{...x,value:150}:x)};
+changed.procurement_document=documentFor(changed.facts);
+const priced=buildMarketReport(changed);assert.ok(priced.estimate);assert.equal(priced.buyer_facts!.users,150);assert.ok(priced.estimate!.uncertainty.includes('not validated'));assert.ok(priced.estimate!.inclusions.length);assert.ok(priced.estimate!.exclusions.length);
+assert.notDeepEqual(rfpContentSnapshot(p),rfpContentSnapshot(changed));
+for(const path of ['estate.users','estate.sites','organisation.regions','organisation.sector','constraints.timeline','estate.existingNetwork','requirements.bespoke','drivers'] as const){
+ const removed={...p,buyer:{...p.buyer,notes:'Staff: 250. Timeline: next year. Reduce outages affecting customer orders. Maintain customer-order connectivity during migration.'},facts:p.facts.map(x=>x.path===path?{...x,struck:true}:x)};removed.procurement_document=documentFor(removed.facts);
+ assert.equal(currentBuyerFacts(removed).states[path],'removed');
+ assert.ok(!Object.keys(removed.procurement_document.factSnapshot).some(k=>k===path||k.startsWith(path+':')));
+ if(path==='estate.users'){assert.equal(buildMarketReport(removed).estimate,null);assert.equal(currentBuyerFacts(removed).users,undefined);assert.ok(!currentPublicBrief(removed).summary.includes('250'));}
+ if(path==='organisation.sector')assert.equal(projectMatchingInput(removed).sector,null);
+ if(path==='organisation.regions')assert.deepEqual(projectMatchingInput(removed).required_regions,[]);
+ if(path==='drivers')assert.ok(!currentPublicBrief(removed).summary.includes('Reduce outages'));
+ if(path==='requirements.bespoke')assert.ok(!currentPublicBrief(removed).summary.includes('Maintain customer-order'));
+}
+const inferred={...p,facts:p.facts.map(x=>x.path==='estate.users'?{...x,value:500,provenance:'inferred' as const}:x)};inferred.procurement_document=documentFor(inferred.facts);
+assert.equal(currentBuyerFacts(inferred).states['estate.users'],'inferred');assert.equal(buildMarketReport(inferred).estimate,null);assert.ok(!inferred.procurement_document.summary.includes('500 users'));
+const missing={...p,facts:p.facts.filter(x=>x.path!=='estate.users')};assert.equal(currentBuyerFacts(missing).users,undefined);assert.equal(buildMarketReport(missing).estimate,null);
+const legacy={...p,facts:[],procurement_document:undefined,buyer:{...p.buyer,notes:'Replace ageing access network. Staff: 150. Timeline: two months.',regions:['uk_ireland'],site_count:2,product_scope:'sdwan_only' as const,operating_model:'managed'}};
+assert.equal(currentBuyerFacts(legacy).source,'legacy_buyer_record');assert.equal(currentBuyerFacts(legacy).users,150);assert.ok(buildMarketReport(legacy).estimate);
+assert.equal(buildMarketReport({...legacy,buyer:{...legacy.buyer,notes:'Replace ageing network'}}).estimate,null);
+const legacyDoc={...p,facts:[]};assert.equal(currentBuyerFacts(legacyDoc).source,'legacy_document_snapshot');assert.equal(currentBuyerFacts(legacyDoc).users,2);assert.equal(buildMarketReport(legacyDoc).estimate,null);
+const privateP={...p,facts:[...p.facts,fact('requirements.bespoke','Private Buyer Ltd needs resilient links; contact alice@private.example or https://private.example on +44 7700 900123')]};
+const publicText=currentPublicBrief(privateP).summary;assert.ok(!/Private Buyer Ltd|alice@|https:|7700|PRIVATE-DOCUMENT/.test(publicText));assert.ok(publicText.includes('resilient links'));
+writeFileSync('../facts-validation/comparison.json',JSON.stringify({document:{summary:p.procurement_document!.summary,facts:p.procurement_document!.factSnapshot,counts:currentDocumentCounts(p)},report,public_notice:brief,matching_input:projectMatchingInput(p),readiness:shortProjectReadiness(p),supported_pricing:priced.estimate},null,2));
+console.log('PASS canonical facts: two users/two months, pricing, missing/changed/removed/inferred, legacy fallback, public intent and privacy');
