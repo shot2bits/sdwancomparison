@@ -1,3 +1,4 @@
+import {invitationOpportunity} from './activity-joins';
 import {kvRaw,kvGetJson} from './rfp-store';
 import {readActivityAudit} from './activity-audit';
 import {explicitTestEvidence} from './activity-provenance';
@@ -19,13 +20,13 @@ export async function readActivityReportingRecords(){
   const connections=storedConnections??[];
   const replies=await kvGetJson<RfpResponse[]>(`rfp:${p.id}:responses`)??[];
   const opportunities=[...new Set(publications.map(p=>p.opportunity_id))];
-  const opportunity=opportunities.length===1?opportunities[0]:undefined;
-  const connectionOpportunity=(c:SupplierConnection)=>c.opportunity_id&&opportunities.includes(c.opportunity_id)?c.opportunity_id:opportunity;
+  const connectionOpportunity=(c:SupplierConnection)=>invitationOpportunity(c,opportunities,environment);
+  const missingResponsesBefore=unresolved.response_invitations,unverifiedBefore=unresolved.response_substance_unverified;
   const invitations=connections.flatMap(c=>{const id=connectionOpportunity(c);if(!id){unresolved.invitation_opportunities++;return [];}return [{id:c.id,opportunity_id:id,at:c.created,delivery:c.delivery?.state??'unknown',...(c.first_delivered_at?{delivered_at:c.first_delivered_at}:c.delivery?.state==='delivered'?{delivered_at:c.delivery.updated_at}:{})}];});
   unresolved.response_substance_unverified+=connections.flatMap(c=>(c.messages??[])).filter(m=>m.from==='supplier'&&['message','demo_response'].includes(m.type)&&m.body.trim()).length;
   const responses=connections.flatMap(c=>{const id=connectionOpportunity(c);return id?(c.messages??[]).filter(m=>m.from==='supplier'&&m.type==='decline'&&m.body.trim()).map(m=>({id:m.id,opportunity_id:id,invitation_id:c.id,at:m.created,substantive:true})):[];});
   for(const r of replies.filter(r=>r.submitted!==null)){const c=connections.find(c=>c.vendor_slug===r.vendor_slug),id=c?connectionOpportunity(c):undefined;if(!c||!id){unresolved.response_invitations++;continue;}responses.push({id:r.id,opportunity_id:id,invitation_id:c.id,at:r.submitted!,substantive:Object.values(r.answers??{}).some(a=>a.trim().length>0)});}
-  records.push({app:'sase',id:p.id,environment,route:p.journey?.mode??'unknown',created_at:p.created,activity:audit.at(-1)?.activity??p.activity,legacy_test_evidence:explicitTestEvidence(p),publications,invitations,responses,outcomes:[],invitation_records_complete:invitations.length===connections.length&&(storedConnections!==null||snapshots.every(s=>s.invited_vendor_ids?.length===0))});
+  records.push({app:'sase',id:p.id,environment,route:p.journey?.mode??'unknown',created_at:p.created,activity:audit.at(-1)?.activity??p.activity,legacy_test_evidence:explicitTestEvidence(p),publications,invitations,responses,outcomes:[],response_records_complete:unresolved.response_invitations===missingResponsesBefore&&unresolved.response_substance_unverified===unverifiedBefore,invitation_records_complete:invitations.length===connections.length&&snapshots.every(s=>Array.isArray(s.invited_vendor_ids)&&s.invited_vendor_ids.every(slug=>connections.some(c=>c.vendor_slug===slug)))});
 
  }
  const events:ReportingEvent[]=[];for(const env of ['production','preview','development','unknown']){const raw=await kvRaw(['LRANGE',`activity:events:sase:${env}`,0,-1]);for(const r of Array.isArray(raw)?raw:[]){const e=JSON.parse(String(r));events.push({app:'sase',environment:normaliseEnvironment(e.environment),record_id:e.project_id,event:e.event,id:e.id,at:e.at});}}

@@ -185,6 +185,17 @@ await withFakeKv(async (store) => {
   assert.equal(reporting.publications?.length,process.env.TEST_CANONICAL_FACTS==='1'?2:1);
   assert.equal(reporting.invitations?.length,noMatches?0:3);
   for(const c of await listConnections(project.id)){assert.ok(c.publication_id);assert.equal(c.opportunity_id,result.board.opportunity_id);assert.equal(c.activity_environment,'unknown');}
+  if(!noMatches){
+    const originalConnections=await listConnections(project.id);
+    await kvSetJson(`rfp:${project.id}:connections`,[]);
+    const missing=(await readActivityReportingRecords()).records.find(r=>r.id===project.id)!;
+    assert.equal(missing.invitation_records_complete,false,'a stored empty list cannot erase published invitation evidence');
+    await kvSetJson(`rfp:${project.id}:connections`,originalConnections.map((c,i)=>i===0?{...c,opportunity_id:'conflicting-opportunity'}:c));
+    const conflicting=(await readActivityReportingRecords()).records.find(r=>r.id===project.id)!;
+    assert.equal(conflicting.invitations?.length,originalConnections.length-1);
+    assert.equal(conflicting.invitation_records_complete,false);
+    await kvSetJson(`rfp:${project.id}:connections`,originalConnections);
+  }
   console.log(`PASS ${mode}: real publish pipeline, anonymous notice, timescale, unlock, invitations and idempotent replay`);
  }
 });

@@ -1,3 +1,4 @@
+import {invitationOpportunity} from '../src/lib/activity-joins';
 import {writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {activityKvBinding} from '../src/lib/activity-storage';import {createActivity,activityEnvironment} from '../src/lib/activity-provenance';
@@ -37,3 +38,20 @@ await withFakeKv(async()=>{
 console.log('PASS storage isolation, explicit/unknown classifications, cross-environment IDs, window boundaries, repeated events, audited corrections, late responses and acceptance versus delivery');
 
 writeFileSync('../reporting-validation/synthetic-weekly-report.json',JSON.stringify({fixture:true,description:'Synthetic production, preview test and unlabelled legacy records; late response included.',...weeklyActivityReport([r,preview,legacy],events,start,end,end+7200000)},null,2));
+
+assert.equal(invitationOpportunity({opportunity_id:'wrong'},['right'],'production'),undefined);
+assert.equal(invitationOpportunity({opportunity_id:'right',activity_environment:'preview'},['right'],'production'),undefined);
+assert.equal(invitationOpportunity({},['right'],'production'),'right');
+assert.equal(invitationOpportunity({},['one','two'],'production'),undefined);
+const unresolvedResponse=weeklyActivityReport([{...r,responses:[],response_records_complete:false}],[],start,end);
+assert.equal(unresolvedResponse.response_coverage.ratio,null);
+assert.equal(unresolvedResponse.response_coverage.unanswered,0);
+assert.equal(unresolvedResponse.response_coverage.response_unknown,1);
+assert.equal(unresolvedResponse.response_coverage.rows[0].unanswered_age_hours,null);
+const futureInvite={...r,invitations:r.invitations!.map(i=>({...i,at:end+1,delivered_at:end+2}))};
+const beforeInvite=weeklyActivityReport([futureInvite],[],start,end);
+assert.equal(beforeInvite.response_coverage.zero_invite,1);
+assert.equal(beforeInvite.response_coverage.retained_zero_invite_all_environments,1);
+const earlyResponse={...r,responses:[{...r.responses![0],at:start+500},{...r.responses![0],id:'later',at:start+2000}]};
+assert.equal(weeklyActivityReport([earlyResponse],[],start,end).response_coverage.rows[0].response_hours,null,'do not replace the first response with a later response to manufacture latency');
+console.log('PASS conflicting joins, unresolved responses, consistent cutoff and first-response latency');

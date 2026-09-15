@@ -47,3 +47,7 @@ Non-production Resend sends are blocked before network access; BT quote webhooks
 ## Validation
 
 See the bundled validation log. Tests cover storage refusal, cross-environment IDs, explicit tests, unknown legacy records, atomic repeated-event deduplication, audited corrections/conflicts, unauthorised reads and writes, late replies, delivery acceptance versus delivery, zero denominators and reviewed operational joins. Real SASE publication tests use isolated storage for both short journey modes, matched/zero-match/unavailable catalogue, idempotent replay and persisted report joins. No real suppliers are contacted.
+
+## Follow-up bug check
+
+Explicit conflicting invitation references must not fall back to another opportunity. Compare retained invitations with frozen publication evidence before calling a list complete. Unresolved responses suppress definitive coverage and unanswered age. Use one as-of cutoff for all invitation counts and retain the actual first response for latency. BT application creation uses an atomic create-if-absent write; retries preserve the original status and correlation and do not backdate receipt events. Redis command errors are storage failures even with HTTP 200.
