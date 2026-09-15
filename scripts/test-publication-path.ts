@@ -178,7 +178,7 @@ await withFakeKv(async (store) => {
     const history = await getPublishedSnapshotHistory(project.id);
     assert.equal(history.length,2);
     assert.deepEqual(history[0],beforeHistory[0]);
-    assert.equal((await listConnections(project.id)).length,3);
+    assert.equal((await listConnections(project.id)).length,noMatches ? 0 : 3);
   }
   const {readActivityReportingRecords}=await import('../src/lib/activity-report-reader');
   const reporting=(await readActivityReportingRecords()).records.find(r=>r.id===project.id)!;
