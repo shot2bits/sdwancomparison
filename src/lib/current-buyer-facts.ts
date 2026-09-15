@@ -6,10 +6,13 @@ type BuyerFactsSource = Pick<ProjectDetails, 'facts'|'buyer'|'procurement_docume
 
 export const BUYER_FACTS_CONTRACT = 'buyer-facts/2026-09-15.2';
 /** Ledger identities, including tombstones, win before provenance is considered. */
-export function confirmedBuyerLedger(facts: WorkspaceFact[]) {
+function latestBuyerLedger(facts: WorkspaceFact[]) {
   const latest = new Map<string, WorkspaceFact>();
   for (const fact of facts) latest.set(LIST_FACT_PATHS.has(fact.path) ? fact.id : fact.path, fact);
-  return [...latest.values()].filter(f => !f.struck && f.provenance === 'stated');
+  return [...latest.values()];
+}
+export function confirmedBuyerLedger(facts: WorkspaceFact[]) {
+  return latestBuyerLedger(facts).filter(f => !f.struck && f.provenance === 'stated');
 }
 
 /** A read projection, never another mutable summary store. No notes fallback once a ledger/document exists. */
@@ -33,7 +36,7 @@ export function currentBuyerFacts(project: BuyerFactsSource) {
   const buying = text('procurement.buying');
   const scopeMap: Record<string,string> = {sase:'full_sase',sdwan:'sdwan_only',sse:'sse_only',managed_security:'not_stated'};
   const states = Object.fromEntries(['estate.users','estate.sites','organisation.regions','organisation.sector','constraints.timeline','estate.existingNetwork','estate.existingSecurity','requirements.bespoke','drivers','procurement.buying','procurement.operatingModel'].map(path => {
-    const all = ledger.filter(f => f.path === path);
+    const all = latestBuyerLedger(ledger).filter(f => f.path === path);
     return [path, read(path).length ? (hasLedger ? 'confirmed' : 'legacy_unverified') : all.some(f => !f.struck && f.provenance === 'inferred') ? 'inferred' : all.length ? 'removed' : 'missing'];
   }));
   return {
@@ -78,7 +81,7 @@ function redact(text: string, project: BuyerFactsSource) {
 export function currentPublicBrief(project: BuyerFactsSource) {
   const f = currentBuyerFacts(project);
   // Whitelist buyer-confirmed intent/requirements, never quotes, source turns, private document prose or legacy notes.
-  const intent = f.canonical ? [...f.business_outcomes,...f.requirements].map(v => redact(v.replace(/_/g,' '),project)).filter(Boolean).join('. ') : redact(project.buyer.notes,project);
+  const intent = f.canonical ? [...f.business_outcomes,...f.requirements].map(v => redact(v,project).replace(/_/g,' ')).filter(Boolean).join('. ') : redact(project.buyer.notes,project);
   const summary = [intent && /[.!?]$/.test(intent) ? intent : intent ? intent + '.' : '', f.users ? `${f.users} users in scope.` : '', f.sites ? `${f.sites} sites.` : '', f.timeline ? `Timeline: ${redact(f.timeline,project)}.` : ''].filter(Boolean).join(' ');
   return {summary, timeline:redact(f.timeline,project), outcome:intent, title:redact(project.title,project)};
 }

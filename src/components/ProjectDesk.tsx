@@ -4990,7 +4990,7 @@ export default function ProjectDesk({
   /* enough to read. Same cards, same onClick handlers, same material/   */
   /* optional classification.                                           */
   /* ================================================================== */
-  const publishedFlag = Boolean(published);
+  const publishedFlag = Boolean(published) || workspaceSessionPublished;
   const reachable = reachableSteps({ started, published: publishedFlag, publishReady: contentReady });
   const completed = completedSteps({ started, materialDecisionsRemaining, published: publishedFlag });
   /* Navigation can never strand the buyer on a station that stopped

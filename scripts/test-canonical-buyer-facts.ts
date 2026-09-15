@@ -37,6 +37,10 @@ for(const path of ['estate.users','estate.sites','organisation.regions','organis
 }
 const inferred={...p,facts:p.facts.map(x=>x.path==='estate.users'?{...x,value:500,provenance:'inferred' as const}:x)};inferred.procurement_document=documentFor(inferred.facts);
 assert.equal(currentBuyerFacts(inferred).states['estate.users'],'inferred');assert.equal(buildMarketReport(inferred).estimate,null);assert.ok(!inferred.procurement_document.summary.includes('500 users'));
+const oldInference=fact('estate.users',500);oldInference.provenance='inferred';
+const removedInference={...p,facts:[...p.facts,oldInference,{...oldInference,struck:true}]};
+assert.equal(currentBuyerFacts(removedInference).states['estate.users'],'removed');
+assert.equal(currentBuyerFacts(removedInference).users,undefined);
 const missing={...p,facts:p.facts.filter(x=>x.path!=='estate.users')};assert.equal(currentBuyerFacts(missing).users,undefined);assert.equal(buildMarketReport(missing).estimate,null);
 const legacy={...p,facts:[],procurement_document:undefined,buyer:{...p.buyer,notes:'Replace ageing access network. Staff: 150. Timeline: two months.',regions:['uk_ireland'],site_count:2,product_scope:'sdwan_only' as const,operating_model:'managed'}};
 assert.equal(currentBuyerFacts(legacy).source,'legacy_buyer_record');assert.equal(currentBuyerFacts(legacy).users,150);assert.ok(buildMarketReport(legacy).estimate);
@@ -46,5 +50,7 @@ const dated={...p,facts:p.facts.map(f=>f.path==='constraints.timeline'?{...f,val
 assert.equal(currentPublicBrief(dated).timeline,'2026-11-15','a date is not a phone number');
 const privateP={...p,facts:[...p.facts,fact('requirements.bespoke','Private Buyer Ltd needs resilient links; contact alice@private.example or https://private.example on +44 7700 900123')]};
 const publicText=currentPublicBrief(privateP).summary;assert.ok(!/Private Buyer Ltd|alice@|https:|7700|PRIVATE-DOCUMENT/.test(publicText));assert.ok(publicText.includes('resilient links'));
+const underscored={...p,buyer:{...p.buyer,organisation:'Private_Buyer Ltd'},facts:[...p.facts,fact('requirements.bespoke','Private_Buyer Ltd needs resilient links; alice_smith@private.example can confirm')]};
+assert.ok(!/Private[ _]Buyer|alice[ _]smith|private.example/.test(currentPublicBrief(underscored).summary),'redaction must happen before display normalisation');
 writeFileSync('../facts-validation/comparison.json',JSON.stringify({document:{summary:p.procurement_document!.summary,facts:p.procurement_document!.factSnapshot,counts:currentDocumentCounts(p)},report,public_notice:brief,matching_input:projectMatchingInput(p),readiness:shortProjectReadiness(p),supported_pricing:priced.estimate},null,2));
 console.log('PASS canonical facts: two users/two months, pricing, missing/changed/removed/inferred, legacy fallback, public intent and privacy');

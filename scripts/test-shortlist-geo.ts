@@ -21,12 +21,12 @@ const workspaceTools = readFileSync("src/lib/mcp-workspace-tools.ts", "utf8");
 
 assert.match(content, /Compare SD-WAN and SASE providers, vendors and managed services/);
 assert.match(page, /2026 market answer/);
-assert.match(page, /viewRanking\.slice\(0, 10\)/);
-assert.match(page, /Leading \{SHORTLIST_VIEWS\[selectedView\]\.label\.toLowerCase\(\)\} at a glance/);
-assert.match(page, /itemListOrder: "https:\/\/schema\.org\/ItemListOrderDescending"/);
-assert.match(page, /position: provider\.rank/);
-assert.match(dataRoute, /top_providers_at_balanced_setting: defaultResult\.shortlist\.slice\(0, 10\)/);
-assert.match(dataRoute, /shortlist_size: vendors\.length/);
+assert.match(page, /viewRanking\.map/);
+assert.match(page, /Comparison summary/);
+assert.match(page, /itemListOrder: "https:\/\/schema\.org\/ItemListOrderAscending"/);
+assert.match(page, /position: provider\.position/);
+assert.match(dataRoute, /ordered_by: PUBLIC_EVIDENCE_ORDER/);
+assert.doesNotMatch(dataRoute, /top_providers_at_balanced_setting:/);
 assert.match(dataRoute, /csv: `\$\{SITE_URL\}\/shortlist\/data\.csv`/);
 assert.match(csvRoute, /getLiveShortlistDataset/);
 assert.match(csvRoute, /GOVERNED_SHORTLIST_CONTRACT_VERSION/);
@@ -61,4 +61,4 @@ assert.equal(
 console.log("shortlist GEO regression tests passed");
 
 assert.match(shortlistBuilder, /CompareTable comparison=\{comparison\}/);
-assert.match(shortlistBuilder, /Find providers for my project/);
+assert.match(shortlistBuilder, /Get proposals for my project/);
