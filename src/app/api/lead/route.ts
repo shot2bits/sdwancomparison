@@ -1,3 +1,5 @@
+import {activityMailFetch} from "@/lib/activity-mail";
+import { activityKvBinding } from "@/lib/activity-storage";
 export const runtime = "edge";
 
 /**
@@ -59,8 +61,8 @@ function vendorHtml(vendors: LeadBody["top_vendors"]): string {
 }
 
 async function kvStore(lead: Record<string, unknown>) {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
+  const url = activityKvBinding().url;
+  const token = activityKvBinding().token;
   if (!url || !token) return;
   await fetch(`${url}/lpush/shortlist_leads`, {
     method: "POST",
@@ -82,7 +84,7 @@ function sendEmails(body: LeadBody) {
   const shortlistUrl = safeNetifyUrl(body.shortlist_url) ?? "https://netify.co.uk/sase/shortlist/";
 
   const send = (payload: Record<string, unknown>) =>
-    fetch("https://api.resend.com/emails", {
+    activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         authorization: `Bearer ${key}`,

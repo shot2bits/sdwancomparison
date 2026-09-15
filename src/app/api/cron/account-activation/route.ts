@@ -1,3 +1,4 @@
+import {activityMailFetch} from "@/lib/activity-mail";
 import { kvConfigured, kvGetJson, kvSetJson, listAllRfpIds, getProjectsBulk, listSessions } from "@/lib/rfp-store";
 import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
 import { SITE_URL } from "@/lib/structured-data";
@@ -109,7 +110,7 @@ export async function GET(req: Request) {
     const unsubUrl = `${SITE_URL}/api/email/unsubscribe?e=${encodeURIComponent(email)}&t=${signUnsubscribe(email)}`;
     const { text, html } = emailBodies(unsubUrl);
     try {
-      const res = await fetch("https://api.resend.com/emails", {
+      const res = await activityMailFetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${resendKey}`, "content-type": "application/json" },
         body: JSON.stringify({

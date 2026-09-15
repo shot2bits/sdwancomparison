@@ -1,3 +1,4 @@
+import type { ActivityMetadata } from "./activity-provenance";
 /**
  * RFP entity model. Client-safe: pure types and Zod schemas, no Node imports.
  * Shared by the store, the API routes, the agent and the UIs.
@@ -364,6 +365,7 @@ export const ProjectDetailsSchema = z.object({
    *  emails, joins no buyer index or moderation queue, and is excluded
    *  from telemetry funnels. */
   test: z.boolean().optional(),
+  activity: z.custom<ActivityMetadata>().optional(),
   activity_environment: z.enum(["production", "preview", "development", "unknown"]).optional(),
   /**
    * 2030 blueprint, Checkpoint B (17 Aug 2026): the canonical envelope's
@@ -591,6 +593,10 @@ export const CONNECTION_STATUSES = ["invited", "engaged", "demo_requested", "con
 export type ConnectionStatus = (typeof CONNECTION_STATUSES)[number];
 
 export const SupplierConnectionSchema = z.object({
+  activity_environment: z.enum(["production","preview","development","unknown"]).optional(),
+  publication_id: z.string().optional(),
+  opportunity_id: z.string().optional(),
+  first_delivered_at: z.number().optional(),
   id: z.string(),
   rfp_id: z.string(),
   vendor_slug: z.string(),       // ties the supplier to the graded vendor directory

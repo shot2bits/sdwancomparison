@@ -23,19 +23,19 @@ export function aggregateFunnel(raw: unknown[], now = Date.now()) {
   } catch { /* Ignore malformed historical analytics, never return their contents. */ }
  }
  events.sort((a,b)=>a.at-b.at);
- const testProjects = new Set(events.filter(e => e.classification === "test").map(e => e.project_id));
- const excludedTestEvents = events.filter(e => e.at >= start && testProjects.has(e.project_id)).length;
- const eligible = events.filter(e => !testProjects.has(e.project_id));
+ const testProjects = new Set(events.filter(e => e.classification === "test").map(e => e.environment+":"+e.project_id));
+ const excludedTestEvents = events.filter(e => e.at >= start && testProjects.has(e.environment+":"+e.project_id)).length;
+ const eligible = events.filter(e => !testProjects.has(e.environment+":"+e.project_id));
  const environmentCounts = Object.fromEntries(["production","preview","development","unknown"].map(env => [env,emptyCounts()]));
  const origins = new Map<string, Event>();
- for (const e of eligible) if (!origins.has(e.project_id) || (origins.get(e.project_id)?.source === "unknown" && e.source !== "unknown")) origins.set(e.project_id,e);
+ for (const e of eligible) if (!origins.has(e.environment+":"+e.project_id) || (origins.get(e.environment+":"+e.project_id)?.source === "unknown" && e.source !== "unknown")) origins.set(e.environment+":"+e.project_id,e);
  const groups = new Map<string, Row>(); const seen = new Set<string>(); const counts=emptyCounts();
  for (const e of eligible.filter(e=>e.at>=start)) {
   const key=e.environment+":"+e.project_id+":"+e.event; if(seen.has(key))continue; seen.add(key); environmentCounts[e.environment][e.event]++; if(e.environment === "production") counts[e.event]++;
-  const origin=origins.get(e.project_id)!; const groupKey=[e.environment,origin.source,origin.mode,origin.channel].join(":");
+  const origin=origins.get(e.environment+":"+e.project_id)!; const groupKey=[e.environment,origin.source,origin.mode,origin.channel].join(":");
   let group=groups.get(groupKey); if(!group){group={environment:e.environment,source:origin.source,mode:origin.mode,channel:origin.channel,counts:emptyCounts()};groups.set(groupKey,group);}
   group.counts[e.event]++;
  }
- return { environment_counts:environmentCounts, excluded_test_events:excludedTestEvents, generated_at:now, period_start:start, period_days:28, oldest_available:events[0]?.at??null, retained_event_limit:10000, retention_limit_reached:raw.length>=10000, counts, rows:[...groups.values()].sort((a,b)=>a.source.localeCompare(b.source)||a.mode.localeCompare(b.mode)||a.channel.localeCompare(b.channel)), interpretation:"Headline counts include only recorded production activity and exclude identified tests. Preview, development and unlabelled historical activity are shown separately. Remaining projects are unverified, not confirmed buyers. Unique projects reaching each stage in the last 28 days, not one acquisition cohort or a conversion rate. Some projects started earlier. Browser entry counts are separate consent-dependent analytics. Coverage was extended on 6 September 2026; missing historical events are not backfilled." };
+ return { raw_event_count:events.filter(e=>e.at>=start).length, environment_counts:environmentCounts, excluded_test_events:excludedTestEvents, generated_at:now, period_start:start, period_days:28, oldest_available:events[0]?.at??null, retained_event_limit:10000, retention_limit_reached:raw.length>=10000, counts, rows:[...groups.values()].sort((a,b)=>a.source.localeCompare(b.source)||a.mode.localeCompare(b.mode)||a.channel.localeCompare(b.channel)), interpretation:"Headline counts include only recorded production activity and exclude identified tests. Preview, development and unlabelled historical activity are shown separately. Remaining projects are unverified, not confirmed buyers. Unique projects reaching each stage in the last 28 days, not one acquisition cohort or a conversion rate. Some projects started earlier. Browser entry counts are separate consent-dependent analytics. Coverage was extended on 6 September 2026; missing historical events are not backfilled." };
 }
 export type FunnelReport = ReturnType<typeof aggregateFunnel>;

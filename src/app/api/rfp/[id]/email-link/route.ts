@@ -1,3 +1,5 @@
+import {activityMailFetch} from "@/lib/activity-mail";
+import { activityKvBinding } from "@/lib/activity-storage";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { buildMarketReport } from "@/lib/market-report";
 import { getProject, kvConfigured, kvGetJson, kvSetJson, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
@@ -11,8 +13,8 @@ export async function OPTIONS(req: Request) { return preflight(req); }
 
 /** LPUSH a draft-link capture record (same write shape as /api/lead's kvStore). */
 async function recordCapture(record: Record<string, unknown>) {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
+  const url = activityKvBinding().url;
+  const token = activityKvBinding().token;
   if (!url || !token) return;
   await fetch(`${url}/lpush/rfp_draftlink_leads`, {
     method: "POST",
@@ -28,7 +30,7 @@ async function sendDraftLink(email: string, p: { id: string; title: string; mana
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const link = `${SITE_URL}/rfp-builder/${p.id}/?manage=${p.manage_token}`;
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({

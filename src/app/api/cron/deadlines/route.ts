@@ -1,3 +1,4 @@
+import {activityMailFetch} from "@/lib/activity-mail";
 import { getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, listAllRfpIds, listConnections } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -26,7 +27,7 @@ async function sendBuyerEmail(to: string, subject: string, html: string): Promis
   if (!key) return false;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   try {
-    const res = await fetch("https://api.resend.com/emails", {
+    const res = await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({ from, to, reply_to: "support@netify.com", subject, html }),

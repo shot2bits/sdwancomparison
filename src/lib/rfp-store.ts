@@ -1,4 +1,6 @@
-import { activityEnvironment } from "./activity-provenance";
+import {recordPersistedActivity} from "./activity-events";
+import { activityKvBinding } from "@/lib/activity-storage";
+import { createActivity, activityEnvironment } from "./activity-provenance";
 /**
  * RFP persistence on Vercel KV (Upstash REST). Edge and Node safe.
  * Degrades with a clear error when KV is not configured so builds and
@@ -28,8 +30,8 @@ import {
 import { assertEngineArtefactsIntact } from "@/lib/security/generate-rfp";
 import { assertHistoryExtends, assertPhaseStatusConsistent } from "@/lib/project-machine";
 
-const URL_ENV = process.env.KV_REST_API_URL;
-const TOKEN_ENV = process.env.KV_REST_API_TOKEN;
+const URL_ENV = activityKvBinding().url;
+const TOKEN_ENV = activityKvBinding().token;
 
 export class KvNotConfiguredError extends Error {
   constructor() {
@@ -105,6 +107,7 @@ export async function saveProject(
   const existing = await getJson<ProjectDetails>(`rfp:${parsed.id}`);
   // The creation environment is server-owned and remains unknown for legacy records.
   parsed.activity_environment = existing ? existing.activity_environment ?? "unknown" : activityEnvironment();
+  parsed.activity = existing ? existing.activity : createActivity(parsed, parsed.entrance_context?.source ?? "unknown");
   if (existing) assertHistoryExtends(existing.history ?? [], parsed.history ?? []);
   // Step 1.1 closure: on engine records, status may only move via the
   // machine; a legacy path mutating it directly is refused here.
@@ -279,7 +282,7 @@ export async function saveResponse(r: RfpResponse): Promise<RfpResponse> {
   await setJson(`rfp:${parsed.rfp_id}:responses`, responses);
   try {
     const project=await getProject(parsed.rfp_id);
-    if(project&&!project.test&&parsed.submitted!==null){const {recordMarketplaceFunnelEvent}=await import("@/lib/marketplace-funnel");await recordMarketplaceFunnelEvent({event:"supplier_response",project_id:parsed.rfp_id,channel:"api"});}
+    if(project&&!project.test&&parsed.submitted!==null){const {recordMarketplaceFunnelEvent}=await import("@/lib/marketplace-funnel");await recordMarketplaceFunnelEvent({event:"supplier_response",project_id:parsed.rfp_id,channel:"api",detail:{response_id:parsed.id+":"+parsed.submitted}});}
   } catch { /* Reporting cannot break a saved supplier response. */ }
   return parsed;
 }
@@ -493,10 +496,19 @@ export async function saveConnection(c: SupplierConnection): Promise<SupplierCon
   const parsed = SupplierConnectionSchema.parse({ ...c, updated: Date.now() });
   const all = await listConnections(parsed.rfp_id);
   const idx = all.findIndex((x) => x.vendor_slug === parsed.vendor_slug);
+  const previous=idx>=0?all[idx]:undefined;
+  if(previous){parsed.activity_environment=previous.activity_environment;parsed.publication_id=previous.publication_id;parsed.opportunity_id=previous.opportunity_id;parsed.first_delivered_at=previous.first_delivered_at;}
+  else {const unlock=await getJson<{published_revision_id:string;board_opportunity_id:string}>(`rfp:${parsed.rfp_id}:market_unlock`);parsed.activity_environment=activityEnvironment();parsed.publication_id=unlock?.published_revision_id;parsed.opportunity_id=unlock?.board_opportunity_id;}
+  if(!parsed.first_delivered_at&&parsed.delivery?.state==='delivered')parsed.first_delivered_at=parsed.delivery.updated_at;
   if (idx >= 0) all[idx] = parsed;
   else all.push(parsed);
   await setJson(`rfp:${parsed.rfp_id}:connections`, all);
   await kv(["SET", `rfp:conn:${parsed.token}`, JSON.stringify({ rfp_id: parsed.rfp_id, vendor_slug: parsed.vendor_slug })]);
+  try {const project=await getJson<ProjectDetails>(`rfp:${parsed.rfp_id}`);
+   if(!previous)await recordPersistedActivity('sase',parsed.rfp_id,'invitation_created',parsed.id,project?.activity,parsed.created);
+   if(parsed.delivery?.state!==previous?.delivery?.state)await recordPersistedActivity('sase',parsed.rfp_id,'invitation_delivery_changed',`${parsed.id}:${parsed.delivery?.state}:${parsed.delivery?.updated_at}`,project?.activity);
+   for(const message of parsed.messages)if(message.from==='supplier'&&!previous?.messages.some(m=>m.id===message.id))await recordPersistedActivity('sase',parsed.rfp_id,'supplier_message_saved',message.id,project?.activity,message.created);
+  }catch{ /* Primary records remain reportable if the event journal is unavailable. */ }
   return parsed;
 }
 

@@ -1,3 +1,4 @@
+import {activityMailFetch} from "@/lib/activity-mail";
 import { randomUUID } from "node:crypto";
 import { kvRaw } from "@/lib/rfp-store";
 import { currentBuyerFacts, currentPublicBrief, projectWithCurrentBuyerFacts, currentDocumentCounts, currentDocumentIsConsistent } from "@/lib/current-buyer-facts";
@@ -396,7 +397,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
   ].filter(Boolean).join("<br/>");
 
   const send = (payload: Record<string, unknown>) =>
-    fetch("https://api.resend.com/emails", {
+    activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify(payload),

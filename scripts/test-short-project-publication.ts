@@ -5,7 +5,7 @@ import { registerHooks } from 'node:module';
 import { withFakeKv } from './fake-kv-harness';
 import { getShortlistDataset } from '../src/lib/vendors';
 import { ProjectDetailsSchema } from '../src/lib/rfp-types';
-import { shortProjectReadiness } from '../src/lib/short-project';
+import { shortProjectReadiness, shortProjectNotice } from '../src/lib/short-project';
 
 // Only external business verification and provider database are substituted.
 // The real publication pipeline, board, snapshots, unlock and invitation persistence run against isolated KV.
@@ -27,7 +27,8 @@ await withFakeKv(async () => {
  for (const mode of ['quick_list','find_providers'] as const) {
   const project = ProjectDetailsSchema.parse({ id: `rfp_${mode}_isolated`, title: 'Managed network refresh for manufacturing sites', created: Date.now(), updated: Date.now(), share_token: `share_${mode}`, manage_token: `manage_${mode}`, buyer: { organisation: 'Private Buyer Ltd', sector: 'manufacturing', site_count: 20, regions: ['uk_ireland'], product_scope: 'sdwan_only', operating_model: 'managed', notes: 'Replace ageing network equipment across twenty manufacturing sites with resilient managed connectivity.' }, journey: { contract_version: 'project-journey/1.0.0', source: 'shortlist', source_url: 'https://netify.co.uk/sase/shortlist/', mode, started_at: Date.now() }, entrance_context: { version: 'project-entrance/1.0.0', source: 'shortlist', captured_at: Date.now(), raw_input: { timescale: 'Within six months' } } });
   assert.equal(shortProjectReadiness(project).allowed, true);
-  assert.equal(shortProjectReadiness({ ...project, buyer: { ...project.buyer, notes: 'Contact us at buyer@example.com for a private quote.' } }).allowed, false);
+  const privateNotes = { ...project, buyer: { ...project.buyer, notes: 'Contact us at buyer@example.com for a private quote.' } };
+  assert.ok(!shortProjectNotice(privateNotes).summary.includes('buyer@example.com'), 'private contact details must be redacted from the public brief');
   await saveProject(project);
   const result = await executePublish(project, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 });
   assert.equal(result.board.listed, true, result.board.reason);

@@ -55,7 +55,10 @@ await withFakeKv(async (store) => {
     assert.equal(await isMarketUnlocked(project.id), false);
     assert.equal((await listConnections(project.id)).length, 0);
     assert.equal((await getProject(project.id))!.status, 'draft');
-    console.log(`PASS ${mode}: ${catalogueCase} catalogue blocks publication and invitations`);
+    const {readActivityReportingRecords}=await import('../src/lib/activity-report-reader');
+    const reporting=(await readActivityReportingRecords()).records.find(r=>r.id===project.id)!;
+    assert.equal(reporting.publications?.length,0);assert.equal(reporting.invitations?.length,0);
+  console.log(`PASS ${mode}: ${catalogueCase} catalogue blocks publication and invitations`);
     continue;
   }
   if (process.env.TEST_SNAPSHOT_FAILURE === '1') {
@@ -177,6 +180,11 @@ await withFakeKv(async (store) => {
     assert.deepEqual(history[0],beforeHistory[0]);
     assert.equal((await listConnections(project.id)).length,3);
   }
+  const {readActivityReportingRecords}=await import('../src/lib/activity-report-reader');
+  const reporting=(await readActivityReportingRecords()).records.find(r=>r.id===project.id)!;
+  assert.equal(reporting.publications?.length,process.env.TEST_CANONICAL_FACTS==='1'?2:1);
+  assert.equal(reporting.invitations?.length,noMatches?0:3);
+  for(const c of await listConnections(project.id)){assert.ok(c.publication_id);assert.equal(c.opportunity_id,result.board.opportunity_id);assert.equal(c.activity_environment,'unknown');}
   console.log(`PASS ${mode}: real publish pipeline, anonymous notice, timescale, unlock, invitations and idempotent replay`);
  }
 });

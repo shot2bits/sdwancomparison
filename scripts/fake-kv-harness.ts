@@ -34,7 +34,7 @@
  * env vars, before this module ever gets a chance to fake them.
  */
 
-export const FAKE_KV_URL = "https://fake-kv.internal.test/redis";
+export const FAKE_KV_URL = "http://127.0.0.1:1/redis";
 export const FAKE_KV_TOKEN = "fake-kv-token-not-real";
 
 type Entry =
@@ -116,6 +116,9 @@ export class FakeKvStore {
         return "OK";
       }
       case "EVAL": {
+        if(String(args[0]).includes('activity-append-once')){const key=String(args[2]);if(this.store.has(key))return 0;this.command(['LPUSH',String(args[3]),String(args[4])]);this.command(['SET',key,'1']);return 1;}
+        if(String(args[0]).includes("redis.call('llen',KEYS[1])")){const key=String(args[2]);const rows=this.command(['LRANGE',key,0,-1]) as string[];if(rows.length!==Number(args[3]))return -1;this.command(['RPUSH',key,String(args[4])]);return rows.length+1;}
+
         if (String(args[0]).includes("netify-funnel-append-once") && Number(args[1]) === 2) {
           const marker=String(args[2]), key=String(args[3]);
           if(this.store.has(marker))return 0;

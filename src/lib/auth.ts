@@ -1,3 +1,4 @@
+import {activityMailFetch} from "@/lib/activity-mail";
 /**
  * Auth helpers: cookie handling, magic-link email, session resolution.
  * Cookie is httpOnly; the session token lives in KV. Reading and building
@@ -112,7 +113,7 @@ export async function sendMagicLink(email: string, token: string, role: string, 
     ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched vendors, who review your requirements and make contact through the Netify app. Your contact details are never shown to them, and you can edit the RFP afterwards; they always see the latest version.</p>${codeBlock}<p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
     : `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p>${codeBlock}<p>If you did not request this, ignore this email.</p>`;
   try {
-    const res = await fetch("https://api.resend.com/emails", {
+    const res = await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({ from, to: email, subject, html }),
@@ -173,7 +174,7 @@ export async function notifyNewSignup(
     a?.page ? `<strong>Signed in from:</strong> ${a.page}` : "",
   ].filter(Boolean).join("<br/>");
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({
@@ -202,7 +203,7 @@ export async function notifyCompanyAdded(email: string, name: string | undefined
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({

@@ -1,3 +1,5 @@
+import {activityMailFetch} from "@/lib/activity-mail";
+import { activityKvBinding } from "@/lib/activity-storage";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
@@ -36,8 +38,8 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
   if (!domain || (await isBlockedDomainLive(domain))) return;
   try { await kvSetJson(`rfp:${p.id}:contact_email`, email); } catch { /* best effort */ }
   try {
-    const url = process.env.KV_REST_API_URL;
-    const token = process.env.KV_REST_API_TOKEN;
+    const url = activityKvBinding().url;
+    const token = activityKvBinding().token;
     if (url && token) {
       await fetch(`${url}/lpush/rfp_draftlink_leads`, {
         method: "POST",
@@ -51,7 +53,7 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const link = `${SITE_URL}/rfp-builder/${p.id}/?manage=${p.manage_token}#publish`;
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({

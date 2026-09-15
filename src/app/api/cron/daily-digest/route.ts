@@ -1,3 +1,4 @@
+import {activityMailFetch} from "@/lib/activity-mail";
 import {
   kvConfigured,
   kvGetJson,
@@ -184,7 +185,7 @@ export async function GET(req: Request) {
   let sent = false;
   if (!dry) {
     try {
-      const res = await fetch("https://api.resend.com/emails", {
+      const res = await activityMailFetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${resendKey}`, "content-type": "application/json" },
         body: JSON.stringify({

@@ -1,3 +1,4 @@
+import {activityMailFetch} from "@/lib/activity-mail";
 /**
  * Buyer notifications for supplier activity on an opportunity. Best effort
  * via Resend (same transport as magic links); failures never block the
@@ -53,7 +54,7 @@ export async function notifyOpportunityPublishedLead(opp: Opportunity): Promise<
     opp.regions.length > 0 && `Regions: ${opp.regions.join(", ")}`,
   ].filter(Boolean).join("<br/>");
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({
@@ -98,7 +99,7 @@ export async function notifyBuyerOfSupplierActivity(
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const roomUrl = `${SITE_URL}/opportunities/${opp.id}/room`;
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({
