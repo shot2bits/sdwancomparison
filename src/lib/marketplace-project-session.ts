@@ -23,8 +23,8 @@ const hash = (value: string) => createHash("sha256").update(value).digest("hex")
 const sessionKey = (token: string) => `marketplace:project_session:${hash(token)}`;
 const idempotencyKey = (projectId: string, key: string) => `marketplace:project_update:${projectId}:${hash(key)}`;
 
-export class MarketplaceProjectConflict extends Error { status = 409 as const; }
-export class MarketplaceProjectUnauthorised extends Error { status = 404 as const; }
+import { MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "./marketplace-project-errors";
+export { MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "./marketplace-project-errors";
 
 async function persistSession(token: string, session: MarketplaceSession) {
   await kvRaw(["SET", sessionKey(token), JSON.stringify(session), "EX", SESSION_TTL_SECONDS]);

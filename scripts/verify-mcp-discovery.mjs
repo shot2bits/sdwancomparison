@@ -6,7 +6,8 @@ async function call(name,args){const r=await rpc('tools/call',{name,arguments:ar
 const init=await rpc('initialize',{protocolVersion:'2025-06-18',clientInfo:{name:'Netify read-only verification',version:'1'},capabilities:{}});
 assert(init.instructions.includes('https://netify.co.uk/sase/pricing/'));
 assert(init.instructions.includes('https://netify.co.uk/sase-sd-wan-rfp-builder/'));
-const catalogue=await rpc('tools/list');assert.equal(catalogue.tools.length,46);assert.equal(new Set(catalogue.tools.map(t=>t.name)).size,46);
+const catalogue=await rpc('tools/list');assert.equal(new Set(catalogue.tools.map(t=>t.name)).size,catalogue.tools.length);
+for (const name of ["build_sase_shortlist","compare_vendors","start_project","update_requirements","prepare_publication","publish_opportunity","get_unlocked_matches","get_project_status"]) assert(catalogue.tools.some(t=>t.name===name), `Missing required tool: ${name}`);
 const comparison=await call('compare_vendors',{slugs:['cato-networks','fortinet'],question:'Compare manufacturing failover evidence'});
 assert(!comparison.r.isError);assert.deepEqual(comparison.data.slugs,['cato-networks','fortinet']);assert.equal(comparison.data._meta.canonicalUrl,'https://netify.co.uk/sase/shortlist/');assert.equal(new URL(comparison.data.resume_url).searchParams.get('question'),'Compare manufacturing failover evidence');
 const cost=await call('netify_estimate_sase_tco',{users:1000,sites:20,regions:['uk-europe'],securityDepth:'full-sase',deliveryModel:'managed',termYears:3});assert(!cost.r.isError);assert.match(JSON.stringify(cost.data),/provisional|calibration/i);
@@ -17,4 +18,4 @@ const denied=await call('netify_read_circuit_responses',{request_id:'00000000-00
 const example=await rpc('resources/read',{uri:'https://netify.co.uk/sase/examples/manufacturing-rfp/data.json'});const data=JSON.parse(example.contents[0].text);assert(data.synthetic);assert.equal(data.example.walkthrough.steps.length,5);
 const doc=await(await fetch(root+'/sase/capabilities.json')).json();assert.equal(doc.pricing_routes.length,3);assert.equal(doc.public_evidence.manufacturing_data,'https://netify.co.uk/sase/examples/manufacturing-rfp/data.json');
 const page=await(await fetch(root+'/sase/connector/')).text();for(const route of doc.pricing_routes)assert(page.includes(route.title));
-console.log('PASS initialize, 46 tools, named comparison + handoff, provisional cost, circuit validation, private denial, example resource, HTML/JSON route parity. No project writes or messages.');
+console.log('PASS initialize, '+catalogue.tools.length+' unique tools, required procurement contract, named comparison + handoff, provisional cost, circuit validation, private denial, example resource, HTML/JSON route parity. No project writes or messages.');

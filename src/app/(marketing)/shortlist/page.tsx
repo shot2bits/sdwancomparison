@@ -239,8 +239,8 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
       </figure>
 
       <section className="mt-20">
-        <p className="eyebrow mb-3">Ranked shortlists</p>
-        <h2 className="mb-4">Pre-built rankings by sector, size and priority</h2>
+        <p className="eyebrow mb-3">Provider evidence guides</p>
+        <h2 className="mb-4">Provider evidence by sector, size and priority</h2>
         <div className="flex flex-wrap gap-2">
           {BEST_PAGES.map((bp) => (
             <Link

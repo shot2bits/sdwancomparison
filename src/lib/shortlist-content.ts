@@ -38,7 +38,7 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is this comparison vendor neutral?",
-    a: "Yes, we don't have a bias to any vendor and use publicly available sources and evidence only, as well as every vendor being scored against the exact same matrix. We must mention that Netify is a BT Authorised Partner and earns commission on some routes to market, however these rankings are not influenced by commercial relationships.",
+    a: "Public comparisons use the same capability definitions and published evidence for every provider. Public positions follow evidence counts, verification date and name, not computed fit. Personalised rankings require authorised access after verified publication. Netify is a BT Authorised Partner and earns commission on some routes to market; those relationships do not determine the public evidence order.",
   },
   {
     q: "How accurate are the extended dimensions?",

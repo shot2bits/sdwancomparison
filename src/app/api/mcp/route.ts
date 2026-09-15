@@ -6,6 +6,7 @@ import { SECURITY_TOOL_DEFINITIONS_ALL, SECURITY_TOOL_NAMES, callSecurityTool } 
 import { WORKSPACE_TOOL_DEFINITIONS, WORKSPACE_TOOL_NAMES, callWorkspaceTool } from "@/lib/mcp-workspace-tools";
 import { TOOL_ANNOTATIONS, SERVER_INSTRUCTIONS } from "@/lib/mcp-annotations";
 import { SITE_URL } from "@/lib/structured-data";
+import { mcpExecutionError } from "@/lib/mcp-execution-error";
 import { mcpToolResult } from "@/lib/mcp-tool-result";
 import { sessionFromRequest } from "@/lib/auth";
 
@@ -125,9 +126,9 @@ const RESOURCE_TEMPLATES = [
   {
     uriTemplate: `${SITE_URL}/best/{slug}/data.json`,
     name: "sase-best-ranking",
-    title: "Ranked providers for a sector, size or intent, machine twin",
+    title: "Provider evidence for a sector, size or intent, machine twin",
     description:
-      "Any best-providers ranking page as data, {slug} like sd-wan-sase-providers-for-healthcare. Slugs are listed at /sase/best/. CC BY 4.0 with attribution to Netify.",
+      "Any best-providers evidence page as data, {slug} like sd-wan-sase-providers-for-healthcare. Slugs are listed at /sase/best/. CC BY 4.0 with attribution to Netify.",
     mimeType: "application/json",
   },
 ] as const;
@@ -218,9 +219,9 @@ export async function POST(req: Request) {
               ? await callRfpTool(name, args, { verifiedBuyerEmail: await sessionFromRequest(req).then((session) => session && (session.role === "buyer" || session.role === "netify") ? session.email : undefined), requestKey: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous" })
               : await callMcpTool(name, args);
       return rpcResult(body.id, mcpToolResult(result), protocol);
-      } catch {
+      } catch (error) {
         // Execution errors belong to the tool result. Do not leak storage or credential details.
-        return rpcResult(body.id, mcpToolResult({ error: "Tool execution failed. Check the input and try again." }), protocol);
+        return rpcResult(body.id, mcpToolResult(mcpExecutionError(error)), protocol);
       }
     }
     case "resources/list":

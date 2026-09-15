@@ -181,7 +181,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
     columns: 2,
     items: [
       { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/", desc: "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation." },
-      { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Score evaluated suppliers against capability and sector requirements." },
+      { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Compare public provider evidence; personalised matching follows verified publication." },
       { label: "Cost and TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership for SASE and SD-WAN." },
       { label: "Request circuit pricing", href: "/sase/circuit-pricing/", desc: "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations." },
       { label: "SD-WAN vendor filter", href: "/sd-wan/vendor-filter/", desc: "Narrow the market by service model, capability and requirement." },

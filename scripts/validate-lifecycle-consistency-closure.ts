@@ -216,8 +216,8 @@ function main() {
     // `responseCount === null` (never fetched / fetch failed), since
     // neither is proof that a response exists.
     record(/Published — awaiting supplier responses/.test(desk), "6: published-with-no-confirmed-responses renders \"Published — awaiting supplier responses\"", "");
-    const responseBlock = desk.match(/\{responseCount\s*\?\s*`\$\{responseCount\}[\s\S]{0,220}?:\s*`Published — awaiting supplier responses[\s\S]{0,150}?`\}/);
-    record(Boolean(responseBlock), "6: the response-status text is a single `responseCount ? ... : \"awaiting\"` branch -- `0` and `null` both take the honest \"awaiting\" branch (falsy), never the confirmed-count branch", "");
+    record(/responseCount\s*\?\s*`\$\{responseCount\}/.test(desk), "6: confirmed responses use the real positive count", "");
+    record(/: published\.invited\.length > 0 \? `Published — awaiting supplier responses[\s\S]{0,150}?` : "Published with no supplier invitations\./.test(desk), "6: zero invitations have an explicit state rather than promising supplier responses", "");
     // Fixture 7: only when real stored responses exist does the honest
     // "N have responded" wording appear, with a link to the REAL,
     // already-correct comparison experience (RfpBuilder.tsx) -- never a
