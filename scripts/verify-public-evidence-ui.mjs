@@ -6,7 +6,7 @@ mkdirSync(dir,{recursive:true});
 const browser = await chromium.launch({headless:true});
 const page = await browser.newPage({viewport:{width:1440,height:1000}});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
-const base='http://127.0.0.1:3177/sase';
+const base=process.env.VERIFY_BASE_URL ?? 'http://127.0.0.1:3177/sase';
 const response=await page.goto(base+'/shortlist/',{waitUntil:'networkidle',timeout:120000});
 assert.equal(response.status(),200);
 await page.getByRole('heading',{name:'Provider, product and differentiator'}).waitFor();

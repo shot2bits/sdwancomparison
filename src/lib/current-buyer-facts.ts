@@ -30,7 +30,7 @@ export function currentPublicBrief(project: ProjectDetails) {
   // Generated empty-document guidance is never a buyer requirement.
   const outcome = /No supplier requirements have been created yet/i.test(notes) ? '' : notes;
   const summary = facts.canonical
-    ? [facts.users ? `${facts.users} users in scope.` : '', facts.sites ? `${facts.sites} sites.` : '', timeline ? `Timeline: ${timeline}.` : ''].filter(Boolean).join(' ')
+    ? [outcome, facts.users ? `${facts.users} users in scope.` : '', facts.sites ? `${facts.sites} sites.` : '', timeline ? `Timeline: ${timeline}.` : ''].filter(Boolean).join(' ')
     : outcome;
   return { summary, timeline };
 }

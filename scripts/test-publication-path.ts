@@ -5,6 +5,7 @@ import { registerHooks } from 'node:module';
 import { withFakeKv } from './fake-kv-harness';
 import { getShortlistDataset } from '../src/lib/vendors';
 import { ProjectDetailsSchema } from '../src/lib/rfp-types';
+import { currentPublicBrief } from '../src/lib/current-buyer-facts';
 import { shortProjectReadiness } from '../src/lib/short-project';
 
 // Only external business verification and provider database are substituted.
@@ -29,6 +30,11 @@ await withFakeKv(async () => {
   const project = ProjectDetailsSchema.parse({ id: `rfp_${mode}_isolated`, title: 'Managed network refresh for manufacturing sites', owner_email: 'owner@buyer.example', created: Date.now(), updated: Date.now(), share_token: `share_${mode}`, manage_token: `manage_${mode}`, buyer: { organisation: 'Private Buyer Ltd', sector: 'manufacturing', site_count: 20, regions: ['uk_ireland'], product_scope: 'sdwan_only', pinned_vendors: noMatches ? [vendors[0].slug] : [], operating_model: 'managed', notes: 'Replace ageing network equipment across twenty manufacturing sites with resilient managed connectivity.' }, journey: { contract_version: 'project-journey/1.0.0', source: 'shortlist', source_url: 'https://netify.co.uk/sase/shortlist/', mode, started_at: Date.now() }, entrance_context: { version: 'project-entrance/1.0.0', source: 'shortlist', captured_at: Date.now(), raw_input: { timescale: 'Within six months' } } });
   assert.equal(shortProjectReadiness(project).allowed, true);
   assert.equal(shortProjectReadiness({ ...project, buyer: { ...project.buyer, notes: 'Contact us at buyer@example.com for a private quote.' } }).allowed, false);
+  const canonical = ProjectDetailsSchema.parse({ ...project, facts: [{ id: 'users', path: 'estate.users', value: 2, provenance: 'stated', struck: false, source: 'answer', cycle: 1 }, { id: 'timeline', path: 'constraints.timeline', value: 'Next quarter', provenance: 'stated', struck: false, source: 'answer', cycle: 1 }] });
+  assert.ok(currentPublicBrief(canonical).summary.includes(project.buyer.notes));
+  assert.ok(currentPublicBrief(canonical).summary.includes('2 users in scope.'));
+  assert.equal(currentPublicBrief(canonical).timeline, 'Next quarter');
+  assert.equal(shortProjectReadiness({ ...canonical, buyer: { ...canonical.buyer, notes: 'Contact buyer@example.com for the requirement.' } }).allowed, false);
   await saveProject(project);
   const mcpToken = `isolated-${mode}`;
   const tokenHash = createHash('sha256').update(mcpToken).digest('hex');
@@ -51,17 +57,41 @@ await withFakeKv(async () => {
     console.log(`PASS ${mode}: ${catalogueCase} catalogue blocks publication and invitations`);
     continue;
   }
+  if (process.env.TEST_SNAPSHOT_FAILURE === '1') {
+    const originalFetch = global.fetch;
+    const failKey = `rfp:${project.id}:${mode === 'quick_list' ? 'published_snapshot' : 'published_snapshots'}`;
+    let failed = false;
+    global.fetch = (async (input, init) => {
+      const command = init?.body ? JSON.parse(String(init.body)) : [];
+      if (!failed && command[0] === 'SET' && command[1] === failKey) {
+        failed = true;
+        throw new Error('synthetic snapshot storage failure');
+      }
+      return originalFetch(input, init);
+    }) as typeof fetch;
+    try {
+      await assert.rejects(executePublish(project, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 }), /synthetic snapshot storage failure/);
+    } finally { global.fetch = originalFetch; }
+    assert.equal(failed, true);
+    process.env.TEST_CATALOGUE_CHANGED = '1';
+  }
+  const publishInput = process.env.TEST_SNAPSHOT_FAILURE === '1' ? (await getProject(project.id))! : project;
   const simultaneous = await Promise.allSettled([
-    executePublish(project, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 }),
-    executePublish(project, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 }),
+    executePublish(publishInput, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 }),
+    executePublish(publishInput, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 }),
   ]);
   const successful = simultaneous.filter(r => r.status === 'fulfilled');
-  assert.equal(successful.length, 1, 'concurrent publication is serialised');
+  assert.equal(successful.length, 1, 'concurrent publication is serialised: ' + simultaneous.filter(r => r.status === 'rejected').map(r => String((r as PromiseRejectedResult).reason)).join('; '));
   const result = (successful[0] as PromiseFulfilledResult<Awaited<ReturnType<typeof executePublish>>>).value;
   assert.equal(result.board.listed, true, result.board.reason);
   assert.equal(await isMarketUnlocked(project.id), true);
   const { getLatestPublishedSnapshot, rfpContentSnapshot } = await import('../src/lib/published-snapshot');
+  delete process.env.TEST_CATALOGUE_CHANGED;
   const snapshot = await getLatestPublishedSnapshot(project.id);
+  const { getPublishedSnapshotHistory, savePublishedSnapshot } = await import('../src/lib/published-snapshot');
+  assert.equal((await getPublishedSnapshotHistory(project.id)).length, 1);
+  await savePublishedSnapshot(project.id, { ...snapshot!, computed_matches: [] });
+  assert.deepEqual(await getLatestPublishedSnapshot(project.id), snapshot, 'same revision cannot be overwritten');
   assert.equal(snapshot!.market_report.matched.total_evaluated_market, vendors.length);
   assert.equal(snapshot!.market_report.matched.count, noMatches ? 0 : 3);
   assert.equal(snapshot!.matched_vendor_ids.length, noMatches ? 0 : 3);

@@ -690,7 +690,8 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
   const priorGovernedState = await loadGovernedRevisionState(project.id);
   if (isPublicationReplay(priorGovernedState.lastAppliedEventId, publishEventIdForRequest)) {
     const priorSnapshot = await getLatestPublishedSnapshot(project.id);
-    if (priorSnapshot) return replayResultFrom(project, priorSnapshot);
+    const pendingAttempt = await getPublicationAttempt(project.id);
+    if (priorSnapshot && (!pendingAttempt || priorSnapshot.id === pendingAttempt.id)) return replayResultFrom(project, priorSnapshot);
     // Governed state says this exact request already applied, but no
     // snapshot exists (a pre-Phase-2 record, or a snapshot write that
     // failed after the state commit) -- fall through to a real publish
@@ -1204,8 +1205,6 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
     };
   }
 
-  // Notifications are best effort and never block the publish.
-  try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
 
   // Freeze the published snapshot and COMMIT the governed-revision state
   // (Robert's Phase 2 brief): only now, after every side effect above has
@@ -1240,7 +1239,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
     const provider = evidenceBySlug.get(slug);
     return provider ? [{ slug, name: provider.name }] : [];
   });
-  if (govResult.applied && govResult.revision) {
+  if ((govResult.applied && govResult.revision) || govResult.reason === "replay") {
     const snapshot: PublishedSnapshot = {
       // Market-unlock correction round: the SAME id minted and bound into
       // the MarketUnlock record above (published_revision_id /
@@ -1250,7 +1249,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
       // under" must always be the same identity.
       id: publishedRevisionId,
       project_id: published.id,
-      document_version: govResult.revision.cycle,
+      document_version: govResult.revision?.cycle ?? govResult.state.cycle,
       compiler_version: RFP_DOCUMENT_PIPELINE_VERSION,
       methodology_version: published.methodology_version,
       rulebook_version: rulebookVersionOf(published),
@@ -1277,14 +1276,10 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
     };
     await savePublishedSnapshot(project.id, snapshot);
   }
-  // A missing `govResult.applied` here would mean this exact eventId was
-  // somehow already the last-applied one despite failing the read at the
-  // top of this function (a race between two truly concurrent identical
-  // requests -- see rfp-governed-revision.ts's own documented limit). The
-  // publish itself has already genuinely succeeded above either way; only
-  // the SNAPSHOT write is skipped to avoid a duplicate version, matching
-  // this function's idempotency contract rather than throwing after the
-  // buyer's vendors have already been invited.
+  // A resumed event repairs a missing snapshot without adding a governed revision.
+
+  // Notify only after the durable snapshot exists. A snapshot-write retry cannot resend these emails.
+  try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
 
   if(!project.test && board.listed && board.opportunity_id && marketUnlockValid) await recordMarketplaceFunnelEvent({event:"publication_completed",project_id:project.id,source:project.journey?.source??"rfp_builder",mode:project.journey?.mode??"build_rfp",channel:project.journey?.source==="mcp"?"mcp":"api",detail:{board_created:true}});
   return { published, invited, criteria: attempt.match_criteria ?? "", board, market_report, matched_vendors: matchedVendorsFrozen };

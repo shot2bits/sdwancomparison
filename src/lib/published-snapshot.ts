@@ -284,13 +284,19 @@ export async function getPublishedSnapshotHistory(rfpId: string): Promise<Publis
 /** Snapshots are immutable once created: this ALWAYS appends a new record
  *  (or updates the "latest" pointer to it) -- it never mutates an existing
  *  entry. Callers only invoke this when rfp-governed-revision.ts has
- *  confirmed a genuine new event (never on a replay). */
+ *  confirmed a new event or a replay repairing an interrupted snapshot save. */
 export async function savePublishedSnapshot(rfpId: string, snapshot: PublishedSnapshot): Promise<void> {
   const history = await getPublishedSnapshotHistory(rfpId);
   // Cap history so a project republished hundreds of times cannot grow the
   // record unbounded; the last 50 versions is generous for any real
   // republish cadence and matches this codebase's existing cap convention
   // (rfp-publish.ts's publish:leads list caps at 500).
+  const existing = history.find(entry => entry.id === snapshot.id);
+  if (existing) {
+    // Repair a failed latest-pointer write without duplicating or replacing the immutable revision.
+    await kvSetJson(latestKey(rfpId), existing);
+    return;
+  }
   const nextHistory = [...history, snapshot].slice(-50);
   await kvSetJson(historyKey(rfpId), nextHistory);
   await kvSetJson(latestKey(rfpId), snapshot);
