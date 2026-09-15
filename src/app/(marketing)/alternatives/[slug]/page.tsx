@@ -1,8 +1,8 @@
+import { publicProviderEvidence } from "@/lib/public-provider-evidence";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
-import { buildShortlist } from "@/lib/shortlist-core";
+import { getShortlistDataset } from "@/lib/vendors";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -25,15 +25,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const vendor = getShortlistDataset().find((v) => v.slug === slug);
   if (!vendor) return {};
-  const longTitle = `Top ${vendor.name} alternatives (2026): 10 rivals ranked`;
+  const longTitle = `Top ${vendor.name} alternatives (2026): provider evidence`;
   const title = longTitle.length <= 56 ? longTitle : `Top ${vendor.name} alternatives (2026)`;
   return {
     title,
-    description: `The strongest SD-WAN and SASE alternatives to ${vendor.name} in 2026, ranked by Netify's 40-feature evidence matrix with scores and caveats.`,
+    description: `Source evidence for SD-WAN and SASE alternatives to ${vendor.name} in 2026, listed alphabetically with capability grades and caveats.`,
     alternates: { canonical: `${SITE_URL}/alternatives/${slug}/` },
     openGraph: {
       title: `Top ${vendor.name} alternatives (2026)`,
-      description: `The strongest SD-WAN and SASE alternatives to ${vendor.name}, ranked by evidence.`,
+      description: `Source evidence for alternatives to ${vendor.name}, listed alphabetically.`,
       url: `${SITE_URL}/alternatives/${slug}`,
       type: "article",
       locale: "en_GB",
@@ -48,7 +48,7 @@ export default async function AlternativesPage({ params }: Props) {
   if (!vendor) notFound();
 
   const rivals = all.filter((v) => v.slug !== slug);
-  const result = buildShortlist(rivals, { shortlist_size: 10 }, FEATURE_NAMES);
+  const result = publicProviderEvidence(rivals, { shortlist_size: 10 });
   const sameCategory = new Set(
     rivals.filter((v) => v.category === vendor.category).map((v) => v.slug),
   );
@@ -56,15 +56,15 @@ export default async function AlternativesPage({ params }: Props) {
   const faqs = [
     {
       q: `What are the best alternatives to ${vendor.name}?`,
-      a: `Ranked by the Netify 40-feature evidence matrix, verified ${datasetVerifiedLong()}, the strongest alternatives are listed above with scores. Close peers in the same category (${vendor.category}) are marked. The right alternative depends on your operating model, sector and regions, which the interactive shortlist builder scores for free.`,
+      a: `Researched using the Netify 40-feature evidence matrix, verified ${datasetVerifiedLong()}, provider evidence is listed alphabetically. Close peers in the same category (${vendor.category}) are marked. The right alternative depends on your operating model, sector and regions, with computed fit available after verified publication.`,
     },
     {
       q: `Why do buyers look beyond ${vendor.name}?`,
       a: `Common reasons from the Netify evaluation include: ${vendor.watch_outs.slice(0, 2).join(" ")} Whether these matter depends on your estate; the ${vendor.name} profile carries the full evidence record.`,
     },
     {
-      q: "How is this alternatives ranking calculated?",
-      a: "Every provider is scored on the same published evidence grades across 40 capability features, with the subject vendor excluded. The ranking is deterministic and reproducible via the canonical URL, its JSON twin and the MCP tool.",
+      q: "How is this evidence directory ordered?",
+      a: "Providers are listed alphabetically, with the subject vendor excluded. Capability grades remain public; computed rankings require verified project publication.",
     },
   ];
 
@@ -77,7 +77,7 @@ export default async function AlternativesPage({ params }: Props) {
     numberOfItems: result.shortlist.length,
     itemListElement: result.shortlist.map((v) => ({
       "@type": "ListItem",
-      position: v.rank,
+
       name: v.name,
       url: `${SITE_URL}/vendors/${v.slug}`,
     })),
@@ -104,17 +104,14 @@ export default async function AlternativesPage({ params }: Props) {
       <div className="mb-10 fade-rise">
         <p className="eyebrow mb-3">Alternatives · Updated {datasetVerifiedMonth()}</p>
         <h1 id="page-h1" className="mb-4">
-          Top {vendor.name} alternatives (2026): 10 rivals ranked
+          Top {vendor.name} alternatives (2026): provider evidence
         </h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          {vendor.name} ({vendor.category}) scores well in the Netify matrix, and
-          it is not right for every estate. Buyers commonly weigh these
-          watch-outs: {vendor.watch_outs[0]} The 10 strongest alternatives are
-          ranked below on the same 40-feature evidence grades.
+          Compare source evidence for alternatives to {vendor.name} ({vendor.category}). Review the provider profiles and caveats. Computed fit and rankings unlock after verified project publication.
         </p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
-          {`Netify's ${datasetVerifiedMonth()} evaluation ranks the top ${vendor.name} alternatives as: `}
-          {result.shortlist.map((v) => `${v.rank}. ${v.name} (${v.score})`).join("; ")}.
+          {`Netify's ${datasetVerifiedMonth()} evidence directory lists alternatives alphabetically: `}
+          {result.shortlist.map((v) => v.name).join("; ")}.
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
@@ -137,9 +134,10 @@ export default async function AlternativesPage({ params }: Props) {
           queries carry real citation share (Forcepoint 43 per cent, 29 July
           2026) and had no table to quote from. */}
       <SourcedTable
+        ranked={false}
         slugs={result.shortlist.map((v) => v.slug)}
         caption={`${vendor.name} alternatives compared on sourced evidence`}
-        intro={`How the leading alternatives to ${vendor.name} differ on who owns the network and who runs the service. Ordered as ranked.`}
+        intro={`How alternatives to ${vendor.name} differ on who owns the network and who runs the service. Alphabetical order.`}
         id="evidence-table"
       />
 
@@ -147,11 +145,11 @@ export default async function AlternativesPage({ params }: Props) {
         {result.shortlist.map((v) => (
           <li
             key={v.slug}
-            id={`rank-${v.rank}-${v.slug}`}
+            id={`provider-${v.slug}`}
             className="border border-[var(--ink-300,#ccc)] rounded-sm p-5"
           >
             <p className="eyebrow mb-1">
-              No. {v.rank} · Score {v.score}
+              Source evidence
               {sameCategory.has(v.slug) && " · Same category"}
             </p>
             <h2 className="text-xl mb-1">
@@ -178,7 +176,7 @@ export default async function AlternativesPage({ params }: Props) {
 
       <section className="mt-14 max-w-3xl">
         <p className="eyebrow mb-3">Questions</p>
-        <h2 className="mb-6">About this ranking</h2>
+        <h2 className="mb-6">About this evidence</h2>
         <div className="space-y-6">
           {faqs.map((f) => (
             <div key={f.q}>

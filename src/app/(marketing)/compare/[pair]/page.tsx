@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = longTitle.length <= 56 ? longTitle : `${c.names[a]} vs ${c.names[b]} (2026)`;
   return {
     title,
-    description: `${c.names[a]} vs ${c.names[b]} compared feature by feature: 40 graded capabilities plus regions, clouds, AI and resilience. Scores, wins and caveats.`,
+    description: `${c.names[a]} vs ${c.names[b]} compared feature by feature: 40 graded capabilities plus regions, clouds, AI and resilience. Source grades and caveats.`,
     alternates: { canonical: `${SITE_URL}/compare/${pair}/` },
     openGraph: {
       title: `${c.names[a]} vs ${c.names[b]} (2026)`,
@@ -60,22 +60,9 @@ export default async function ComparePage({ params }: Props) {
   const [a, b] = c.slugs;
 
   const faqs = [
-    {
-      q: `${c.names[a]} or ${c.names[b]}: which is better?`,
-      a: `${c.summary} Which fits you depends on operating model, sector, regions and security priorities; the interactive shortlist builder scores both against your exact requirements.`,
-    },
-    {
-      q: `Where does ${c.names[a]} beat ${c.names[b]}?`,
-      a: c.wins[a].length > 0
-        ? `${c.names[a]} holds a clear evidence advantage on ${c.wins[a].length} features, including ${c.wins[a].slice(0, 4).join(", ")}.`
-        : `${c.names[a]} holds no outright feature advantages in this comparison; differences sit in degree and delivery rather than capability presence.`,
-    },
-    {
-      q: `Where does ${c.names[b]} beat ${c.names[a]}?`,
-      a: c.wins[b].length > 0
-        ? `${c.names[b]} holds a clear evidence advantage on ${c.wins[b].length} features, including ${c.wins[b].slice(0, 4).join(", ")}.`
-        : `${c.names[b]} holds no outright feature advantages in this comparison; differences sit in degree and delivery rather than capability presence.`,
-    },
+    { q: `${c.names[a]} or ${c.names[b]}: how should I compare them?`, a: c.summary },
+    { q: `Where can I check ${c.names[a]}'s evidence?`, a: "Read the source grades below and open the provider profile for the supporting evidence. Unknown does not mean unsupported." },
+    { q: `Where can I check ${c.names[b]}'s evidence?`, a: "Read the source grades below and open the provider profile for the supporting evidence. Project-specific recommendations require verified publication." },
   ];
 
   const schemas = [
@@ -131,7 +118,7 @@ export default async function ComparePage({ params }: Props) {
       <div className="grid sm:grid-cols-2 gap-4 mb-10">
         {c.slugs.map((s) => (
           <div key={s} className="border border-[var(--ink-300,#ccc)] rounded-sm p-5">
-            <p className="eyebrow mb-1">Score {c.meta[s].score}</p>
+            <p className="eyebrow mb-1">Source evidence</p>
             <h2 className="text-lg mb-1">
               <Link href={`/vendors/${s}`} className="no-underline hover:text-[var(--accent)]">{c.names[s]}</Link>
             </h2>
@@ -139,8 +126,7 @@ export default async function ComparePage({ params }: Props) {
               {c.meta[s].category} · Typical deployment: {c.meta[s].deployment_speed}
             </p>
             <p className="text-sm text-[var(--ink-700)] mb-3">
-              Clear feature advantages: {c.wins[s].length > 0 ? c.wins[s].slice(0, 3).join("; ") : "none outright"}
-              {c.wins[s].length > 3 ? ` (and ${c.wins[s].length - 3} more)` : ""}
+              Compare the source grades below; provider fit depends on your published requirements.
             </p>
             <div className="flex gap-2 flex-wrap">
               <a
@@ -184,7 +170,7 @@ export default async function ComparePage({ params }: Props) {
           pageUrl={`${SITE_URL}/compare/${pair}`}
         />
         <p className="mt-3 text-sm text-[var(--ink-500)]">
-          Or <Link href="/shortlist" className="underline">score both against your requirements in the shortlist builder</Link>.
+          Or <Link href="/shortlist" className="underline">explore source evidence in the shortlist builder</Link>.
         </p>
       </div>
 

@@ -17,7 +17,8 @@ for (const view of SHORTLIST_VIEW_KEYS) {
   const second = buildShortlistMarketView(vendors, view);
   assert.ok(first.length > 0, `${view} must return providers`);
   assert.deepEqual(first.map((provider) => provider.slug), second.map((provider) => provider.slug), `${view} must be deterministic`);
-  assert.ok(first.every((provider, index) => provider.rank === index + 1), `${view} ranks must be contiguous`);
+  assert.deepEqual(first.map(p => p.name), first.map(p => p.name).sort((a,b) => a.localeCompare(b)), `${view} must be alphabetical`);
+  assert.ok(first.every(p => !("rank" in p) && !("score" in p)));
 }
 
 const sdWan = buildShortlistMarketView(vendors, "sd-wan-vendors");

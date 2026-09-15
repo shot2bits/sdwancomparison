@@ -66,7 +66,8 @@ assert.match(data, /provider_contract_version:\s*live\.providerContractVersion/)
 assert.match(data, /generated_at:\s*generatedAt/);
 assert.match(data, /provider_loaded_at:\s*generatedAt/);
 assert.doesNotMatch(data, /provider_loaded_at:\s*live\.loadedAt/);
-assert.match(data, /default_shortlist:\s*\{ \.\.\.defaultResult, generated_at: generatedAt \}/);
+assert.doesNotMatch(data, /default_shortlist:/);
+assert.match(data, /PUBLIC_EVIDENCE_CONTRACT/);
 assert.match(data, /createHash\("sha256"\)/);
 assert.match(data, /if-none-match/);
 assert.match(csvData, /'generated_at'/);

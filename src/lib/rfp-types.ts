@@ -605,5 +605,11 @@ export const SupplierConnectionSchema = z.object({
   // the link during the brokered phase before supplier registration.
   viewed_at: z.number().optional(),
   forwarded_at: z.number().optional(),
+  // Creating an invitation is not transport delivery. Legacy records stay unknown.
+  delivery: z.object({
+    state: z.enum(["not_attempted", "accepted", "delivered", "failed", "unknown"]),
+    updated_at: z.number(),
+    receipt_ref: z.string().optional(),
+  }).optional(),
 }).strict();
 export type SupplierConnection = z.infer<typeof SupplierConnectionSchema>;

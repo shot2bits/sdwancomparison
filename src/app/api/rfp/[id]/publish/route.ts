@@ -1,3 +1,5 @@
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
+import { publicationOutcomes } from "@/lib/publication-outcomes";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
@@ -130,5 +132,5 @@ export async function POST(req: Request, ctx: Ctx) {
   // without a second KV read. Callers should still treat market-unlock.ts
   // as the single source of truth on any LATER read (the GET routes all
   // query it directly); this is only for this one immediate response.
-  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report, market_unlocked: marketUnlocked, publication_policy_version: PUBLICATION_POLICY_VERSION }, { headers: cors });
+  return Response.json({ ok: true, publication_outcomes: await publicationOutcomes(id, await getLatestPublishedSnapshot(id)), status: published.status, invited, matched_vendors, criteria, board, market_report, market_unlocked: marketUnlocked, publication_policy_version: PUBLICATION_POLICY_VERSION }, { headers: cors });
 }

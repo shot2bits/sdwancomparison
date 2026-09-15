@@ -53,6 +53,7 @@ export type PublicationAttempt = {
   invitation_plan: { slug: string; name: string }[] | null;
   /** Provider evidence sealed before any board write. Optional so attempts
    *  created before the Neon catalogue contract remain readable. */
+  computed_matches?: Array<{ slug: string; rank: number; score: number }>;
   provider_evidence?: Array<{
     slug: string;
     name: string;
@@ -63,6 +64,10 @@ export type PublicationAttempt = {
   }>;
   provider_provenance?: {
     evaluated_provider_count?: number;
+    eligible_provider_count?: number;
+    evaluated_at?: string;
+    matching_rules_version?: string;
+    evaluation?: Array<{ slug: string; eligible: boolean; reasons: string[] }>;
     shortlist_contract_version: string;
     provider_contract_version: string;
     dataset_versions: string[];

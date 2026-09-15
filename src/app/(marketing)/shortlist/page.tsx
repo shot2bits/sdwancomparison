@@ -67,10 +67,10 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
     getShortlistFaqSchema(SHORTLIST_FAQS),
     { "@context": "https://schema.org", "@type": "WebPage", name: SHORTLIST_VIEWS[selectedView].title, url: selectedView === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${selectedView}/`, dateModified: verified },
     {
-      "@context": "https://schema.org", "@type": "ItemList", name: "SD-WAN and SASE providers ranked by Netify",
+      "@context": "https://schema.org", "@type": "ItemList", name: "SD-WAN and SASE provider evidence",
       numberOfItems: viewRanking.length,
-      itemListOrder: "https://schema.org/ItemListOrderDescending",
-      itemListElement: viewRanking.map((provider) => ({ "@type": "ListItem", position: provider.rank, url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
+      itemListOrder: "https://schema.org/ItemListUnordered",
+      itemListElement: viewRanking.map((provider) => ({ "@type": "ListItem",  url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
     },
     // The 40 capability definitions as a DefinedTermSet, mirroring the
     // visible glossary below so AI engines can quote a row's meaning
@@ -80,7 +80,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
       "@type": "DefinedTermSet",
       "@id": `${SITE_URL}/shortlist/#capability-definitions`,
       name: "Netify SD-WAN and SASE capability definitions",
-      description: "One-sentence definitions of the 40 evidence-graded capabilities used across the Netify shortlist builder, vendor profiles and ranked comparisons.",
+      description: "One-sentence definitions of the 40 evidence-graded capabilities used across the Netify shortlist builder, vendor profiles and evidence comparisons.",
       hasDefinedTerm: FEATURES.map((f) => ({
         "@type": "DefinedTerm",
         "@id": `${SITE_URL}/shortlist/#${f.id}`,
@@ -94,10 +94,10 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
   const listBlocks = (
     <>
       <section className="mb-10" aria-labelledby="leading-providers-title">
-        <p className="eyebrow mb-2">Leading providers</p>
+        <p className="eyebrow mb-2">Provider evidence</p>
         <h2 id="leading-providers-title" className="text-xl">Provider, product and differentiator</h2>
         <ul className="mt-4 grid list-none gap-3 p-0 md:grid-cols-2">
-          {viewRanking.slice(0, 10).map((provider) => {
+          {viewRanking.map((provider) => {
             const source = sourceBySlug.get(provider.slug)!;
             return <li key={provider.slug} className="rounded-lg border border-[var(--ink-200,#e8ebef)] p-4 text-sm leading-6">
               <a className="font-semibold underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a>
@@ -110,19 +110,19 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
       <section className="mb-10 overflow-hidden rounded-lg border border-[var(--ink-300,#d5d9df)]" aria-labelledby="comparison-summary-title">
         <div className="border-b border-[var(--ink-200,#e8ebef)] bg-white px-5 py-4">
           <p className="eyebrow mb-1">Comparison summary</p>
-          <h2 id="comparison-summary-title" className="text-xl">Leading {inSentence(SHORTLIST_VIEWS[selectedView].label)} at a glance</h2>
+          <h2 id="comparison-summary-title" className="text-xl">Evidence for {inSentence(SHORTLIST_VIEWS[selectedView].label)} at a glance</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
             <caption className="sr-only">Comparative overview of {viewRanking.length} {inSentence(SHORTLIST_VIEWS[selectedView].label)}, updated {verified}</caption>
             <thead className="bg-[var(--ink-50,#f6f8fa)]">
-              <tr>{["Rank and provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
+              <tr>{["Provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
             </thead>
             <tbody>
-              {viewRanking.slice(0, 10).map((provider) => {
+              {viewRanking.map((provider) => {
                 const source = sourceBySlug.get(provider.slug)!;
                 return <tr key={provider.slug} className="align-top even:bg-[var(--ink-50,#f8f9fa)]">
-                  <td className="border-b px-4 py-3 font-medium"><span className="mr-2 text-[var(--ink-500)]">{provider.rank}</span><a className="underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a></td>
+                  <td className="border-b px-4 py-3 font-medium"><a className="underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a></td>
                   <td className="border-b px-4 py-3">{provider.category}</td>
                   <td className="border-b px-4 py-3">{source.product_focus || "Product names are listed in the full profile."}</td>
                   <td className="border-b px-4 py-3">{provider.best_fit_for[0] || provider.shortlist_summary}</td>
@@ -222,15 +222,15 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
           <p className="eyebrow mb-2">2026 market answer</p>
           <h2 id="market-view-title" className="text-xl">{SHORTLIST_VIEWS[selectedView].title}</h2>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--ink-700)]">{SHORTLIST_VIEWS[selectedView].answer}</p>
-          <p className="mt-2 text-xs text-[var(--ink-500)]">{viewRanking.length} eligible providers. Reviewed {verified}. View contract {SHORTLIST_VIEW_CONTRACT_VERSION}.</p>
+          <p className="mt-2 text-xs text-[var(--ink-500)]">{viewRanking.length} providers in this evidence view. Reviewed {verified}. View contract {SHORTLIST_VIEW_CONTRACT_VERSION}.</p>
         </div>
       </section>
 
       {!listFirst && listBlocks}
 
       <figure className="mb-10 rounded-lg border border-[var(--ink-200,#e8ebef)] p-4">
-        <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Comparison chart for the leading ${inSentence(SHORTLIST_VIEWS[selectedView].label)}, ranked by the Netify governed evidence score`} className="h-auto w-full" />
-        <figcaption className="mt-2 text-xs text-[var(--ink-600)]">Leading providers by the selected governed evidence score. Use the table above for the underlying decision fields.</figcaption>
+        <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Alphabetical evidence directory for ${inSentence(SHORTLIST_VIEWS[selectedView].label)}`} className="h-auto w-full" />
+        <figcaption className="mt-2 text-xs text-[var(--ink-600)]">Provider evidence by the selected governed evidence score. Use the table above for the underlying decision fields.</figcaption>
       </figure>
 
       <section className="mt-20">

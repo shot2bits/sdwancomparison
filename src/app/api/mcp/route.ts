@@ -86,7 +86,7 @@ const ESTATE_RESOURCES = [
     name: "sase-shortlist",
     title: "The SASE and SD-WAN provider shortlist, machine twin",
     description:
-      "The flagship providers dataset: 30 vendors graded on 40 evidenced capabilities with the default ranking, the scoring model, and the callable tools to compute bespoke shortlists. Same content as netify.co.uk/sase/shortlist/. CC BY 4.0 with attribution to Netify.",
+      "The flagship providers dataset: 30 vendors graded on 40 evidenced capabilities with public source evidence and callable tools; computed fit unlocks after verified project publication. Same content as netify.co.uk/sase/shortlist/. CC BY 4.0 with attribution to Netify.",
   },
   {
     path: "/demand/data.json",

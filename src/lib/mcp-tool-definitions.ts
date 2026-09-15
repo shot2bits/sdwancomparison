@@ -117,7 +117,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "explain_shortlist",
     description:
-      "Compare two named vendors using the public balanced research baseline and sourced differences. Personalised criteria are not applied; those results require a published project. Also states plainly where the score gap is too small to be a real difference between vendors.",
+      "Compare two named vendors using public source grades. No computed scores, ranks or winners are returned. Computed fit requires an authorised published project.",
     inputSchema: {
       type: "object",
       properties: {

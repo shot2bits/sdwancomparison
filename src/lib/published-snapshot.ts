@@ -195,6 +195,7 @@ export type PublishedSnapshot = {
   invited_vendors?: { slug: string; name: string; supplier_url: string }[];
   /** Exact provider records and revision identities used for this
    *  publication. Optional for snapshots written before this contract. */
+  computed_matches?: Array<{ slug: string; rank: number; score: number }>;
   provider_evidence?: Array<{
     slug: string;
     name: string;
@@ -205,6 +206,10 @@ export type PublishedSnapshot = {
   }>;
   provider_provenance?: {
     evaluated_provider_count?: number;
+    eligible_provider_count?: number;
+    evaluated_at?: string;
+    matching_rules_version?: string;
+    evaluation?: Array<{ slug: string; eligible: boolean; reasons: string[] }>;
     shortlist_contract_version: string;
     provider_contract_version: string;
     dataset_versions: string[];

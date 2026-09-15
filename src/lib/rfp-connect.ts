@@ -42,6 +42,7 @@ export async function inviteSupplier(
     vendor_name: vendor.name,
     token: newId("stok"),
     status: "invited",
+    delivery: { state: "not_attempted", updated_at: now },
     messages: intro
       ? [{ id: newId("msg"), from: "buyer", type: "intro", body: intro, payload: {}, created: now, read: false }]
       : [],

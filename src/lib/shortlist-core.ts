@@ -355,7 +355,10 @@ export type VendorVerdict = {
   uk_basis: string;
 };
 
+export const MATCHING_RULES_VERSION = "shortlist-matching/2026-09-15.1";
+
 export type ShortlistResult = {
+  evaluation: Array<{ slug: string; eligible: boolean; reasons: string[] }>;
   input: ShortlistInput;
   criteria_summary: string;
   considered: number;
@@ -715,6 +718,7 @@ export function buildShortlist(
   return {
     input,
     criteria_summary: describeCriteria(input, featureNames),
+    evaluation: verdicts.map(v => ({ slug: v.slug, eligible: v.eligible, reasons: [...v.gating_failures] })),
     considered: vendors.length,
     excluded: excluded.length,
     shortlist,
@@ -816,7 +820,7 @@ export type ComparisonResult = {
   names: Record<string, string>;
   meta: Record<
     string,
-    { category: string; deployment_speed: DeploymentSpeed; cost_model: string; score: number; website: string; marketplace_url: string | null }
+    { category: string; deployment_speed: DeploymentSpeed; cost_model: string; website: string; marketplace_url: string | null }
   >;
   groups: CompareGroup[];
   wins: Record<string, string[]>;
@@ -837,10 +841,6 @@ export function buildComparison(
     .map((s) => vendors.find((v) => v.slug === s))
     .filter((v): v is ShortlistVendor => Boolean(v));
   if (chosen.length < 2) return null;
-
-  const balanced = buildShortlist(vendors, { shortlist_size: 30 }, {});
-  const scoreOf = (slug: string) =>
-    balanced.shortlist.find((x) => x.slug === slug)?.score ?? 0;
 
   const groups: CompareGroup[] = [];
   const categories = Array.from(new Set(featureMeta.map((f) => f.category)));
@@ -894,26 +894,12 @@ export function buildComparison(
     ],
   });
 
-  // Per-feature wins (clear point advantages on the 40-feature matrix)
-  const wins: Record<string, string[]> = Object.fromEntries(chosen.map((v) => [v.slug, []]));
+  // Compatibility fields remain empty: public comparisons show source grades,
+  // never inferred winners or a computed recommendation.
+  const wins: Record<string, string[]> = Object.fromEntries(chosen.map(v => [v.slug, []]));
   const even: string[] = [];
-  for (const f of featureMeta) {
-    const pts = chosen.map((v) => ({ slug: v.slug, p: STATUS_POINTS[v.capabilities[f.id] ?? "unknown"] }));
-    const max = Math.max(...pts.map((x) => x.p));
-    const leaders = pts.filter((x) => x.p === max);
-    if (leaders.length === 1 && max > 0) {
-      wins[leaders[0].slug].push(f.name);
-    } else {
-      even.push(f.name);
-    }
-  }
-
-  const names = Object.fromEntries(chosen.map((v) => [v.slug, v.name]));
-  const summary = `${chosen
-    .map((v) => `${v.name} scores ${scoreOf(v.slug)}`)
-    .join("; ")} on the Netify 40-feature balanced matrix. ${chosen
-    .map((v) => `${v.name} leads on ${wins[v.slug].length} features`)
-    .join("; ")}; ${even.length} features are level.`;
+  const names = Object.fromEntries(chosen.map(v => [v.slug, v.name]));
+  const summary = "Source evidence shown side by side. Publish a verified project to unlock computed provider fit and rankings.";
 
   return {
     slugs: chosen.map((v) => v.slug),
@@ -925,7 +911,6 @@ export function buildComparison(
           category: v.category,
           deployment_speed: v.deployment_speed,
           cost_model: v.cost_model,
-          score: scoreOf(v.slug),
           website: v.website,
           marketplace_url: v.marketplace_url,
         },

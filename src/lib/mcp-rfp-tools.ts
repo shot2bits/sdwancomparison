@@ -258,6 +258,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
         const frozen = evidence.get(provider.slug);
         return {
           rank: index + 1,
+          score: snapshot.computed_matches?.find(v => v.slug === provider.slug)?.score ?? null,
           slug: provider.slug,
           name: provider.name,
           provider_id: frozen?.provider_id ?? null,

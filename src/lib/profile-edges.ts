@@ -8,14 +8,10 @@
  * the same shortlist engine that renders those pages, close peers from
  * the vendor group taxonomy, research from the mentions dataset.
  */
-import { BEST_PAGES } from "@/lib/best-pages";
 import { getPairsFor } from "@/lib/compare-pages";
 import { getMentionsFor, type ResearchMention } from "@/lib/mentions";
-import { buildShortlist } from "@/lib/shortlist-core";
 import {
-  FEATURE_NAMES,
   getAllVendors,
-  getShortlistDataset,
   getVendorGroup,
 } from "@/lib/vendors";
 
@@ -27,14 +23,8 @@ export type PairLink = { slug: string; otherSlug: string; otherName: string };
  *  with its rank on each. Runs the pages' own engine, so the edge can
  *  never claim an appearance the page does not render. */
 export function getBestAppearances(vendorSlug: string): BestAppearance[] {
-  const dataset = getShortlistDataset();
-  const out: BestAppearance[] = [];
-  for (const page of BEST_PAGES) {
-    const result = buildShortlist(dataset, page.input, FEATURE_NAMES);
-    const hit = result.shortlist.find((v) => v.slug === vendorSlug);
-    if (hit) out.push({ slug: page.slug, title: page.title, rank: hit.rank });
-  }
-  return out.sort((a, b) => a.rank - b.rank);
+  void vendorSlug;
+  return []; // Public profile navigation must not imply a computed fit ranking.
 }
 
 /** Head-to-heads involving the supplier, labelled by the other side. */

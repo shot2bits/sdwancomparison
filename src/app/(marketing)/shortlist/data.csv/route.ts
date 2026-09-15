@@ -1,5 +1,4 @@
-import { buildShortlist, DEFAULT_INPUT } from '@/lib/shortlist-core';
-import { FEATURE_NAMES } from '@/lib/vendors';
+import { PUBLIC_EVIDENCE_CONTRACT } from "@/lib/public-provider-evidence";
 import { getLiveShortlistDataset } from '@/lib/live-shortlist';
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from '@/lib/governed-provider-catalogue';
 import { createHash } from 'node:crypto';
@@ -13,30 +12,25 @@ function csv(value: unknown): string {
 export async function GET(request: Request) {
   const live = await getLiveShortlistDataset();
   const view = parseShortlistMarketView(new URL(request.url).searchParams.get('view'));
-  const ranked = view === 'all' ? buildShortlist(
-      live.vendors,
-      { ...DEFAULT_INPUT, shortlist_size: live.vendors.length },
-      FEATURE_NAMES,
-    ).shortlist : buildShortlistMarketView(live.vendors, view);
+  const ranked = buildShortlistMarketView(live.vendors, view);
   const sourceBySlug = new Map(live.vendors.map((provider) => [provider.slug, provider]));
   const lastModified = live.vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
   const headings = [
-    'contract_version', 'market_view_contract_version', 'market_view', 'generated_at', 'rank', 'slug', 'name', 'provider_type', 'score',
+    'public_evidence_contract', 'contract_version', 'market_view_contract_version', 'market_view', 'generated_at', 'slug', 'name', 'provider_type',
     'summary', 'products', 'evidence_source_count', 'reviewed_at', 'profile_url',
   ];
   const rows = ranked.map((provider) => {
     const source = sourceBySlug.get(provider.slug);
     const generatedAt = new Date(`${lastModified}T00:00:00.000Z`).toISOString();
     return [
+    PUBLIC_EVIDENCE_CONTRACT,
     GOVERNED_SHORTLIST_CONTRACT_VERSION,
     SHORTLIST_VIEW_CONTRACT_VERSION,
     view,
     generatedAt,
-    provider.rank,
     provider.slug,
     provider.name,
     provider.category,
-    provider.score,
     provider.shortlist_summary,
     source?.product_focus ?? '',
     source?.evidence_source_count ?? 0,
@@ -52,6 +46,7 @@ export async function GET(request: Request) {
     'Content-Disposition': 'inline; filename="netify-sase-sd-wan-shortlist.csv"',
     'Last-Modified': new Date(lastModified).toUTCString(),
     'ETag': etag,
+    'Cache-Control': 'no-store',
   };
   if (request.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers });
 

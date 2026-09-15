@@ -58,6 +58,10 @@ const nextConfig: NextConfig = {
   // canonicals, which all point at https://netify.co.uk/sase/*.
   async headers() {
     return [
+      { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "private, no-store" }] },
+      { source: "/shortlist/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
+      { source: "/best/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
+      { source: "/alternatives/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       {
         source: "/:path*",
         headers: [{ key: "X-Robots-Tag", value: "index, follow" }],

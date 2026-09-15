@@ -1,9 +1,7 @@
 import {
-  buildShortlist,
   DEFAULT_INPUT,
   type ShortlistInput,
   type ShortlistVendor,
-  type VendorVerdict,
 } from "@/lib/shortlist-core";
 import featureDefinitions from "@data/feature-definitions.json";
 
@@ -36,14 +34,14 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   all: {
     label: "All providers",
     title: "All SD-WAN and SASE providers",
-    answer: "All 30 researched providers are ranked against the same 40-capability evidence model.",
+    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
     input: {},
     eligible: () => true,
   },
   "sd-wan-vendors": {
     label: "SD-WAN vendors",
     title: "SD-WAN vendors compared",
-    answer: "This view ranks technology vendors with public evidence for an encrypted SD-WAN overlay and gives extra weight to path selection, application routing, traffic control, cloud access and resilience.",
+    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
     input: {
       required_features: ["f09_encrypted_overlay_fabric"],
       preferred_features: ["f10_dynamic_path_selection", "f12_application_aware_routing", "f13_qos_and_traffic_shaping", "f18_cloud_on_ramp", "f25_high_availability_design"],
@@ -54,7 +52,7 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   "sase-vendors": {
     label: "SASE vendors",
     title: "SASE vendors compared",
-    answer: "This view ranks technology vendors with public SASE evidence and gives extra weight to ZTNA, secure web gateway, CASB, data loss prevention and centralised orchestration.",
+    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
     input: {
       preferred_features: ["f28_full_sase_platform", "f30_zero_trust_network_access", "f31_secure_web_gateway", "f32_casb_capability", "f33_data_loss_prevention", "f36_centralised_orchestration"],
       weight_preset: "security_led",
@@ -64,7 +62,7 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   "managed-sd-wan": {
     label: "Managed SD-WAN providers",
     title: "Managed SD-WAN providers compared",
-    answer: "This view ranks providers with public evidence for both managed service delivery and an encrypted SD-WAN overlay, with extra weight on migration, last-mile and lifecycle management.",
+    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
     input: {
       service_model: "managed",
       required_features: ["f01_fully_managed_service", "f09_encrypted_overlay_fabric"],
@@ -89,14 +87,8 @@ export function inputForShortlistMarketView(view: ShortlistMarketView): Shortlis
   };
 }
 
-export function buildShortlistMarketView(vendors: ShortlistVendor[], view: ShortlistMarketView): VendorVerdict[] {
-  const definition = SHORTLIST_VIEWS[view];
-  const eligible = vendors.filter(definition.eligible);
-  return buildShortlist(
-    eligible,
-    { ...inputForShortlistMarketView(view), shortlist_size: eligible.length },
-    FEATURE_NAMES,
-  ).shortlist;
+export function buildShortlistMarketView(vendors: ShortlistVendor[], view: ShortlistMarketView): ShortlistVendor[] {
+  return vendors.filter(SHORTLIST_VIEWS[view].eligible).sort((a,b) => a.name.localeCompare(b.name));
 }
 
 export function firstUnconfirmedDecision(provider: ShortlistVendor): string {

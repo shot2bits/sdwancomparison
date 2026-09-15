@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import { kvRaw } from "@/lib/rfp-store";
 import { currentBuyerFacts, currentPublicBrief } from "@/lib/current-buyer-facts";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
@@ -7,7 +9,7 @@ import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED_ACTION, ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { inviteSupplier, vendorBySlug } from "@/lib/rfp-connect";
 import { regionHintFromEmail } from "@/lib/region-hint";
-import { buildShortlist } from "@/lib/shortlist-core";
+import { buildShortlist, MATCHING_RULES_VERSION } from "@/lib/shortlist-core";
 import { FEATURE_NAMES } from "@/lib/vendors";
 import { getStrictLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 import { SITE_URL } from "@/lib/structured-data";
@@ -532,7 +534,7 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
       ...(snapshot.public_projection.opportunity_id ? { opportunity_id: snapshot.public_projection.opportunity_id } : {}),
       ...(snapshot.public_projection.url ? { url: snapshot.public_projection.url } : {}),
     },
-    market_report: snapshot.market_report,
+    market_report: { ...snapshot.market_report, matched: { ...snapshot.market_report.matched, total_evaluated_market: snapshot.provider_provenance?.evaluated_provider_count ?? null } },
     matched_vendors: matchedVendorsReplay,
   };
 }
@@ -664,6 +666,17 @@ export function minimumContentQuestionCount(project: ProjectDetails): number {
 }
 
 export async function executePublish(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
+  const key = `rfp:${project.id}:publication_lock`;
+  const owner = randomUUID();
+  // Longer than this application's request lifetime; compare-and-delete cannot release another owner.
+  if (await kvRaw(["SET", key, owner, "NX", "EX", 600]) !== "OK") {
+    throw new Error("Publication is already in progress. Reload your project before retrying.");
+  }
+  try { return await executePublishLocked(project, sessionEmail, opts); }
+  finally { await kvRaw(["EVAL", "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end", 1, key, owner]); }
+}
+
+async function executePublishLocked(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
   // IDEMPOTENCY (Robert's Phase 2 brief): checked first, before any gate or
   // side effect. If this exact request (same governed content, same
   // options) already completed a successful publish, this is a double-
@@ -867,7 +880,8 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     };
     const shortlist = buildShortlist(live.vendors, matchInput, FEATURE_NAMES);
     const rankedFill = shortlist.shortlist.map((vendor) => vendor.slug).filter((slug) => !excluded.has(slug));
-    const inviteSlugs = [...new Set([...pinSlugs, ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
+    const eligibleSlugs = new Set(shortlist.evaluation.filter(v => v.eligible).map(v => v.slug));
+    const inviteSlugs = [...new Set([...pinSlugs.filter(slug => eligibleSlugs.has(slug)), ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
     const revisionBySlug = new Map(live.providerRevisions.map((revision) => [revision.slug, revision]));
     const vendorById = new Map(live.vendors.map((vendor) => [vendor.slug, vendor]));
     const evidenceSlugs = [...new Set([...shortlist.shortlist.map((vendor) => vendor.slug), ...inviteSlugs])];
@@ -888,8 +902,13 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       ...attempt,
       invitation_plan: inviteSlugs.map((slug) => ({ slug, name: vendorById.get(slug)?.name ?? slug })),
       provider_evidence: providerEvidence,
+      computed_matches: shortlist.shortlist.map(v => ({ slug: v.slug, rank: v.rank, score: v.score })),
       provider_provenance: {
         evaluated_provider_count: live.vendors.length,
+        eligible_provider_count: shortlist.considered - shortlist.excluded,
+        evaluated_at: shortlist.generated_at,
+        matching_rules_version: MATCHING_RULES_VERSION,
+        evaluation: shortlist.evaluation,
         shortlist_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
         provider_contract_version: live.providerContractVersion,
         dataset_versions: live.datasetVersions,
@@ -1249,6 +1268,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       matched_vendors: matchedVendorsFrozen,
       invited_vendors: invited,
       provider_evidence: sealedProviderEvidence,
+      computed_matches: attempt.computed_matches,
       provider_provenance: attempt.provider_provenance,
       provider_match_input: attempt.match_input,
       accepted_assumptions: market_report.assumptions,

@@ -5,7 +5,7 @@
 
 import { publicShortlistPreview } from "@/lib/public-shortlist";
 import { FEATURES, FEATURE_NAMES, getVendor, getAllVendorSlugs } from "@/lib/vendors";
-import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
+import { buildComparison, DEFAULT_INPUT, encodeScenario, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
 import { applyComparisonHandoff } from "@/lib/comparison-handoff";
 import { SITE_URL } from "@/lib/structured-data";
 import { getDemandIndex } from "@/lib/demand-index";
@@ -465,55 +465,9 @@ export function explainShortlist(args: unknown, shortlist?: ShortlistVendor[]): 
   if (!known.includes(slugA) || !known.includes(slugB)) {
     return { error: `Give two known vendor slugs as a and b. Unknown: ${[slugA, slugB].filter((s) => !known.includes(s)).join(", ") || "(none given)"}. Call list_sase_vendors.` };
   }
-  const result = buildShortlist(shortlist ?? [], a.criteria ?? {}, FEATURE_NAMES);
-  // buildShortlist numbers the shortlist and leaves near misses at rank 0. A
-  // model reading rank 0 reports the supplier as ranked zero rather than absent,
-  // which is worse than saying nothing, so placement is stated explicitly and
-  // rank is null whenever the supplier is not on the list. Caught live 29 Jul.
-  const place = (slug: string) => {
-    const onList = result.shortlist.find((x) => x.slug === slug);
-    if (onList) return { rec: onList, rank: onList.rank as number | null, placement: "in_shortlist" };
-    const near = result.near_misses.find((x) => x.slug === slug);
-    if (near) return { rec: near, rank: null, placement: near.eligible ? "eligible_but_outside_shortlist" : "excluded_by_criteria" };
-    return { rec: undefined, rank: null, placement: "not_returned_for_these_criteria" };
-  };
-  const pA = place(slugA), pB = place(slugB);
-  const rA = pA.rec, rB = pB.rec;
-  const vA = getVendor(slugA), vB = getVendor(slugB);
-  const fA = factsOf(vA), fB = factsOf(vB);
-  const regA = new Map(registerOf(vA).map((e) => [e.n, e])), regB = new Map(registerOf(vB).map((e) => [e.n, e]));
-
-  const differences = Object.keys(fA)
-    .filter((k) => fB[k] && fA[k].value !== fB[k].value)
-    .map((k) => ({
-      fact: k,
-      [slugA]: {
-        value: fA[k].value, quote: fA[k].quote || null,
-        source: (fA[k].evidence ?? []).map((n) => regA.get(n)?.url).filter(Boolean)[0] ?? null,
-        confidence: fA[k].confidence,
-      },
-      [slugB]: {
-        value: fB[k].value, quote: fB[k].quote || null,
-        source: (fB[k].evidence ?? []).map((n) => regB.get(n)?.url).filter(Boolean)[0] ?? null,
-        confidence: fB[k].confidence,
-      },
-    }));
-
   return {
-    criteria: result.input,
-    shortlist_size: result.shortlist.length,
-    a: { slug: slugA, name: vA.name, rank: pA.rank, placement: pA.placement, score: rA?.score ?? null, eligible: rA?.eligible ?? null, gating_failures: rA?.gating_failures ?? [] },
-    b: { slug: slugB, name: vB.name, rank: pB.rank, placement: pB.placement, score: rB?.score ?? null, eligible: rB?.eligible ?? null, gating_failures: rB?.gating_failures ?? [] },
-    sourced_differences: differences,
-    differences_count: differences.length,
-    scoring_note: result.methodology_note,
-    honest_limit:
-      "The score is a weighted average across 40 capability grades. Sixteen of those forty no longer separate this market, so a score gap of a point or two is not a meaningful difference between vendors. The sourced differences above are the ones that carry evidence behind them, and they are what should decide a shortlist.",
-    verified_on: vA.last_verified,
-    attribution: attributionFor(vA.last_verified),
-    _meta: {
-      canonicalUrl: `${SITE_URL}/compare/${slugA}-vs-${slugB}`,
-      note: "Every value in sourced_differences carries a quoted sentence and the page it came from, so an answer can attribute rather than assert.",
-    },
+    requires_publication: true,
+    evidence: buildComparison(shortlist ?? [], [slugA, slugB], FEATURES),
+    next_step: "Use get_unlocked_matches with an authorised published project for computed fit and rankings.",
   };
 }

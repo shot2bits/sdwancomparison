@@ -1,6 +1,7 @@
+import { publicProviderEvidence } from "@/lib/public-provider-evidence";
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
-import { FEATURE_NAMES, getShortlistDataset, getAllVendors } from "@/lib/vendors";
-import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
+import { getShortlistDataset, getAllVendors } from "@/lib/vendors";
+import { encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import { deriveContinuationSector } from "@/lib/continuation/derive";
 import { continuationForTwin } from "@/lib/continuation/types";
 import { SITE_URL } from "@/lib/structured-data";
@@ -19,14 +20,14 @@ export async function GET(_req: Request, ctx: Ctx) {
   const page = getBestPage(slug);
   if (!page) return Response.json({ error: "Unknown page" }, { status: 404 });
 
-  const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
+  const result = publicProviderEvidence(getShortlistDataset(), page.input);
   /* DEF wave one: the twin carries the same continuation the page renders,
      or omits the key entirely when derivation returns null. One truth. */
   const cont = deriveContinuationSector({
     sectorKey: page.input.sector as string | undefined,
     sectorLabel: page.input.sector ? SECTOR_LABELS[page.input.sector] : undefined,
     pageTitle: page.title,
-    pins: result.shortlist.slice(0, 5).map((v) => v.slug),
+    pins: [],
   });
   return Response.json(
     {
@@ -44,7 +45,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       interactive_equivalent: `${SITE_URL}/shortlist/?${encodeScenario(result.input)}`,
       result,
       faqs: page.faqs,
-      citation: `Cite as: Netify ranked shortlist, ${page.title}, ${SITE_URL}/best/${page.slug}`,
+      citation: `Cite as: Netify provider evidence, ${page.title}, ${SITE_URL}/best/${page.slug}`,
       ...(cont ? { continuation: continuationForTwin(cont) } : {}),
     },
     { headers: { "X-Robots-Tag": "noindex" } },

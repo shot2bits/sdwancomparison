@@ -10,7 +10,7 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Who are the leading SD-WAN providers?",
-    a: "The SD-WAN vendor view ranks the current governed records using network-led criteria. The order changes when a buyer adds required regions, managed service delivery, cloud platforms or individual capabilities.",
+    a: "The SD-WAN vendor view lists public provider evidence alphabetically. Computed fit against your operating model, regions and requirements unlocks after verified project publication.",
   },
   {
     q: "Is SD-WAN obsolete?",
@@ -22,11 +22,11 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Who are the leading SASE vendors?",
-    a: "The SASE vendor view ranks providers with public SASE, ZTNA or secure web gateway evidence. Buyers should compare the networking and security components separately before accepting a single-vendor claim.",
+    a: "The SASE vendor view lists providers with public SASE, ZTNA or secure web gateway evidence in alphabetical order. Buyers should compare the networking and security components separately before accepting a single-vendor claim.",
   },
   {
     q: "How does the shortlist builder rank vendors?",
-    a: "The Netify shortlist builder ranks each and every provider based on their capabilities to deliver 40 different in-built features, alongside the likes of regional coverage, cloud support, AI capabilities, resilience and deployment speed, all of which is drawn from information we've been able to publicly source or find evidence for.",
+    a: "Public comparison pages show source grades and alphabetical provider lists. After verified publication, the private matching engine evaluates your requirements against the current catalogue and freezes its matching rules, evidence, ranks and scores with that publication.",
   },
   {
     q: "Can I share or save my shortlist?",
