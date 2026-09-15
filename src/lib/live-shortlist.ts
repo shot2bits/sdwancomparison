@@ -103,8 +103,9 @@ function evidenceStatus(records: Array<EvidenceState | undefined>): CapabilitySt
 }
 
 function namedStatus(records: Record<string, EvidenceState>, names: string[]): CapabilityStatus {
-  const wanted = names.map((name) => name.toLowerCase());
-  return evidenceStatus(Object.entries(records).filter(([name]) => wanted.some((item) => name.toLowerCase().includes(item))).map(([, value]) => value));
+  const normalize = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const wanted = names.map(normalize);
+  return evidenceStatus(Object.entries(records).filter(([name]) => wanted.some((item) => (` ${normalize(name)} `).includes(` ${item} `))).map(([, value]) => value));
 }
 
 function combinedSaseStatus(record: ProviderMatchRecord): CapabilityStatus {
@@ -168,8 +169,8 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     }));
     provider.evidence_coverage_pct = Object.values(provider.capabilities).filter((state) => state !== "unknown").length / FEATURES.length;
 
-    provider.regions = Object.fromEntries(REGION_KEYS.map((key) => [key, namedStatus(record.regions, REGION_TERMS[key])])) as ShortlistVendor["regions"];
-    provider.sectors = Object.fromEntries(SECTOR_KEYS.map((key) => [key, namedStatus(record.sectors, SECTOR_TERMS[key])])) as ShortlistVendor["sectors"];
+    provider.regions = Object.fromEntries(REGION_KEYS.map((key) => [key, namedStatus(record.regions, [key, ...REGION_TERMS[key]])])) as ShortlistVendor["regions"];
+    provider.sectors = Object.fromEntries(SECTOR_KEYS.map((key) => [key, namedStatus(record.sectors, [key, ...SECTOR_TERMS[key]])])) as ShortlistVendor["sectors"];
     provider.supported_clouds = Object.fromEntries(CLOUD_KEYS.map((key) => [key, targetBuyerStatus(record.integration_names, key === "gcp" ? ["google cloud", "gcp"] : key === "azure" ? ["azure"] : key === "aws" ? ["aws", "amazon web services"] : key === "oracle_cloud" ? ["oracle cloud"] : ["alibaba cloud"])])) as ShortlistVendor["supported_clouds"];
     provider.ai_capability = {
       ai_driven_operations: evidenceStatus(["anomaly_detection", "automated_policy_recommendation", "automated_remediation", "capacity_path_optimisation", "root_cause_analysis"].map((code) => record.capabilities[code])),

@@ -62,6 +62,7 @@ export type PublicationAttempt = {
     record: ShortlistVendor;
   }>;
   provider_provenance?: {
+    evaluated_provider_count?: number;
     shortlist_contract_version: string;
     provider_contract_version: string;
     dataset_versions: string[];

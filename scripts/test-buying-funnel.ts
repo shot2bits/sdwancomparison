@@ -8,6 +8,7 @@ import {analyticsPath,analyticsReferrer,analyticsProps} from '../src/lib/analyti
 assert.equal(analyticsPath('https://netify.co.uk/sase/rfp-builder/private-id/?token=secret'),'\/sase/rfp-builder/');
 assert.equal(analyticsReferrer('https://example.test/private?secret=1'),'https://example.test');
 assert.deepEqual(analyticsProps({token:'secret',requirement:'Private text',source:'mcp',provider_count:'2'}),{source:'mcp',provider_count:'2'});
+process.env.VERCEL_ENV = 'production';
 await withFakeKv(async()=>{
  const {recordMarketplaceFunnelEvent}=await import('../src/lib/marketplace-funnel');
  const {kvRaw,createSession}=await import('../src/lib/rfp-store');
@@ -21,7 +22,7 @@ await withFakeKv(async()=>{
  const admin=await createSession({role:'netify',email:'support@netify.com',vendor_slug:null});
  const response=await GET(new Request('https://example.test',{headers:{cookie:'netify_session='+admin.token}}));assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'private, no-store');
  const text=await response.text();assert(!text.includes('test_project'));assert(!text.includes('secret'));assert.equal(JSON.parse(text).counts.publication_completed,1);
- const now=Date.now();const stage={at:now-1000,event:'project_started',project_id:'one',source:'shortlist',mode:'quick_list',channel:'mcp'};
+ const now=Date.now();const stage={environment:'production',at:now-1000,event:'project_started',project_id:'one',source:'shortlist',mode:'quick_list',channel:'mcp'};
  const report=aggregateFunnel([stage,stage,{...stage,event:'publication_completed',source:'unknown'},{...stage,event:'supplier_response',channel:'web'},{...stage,at:now-29*86400000,project_id:'old'},'broken'],now);
  assert.equal(report.counts.project_started,1);assert.equal(report.counts.publication_completed,1);assert.equal(report.rows[0].source,'shortlist');assert.equal(report.rows[0].channel,'mcp');assert.equal(report.rows[0].counts.supplier_response,1);assert(!JSON.stringify(report).includes('project_id'));
  const service=await import('../src/lib/marketplace-project-session');

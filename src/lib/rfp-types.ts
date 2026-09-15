@@ -364,6 +364,7 @@ export const ProjectDetailsSchema = z.object({
    *  emails, joins no buyer index or moderation queue, and is excluded
    *  from telemetry funnels. */
   test: z.boolean().optional(),
+  activity_environment: z.enum(["production", "preview", "development", "unknown"]).optional(),
   /**
    * 2030 blueprint, Checkpoint B (17 Aug 2026): the canonical envelope's
    * OWN schema version -- distinct from `methodology_version` (the

@@ -9,7 +9,8 @@ import { shortProjectReadiness } from '../src/lib/short-project';
 
 // Only external business verification and provider database are substituted.
 // The real publication pipeline, board, snapshots, unlock and invitation persistence run against isolated KV.
-const vendors = getShortlistDataset();
+const noMatches = process.env.TEST_NO_MATCHES === "1";
+const vendors = getShortlistDataset().map(v => noMatches ? {...v, sectors: Object.fromEntries(Object.keys(v.sectors).map(key => [key,"unknown"])) as typeof v.sectors} : v);
 const live = { vendors, source: 'neon', providerContractVersion: 'provider-match-records/2.0.0', datasetVersions: ['fixture-v1'], loadedAt: new Date().toISOString(), providerRevisions: vendors.map((v) => ({ slug: v.slug, providerId: v.slug, revisionId: `revision-${v.slug}`, datasetVersion: 'fixture-v1' })) };
 const mocks: Record<string, string> = {
  'server-only': 'export {};',
@@ -33,6 +34,11 @@ await withFakeKv(async () => {
   assert.equal(await isMarketUnlocked(project.id), true);
   const { getLatestPublishedSnapshot, rfpContentSnapshot } = await import('../src/lib/published-snapshot');
   const snapshot = await getLatestPublishedSnapshot(project.id);
+  assert.equal(snapshot!.market_report.matched.total_evaluated_market, vendors.length);
+  assert.equal(snapshot!.market_report.matched.count, noMatches ? 0 : 3);
+  assert.equal(snapshot!.matched_vendor_ids.length, noMatches ? 0 : 3);
+  assert.equal(snapshot!.invited_vendor_ids.length, noMatches ? 0 : 3);
+  assert.equal(snapshot!.provider_provenance!.evaluated_provider_count, vendors.length);
   writeFileSync(`/tmp/netify-published-${mode}.json`, JSON.stringify({ project: await getProject(project.id), snapshot, result }));
   const versioned = { ...project, entrance_context: { ...project.entrance_context!, raw_input: { ...project.entrance_context!.raw_input, publication_contract: 'short-project/1' } } };
   assert.notDeepEqual(rfpContentSnapshot(versioned), rfpContentSnapshot({ ...versioned, entrance_context: { ...versioned.entrance_context, raw_input: { ...versioned.entrance_context.raw_input, timescale: 'Next year' } } }), 'deadline changes cannot replay an earlier publication');

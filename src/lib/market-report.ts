@@ -11,6 +11,7 @@
  * follow-up list, and no response time is promised anywhere.
  */
 
+import { currentBuyerFacts } from "./current-buyer-facts";
 import { estimate, type EstimateResult } from "@/lib/estimator/engine";
 import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
 import { matchSuppliers } from "@/lib/supplier-match";
@@ -30,7 +31,7 @@ export type MarketReport = {
    *  as the general market, never as this project's matches. `count` and
    *  `names` remain this project's actual ranked/filtered matches and MUST
    *  stay hidden until publication (see /api/rfp/[id]/report/route.ts). */
-  matched: { count: number; names: string[]; total_evaluated_market: number; region_assumption?: string };
+  matched: { count: number; names: string[]; total_evaluated_market: number | null; region_assumption?: string };
   /** Indicative price band, or null when the estate cannot be banded honestly. */
   estimate: {
     monthly_band_gbp: [number, number];
@@ -82,6 +83,7 @@ function usersBandFromNotes(notes: string): string | null {
 
 function estimateForProject(p: ProjectDetails): { result: EstimateResult | null; assumptions: string[] } {
   const assumptions: string[] = [];
+  const facts = currentBuyerFacts(p);
 
   // Users, in order of evidence quality (Harry's QA, RFP Builder F4: two
   // unrelated projects produced byte-identical bands because both fell to
@@ -94,7 +96,12 @@ function estimateForProject(p: ProjectDetails): { result: EstimateResult | null;
   const bandKey = usersBandFromNotes(p.buyer.notes ?? "");
   let users: number;
   let usersAssumed = false;
-  if (typeof engineEstate?.users === "number" && engineEstate.users > 0) {
+  if (facts.users !== undefined) {
+    users = facts.users;
+    assumptions.push(`User count taken from your current project document (${users} users).`);
+  } else if (facts.canonical) {
+    return { result: null, assumptions: ["No confirmed user count in the current project document; add it to obtain a modelled band."] };
+  } else if (typeof engineEstate?.users === "number" && engineEstate.users > 0) {
     users = engineEstate.users;
     assumptions.push(`User count taken from your security assessment (${users} users).`);
   } else if (staffNote) {
@@ -110,8 +117,13 @@ function estimateForProject(p: ProjectDetails): { result: EstimateResult | null;
   }
 
   // Sites: the wizard already stores a representative count.
-  const sites = p.buyer.site_count && p.buyer.site_count > 0 ? p.buyer.site_count : 5;
-  const sitesAssumed = !(p.buyer.site_count && p.buyer.site_count > 0);
+  const statedSites = facts.canonical ? facts.sites : p.buyer.site_count;
+  const sites = statedSites && statedSites > 0 ? statedSites : 5;
+  const sitesAssumed = !statedSites;
+  if (users < 50 || users > 250000) {
+    assumptions.push(`Your stated ${users} users are outside the model’s supported range of 50–250,000 users. Request supplier pricing for this estate.`);
+    return { result: null, assumptions };
+  }
   if (sitesAssumed) assumptions.push("Site count not provided; the band assumes 5 sites.");
 
   // When both estate dimensions are assumed, the figures are the Netify
@@ -156,13 +168,14 @@ function estimateForProject(p: ProjectDetails): { result: EstimateResult | null;
 function gapChecks(p: ProjectDetails): string[] {
   const gaps: string[] = [];
   const b = p.buyer;
+  const facts = currentBuyerFacts(p);
   if (!b.sector) gaps.push("No sector stated. Sector context sharpens vendor answers and reference cases.");
-  if (!b.site_count) gaps.push("No site count stated. Vendors will price more accurately with an estate size.");
+  if (!(facts.canonical ? facts.sites : b.site_count)) gaps.push("No site count stated. Vendors will price more accurately with an estate size.");
   if ((b.regions ?? []).length === 0) gaps.push("No regions stated. Coverage answers cannot be checked without them.");
   if ((b.compliance ?? []).length === 0) gaps.push("No compliance requirements listed. If any apply (PCI DSS, ISO 27001, Cyber Essentials), vendors should evidence them.");
-  if (!/Timeline|go-live|golive/i.test(b.notes ?? "")) gaps.push("No timeline stated. A target go-live focuses vendor responses.");
+  if (!(facts.canonical ? facts.timeline : /Timeline|go-live|golive/i.test(b.notes ?? ""))) gaps.push("No timeline stated. A target go-live focuses vendor responses.");
   const sections = includedSections(p);
-  const mandatory = sections.reduce((n, s) => n + s.questions.filter((q) => q.mandatory).length, 0);
+  const mandatory = p.procurement_document ? p.procurement_document.clauses.filter(c => c.mandatory).length : sections.reduce((n, s) => n + s.questions.filter((q) => q.mandatory).length, 0);
   if (mandatory === 0) gaps.push("No questions are flagged as hard requirements yet. Marking your deal-breakers improves the scoring matrix.");
   return gaps;
 }
@@ -197,8 +210,8 @@ export function buildMarketReport(p: ProjectDetails, vendors?: ShortlistVendor[]
     assumptions,
     gaps: gapChecks(p),
     document: {
-      sections: sections.length,
-      questions: sections.reduce((n, s) => n + s.questions.length, 0),
+      sections: p.procurement_document ? new Set(p.procurement_document.clauses.map(c => c.section)).size : sections.length,
+      questions: p.procurement_document?.counts.questions ?? sections.reduce((n, s) => n + s.questions.length, 0),
     },
     analyst_note: ANALYST_NOTE,
   };

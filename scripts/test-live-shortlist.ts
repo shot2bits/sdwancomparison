@@ -74,3 +74,10 @@ assert.match(csvData, /createHash\('sha256'\)/);
 assert.match(csvData, /if-none-match/);
 assert.match(mcp, /runtime_provider_source/);
 console.log("live Neon shortlist tests passed");
+
+const [canonical] = mergeNeonProviderRecords(base, [{...record, regions: { north_america: supported(), asia_pacific: supported(), uk_ireland: supported(), latin_america: {...supported(), freshness_state: 'stale'} }, sectors: {financial_services: {...supported(), evidence_strength: "strong"}} }]);
+assert.equal(canonical.regions.north_america, 'yes');
+assert.equal(canonical.regions.asia_pacific, 'yes');
+assert.equal(canonical.regions.uk_ireland, 'yes');
+assert.equal(canonical.regions.latin_america, 'unknown', 'stale evidence must not be promoted');
+assert.equal(canonical.sectors.financial_services, 'yes');

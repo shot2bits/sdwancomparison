@@ -1,3 +1,4 @@
+import { activityEnvironment } from "./activity-provenance";
 /**
  * RFP persistence on Vercel KV (Upstash REST). Edge and Node safe.
  * Degrades with a clear error when KV is not configured so builds and
@@ -102,6 +103,8 @@ export async function saveProject(
   // history. One stored read per save; pre-engine records (empty histories
   // on both sides) pass untouched, so every existing flow is unaffected.
   const existing = await getJson<ProjectDetails>(`rfp:${parsed.id}`);
+  // The creation environment is server-owned and remains unknown for legacy records.
+  parsed.activity_environment = existing ? existing.activity_environment ?? "unknown" : activityEnvironment();
   if (existing) assertHistoryExtends(existing.history ?? [], parsed.history ?? []);
   // Step 1.1 closure: on engine records, status may only move via the
   // machine; a legacy path mutating it directly is refused here.

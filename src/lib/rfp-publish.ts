@@ -1,3 +1,4 @@
+import { currentBuyerFacts, currentPublicBrief } from "@/lib/current-buyer-facts";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
 import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
@@ -184,12 +185,19 @@ export async function listRfpOnBoard(
   // RFP Builder F3: the notice said "across 5 sections" while the document
   // rendered 2, because included-but-empty sections were being counted).
   const activeSections = p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
-  const questionCount = activeSections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
-  const sectionCount = activeSections.length;
+  const questionCount = p.procurement_document?.counts.questions ?? activeSections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+  const sectionCount = p.procurement_document ? new Set(p.procurement_document.clauses.map(c => c.section)).size : activeSections.length;
+  const facts = currentBuyerFacts(p);
+  const publicBrief = currentPublicBrief(p);
+  const company = p.buyer.organisation.trim();
+  if (facts.canonical && (/@|https?:\/\//i.test(`${publicBrief.summary} ${publicBrief.timeline}`) || (company.length >= 3 && `${publicBrief.summary} ${publicBrief.timeline}`.toLowerCase().includes(company.toLowerCase())))) {
+    throw new Error("Remove company names, email addresses and website links from the public requirement and timeline before publishing.");
+  }
+  const currentSites = facts.canonical ? facts.sites ?? null : p.buyer.site_count;
   const quickListing = isShortProject(p);
   const summary = quickListing
     ? shortProjectNotice(p).summary
-    : `The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, Netify SASE Methodology v${p.methodology_version}). Vendors respond to the RFP question set with evidence; pricing stays private to the buyer.`;
+    : `${facts.canonical ? publicBrief.summary + " " : ""}The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, Netify SASE Methodology v${p.methodology_version}). Vendors respond to the RFP question set with evidence; pricing stays private to the buyer.`;
 
   // No two identical open titles on the board (Harry's Section 1 finding,
   // 28 Jul 2026): the new listing's title gains one distinguishing stated
@@ -200,7 +208,7 @@ export async function listRfpOnBoard(
   const distinctTitle = ensureDistinctNoticeTitle(
     p.title,
     {
-      sites: p.buyer.site_count ?? null,
+      sites: currentSites ?? null,
       regions: p.buyer.regions ?? [],
       created: existing?.created ?? Date.now(),
       // RFP notices list anonymously; the title's site figure follows the
@@ -218,11 +226,11 @@ export async function listRfpOnBoard(
     buyer_org: anonymousBuyerOrganisation(),
     title: distinctTitle,
     scope: boardScope(p),
-    sites: p.buyer.site_count,
+    sites: currentSites,
     regions: p.buyer.regions,
     summary,
     budget_note: existing?.budget_note ?? "",
-    timeline_note: quickListing ? shortProjectNotice(p).timeline_note : existing?.timeline_note ?? "",
+    timeline_note: publicBrief.timeline || (facts.canonical ? "" : existing?.timeline_note ?? ""),
     status: "open",
     engagement_type: "quote_room",
     auction_format: "open",
@@ -241,7 +249,7 @@ export async function listRfpOnBoard(
     buyer_size_band: p.buyer.organisation_size === "any" ? "" : p.buyer.organisation_size,
     compliance_requirements: p.buyer.compliance,
     response_mode: quickListing ? "indicative_pricing" : "full_rfp",
-    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${p.buyer.site_count ? ` across ${p.buyer.site_count} sites` : ""}. ${quickListing ? "A concise opportunity brief has been published; sign in as a verified vendor to register interest." : "A full RFP with methodology-mapped questions has been issued; sign in as a verified vendor to register interest."}`,
+    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${currentSites ? ` across ${currentSites} sites` : ""}. ${quickListing ? "A concise opportunity brief has been published; sign in as a verified vendor to register interest." : "A full RFP with methodology-mapped questions has been issued; sign in as a verified vendor to register interest."}`,
     methodology_version: p.methodology_version,
     // The instrument's true shape rides the notice (Robert's R8 ruling,
     // 28 Jul 2026): section titles and counts only, never the questions;
@@ -432,7 +440,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       `<p>Hello,</p>` +
       `<p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
       `<p><strong>What happens to your information:</strong> ${PROMISES_PARAGRAPH} The vetting standard is published at <a href="${SITE_URL}/supplier-vetting-standard/">${SITE_URL}/supplier-vetting-standard/</a>.</p>` +
-      `<p><strong>What happens next:</strong> ${invited.length} evaluated vendor${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>` +
+      (invited.length === 0 ? "<p><strong>What happens next:</strong> No suppliers have been invited. Publication is complete, but supplier responses are not guaranteed. Review your requirements and the available provider evidence in your workspace.</p>" : `<p><strong>What happens next:</strong> ${invited.length} evaluated vendor${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>`) +
       bandBlock +
       (report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : "") +
       pinnedNoteFor(p) +
@@ -836,6 +844,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // already-sealed plan and never recompute it against newer evidence.
   if (opts.list_on_board !== false && (!attempt.invitation_plan || !attempt.provider_evidence || !attempt.match_input)) {
     const live = await getStrictLiveShortlistDataset();
+    if (live.vendors.length === 0) throw new Error("The provider catalogue is empty. Publication has not been completed; retry when provider evidence is available.");
     const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
     const pinSlugs = (working.buyer.pinned_vendors ?? []).filter(Boolean);
     const excluded = new Set(
@@ -880,6 +889,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       invitation_plan: inviteSlugs.map((slug) => ({ slug, name: vendorById.get(slug)?.name ?? slug })),
       provider_evidence: providerEvidence,
       provider_provenance: {
+        evaluated_provider_count: live.vendors.length,
         shortlist_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
         provider_contract_version: live.providerContractVersion,
         dataset_versions: live.datasetVersions,
@@ -1160,10 +1170,13 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   let market_report: MarketReport;
   try {
     market_report = buildMarketReport(published, sealedProviderEvidence.map((provider) => provider.record));
+    const matchedSlugs = new Set(attempt.matched_provider_slugs ?? sealedProviderEvidence.map(provider => provider.slug));
+    const matchedEvidence = sealedProviderEvidence.filter(provider => matchedSlugs.has(provider.slug));
+    market_report.matched = { count: matchedSlugs.size, names: matchedEvidence.map(provider => provider.name), total_evaluated_market: attempt.provider_provenance?.evaluated_provider_count ?? null };
   } catch {
     market_report = {
       generated_at: Date.now(),
-      matched: { count: invited.length, names: invited.map((i) => i.name), total_evaluated_market: invited.length },
+      matched: { count: invited.length, names: invited.map((i) => i.name), total_evaluated_market: attempt.provider_provenance?.evaluated_provider_count ?? null },
       estimate: null,
       assumptions: [],
       gaps: [],

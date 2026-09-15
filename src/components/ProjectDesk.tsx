@@ -5468,7 +5468,7 @@ export default function ProjectDesk({
       {published.shortBrief.timescale && <p className="mt-2"><strong>Timescale:</strong> {published.shortBrief.timescale}</p>}
       <h3 className="mt-6 text-lg font-semibold">Your matched providers</h3>
       <p className="mt-1 text-sm">{published.frozen ? 'Saved at publication.' : 'Matches from your project record.'} {published.invited.length} providers invited directly.</p>
-      {published.matchedVendors.length ? <ul className="mt-3 divide-y">{published.matchedVendors.map((vendor) => <li key={vendor.slug} className="py-3"><strong>{vendor.name}</strong>{published.invited.some((invited) => invited.slug === vendor.slug) && <span className="ml-3 text-sm">Invited</span>}</li>)}</ul> : <p className="mt-3">No providers matched these requirements. Your published brief remains available on the board.</p>}
+      {published.matchedVendors.length ? <ul className="mt-3 divide-y">{published.matchedVendors.map((vendor) => <li key={vendor.slug} className="py-3"><strong>{vendor.name}</strong>{published.invited.some((invited) => invited.slug === vendor.slug) && <span className="ml-3 text-sm">Invited</span>}</li>)}</ul> : <p className="mt-3">No providers have a confirmed match against the recorded requirements and available evidence. Your published brief remains available on the board.</p>}
       <a className="mt-5 inline-block rounded bg-[#a84412] px-5 py-3 font-semibold text-white" href={`/sase/project/${encodeURIComponent(created.id)}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ''}`}>View project and supplier responses</a>
     </section>;
   }
@@ -6316,7 +6316,7 @@ export default function ProjectDesk({
                                 <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#110f0d" }}>
                                   {responseCount
                                     ? `${responseCount} of ${published.invited.length || responseCount} invited vendor${responseCount === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
-                                    : `Published — awaiting supplier responses.${published.invited.length > 0 ? ` ${cap(numWord(published.invited.length))} invited so far.` : ""}`}
+                                    : published.invited.length > 0 ? `Published — awaiting supplier responses. ${cap(numWord(published.invited.length))} invited so far.` : "Published with no supplier invitations. Your brief is on the board; review the requirements and available provider evidence."}
                                 </p>
                                 {Boolean(responseCount) && created?.id && (
                                   <p className="m-0 mt-1.5 text-[13px]">
