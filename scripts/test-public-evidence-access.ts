@@ -10,9 +10,10 @@ registerHooks({ resolve(s: string, c: object, next: (s: string,c: object) => {ur
  return source ? { url: `data:text/javascript,${encodeURIComponent(source)}`, shortCircuit: true } : next(s,c);
 }});
 function noScores(value: unknown): void {
+ assert.notEqual(value, 'unknown', 'public status must use not_confirmed');
  if (!value || typeof value !== 'object') return;
  for (const [key, child] of Object.entries(value)) {
-  assert.ok(!['rank','score','default_shortlist','top_providers_at_balanced_setting','ranking'].includes(key), `public key ${key}`);
+  assert.ok(!['rank','score','match_percentage','match_pct','fit_score','balanced_setting_score','default_shortlist','top_providers_at_balanced_setting','ranking'].includes(key), `public key ${key}`);
   noScores(child);
  }
 }
@@ -26,7 +27,7 @@ await withFakeKv(async () => {
  const body = await (await csv.GET(new Request('http://test/sase/shortlist/data.csv?view=all'))).text();
  assert.ok(!body.split('\r\n')[0].includes('"rank"')); assert.ok(!body.split('\r\n')[0].includes('"score"'));
  const { callMcpTool } = await import('../src/lib/mcp-tools');
- for (const [tool,args] of [['build_sase_shortlist',{required_regions:['north_america']}],['compare_vendors',{slugs:vendors.slice(0,2).map(v=>v.slug)}],['explain_shortlist',{a:vendors[0].slug,b:vendors[1].slug}]] as const) noScores(await callMcpTool(tool,args));
+ for (const [tool,args] of [['list_sase_vendors',{}],['get_sase_vendor_profile',{slug:vendors[0].slug}],['build_sase_shortlist',{required_regions:['north_america']}],['compare_vendors',{slugs:vendors.slice(0,2).map(v=>v.slug)}],['explain_shortlist',{a:vendors[0].slug,b:vendors[1].slug}]] as const) noScores(await callMcpTool(tool,args));
  const best = await import('../src/app/(marketing)/best/[slug]/data.json/route');
  const { BEST_PAGES } = await import('../src/lib/best-pages');
  noScores(await (await best.GET(req,{params:Promise.resolve({slug:BEST_PAGES[0].slug})})).json());

@@ -1,3 +1,4 @@
+import { publicEvidenceOutput } from "@/lib/public-provider-evidence";
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { FEATURES } from '@/lib/vendors';
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
   catch { return Response.json({ error: 'Invalid comparison request.' }, { status: 400, headers }); }
   const { vendors } = await getLiveShortlistDataset();
   const slugs = [...new Set(body.comparison_slugs)].filter((s) => vendors.some((v) => v.slug === s));
-  const comparison = buildComparison(vendors, slugs, FEATURES);
+  const comparison = publicEvidenceOutput(buildComparison(vendors, slugs, FEATURES));
   if (!comparison) return Response.json({ requires_publication: true, narrative: 'Select two or three named providers for a free factual comparison. For a personalised shortlist, describe and publish a short anonymous project. A full RFP is optional.', project_url: '/sase-sd-wan-rfp-builder/?journey=find_providers' }, { headers });
   const question = body.messages?.filter((m) => m.role === 'user').at(-1)?.content ?? body.prompt ?? '';
   if (!question.trim()) return Response.json({ comparison, narrative: comparison.summary }, { headers });
