@@ -69,7 +69,7 @@ const REGION_MAP: Record<string, "uk-europe" | "north-america" | "apac" | "middl
 
 function estimateForProject(p: ProjectDetails): { result: EstimateResult | null; assumptions: string[] } {
   const f = currentBuyerFacts(p);
-  const assumptions = [`Buyer facts source: ${f.source}.`];
+  const assumptions = [f.source === "buyer_fact_ledger" ? "Based on current buyer-confirmed project facts." : f.source === "legacy_document_snapshot" ? "Based on the historical saved document; original confirmation provenance is unavailable." : "Based on the legacy buyer record; confirm these details before relying on the budget."];
   if (f.users === undefined) return {result:null, assumptions:[...assumptions,"No confirmed user count is available. Confirm your licensed users or request supplier pricing; no population has been assumed."]};
   assumptions.push(`Current project population: ${f.users} users.`);
   if (f.users < 50 || f.users > 250000) return {result:null, assumptions:[...assumptions,`Your stated ${f.users} users are outside the model’s supported range of 50–250,000 users. Request supplier pricing for this estate.`]};

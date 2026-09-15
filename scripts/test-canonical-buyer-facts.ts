@@ -38,6 +38,8 @@ const legacy={...p,facts:[],procurement_document:undefined,buyer:{...p.buyer,not
 assert.equal(currentBuyerFacts(legacy).source,'legacy_buyer_record');assert.equal(currentBuyerFacts(legacy).users,150);assert.ok(buildMarketReport(legacy).estimate);
 assert.equal(buildMarketReport({...legacy,buyer:{...legacy.buyer,notes:'Replace ageing network'}}).estimate,null);
 const legacyDoc={...p,facts:[]};assert.equal(currentBuyerFacts(legacyDoc).source,'legacy_document_snapshot');assert.equal(currentBuyerFacts(legacyDoc).users,2);assert.equal(buildMarketReport(legacyDoc).estimate,null);
+const dated={...p,facts:p.facts.map(f=>f.path==='constraints.timeline'?{...f,value:'2026-11-15'}:f)};
+assert.equal(currentPublicBrief(dated).timeline,'2026-11-15','a date is not a phone number');
 const privateP={...p,facts:[...p.facts,fact('requirements.bespoke','Private Buyer Ltd needs resilient links; contact alice@private.example or https://private.example on +44 7700 900123')]};
 const publicText=currentPublicBrief(privateP).summary;assert.ok(!/Private Buyer Ltd|alice@|https:|7700|PRIVATE-DOCUMENT/.test(publicText));assert.ok(publicText.includes('resilient links'));
 writeFileSync('../facts-validation/comparison.json',JSON.stringify({document:{summary:p.procurement_document!.summary,facts:p.procurement_document!.factSnapshot,counts:currentDocumentCounts(p)},report,public_notice:brief,matching_input:projectMatchingInput(p),readiness:shortProjectReadiness(p),supported_pricing:priced.estimate},null,2));

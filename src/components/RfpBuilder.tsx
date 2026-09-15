@@ -1361,7 +1361,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       <section id="publish" ref={publishPanelRef} className={`mb-6 rounded-sm border p-4 ${published ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
         {published ? (
           <div>
-            <p className="text-base font-semibold mb-1">Published. Your RFP is with your vendors now.</p>
+            <p className="text-base font-semibold mb-1">Published. Your project and supplier invitation records are saved.</p>
             <p className="text-sm text-[var(--ink-700)]">
               {connections.length > 0 ? `${connections.filter((c) => c.viewed_at).length} of ${connections.length} vendors have viewed your RFP.` : "Invited vendors hold private response links."}{" "}
               {project.response_deadline ? `Responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left). ` : ""}
@@ -1410,7 +1410,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 )}
                 {marketReport.gaps.length > 0 && (
                   <div className="mb-2 text-sm">
-                    <p className="font-medium mb-0.5">Gaps worth closing (edit below any time; vendors always see the latest version):</p>
+                    <p className="font-medium mb-0.5">Gaps in this published revision (save and republish corrections to update what suppliers see):</p>
                     <ul className="list-disc list-inside space-y-0.5 text-[var(--ink-700)]">
                       {marketReport.gaps.map((g) => <li key={g}>{g}</li>)}
                     </ul>

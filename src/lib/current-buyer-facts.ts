@@ -57,7 +57,7 @@ export const matchingRegionKeys = (regions: string[]) => [...new Set(regions.map
 export function projectWithCurrentBuyerFacts(project: ProjectDetails): ProjectDetails {
   const f = currentBuyerFacts(project);
   if (!f.canonical) return project;
-  return {...project, buyer:{...project.buyer, sector:wizardSectorKey(f.sector ?? undefined) ?? f.sector, site_count:f.sites ?? null, regions:matchingRegionKeys(f.regions), organisation_size:f.organisation_size, product_scope:f.scope as ProjectDetails['buyer']['product_scope'], operating_model:f.operating_model as ProjectDetails['buyer']['operating_model'], compliance:f.compliance}};
+  return {...project, buyer:{...project.buyer, notes:currentPublicBrief(project).summary, sector:wizardSectorKey(f.sector ?? undefined) ?? f.sector, site_count:f.sites ?? null, regions:matchingRegionKeys(f.regions), organisation_size:f.organisation_size, product_scope:f.scope as ProjectDetails['buyer']['product_scope'], operating_model:f.operating_model as ProjectDetails['buyer']['operating_model'], compliance:f.compliance}};
 }
 
 export function currentDocumentCounts(project: ProjectDetails) {
@@ -70,8 +70,8 @@ export function currentDocumentCounts(project: ProjectDetails) {
 function redact(text: string, project: ProjectDetails) {
   let result = text;
   const company = project.buyer.organisation.trim();
-  if (company.length >= 2) result = result.replace(new RegExp(company.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'the buyer');
-  return result.replace(/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/gi,'[contact withheld]').replace(/https?:\/\/\S+|\bwww\.\S+/gi,'[website withheld]').replace(/(?:\+?\d[\d ()-]{7,}\d)/g,'[contact withheld]').replace(/No supplier requirements have been created yet[^.]*\.?/gi,'').trim();
+  if (company.length >= 2) result = result.replace(new RegExp('(?<!\\w)' + company.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '(?!\\w)','gi'),'the buyer');
+  return result.replace(/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/gi,'[contact withheld]').replace(/https?:\/\/\S+|\bwww\.\S+/gi,'[website withheld]').replace(/(?:\+?\d[\d ()-]{7,}\d)/g, value => value.replace(/\D/g,'').length >= 10 ? '[contact withheld]' : value).replace(/No supplier requirements have been created yet[^.]*\.?/gi,'').trim();
 }
 export function currentPublicBrief(project: ProjectDetails) {
   const f = currentBuyerFacts(project);

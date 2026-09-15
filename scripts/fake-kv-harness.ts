@@ -167,6 +167,12 @@ export class FakeKvStore {
         return this.setEntry(String(args[0])).has(String(args[1])) ? 1 : 0;
       case "SMEMBERS":
         return Array.from(this.setEntry(String(args[0])));
+      case "HSET": {
+        const h = this.hashEntry(String(args[0]));
+        let added = 0;
+        for (let i=1;i<args.length;i+=2) { if (!h.has(String(args[i]))) added++; h.set(String(args[i]),String(args[i+1])); }
+        return added;
+      }
       case "HINCRBY": {
         const h = this.hashEntry(String(args[0]));
         const cur = Number(h.get(String(args[1])) ?? "0");
@@ -192,11 +198,13 @@ export class FakeKvStore {
         const keys = Array.from(this.store.keys()).filter((k) => re.test(k));
         return ["0", keys];
       }
+      case "RPUSH":
       case "LPUSH": {
         const key = String(args[0]);
         const current = this.store.get(key);
         const list = current?.type === "list" ? current.value : [];
-        list.unshift(...args.slice(1).map(String));
+        if (op === "RPUSH") list.push(...args.slice(1).map(String));
+        else list.unshift(...args.slice(1).map(String));
         this.store.set(key, { type: "list", value: list });
         return list.length;
       }
