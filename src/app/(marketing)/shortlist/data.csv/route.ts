@@ -1,4 +1,4 @@
-import { PUBLIC_EVIDENCE_CONTRACT } from "@/lib/public-provider-evidence";
+import { PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_ORDER } from "@/lib/public-provider-evidence";
 import { getLiveShortlistDataset } from '@/lib/live-shortlist';
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from '@/lib/governed-provider-catalogue';
 import { createHash } from 'node:crypto';
@@ -16,14 +16,14 @@ export async function GET(request: Request) {
   const sourceBySlug = new Map(live.vendors.map((provider) => [provider.slug, provider]));
   const lastModified = live.vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
   const headings = [
-    'public_evidence_contract', 'contract_version', 'market_view_contract_version', 'market_view', 'generated_at', 'slug', 'name', 'provider_type',
+    'position', 'ordered_by', 'proven_evidence_count', 'public_evidence_contract', 'contract_version', 'market_view_contract_version', 'market_view', 'generated_at', 'slug', 'name', 'provider_type',
     'summary', 'products', 'evidence_source_count', 'reviewed_at', 'profile_url',
   ];
   const rows = ranked.map((provider) => {
     const source = sourceBySlug.get(provider.slug);
     const generatedAt = new Date(`${lastModified}T00:00:00.000Z`).toISOString();
     return [
-    PUBLIC_EVIDENCE_CONTRACT,
+    provider.position, PUBLIC_EVIDENCE_ORDER, provider.proven_evidence_count, PUBLIC_EVIDENCE_CONTRACT,
     GOVERNED_SHORTLIST_CONTRACT_VERSION,
     SHORTLIST_VIEW_CONTRACT_VERSION,
     view,

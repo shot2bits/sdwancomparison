@@ -10,14 +10,15 @@ import {
 
 const vendors = getShortlistDataset();
 assert.equal(vendors.length, 30, "the governed comparison must retain all 30 providers");
-assert.equal(SHORTLIST_VIEW_CONTRACT_VERSION, "shortlist-market-view/1.0.0");
+assert.equal(SHORTLIST_VIEW_CONTRACT_VERSION, "shortlist-market-view/2.0.0");
 
 for (const view of SHORTLIST_VIEW_KEYS) {
   const first = buildShortlistMarketView(vendors, view);
   const second = buildShortlistMarketView(vendors, view);
   assert.ok(first.length > 0, `${view} must return providers`);
   assert.deepEqual(first.map((provider) => provider.slug), second.map((provider) => provider.slug), `${view} must be deterministic`);
-  assert.deepEqual(first.map(p => p.name), first.map(p => p.name).sort((a,b) => a.localeCompare(b)), `${view} must be alphabetical`);
+  assert.deepEqual(first, buildShortlistMarketView([...vendors].reverse(), view), `${view} must ignore import order`);
+  assert.deepEqual(first.map(p=>p.position),first.map((_,i)=>i+1));
   assert.ok(first.every(p => !("rank" in p) && !("score" in p)));
 }
 

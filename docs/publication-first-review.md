@@ -46,3 +46,12 @@ Deploy from a reviewed branch/preview with the existing production configuration
 - Live canonical page passed desktop/mobile browser checks. Public shortlist HTML and live provider database (30 providers, Neon) responded successfully.
 - Post-deploy error-level log query returned no entries. This is a short smoke-test window, not continuous monitoring.
 - Production publication/email delivery was not exercised with a real buyer; no synthetic public opportunity or supplier message was created during deployment verification.
+
+## Public evidence ordering and publication boundary (15 September 2026)
+
+These are one contract: `src/lib/public-provider-evidence.ts` (`public-provider-evidence/3.0.0`). Review changes to ordering and disclosure together.
+
+- Public views retain numbered lists and captioned tables. Order by count of published capability items with source grade `yes`, descending; verification date descending (missing/invalid last); case-folded provider name ascending; slug ascending for identical names. Each capability key counts once. Partial, partner-delivered and unconfirmed grades do not count as proven. This is evidence coverage, not quality, eligibility or buyer fit. Import order, load time and scoring weights cannot affect it; changed published evidence can.
+- HTML describes the rule, JSON exposes `ordered_by` and one-based `position`, CSV exposes those columns and `proven_evidence_count`, and the public provider-list MCP tool exposes the same rule. The table columns, titles, H1s and URLs are retained. Source counts remain separate from proven capability counts.
+- No public scoring-model rank, score, match percentage, balanced-setting result or default shortlist. Consumers must use the existing authenticated published-project tools for frozen matches; removed fields have no numeric placeholders. Contract major versions identify the shape change. Public comparison clients accept `not_confirmed`, the public spelling of the legacy unconfirmed grade; source records and eligibility/freshness rules are unchanged.
+- Publication and authorisation continue to gate personalised output. Public order does not claim supplier participation, response commitments or human demand from AI retrieval counts.

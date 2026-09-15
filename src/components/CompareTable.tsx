@@ -13,6 +13,7 @@ const GRADE_CLASS: Record<string, string> = {
   managed_service_dependent: "bg-indigo-100 text-indigo-900",
   not_primary: "bg-gray-200 text-gray-600",
   unknown: "bg-gray-100 text-gray-500",
+  not_confirmed: "bg-gray-100 text-gray-500",
 };
 
 function gradeLabel(value: string): string {

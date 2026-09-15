@@ -1,3 +1,4 @@
+import { publicEvidenceProviders, PUBLIC_EVIDENCE_NOTICE } from "./public-provider-evidence";
 import {
   DEFAULT_INPUT,
   type ShortlistInput,
@@ -9,7 +10,7 @@ const FEATURE_NAMES = Object.fromEntries(
   (featureDefinitions as { features: Array<{ id: string; name: string }> }).features.map((feature) => [feature.id, feature.name]),
 );
 
-export const SHORTLIST_VIEW_CONTRACT_VERSION = "shortlist-market-view/1.0.0" as const;
+export const SHORTLIST_VIEW_CONTRACT_VERSION = "shortlist-market-view/2.0.0" as const;
 
 export const SHORTLIST_VIEW_KEYS = ["all", "sd-wan-vendors", "sase-vendors", "managed-sd-wan"] as const;
 export type ShortlistMarketView = (typeof SHORTLIST_VIEW_KEYS)[number];
@@ -34,14 +35,14 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   all: {
     label: "All providers",
     title: "All SD-WAN and SASE providers",
-    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
+    answer: PUBLIC_EVIDENCE_NOTICE,
     input: {},
     eligible: () => true,
   },
   "sd-wan-vendors": {
     label: "SD-WAN vendors",
     title: "SD-WAN vendors compared",
-    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
+    answer: PUBLIC_EVIDENCE_NOTICE,
     input: {
       required_features: ["f09_encrypted_overlay_fabric"],
       preferred_features: ["f10_dynamic_path_selection", "f12_application_aware_routing", "f13_qos_and_traffic_shaping", "f18_cloud_on_ramp", "f25_high_availability_design"],
@@ -52,7 +53,7 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   "sase-vendors": {
     label: "SASE vendors",
     title: "SASE vendors compared",
-    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
+    answer: PUBLIC_EVIDENCE_NOTICE,
     input: {
       preferred_features: ["f28_full_sase_platform", "f30_zero_trust_network_access", "f31_secure_web_gateway", "f32_casb_capability", "f33_data_loss_prevention", "f36_centralised_orchestration"],
       weight_preset: "security_led",
@@ -62,7 +63,7 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   "managed-sd-wan": {
     label: "Managed SD-WAN providers",
     title: "Managed SD-WAN providers compared",
-    answer: "Compare public provider evidence in alphabetical order. Publish a verified project to unlock computed fit and rankings.",
+    answer: PUBLIC_EVIDENCE_NOTICE,
     input: {
       service_model: "managed",
       required_features: ["f01_fully_managed_service", "f09_encrypted_overlay_fabric"],
@@ -87,11 +88,11 @@ export function inputForShortlistMarketView(view: ShortlistMarketView): Shortlis
   };
 }
 
-export function buildShortlistMarketView(vendors: ShortlistVendor[], view: ShortlistMarketView): ShortlistVendor[] {
-  return vendors.filter(SHORTLIST_VIEWS[view].eligible).sort((a,b) => a.name.localeCompare(b.name));
+export function buildShortlistMarketView(vendors: ShortlistVendor[], view: ShortlistMarketView) {
+  return publicEvidenceProviders(vendors.filter(SHORTLIST_VIEWS[view].eligible));
 }
 
 export function firstUnconfirmedDecision(provider: ShortlistVendor): string {
-  const feature = Object.entries(provider.capabilities).find(([, state]) => state === "unknown");
+  const feature = Object.entries(provider.capabilities).find(([, state]) => (state === "unknown" || state === "not_confirmed"));
   return feature ? FEATURE_NAMES[feature[0]] ?? "Commercial and delivery detail" : "Commercial and delivery detail";
 }

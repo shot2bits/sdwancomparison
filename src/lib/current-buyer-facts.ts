@@ -2,6 +2,8 @@ import type { ProjectDetails } from './rfp-types';
 import { LIST_FACT_PATHS } from './workspace/extract';
 import { wizardSectorKey, wizardRegions, type WorkspaceFact } from './workspace/draft';
 
+type BuyerFactsSource = Pick<ProjectDetails, 'facts'|'buyer'|'procurement_document'|'envelope'|'engine_data'|'entrance_context'|'title'>;
+
 export const BUYER_FACTS_CONTRACT = 'buyer-facts/2026-09-15.2';
 /** Ledger identities, including tombstones, win before provenance is considered. */
 export function confirmedBuyerLedger(facts: WorkspaceFact[]) {
@@ -11,7 +13,7 @@ export function confirmedBuyerLedger(facts: WorkspaceFact[]) {
 }
 
 /** A read projection, never another mutable summary store. No notes fallback once a ledger/document exists. */
-export function currentBuyerFacts(project: ProjectDetails) {
+export function currentBuyerFacts(project: BuyerFactsSource) {
   const ledger = project.facts ?? [];
   const hasLedger = ledger.length > 0 || Boolean(project.envelope);
   const canonical = hasLedger || Boolean(project.procurement_document);
@@ -67,17 +69,17 @@ export function currentDocumentCounts(project: ProjectDetails) {
   return {sections:sections.length, questions:sections.reduce((n,s) => n+s.questions.filter(q => q.priority !== 'optional').length,0), requirements:sections.reduce((n,s) => n+s.questions.filter(q => q.mandatory).length,0)};
 }
 
-function redact(text: string, project: ProjectDetails) {
+function redact(text: string, project: BuyerFactsSource) {
   let result = text;
   const company = project.buyer.organisation.trim();
   if (company.length >= 2) result = result.replace(new RegExp('(?<!\\w)' + company.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '(?!\\w)','gi'),'the buyer');
   return result.replace(/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/gi,'[contact withheld]').replace(/https?:\/\/\S+|\bwww\.\S+/gi,'[website withheld]').replace(/(?:\+?\d[\d ()-]{7,}\d)/g, value => value.replace(/\D/g,'').length >= 10 ? '[contact withheld]' : value).replace(/No supplier requirements have been created yet[^.]*\.?/gi,'').trim();
 }
-export function currentPublicBrief(project: ProjectDetails) {
+export function currentPublicBrief(project: BuyerFactsSource) {
   const f = currentBuyerFacts(project);
   // Whitelist buyer-confirmed intent/requirements, never quotes, source turns, private document prose or legacy notes.
   const intent = f.canonical ? [...f.business_outcomes,...f.requirements].map(v => redact(v.replace(/_/g,' '),project)).filter(Boolean).join('. ') : redact(project.buyer.notes,project);
-  const summary = [intent, f.users ? `${f.users} users in scope.` : '', f.sites ? `${f.sites} sites.` : '', f.timeline ? `Timeline: ${redact(f.timeline,project)}.` : ''].filter(Boolean).join(' ');
+  const summary = [intent && /[.!?]$/.test(intent) ? intent : intent ? intent + '.' : '', f.users ? `${f.users} users in scope.` : '', f.sites ? `${f.sites} sites.` : '', f.timeline ? `Timeline: ${redact(f.timeline,project)}.` : ''].filter(Boolean).join(' ');
   return {summary, timeline:redact(f.timeline,project), outcome:intent, title:redact(project.title,project)};
 }
 
@@ -87,4 +89,9 @@ export function currentDocumentIsConsistent(project: ProjectDetails) {
   const expected = Object.fromEntries(confirmedBuyerLedger(project.facts).map(f => [f.id,f.value]));
   const actual = project.procurement_document.factSnapshot;
   return Object.keys(expected).length === Object.keys(actual).length && Object.entries(expected).every(([key,value]) => JSON.stringify(value) === JSON.stringify(actual[key]));
+}
+
+/** Client/server brief preview from the same ledger, without a saved summary copy. */
+export function publicBriefFromFacts(facts: WorkspaceFact[], company: string) {
+  return currentPublicBrief({facts,title:'',buyer:{organisation:company,notes:'',sector:null,site_count:null,regions:[],compliance:[],organisation_size:'any',operating_model:'any',product_scope:'not_stated',pinned_vendors:[]}});
 }

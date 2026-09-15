@@ -1,4 +1,5 @@
-import { projectWithCurrentBuyerFacts } from "./current-buyer-facts";
+import { isMarketUnlocked } from "./market-unlock";
+import { currentBuyerFacts, projectWithCurrentBuyerFacts } from "./current-buyer-facts";
 import { preserveMarketplaceWorkspace, marketplaceWorkspacePayload, MarketplaceEnvelopeError } from "./marketplace-workspace-envelope";
 import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
 import { createHash, randomBytes } from "node:crypto";
@@ -164,6 +165,7 @@ export async function readMarketplaceProject(projectId: string, token: string) {
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   return {
     project_reference: project.id, revision: project.marketplace_revision, envelope_revision: project.envelope_revision,
+    buyer_facts: currentBuyerFacts(project), market_unlocked: await isMarketUnlocked(project.id),
     workspace_payload: marketplaceWorkspacePayload(project),
     expires_at: session.expires_at, buyer: projectWithCurrentBuyerFacts(project).buyer, entrance_context: project.entrance_context,
     notice: isShortProject(project) ? shortProjectNotice(project) : null,

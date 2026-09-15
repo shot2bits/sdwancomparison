@@ -167,7 +167,7 @@ export default async function BestPage({ params }: Props) {
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
-          {`Netify's ${reviewedMonth} evidence directory, alphabetically: `}
+          {`Netify's ${reviewedMonth} evidence directory, by proven capability count, verification date and name: `}
           {result.shortlist
             .map((v) => v.name)
             .join("; ")}
@@ -242,7 +242,7 @@ export default async function BestPage({ params }: Props) {
       <SourcedTable
         slugs={result.shortlist.map((v) => v.slug)}
         caption={`${page.h1.replace(/\s*\(\d{4}\)\s*$/, "")}: the evidence`}
-        intro="Source evidence in alphabetical order. Computed recommendations unlock after verified publication."
+        intro="Source evidence in published evidence order. Computed recommendations unlock after verified publication."
         ranked={false}
         id="evidence-table"
       />

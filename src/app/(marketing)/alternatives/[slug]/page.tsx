@@ -29,11 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = longTitle.length <= 56 ? longTitle : `Top ${vendor.name} alternatives (2026)`;
   return {
     title,
-    description: `Source evidence for SD-WAN and SASE alternatives to ${vendor.name} in 2026, listed alphabetically with capability grades and caveats.`,
+    description: `Source evidence for SD-WAN and SASE alternatives to ${vendor.name} in 2026, listed by proven capability count, verification date and name with capability grades and caveats.`,
     alternates: { canonical: `${SITE_URL}/alternatives/${slug}/` },
     openGraph: {
       title: `Top ${vendor.name} alternatives (2026)`,
-      description: `Source evidence for alternatives to ${vendor.name}, listed alphabetically.`,
+      description: `Source evidence for alternatives to ${vendor.name}, listed by proven capability count, verification date and name.`,
       url: `${SITE_URL}/alternatives/${slug}`,
       type: "article",
       locale: "en_GB",
@@ -56,7 +56,7 @@ export default async function AlternativesPage({ params }: Props) {
   const faqs = [
     {
       q: `What are the best alternatives to ${vendor.name}?`,
-      a: `Researched using the Netify 40-feature evidence matrix, verified ${datasetVerifiedLong()}, provider evidence is listed alphabetically. Close peers in the same category (${vendor.category}) are marked. The right alternative depends on your operating model, sector and regions, with computed fit available after verified publication.`,
+      a: `Researched using the Netify 40-feature evidence matrix, verified ${datasetVerifiedLong()}, provider evidence is listed by proven capability count, verification date and name. Close peers in the same category (${vendor.category}) are marked. The right alternative depends on your operating model, sector and regions, with computed fit available after verified publication.`,
     },
     {
       q: `Why do buyers look beyond ${vendor.name}?`,
@@ -64,7 +64,7 @@ export default async function AlternativesPage({ params }: Props) {
     },
     {
       q: "How is this evidence directory ordered?",
-      a: "Providers are listed alphabetically, with the subject vendor excluded. Capability grades remain public; computed rankings require verified project publication.",
+      a: "Providers are listed by proven capability count, verification date and name, with the subject vendor excluded. Capability grades remain public; computed rankings require verified project publication.",
     },
   ];
 
@@ -110,7 +110,7 @@ export default async function AlternativesPage({ params }: Props) {
           Compare source evidence for alternatives to {vendor.name} ({vendor.category}). Review the provider profiles and caveats. Computed fit and rankings unlock after verified project publication.
         </p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
-          {`Netify's ${datasetVerifiedMonth()} evidence directory lists alternatives alphabetically: `}
+          {`Netify's ${datasetVerifiedMonth()} evidence directory lists alternatives by proven capability count, verification date and name: `}
           {result.shortlist.map((v) => v.name).join("; ")}.
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">
@@ -137,7 +137,7 @@ export default async function AlternativesPage({ params }: Props) {
         ranked={false}
         slugs={result.shortlist.map((v) => v.slug)}
         caption={`${vendor.name} alternatives compared on sourced evidence`}
-        intro={`How alternatives to ${vendor.name} differ on who owns the network and who runs the service. Alphabetical order.`}
+        intro={`How alternatives to ${vendor.name} differ on who owns the network and who runs the service. Evidence order: proven capability count, verification date, then name.`}
         id="evidence-table"
       />
 

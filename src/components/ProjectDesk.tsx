@@ -1,6 +1,6 @@
 "use client";
 
-import { confirmedBuyerLedger } from "@/lib/current-buyer-facts";
+import { confirmedBuyerLedger, publicBriefFromFacts } from "@/lib/current-buyer-facts";
 import { isUnrelatedBuyingInput } from "@/lib/workspace/extract";
 import {requestBrief, confirmedWorkspaceRegions, workspaceUpdatesFromBrief, type BriefFields, type DocumentPurpose, type WorkspaceProject} from "@/lib/buying-workspace-project";
 import {projectTokenKey} from "@/lib/buying-entry";
@@ -2091,7 +2091,7 @@ export default function ProjectDesk({
       if(!active)return;
       setLocalDraftStatus("idle");
       setWorkspaceEnvelopeId(id);setWorkspaceCompany(data.buyer?.organisation||'');setAdded(data.buyer?.pinned_vendors||[]);
-      setWorkspaceSessionPublished(data.marketplace_state?.publication_status==='published');
+      setWorkspaceSessionPublished(data.market_unlocked===true || data.marketplace_state?.publication_status==='published');
       const payload=data.workspace_payload ?? data.entrance_context?.raw_input?.workspace_payload;
       if(payload?.position?.rfp_depth)setRfpDepth(payload.position.rfp_depth==="detailed"?"detailed":"short");
       if(payload?.position?.entry_mode==="check"){setRfpEntryMode("check");rfpValidationCorpusRef.current=(payload.source_turns||[]).map((t:{text:string})=>t.text).join("\n\n");}
@@ -2099,14 +2099,14 @@ export default function ProjectDesk({
       if(payload?.facts){factsRef.current=payload.facts;setFacts(payload.facts);setReceipts(payload.receipts||[]);receiptsRef.current=payload.receipts||[];receiptId.current=(payload.receipts||[]).reduce((max:number,item:Receipt)=>Math.max(max,item.id),0);cycleRef.current=(payload.facts||[]).reduce((max:number,item:WorkspaceFact)=>Math.max(max,item.cycle||0),0);const turns=hydrateSourceTurns(payload.source_turns);setSourceTurns(turns);sourceTurnsRef.current=turns;const decisions=payload.decision_turns||[];setDecisionTurns(decisions);decisionTurnsRef.current=decisions;const replay=replayDecisionLedger(decisions);setNoted(replay.noted);setDismissedQuestionIds(replay.dismissedQuestionIds);setDeclinedSuggestionIds(replay.declinedSuggestionIds);if(payload.compiled_document)previousProcurementDocumentRef.current=payload.compiled_document;}
       else {
         const buyer=data.buyer||{}, raw=data.entrance_context?.raw_input||{};
-        const fields:Partial<BriefFields>={sector:buyer.sector,sites:buyer.site_count?String(buyer.site_count):'',scope:raw.solution_scope||(buyer.product_scope==='sdwan_only'?'sdwan':buyer.product_scope==='sse_only'?'sse':buyer.product_scope==='full_sase'?'sase':''),regions:buyer.regions||[],operatingModel:buyer.operating_model,timescale:typeof raw.timescale==='string'?raw.timescale:''};
+        const fields:Partial<BriefFields>={sector:buyer.sector,sites:buyer.site_count?String(buyer.site_count):'',scope:raw.solution_scope||(buyer.product_scope==='sdwan_only'?'sdwan':buyer.product_scope==='sse_only'?'sse':buyer.product_scope==='full_sase'?'sase':''),regions:buyer.regions||[],operatingModel:buyer.operating_model,timescale:typeof data.buyer_facts?.timeline==='string'?data.buyer_facts.timeline:typeof raw.timescale==='string'?raw.timescale:''};
         if(buyer.notes)keepSourceTurn(buyer.notes,'typed');
         applyMerge(workspaceUpdatesFromBrief(fields),'answer');
       }
       setWorkspaceNotice(data.buyer?.notes||null);setSaveDirty(false);
       envelopeRevisionRef.current=data.envelope_revision??payload?.base_revision??0;
       setCheckpointRevision(envelopeRevisionRef.current);
-      setCanonicalLedgerLoaded(envelopeRevisionRef.current > 0);
+      setCanonicalLedgerLoaded(Boolean(payload?.facts) || envelopeRevisionRef.current > 0);
       checkpointBaselineRef.current=null;
       try {
         const raw=localStorage.getItem(PROJECT_CHECKPOINT_PREFIX+id);
@@ -4752,6 +4752,7 @@ export default function ProjectDesk({
      Every advertised sentence still works typed; the surface copy
      advertises them where they apply. */
 
+  const canonicalBrief = publicBriefFromFacts(facts, workspaceCompany);
   const sendReady = draft.trim().length > 0 && !busy && !resuming;
   const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
 
@@ -4759,7 +4760,7 @@ export default function ProjectDesk({
     const read=(event:Event)=>{
       const detail=(event as CustomEvent<{value:WorkspaceProject|null}>).detail;
       if(!booted)return;
-      detail.value={id:workspaceEnvelopeId||created?.id||localDraftIdRef.current,legacyProject:!!created&&!workspaceEnvelopeId,documentPurpose,busy:busy||workspaceSessionLoading||!!workspaceSessionError||!!projectCheckpoint,published:!!published||workspaceSessionPublished,fields:{scope:buying==='sdwan'?'sdwan':buying==='sse'?'sse':'sase',sector:wizardSectorKey(requirement.organisation?.sector)||'',sites:requirement.estate?.sites?String(requirement.estate.sites):'',regions:wizardRegions(requirement.organisation?.regions||[]),operatingModel:opModel||'any',outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:''),timescale:requirement.constraints?.timeline||'',company:workspaceCompany},payload:{...rfpPayload(false),document_purpose:documentPurpose}};
+      detail.value={id:workspaceEnvelopeId||created?.id||localDraftIdRef.current,legacyProject:!!created&&!workspaceEnvelopeId,documentPurpose,busy:busy||workspaceSessionLoading||!!workspaceSessionError||!!projectCheckpoint,published:!!published||workspaceSessionPublished,fields:{scope:buying==='sdwan'?'sdwan':buying==='sse'?'sse':buying==='sase'?'sase':'',sector:wizardSectorKey(requirement.organisation?.sector)||'',sites:requirement.estate?.sites?String(requirement.estate.sites):'',regions:wizardRegions(requirement.organisation?.regions||[]),operatingModel:opModel||'any',outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:''),timescale:requirement.constraints?.timeline||'',company:workspaceCompany},payload:{...rfpPayload(false),document_purpose:documentPurpose}};
     };
     const confirm=(event:Event)=>{
       const detail=(event as CustomEvent<{fields:BriefFields;accepted:boolean;error:string}>).detail;
@@ -4768,7 +4769,9 @@ export default function ProjectDesk({
       const f=detail.fields;
       const existingRegions=standing(factsRef.current).filter(x=>x.path==='organisation.regions').map(x=>String(x.value));
       const regions=confirmedWorkspaceRegions(f.regions,existingRegions);
-      const updates=workspaceUpdatesFromBrief(f,existingRegions);
+      const outcomeChanged=f.outcome!==workspaceNotice && f.outcome!==canonicalBrief.outcome && f.outcome!==canvasDocument.summary;
+      const updates=workspaceUpdatesFromBrief({...f,outcome:outcomeChanged?f.outcome:undefined},existingRegions);
+      if(outcomeChanged)for(const old of standing(factsRef.current).filter(x=>x.path==='requirements.bespoke'&&x.value===workspaceNotice))dropFact(old.id);
       for(const fact of standing(factsRef.current).filter(x=>x.path==='organisation.regions'&&!regions.includes(String(x.value))))dropFact(fact.id);
       if(f.operatingModel==='any')for(const fact of standing(factsRef.current).filter(x=>x.path==='procurement.operatingModel'))dropFact(fact.id);
       applyMerge(updates,'answer');
@@ -5604,7 +5607,7 @@ export default function ProjectDesk({
               <GuidedBuild
                 documentPurpose={documentPurpose}
                 onDocumentPurposeChange={setDocumentPurpose}
-                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
+                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
                 card={guidedQuestionCard}
                 ready={contentReady}
                 depthReady={rfpCoverage.ready}
@@ -6728,7 +6731,7 @@ export default function ProjectDesk({
             <GuidedBuild
                 documentPurpose={documentPurpose}
                 onDocumentPurposeChange={setDocumentPurpose}
-                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
+                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
               card={guidedQuestionCard}
               ready={contentReady}
               depthReady={rfpCoverage.ready}

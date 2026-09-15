@@ -1,3 +1,5 @@
+import {marketplaceWorkspacePayload} from "../src/lib/marketplace-workspace-envelope";
+import {workspaceUpdatesFromBrief} from "../src/lib/buying-workspace-project";
 import assert from 'node:assert/strict';
 import {writeFileSync} from 'node:fs';
 import {canonicalFixture,fact,documentFor} from './canonical-facts-fixture';
@@ -6,6 +8,8 @@ import {shortProjectReadiness,projectMatchingInput} from '../src/lib/short-proje
 import {buildMarketReport} from '../src/lib/market-report';
 import {rfpContentSnapshot} from '../src/lib/published-snapshot';
 const p=canonicalFixture();
+assert.equal(marketplaceWorkspacePayload(p)?.facts.find(f=>f.path==='estate.users')?.value,2);
+assert.ok(workspaceUpdatesFromBrief({outcome:'Keep customer orders running'}).some(f=>f.path==='requirements.bespoke' && f.value==='Keep customer orders running'));
 const f=currentBuyerFacts(p), report=buildMarketReport(p), brief=currentPublicBrief(p);
 assert.equal(f.users,2);assert.equal(f.sites,2);assert.equal(f.timeline,'Within two months');
 assert.equal(report.estimate,null);assert.ok(report.assumptions.some(s=>s.includes('50–250,000')));

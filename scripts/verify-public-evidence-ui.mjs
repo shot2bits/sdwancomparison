@@ -24,7 +24,7 @@ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth <= innerW
 await page.screenshot({path:dir+'/shortlist-mobile.png',fullPage:true});
 await page.goto(base+'/alternatives/cato-networks/',{waitUntil:'networkidle',timeout:120000});
 const alternatives=await page.locator('body').innerText();
-assert.ok(!/No\. \d+ · Score/.test(alternatives));assert.ok(alternatives.includes('alphabetically'));
+assert.ok(!/No\. \d+ · Score/.test(alternatives));assert.ok(alternatives.includes('proven capability count'));
 await page.screenshot({path:dir+'/alternatives-mobile.png',fullPage:true});
 const chart=await page.request.get(base+'/shortlist/comparison-chart.png');assert.equal(chart.status(),200);
 writeFileSync(dir+'/chart.png',await chart.body());

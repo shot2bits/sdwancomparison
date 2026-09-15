@@ -555,7 +555,7 @@ const SECTOR_KEY_BRIDGE: Record<string, string> = {
   "Hospitality & leisure": "hospitality_leisure",
 };
 export function wizardSectorKey(label: string | undefined): string | null {
-  return (label && SECTOR_KEY_BRIDGE[label]) || null;
+  return label ? SECTOR_KEY_BRIDGE[label] || (Object.values(SECTOR_KEY_BRIDGE).includes(label) ? label : null) : null;
 }
 
 /** Coarse public band for the anonymous board card; never the raw number

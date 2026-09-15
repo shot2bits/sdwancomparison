@@ -1,4 +1,4 @@
-import { PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
+import { publicEvidenceProviders, publicEvidenceOutput, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
 import { FEATURES } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { SITE_URL } from "@/lib/structured-data";
@@ -13,7 +13,7 @@ import { buildShortlistMarketView, SHORTLIST_VIEW_CONTRACT_VERSION, SHORTLIST_VI
  */
 export async function GET(request: Request) {
   const live = await getLiveShortlistDataset();
-  const vendors = live.vendors;
+  const vendors = publicEvidenceProviders(live.vendors);
   const lastModified = vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
 
   const generatedAt = new Date(`${lastModified}T00:00:00.000Z`).toISOString();
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       },
       faqs: SHORTLIST_FAQS,
       features: FEATURES,
-      vendors: [...vendors].sort((a,b) => a.name.localeCompare(b.name)),
+      vendors,
       governed_provider_profiles: vendors.map((provider) => ({
         comparison_slug: provider.slug,
         name: provider.name,
@@ -51,9 +51,11 @@ export async function GET(request: Request) {
       })),
       public_evidence_contract: PUBLIC_EVIDENCE_CONTRACT,
       requires_publication: true,
-      ordering: "alphabetical",
+      ordered_by: PUBLIC_EVIDENCE_ORDER,
+      status_vocabulary: { not_confirmed: "Evidence has not been confirmed; not a negative grade." },
       notice: PUBLIC_EVIDENCE_NOTICE,
       market_views: Object.fromEntries(SHORTLIST_VIEW_KEYS.map((view) => [view, {
+        ordered_by: PUBLIC_EVIDENCE_ORDER,
         label: SHORTLIST_VIEWS[view].label,
         title: SHORTLIST_VIEWS[view].title,
         answer: SHORTLIST_VIEWS[view].answer,
@@ -93,7 +95,7 @@ export async function GET(request: Request) {
         csv: `${SITE_URL}/shortlist/data.csv`,
       },
   };
-  const body = JSON.stringify(payload);
+  const body = JSON.stringify(publicEvidenceOutput(payload));
   const etag = `"${createHash("sha256").update(body).digest("hex")}"`;
   const headers = {
     "Content-Type": "application/json; charset=utf-8",

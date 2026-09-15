@@ -23,9 +23,11 @@ export type CapabilityStatus =
   | "partner_integrated"
   | "managed_service_dependent"
   | "not_primary"
-  | "unknown";
+  | "unknown"
+  | "not_confirmed";
 
-export type DeploymentSpeed = "hours" | "days" | "weeks" | "months" | "unknown";
+export type DeploymentSpeed = "hours" | "days" | "weeks" | "months" | "unknown"
+  | "not_confirmed";
 
 export const REGION_KEYS = [
   "uk_ireland",
@@ -173,6 +175,7 @@ export const STATUS_LABELS: Record<CapabilityStatus, string> = {
   managed_service_dependent: "Via managed service",
   not_primary: "Not primary",
   unknown: "Not confirmed",
+  not_confirmed: "Not confirmed",
 };
 
 /** Compact vendor record shipped to the client and used by every surface. */
@@ -266,6 +269,7 @@ export const STATUS_POINTS: Record<CapabilityStatus, number> = {
   managed_service_dependent: 0.65,
   partial: 0.5,
   unknown: 0.15,
+  not_confirmed: 0.15,
   not_primary: 0,
 };
 
@@ -288,6 +292,7 @@ const REGION_FIT_POINTS: Record<CapabilityStatus, number> = {
   partial: 0.4,
   partner_integrated: 0.35,
   unknown: 0,
+  not_confirmed: 0,
   not_primary: 0,
 };
 
@@ -305,6 +310,7 @@ const SPEED_ORDER: Record<DeploymentSpeed, number> = {
   weeks: 3,
   months: 4,
   unknown: 5,
+  not_confirmed: 5,
 };
 
 /** Feature id prefix to category weighting bucket. */

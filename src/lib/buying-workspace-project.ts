@@ -37,6 +37,7 @@ export function confirmedWorkspaceRegions(selected: string[], existing: string[]
 export function workspaceUpdatesFromBrief(fields: Partial<BriefFields>, existingRegions: string[] = []): import('./workspace/extract').FieldUpdate[] {
   const updates: import('./workspace/extract').FieldUpdate[]=[];
   const add=(path:import('./workspace/extract').AllowedPath,value:unknown,quote:string)=>updates.push({path,value,quote,provenance:'stated'});
+  if(fields.outcome?.trim())add('requirements.bespoke',fields.outcome.trim(),fields.outcome.trim());
   if(fields.sites && Number.isSafeInteger(Number(fields.sites)) && Number(fields.sites)>0)add('estate.sites',Number(fields.sites),fields.sites);
   if(fields.scope && ['sase','sdwan','sse'].includes(fields.scope))add('procurement.buying',fields.scope,fields.scope.toUpperCase());
   if(fields.sector && WORKSPACE_SECTORS_BY_KEY[fields.sector])add('organisation.sector',WORKSPACE_SECTORS_BY_KEY[fields.sector],WORKSPACE_SECTORS_BY_KEY[fields.sector]);

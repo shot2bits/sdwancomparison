@@ -10,7 +10,7 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Who are the leading SD-WAN providers?",
-    a: "The SD-WAN vendor view lists public provider evidence alphabetically. Computed fit against your operating model, regions and requirements unlocks after verified project publication.",
+    a: "The SD-WAN vendor view lists public provider evidence by proven capability count, verification date and name. Computed fit against your operating model, regions and requirements unlocks after verified project publication.",
   },
   {
     q: "Is SD-WAN obsolete?",
@@ -22,11 +22,11 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Who are the leading SASE vendors?",
-    a: "The SASE vendor view lists providers with public SASE, ZTNA or secure web gateway evidence in alphabetical order. Buyers should compare the networking and security components separately before accepting a single-vendor claim.",
+    a: "The SASE vendor view lists providers with public SASE, ZTNA or secure web gateway evidence in published evidence order. Buyers should compare the networking and security components separately before accepting a single-vendor claim.",
   },
   {
     q: "How does the shortlist builder rank vendors?",
-    a: "Public comparison pages show source grades and alphabetical provider lists. After verified publication, the private matching engine evaluates your requirements against the current catalogue and freezes its matching rules, evidence, ranks and scores with that publication.",
+    a: "Public comparison pages show source grades and provider lists ordered by published evidence. After verified publication, the private matching engine evaluates your requirements against the current catalogue and freezes its matching rules, evidence, ranks and scores with that publication.",
   },
   {
     q: "Can I share or save my shortlist?",

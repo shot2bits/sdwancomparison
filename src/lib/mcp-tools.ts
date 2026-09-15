@@ -1,3 +1,4 @@
+import { publicEvidenceOutput, publicEvidenceProviders, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_NOTICE } from "./public-provider-evidence";
 /**
  * MCP tool definitions and handlers. The logic core lives in
  * src/lib/shortlist-core.ts; handlers here only validate and dispatch.
@@ -46,8 +47,11 @@ type SectorEvidenceTwin = {
 };
 
 export async function callMcpTool(name: string, args: unknown): Promise<unknown> {
+  return publicEvidenceOutput(await callPublicMcpTool(name,args));
+}
+async function callPublicMcpTool(name: string, args: unknown): Promise<unknown> {
   const live = await getLiveShortlistDataset();
-  const shortlist = live.vendors;
+  const shortlist = publicEvidenceProviders(live.vendors);
   const knownShortlistSlugs = shortlist.map((vendor) => vendor.slug);
   switch (name) {
     case "build_sase_shortlist": {
@@ -86,7 +90,11 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
     case "list_sase_vendors":
       return {
         contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
+        ordered_by: PUBLIC_EVIDENCE_ORDER,
+        notice: PUBLIC_EVIDENCE_NOTICE,
         vendors: shortlist.map((v) => ({
+          position: v.position, proven_evidence_count: v.proven_evidence_count,
+          differentiator: v.key_differentiators[0] || v.shortlist_summary,
           slug: v.slug,
           name: v.name,
           category: v.category,

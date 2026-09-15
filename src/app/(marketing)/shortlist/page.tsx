@@ -1,3 +1,4 @@
+import { publicEvidenceProviders, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -46,7 +47,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
   const query = await searchParams;
   const selectedView = parseShortlistMarketView(typeof query.view === "string" ? query.view : undefined);
   const live = await getLiveShortlistDataset();
-  const vendors = live.vendors;
+  const vendors = publicEvidenceProviders(live.vendors);
   const verified = vendors.map((v) => v.last_verified).sort().slice(-1)[0] ?? "";
   const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
   const viewRanking = buildShortlistMarketView(vendors, selectedView);
@@ -69,8 +70,9 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
     {
       "@context": "https://schema.org", "@type": "ItemList", name: "SD-WAN and SASE provider evidence",
       numberOfItems: viewRanking.length,
-      itemListOrder: "https://schema.org/ItemListUnordered",
-      itemListElement: viewRanking.map((provider) => ({ "@type": "ListItem",  url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      description: PUBLIC_EVIDENCE_NOTICE,
+      itemListElement: viewRanking.map((provider) => ({ "@type": "ListItem", position: provider.position, url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
     },
     // The 40 capability definitions as a DefinedTermSet, mirroring the
     // visible glossary below so AI engines can quote a row's meaning
@@ -96,15 +98,17 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
       <section className="mb-10" aria-labelledby="leading-providers-title">
         <p className="eyebrow mb-2">Provider evidence</p>
         <h2 id="leading-providers-title" className="text-xl">Provider, product and differentiator</h2>
-        <ul className="mt-4 grid list-none gap-3 p-0 md:grid-cols-2">
+        <p className="mt-3 text-sm" id="evidence-order">{PUBLIC_EVIDENCE_NOTICE}</p>
+        <ol aria-describedby="evidence-order" className="mt-4 grid list-none gap-3 p-0 md:grid-cols-2">
           {viewRanking.map((provider) => {
             const source = sourceBySlug.get(provider.slug)!;
             return <li key={provider.slug} className="rounded-lg border border-[var(--ink-200,#e8ebef)] p-4 text-sm leading-6">
-              <a className="font-semibold underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a>
+              <a className="font-semibold underline underline-offset-4" href={provider.marketplace_url!}>{provider.position}. {provider.name}</a>
               {source.product_focus ? ` (${source.product_focus})` : ""}: {provider.key_differentiators[0] || provider.shortlist_summary}
+              <p>{provider.proven_evidence_count} proven capability items · Verified {provider.last_verified || "Date not provided"}</p>
             </li>;
           })}
-        </ul>
+        </ol>
       </section>
 
       <section className="mb-10 overflow-hidden rounded-lg border border-[var(--ink-300,#d5d9df)]" aria-labelledby="comparison-summary-title">
@@ -122,7 +126,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
               {viewRanking.map((provider) => {
                 const source = sourceBySlug.get(provider.slug)!;
                 return <tr key={provider.slug} className="align-top even:bg-[var(--ink-50,#f8f9fa)]">
-                  <td className="border-b px-4 py-3 font-medium"><a className="underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a></td>
+                  <td className="border-b px-4 py-3 font-medium"><a className="underline underline-offset-4" href={provider.marketplace_url!}>{provider.position}. {provider.name}</a></td>
                   <td className="border-b px-4 py-3">{provider.category}</td>
                   <td className="border-b px-4 py-3">{source.product_focus || "Product names are listed in the full profile."}</td>
                   <td className="border-b px-4 py-3">{provider.best_fit_for[0] || provider.shortlist_summary}</td>
@@ -229,8 +233,8 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
       {!listFirst && listBlocks}
 
       <figure className="mb-10 rounded-lg border border-[var(--ink-200,#e8ebef)] p-4">
-        <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Alphabetical evidence directory for ${inSentence(SHORTLIST_VIEWS[selectedView].label)}`} className="h-auto w-full" />
-        <figcaption className="mt-2 text-xs text-[var(--ink-600)]">Provider evidence by the selected governed evidence score. Use the table above for the underlying decision fields.</figcaption>
+        <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Ordered evidence directory for ${inSentence(SHORTLIST_VIEWS[selectedView].label)}`} className="h-auto w-full" />
+        <figcaption className="mt-2 text-xs text-[var(--ink-600)]">Provider evidence in the same published evidence order as the numbered list. Positions are not fit scores.</figcaption>
       </figure>
 
       <section className="mt-20">
