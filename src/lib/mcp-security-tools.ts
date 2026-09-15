@@ -1,3 +1,4 @@
+import { mcpConsentError, withMcpConsentSchema } from "./mcp-consent";
 /**
  * MCP tools for Netify Security Sourcing (Phase A, 21 July 2026).
  * One tool: assess_security_requirement, the Notary read. The page advisor
@@ -318,14 +319,14 @@ const CONTINUE_CONVERSATION_DEFINITION = {
   },
 } as const;
 
-export const SECURITY_TOOL_DEFINITIONS_ALL = [
+export const SECURITY_TOOL_DEFINITIONS_ALL = ([
   ...MCP_SECURITY_TOOL_DEFINITIONS,
   CREATE_PROJECT_DEFINITION,
   GENERATE_RFP_DEFINITION,
   RESCOPE_DEFINITION,
   GET_STATUS_DEFINITION,
   CONTINUE_CONVERSATION_DEFINITION,
-] as const;
+] as const).map(withMcpConsentSchema);
 
 export const SECURITY_TOOL_NAMES = new Set<string>(
   SECURITY_TOOL_DEFINITIONS_ALL.map((t) => t.name),
@@ -335,6 +336,8 @@ export async function callSecurityTool(
   name: string,
   args: Record<string, unknown>,
 ): Promise<unknown> {
+  const denied = mcpConsentError(name, args);
+  if (denied) return denied;
   switch (name) {
     case "assess_security_requirement":
       return assessSecurityRequirement((args ?? {}) as SecurityRequirementInput);

@@ -1,3 +1,4 @@
+import { PROVIDER_CAPABILITY_CONTRACT } from "@/lib/provider-capability-contract";
 import { MCP_TOOL_DEFINITIONS, callMcpTool } from "@/lib/mcp-tools";
 import { MCP_RFP_TOOL_DEFINITIONS, RFP_TOOL_NAMES, callRfpTool } from "@/lib/mcp-rfp-tools";
 import { MCP_COST_TOOL_DEFINITIONS, COST_TOOL_NAMES, callCostTool } from "@/lib/mcp-cost-tools";
@@ -283,6 +284,7 @@ export async function GET(req: Request) {
     protocolVersions: SUPPORTED_PROTOCOLS,
     endpoint: `${SITE_URL}/api/mcp/`,
     connector_page: `${SITE_URL}/connector`,
+    provider_capability_contract: PROVIDER_CAPABILITY_CONTRACT,
     authentication: "none for research, drafting and estimating; write actions that reach named vendors are token-gated per tool",
     tools: annotatedTools().map((t) => t.name),
     resources: ESTATE_RESOURCES.map((r) => ({ uri: `${SITE_URL}${r.path}`, name: r.name })),

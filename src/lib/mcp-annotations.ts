@@ -33,12 +33,28 @@ const write = (title: string, idempotent = false): ToolAnnotation => ({
 });
 
 export const TOOL_ANNOTATIONS: Record<string, ToolAnnotation> = {
+  compare_vendors: read("Compare public provider evidence"),
+  verify_claim: read("Verify a provider claim against sources"),
+  list_exclusions: read("Explain evidence exclusions"),
+  explain_shortlist: read("Explain published comparison evidence"),
+  get_sector_evidence: read("Read sector evidence"),
+  start_project: write("Create a private buyer project"),
+  update_requirements: write("Update saved buyer requirements", true),
+  preview_provider_matches: write("Save aggregate coverage and advance project revision"),
+  prepare_publication: write("Record versioned publication consent"),
+  publish_opportunity: {...write("Publish the approved buyer revision", true), annotations: {readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true}},
+  get_project_status: read("Read current saved facts and project outcomes"),
+  get_unlocked_matches: read("Read frozen published matches as verified owner"),
+  continue_security_conversation: write("Create or update a private procurement conversation"),
   // Research and comparison (pure reads over the evidence dataset).
   build_sase_shortlist: read("Preview SASE / SD-WAN market coverage"),
   list_sase_vendors: read("List the 30 graded vendors"),
   list_sase_features: read("List the 40-capability evaluation matrix"),
   get_sase_vendor_profile: read("Get a vendor's full capability profile"),
   get_demand_index: read('Get the Netify Demand Index (live marketplace demand)'),
+
+  netify_validate_circuit_request: read("Validate a circuit pricing request without saving"),
+  netify_read_circuit_responses: read("Read private circuit responses with an owner-issued token"),
 
   // Cost and TCO (deterministic estimator, no persistence).
   netify_estimate_sase_tco: read("Estimate SASE cost and 3-year TCO bands"),

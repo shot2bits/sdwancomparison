@@ -56,7 +56,7 @@ export default async function BestPage({ params }: Props) {
   // Writer-authored page copy (Harry, June 2026): intro and FAQ answers
   // override the template text where a rewrite exists, so the visible prose
   // and the FAQPage JSON-LD stay in step.
-  const pageOverride = EDITORIAL[base.slug]?._page;
+  const pageOverride = base.evidenceCopyReviewed ? undefined : EDITORIAL[base.slug]?._page;
   const page = {
     ...base,
     intro: pageOverride?.intro ?? base.intro,
@@ -98,13 +98,14 @@ export default async function BestPage({ params }: Props) {
     numberOfItems: result.shortlist.length,
     itemListElement: result.shortlist.map((v) => ({
       "@type": "ListItem",
+      position: v.position,
 
       name: v.name,
-      url: `${SITE_URL}/vendors/${v.slug}`,
+      url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
       item: {
         "@type": "Service",
         name: `${v.name} SD-WAN / SASE`,
-        url: `${SITE_URL}/vendors/${v.slug}`,
+        url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
         description: v.key_differentiators[0],
         provider: { "@type": "Organization", name: v.name, url: v.website },
         potentialAction: {
@@ -166,14 +167,15 @@ export default async function BestPage({ params }: Props) {
         <p className="eyebrow mb-3">Provider evidence · Updated {reviewedMonth}</p>
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
+        {page.input.sector === "healthcare" && <p className="mt-3">For the BT/NHS route, see <a className="underline" href="https://netify.co.uk/sd-wan-for-healthcare/">BT SD-WAN and SASE for healthcare</a>.</p>}
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
           {`Netify's ${reviewedMonth} evidence directory, by proven capability count, verification date and name: `}
           {result.shortlist
             .map((v) => v.name)
             .join("; ")}
-          {`. Computed fit and rankings unlock after verified publication. Describe the project once at `}
+          {`. Positions are evidence order, not recommendations. Describe your project at `}
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
-          {`, raise it to a full RFP and publish to these providers, then compare structured responses side by side, with pricing kept private to the buyer.`}
+          {`. Review the anonymous notice before publication. Personalised matching requires authorised access after publication. Only selected eligible providers receive invitations. If no match is confirmed, no suppliers are invited. Review the reasons and evidence gaps before deciding whether to revise and republish. Supplier participation and response times are not guaranteed. A full RFP is optional.`}
         </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written by the Netify research team. Reviewed by Robert Sturt, Netify
@@ -261,8 +263,8 @@ export default async function BestPage({ params }: Props) {
           >
             <p className="eyebrow mb-1">Source evidence</p>
             <h2 className="text-xl mb-1">
-              <Link href={`/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
-                {v.name}
+              <Link href={v.marketplace_url ?? `/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+                {v.position}. {v.name}
               </Link>
             </h2>
             <p className="text-sm text-[var(--ink-500)] mb-2">
@@ -273,8 +275,9 @@ export default async function BestPage({ params }: Props) {
                 <p key={pi} className="text-sm text-[var(--ink-700)] mb-2">{para}</p>
               ))
             ) : (
-              <p className="text-sm text-[var(--ink-700)] mb-2">{v.key_differentiators[0]}</p>
+              <p className="text-sm text-[var(--ink-700)] mb-2">{v.key_differentiators[0] || v.product_focus || v.shortlist_summary}</p>
             )}
+            <p className="text-sm text-[var(--ink-500)]">Proven capability items: {v.proven_evidence_count} · Verification: {v.last_verified || "Not recorded"}</p>
             {v.gaps.length > 0 && (
               <p className="text-sm text-[var(--ink-500)]">Evidence caveats: {v.gaps.join("; ")}</p>
             )}

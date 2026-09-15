@@ -71,7 +71,7 @@ export const ENGINE_ROLE =
 export const RFP_META_DESCRIPTION =
   "Build an SD-WAN RFP or SASE RFP with governed supplier questions, validate it, publish anonymously and run a like-for-like vendor evaluation. Free for buyers.";
 export const ENGINE_PROMISE =
-  "Describe your needs, bring an RFP or RFI, or build a Short or Detailed RFP. Review and publish an anonymous project to invite supplier responses. A full RFP is optional.";
+  "Describe your needs, bring an RFP or RFI, or build a Short or Detailed RFP. Review your anonymous notice before publication. Your contact details and private project material are not part of that notice. Publication enables authorised access to personalised matching; only selected eligible providers receive invitations. If no match is confirmed, no invitations are created. Supplier participation and response times are not guaranteed. A full RFP is optional.";
 export const ENGINE_VALUE =
   "Use Netify's question bank and sourced provider comparisons to structure your requirements. Choose your sector, including retail, manufacturing, healthcare, financial services or government, then review the relevant questions against your business needs.";
 export const ENGINE_AGENT =

@@ -43,6 +43,8 @@ export async function GET(_req: Request, ctx: Ctx) {
           .slice(-1)[0] ?? "2026-06-10",
       criteria: page.input,
       interactive_equivalent: `${SITE_URL}/shortlist/?${encodeScenario(result.input)}`,
+      ordered_by: result.ordered_by,
+      introduction: page.intro,
       result,
       faqs: page.faqs,
       citation: `Cite as: Netify provider evidence, ${page.title}, ${SITE_URL}/best/${page.slug}`,

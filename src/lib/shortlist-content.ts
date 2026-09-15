@@ -50,5 +50,5 @@ export const SHORTLIST_INTRO = {
   eyebrow: "SD-WAN and SASE shortlist builder",
   h1: "Compare SD-WAN and SASE providers, vendors and managed services",
   subhead:
-    "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Compare named providers and inspect the evidence. Publish a short anonymous project to unlock personalised matching and supplier responses. A full RFP is optional.",
+    "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Explore the public provider evidence, then review and publish an anonymous project when you are ready. Personalised matching is available through authorised access after publication. Publication does not guarantee invitations or supplier responses. A full RFP is optional.",
 };

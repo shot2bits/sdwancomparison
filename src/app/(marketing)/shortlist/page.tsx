@@ -1,3 +1,4 @@
+import { PUBLICATION_EXPLANATION, ZERO_MATCH_EXPLANATION } from "@/lib/publication-copy";
 import { publicEvidenceProviders, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -190,8 +191,9 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
 
       <div className="mb-8 max-w-4xl">
         <p className="mt-4 text-base leading-7 text-[var(--ink-800)]">
-          <strong>Short answer:</strong> compare 30 SD-WAN providers, SD-WAN vendors, SASE providers, carriers and managed services using one governed research dataset. Compare named providers feature by feature or open their evidence profiles. Publish a short anonymous project to unlock personalised matching and supplier responses.
+          <strong>Short answer:</strong> compare 30 SD-WAN providers, SD-WAN vendors, SASE providers, carriers and managed services using one governed research dataset. Compare named providers feature by feature or open their evidence profiles. {PUBLICATION_EXPLANATION}
         </p>
+        <p className="mt-3 text-sm leading-6">{ZERO_MATCH_EXPLANATION}</p>
         {/* The offer in one glance (Robert, 17 July 2026), server-rendered
             so agents and crawlers read it alongside the ranking data. */}
         <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
@@ -203,8 +205,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written and reviewed by the Netify research team. The governed provider records were last updated on {verified}. Comparison contract {GOVERNED_SHORTLIST_CONTRACT_VERSION}. To act on a shortlist, describe the project once at{" "}
           <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">the Netify RFP Builder</a>
-          {", "}review and publish an anonymous brief or RFP to invite supplier responses, then
-          compare structured responses, with pricing kept private to the buyer.
+          {", "}review your anonymous notice before publication. Invitations depend on confirmed eligibility. Review any responses privately; participation and response times are not guaranteed.
           {" "}<a href="/sase/shortlist/research-methodology/" className="underline">Read and cite the research method</a>.
         </p>
       </div>

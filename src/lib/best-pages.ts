@@ -32,6 +32,7 @@ export type BestPage = {
    * one URL competes for the topic.
    */
   canonicalOverride?: string;
+  evidenceCopyReviewed?: boolean;
 };
 
 const YEAR = "2026";
@@ -195,6 +196,20 @@ export const BEST_PAGES: BestPage[] = [
   intentPage("global_expansion", "global-expansion", "Typical needs include private backbones, regional breakout, data residency control and coverage into new markets."),
 ];
 
+const REVIEWED_SECTOR_INTROS: Record<string, string> = {
+  "sd-wan-sase-providers-for-healthcare": "Use this provider evidence to investigate healthcare connectivity and security requirements, including clinical application performance, resilience and patient-data protection. Inclusion does not confirm suitability for your project.",
+  "sd-wan-sase-providers-for-financial-services": "Explore published provider evidence for a financial-services project. Confirm each requirement, deployment scope and supplier claim against your own procurement needs; directory inclusion is not a recommendation or a compliance assurance. Typical drivers in this sector include protecting cardholder data for PCI-DSS, prioritising latency-sensitive traffic (such as trading feeds, SWIFT messaging and core banking ledgers), segmenting ATMs, branch tellers, corporate office traffic and remote wealth management devices, and connectivity to AWS, Azure or Google Cloud without adding policy fragmentation or backhaul delay.",
+  "sd-wan-sase-providers-for-retail": "Use this public provider evidence to investigate retail and e-commerce requirements. The current matching catalogue does not confirm retail/e-commerce suitability. Ask for evidence covering your store operations and online services before treating any provider as a match. Typical drivers in this sector include rapid store rollout, PCI DSS segmentation, cellular backup and centralised management across estates (that can run into hundreds or thousands of sites).",
+  "sd-wan-sase-providers-for-manufacturing": "Explore published provider evidence for manufacturing networks. Assess OT segmentation, plant connectivity, coverage and service ownership against your own requirements; inclusion does not confirm a provider’s suitability. Typical drivers in this sector include OT and IoT network segmentation, plant and factory floor connectivity, global site coverage across production and distribution facilities, and MPLS migration to SD-WAN."
+};
 export function getBestPage(slug: string): BestPage | undefined {
-  return BEST_PAGES.find((p) => p.slug === slug);
+  const base = BEST_PAGES.find((p) => p.slug === slug);
+  const intro = REVIEWED_SECTOR_INTROS[slug];
+  if (!base || !intro) return base;
+  return {...base, intro, evidenceCopyReviewed: true, metaDescription: intro,
+    faqs: [
+      {q: "Does inclusion confirm suitability for my project?", a: "No. This directory presents published provider evidence. Confirm product, sector, region and service scope against your own requirements. Missing evidence remains unconfirmed."},
+      {q: "How is the public directory ordered?", a: "Most proven capability items first, then the most recent verification date, then provider name; slug breaks identical names and missing dates come last. Only yes capability grades count. This is evidence order, not a personalised recommendation."},
+      {q: "What happens when I publish a project?", a: "Review your anonymous notice first. Personalised matching requires authorised access after publication. Only selected eligible providers receive invitations. If no match is confirmed, no suppliers are invited. Review the reasons and evidence gaps before deciding whether to revise and republish. Supplier participation and response times are not guaranteed."}
+    ]};
 }
