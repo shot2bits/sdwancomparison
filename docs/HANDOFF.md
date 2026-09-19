@@ -1,3 +1,11 @@
+# Comparison and attribution repair — 19 September 2026
+
+Work continues from verified production 47c6d64 on `codex/lead-measurement-20260919`; stale `main` was inspected but NOT merged. Repair exact capability mappings, remove unrelated proxy evidence, preserve partial/partner grades in composite SASE, and add six dated vendor-documentation corrections with visible scope, expiry and newer-governed-review precedence. Public comparison and MCP claim verification share these corrections. No supplier invitations, policy-gate changes or database imports.
+
+Add the four shortlist landing paths to attribution, canonicalise the tested old builder alias, rename generic browser form submission to `form_submit_attempt`, and tighten qualified-project reporting cutoffs. Apex's matching attribution patch is on `codex/shortlist-attribution-20260919`. No historical analytics relabelled.
+
+Targeted mapping/evidence, attribution/privacy, activity/access, comparison-interface and MCP-boundary tests passed; TypeScript passed; full validation/build passed before the final MCP parity amendment, with a final candidate build pending. Source-feed credentials are absent locally, so existing live-source tests disclose snapshot fallback. No claim of buyer observations or production deployment yet. Live/private reconciliation currently needs an admin sign-in. Keep actual deployment and apex verification as a separate follow-up entry.
+
 # SASE audit fixes — 15 September 2026
 
 Work branch: codex/agentic-audit-fixes-2026-09-15. Base: f785b0c2609ce8b8c9b2f7bc66096b2dc384c2ce, matching the inspected production source metadata. Do not replace this base with stale main.
