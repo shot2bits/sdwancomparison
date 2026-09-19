@@ -156,7 +156,7 @@ export default function AdminClient() {
 
       <section className={card}>
         <h2 className={h2}>Needs attention</h2>
-        <p className={sub}>External projects with a retained blocked-publication record, or a published project with no supplier connections. Identified tests and internal accounts are excluded. Historical publication records are retention-limited; this is not a qualified-lead count.</p>
+        <p className={sub}>Projects with a retained blocked-publication record, or a published project with no supplier connections. Known internal domains, admin addresses and explicitly identified tests are excluded. Other records, including personal-email history, remain unverified. Historical publication records are retention-limited; this is not a qualified-lead count.</p>
         <p className="text-sm mb-4">Review owner: Netify support team. Personal follow-up is not recorded here; check the support mailbox before contacting anyone. Nothing in this queue approves, publishes or invites suppliers.</p>
         {(data.attention ?? []).length === 0 ? <p>No matching exceptions in the available records.</p> : <ul className="space-y-4">
           {(data.attention ?? []).map(item => <li key={item.id} className="border border-[var(--ink-200,#e5e5e5)] rounded-sm p-3">
