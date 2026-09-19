@@ -4,6 +4,9 @@ import { mergeNeonProviderRecords, LIVE_SHORTLIST_CONTRACT_VERSION } from "../sr
 import type { ProviderMatchRecord } from "../src/lib/provider-matching";
 import { buildShortlist } from "../src/lib/shortlist-core";
 import { FEATURES, FEATURE_NAMES, getShortlistDataset } from "../src/lib/vendors";
+import { applyReviewedComparisonEvidence } from '../src/lib/reviewed-comparison-evidence';
+import { buildComparison } from '../src/lib/shortlist-core';
+import { verifyClaim } from '../src/lib/mcp-tools';
 
 const base = getShortlistDataset().filter((provider) => provider.slug === "hpe-aruba");
 assert.equal(base.length, 1);
@@ -82,3 +85,44 @@ assert.equal(canonical.regions.asia_pacific, 'yes');
 assert.equal(canonical.regions.uk_ireland, 'yes');
 assert.equal(canonical.regions.latin_america, 'unknown', 'stale evidence must not be promoted');
 assert.equal(canonical.sectors.financial_services, 'yes');
+
+// Every formerly unmapped field accepts explicit, current evidence, not a legacy grade.
+const repaired = ['f08_flexible_commercial_model', 'f11_active_active_link_utilisation', 'f20_private_pops_dedicated_pops', 'f21_private_global_backbone', 'f22_regional_breakout_and_data_residency'];
+for (const feature of repaired) {
+  for (const code of [feature, feature.slice(4)]) {
+    const [mapped] = mergeNeonProviderRecords(base, [{...record, capabilities: {[code]: supported()}}]);
+    assert.equal(mapped.capabilities[feature], 'yes', code);
+    const [stale] = mergeNeonProviderRecords(base, [{...record, capabilities: {[code]: {...supported(), freshness_state: 'stale'}}}]);
+    assert.equal(stale.capabilities[feature], 'unknown', `stale ${code}`);
+  }
+}
+const [proxy] = mergeNeonProviderRecords(base, [{...record, capabilities: {
+  supported_wan_underlays: supported(), site_and_circuit_performance: supported(),
+  sla_reporting: supported(), custom_reports: supported(), executive_dashboard: supported(),
+  configuration_generation: supported(), automated_remediation: supported(), network_health: supported(),
+}}]);
+for (const feature of ['f06_last_mile_circuit_management','f07_lifecycle_management','f26_sla_backed_service_fabric','f37_customer_portal_and_rbac','f39_apis_and_automation','f40_managed_service_assurance']) {
+  assert.equal(proxy.capabilities[feature], 'unknown', `adjacent evidence must not prove ${feature}`);
+}
+for (const [state, expected] of [['partner_delivered','partner_integrated'], ['partially_supported','partial']] as const) {
+  const [v] = mergeNeonProviderRecords(base, [{...record, capabilities: {...record.capabilities, ztna: {...supported(), support_state: state}}}]);
+  assert.equal(v.capabilities.f28_full_sase_platform, expected, 'composite SASE must retain qualifications');
+}
+const checked = getShortlistDataset().filter(v => ['aryaka', 'cato-networks'].includes(v.slug));
+for (const v of checked) applyReviewedComparisonEvidence(v, '2026-09-01', Date.parse('2026-09-19T12:00:00Z'));
+assert.equal(checked.find(v => v.slug === 'aryaka')!.capabilities.f21_private_global_backbone, 'yes');
+assert.equal(checked.find(v => v.slug === 'cato-networks')!.capabilities.f11_active_active_link_utilisation, 'yes');
+const comparison = buildComparison(checked, checked.map(v => v.slug), FEATURES)!;
+assert.match(comparison.groups.flatMap(g => g.rows).find(r => r.key === 'f21_private_global_backbone')!.evidence!.aryaka.qualification, /last-mile/);
+const claim = verifyClaim({slug:'aryaka',claim:'private backbone'}, checked) as {value:string; status:string; quote:null; sources:{url:string}[]};
+assert.equal(claim.value,'yes');
+assert.equal(claim.status,'vendor_documented');
+assert.equal(claim.quote,null,'a paraphrase must not become a fabricated quote');
+assert.equal(claim.sources[0].url,'https://www.aryaka.com/unified-sase-platform/');
+const expires = getShortlistDataset().find(v => v.slug === 'aryaka')!;
+expires.capabilities.f21_private_global_backbone = 'unknown';
+applyReviewedComparisonEvidence(expires, '2026-09-01', Date.parse('2026-10-19T00:00:00Z'));
+assert.equal(expires.capabilities.f21_private_global_backbone, 'unknown', 'expired editorial corrections cannot silently persist');
+applyReviewedComparisonEvidence(expires, '2026-09-20', Date.parse('2026-09-21T00:00:00Z'));
+assert.equal(expires.capabilities.f21_private_global_backbone, 'unknown', 'new governed reviews supersede corrections');
+console.log('PASS exact mappings, stale evidence, proxy rejection, qualified SASE, reviewed sources, expiry and newer-review precedence');

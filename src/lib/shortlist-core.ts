@@ -191,6 +191,7 @@ export type ShortlistVendor = {
   uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed";
   uk_basis: string;
   capabilities: Record<string, CapabilityStatus>;
+  capability_evidence?: Record<string, {source_url: string; reviewed_at: string; review_due: string; qualification: string}>;
   deployment_speed: DeploymentSpeed;
   regions: Record<RegionKey, CapabilityStatus>;
   supported_clouds: Record<CloudKey, CapabilityStatus>;
@@ -817,6 +818,7 @@ export type CompareRow = {
   /** One-sentence definition of what the row measures, where available. */
   description?: string;
   grades: Record<string, CapabilityStatus | string>;
+  evidence?: ShortlistVendor['capability_evidence'];
 };
 
 export type CompareGroup = { name: string; rows: CompareRow[] };
@@ -860,6 +862,7 @@ export function buildComparison(
           label: f.name,
           description: f.description,
           grades: Object.fromEntries(chosen.map((v) => [v.slug, v.capabilities[f.id] ?? "unknown"])),
+          evidence: Object.fromEntries(chosen.flatMap((v) => v.capability_evidence?.[f.id] ? [[v.slug, v.capability_evidence[f.id]]] : [])),
         })),
     });
   }

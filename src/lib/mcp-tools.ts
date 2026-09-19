@@ -156,7 +156,7 @@ async function callPublicMcpTool(name: string, args: unknown): Promise<unknown> 
       );
 
     case "verify_claim":
-      return verifyClaim(args);
+      return verifyClaim(args, live.vendors);
     case "list_exclusions":
       return listExclusions(args);
     case "explain_shortlist":
@@ -299,6 +299,8 @@ const CLAIM_ALIASES: Record<string, string> = {
   "delivery model": "delivery_model", type: "delivery_model", vendor_or_provider: "delivery_model",
   backbone: "f21_private_global_backbone", "private backbone": "f21_private_global_backbone",
   "global backbone": "f21_private_global_backbone",
+  "active active": "f11_active_active_link_utilisation", "active-active": "f11_active_active_link_utilisation",
+  "high availability": "f25_high_availability_design", "ha": "f25_high_availability_design",
   managed: "f01_fully_managed_service", "fully managed": "f01_fully_managed_service",
   "co-managed": "f03_co_managed_service", comanaged: "f03_co_managed_service",
   firewall: "f27_integrated_next_generation_firewall", ngfw: "f27_integrated_next_generation_firewall",
@@ -352,7 +354,7 @@ function attributionFor(verifiedOn: string): string {
   return `${ATTRIBUTION_BASE}, verified ${verifiedOn}, netify.co.uk/sase/shortlist`;
 }
 
-export function verifyClaim(args: unknown): unknown {
+export function verifyClaim(args: unknown, liveVendors?: ShortlistVendor[]): unknown {
   const a = (args ?? {}) as { slug?: string; claim?: string; field?: string };
   const slug = (a.slug ?? "").trim();
   if (!getAllVendorSlugs().includes(slug)) {
@@ -363,6 +365,18 @@ export function verifyClaim(args: unknown): unknown {
   const register = registerOf(v);
   const byN = new Map(register.map((e) => [e.n, e]));
   const raw = (a.claim ?? a.field ?? "").trim();
+  const liveVendor = liveVendors?.find(item => item.slug === slug);
+  const reviewedField = resolveClaim(raw, Object.keys(liveVendor?.capability_evidence ?? {}));
+  const correction = reviewedField ? liveVendor?.capability_evidence?.[reviewedField] : undefined;
+  if (reviewedField && correction) return {
+    supplier: v.name, slug, claim: raw, resolved_field: reviewedField,
+    status: 'vendor_documented', value: liveVendor!.capabilities[reviewedField],
+    verified_on: correction.reviewed_at.slice(0, 10), review_due: correction.review_due,
+    quote: null, note: correction.qualification,
+    sources: [{url: correction.source_url, tier: 1, tier_meaning: TIER_MEANING[1], read_on: correction.reviewed_at.slice(0, 10)}],
+    attribution: attributionFor(correction.reviewed_at.slice(0, 10)),
+    _meta: {canonicalUrl: `${SITE_URL}/shortlist/`, note: 'Same dated vendor-documentation correction as the public comparison. Scope is a paraphrase, not a quotation or independent deployment verification.'},
+  };
 
   if (!raw) {
     return {
@@ -375,15 +389,15 @@ export function verifyClaim(args: unknown): unknown {
 
   const field = resolveClaim(raw, Object.keys(facts));
   if (!field) {
-    const caps = (v.capabilities as unknown as Record<string, string>);
+    const caps = (liveVendor?.capabilities ?? v.capabilities) as Record<string, string>;
     const capField = resolveClaim(raw, Object.keys(caps));
     if (capField) {
       return {
         supplier: v.name, slug, claim: raw, resolved_field: capField,
         status: "graded_not_individually_sourced",
         value: caps[capField],
-        verified_on: v.last_verified,
-        note: "This capability carries a grade but was not sourced individually for this vendor. It sits in the market-baseline set, graded from category evidence. Treat it as indicative and confirm it directly with the vendor.",
+        verified_on: liveVendor?.last_verified ?? v.last_verified,
+        note: "This capability has no individually linked source in this response. The grade uses the same available provider record as the comparison; unconfirmed is not proof of absence. Confirm scope directly with the vendor.",
         attribution: attributionFor(v.last_verified),
         _meta: { canonicalUrl: `${SITE_URL}/vendors/${slug}` },
       };

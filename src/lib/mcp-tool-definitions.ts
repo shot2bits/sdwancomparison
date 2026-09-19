@@ -67,7 +67,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "compare_vendors",
     description:
-      "Compare two or three SASE and SD-WAN providers on the same Netify evidence matrix used by the public comparison workspace. Returns scores, feature-by-feature grades, clear capability leads and a canonical URL that opens the selected providers for a human. Read and compute only, no consent needed and nothing stored.",
+      "Compare two or three named SASE and SD-WAN providers on the same evidence matrix used by the public workspace. Returns feature grades, available source qualifications and a canonical URL opening the selected providers. Differences describe recorded evidence, not personalised fit or procurement guarantees; no fit scores are returned. Read only, no consent needed and nothing stored.",
     inputSchema: {
       type: "object",
       properties: {

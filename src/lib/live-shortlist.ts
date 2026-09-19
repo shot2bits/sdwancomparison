@@ -9,6 +9,7 @@ import {
   type ShortlistVendor,
 } from "@/lib/shortlist-core";
 import { FEATURES, getShortlistDataset } from "@/lib/vendors";
+import { applyReviewedComparisonEvidence } from "@/lib/reviewed-comparison-evidence";
 
 export const LIVE_SHORTLIST_CONTRACT_VERSION = "neon-shortlist/2.0.0" as const;
 
@@ -27,12 +28,12 @@ const FEATURE_CODES: Record<string, string[]> = {
   f03_co_managed_service: [],
   f04_multi_tenant_msp_white_label_support: [],
   f05_professional_services_and_migration_support: ["brownfield_migration_support"],
-  f06_last_mile_circuit_management: ["supported_wan_underlays", "site_and_circuit_performance"],
-  f07_lifecycle_management: ["configuration_generation", "zero_touch_provisioning"],
-  f08_flexible_commercial_model: [],
+  f06_last_mile_circuit_management: ["last_mile_circuit_management"],
+  f07_lifecycle_management: ["lifecycle_management"],
+  f08_flexible_commercial_model: ["flexible_commercial_model"],
   f09_encrypted_overlay_fabric: ["sd_wan"],
   f10_dynamic_path_selection: ["dynamic_path_selection"],
-  f11_active_active_link_utilisation: [],
+  f11_active_active_link_utilisation: ["active_active_link_utilisation"],
   f12_application_aware_routing: ["application_aware_routing", "application_identification"],
   f13_qos_and_traffic_shaping: ["qos_and_traffic_engineering"],
   f14_packet_loss_remediation: ["forward_error_correction_packet_duplication", "wan_optimisation"],
@@ -41,16 +42,16 @@ const FEATURE_CODES: Record<string, string[]> = {
   f17_cellular_and_5g_support: ["cap_5g_lte_support"],
   f18_cloud_on_ramp: ["multi_cloud_networking", "virtual_cloud_edge_support"],
   f19_public_cloud_gateways: ["virtual_cloud_edge_support"],
-  f20_private_pops_dedicated_pops: [],
-  f21_private_global_backbone: [],
-  f22_regional_breakout_and_data_residency: [],
+  f20_private_pops_dedicated_pops: ["private_pops_dedicated_pops"],
+  f21_private_global_backbone: ["private_global_backbone"],
+  f22_regional_breakout_and_data_residency: ["regional_breakout_and_data_residency"],
   f23_multi_cloud_transit_fabric: ["multi_cloud_networking"],
   f24_flexible_edge_form_factors: ["edge_form_factors"],
   f25_high_availability_design: ["high_availability"],
-  f26_sla_backed_service_fabric: ["sla_reporting"],
+  f26_sla_backed_service_fabric: ["sla_backed_service_fabric"],
   f27_integrated_next_generation_firewall: ["firewall_as_a_service", "cloud_firewall_cloud_network_security"],
   f28_full_sase_platform: ["sd_wan", "ztna", "secure_web_gateway", "firewall_as_a_service"],
-  f29_sse_ecosystem_integration: ["casb_api", "casb_inline", "secure_web_gateway", "ztna"],
+  f29_sse_ecosystem_integration: ["sse_ecosystem_integration"],
   f30_zero_trust_network_access: ["ztna"],
   f31_secure_web_gateway: ["secure_web_gateway"],
   f32_casb_capability: ["casb_inline", "casb_api"],
@@ -58,10 +59,10 @@ const FEATURE_CODES: Record<string, string[]> = {
   f34_remote_user_access: ["clientless_access", "managed_laptops", "mobile_devices", "remote_user_experience", "unmanaged_byod_devices", "vdi_environments"],
   f35_soc_siem_soar_integration: ["raw_log_access", "security_events", "threat_intelligence"],
   f36_centralised_orchestration: ["automated_policy_recommendation", "configuration_generation", "zero_touch_provisioning"],
-  f37_customer_portal_and_rbac: ["custom_reports", "executive_dashboard", "scheduled_reports"],
+  f37_customer_portal_and_rbac: ["customer_portal_and_rbac"],
   f38_observability_and_digital_experience_monitoring: ["application_performance", "digital_experience_diagnostics", "digital_experience_monitoring", "user_experience"],
-  f39_apis_and_automation: ["automated_remediation", "configuration_generation"],
-  f40_managed_service_assurance: ["network_health", "root_cause_analysis", "sla_reporting", "threat_reporting"],
+  f39_apis_and_automation: ["apis_and_automation"],
+  f40_managed_service_assurance: ["managed_service_assurance"],
 };
 
 const FEATURE_ID_BY_PROVIDER_CODE = new Map<string, string>();
@@ -111,7 +112,10 @@ function namedStatus(records: Record<string, EvidenceState>, names: string[]): C
 function combinedSaseStatus(record: ProviderMatchRecord): CapabilityStatus {
   const states = FEATURE_CODES.f28_full_sase_platform.map((code) => record.capabilities[code]).filter((item): item is NonNullable<typeof item> => Boolean(item));
   const current = states.filter((state) => state.freshness_state === "current");
-  if (current.length === 4 && current.every((state) => positive.has(state.support_state))) return "yes";
+  if (current.length === 4 && current.every((state) => state.support_state === "supported")) return "yes";
+  if (current.length === 4 && current.every((state) => positive.has(state.support_state))) {
+    return current.some((state) => state.support_state === "partially_supported") ? "partial" : "partner_integrated";
+  }
   if (current.some((state) => positive.has(state.support_state))) return "partial";
   if (current.length > 0 && current.every((state) => state.support_state === "not_supported")) return "not_primary";
   return "unknown";
@@ -159,6 +163,10 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     provider.independent_evidence_source_count = 0;
 
     provider.capabilities = Object.fromEntries(FEATURES.map((feature) => {
+      // Exact feature evidence takes precedence over aliases; never infer a
+      // specialised service from an adjacent monitoring/technology capability.
+      const exact = record.capabilities[feature.id];
+      if (exact) return [feature.id, evidenceStatus([exact])];
       if (feature.id === "f28_full_sase_platform") return [feature.id, combinedSaseStatus(record)];
       const codes = FEATURE_CODES[feature.id] ?? [];
       if (feature.id === "f01_fully_managed_service") return [feature.id, namedStatus(record.service_models, ["fully_managed", "fully managed", "managed_service", "managed service"] )];
@@ -167,6 +175,7 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
       if (feature.id === "f04_multi_tenant_msp_white_label_support") return [feature.id, namedStatus(record.service_models, ["msp", "white label", "multi tenant"] )];
       return [feature.id, evidenceStatus(codes.map((code) => record.capabilities[code]))];
     }));
+    applyReviewedComparisonEvidence(provider, record.reviewed_at);
     provider.evidence_coverage_pct = Object.values(provider.capabilities).filter((state) => state !== "unknown").length / FEATURES.length;
 
     provider.regions = Object.fromEntries(REGION_KEYS.map((key) => [key, namedStatus(record.regions, [key, ...REGION_TERMS[key]])])) as ShortlistVendor["regions"];

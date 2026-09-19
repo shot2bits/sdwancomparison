@@ -1,4 +1,4 @@
-import { STATUS_LABELS, type ComparisonResult } from "@/lib/shortlist-core";
+import { STATUS_LABELS, type ComparisonResult, type CompareGroup } from "@/lib/shortlist-core";
 
 /**
  * Grade table for 2 or 3 vendors. Server-renderable (no hooks) so the
@@ -52,7 +52,7 @@ export default function CompareTable({ comparison }: { comparison: ComparisonRes
   );
 }
 
-function Group({ group, slugs }: { group: { name: string; rows: { key: string; label: string; description?: string; grades: Record<string, string> }[] }; slugs: string[] }) {
+function Group({ group, slugs }: { group: CompareGroup; slugs: string[] }) {
   return (
     <>
       <tr>
@@ -72,6 +72,12 @@ function Group({ group, slugs }: { group: { name: string; rows: { key: string; l
               >
                 {gradeLabel(row.grades[s])}
               </span>
+              {row.evidence?.[s] && <details className="mt-1 text-xs max-w-xs">
+                <summary className="cursor-pointer underline">Source and scope</summary>
+                <p className="mt-1">{row.evidence[s].qualification}</p>
+                <a className="underline" href={row.evidence[s].source_url} target="_blank" rel="noopener noreferrer">Vendor documentation</a>
+                <p>Checked {row.evidence[s].reviewed_at.slice(0, 10)}; review due {row.evidence[s].review_due.slice(0, 10)}. Not independently deployment-tested.</p>
+              </details>}
             </td>
           ))}
         </tr>
