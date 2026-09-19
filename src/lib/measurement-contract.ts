@@ -5,10 +5,13 @@ export const PRIORITY_PAGES = [
   '/sase-sd-wan-rfp-builder/', '/resell/bt-business-broadband/',
   '/tools/bt-cloud-voice-pricing-calculator/', '/tools/bt-one-phone-replacement/',
   '/insights/broadband-reseller-companies/', '/resell/voip-reseller/',
+  '/sase/shortlist/', '/sase/shortlist/sd-wan-vendors/',
+  '/sase/shortlist/sase-vendors/', '/sase/shortlist/managed-sd-wan/',
 ] as const;
 export function measurementPage(raw: string): string {
   try {
-    const path = new URL(raw, 'https://netify.co.uk').pathname.replace(/\/+$/, '') + '/';
+    let path = new URL(raw, 'https://netify.co.uk').pathname.replace(/\/+$/, '') + '/';
+    if (path === '/sase-rfp-builder-app/') path = '/sase-sd-wan-rfp-builder/';
     return (PRIORITY_PAGES as readonly string[]).includes(path) ? path : 'other';
   } catch { return 'unknown'; }
 }

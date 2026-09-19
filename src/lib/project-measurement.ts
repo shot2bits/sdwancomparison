@@ -1,6 +1,7 @@
 import {sanitiseAttribution} from './measurement-contract';
 import type {ReportingRecord} from './activity-weekly-report';
 export function projectMeasurement(records:ReportingRecord[],attributions:Map<string,unknown>,start:number,end:number){
+ if(![start,end].every(Number.isFinite)||start>=end)throw Error('Invalid half-open reporting window');
  const groups=new Map<string,{landing_page:string;acquisition:string;drafts_saved:number;publications:number;qualified_projects:number;tests:number;nonproduction:number}>();
  for(const r of records){
   const created=r.created_at>=start&&r.created_at<end;
@@ -13,7 +14,7 @@ export function projectMeasurement(records:ReportingRecord[],attributions:Map<st
   if(r.environment!=='production'){row.nonproduction++;continue;}
   if(created)row.drafts_saved++;
   row.publications+=publications;
-  if(created&&r.activity?.classification.value==='non_test'&&r.activity.buyer_intent?.verified&&r.activity.buyer_intent.evidence_ref&&r.activity.buyer_intent.at<=end)row.qualified_projects++;
+  if(created&&r.activity?.classification.value==='non_test'&&r.activity.buyer_intent?.verified&&r.activity.buyer_intent.evidence_ref.trim()&&r.activity.buyer_intent.at>=r.created_at&&r.activity.buyer_intent.at<end)row.qualified_projects++;
  }
  return {rows:[...groups.values()],definition:'Draft creation and publication are separate activities, not leads. Qualified projects require independently recorded buyer-intent evidence. Attribution is consent-based, client-reported and retained for 90 days; absent or unsupported entrances are unknown. Publication counts are unique opportunities represented in the week, including later revisions; not new-opportunity counts.'};
 }

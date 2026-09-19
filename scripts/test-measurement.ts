@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {acquisitionFromReferrer,sanitiseAttribution} from '../src/lib/measurement-contract';
+import {acquisitionFromReferrer,sanitiseAttribution,measurementPage} from '../src/lib/measurement-contract';
+import {readFileSync} from 'node:fs';
 import {projectMeasurement} from '../src/lib/project-measurement';
 import type {ReportingRecord} from '../src/lib/activity-weekly-report';
 assert.equal(acquisitionFromReferrer(''),'direct_or_unknown');
@@ -11,3 +12,21 @@ const result=projectMeasurement([record],new Map(),0,200);
 assert.equal(result.rows[0].drafts_saved,1);assert.equal(result.rows[0].publications,1);assert.equal(result.rows[0].qualified_projects,0);assert.equal(result.rows[0].acquisition,'unknown');
 assert.equal(projectMeasurement([{...record,environment:'preview'}],new Map(),0,200).rows[0].drafts_saved,0);
 console.log('Measurement attribution, unknown classification, publication deduplication and environment checks passed.');
+for(const path of ['/sase/shortlist/','/sase/shortlist/sd-wan-vendors/','/sase/shortlist/sase-vendors/','/sase/shortlist/managed-sd-wan/']) {
+ assert.equal(measurementPage(path.slice(0,-1)),path);
+ assert.equal(measurementPage(`https://netify.co.uk${path}?results=true#comparison`),path);
+ const a=sanitiseAttribution({version:1,consent:'granted',landing_page:path,acquisition:'ai_referral'});
+ const joined=projectMeasurement([record],new Map([[record.id,a]]),0,200);
+ assert.equal(joined.rows[0].landing_page,path);
+ assert.equal(joined.rows[0].drafts_saved,1);
+ assert.equal(joined.rows[0].qualified_projects,0,'a draft and a publication are not qualification');
+}
+assert.equal(measurementPage('/sase-rfp-builder-app/?x=private'),'/sase-sd-wan-rfp-builder/');
+assert.equal(measurementPage('/sase/workspace/private-id/'),'other');
+assert.equal(measurementPage('/sase/shortlist/not-an-approved-page/'),'other');
+assert(!JSON.stringify(sanitiseAttribution({version:1,consent:'granted',landing_page:'/sase/shortlist/?email=private@example.test',acquisition:'made_up_source'})).includes('private'));
+assert.throws(()=>projectMeasurement([],new Map(),200,100),/Invalid/);
+const events=readFileSync('src/components/NetifyEvents.tsx','utf8');
+assert.match(events,/fire\('form_submit_attempt'\)/);
+assert.doesNotMatch(events,/fire\('form_submit'\)/);
+console.log('PASS shortlist family attribution, redirect alias, private-path/query removal and form-attempt semantics');

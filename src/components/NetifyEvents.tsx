@@ -253,7 +253,8 @@ export default function NetifyEvents() {
     const onSubmit = (e: Event) => {
       const form = e.target as Element | null;
       if (!form || form.tagName !== 'FORM') return;
-      fire('form_submit');
+      // DOM submission is an attempt, not server acceptance or a buying enquiry.
+      fire('form_submit_attempt');
     };
 
     document.addEventListener('click', onClick, true);
