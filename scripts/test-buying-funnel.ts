@@ -11,8 +11,10 @@ assert.deepEqual(analyticsProps({token:'secret',requirement:'Private text',sourc
 process.env.VERCEL_ENV = 'production';
 await withFakeKv(async()=>{
  const {recordMarketplaceFunnelEvent}=await import('../src/lib/marketplace-funnel');
- const {kvRaw,createSession}=await import('../src/lib/rfp-store');
+ const {kvRaw,kvSetJson,createSession}=await import('../src/lib/rfp-store');
  const {GET}=await import('../src/app/api/admin/buying-funnel/route');
+ // Activity records require a persisted project; keep this fixture isolated in fake KV.
+ await kvSetJson('rfp:test_project', {id:'test_project'});
  for(let i=0;i<2;i++)await recordMarketplaceFunnelEvent({event:'publication_completed',project_id:'test_project',source:'private@example.test',mode:'Secret requirements',channel:'web',detail:{company:'Private Ltd',token:'secret',revision:2,board_created:true}});
  const raw=await kvRaw(['LRANGE','marketplace:funnel:events',0,-1]) as string[];
  assert.equal(raw.length,1);assert(!raw[0].includes('Private'));assert(!raw[0].includes('secret'));assert(!raw[0].includes('@'));assert.equal(JSON.parse(raw[0]).source,'unknown');

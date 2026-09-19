@@ -1,3 +1,13 @@
+# Buyer recovery and publication exceptions — 19 September 2026
+
+Branch codex/buyer-recovery-20260919 starts from live 32cb801. Replace supplier-count/bid promises in the existing one-off nudge with latest retained publication-outcome-aware copy, reply-to-support review, escaped HTML and stronger internal/test exclusions. Do not replay previously sent reminders. No cron was manually invoked.
+
+Admin Needs attention lists external blocked-publication records and published projects with zero supplier connections, with reason, age and explicitly unknown personal follow-up. Retained history is bounded; not a qualified-lead count. Queue has no action buttons and creates no access exceptions. Admin responses are private/no-store. Buyer workspaces remain private.
+
+Shared public notice projection removes only exact generated empty-editor instructions, distinguishes short briefs from full-RFP response mode with question evidence, and uses the notice's response deadline with legacy deadline fallback. Future RFP publication passes its existing response window into the notice. Admin brokering shows that same published deadline. Historical missing deadlines are not invented or silently backfilled. Original buyer wording and stored records are preserved.
+
+Tests exposed a stale buying-funnel fixture (missing persisted project), corrected in fake KV, and an initial telemetry read outside the failure-isolation guard, now protected. Targeted recovery/notice/publication-policy/activity/funnel checks and initial production build passed. Final release verification follows separately. No real email, invitation, publication, database migration or gate relaxation performed.
+
 # Comparison and attribution repair — 19 September 2026
 
 Work continues from verified production 47c6d64 on `codex/lead-measurement-20260919`; stale `main` was inspected but NOT merged. Repair exact capability mappings, remove unrelated proxy evidence, preserve partial/partner grades in composite SASE, and add six dated vendor-documentation corrections with visible scope, expiry and newer-governed-review precedence. Public comparison and MCP claim verification share these corrections. No supplier invitations, policy-gate changes or database imports.

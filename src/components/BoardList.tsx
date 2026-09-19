@@ -152,6 +152,7 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
                     <>
                       <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 font-medium uppercase tracking-wide text-[var(--ink-600)]">{RESPONSE_MODE_LABELS[o.response_mode] ?? (o.engagement_type === "auction" ? "Auction" : "Quote room")}</span>
                       {o.has_full_rfp && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Full RFP included</span>}
+                      {!o.has_full_rfp && o.rfp_shape && <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5">Short project brief</span>}
                     </>
                   )}
                   {/* Neutral, not emerald (Robert's ruling, 28 Jul 2026):

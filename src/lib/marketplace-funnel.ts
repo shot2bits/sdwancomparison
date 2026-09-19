@@ -17,7 +17,8 @@ export async function recordMarketplaceFunnelEvent(input: { event: MarketplaceFu
  if (!FUNNEL_EVENTS.includes(input.event) || !/^[a-zA-Z0-9_-]{1,100}$/.test(input.project_id)) return;
  const detail = Object.fromEntries(Object.entries(input.detail??{}).filter(([key,value])=>["revision","considered_count","board_created"].includes(key) && (typeof value==="boolean" || (typeof value==="number" && Number.isFinite(value)))));
  const environment = activityEnvironment();
- const project = await kvGetJson<{activity?:import("./activity-provenance").ActivityMetadata}>(`rfp:${input.project_id}`);
+ let project: {activity?:import("./activity-provenance").ActivityMetadata} | null;
+ try { project = await kvGetJson(`rfp:${input.project_id}`); } catch { return; /* Reporting must not fail the primary buyer action. */ }
  if (!project) return;
  let classification: "test" | "unverified" = "unverified";
  try { classification = activityClassification(await kvGetJson(`rfp:${input.project_id}`)); } catch { /* Unverified is not a confirmed buyer. */ }

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:buyer-recovery": "tsx scripts/test-buyer-recovery.ts && tsx scripts/test-notice-recovery.ts",
     "dev": "next dev",
     "build": "node scripts/build-release.mjs",
     "start": "next start",

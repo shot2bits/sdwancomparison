@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import SignIn from "@/components/SignIn";
+import type { AttentionItem } from "@/lib/buyer-recovery";
 
 type SessionInfo = { authenticated: boolean; role?: string; email?: string; admin?: boolean };
 type AdminSession = { token: string; role: string; email: string; vendor_slug: string | null; created: number; expires: number };
@@ -47,6 +48,8 @@ type PublishLead = {
   } | null;
 };
 type Overview = {
+  generated_at?: number;
+  attention?: AttentionItem[];
   admin_email: string;
   sessions: AdminSession[];
   users: UserRow[];
@@ -150,6 +153,20 @@ export default function AdminClient() {
       <p className="text-sm text-[var(--ink-600)]">Signed in as <strong>{data.admin_email}</strong>. <button onClick={load} className="underline" disabled={busy}>Refresh</button></p>
       {error && <p className="text-sm text-red-700">{error}</p>}
       {notice && <p className="text-sm text-emerald-700">{notice}</p>}
+
+      <section className={card}>
+        <h2 className={h2}>Needs attention</h2>
+        <p className={sub}>External projects with a retained blocked-publication record, or a published project with no supplier connections. Identified tests and internal accounts are excluded. Historical publication records are retention-limited; this is not a qualified-lead count.</p>
+        <p className="text-sm mb-4">Review owner: Netify support team. Personal follow-up is not recorded here; check the support mailbox before contacting anyone. Nothing in this queue approves, publishes or invites suppliers.</p>
+        {(data.attention ?? []).length === 0 ? <p>No matching exceptions in the available records.</p> : <ul className="space-y-4">
+          {(data.attention ?? []).map(item => <li key={item.id} className="border border-[var(--ink-200,#e5e5e5)] rounded-sm p-3">
+            <p className="font-medium">{item.title}</p><p className="text-sm">{item.email} · {item.id}</p>
+            <p className="text-sm">{item.status} · recorded {when(item.at)}{data.generated_at ? ` · ${Math.max(0,Math.floor((data.generated_at-item.at)/86400000))} days old at refresh` : ''}</p>
+            <p className="text-sm mt-2">{item.reason}</p>
+            <p className="text-xs mt-2">Follow-up status: unknown — confirm in the support mailbox. Buyer workspace access remains private.</p>
+          </li>)}
+        </ul>}
+      </section>
 
       {/* Brokering queue: until suppliers register, the team delivers the
           private response links. Copy, send, mark forwarded. */}

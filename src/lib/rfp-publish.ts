@@ -177,7 +177,7 @@ function boardScope(p: ProjectDetails): OppScope[] {
 export async function listRfpOnBoard(
   p: ProjectDetails,
   ownerEmail: string,
-  opts: { publishedRevisionId?: string } = {},
+  opts: { publishedRevisionId?: string; responseDeadline?: number | null } = {},
 ): Promise<{ opportunity_id: string; url: string }> {
   const visibility = "public" as const;
   const mapKey = `rfp:${p.id}:board_opp`;
@@ -237,6 +237,7 @@ export async function listRfpOnBoard(
     engagement_type: "quote_room",
     auction_format: "open",
     deadline: null,
+    response_deadline: opts.responseDeadline ?? p.response_deadline ?? existing?.response_deadline ?? existing?.deadline ?? null,
     eligibility: "open",
     visibility,
     awarded_vendor_slug: existing?.awarded_vendor_slug ?? null,
@@ -935,7 +936,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
     };
   } else {
     try {
-      const listed = await listRfpOnBoard(working, sessionEmail, { publishedRevisionId });
+      const listed = await listRfpOnBoard(working, sessionEmail, { publishedRevisionId, responseDeadline });
       board = { listed: true, ...listed, visibility: "public" as const };
       if (attempt.board_opportunity_id !== listed.opportunity_id) {
         attempt = await savePublicationAttempt({ ...attempt, board_opportunity_id: listed.opportunity_id });

@@ -1,7 +1,9 @@
 import {activityMailFetch} from "@/lib/activity-mail";
 import { getProjectsBulk, kvConfigured, kvGetJson, kvMgetJson, kvSetJson, listAllRfpIds } from "@/lib/rfp-store";
 import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
-import { matchSuppliers } from "@/lib/supplier-match";
+import { latestPublicationOutcomes, recoveryReminder, type PublicationOutcome } from "@/lib/buyer-recovery";
+import { activityClassification } from "@/lib/activity-provenance";
+import { isAdminEmail } from "@/lib/access-control";
 import { SITE_URL } from "@/lib/structured-data";
 import { getBounces, recordResendSend } from "@/lib/email-bounces";
 
@@ -32,48 +34,6 @@ function cronAuthorised(req: Request): boolean {
   return req.headers.get("authorization") === `Bearer ${secret}`;
 }
 
-function matchParamsFor(p: { buyer: { product_scope: string; operating_model: string; regions: string[] } }) {
-  const scope = p.buyer.product_scope === "sdwan_only" ? "sdwan" : p.buyer.product_scope === "sse_only" ? "sse" : "sase";
-  const model = p.buyer.operating_model === "managed" || p.buyer.operating_model === "diy" ? p.buyer.operating_model : "any";
-  return { scope, regions: p.buyer.regions ?? [], model };
-}
-
-function emailBodies(title: string, count: number, link: string, unsubUrl: string) {
-  const matchLine = count > 0
-    ? `${count} vendors and managed service providers on the Netify marketplace currently match what you described.`
-    : "Verified vendors and managed service providers on the Netify marketplace are matched to what you described.";
-  const benefits = [
-    "Indicative pricing, private to you",
-    "Demo and proof of concept requests",
-    "Evidence documents and PDF collateral",
-    "Messaging with vendors and managed providers inside the app",
-    "Sales and account contact only when you choose",
-    "Independent scoring of every response",
-  ];
-  const text = [
-    `You built the RFP "${title}" on the Netify marketplace but have not submitted it yet. Until you submit, no vendor can see it and nothing is shared.`,
-    matchLine,
-    "Submitting invites each matched vendor and service provider to respond through a structured form, so you receive comparable bids without speaking to a single salesperson. It is the fastest and simplest way to see whether your requirements match the market.",
-    "What submitting gets you:",
-    ...benefits.map((b) => `- ${b}`),
-    `Submit your RFP: ${link}`,
-    "The link is private to you. Vendors and service providers never see your email address or phone number.",
-    "Netify",
-    `You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits.\nUnsubscribe: ${unsubUrl}`,
-  ].join("\n\n");
-  const html = [
-    `<p>You built the RFP "<strong>${title}</strong>" on the Netify marketplace but have not submitted it yet. Until you submit, no vendor can see it and nothing is shared.</p>`,
-    `<p>${matchLine}</p>`,
-    `<p>Submitting invites each matched vendor and service provider to respond through a structured form, so you receive comparable bids <strong>without speaking to a single salesperson</strong>. It is the fastest and simplest way to see whether your requirements match the market.</p>`,
-    `<p>What submitting gets you:</p><ul>${benefits.map((b) => `<li>${b}</li>`).join("")}</ul>`,
-    `<p><a href="${link}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Submit your RFP</a></p>`,
-    `<p>The link is private to you. Vendors and service providers never see your email address or phone number.</p>`,
-    `<p>Netify</p>`,
-    `<p style="font-size:12px;color:#666;">You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits. <a href="${unsubUrl}" style="color:#666;">Unsubscribe</a></p>`,
-  ].join("");
-  return { text, html };
-}
-
 export async function GET(req: Request) {
   if (!cronAuthorised(req)) {
     return Response.json({ error: process.env.CRON_SECRET ? "Unauthorised." : "CRON_SECRET not configured." }, { status: 401 });
@@ -89,6 +49,7 @@ export async function GET(req: Request) {
 
   const ids = await listAllRfpIds();
   const projects = await getProjectsBulk(ids);
+  const outcomes = latestPublicationOutcomes(await kvGetJson<PublicationOutcome[]>("publish:leads") ?? []);
   // Early-capture contact emails (the wizard's optional field): drafts with
   // no owner become reachable through the address the buyer volunteered for
   // exactly this purpose ("your RFP link and one reminder if you do not
@@ -113,7 +74,7 @@ export async function GET(req: Request) {
     if (p.status !== "draft" && p.status !== "review") { skipped.published += 1; continue; }
     const owner = ((p.owner_email ?? "").toLowerCase().trim()) || (contactByIndex.get(idx) ?? "");
     if (!owner) { skipped.anonymous += 1; continue; }
-    if (owner.endsWith("@netify.com")) { skipped.internal += 1; continue; }
+    if (isAdminEmail(owner) || /@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/.test(owner) || activityClassification(p) === "test") { skipped.internal += 1; continue; }
     if (optoutSet.has(owner)) { skipped.opted_out += 1; continue; }
     if (bounces.has(owner)) { skipped.known_bounced += 1; continue; }
     const lastTouch = Math.max(p.updated ?? 0, p.created ?? 0);
@@ -121,17 +82,13 @@ export async function GET(req: Request) {
     const flagKey = `rfp:nudge:${p.id}`;
     if (await kvGetJson<number>(flagKey)) { skipped.already_nudged += 1; continue; }
 
-    const match = matchSuppliers(matchParamsFor(p));
     const title = p.title?.trim() || "Untitled RFP";
     const link = `${SITE_URL}/rfp-builder/${p.id}?manage=${encodeURIComponent(p.manage_token ?? "")}#publish`;
-    const subject = match.count > 0
-      ? `${match.count} vendors match your RFP. Submit to invite them`
-      : "Your Netify RFP is one step from vendor bids";
 
     if (dry) { sent += 1; continue; }
 
     const unsubUrl = `${SITE_URL}/api/email/unsubscribe?e=${encodeURIComponent(owner)}&t=${signUnsubscribe(owner)}`;
-    const { text, html } = emailBodies(title, match.count, link, unsubUrl);
+    const { subject, text, html } = recoveryReminder(title, link, unsubUrl, outcomes.get(p.id));
     try {
       const res = await activityMailFetch("https://api.resend.com/emails", {
         method: "POST",

@@ -9,6 +9,7 @@
  */
 
 import { z } from "zod";
+import { cleanPublishedSummary, publishedDeadline } from "./notice-presentation";
 import { noticeDisplayTitle } from "@/lib/notice-title";
 import { siteBandLabelFor, siteFigureIsIdentifying } from "@/lib/notice-options";
 import { anonymousBuyerOrganisation } from "@/lib/publication-policy";
@@ -305,7 +306,7 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     sites: siteFigureIsIdentifying(o) ? null : o.sites,
     site_band: siteFigureIsIdentifying(o) ? siteBandLabelFor(o.sites) : null,
     regions: o.regions,
-    summary: o.summary,
+    summary: o.source_rfp_id ? cleanPublishedSummary(o.summary) : o.summary,
     budget_note: o.budget_note,
     timeline_note: o.timeline_note,
     status: o.status,
@@ -333,7 +334,7 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     evidence_requested: o.evidence_requested,
     evaluation_priorities: o.evaluation_priorities,
     response_mode: o.response_mode,
-    response_deadline: o.response_deadline,
+    response_deadline: publishedDeadline(o),
     decision_target: o.decision_target,
     go_live_target: o.go_live_target,
     ai_summary: o.ai_summary,
@@ -341,6 +342,6 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     ai_gap_flags: o.ai_gap_flags,
     methodology_version: o.methodology_version,
     rfp_shape: o.rfp_shape ?? null,
-    has_full_rfp: Boolean(o.source_rfp_id),
+    has_full_rfp: Boolean(o.source_rfp_id && o.response_mode === 'full_rfp' && (o.rfp_shape?.total ?? 0) > 0),
   };
 }
