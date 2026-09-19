@@ -16,6 +16,8 @@ import { SITE_URL } from "@/lib/structured-data";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 import { buildEnvelopeUpdate } from "@/lib/workspace/envelope";
+import {sanitiseAttribution} from '@/lib/measurement-contract';
+import {kvRaw} from '@/lib/rfp-store';
 
 /**
  * Early-capture contact email (the wizard's optional "get a link to this RFP
@@ -102,6 +104,7 @@ export async function POST(req: Request) {
     entrance_context?: unknown;
     journey_mode?: unknown;
     sector_profile?: unknown;
+    measurement_attribution?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -240,6 +243,9 @@ export async function POST(req: Request) {
     });
   } catch { /* the history is a record, never a gate */ }
   const saved = await saveProject(project);
+  // Private sidecar: never attach attribution to a project or public snapshot.
+  const attribution=sanitiseAttribution(body.measurement_attribution);
+  if(attribution)try{await kvRaw(['SET',`measurement:attribution:${saved.id}`,JSON.stringify(attribution),'EX',90*86400]);}catch{/* Attribution failure must not invalidate an already saved project. */}
   if (ownerEmail) {
     try { await indexRfpForBuyer(ownerEmail, saved.id); } catch { /* best effort */ }
   }

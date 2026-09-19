@@ -19,3 +19,10 @@ No customer data changes, publication, supplier messages, grade imports or migra
 ## Pre-release verification
 
 Full npm run build (including validation suite) passed. Public evidence ordering, canonical buyer facts and new audit-fix regression tests passed. Read-only MCP discovery passed on isolated local storage; invalid private session returned the safe authentication error. Browser comparison of Cato and Cisco rendered capability rows with no console errors. No live write tools used.
+# Measurement changes — 19 September 2026
+
+Work branch `codex/lead-measurement-20260919`, based on verified Git production 220253707ca15f5dd43c60fb98739e20230bc611 (dpl_37XpL4bXQrMANFCywDDHKjWktrjN). Production alias project-8q2xb.vercel.app follows this project; no alias reassignment is required.
+
+Retains the private-route Google Analytics guard. Stops nonproduction commercial tracking; consent-gates first-touch storage; carries the apex coarse landing/source category into consented events without identifiers; renames UI source to interaction_source for GA. Principal RFP creation routes store a sanitised, private 90-day attribution sidecar, never in public projects/snapshots. Admin activity reporting now defaults to the trailing seven days and groups attributed draft/publication activity separately from independently qualified projects. Unsupported/historical attribution stays unknown.
+
+Pre-release: full production build including validation suite passes; activity reporting/access tests pass; new measurement attribution/deduplication/environment checks pass; TypeScript passes. No customer publication, invitation, notification or live synthetic enquiry. No schema migrations or matching-policy changes. Deployment and public-domain verification will be recorded after Git release.

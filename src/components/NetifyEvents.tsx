@@ -6,6 +6,7 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { analyticsPath, analyticsReferrer, analyticsLocation, analyticsProps } from '@/lib/analytics-privacy';
+import { journeyAttribution } from '@/lib/journey-attribution';
 
 type VaFn = {
  (event: 'event', props: {name:string;data?:Record<string,string>}):void;
@@ -85,6 +86,7 @@ export function fireNetifyEvent(name: string, data: Record<string, string> = {})
  */
 export function firstTouch(): { ref: string; landing: string } | null {
   try {
+    if (!readConsent().analytics) {sessionStorage.removeItem('netify_first_touch'); return null;}
     const raw = sessionStorage.getItem("netify_first_touch");
     if (!raw) return null;
     const t = JSON.parse(raw) as { ref?: string; landing?: string };
@@ -95,8 +97,10 @@ export function firstTouch(): { ref: string; landing: string } | null {
 }
 
 function fire(name: string, data: Record<string, string> = {}): void {
+  if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') return;
   if (!readConsent().analytics) return;
-  const payload = { ...analyticsProps(data), path: analyticsPath(window.location.href) };
+  const journey=journeyAttribution();
+  const payload = { ...analyticsProps(data), path: analyticsPath(window.location.href), measurement_version:'2', ...(journey?{landing_page:journey.landing_page,acquisition:journey.acquisition}:{acquisition:'unknown'}) };
   try {
     window.va?.('event', { name, data: payload });
   } catch {
@@ -105,7 +109,8 @@ function fire(name: string, data: Record<string, string> = {}): void {
   try {
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void })
       .gtag;
-    if(googleAllowed())gtag?.('event', name, { event_category: 'commercial', ...payload, page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
+    const {source, ...googlePayload} = payload as typeof payload & {source?:string};
+    if(googleAllowed())gtag?.('event', name, { event_category: 'commercial', ...googlePayload, ...(source ? {interaction_source:source} : {}), page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
   } catch {
     /* ignore */
   }
@@ -114,12 +119,15 @@ function fire(name: string, data: Record<string, string> = {}): void {
 export default function NetifyEvents() {
   const pathname=usePathname();
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') return;
     installGooglePrivacyGuard();
+    journeyAttribution();
     // First-touch attribution capture, once per browser session (see
     // firstTouch above). Must run before anything else so a visitor who
     // signs in on their landing page still gets attributed.
     try {
-      if (!sessionStorage.getItem("netify_first_touch")) {
+      if (!readConsent().analytics) sessionStorage.removeItem('netify_first_touch');
+      else if (!sessionStorage.getItem("netify_first_touch")) {
         sessionStorage.setItem(
           "netify_first_touch",
           JSON.stringify({ ref: analyticsReferrer(document.referrer), landing: analyticsPath(window.location.href), at: Date.now() }),
@@ -260,4 +268,3 @@ export default function NetifyEvents() {
 
   return null;
 }
-

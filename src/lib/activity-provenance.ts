@@ -11,7 +11,7 @@ export function explicitTestEvidence(record:unknown):string|null {
  const p=record as {test?:boolean;company?:string;applicantMessage?:string;buyer?:{organisation?:string;notes?:string};owner_email?:string;entrance_context?:{requirement_text?:string}};
  if(p.test===true)return 'explicit_test_flag';
  const text=[p.company,p.applicantMessage,p.buyer?.organisation,p.buyer?.notes,p.entrance_context?.requirement_text].filter(Boolean).join(' ');
- if(/\b(?:synthetic|automated QA|do not publish|usability test|QA control|QA audit|private acceptance draft|HTML testing|Netify QA)\b/i.test(text))return 'explicit_internal_or_test_statement';
+ if(/\b(?:TEST ONLY|delivery test|synthetic|automated QA|do not publish|usability test|QA control|QA audit|private acceptance draft|HTML testing|Netify QA)\b/i.test(text))return 'explicit_internal_or_test_statement';
  if(p.buyer?.organisation?.trim().toLowerCase()==='test'&&/@netify\.(com|co\.uk)$/i.test(p.owner_email??''))return 'internal_owner_and_explicit_test_organisation';
  return null;
 }

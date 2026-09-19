@@ -64,6 +64,7 @@ import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import {journeyAttribution} from '@/lib/journey-attribution';
 import { hasPublished } from "@/lib/project-machine";
 /** Living Procurement OS · Phase 3 Stage A (14 Aug 2026): wires the
  *  existing, pure `compileProcurementDocument()` compiler into this real
@@ -3553,6 +3554,7 @@ export default function ProjectDesk({
     ].filter(Boolean).join(" ");
     return {
       title: publishTitle,
+      measurement_attribution: journeyAttribution(),
       buyer: {
         sector: sectorKey,
         site_count: requirement.estate?.sites ?? null,

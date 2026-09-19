@@ -23,6 +23,7 @@ import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
 import { publicationReceipt } from "@/lib/publication-receipt";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import {journeyAttribution} from '@/lib/journey-attribution';
 import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
 import FlowStageStrip, { type FlowStage } from "@/components/FlowStageStrip";
 import { hasPublished } from "@/lib/project-machine";
@@ -622,7 +623,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function startRfp(buyer?: Record<string, unknown>) {
     setCreating(true); setError(null);
     try {
-      const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buyer ? { buyer } : {}) });
+      const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({...(buyer?{buyer}:{}),measurement_attribution:journeyAttribution()}) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not start an RFP."); }
       const p = (await res.json()) as ProjectDetails;
       applyProject(p); // create returns the full token; persist it client-side

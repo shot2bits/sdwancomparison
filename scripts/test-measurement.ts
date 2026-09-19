@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {acquisitionFromReferrer,sanitiseAttribution} from '../src/lib/measurement-contract';
+import {projectMeasurement} from '../src/lib/project-measurement';
+import type {ReportingRecord} from '../src/lib/activity-weekly-report';
+assert.equal(acquisitionFromReferrer(''),'direct_or_unknown');
+assert.equal(acquisitionFromReferrer('https://chatgpt.com.evil.test'),'other_referral');
+assert.equal(acquisitionFromReferrer('https://chatgpt.com/c/private'),'ai_referral');
+assert.equal(sanitiseAttribution({version:1,consent:'not_granted'}),undefined);
+const record:ReportingRecord={app:'sase',id:'test-record',environment:'production',route:'project',created_at:100,publications:[{id:'revision1',opportunity_id:'opp1',at:120},{id:'revision2',opportunity_id:'opp1',at:130}]};
+const result=projectMeasurement([record],new Map(),0,200);
+assert.equal(result.rows[0].drafts_saved,1);assert.equal(result.rows[0].publications,1);assert.equal(result.rows[0].qualified_projects,0);assert.equal(result.rows[0].acquisition,'unknown');
+assert.equal(projectMeasurement([{...record,environment:'preview'}],new Map(),0,200).rows[0].drafts_saved,0);
+console.log('Measurement attribution, unknown classification, publication deduplication and environment checks passed.');

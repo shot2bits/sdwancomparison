@@ -1,4 +1,5 @@
 import {invitationOpportunity} from './activity-joins';
+import {projectMeasurement} from './project-measurement';
 import {kvRaw,kvGetJson} from './rfp-store';
 import {readActivityAudit} from './activity-audit';
 import {explicitTestEvidence} from './activity-provenance';
@@ -6,11 +7,13 @@ import {normaliseEnvironment,type ReportingRecord,type ReportingEvent} from './a
 import type {ProjectDetails,SupplierConnection,RfpResponse} from './rfp-types';
 import type {PublishedSnapshot} from './published-snapshot';
 /** Raw reads only: do not call lazy-healing project/opportunity accessors in a report. */
-export async function readActivityReportingRecords(){
+export async function readActivityReportingRecords(start?:number,end?:number){
+ const attributions=new Map<string,unknown>();
  const keys=new Set<string>();let cursor='0';do{const result=await kvRaw(['SCAN',cursor,'MATCH','rfp:*','COUNT',500]) as [string,string[]];cursor=String(result[0]);for(const key of result[1])if(/^rfp:[a-zA-Z0-9_-]+$/.test(key))keys.add(key);}while(cursor!=='0');
  const records:ReportingRecord[]=[];const unresolved={publication_opportunities:0,invitation_opportunities:0,response_invitations:0,response_substance_unverified:0};
  for(const key of keys){
   const p=await kvGetJson<ProjectDetails>(key);if(!p?.id||!p.buyer)continue;
+  if(start!==undefined&&end!==undefined)attributions.set(p.id,await kvGetJson(`measurement:attribution:${p.id}`));
   const environment=normaliseEnvironment(p.activity?.environment??p.activity_environment);
   const audit=await readActivityAudit('sase',environment,p.id);
   const snapshots=await kvGetJson<PublishedSnapshot[]>(`rfp:${p.id}:published_snapshots`)??[];
@@ -32,5 +35,5 @@ export async function readActivityReportingRecords(){
  const events:ReportingEvent[]=[];for(const env of ['production','preview','development','unknown']){const raw=await kvRaw(['LRANGE',`activity:events:sase:${env}`,0,-1]);for(const r of Array.isArray(raw)?raw:[]){const e=JSON.parse(String(r));events.push({app:'sase',environment:normaliseEnvironment(e.environment),record_id:e.project_id,event:e.event,id:e.id,at:e.at});}}
  const legacy=await kvRaw(['LRANGE','marketplace:funnel:events',0,-1]);
  for(const raw of Array.isArray(legacy)?legacy:[]){const e=JSON.parse(String(raw));if(e.version!=='marketplace-funnel/2.0.0'||!['project_started','publication_completed','supplier_response'].includes(e.event))events.push({app:'sase',environment:normaliseEnvironment(e.environment),record_id:e.project_id,event:e.event,id:`legacy:${e.project_id}:${e.event}:${e.at}`,at:e.at});}
- return {records,events,unresolved_joins:unresolved,limitations:['Published snapshot history retains at most 50 revisions per project. Expired/deleted records cannot be recovered.','Invitation delivery timestamps represent the saved delivery evidence; provider acceptance is not delivery.','Connections with multiple possible historical opportunities and no explicit join are excluded; their attribution requires review. No SASE commercial-stage source is currently wired; absence of recorded outcomes is not evidence of no off-platform deal.']};
+ return {records,events,measurement:start!==undefined&&end!==undefined?projectMeasurement(records,attributions,start,end):undefined,unresolved_joins:unresolved,limitations:['Published snapshot history retains at most 50 revisions per project. Expired/deleted records cannot be recovered.','Invitation delivery timestamps represent the saved delivery evidence; provider acceptance is not delivery.','Connections with multiple possible historical opportunities and no explicit join are excluded; their attribution requires review. No SASE commercial-stage source is currently wired; absence of recorded outcomes is not evidence of no off-platform deal.']};
 }

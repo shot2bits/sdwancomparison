@@ -22,6 +22,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
+import {journeyAttribution} from '@/lib/journey-attribution';
 import WizardProgressRail, { WizardProgressBar } from "@/components/WizardProgressRail";
 import FlowStageStrip from "@/components/FlowStageStrip";
 import { REGIONS, SITES_BANDS, USERS_BANDS, SECTORS } from "@/lib/notice-options";
@@ -303,7 +304,7 @@ export default function DescribeWizard() {
         // whose magic-link click never happens. No email is ever sent about
         // the draft itself; the only email is Confirm and submit.
         const contact_email = submit && email.trim().includes("@") ? email.trim() : undefined;
-        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: finalTitle, buyer, consent, pending_submit, contact_email }) });
+        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: finalTitle, buyer, consent, pending_submit, contact_email, measurement_attribution:journeyAttribution() }) });
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
         const p = (await res.json()) as { id: string; manage_token?: string };
         // POST /api/rfp returns manage_token directly in this same response
