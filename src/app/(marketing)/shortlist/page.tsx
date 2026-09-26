@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
+import { PROVIDER_ROLE_GUIDE } from "@/lib/uk-shortlist";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST } from "@/lib/vendors";
@@ -32,8 +33,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const query = await searchParams;
   const view = parseShortlistMarketView(typeof query.view === "string" ? query.view : undefined);
   const viewTitle = SHORTLIST_VIEWS[view].title;
-  const title = `${viewTitle} (2026): 30-Provider Research Dataset`;
-  const description = `${SHORTLIST_VIEWS[view].answer} Compare public evidence and publish a short project to unlock personalised matches.`;
+  const title = view === "all" ? "Compare SD-WAN & SASE Providers for UK Businesses" : `${viewTitle} (2026): 30-Provider Research Dataset`;
+  const description = view === "all" ? "Compare SD-WAN and SASE providers for UK businesses. Explore platform and managed-service evidence, plan UK or overseas requirements, and build your provider shortlist." : `${SHORTLIST_VIEWS[view].answer} Compare public evidence and publish a short project to unlock personalised matches.`;
   return {
     title,
     description,
@@ -67,7 +68,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
     getShortlistWebApplicationSchema(),
     getShortlistDatasetSchema(vendors.length, features.length, verified),
     getShortlistFaqSchema(SHORTLIST_FAQS),
-    { "@context": "https://schema.org", "@type": "WebPage", name: SHORTLIST_VIEWS[selectedView].title, url: selectedView === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${selectedView}/`, dateModified: verified },
+    { "@context": "https://schema.org", "@type": "WebPage", name: selectedView === "all" ? SHORTLIST_INTRO.h1 : SHORTLIST_VIEWS[selectedView].title, url: selectedView === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${selectedView}/`, dateModified: verified },
     {
       "@context": "https://schema.org", "@type": "ItemList", name: "SD-WAN and SASE provider evidence",
       numberOfItems: viewRanking.length,
@@ -121,7 +122,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
           <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
             <caption className="sr-only">Comparative overview of {viewRanking.length} {inSentence(SHORTLIST_VIEWS[selectedView].label)}, updated {verified}</caption>
             <thead className="bg-[var(--ink-50,#f6f8fa)]">
-              <tr>{["Provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
+              <tr>{["Provider", "Provider role", "Technology / products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
             </thead>
             <tbody>
               {viewRanking.map((provider) => {
@@ -176,17 +177,32 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
           href="https://netify.co.uk/sase-sd-wan-rfp-builder/"
           className="inline-flex shrink-0 items-center gap-2 font-semibold text-zinc-950 underline decoration-amber-500 decoration-2 underline-offset-4"
         >
-          Start my project
+          Build my provider shortlist
           <span aria-hidden="true">→</span>
         </a>
       </aside>
+      {selectedView === "all" && <aside aria-label="Discuss a new SD-WAN or SASE project" className="mb-8 flex flex-col gap-3 rounded-lg border border-slate-300 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div><h2 className="text-lg font-semibold">Discuss your UK SD-WAN or SASE project</h2><p className="mt-1 text-sm text-slate-700">Talk to Netify about a new purchase, renewal or migration.</p></div>
+        <a href="tel:+443332021011" className="inline-flex shrink-0 flex-col rounded-lg bg-[#233849] px-5 py-3 text-white no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-800"><span className="text-xs">Call Netify sales</span><span className="text-xl font-semibold">0333 202 1011</span></a>
+      </aside>}
+
+      {selectedView === "all" && <section className="mb-8 rounded-lg border border-zinc-200 bg-white p-5" aria-labelledby="provider-roles-title">
+        <h2 id="provider-roles-title" className="text-xl">Compare the technology and the company delivering it</h2>
+        <p className="mt-2 text-sm text-zinc-600">A provider can have more than one role. The comparison retains the classifications and products in each provider’s published evidence.</p>
+        <dl className="mt-4 grid gap-4 md:grid-cols-3">
+          {PROVIDER_ROLE_GUIDE.map((item) => <div key={item.role}>
+            <dt className="font-semibold">{item.role}</dt>
+            <dd className="mt-1 text-sm leading-6 text-zinc-700">{item.description}</dd>
+          </div>)}
+        </dl>
+      </section>}
 
       {/* The comparison, requirements and RFP routes are the primary user
           task, so they appear before the supporting research content. */}
       {listFirst && listBlocks}
 
       <Suspense fallback={null}>
-        <ShortlistBuilder vendors={vendors} features={features} initialView={selectedView} />
+        <ShortlistBuilder vendors={vendors} features={features} initialView={selectedView} ukBuyerGuidance={selectedView === "all"} />
       </Suspense>
 
       <div className="mb-8 max-w-4xl">
@@ -224,7 +240,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
           ))}
         </div>
         <div className="mt-5 rounded-lg border border-[var(--ink-200,#e8ebef)] bg-[var(--ink-50,#f6f8fa)] p-5">
-          <p className="eyebrow mb-2">2026 market answer</p>
+          <p className="eyebrow mb-2">{selectedView === "all" ? "UK buyer’s comparison · 2026" : "2026 market answer"}</p>
           <h2 id="market-view-title" className="text-xl">{SHORTLIST_VIEWS[selectedView].title}</h2>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--ink-700)]">{SHORTLIST_VIEWS[selectedView].answer}</p>
           <p className="mt-2 text-xs text-[var(--ink-500)]">{viewRanking.length} providers in this evidence view. Reviewed {verified}. View contract {SHORTLIST_VIEW_CONTRACT_VERSION}.</p>

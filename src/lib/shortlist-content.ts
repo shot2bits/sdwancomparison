@@ -5,6 +5,18 @@
 
 export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   {
+    q: "How should a UK business compare SD-WAN and SASE providers?",
+    a: "Compare the technology platform and delivery company separately. Confirm connectivity at each site, who deploys and manages the service, support hours, escalation ownership, migration responsibilities and the scope of the contract. Use the provider evidence to prepare questions; confirm project-specific commitments in the supplier proposal.",
+  },
+  {
+    q: "Can I compare providers for UK and overseas offices?",
+    a: "Yes. Choose the UK headquarters with overseas offices buying situation and describe the countries and sites in your project. The public comparison retains the full provider catalogue; selecting a situation does not certify coverage or create a personalised ranking. Confirm local delivery and support for each location with the supplier.",
+  },
+  {
+    q: "Does a UK point of presence confirm UK data residency?",
+    a: "A UK point of presence alone does not establish where all traffic is inspected or logs are stored. Ask the supplier to evidence traffic processing, log storage, administration access and failover locations for the specific service you are buying.",
+  },
+  {
     q: "Which SD-WAN vendor is best?",
     a: "There is no single best vendor for every estate. The right shortlist depends on operating model, regions, applications, security requirements and the evidence a supplier can provide for the project.",
   },
@@ -47,8 +59,8 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
 ];
 
 export const SHORTLIST_INTRO = {
-  eyebrow: "SD-WAN and SASE shortlist builder",
-  h1: "Compare SD-WAN and SASE providers, vendors and managed services",
+  eyebrow: "For UK IT decision makers",
+  h1: "Compare SD-WAN and SASE providers for UK businesses",
   subhead:
     "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Explore the public provider evidence, then review and publish an anonymous project when you are ready. Personalised matching is available through authorised access after publication. Publication does not guarantee invitations or supplier responses. A full RFP is optional.",
 };

@@ -1,4 +1,5 @@
 import { publicEvidenceProviders, publicEvidenceOutput, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
+import { UK_BUYING_SITUATIONS, PROVIDER_ROLE_GUIDE } from "@/lib/uk-shortlist";
 import { FEATURES } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { SITE_URL } from "@/lib/structured-data";
@@ -37,6 +38,7 @@ export async function GET(request: Request) {
         sources_total: vendors.reduce((n, provider) => n + (provider.evidence_source_count ?? 0), 0),
       },
       faqs: SHORTLIST_FAQS,
+      uk_buyer_guidance: { situations: UK_BUYING_SITUATIONS, provider_roles: PROVIDER_ROLE_GUIDE, notice: "Buying guidance only. A situation does not certify coverage, filter providers or change evidence grades." },
       features: FEATURES,
       vendors,
       governed_provider_profiles: vendors.map((provider) => ({

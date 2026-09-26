@@ -19,7 +19,7 @@ const shortlistBuilder = readFileSync("src/components/ShortlistBuilder.tsx", "ut
 const nav = readFileSync("src/lib/nav.ts", "utf8");
 const workspaceTools = readFileSync("src/lib/mcp-workspace-tools.ts", "utf8");
 
-assert.match(content, /Compare SD-WAN and SASE providers, vendors and managed services/);
+assert.match(content, /Compare SD-WAN and SASE providers for UK businesses/);
 assert.match(page, /2026 market answer/);
 assert.match(page, /viewRanking\.map/);
 assert.match(page, /Comparison summary/);

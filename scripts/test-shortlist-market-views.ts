@@ -50,7 +50,7 @@ assert.ok(
 assert.ok(
   page.includes('aria-label="Netify RFP Builder"') &&
     page.includes("https://netify.co.uk/sase-sd-wan-rfp-builder/") &&
-    page.includes("Start my project"),
+    page.includes("Build my provider shortlist"),
   "shortlist page must expose a visible canonical RFP Builder handoff",
 );
 assert.ok(
