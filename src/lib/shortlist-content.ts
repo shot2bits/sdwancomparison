@@ -62,5 +62,5 @@ export const SHORTLIST_INTRO = {
   eyebrow: "For UK IT decision makers",
   h1: "Compare SD-WAN and SASE providers for UK businesses",
   subhead:
-    "Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. Explore the public provider evidence, then review and publish an anonymous project when you are ready. Personalised matching is available through authorised access after publication. Publication does not guarantee invitations or supplier responses. A full RFP is optional.",
+    "Compare 30 researched SD-WAN and SASE providers for UK businesses across operating model, network and security capability. Explore the public provider evidence, then review and publish an anonymous project when you are ready. Personalised matching is available through authorised access after publication. Publication does not guarantee invitations or supplier responses. A full RFP is optional.",
 };
