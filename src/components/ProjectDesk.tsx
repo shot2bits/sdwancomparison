@@ -5398,9 +5398,9 @@ export default function ProjectDesk({
   }> = [
     { icon: "requirements", label: "Requirements", current: activeStep === "describe" || activeStep === "decisions", onClick: () => goToStep("describe") },
     {
-      icon: "suppliers", label: "Suppliers", current: activeStep === "publish", disabled: !reachable.has("publish"),
+      icon: "suppliers", label: "Suppliers", current: activeStep === "publish", disabled: !reachable.has("publish") && !(workspaceEnvelopeId && !publishedFlag),
       disabledReason: "Complete the essential baseline before reviewing publication and supplier matching.",
-      onClick: () => goToStep("publish"),
+      onClick: () => { if(workspaceEnvelopeId && !publishedFlag){requestBrief();return;} goToStep("publish"); },
     },
     {
       icon: "responses", label: "Responses", current: activeStep === "compare", disabled: !reachable.has("compare"),
