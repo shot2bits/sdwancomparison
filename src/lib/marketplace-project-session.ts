@@ -12,6 +12,7 @@ import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-stor
 import { ProviderMatchInputSchema, PROVIDER_MATCH_METHODOLOGY_VERSION } from "@/lib/provider-matching";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { getStrictLiveShortlistDataset, shortlistInputFromProviderMatchInput } from "@/lib/live-shortlist";
+import { sectorUnconfirmedCoverage } from "./coverage-preview";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { FEATURE_NAMES } from "@/lib/vendors";
 
@@ -111,7 +112,7 @@ async function previewMarketplaceProjectUnlocked(projectId: string, token: strin
       : /managed service provider|carrier network provider|integrator/.test(category);
   });
   const result = buildShortlist(scoped, { ...translated.input, ...projectMatchingInput(project) }, FEATURE_NAMES);
-  const eligibleSlugs = new Set(result.shortlist.map((provider) => provider.slug));
+  const eligibleSlugs = new Set(result.evaluation.filter((provider) => provider.eligible).map((provider) => provider.slug));
   const eligible = scoped.filter((provider) => eligibleSlugs.has(provider.slug));
   const satisfies = new Set(["yes", "partial", "partner_integrated", "managed_service_dependent"]);
   const nextRevision = session.revision + 1;
@@ -122,6 +123,7 @@ async function previewMarketplaceProjectUnlocked(projectId: string, token: strin
     eligible_technology_count: eligible.filter((provider) => provider.category.toLowerCase().includes("technology vendor")).length,
     eligible_managed_provider_count: eligible.filter((provider) => /managed service provider|carrier network provider|integrator/.test(provider.category.toLowerCase())).length,
     meets_all_mandatory_count: eligible.length,
+    sector_unconfirmed_count: sectorUnconfirmedCoverage(scoped, result.input),
     capability_coverage: input.mandatory_capabilities.map((code) => {
       const featureId = translated.featureIdFor(code);
       return { code, supported_provider_count: featureId ? scoped.filter((provider) => satisfies.has(provider.capabilities[featureId])).length : 0 };

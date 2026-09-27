@@ -220,6 +220,7 @@ export const ProviderMatchPreviewSchema = z.object({
   eligible_technology_count: z.number().int().min(0),
   eligible_managed_provider_count: z.number().int().min(0),
   meets_all_mandatory_count: z.number().int().min(0),
+  sector_unconfirmed_count: z.number().int().min(0).optional(),
   capability_coverage: z.array(z.object({ code: z.string(), supported_provider_count: z.number().int().min(0) }).strict()),
   unresolved_requirements: z.array(z.string()),
   calculated_at: z.number(),

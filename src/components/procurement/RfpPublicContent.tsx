@@ -106,7 +106,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is the Netify RFP Builder free?",
-    a: "Yes. Building and validating an SD-WAN or SASE RFP is free for buyers. Final downloads and personalised matches unlock after anonymous publication. Review the notice and confirm publication with a verified work email; supplier pricing is permission-controlled.",
+    a: "Yes. Building and validating an SD-WAN or SASE RFP is free for buyers. Private working drafts can be downloaded as Word or printed to PDF without an account or publication. Published document packages and personalised matches unlock after anonymous publication. Review the notice and confirm publication with a verified work email; supplier pricing is permission-controlled.",
   },
 ];
 

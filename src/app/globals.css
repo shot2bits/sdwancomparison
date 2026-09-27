@@ -1967,3 +1967,11 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 
 /* Keep input before the notice summary when the workspace stacks. */
 @media(max-width:1150px){.nf-buying-shell .lpos-builder>.nf-guided-main,.nf-buying-shell .lpos-builder>.nf-notice-preview,.nf-buying-shell .lpos-builder>.nf-guided-document{order:0!important}}
+
+/* Private drafts are useful before the buyer chooses to publish. */
+.nf-private-draft{border:1px solid #d8dfe0;border-radius:8px;padding:16px;margin:16px 0;background:#f8faf9;color:#243238;overflow-wrap:anywhere}
+.nf-private-draft p{font-size:14px;line-height:1.5;margin:6px 0 12px}
+.nf-private-draft>div{display:flex;flex-wrap:wrap;gap:10px}
+.nf-private-draft button{padding:10px 14px;border:1px solid #52616a;border-radius:5px;background:white;color:#243238;font-size:14px;min-height:44px;cursor:pointer}
+.nf-private-draft button:disabled{opacity:.5;cursor:default}
+.nf-private-draft button:focus-visible{outline:3px solid #197a77;outline-offset:3px}

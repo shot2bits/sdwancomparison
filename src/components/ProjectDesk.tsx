@@ -1,4 +1,7 @@
 "use client";
+import PrivateDraftDownload from "@/components/procurement/PrivateDraftDownload";
+import { privateDraftMarkdown } from "@/lib/private-draft";
+
 
 import { confirmedBuyerLedger, publicBriefFromFacts } from "@/lib/current-buyer-facts";
 import { isUnrelatedBuyingInput } from "@/lib/workspace/extract";
@@ -4672,7 +4675,7 @@ export default function ProjectDesk({
     ?? publishChecklist.remaining[0]
     ?? "Add the next material requirement, constraint or success measure";
   const advisorMessage = !contentReady
-    ? `To unlock publishing, ${publishChecklist.remaining.join(", ").toLowerCase()}. You can answer several in one message.`
+    ? `To develop the full RFP, complete: ${publishChecklist.remaining.join(", ").toLowerCase()}. You can also review a short brief without completing the full RFP.`
     : rfpCoverage.ready
       ? "This document meets the RFP depth standard. Review it, then publish when you are ready."
       : `You can publish this opportunity now. To strengthen the living RFP, add ${rfpCoverage.remainingAnswers} more populated question${rfpCoverage.remainingAnswers === 1 ? "" : "s"} across the included sections. Consider next: ${nextAdvisorQuestion}`;
@@ -5419,9 +5422,9 @@ export default function ProjectDesk({
       onClick: () => goToStep("review"),
     },
     {
-      icon: "exports", label: "Exports", current: false, disabled: !publishedFlag,
-      disabledReason: "Word and PDF exports unlock after publication.",
-      onClick: () => goToStep("publish"),
+      icon: "exports", label: "Exports", current: false, disabled: !started,
+      disabledReason: "Add your first requirement to download a private draft.",
+      onClick: () => { document.querySelector(".nf-private-draft")?.scrollIntoView({ behavior: "smooth", block: "center" }); if (publishedFlag) goToStep("publish"); },
     },
   ];
 
@@ -5620,6 +5623,7 @@ export default function ProjectDesk({
                 position={guidedQuestionCard?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
                 total={sectionProgress.total}
                 documentTitle={canvasDocument.title}
+                privateDraftActions={!publishedFlag ? <PrivateDraftDownload title={canvasDocument.title} markdown={privateDraftMarkdown(canvasDocument)} enabled={facts.length > 0 || sourceTurns.length > 0} /> : undefined}
                 documentSummary={canvasDocument.summary}
                 clauses={canvasDocument.clauses}
                 captured={answeredLog.stated.map((item) => ({ id: item.key, label: item.label, answer: item.answer, path: item.path }))}
@@ -6701,7 +6705,7 @@ export default function ProjectDesk({
               <div className="nf-2030-command-intro">
                 <span>SASE &amp; SD-WAN procurement</span>
                 <h2><strong>Build</strong> a new RFP or <strong>validate</strong> one created by ChatGPT or another AI.</h2>
-                <p>Netify makes it procurement-ready, then anonymous publication unlocks provider matching, downloads and comparable bids.</p>
+                <p>Netify makes it procurement-ready, with a private draft download for internal review. Anonymous publication is optional and enables supplier matching and responses.</p>
               </div>
               {composerBlock}
               <div className="nf-2030-command-actions">
@@ -6724,7 +6728,7 @@ export default function ProjectDesk({
               <ol className="nf-2030-outcomes" aria-label="What Netify produces">
                 <li><span>01</span><div><strong>Build</strong><p>One living SASE or SD-WAN RFI/RFP for your sector.</p></div></li>
                 <li><span>02</span><div><strong>Validate</strong><p>Find missing requirements and improve supplier comparability.</p></div></li>
-                <li><span>03</span><div><strong>Publish &amp; match</strong><p>Publish anonymously to unlock providers, downloads and bids.</p></div></li>
+                <li><span>03</span><div><strong>Publish &amp; match</strong><p>Review your private draft, then publish anonymously when you want supplier proposals.</p></div></li>
               </ol>
             </div>
           </section> : <>
@@ -6744,6 +6748,7 @@ export default function ProjectDesk({
               position={activeRowPosition?.["position"] ?? 1}
               total={sectionProgress.total}
               documentTitle={canvasDocument.title}
+                privateDraftActions={!publishedFlag ? <PrivateDraftDownload title={canvasDocument.title} markdown={privateDraftMarkdown(canvasDocument)} enabled={facts.length > 0 || sourceTurns.length > 0} /> : undefined}
               documentSummary={canvasDocument.summary}
               clauses={canvasDocument.clauses}
               captured={answeredLog.stated.map((item) => ({ id: item.key, label: item.label, answer: item.answer, path: item.path }))}

@@ -31,7 +31,7 @@ export async function GET() {
       "Coverage assessment does not verify technical correctness, measurable targets, or readiness to issue an RFP.",
       "The validator does not invent unstated buyer requirements.",
       "Recommendations require buyer approval before inclusion.",
-      "Provider matching, downloads and structured responses unlock only after anonymous publication to the Netify Opportunity Board.",
+      "Private working drafts can be downloaded without publication. Personalised provider matching and structured responses unlock after anonymous publication to the Netify Opportunity Board.",
     ],
     source_data: {
       question_bank: "https://netify.co.uk/sase/question-bank.json",

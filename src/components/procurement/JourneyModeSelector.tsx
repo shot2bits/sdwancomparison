@@ -9,6 +9,9 @@ import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY, PROJECT_DRAFT_KEY, pr
 import DraftRecovery from "./DraftRecovery";
 import {readWorkspaceProject,confirmBriefInWorkspace,syncWorkspaceRevision,type BriefFields} from "@/lib/buying-workspace-project";
 import SignIn from '@/components/SignIn';
+import { coverageExplanation, type CoveragePreview } from '@/lib/coverage-preview';
+import PrivateDraftDownload from './PrivateDraftDownload';
+import { briefDraftMarkdown } from '@/lib/private-draft';
 
 type Fields = BriefFields;
 const EMPTY: Fields = { scope: 'sase', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '', requiredFeatures: [] };
@@ -32,10 +35,10 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   const [signedIn, setSignedIn] = useState(false);
   const [published, setPublished] = useState(false);
   const [workspaceWaiting, setWorkspaceWaiting] = useState(false);
-  const [coverage, setCoverage] = useState<number | null>(null);
+  const [coverage, setCoverage] = useState<CoveragePreview | null>(null);
   const inFlight = useRef(false);
   const mode = useRef<ProjectJourneyMode>('quick_list');
-  function setField<K extends keyof Fields>(key: K, value: Fields[K]) { setFields((old) => ({ ...old, [key]: value })); }
+  function setField<K extends keyof Fields>(key: K, value: Fields[K]) { setFields((old) => ({ ...old, [key]: value })); setCoverage(null); }
 
   useEffect(() => {
     let active = true;
@@ -218,7 +221,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
     if (!project) return;
     await action(async () => {
       const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}/match-preview`, { base_revision: project.revision, input: { mandatory_capabilities: fields.requiredFeatures, preferred_capabilities: [], required_regions: fields.regions, service_model: fields.operatingModel === 'managed' ? 'fully_managed' : fields.operatingModel === 'any' ? null : fields.operatingModel === 'diy' ? 'self_managed' : fields.operatingModel, sector: fields.sector, provider_scope: 'both' } });
-      setProject({ ...project, revision: data.revision }); setCoverage(data.preview.meets_all_mandatory_count);
+      setProject({ ...project, revision: data.revision }); setCoverage(data.preview);
     });
   }
   return <>
@@ -238,10 +241,12 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
           {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
           {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your board listing is live. Open your project to review matches and any supplier responses. Publication does not guarantee a response or quote.</p><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
             <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
+            <PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled={!!fields.outcome.trim()} />
+            <p className="mt-3 text-sm">Not ready to publish? Keep your draft private, or <a className="underline" href="tel:+443332021011">call Netify on 0333 202 1011</a> to discuss your requirement. No supplier is contacted by saving or downloading.</p>
             <section className="mt-4 rounded border border-slate-200 bg-slate-50 p-4 text-sm" aria-label="What publication means"><h3 className="font-semibold">What happens after publication?</h3><p className="mt-2">Your anonymous notice appears on the Opportunity Board. Netify can use your requirements to source proposals. Open your project to review matches and any responses received.</p><p className="mt-2"><strong>Private:</strong> your company name, work email and pricing. <strong>Public:</strong> the project notice you approve. Remove names, addresses and contact details from the requirement text.</p><p className="mt-2">Supplier participation is developing. Responses, prices and response times are not guaranteed. Publishing is not an order.</p></section>
             <button type="button" disabled={busy || workspaceWaiting} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
             {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy || workspaceWaiting} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
-            {coverage !== null && <p className="mt-3 text-sm">{coverage} providers meet the filters checked so far. This is market coverage, not confirmation of every requirement. Personalised matches unlock after publication.</p>}
+            {coverage !== null && <p className="mt-3 text-sm">{coverageExplanation(coverage)}</p>}
             <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} disabled={busy || workspaceWaiting} onChange={(e) => setConsent(e.target.checked)} className="mt-1"/><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label>
             {prepared && !signedIn && <div className="mt-4"><SignIn role="buyer" prompt="Verify your work email, then return here to publish. Your company stays private." onAuthed={() => setSignedIn(true)} /></div>}
             <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
