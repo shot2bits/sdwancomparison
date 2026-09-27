@@ -29,11 +29,11 @@ export default function PrivateDraftDownload({ title, markdown, enabled }: { tit
     win.focus(); win.print();
     track("private_draft_download", { format: "print" });
   }
-  return <section className="nf-private-draft" aria-label="Private draft downloads">
+  return <details className="nf-private-draft" aria-label="Private draft downloads"><summary>Save for internal review</summary><div className="nf-private-draft-content">
     <strong>Keep a private copy</strong>
     <p>Download your working draft for internal review. No account or publication required. Nothing is sent to suppliers.</p>
     <div><button type="button" disabled={!enabled || busy} onClick={downloadWord}>{busy ? "Preparing Word draft…" : "Download private Word draft"}</button><button type="button" disabled={!enabled || busy} onClick={printDraft}>Print / save as PDF</button></div>
     {!enabled && <small>Add your first requirement to create a draft.</small>}
     {error && <p role="alert">{error}</p>}
-  </section>;
+  </div></details>;
 }

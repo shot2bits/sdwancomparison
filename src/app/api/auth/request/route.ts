@@ -1,3 +1,4 @@
+import { recordPublicationVerification } from "@/lib/publication-verification-events";
 import {CircuitSignupIntentSchema} from "@/lib/circuit-schema";
 import {prepareCircuitBuyer, circuitBuyerCanSignIn} from "@/lib/circuit-store";
 import { authReturnPath, publicationProjectFromReturn } from "@/lib/auth-return";
@@ -242,6 +243,7 @@ export async function POST(req: Request) {
   } catch { code = undefined; /* code is an enhancement; the link still works */ }
 
   const sent = await sendMagicLink(email, token, resolvedRole, returnTo, code);
+  if (sent.ok && rfpId && role === "buyer") await recordPublicationVerification(rfpId, email, "verification_requested");
   // Correlate this send against Resend's own email id so the bounce webhook
   // (which only ever carries that id, never any of this app's own context)
   // can trace a later bounce back to this exact attempt. Best effort: see

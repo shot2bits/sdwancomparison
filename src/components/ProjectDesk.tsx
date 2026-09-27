@@ -4811,6 +4811,7 @@ export default function ProjectDesk({
       const action = (event as CustomEvent<string>).detail;
       if (action === "settings") { goToStep("describe"); setDocumentSettingsOpen(true); }
       if (action === "requirements") goToStep("describe");
+      if (action === "brief") { setDocumentPurpose("brief"); goToStep("describe"); requestBrief(); }
       if (action === "short-rfp" || action === "detailed-rfp") { setDocumentPurpose("rfp"); setRfpEntryMode("build"); changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
       if (action === "import") { setRfpEntryMode("check"); goToStep("describe"); fileRef.current?.click(); }
       if (action === "review") goToStep(started ? "review" : "describe");
@@ -5424,7 +5425,7 @@ export default function ProjectDesk({
     {
       icon: "exports", label: "Exports", current: false, disabled: !started,
       disabledReason: "Add your first requirement to download a private draft.",
-      onClick: () => { document.querySelector(".nf-private-draft")?.scrollIntoView({ behavior: "smooth", block: "center" }); if (publishedFlag) goToStep("publish"); },
+      onClick: () => { const downloads = document.querySelector<HTMLDetailsElement>(".nf-private-draft"); if (downloads) { downloads.open = true; downloads.scrollIntoView({ behavior: "smooth", block: "center" }); } if (publishedFlag) goToStep("publish"); },
     },
   ];
 
@@ -6705,7 +6706,7 @@ export default function ProjectDesk({
               <div className="nf-2030-command-intro">
                 <span>SASE &amp; SD-WAN procurement</span>
                 <h2><strong>Build</strong> a new RFP or <strong>validate</strong> one created by ChatGPT or another AI.</h2>
-                <p>Netify makes it procurement-ready, with a private draft download for internal review. Anonymous publication is optional and enables supplier matching and responses.</p>
+                <p>Prepare your requirement, review the anonymous notice and publish to the Netify Opportunity Board. A short brief is enough to start; publication enables personalised matching and a place to review supplier responses.</p>
               </div>
               {composerBlock}
               <div className="nf-2030-command-actions">

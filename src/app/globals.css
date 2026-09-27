@@ -1975,3 +1975,16 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 .nf-private-draft button{padding:10px 14px;border:1px solid #52616a;border-radius:5px;background:white;color:#243238;font-size:14px;min-height:44px;cursor:pointer}
 .nf-private-draft button:disabled{opacity:.5;cursor:default}
 .nf-private-draft button:focus-visible{outline:3px solid #197a77;outline-offset:3px}
+
+/* Marketplace-first entry, with private downloads remaining secondary. */
+.nf-buying-start nav button{min-height:44px;padding:10px 16px;border:1px solid #cbd5df;border-radius:6px;text-decoration:none;background:#fff}
+.nf-buying-start nav button:first-child{background:#263b48;color:#fff;border-color:#263b48}
+.nf-buying-start>p:first-child{font-weight:600}
+.nf-buying-shell .nf-format-options,.nf-buying-shell .nf-private-draft{grid-column:1/-1;margin:8px 0;background:transparent}
+.nf-format-options>summary,.nf-private-draft>summary{cursor:pointer;padding:12px 0;font-size:14px;min-height:44px;color:#344853}
+.nf-private-draft{padding:0;border:0;border-top:1px solid #e2e8f0;border-radius:0;background:transparent}
+.nf-private-draft>.nf-private-draft-content{display:block;padding:8px 0 16px}
+.nf-private-draft-content>div{display:flex;flex-wrap:wrap;gap:10px}
+.nf-notice-privacy{font-size:13px;line-height:1.6}
+.nf-format-options>summary:focus-visible,.nf-private-draft>summary:focus-visible{outline:2px solid #197a77;outline-offset:3px}
+@media(max-width:600px){.nf-buying-start nav{display:grid;grid-template-columns:minmax(0,1fr)}.nf-buying-start nav button{text-align:left}}

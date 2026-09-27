@@ -9,6 +9,7 @@ import { buyingPlatformPath, COMPARISON_PROJECT_DRAFT_KEY, PROJECT_DRAFT_KEY, pr
 import DraftRecovery from "./DraftRecovery";
 import {readWorkspaceProject,confirmBriefInWorkspace,syncWorkspaceRevision,type BriefFields} from "@/lib/buying-workspace-project";
 import SignIn from '@/components/SignIn';
+import { fireNetifyEvent } from '@/components/NetifyEvents';
 import { coverageExplanation, type CoveragePreview } from '@/lib/coverage-preview';
 import PrivateDraftDownload from './PrivateDraftDownload';
 import { briefDraftMarkdown } from '@/lib/private-draft';
@@ -37,8 +38,9 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   const [workspaceWaiting, setWorkspaceWaiting] = useState(false);
   const [coverage, setCoverage] = useState<CoveragePreview | null>(null);
   const inFlight = useRef(false);
+  const briefStarted = useRef(false);
   const mode = useRef<ProjectJourneyMode>('quick_list');
-  function setField<K extends keyof Fields>(key: K, value: Fields[K]) { setFields((old) => ({ ...old, [key]: value })); setCoverage(null); }
+  function setField<K extends keyof Fields>(key: K, value: Fields[K]) { if (!briefStarted.current) { briefStarted.current = true; fireNetifyEvent("marketplace_brief_started", { intent: "project" }); } setFields((old) => ({ ...old, [key]: value })); setCoverage(null); }
 
   useEffect(() => {
     let active = true;
@@ -198,6 +200,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
       }
       if(saved.envelope_revision!==undefined)syncWorkspaceRevision(saved.envelope_revision,saved.project_reference);
       setProject(saved); setReview(true); setPrepared(false); setConsent(false); setCoverage(null);
+      fireNetifyEvent("marketplace_review_reached", { intent: "project" });
       const url = new URL(location.href); url.searchParams.set('project', saved.project_reference); url.searchParams.delete('from');
       history.replaceState(history.state, '', url);
       localStorage.removeItem(PROJECT_DRAFT_KEY);
@@ -235,21 +238,21 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
     <dialog ref={dialogRef} className="nf-brief-dialog" aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
       <header className="nf-brief-panel-header"><span>Netify · Project review</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
       <div className="nf-brief-panel-body">
-          <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Publish a short project brief'}</h2>
-          <p className="mt-2 text-sm text-[#66635e]">Describe what you need, review the anonymous notice, then verify your work email to publish. A full RFP is optional.</p>
+          <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Describe your project'}</h2>
+          <p className="mt-2 text-sm text-[#66635e]">Describe your project, review what suppliers will see, then verify your work email and publish to the Netify Opportunity Board. A short brief is enough to start; a full RFP is optional.</p>
           {workspaceWaiting && <p role="status" className="mt-4">Finishing your requirements. This review will update automatically.</p>}
           {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
           {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your board listing is live. Open your project to review matches and any supplier responses. Publication does not guarantee a response or quote.</p><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
             <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
-            <PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled={!!fields.outcome.trim()} />
-            <p className="mt-3 text-sm">Not ready to publish? Keep your draft private, or <a className="underline" href="tel:+443332021011">call Netify on 0333 202 1011</a> to discuss your requirement. No supplier is contacted by saving or downloading.</p>
-            <section className="mt-4 rounded border border-slate-200 bg-slate-50 p-4 text-sm" aria-label="What publication means"><h3 className="font-semibold">What happens after publication?</h3><p className="mt-2">Your anonymous notice appears on the Opportunity Board. Netify can use your requirements to source proposals. Open your project to review matches and any responses received.</p><p className="mt-2"><strong>Private:</strong> your company name, work email and pricing. <strong>Public:</strong> the project notice you approve. Remove names, addresses and contact details from the requirement text.</p><p className="mt-2">Supplier participation is developing. Responses, prices and response times are not guaranteed. Publishing is not an order.</p></section>
+            <section className="mt-4 rounded border border-slate-200 bg-slate-50 p-4 text-sm" aria-label="What publication means"><h3 className="font-semibold">What happens after publication?</h3><p className="mt-2">Your approved notice appears on the Netify Opportunity Board. Publication unlocks personalised matching against the available provider evidence and a project workspace to review any supplier responses. Netify can use the published requirement to source proposals; invitations depend on confirmed eligibility and your approvals.</p><p className="mt-2"><strong>Private:</strong> your company name, work email and pricing. <strong>Public:</strong> the project notice you approve. Remove names, addresses and contact details from the requirement text.</p><p className="mt-2">Supplier participation is developing. Responses, prices and response times are not guaranteed. Publishing is not an order.</p></section>
             <button type="button" disabled={busy || workspaceWaiting} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
             {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy || workspaceWaiting} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
             {coverage !== null && <p className="mt-3 text-sm">{coverageExplanation(coverage)}</p>}
             <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} disabled={busy || workspaceWaiting} onChange={(e) => setConsent(e.target.checked)} className="mt-1"/><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label>
             {prepared && !signedIn && <div className="mt-4"><SignIn role="buyer" prompt="Verify your work email, then return here to publish. Your company stays private." onAuthed={() => setSignedIn(true)} /></div>}
-            <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project and unlock providers' : 'Verify work email to publish'}</button>
+            <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my project to the Opportunity Board' : 'Verify work email to publish'}</button>
+            <PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled={!!fields.outcome.trim()} />
+            <p className="mt-3 text-sm">Not ready to publish? Keep your draft private, or <a className="underline" href="tel:+443332021011">call Netify on 0333 202 1011</a> to discuss your requirement. No supplier is contacted by saving or downloading.</p>
           </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void saveForReview(); }}>
             <fieldset disabled={busy || workspaceWaiting} className="grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold">Solution<select aria-label="Solution" className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
