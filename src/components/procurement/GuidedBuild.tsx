@@ -370,13 +370,14 @@ export default function GuidedBuild({
   const hasStarted = clauses.length > 0 || progress.ready > 0;
   const briefReady = quickListingReadiness({ solutionScope: briefFields.scope ?? "", sector: briefFields.sector ?? "", siteCount: Number(briefFields.sites), regions: briefFields.regions ?? [], timescale: briefFields.timescale ?? "", outcome: briefFields.outcome ?? "", operatingModel: briefFields.operatingModel ?? "any" }).allowed;
   const canReviewPublication = publishReachable || briefReady;
+  const hasProjectDetails = hasStarted || captured.length > 0 || [briefFields.sector, briefFields.sites, briefFields.timescale, briefFields.outcome].some(value => Boolean(value?.trim())) || Boolean(briefFields.regions?.length);
 
   const displayDocumentTitle = documentTitle === "Sourcing procurement" ? "Your SASE & SD-WAN RFP" : documentTitle;
 
   return (
     <div className="lpos-builder" data-workspace-tab={workspaceTab}>
       <div className="nf-workspace-intro"><h1>Publish your SD-WAN or SASE project<br/>and find compatible providers.</h1><p>Start with a short brief, upload an existing RFP or build one here. Review your anonymous notice, then publish it to the Netify Opportunity Board to unlock personalised provider matching and a place to review supplier responses.</p></div>
-      <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div><button type="button" className="nf-calm-publish" title="Review your project and complete the publication details" onClick={onPublish}>Review &amp; publish →</button></div>
+      <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div>{(published || hasProjectDetails) && <button type="button" className="nf-calm-publish" onClick={onPublish}>{published ? "Review & publish" : canReviewPublication ? "Review my project" : "Complete my project brief"} →</button>}</div>
       <details className="nf-format-options"><summary>Project format and RFP depth</summary><section className="nf-project-formats" aria-label="Choose your project format"><strong>How would you like to build your project?</strong><div>
         <button aria-pressed={documentPurpose === 'brief'} onClick={()=>{onDocumentPurposeChange?.('brief');requestBrief();}}>Basic requirements<span>A short business brief</span></button>
         <button aria-pressed={documentPurpose === 'rfp' && entryMode === 'build' && rfpDepth === 'short'} onClick={()=>{onDocumentPurposeChange?.('rfp');onEntryModeChange('build');onRfpDepthChange('short');setWorkspaceTab('requirements');}}>Short RFP<span>Core supplier questions</span></button>
