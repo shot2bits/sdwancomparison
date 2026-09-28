@@ -1,3 +1,7 @@
+# Basic requirements default, 28 September 2026
+
+Set the fresh ProjectDesk document purpose to brief so Basic requirements is selected for a new project, including journey=quick_list. Keep explicit build/check RFP entry and legacy RFP resume as RFP; persisted local/server document-purpose restoration is unchanged. No publication gates changed and no copy added. Focused ESLint and full validation/production build passed. Local browser confirms fresh Basic selected and a chosen Detailed RFP with a saved sector still selected after reload and Resume saved project. Public verification follows Git release.
+
 # Expanded sections verified live, 28 September 2026
 
 Production commit 950060ee7f69c195eff181d63e22a4bf4c39b2ef, deployment dpl_FYmuVgMr4jALuqxjc4QUoVJ9bhnm READY. Public browser at canonical RFP builder shows Project format and RFP depth and Save for internal review expanded, version 2809261040. Local browser confirms both can still collapse; empty-draft downloads remain disabled. No browser errors observed. Public regression script: 2026-09-28 09:43 UTC passed 42 failed 0. Display-only change, no added copy or live form submission.

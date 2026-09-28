@@ -1324,7 +1324,7 @@ export default function ProjectDesk({
    *  unconditionally, unaffected by this -- reviewing the full document
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
-  const [documentPurpose,setDocumentPurpose]=useState<DocumentPurpose>("rfp");
+  const [documentPurpose,setDocumentPurpose]=useState<DocumentPurpose>("brief");
   const [workspaceNotice,setWorkspaceNotice]=useState<string|null>(null);
   const [workspaceSessionLoading,setWorkspaceSessionLoading]=useState(false);
   const [workspaceSessionError,setWorkspaceSessionError]=useState("");
@@ -1641,6 +1641,7 @@ export default function ProjectDesk({
     if (p.get("test") === "1") setTestMode(true);
     const resumeId = p.get("id");
     const resumeManage = p.get("manage");
+    if (resumeId || requestedJourney === "build_rfp" || requestedJourney === "check_rfp") setDocumentPurpose("rfp");
     resumedFromUrlRef.current = Boolean(resumeId || p.get("project"));
 
     /* Step 1: restore the exact working ledgers before any link-carried
