@@ -16,13 +16,19 @@ import PublicationPreview from './PublicationPreview';
 import { briefDraftMarkdown } from '@/lib/private-draft';
 
 type Fields = BriefFields;
-const EMPTY: Fields = { scope: 'sase', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '', requiredFeatures: [] };
+const EMPTY: Fields = { scope: '', sector: '', sites: '', regions: ['uk_ireland'], operatingModel: 'any', outcome: '', timescale: '', company: '', requiredFeatures: [] };
 type Project = { project_reference: string; revision: number; envelope_revision?: number };
 const inputClass = 'mt-1 block w-full rounded border border-[#cfc8bf] bg-white p-2 text-sm font-normal';
 
 export default function JourneyModeSelector({ children }: { children?: ReactNode }) {
   const [panelOpen, setPanelOpen] = useState(false);
+  const [basicAvailable, setBasicAvailable] = useState(false);
+  const [engineRequested, setEngineRequested] = useState(false);
+  const inlineBrief = basicAvailable && !engineRequested;
+  const inlineBriefRef = useRef(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const detailsRef = useRef<HTMLSelectElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const [selected, setSelected] = useState<ProjectJourneyMode>('quick_list');
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [project, setProject] = useState<Project | null>(null);
@@ -119,19 +125,19 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
 
   useEffect(() => {
     const dialog = dialogRef.current;
-    if (!dialog || !ready) return;
+    if (!dialog || !ready || inlineBrief) return;
     if (panelOpen && !dialog.open) dialog.showModal();
     if (!panelOpen && dialog.open) dialog.close();
     if (!panelOpen) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = previous; };
-  }, [panelOpen, ready]);
+  }, [panelOpen, ready, inlineBrief]);
 
   function choose(next: ProjectJourneyMode) {
     const workspace=readWorkspaceProject();
     if(workspace?.legacyProject){setPanelOpen(false);window.dispatchEvent(new Event("netify:legacy-project-review"));return;}
-    mode.current = next; setSelected(next);
+    mode.current = next; setSelected(next); setEngineRequested(false);
     if(workspace?.busy){setError('');setWorkspaceWaiting(true);setPanelOpen(true);return;}
     setWorkspaceWaiting(false); setError('');
     if(workspace&&(Array.isArray(workspace.payload.facts)&&workspace.payload.facts.length||Array.isArray(workspace?.payload.source_turns)&&workspace.payload.source_turns.length)){
@@ -165,6 +171,44 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
     }, 250);
     return () => window.clearInterval(timer);
   }, [panelOpen, workspaceWaiting]);
+  useEffect(() => {
+    const presentation = (event: Event) => {
+      const { basic, available } = (event as CustomEvent<{basic: boolean; available: boolean}>).detail;
+      const next = basic && available;
+      if (next && !inlineBriefRef.current) {
+        const workspace = readWorkspaceProject();
+        if (workspace && ((Array.isArray(workspace.payload.facts) && workspace.payload.facts.length) || (Array.isArray(workspace.payload.source_turns) && workspace.payload.source_turns.length))) {
+          setFields(old => ({...old, ...workspace.fields, company: workspace.fields.company || old.company, requiredFeatures: old.requiredFeatures}));
+        }
+      }
+      inlineBriefRef.current = next;
+      setBasicAvailable(next);
+      if (next) setPanelOpen(false);
+    };
+    window.addEventListener('netify:workspace-presentation', presentation);
+    return () => window.removeEventListener('netify:workspace-presentation', presentation);
+  }, []);
+  useEffect(() => {
+    const prepare = (event: Event) => {
+      const detail = (event as CustomEvent<{action: string; pending?: Promise<void>}>).detail;
+      const proceed = () => { setEngineRequested(detail.action !== 'brief'); setPanelOpen(false); };
+      if (!inlineBrief || review || published) { proceed(); return; }
+      if (![fields.outcome, fields.scope, fields.sector, fields.sites, fields.timescale, fields.company].some(value => value.trim())) { proceed(); return; }
+      detail.pending = confirmBriefInWorkspace(fields).then(workspace => {
+        if (!workspace || workspace.busy) throw new Error('Your project is still loading. Please try again.');
+        proceed();
+      }).catch(reason => { setError(reason instanceof Error ? reason.message : 'Could not preserve your brief. Please try again.'); throw reason; });
+    };
+    window.addEventListener('netify:prepare-workspace-action', prepare);
+    return () => window.removeEventListener('netify:prepare-workspace-action', prepare);
+  }, [inlineBrief, fields, review, published]);
+
+  useEffect(() => {
+    if (!inlineBrief && !panelOpen) return;
+    if (review) headingRef.current?.focus();
+    else if (detailsOpen) detailsRef.current?.focus();
+  }, [detailsOpen, review, inlineBrief, panelOpen]);
+
   async function request(path: string, body: unknown, method = 'POST', current = project) {
     const token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
     if (current && !token) throw new Error('Your private session is unavailable. Reload to recover your project.');
@@ -229,23 +273,17 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
       setProject({ ...project, revision: data.revision }); setCoverage(data.preview);
     });
   }
-  return <>
-    {!resuming && <div className="nf-brief-toolbar">
-      <div><strong>Your buying workspace</strong><span>Describe your needs, review your project and approve publication. A full RFP is optional. <a href="/sase/examples/sase-rfp/" className="underline">See a SASE RFP worked example</a></span></div>
-      <button type="button" disabled={!ready} onClick={() => choose(selected === 'find_providers' ? 'find_providers' : 'quick_list')}>
-        {project ? 'Return to my project brief' : 'Start my project'} <span aria-hidden="true">↗</span>
-      </button>
-    </div>}
-    {ready && <DraftRecovery>{children}</DraftRecovery>}
-    <dialog ref={dialogRef} className="nf-brief-dialog" aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
-      <header className="nf-brief-panel-header"><span>Netify · Project review</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
+  const briefContent = (
       <div className="nf-brief-panel-body">
-          <h2 id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Describe your project'}</h2>
+          <ol className="nf-brief-progress" aria-label="Project progress">
+            {['Describe your project', 'Review your notice', 'Verify email and publish'].map((label, index) => <li key={label} aria-current={index === (prepared || published ? 2 : review ? 1 : 0) ? 'step' : undefined}><span>{index + 1}</span>{label}</li>)}
+          </ol>
+          <h2 ref={headingRef} tabIndex={-1} id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your anonymous project notice' : 'Describe your project'}</h2>
           <p className="mt-2 text-sm text-[#66635e]">Describe your project, review what suppliers will see, then verify your work email and publish to the Netify Opportunity Board. A short brief is enough to start; a full RFP is optional.</p>
           {workspaceWaiting && <p role="status" className="mt-4">Finishing your requirements. This review will update automatically.</p>}
           {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
           {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your board listing is live. Open your project to review matches and any supplier responses. Publication does not guarantee a response or quote.</p><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
-            <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
+            <dl className="mt-5 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope === 'sdwan' ? 'SD-WAN' : fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
             <section className="mt-4 rounded border border-slate-200 bg-slate-50 p-4 text-sm" aria-label="What publication means"><h3 className="font-semibold">What happens after publication?</h3><p className="mt-2">Your approved notice appears on the Netify Opportunity Board. Publication unlocks personalised matching against the available provider evidence and a project workspace to review any supplier responses. Netify can use the published requirement to source proposals; invitations depend on confirmed eligibility and your approvals.</p><p className="mt-2"><strong>Private:</strong> your company name, work email and pricing. <strong>Public:</strong> the project notice you approve. Remove names, addresses and contact details from the requirement text.</p><p className="mt-2">Supplier participation is developing. Responses, prices and response times are not guaranteed. Publishing is free and is not an order. You do not have to accept a response.</p><p className="mt-2">The board notice is public. Supplier access to your private project is controlled separately. To request closure or discuss access, <a className="underline" href="mailto:support@netify.com">contact Netify</a>. Closing a notice moves it to the closed archive; it does not erase the published notice.</p></section>
             <button type="button" disabled={busy || workspaceWaiting} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
             {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy || workspaceWaiting} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
@@ -258,12 +296,12 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
           </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); if (!detailsOpen) { setDetailsOpen(true); fireNetifyEvent('marketplace_brief_details_reached', { intent: 'project' }); return; } void saveForReview(); }}>
             <p className="mb-4 text-sm">{detailsOpen ? 'Check the details below and add your sector and private company name before review.' : 'Start with what you know. You can refine your brief before publication.'}</p>
             <fieldset disabled={busy || workspaceWaiting} className="grid gap-4 sm:grid-cols-2">
+                <label className="text-sm font-semibold">Solution<select aria-label="Solution" required className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="">Choose SASE, SD-WAN or SSE</option><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
               <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea aria-label="What do you need to achieve?" required minLength={20} maxLength={4000} rows={4} placeholder="Tell us what needs to change, roughly how many sites or users you have, and where they are. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/></label>
               <label className="text-sm font-semibold">Approximate number of sites<input required={detailsOpen} type="number" min="1" step="1" className={inputClass} value={fields.sites} onChange={(e) => setField('sites', e.target.value)}/><span className="mt-1 block text-xs font-normal">An estimate is fine. A site count is needed before review.</span></label>
               <label className="text-sm font-semibold">Buying timescale<input required={detailsOpen} maxLength={200} placeholder="e.g. within six months, or not decided" className={inputClass} value={fields.timescale} onChange={(e) => setField('timescale', e.target.value)}/><button type="button" className="mt-1 text-xs font-normal underline" onClick={() => setField('timescale', 'Not decided')}>Not decided yet</button></label>
               {detailsOpen && <>
-                <label className="text-sm font-semibold">Solution<select aria-label="Solution" className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
-                <label className="text-sm font-semibold">Sector<select aria-label="Sector" required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
+                <label className="text-sm font-semibold">Sector<select ref={detailsRef} aria-label="Sector" required className={inputClass} value={fields.sector} onChange={(e) => setField('sector', e.target.value)}><option value="">Choose sector</option>{SECTOR_KEYS.map((s) => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></label>
                 <label className="text-sm font-semibold">Operating model<select aria-label="Operating model" className={inputClass} value={fields.operatingModel} onChange={(e) => setField('operatingModel', e.target.value)}><option value="any">Not sure yet</option><option value="managed">Fully managed</option><option value="co_managed">Co-managed</option><option value="diy">Self-managed</option></select></label>
                 <label className="text-sm font-semibold">Company name (private)<input required minLength={2} maxLength={200} autoComplete="organization" className={inputClass} value={fields.company} onChange={(e) => setField('company', e.target.value)}/></label>
               </>}
@@ -275,8 +313,21 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
             <button disabled={busy || workspaceWaiting} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : detailsOpen ? 'Review my opportunity' : 'Continue to project details'}</button>
             <p className="mt-3 text-xs text-[#66635e]">Nothing is published until you verify your work email and approve the notice.</p>
             <div className="mt-6"><PublicationPreview fields={fields} /></div>
+            {!!fields.outcome.trim() && <PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled /> }
           </form>}
       </div>
-    </dialog>
+  );
+  return <>
+    {ready && <DraftRecovery>
+      <div className="nf-brief-engine" hidden={inlineBrief}>{children}</div>
+      {inlineBrief && <section className="nf-inline-brief" aria-label="Project brief">
+        <h1>Find suitable SASE and SD-WAN providers for your project.</h1>
+        {briefContent}
+      </section>}
+    </DraftRecovery>}
+    {!inlineBrief && <dialog ref={dialogRef} className="nf-brief-dialog" aria-labelledby="brief-panel-title" onCancel={() => setPanelOpen(false)} onClose={() => setPanelOpen(false)}>
+      <header className="nf-brief-panel-header"><span>Netify · Project review</span><button type="button" onClick={() => setPanelOpen(false)} aria-label="Close project brief">Close <span aria-hidden="true">×</span></button></header>
+      {briefContent}
+    </dialog>}
   </>;
 }

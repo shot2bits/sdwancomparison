@@ -1988,3 +1988,20 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 .nf-notice-privacy{font-size:13px;line-height:1.6}
 .nf-format-options>summary:focus-visible,.nf-private-draft>summary:focus-visible{outline:2px solid #197a77;outline-offset:3px}
 @media(max-width:600px){.nf-buying-start nav{display:grid;grid-template-columns:minmax(0,1fr)}.nf-buying-start nav button{text-align:left}}
+
+/* Brief-first entry: the engine stays mounted to preserve facts and uploads. */
+.nf-brief-engine[hidden] { display:none!important; }
+.nf-inline-brief { max-width:1000px; margin:0 auto; }
+.nf-inline-brief > h1 { font-size:clamp(26px,3vw,38px); line-height:1.2; color:#203442; margin:24px 0; font-weight:650; }
+.nf-inline-brief .nf-brief-panel-body { padding:0; }
+.nf-inline-brief input,.nf-inline-brief select,.nf-inline-brief textarea { font-size:16px; }
+.nf-brief-progress { display:flex; gap:16px; list-style:none; padding:0; margin:0 0 26px; }
+.nf-brief-progress li { flex:1; display:flex; align-items:center; gap:8px; color:#64748b; font-size:14px; border-bottom:2px solid #e2e8f0; padding:12px 0; }
+.nf-brief-progress li[aria-current=step] { color:#203442; border-color:#203442; font-weight:650; }
+.nf-brief-progress li > span { flex:none; border:1px solid currentColor; border-radius:50%; width:25px; height:25px; display:grid; place-items:center; }
+.nf-notice-next ul { padding-left:20px; margin:10px 0; }
+.nf-notice-next li { margin:4px 0; }
+@media(max-width:600px) { .nf-brief-progress { gap:8px; }.nf-brief-progress li { align-items:flex-start; flex-direction:column; font-size:12px; } }
+
+.nf-buying-start nav button[aria-pressed=false] {background:#fff;color:#1c2c42;border-color:#cbd5df}
+.nf-buying-start nav button[aria-pressed=true] {background:#263b48;color:#fff;border-color:#263b48}

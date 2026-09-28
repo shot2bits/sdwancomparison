@@ -385,7 +385,6 @@ export default function GuidedBuild({
         <button aria-pressed={entryMode === 'check'} onClick={()=>{onEntryModeChange('check');setWorkspaceTab('overview');}}>Bring an RFP or RFI<span>Keep your original wording</span></button>
       </div><p>One project throughout. Switching keeps your answers, source material and bespoke questions.</p>
       {entryMode === 'check' && <label className="nf-document-purpose">Your document type <select value={documentPurpose==='rfi'?'rfi':'rfp'} onChange={e=>onDocumentPurposeChange?.(e.target.value as DocumentPurpose)}><option value="rfp">Request for proposal (RFP)</option><option value="rfi">Request for information (RFI)</option></select></label>}</section></details>
-      {privateDraftActions}
       <nav className="nf-calm-tabs" aria-label="Project views">
         <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
         <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>
@@ -431,7 +430,7 @@ export default function GuidedBuild({
                 ? "Complete the essential baseline, then review and publish a valid opportunity. Optional questions are not required."
                 : `Complete the same essential baseline, then build out each included section to ${rfpQuestionTarget} populated questions.`}</span>
             </div>
-            {rfpDepth === "detailed" && (
+            {documentPurpose === "rfp" && entryMode === "build" && rfpDepth === "detailed" && (
               <div className="lpos-depth-recommendations">
                 <p><strong>{depthReady ? "Detailed question depth complete" : "Recommended expansion"}</strong><span>{depthReady ? "All included sections meet the detailed target" : `${depthRemainingAnswers} more populated question${depthRemainingAnswers === 1 ? "" : "s"} across the included sections`}</span></p>
                 <div>{(recommendedTopics.length ? recommendedTopics : ["Add sector, sites, SASE scope, underlay or service model for tailored recommendations"]).map((topic) => <span key={topic}>{topic}</span>)}</div>
@@ -681,6 +680,7 @@ export default function GuidedBuild({
           </section>
         </div>
       )}
+      {privateDraftActions}
     </div>
   );
 }

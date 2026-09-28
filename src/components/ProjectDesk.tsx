@@ -4825,6 +4825,16 @@ export default function ProjectDesk({
     return () => window.removeEventListener("netify:workspace-action", receive);
   });
 
+  // Presentation follows the restored document, never a second saved-project state.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('netify:workspace-presentation', { detail: {
+      format: rfpEntryMode === 'check' ? 'import' : documentPurpose === 'brief' ? 'brief' : rfpDepth === 'detailed' ? 'detailed-rfp' : 'short-rfp',
+      basic: documentPurpose === 'brief' && rfpEntryMode === 'build' && !(created && !workspaceEnvelopeId),
+      available: booted && !workspaceSessionLoading && !workspaceSessionError && !projectCheckpoint,
+    } })));
+    return () => cancelAnimationFrame(frame);
+  }, [documentPurpose, rfpEntryMode, rfpDepth, created, workspaceEnvelopeId, booted, workspaceSessionLoading, workspaceSessionError, projectCheckpoint]);
+
   if (!booted || workspaceSessionLoading) return <div className="pd-root mt-10" role="status">Loading your project…</div>;
   if(workspaceSessionError)return <p role="alert">{workspaceSessionError}</p>;
   if(projectCheckpoint){
@@ -5614,7 +5624,7 @@ export default function ProjectDesk({
               <GuidedBuild
                 documentPurpose={documentPurpose}
                 onDocumentPurposeChange={setDocumentPurpose}
-                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
+                briefFields={{company:workspaceCompany,scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
                 card={guidedQuestionCard}
                 ready={contentReady}
                 depthReady={rfpCoverage.ready}
@@ -6739,7 +6749,7 @@ export default function ProjectDesk({
             <GuidedBuild
                 documentPurpose={documentPurpose}
                 onDocumentPurposeChange={setDocumentPurpose}
-                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
+                briefFields={{company:workspaceCompany,scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
               card={guidedQuestionCard}
               ready={contentReady}
               depthReady={rfpCoverage.ready}

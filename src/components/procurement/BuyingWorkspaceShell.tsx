@@ -29,11 +29,20 @@ export default function BuyingWorkspaceShell({ children, comparison, information
   useEffect(()=>{const frame=requestAnimationFrame(()=>{if(new URLSearchParams(window.location.search).has('request')){setView('circuits');setCircuitVisited(true)}});return()=>cancelAnimationFrame(frame)},[]);
   const [assistantVisited, setAssistantVisited] = useState(false);
   const [assistantMode, setAssistantMode] = useState<'memories' | 'skills'>('memories');
+  const [format, setFormat] = useState('brief');
+  useEffect(() => {
+    const update = (event: Event) => setFormat((event as CustomEvent<{format: string}>).detail.format);
+    window.addEventListener('netify:workspace-presentation', update);
+    return () => window.removeEventListener('netify:workspace-presentation', update);
+  }, []);
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   useEffect(()=>{const open=()=>setView('project');window.addEventListener('netify:open-brief',open);return()=>window.removeEventListener('netify:open-brief',open);},[]);
   function navigate(next: View) { if(next==='circuits')setCircuitVisited(true); if (next === 'memories' || next === 'skills') { setAssistantVisited(true); setAssistantMode(next); } setView(next); setMenuOpen(false); }
-  function projectTool(action: string) {
+  async function projectTool(action: string) {
+    const detail: { action: string; pending?: Promise<void> } = { action };
+    window.dispatchEvent(new CustomEvent('netify:prepare-workspace-action', { detail }));
+    try { await detail.pending; } catch { return; }
     navigate('project');
     window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('netify:workspace-action', { detail: action })));
   }
@@ -48,7 +57,6 @@ export default function BuyingWorkspaceShell({ children, comparison, information
         <button onClick={() => navigate('responses')} aria-current={view === 'responses' ? 'page' : undefined}><span aria-hidden="true">▱</span>Responses</button>
         <a href="/sase/opportunities/board/"><span aria-hidden="true">▦</span>Opportunity board</a>
       </nav>
-      <nav aria-label="Build and buy" className="nf-buying-secondary"><span>Build &amp; buy</span><button onClick={() => projectTool('short-rfp')}><span aria-hidden="true">▤</span>Short RFP</button><button onClick={() => projectTool('detailed-rfp')}><span aria-hidden="true">▥</span>Detailed RFP</button><button onClick={() => projectTool('import')}><span aria-hidden="true">＋</span>Bring an RFP or RFI</button></nav>
       <nav aria-label="Workspace tools" className="nf-buying-secondary">
         <span>Tools</span>
         {assistantEnabled && <><button onClick={() => navigate('memories')} aria-current={view === 'memories' ? 'page' : undefined}><span aria-hidden="true">◇</span>Memories</button><button onClick={() => navigate('skills')} aria-current={view === 'skills' ? 'page' : undefined}><span aria-hidden="true">✦</span>Skills</button></>}
@@ -64,7 +72,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <div className="nf-buying-page">
         {assistantEnabled && assistantVisited && <div hidden={view !== 'memories' && view !== 'skills'}><BuyerAssistant mode={assistantMode} onCompare={() => navigate('compare')} onProject={() => navigate('project')} /></div>}
         <div hidden={view !== 'circuits'}>{circuitVisited && <CircuitPricing />}</div>
-        <div hidden={view !== 'project'} className="nf-buying-engine"><section className="nf-buying-start" aria-label="Ways to start your project"><p>Start with a short project brief</p><nav aria-label="Start your buying journey"><button type="button" onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('brief'); }}>Describe my project</button><button type="button" onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('import'); }}>Upload my existing RFP</button><button type="button" onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('detailed-rfp'); }}>Build a detailed RFP</button></nav><p className="nf-buying-subtle">Describe your needs, review your anonymous notice, then choose whether to publish. A full RFP is optional.</p></section>{children}</div>
+        <div hidden={view !== 'project'} className="nf-buying-engine"><section className="nf-buying-start" aria-label="Ways to start your project"><p>Start with a short project brief</p><nav aria-label="Start your buying journey"><button type="button" aria-pressed={format === 'brief'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('brief'); }}>Describe my project</button><button type="button" aria-pressed={format === 'import'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('import'); }}>Upload my existing RFP</button><button type="button" aria-pressed={format === 'detailed-rfp'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('detailed-rfp'); }}>Build a detailed RFP</button></nav><p className="nf-buying-subtle">Describe your needs, review your anonymous notice, then choose whether to publish. A full RFP is optional.</p></section>{children}</div>
         <section hidden={view !== 'compare'} aria-label="Public provider comparison" className="nf-buying-research"><p className="nf-buying-eyebrow">Public research</p><h1>Compare SASE &amp; SD-WAN providers</h1><p>Explore capability differences. Turn your research into an anonymous project when you are ready.</p>{comparison}</section>
         <section hidden={view !== 'responses'} className="nf-buying-responses"><p className="nf-buying-eyebrow">Supplier responses</p><h1>Bring every response together</h1><p>Open your published project to review supplier submissions, evidence, pricing and clarifications.</p><a className="nf-buying-primary" href="/sase/account/">Open my saved projects →</a><button onClick={() => projectTool('responses')}>View this project’s responses</button><p className="nf-buying-subtle">Still preparing your project? Review your anonymous notice before publication. Invitations depend on confirmed eligibility; no confirmed matches means no invitations. Supplier responses are not guaranteed. A full RFP is optional.</p></section>
         <section hidden={view !== 'tools'} className="nf-buying-tools"><p className="nf-buying-eyebrow">Buying tools</p><h1>All tools</h1><p>Every stage of your buying journey, available when you need it.</p><div className="nf-buying-tool-grid">
