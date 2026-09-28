@@ -376,7 +376,7 @@ export default function GuidedBuild({
 
   return (
     <div className="lpos-builder" data-workspace-tab={workspaceTab}>
-      <div className="nf-workspace-intro"><h1>Find suitable SASE and SD-WAN providers for your project.</h1><p>Describe what you need, review your anonymous project notice and choose whether to publish it to the Netify Opportunity Board. A full RFP is optional.</p></div>
+      <div className="nf-workspace-intro"><h2>Build and review your RFP requirements</h2><p>Describe what you need, review your anonymous project notice and choose whether to publish it to the Netify Opportunity Board. A full RFP is optional.</p></div>
       <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div>{(published || hasProjectDetails) && <button type="button" className="nf-calm-publish" onClick={onPublish}>{published || canReviewPublication ? "Review my opportunity" : "Complete my project brief"} →</button>}</div>
       <details className="nf-format-options" open><summary>Project format and RFP depth</summary><section className="nf-project-formats" aria-label="Choose your project format"><strong>How would you like to build your project?</strong><div>
         <button aria-pressed={documentPurpose === 'brief' && entryMode === 'build'} onClick={()=>{onDocumentPurposeChange?.('brief');onEntryModeChange('build');requestBrief();}}>Basic requirements<span>A short business brief</span></button>

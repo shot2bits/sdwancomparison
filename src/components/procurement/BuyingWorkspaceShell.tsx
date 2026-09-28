@@ -7,6 +7,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 const BuyerAssistant = dynamic(() => import('./BuyerAssistant'), { loading: () => <p role="status">Loading workspace tools…</p> });
 import { MEGA_GROUPS } from '@/lib/nav';
+import { PublicationBenefits } from './PublicationBenefits';
 
 const CircuitPricing = dynamic(() => import('./CircuitPricing'), { loading: () => <p role="status">Loading circuit pricing…</p> });
 type View = 'circuits' | 'project' | 'compare' | 'responses' | 'tools' | 'memories' | 'skills';
@@ -36,6 +37,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
   const [assistantVisited, setAssistantVisited] = useState(false);
   const [assistantMode, setAssistantMode] = useState<'memories' | 'skills'>('memories');
   const [format, setFormat] = useState('brief');
+  useEffect(() => { fireNetifyEvent('marketplace_builder_viewed', { intent: 'project' }); }, []);
   useEffect(() => {
     const update = (event: Event) => setFormat((event as CustomEvent<{format: string}>).detail.format);
     window.addEventListener('netify:workspace-presentation', update);
@@ -57,20 +59,22 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <a href="/sase/home/" className="nf-buying-wordmark" aria-label="Netify home">netify<sup>®</sup></a>
       <button className="nf-buying-new" onClick={()=>{try{startNewBuyingProject()}catch{window.alert("Your draft could not be archived. Nothing was deleted.");}}}>＋ New project</button><div className="nf-buying-project-label"><span>Workspace</span><strong>SASE &amp; SD-WAN procurement</strong></div>
       <nav aria-label="Buying workspace">
-        <button onClick={() => navigate('project')} aria-current={view === 'project' ? 'page' : undefined}><span aria-hidden="true">▤</span>Project</button>
-        <button onClick={() => navigate('circuits')} aria-current={view === 'circuits' ? 'page' : undefined}><span aria-hidden="true">⇆</span>Circuit pricing</button>
-        <button onClick={() => navigate('compare')} aria-current={view === 'compare' ? 'page' : undefined}><span aria-hidden="true">⇄</span>Compare known providers</button>
+        <button onClick={() => navigate('project')} aria-current={view === 'project' ? 'page' : undefined}><span aria-hidden="true">▤</span>My project</button>
+        <button onClick={() => projectTool('review')}><span aria-hidden="true">◷</span>Review &amp; publish</button>
         <button onClick={() => navigate('responses')} aria-current={view === 'responses' ? 'page' : undefined}><span aria-hidden="true">▱</span>Responses</button>
-        <a href="/sase/opportunities/board/"><span aria-hidden="true">▦</span>Opportunity board</a>
       </nav>
-      <nav aria-label="Workspace tools" className="nf-buying-secondary">
-        <span>Tools</span>
-        {assistantEnabled && <><button onClick={() => navigate('memories')} aria-current={view === 'memories' ? 'page' : undefined}><span aria-hidden="true">◇</span>Memories</button><button onClick={() => navigate('skills')} aria-current={view === 'skills' ? 'page' : undefined}><span aria-hidden="true">✦</span>Skills</button></>}
-        <button onClick={() => navigate('tools')} aria-current={view === 'tools' ? 'page' : undefined}><span aria-hidden="true">⊞</span>All tools</button>
-        <a href="/sase/connector/"><span aria-hidden="true">⌘</span>Connections</a>
-        <button onClick={() => projectTool('review')}><span aria-hidden="true">◷</span>Activity &amp; review</button>
-        <button onClick={() => projectTool('settings')}><span aria-hidden="true">⚙</span>Settings</button>
-      </nav>
+      <details className="nf-buying-more-navigation">
+        <summary>Research &amp; other tools</summary>
+        <nav aria-label="Research and workspace tools" className="nf-buying-secondary">
+          <button onClick={() => navigate('circuits')} aria-current={view === 'circuits' ? 'page' : undefined}><span aria-hidden="true">⇆</span>Circuit pricing</button>
+          <button onClick={() => navigate('compare')} aria-current={view === 'compare' ? 'page' : undefined}><span aria-hidden="true">⇄</span>Compare known providers</button>
+          <a href="/sase/opportunities/board/"><span aria-hidden="true">▦</span>Opportunity board</a>
+          {assistantEnabled && <><button onClick={() => navigate('memories')} aria-current={view === 'memories' ? 'page' : undefined}><span aria-hidden="true">◇</span>Memories</button><button onClick={() => navigate('skills')} aria-current={view === 'skills' ? 'page' : undefined}><span aria-hidden="true">✦</span>Skills</button></>}
+          <button onClick={() => navigate('tools')} aria-current={view === 'tools' ? 'page' : undefined}><span aria-hidden="true">⊞</span>All tools</button>
+          <a href="/sase/connector/"><span aria-hidden="true">⌘</span>Connections</a>
+          <button onClick={() => projectTool('settings')}><span aria-hidden="true">⚙</span>Settings</button>
+        </nav>
+      </details>
       <button className="nf-buying-collapse" aria-label={collapsed ? "Expand workspace menu" : "Collapse workspace menu"} aria-expanded={!collapsed} onClick={() => setCollapsed(!collapsed)}>{collapsed ? "→" : "← Collapse menu"}</button><div className="nf-buying-privacy"><strong>Your identity stays private</strong><p>You review and approve what suppliers receive.</p><a href="/sase/account/">My projects &amp; account →</a></div>
     </aside>
     <div className="nf-buying-body">
@@ -78,7 +82,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <div className="nf-buying-page">
         {assistantEnabled && assistantVisited && <div hidden={view !== 'memories' && view !== 'skills'}><BuyerAssistant mode={assistantMode} onCompare={() => navigate('compare')} onProject={() => navigate('project')} /></div>}
         <div hidden={view !== 'circuits'}>{circuitVisited && <CircuitPricing />}</div>
-        <div hidden={view !== 'project'} className="nf-buying-engine"><section className="nf-buying-start" aria-label="Ways to start your project"><p>Start with a short project brief</p><nav aria-label="Start your buying journey"><button type="button" aria-pressed={format === 'brief'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('brief'); }}>Describe my project</button><button type="button" aria-pressed={format === 'import'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('import'); }}>Upload my existing RFP</button><button type="button" aria-pressed={format === 'detailed-rfp'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('detailed-rfp'); }}>Build a detailed RFP</button></nav><p className="nf-buying-subtle">Describe your needs, review your anonymous notice, then choose whether to publish. A full RFP is optional.</p></section>{children}</div>
+        <div hidden={view !== 'project'} className="nf-buying-engine"><section className="nf-buying-start" aria-label="Ways to start your project"><h1>Build your SASE or SD-WAN requirements and find suitable providers.</h1><p>Start with a short brief, review your requirements, then publish anonymously to unlock personalised provider and vendor matching.</p><PublicationBenefits compact /><nav aria-label="Start your buying journey"><button type="button" aria-pressed={format === 'brief'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('brief'); }}>Describe my project</button><button type="button" aria-pressed={format === 'import'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('import'); }}>Upload my existing RFP</button><button type="button" aria-pressed={format === 'detailed-rfp'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('detailed-rfp'); }}>Build a detailed RFP</button></nav><p className="nf-buying-subtle">A brief is enough to publish. A full RFP is optional. Publishing is free and does not commit you to buy.</p></section>{children}</div>
         <section hidden={view !== 'compare'} aria-label="Public provider comparison" className="nf-buying-research"><p className="nf-buying-eyebrow">Public research</p><h1>Compare SASE &amp; SD-WAN providers</h1><p>Explore capability differences. Turn your research into an anonymous project when you are ready.</p>{comparison}</section>
         <section hidden={view !== 'responses'} className="nf-buying-responses"><p className="nf-buying-eyebrow">Supplier responses</p><h1>Bring every response together</h1><p>Open your published project to review supplier submissions, evidence, pricing and clarifications.</p><a className="nf-buying-primary" href="/sase/account/">Open my saved projects →</a><button onClick={() => projectTool('responses')}>View this project’s responses</button><p className="nf-buying-subtle">Still preparing your project? Review your anonymous notice before publication. Invitations depend on confirmed eligibility; no confirmed matches means no invitations. Supplier responses are not guaranteed. A full RFP is optional.</p></section>
         <section hidden={view !== 'tools'} className="nf-buying-tools"><p className="nf-buying-eyebrow">Buying tools</p><h1>All tools</h1><p>Project controls, research and account tools. Options marked Coming soon are not available yet.</p><div className="nf-buying-tool-grid">
