@@ -1351,6 +1351,9 @@ export default function ProjectDesk({
    *  through here, including handleCommand's own publish/whoFits/back
    *  cases, so `phase` and the rail can never disagree. */
   const goToStep = (next: WizardStep) => {
+    // Basic projects use the same brief review from every navigation entry.
+    // Existing legacy RFPs retain their original publication workflow.
+    if (next === "review" && documentPurpose === "brief" && !(created && !workspaceEnvelopeId) && requestBrief()) return;
     setStep(next);
     setPhase(next === "publish" || next === "compare" ? "fits" : "live");
   };
@@ -4815,7 +4818,7 @@ export default function ProjectDesk({
       if (action === "brief") { setDocumentPurpose("brief"); setRfpEntryMode("build"); goToStep("describe"); requestBrief(); }
       if (action === "short-rfp" || action === "detailed-rfp") { setDocumentPurpose("rfp"); setRfpEntryMode("build"); changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
       if (action === "import") { setRfpEntryMode("check"); setDocumentPurpose((purpose) => purpose === "brief" ? "rfp" : purpose); goToStep("describe"); fileRef.current?.click(); }
-      if (action === "review") goToStep(started ? "review" : "describe");
+      if (action === "review") goToStep(documentPurpose === "brief" || started ? "review" : "describe");
       if (action === "responses") { if(reachable.has("compare"))goToStep("compare");else {say("Supplier responses become available after you publish and suppliers reply. Review your project to continue.");requestBrief();} }
       if (action === "tools") {
         document.querySelectorAll<HTMLDetailsElement>(".nf-calm-project-tools").forEach((panel) => { panel.open = true; panel.scrollIntoView({ block: "nearest" }); });

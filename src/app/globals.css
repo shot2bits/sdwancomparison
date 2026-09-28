@@ -2005,3 +2005,7 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 
 .nf-buying-start nav button[aria-pressed=false] {background:#fff;color:#1c2c42;border-color:#cbd5df}
 .nf-buying-start nav button[aria-pressed=true] {background:#263b48;color:#fff;border-color:#263b48}
+
+.nf-buying-tool-grid .nf-buying-coming-soon { background:#f7f8fa; color:#536174; }
+.nf-buying-tool-grid .nf-buying-status { display:inline-block; border:1px solid #c9d2dc; border-radius:4px; padding:2px 7px; color:#34465a; font-weight:600; }
+.nf-buying-coming-soon p { margin:10px 0 0; font-size:12px; color:#536174; }

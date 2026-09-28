@@ -11,16 +11,22 @@ import { MEGA_GROUPS } from '@/lib/nav';
 const CircuitPricing = dynamic(() => import('./CircuitPricing'), { loading: () => <p role="status">Loading circuit pricing…</p> });
 type View = 'circuits' | 'project' | 'compare' | 'responses' | 'tools' | 'memories' | 'skills';
 const resources = [
-  ['Provider directory', '/sase/vendors/', 'Explore vendor and managed service provider profiles.'],
-  ['Cost & TCO', '/sase/cost-estimator/', 'Model indicative costs and contract assumptions.'],
-  ['Security assessment', '/sase/security-sourcing/', 'Review security and compliance requirements.'],
+  ['Provider directory', '/marketplace/', 'Explore vendor and managed service provider profiles.'],
+  ['Cost & TCO', '/sase/cost-estimator/', 'Cost assumptions are being checked before estimates are offered here.'],
+  ['Security assessment', '/sase/security-sourcing/', 'A dedicated security assessment is being prepared. You can include security needs in your project brief now.'],
   ['Market insights', '/sase/demand/', 'Read market research and demand signals.'],
   ['Question bank', '/sase/rfp-builder/questions/', 'Explore the governed supplier question bank.'],
-  ['Connections', '/sase/connector/', 'Connect an approved AI agent through MCP.'],
+  ['Connections', '/sase/connector/', 'Read the setup guide for connecting an approved AI assistant.'],
   ['My projects & account', '/sase/account/', 'Reopen saved projects and manage your identity.'],
-  ['Supplier workspace', '/sase/supplier/', 'Manage supplier opportunities and responses.'],
+  ['Supplier workspace', '/sase/supplier/', 'For suppliers: sign in to manage opportunities and responses.'],
   ['Help & methodology', '/sase/how-it-works/', 'Understand the buying process and publication.'],
 ] as const;
+
+const comingSoon = (href: string) => ['/sase/cost-estimator/', '/sase/security-sourcing/'].includes(href);
+function ResourceCard({name, href, description}: {name: string; href: string; description?: string}) {
+  if (comingSoon(href)) return <div className="nf-buying-coming-soon" aria-label={`${name}: Coming soon`}><strong>{name}</strong><span className="nf-buying-status">Coming soon</span><p>{description}</p></div>;
+  return <a href={href}><strong>{name}</strong><span>{description}</span></a>;
+}
 
 /** Presentation only: keep the engine mounted across research navigation. */
 export default function BuyingWorkspaceShell({ children, comparison, information, assistantEnabled = false, initialView = 'project' }: { children: ReactNode; comparison: ReactNode; information: ReactNode; assistantEnabled?: boolean; initialView?: View }) {
@@ -75,12 +81,12 @@ export default function BuyingWorkspaceShell({ children, comparison, information
         <div hidden={view !== 'project'} className="nf-buying-engine"><section className="nf-buying-start" aria-label="Ways to start your project"><p>Start with a short project brief</p><nav aria-label="Start your buying journey"><button type="button" aria-pressed={format === 'brief'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('brief'); }}>Describe my project</button><button type="button" aria-pressed={format === 'import'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('import'); }}>Upload my existing RFP</button><button type="button" aria-pressed={format === 'detailed-rfp'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('detailed-rfp'); }}>Build a detailed RFP</button></nav><p className="nf-buying-subtle">Describe your needs, review your anonymous notice, then choose whether to publish. A full RFP is optional.</p></section>{children}</div>
         <section hidden={view !== 'compare'} aria-label="Public provider comparison" className="nf-buying-research"><p className="nf-buying-eyebrow">Public research</p><h1>Compare SASE &amp; SD-WAN providers</h1><p>Explore capability differences. Turn your research into an anonymous project when you are ready.</p>{comparison}</section>
         <section hidden={view !== 'responses'} className="nf-buying-responses"><p className="nf-buying-eyebrow">Supplier responses</p><h1>Bring every response together</h1><p>Open your published project to review supplier submissions, evidence, pricing and clarifications.</p><a className="nf-buying-primary" href="/sase/account/">Open my saved projects →</a><button onClick={() => projectTool('responses')}>View this project’s responses</button><p className="nf-buying-subtle">Still preparing your project? Review your anonymous notice before publication. Invitations depend on confirmed eligibility; no confirmed matches means no invitations. Supplier responses are not guaranteed. A full RFP is optional.</p></section>
-        <section hidden={view !== 'tools'} className="nf-buying-tools"><p className="nf-buying-eyebrow">Buying tools</p><h1>All tools</h1><p>Every stage of your buying journey, available when you need it.</p><div className="nf-buying-tool-grid">
-          <button onClick={() => projectTool('requirements')}><strong>Requirements &amp; full RFP</strong><span>Eight sections, imports, voice, validation, recommended and bespoke questions.</span></button>
-          <button onClick={() => projectTool('review')}><strong>Supplier document &amp; project review</strong><span>Review requirements, decisions, architecture and provenance.</span></button>
+        <section hidden={view !== 'tools'} className="nf-buying-tools"><p className="nf-buying-eyebrow">Buying tools</p><h1>All tools</h1><p>Project controls, research and account tools. Options marked Coming soon are not available yet.</p><div className="nf-buying-tool-grid">
+          <button onClick={() => projectTool('requirements')}><strong>Edit requirements</strong><span>Open your requirement editor. Choose Short or Detailed RFP there if you need supplier questions.</span></button>
+          <button onClick={() => projectTool('review')}><strong>Review my project</strong><span>Review your basic brief or RFP using the format you have chosen. Nothing is published automatically.</span></button>
           <button onClick={() => projectTool('tools')}><strong>Project tools</strong><span>Private draft downloads, plus supplier responses and evidence after publication.</span></button>
-          {resources.map(([name, href, description]) => <a key={href} href={href}><strong>{name}</strong><span>{description}</span></a>)}
-        </div><details className="nf-buying-more-tools"><summary>More research, sector guides &amp; services</summary>{MEGA_GROUPS.map(group => <section key={group.label}><h2>{group.label}</h2><div className="nf-buying-tool-grid">{group.items.map(item => <a key={item.href} href={item.href}><strong>{item.label}</strong><span>{item.desc}</span></a>)}{group.footerLink && <a href={group.footerLink.href}><strong>{group.footerLink.label}</strong></a>}</div></section>)}</details></section>
+          {resources.map(([name, href, description]) => <ResourceCard key={href} name={name} href={href} description={description} />)}
+        </div><details className="nf-buying-more-tools"><summary>More research, sector guides &amp; services</summary>{MEGA_GROUPS.map(group => <section key={group.label}><h2>{group.label}</h2><div className="nf-buying-tool-grid">{group.items.map(item => <ResourceCard key={item.href} name={item.label} href={item.href} description={item.desc} />)}{group.footerLink && <a href={group.footerLink.href}><strong>{group.footerLink.label}</strong></a>}</div></section>)}</details></section>
       </div>
       <details className="nf-buying-information"><summary>SASE &amp; SD-WAN buying guide</summary><div className="nf-buying-guide-content">{information}</div></details>
     </div>

@@ -1,3 +1,9 @@
+# Workspace options audit, 28 September 2026
+
+All Basic review entries now use the existing short-brief review bridge, including Activity & review, the tool card and internal review navigation. Legacy/full RFP review remains unchanged. Tool cards describe actual actions; Provider directory links directly to /marketplace/. Cost & TCO and Security assessment are non-interactive Coming soon cards in the workspace, including expanded research listings, because pricing calibration is outstanding and security currently redirects back to the builder. Existing public tools, URLs, auth and publication rules remain intact. No em dashes in added text.
+
+Local browser checked Basic review through sidebar and card, preserved typed input, Detailed review and return to Basic, Settings, circuit connection form, two-provider comparison, response gate, and assistant sign-in. Circuit and buyer-memory/skill service tests passed after adapting fixtures to the existing storage and outbound-mail isolation policy; no production data or mail used. Marketplace journey and publication policy tests passed. Full validation and production build, TypeScript and focused lint passed. Mobile menu opens/closes and tool cards have no horizontal overflow at 390px. The local provider source intentionally uses the reviewed snapshot because production provider credentials are absent; this is not a production-source failure. All eight active resource destinations returned direct HTTP 200 on the public hostname. Git release and final live verification follow.
+
 # Brief-first builder live acceptance, 28 September 2026
 
 Production source `b6788efce2eba232a38245c21976ec3e97a7cb23`, Git deployment `dpl_7MtDaECg2VK6R93MEoXHr7oWDGty`, READY and assigned to the registered `project-8q2xb.vercel.app` origin. Public canonical builder returns direct HTTP200 with the same canonical and b6788ef source stamp. Live version 2809261731.
