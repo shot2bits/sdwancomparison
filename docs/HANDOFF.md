@@ -1,3 +1,13 @@
+# Buyer publication journey, 28 September 2026
+
+Branch codex/marketplace-buyer-journey-20260928 starts from verified production 82c5898 (dpl_Dzhx12S6Zds2APuFtCL3QSHBrT61). User authorised the focused publication journey with no em dashes in added copy.
+
+Lead with finding suitable providers. Keep Describe my project primary, existing upload and Detailed RFP secondary. The brief begins with outcome, approximate sites, timing and geography; sector, solution, operating model and private company are shown on continuation. Site and sector requirements still apply before review. Not decided is an explicit timing choice; no answers or eligibility are invented. The existing notice component now previews changes in the form without a duplicate action or private company field. Review labels consistently say Review my opportunity; final authenticated action says Publish my anonymous opportunity. Explain public board visibility, private access controls and the actual admin closure/archive route. No supplier participation or response promises added.
+
+Existing consent, owner, identity, publication, response and matching policies are unchanged. Existing server funnel stages retained; add consent-gated browser marketplace_brief_details_reached with no project text or identity. Existing public citation URLs and research are unchanged.
+
+Verification: full validation and production build passed, followed by final nonmutating production build. TypeScript and focused ESLint passed. Publication-policy (13 checks plus persisted binding cases), RFP conversion, marketplace journey and added default-region/private-preview checks passed. CUA browser on isolated in-memory KV with mail/API keys empty: new short brief, undecided timing, inline preview, private company omission, saved review, consent gate, verification handoff, reload, recovery of unsaved device changes and resave passed. Upload entry and Detailed RFP preserve requirements. At 390px document width 390 and dialog width/scroll width both 352, with no browser errors. Reviewed React state, conditional validation, optional preview action and accessibility. Local provider-source credentials absent; existing reviewed snapshot fallback disclosed, not counted as live provider verification. No real project published, email sent or supplier contacted. Public release verification follows.
+
 # Buyer recovery and publication exceptions — 19 September 2026
 
 Branch codex/buyer-recovery-20260919 starts from live 32cb801. Replace supplier-count/bid promises in the existing one-off nudge with latest retained publication-outcome-aware copy, reply-to-support review, escaped HTML and stronger internal/test exclusions. Do not replay previously sent reminders. No cron was manually invoked.
