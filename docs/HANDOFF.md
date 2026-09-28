@@ -1,3 +1,7 @@
+# Expanded sections verified live, 28 September 2026
+
+Production commit 950060ee7f69c195eff181d63e22a4bf4c39b2ef, deployment dpl_FYmuVgMr4jALuqxjc4QUoVJ9bhnm READY. Public browser at canonical RFP builder shows Project format and RFP depth and Save for internal review expanded, version 2809261040. Local browser confirms both can still collapse; empty-draft downloads remain disabled. No browser errors observed. Public regression script: 2026-09-28 09:43 UTC passed 42 failed 0. Display-only change, no added copy or live form submission.
+
 # Expanded project choices, 28 September 2026
 
 User requests Project format and RFP depth and Save for internal review expanded by default. Add the native open attribute to both disclosure elements; visitors can still collapse them. No workflow, persistence, download or publication logic changed. Existing download presentation assertion updated. Focused ESLint, marketplace journey test and full production validation/build passed. Live verification follows Git release.
