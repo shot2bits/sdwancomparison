@@ -1,3 +1,7 @@
+# Public buyer journey verification, 28 September 2026
+
+Public verification: 28 September 2026, 07:15 UTC. SASE deployment dpl_DYUZmersEX23wpCiAfgGM4goTzVa and apex deployment dpl_WSpj6nnGrtwRb4UVa4YAQ6ufPkzV are READY from the recorded Git commits. Canonical builder, cited guide and shortlist each return direct HTTP 200. Public-domain browser confirms new headline, brief step, live preview, upload entry, Detailed RFP and guide CTA. Browser error log empty. All 30 live shortlist provider records unchanged before/after. Apex regression suite: passed 42, failed 0. No production form or publication submitted.
+
 # Buyer publication journey, 28 September 2026
 
 Branch codex/marketplace-buyer-journey-20260928 starts from verified production 82c5898 (dpl_Dzhx12S6Zds2APuFtCL3QSHBrT61). User authorised the focused publication journey with no em dashes in added copy.
