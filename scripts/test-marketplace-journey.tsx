@@ -22,7 +22,7 @@ assert.ok(!renderToStaticMarkup(<PublicationPreview fields={{regions:['uk_irelan
 assert.ok(!noAction.includes(fields.company), 'live preview never prints the private company field');
 const download=renderToStaticMarkup(<PrivateDraftDownload title="draft" markdown="draft" enabled={true}/>);
 assert.match(download, /^<details[^>]*><summary>Save for internal review/);
-assert.doesNotMatch(download, /<details[^>]*\sopen(?:=|\s|>)/);
+assert.match(download, /<details[^>]*\sopen(?:=|\s|>)/);
 assert.ok(download.includes('Download private Word draft'));
 
 await withFakeKv(async()=>{
@@ -56,4 +56,4 @@ await withFakeKv(async()=>{
  assert.equal(aggregateFunnel(events.map(e=>({...JSON.parse(e),environment:'production',classification:'test'}))).counts.verification_completed,0);
  const original=global.fetch;try{global.fetch=async()=>{throw Error('simulated reporting outage')};await recordPublicationVerification(id,email,'verification_completed');}finally{global.fetch=original;}
 });
-console.log('PASS: notice readiness, public/private split, collapsed downloads, real verification route, single-use token, ownership, event deduplication, test exclusion and telemetry failure isolation');
+console.log('PASS: notice readiness, public/private split, expanded downloads, real verification route, single-use token, ownership, event deduplication, test exclusion and telemetry failure isolation');

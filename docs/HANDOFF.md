@@ -1,3 +1,7 @@
+# Expanded project choices, 28 September 2026
+
+User requests Project format and RFP depth and Save for internal review expanded by default. Add the native open attribute to both disclosure elements; visitors can still collapse them. No workflow, persistence, download or publication logic changed. Existing download presentation assertion updated. Focused ESLint, marketplace journey test and full production validation/build passed. Live verification follows Git release.
+
 # Public buyer journey verification, 28 September 2026
 
 Public verification: 28 September 2026, 07:15 UTC. SASE deployment dpl_DYUZmersEX23wpCiAfgGM4goTzVa and apex deployment dpl_WSpj6nnGrtwRb4UVa4YAQ6ufPkzV are READY from the recorded Git commits. Canonical builder, cited guide and shortlist each return direct HTTP 200. Public-domain browser confirms new headline, brief step, live preview, upload entry, Detailed RFP and guide CTA. Browser error log empty. All 30 live shortlist provider records unchanged before/after. Apex regression suite: passed 42, failed 0. No production form or publication submitted.
