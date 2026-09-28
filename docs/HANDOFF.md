@@ -1,3 +1,9 @@
+# Brief-first builder live acceptance, 28 September 2026
+
+Production source `b6788efce2eba232a38245c21976ec3e97a7cb23`, Git deployment `dpl_7MtDaECg2VK6R93MEoXHr7oWDGty`, READY and assigned to the registered `project-8q2xb.vercel.app` origin. Public canonical builder returns direct HTTP200 with the same canonical and b6788ef source stamp. Live version 2809261731.
+
+Live browser: inline Basic brief and three-stage progress present; detailed expansion absent; blank form cannot continue; no browser console errors. Narrow public viewport reported520px with document width520px; actual390px was tested locally. Browser viewport reset. Existing cached solution selection is preserved; a fresh local origin verifies the blank deliberate-choice default. All42 public regression checks passed at2026-09-28 16:33UTC. Vercel runtime-error connector returned no errors in its selected window, a limited observation rather than a guarantee. No real project, enquiry, verification email or supplier publication was created. Local synthetic review/save/import tests used only isolated memory storage and disabled mail keys. Final local production TypeScript/build and focused lint were clean.
+
 # Brief-first builder, 28 September 2026
 
 Work branch `codex/rfp-brief-first-20260928`, based on production `59350f7` plus the existing verification-only handoff. User authorised making the reviewed simplification live.
