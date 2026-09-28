@@ -1,3 +1,7 @@
+# Basic default verified live, 28 September 2026
+
+Production commit 59350f7d4da90afbf4626394abed36d17cb00645, deployment dpl_6XBqMqNXy4cJP9tEne5GsQUeT5sg READY. Public canonical builder with journey=quick_list visibly selects Basic requirements only, version 2809261055; both disclosures remain expanded. No browser console errors observed. Full build and focused lint passed; local Basic -> Import -> Basic selection and saved Detailed RFP restoration checked. Public regression script at 2026-09-28 09:57 UTC: passed 42, failed 0. No live form submission or publication.
+
 # Basic and import format switching, 28 September 2026
 
 Follow-up to the Basic default: selecting an imported RFP changes a brief purpose to RFP, retaining explicit RFI. Returning to Basic exits import mode; only one format is selected. Both workspace entry actions and GuidedBuild callbacks are covered. Focused ESLint, full validation/build and local browser Basic -> Import -> Basic passed. No publication or storage gates changed.
