@@ -4812,9 +4812,9 @@ export default function ProjectDesk({
       const action = (event as CustomEvent<string>).detail;
       if (action === "settings") { goToStep("describe"); setDocumentSettingsOpen(true); }
       if (action === "requirements") goToStep("describe");
-      if (action === "brief") { setDocumentPurpose("brief"); goToStep("describe"); requestBrief(); }
+      if (action === "brief") { setDocumentPurpose("brief"); setRfpEntryMode("build"); goToStep("describe"); requestBrief(); }
       if (action === "short-rfp" || action === "detailed-rfp") { setDocumentPurpose("rfp"); setRfpEntryMode("build"); changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
-      if (action === "import") { setRfpEntryMode("check"); goToStep("describe"); fileRef.current?.click(); }
+      if (action === "import") { setRfpEntryMode("check"); setDocumentPurpose((purpose) => purpose === "brief" ? "rfp" : purpose); goToStep("describe"); fileRef.current?.click(); }
       if (action === "review") goToStep(started ? "review" : "describe");
       if (action === "responses") { if(reachable.has("compare"))goToStep("compare");else {say("Supplier responses become available after you publish and suppliers reply. Review your project to continue.");requestBrief();} }
       if (action === "tools") {
@@ -5660,7 +5660,7 @@ export default function ProjectDesk({
                 onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
                 onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
                 entryMode={rfpEntryMode}
-                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "check") setDocumentPurpose((purpose) => purpose === "brief" ? "rfp" : purpose); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
                 validationReport={rfpValidation}
                 validatingRfp={validatingRfp}
                 validationError={rfpValidationError}
@@ -6783,7 +6783,7 @@ export default function ProjectDesk({
               onSelectSection={(key) => setActiveSection(key)}
               onPublish={() => { if(created&&!workspaceEnvelopeId)goToStep("publish");else requestBrief(); }}
               entryMode={rfpEntryMode}
-              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "check") setDocumentPurpose((purpose) => purpose === "brief" ? "rfp" : purpose); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
               validationReport={rfpValidation}
               validatingRfp={validatingRfp}
               validationError={rfpValidationError}

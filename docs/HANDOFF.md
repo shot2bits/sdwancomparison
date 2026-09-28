@@ -1,3 +1,7 @@
+# Basic and import format switching, 28 September 2026
+
+Follow-up to the Basic default: selecting an imported RFP changes a brief purpose to RFP, retaining explicit RFI. Returning to Basic exits import mode; only one format is selected. Both workspace entry actions and GuidedBuild callbacks are covered. Focused ESLint, full validation/build and local browser Basic -> Import -> Basic passed. No publication or storage gates changed.
+
 # Basic requirements default, 28 September 2026
 
 Set the fresh ProjectDesk document purpose to brief so Basic requirements is selected for a new project, including journey=quick_list. Keep explicit build/check RFP entry and legacy RFP resume as RFP; persisted local/server document-purpose restoration is unchanged. No publication gates changed and no copy added. Focused ESLint and full validation/production build passed. Local browser confirms fresh Basic selected and a chosen Detailed RFP with a saved sector still selected after reload and Resume saved project. Public verification follows Git release.
