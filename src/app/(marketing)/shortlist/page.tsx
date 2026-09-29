@@ -166,6 +166,14 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         </p>
       </div>
 
+      {selectedView === "all" && <aside aria-label="Explore provider evidence" className="mb-6 rounded-lg border border-slate-300 bg-white p-5">
+        <h2 className="text-lg font-semibold">Research providers before starting a project</h2>
+        <p className="mt-2 text-sm text-slate-700">Compare two or three named providers across {features.length} capabilities. The public comparison is free to explore and does not require you to publish a project.</p>
+        <a href="#comparison-workspace" className="mt-4 inline-flex items-center rounded-lg bg-[#233849] px-5 py-3 font-semibold text-white no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-800">
+          Compare provider evidence
+        </a>
+      </aside>}
+
       <aside
         aria-label="Netify RFP Builder"
         className="mb-6 flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 px-5 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between"

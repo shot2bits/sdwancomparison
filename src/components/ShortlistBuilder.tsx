@@ -86,7 +86,7 @@ export default function ShortlistBuilder({ vendors, features, ukBuyerGuidance = 
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not load the explanation.'); }
     finally { setBusy(false); }
   }
-  return <section id="comparison-workspace" className="my-6 rounded-xl border border-zinc-300 bg-white p-5 text-zinc-900 md:p-8" aria-labelledby="comparison-title">
+  return <section id="comparison-workspace" className="my-6 scroll-mt-24 rounded-xl border border-zinc-300 bg-white p-5 text-zinc-900 md:p-8" aria-labelledby="comparison-title">
     <h2 id="comparison-title" className="text-2xl font-semibold">{ukBuyerGuidance ? "SD-WAN and SASE provider comparison for UK IT teams" : "Compare SD-WAN and SASE providers"}</h2>
     <p className="mt-2 text-sm text-zinc-600">Compare two or three named vendors and service providers across {features.length} capabilities. Public evidence is free to explore; personalised matching unlocks when you publish a project.</p>
     {ukBuyerGuidance && <fieldset className="mt-5 rounded-lg border border-slate-200 p-4" aria-describedby="uk-situation-help">
