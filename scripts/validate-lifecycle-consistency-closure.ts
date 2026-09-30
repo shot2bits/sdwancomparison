@@ -110,7 +110,7 @@ function main() {
     const explainerGate = desk.match(/\{!published && \(\s*<div className="overflow-hidden rounded-\[4px\][\s\S]{0,300}/);
     record(Boolean(explainerGate), "3: the pre-publish explainer card (\"Publish to match this project…\") is gated on `!published`", "");
     record(/Publish to match this project against Netify/.test(desk), "3 setup: the explainer heading string still exists in source (proving the fixture isn't vacuous -- the content exists, just conditionally)", "");
-    record(/What publishing unlocks: your matched vendors/.test(desk), "3 setup: \"What publishing unlocks\" copy still exists in source, same reasoning", "");
+    record(/SOURCING_DESCRIPTION/.test(desk.slice(desk.indexOf("Publish to match this project against Netify"), desk.indexOf("Generate and publish: the only exit"))), "3 setup: shared sourcing description supplies the explainer copy", "");
     // `setPhase` is never called anywhere inside the publish success
     // branch, confirming `phase === "fits"` alone cannot be trusted as a
     // "before publish" signal (this is WHY `!published` is the correct
