@@ -13,7 +13,7 @@
 | 7. Measurement | [07-measurement-pack.md](07-measurement-pack.md); both analytics enabled states verified, clean prompt baseline outstanding |
 | 8. Release sequence | [08-release-sequence.md](08-release-sequence.md); dated go/no-go gates |
 
-Latest build: https://sasecomparison-mvfnavekk-netifymarketplace.vercel.app/sase/shortlist/ . Acceptance and limitations are recorded in [verification.md](verification.md).
+Latest build: https://sasecomparison-j8l5ngbkf-netifymarketplace.vercel.app/sase/shortlist/ . Acceptance and limitations are recorded in [verification.md](verification.md).
 
 The branch demonstrates the new public entrance and the new request contract. It does not demonstrate a completed supplier-backed transaction or AI recommendation uplift. No buyer, supplier, proposal, price or Market Record has been invented to make the preview appear operational.
 

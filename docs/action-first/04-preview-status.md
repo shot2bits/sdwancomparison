@@ -8,7 +8,7 @@ Private RFP, private connectivity pricing and proposal comparison now share the 
 
 All 72 flagged sector rows now have source adjudications (including the remaining 68). 31 have qualified deployment evidence; 41 are adjacent, wrong-sector, planned, outside taxonomy or insufficient. Seventeen still lack usable evidence. These are dispositions, not 72 verified capabilities. Supported preview projections preserve qualifications and await human release sign-off. See sector-adjudications.csv.
 
-Production's authenticated matching endpoint was verified read-only as Neon-backed with 30 records and contract provider-match-records/2.0.0. The previous preview rejected its credential. A branch-specific producer/consumer connection is being verified separately. Supplier commitments and Harry's copy remain unconfirmed.
+Production's authenticated matching endpoint was verified read-only as Neon-backed with 30 records and contract provider-match-records/2.0.0. The previous preview rejected its credential. A branch-specific producer/consumer connection is now verified as Neon-backed on the updated preview. Hosted sector acceptance revealed unresolved UK/Ireland coverage gates; see 09-integration-review.md. Supplier commitments and Harry's copy remain unconfirmed.
 
 Validation: focused consent/expiry/payload binding/recipient/order/source-qualification tests and existing project-entrance tests pass; TypeScript and focused ESLint pass. The Vercel preview uses test:action-first plus the non-mutating production build. The legacy full validation suite still assumes publication-gated research; it has not been certified for this policy change. Production release requires updating and running those regression gates, not bypassing them.
 
