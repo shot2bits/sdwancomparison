@@ -68,3 +68,13 @@ TypeScript and action-first suite exit 0. [OWNER] all 19 sign-offs remain empty.
 Created release/2026-09-30 from c28fe0b. Vercel SASE Production → Branch Tracking updated and API readback confirms release/2026-09-30. Existing domains/production storage retained. No further pushes to codex/publication-first-comparison. Draft PR: https://github.com/shot2bits/sdwancomparison/pull/8 (75 release-line commits at creation). Main has three independent commits absent from this production line; PR conflicts are in docs/HANDOFF.md and package.json. They are not silently resolved by replacing main or importing unreviewed RFP changes. PR merge is not part of this production deployment.
 
 Final preview c28fe0b READY; public UK review audit has four sourced records; live Neon prepare_sourcing_plan returns all four with uk_provider_only true. TypeScript, action-first suite and full validation passed, and prior hosted confirmation/panel acceptance remains recorded above. Production deployment and apex verification follow below.
+
+Production SASE cec4800: dpl_AcAFbxeBhX8Dxdeoiibkw66KGFw3 READY, githubCommitRef release/2026-09-30. Apex 1100f9d: dpl_5YAmJX5nN6yUBRsoDkZHk7f8oJQo READY.
+```text
+PASS live HTML including JSON-LD: four requested URLs HTTP 200; zero prohibited copy matches
+PASS live UK-only plan: authenticated Neon source; all four carriers returned
+PASS live feed: 30 researched providers; zero panel memberships; 19 sector sign-offs pending
+PASS browser: four UK evidence matches; no console warnings or errors
+2026-09-30 20:14 UTC  passed 42  failed 0
+```
+No synthetic live confirmations or supplier messages. Owner blanks unchanged.
