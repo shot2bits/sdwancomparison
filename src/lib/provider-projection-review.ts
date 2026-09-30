@@ -4,6 +4,9 @@ import sectorAdjudications from "../../data/provider-sector-adjudications.json";
 import type { ShortlistVendor, CapabilityStatus } from "./shortlist-core";
 import type { ProviderMatchRecord } from "./provider-matching";
 export type ReviewedProjection = {
+  signed_off_by?: string;
+  signed_off_at?: string;
+  uk_sector_evidence?: Record<string, boolean>;
   reviewed_at: string;
   review_due: string;
   reviewer: string;
@@ -153,6 +156,7 @@ for (const [slug, uk] of Object.entries(UK_CARRIER_REVIEWS)) {
     ...uk,
     reviewer: previous?.reviewer ?? uk.reviewer,
     sector_signoff: previous?.sector_signoff,
+    uk_sector_evidence: previous?.uk_sector_evidence,
     sectors: previous?.sectors,
     regions: { ...previous?.regions, ...uk.regions },
     source_urls: [
@@ -203,15 +207,20 @@ export function applyProjectionReview(
     !review ||
     !review.reviewer ||
     !review.source_urls.length ||
-    now < Date.parse(review.reviewed_at) ||
-    now >= Date.parse(review.review_due)
+    now < Date.parse(review.reviewed_at)
   )
     return;
+  if (now >= Date.parse(review.review_due)) {
+    provider.projection_provenance.resolution = "review_expired";
+    return;
+  }
   if (
     record.reviewed_at &&
     Date.parse(record.reviewed_at) > Date.parse(review.reviewed_at)
-  )
+  ) {
+    provider.projection_provenance.resolution = "source_newer_than_review";
     return;
+  }
   for (const [sector, status] of Object.entries(review.sectors ?? {}))
     provider.sectors[sector as keyof typeof provider.sectors] =
       status as CapabilityStatus;
@@ -229,6 +238,7 @@ export function applyProjectionReview(
       review.independent_evidence_source_count;
   provider.projection_provenance.resolution = "reviewed_override";
   provider.projection_provenance.active_review = {
+    uk_sector_evidence: review.uk_sector_evidence ?? {},
     reviewed_at: review.reviewed_at,
     review_due: review.review_due,
     reviewer: review.reviewer,

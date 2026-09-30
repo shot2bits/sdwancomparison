@@ -1,3 +1,6 @@
+import {sourcingPlanAllowed} from "./sourcing-plan-limit";
+import {randomUUID} from "node:crypto";
+import {recordSourcingMetric} from "./sourcing-metrics";
 import {
   sourcingUndertaking, SOURCING_TARGET, type SourcingTarget,
   SourcingBriefSchema,
@@ -61,6 +64,7 @@ export async function callSourcingTool(
   name: string,
   args: unknown,
   requestKey: string,
+  acquisition = "mcp",
 ) {
   if (name === "request_comparable_proposals")
     return requestSourcing(
@@ -78,7 +82,9 @@ export async function callSourcingTool(
   if (name !== "prepare_sourcing_plan")
     throw new Error("Unsupported sourcing action");
   const b = SourcingBriefSchema.parse(args);
+  if(acquisition === "mcp" && !await sourcingPlanAllowed(requestKey)) throw new Error("Too many plan requests. Retry shortly.");
   const live = await getLiveShortlistDataset();
+  await recordSourcingMetric("plan",acquisition,randomUUID());
   return {
     brief: b,
     runtime_provider_source:live.source,

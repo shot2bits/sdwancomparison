@@ -51,3 +51,24 @@ export async function sourcingAccess(
   const p = await getProject(id);
   return p?.owner_email?.toLowerCase() === g.email.toLowerCase() ? g : null;
 }
+
+/** Recovery requires both project ownership and a committed, consented request. */
+export async function confirmedSourcingOwner(
+  project: Awaited<ReturnType<typeof getProject>>,
+  email: string,
+): Promise<boolean> {
+  if (!project || project.owner_email?.toLowerCase() !== email.toLowerCase())
+    return false;
+  const id = project.entrance_context?.raw_input?.sourcing_request_id;
+  if (typeof id !== "string") return false;
+  const r = await kvGetJson<SourcingRecord>(`sourcing:request:${id}`);
+  return Boolean(
+    r &&
+      r.id === id &&
+      r.project_id === project.id &&
+      r.status === "desk_review" &&
+      r.request.consent === true &&
+      r.request.email.toLowerCase() === email.toLowerCase() &&
+      r.payload_hash === hash(JSON.stringify(r.request)),
+  );
+}

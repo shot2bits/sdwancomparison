@@ -1,3 +1,4 @@
+import { SOURCING_ACQUISITIONS } from "./sourcing-acquisition";
 import { z } from "zod";
 import { REGION_KEYS, SECTOR_KEYS } from "./shortlist-core";
 export const SOURCING_VERSION = "netify-sourcing/1.0.0";
@@ -11,20 +12,37 @@ export const SOURCING_ACTION_LABELS = {
   demo: "Demo",
   proposals: "Include in proposals",
 } as const;
-export type SourcingTarget = {proposals:number|null;working_days:number|null};
+export type SourcingTarget = {
+  proposals: number | null;
+  working_days: number | null;
+};
 // [OWNER] Set both only after agreeing the operational undertaking.
-export const SOURCING_TARGET:SourcingTarget = {proposals:null,working_days:null};
-export function sourcingUndertaking(target:SourcingTarget=SOURCING_TARGET):string {
- const valid=(n:number|null):n is number=>n!==null&&Number.isSafeInteger(n)&&n>0;
- return valid(target.proposals)&&valid(target.working_days)
-  ? `${target.proposals} written proposals within ${target.working_days} working days. If a supplier declines, we report it and agree what happens next.`
-  : 'Agree a response target before outreach. If a supplier declines, we report it and agree what happens next.';
+export const SOURCING_TARGET: SourcingTarget = {
+  proposals: null,
+  working_days: null,
+};
+export function sourcingUndertaking(
+  target: SourcingTarget = SOURCING_TARGET,
+): string {
+  const valid = (n: number | null): n is number =>
+    n !== null && Number.isSafeInteger(n) && n > 0;
+  return valid(target.proposals) && valid(target.working_days)
+    ? `${target.proposals} written proposals within ${target.working_days} working days. If a supplier declines, we report it and agree what happens next.`
+    : "Netify reviews your brief, confirms the providers you approve and coordinates requests for written proposals. We agree the response timetable with you before outreach, track replies and report declines or missing responses so you can decide the next step.";
 }
-export function sourcingServiceSchema(url:string,target:SourcingTarget=SOURCING_TARGET){return {
- '@context':'https://schema.org','@type':'Service',name:SOURCING_TITLE,
- description:`${SOURCING_DESCRIPTION} ${sourcingUndertaking(target)}`,url,
- provider:{'@type':'Organization',name:'Netify'},
-};}
+export function sourcingServiceSchema(
+  url: string,
+  target: SourcingTarget = SOURCING_TARGET,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: SOURCING_TITLE,
+    description: `${SOURCING_DESCRIPTION} ${sourcingUndertaking(target)}`,
+    url,
+    provider: { "@type": "Organization", name: "Netify" },
+  };
+}
 export const COMMISSION_DESCRIPTION =
   "Netify is paid by suppliers when an introduction leads to business. Commission never affects the evidence order.";
 export const SourcingBriefSchema = z.object({
@@ -61,17 +79,7 @@ export const SourcingRequestSchema = z
       .transform((s) => s.trim().toLowerCase()),
     consent: z.literal(true),
     anonymous: z.literal(true),
-    acquisition: z
-      .enum([
-        "web",
-        "chatgpt",
-        "gemini",
-        "perplexity",
-        "copilot",
-        "mcp",
-        "other",
-      ])
-      .default("web"),
+    acquisition: z.enum(SOURCING_ACQUISITIONS).default("web"),
     idempotency_key: z.string().uuid(),
   })
   .strict();
@@ -90,11 +98,38 @@ export function validateRecipients(input: SourcingRequest, slugs: string[]) {
       "Review the anonymous supplier brief before approving recipients.",
     );
 }
-export {responsePanelMember} from './response-panel-contract';
+export { responsePanelMember } from "./response-panel-contract";
 export const PUBLIC_SOURCING_TOOLS = [
   "prepare_sourcing_plan",
   "request_comparable_proposals",
   "get_sourcing_request_status",
 ] as const;
 
-export const PRIVATE_CIRCUIT_CONSENT = "Ask Netify to review these private connectivity requirements within my sourcing project. No public notice is created. Supplier recipients and any identifying details must be approved before disclosure. This is not an order.";
+export const PRIVATE_CIRCUIT_CONSENT =
+  "Ask Netify to review these private connectivity requirements within my sourcing project. No public notice is created. Supplier recipients and any identifying details must be approved before disclosure. This is not an order.";
+
+export const SOURCING_STEPS = [
+  {
+    title: "Describe your requirements",
+    body: "Research providers openly and describe your sites, users, locations and service needs.",
+  },
+  {
+    title: "Review the evidence and recipients",
+    body: "Compare sourced capabilities and gaps. You approve the named providers and the information each may receive.",
+  },
+  {
+    title: "Ask Netify to coordinate",
+    body: "Confirm your request with your work email. Netify reviews the brief, agrees the response timetable and coordinates approved supplier outreach.",
+  },
+  {
+    title: "Compare the responses received",
+    body: "Keep your requirements, connectivity pricing and written proposals together in a private project. Review declines and outstanding questions before deciding.",
+  },
+] as const;
+
+export const SOURCING_NEED_LABELS = {
+  sdwan: "SD-WAN",
+  sase: "SASE",
+  secure_access: "Secure remote access",
+  help_deciding: "Help choosing the service",
+} as const;

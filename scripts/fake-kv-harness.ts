@@ -45,6 +45,8 @@ type Entry =
   | { type: "zset"; value: Map<string, number> };
 
 export class FakeKvStore {
+  private expirations = new Map<string,number>();
+  private expireKeys() {for(const [k,at] of this.expirations) if(at<=Date.now()){this.store.delete(k);this.expirations.delete(k);}}
   private store = new Map<string, Entry>();
 
   /** Export synthetic fixtures for the local, read-only preview server. */
@@ -61,6 +63,7 @@ export class FakeKvStore {
   }
 
   private str(key: string): string | null {
+    this.expireKeys();
     const e = this.store.get(key);
     return e && e.type === "string" ? e.value : null;
   }
@@ -94,6 +97,7 @@ export class FakeKvStore {
   }
 
   command(cmd: (string | number)[]): unknown {
+    this.expireKeys();
     const [name, ...args] = cmd;
     const op = String(name).toUpperCase();
     switch (op) {
@@ -114,10 +118,20 @@ export class FakeKvStore {
       case "SET": {
         const flags = args.slice(2).map((value) => String(value).toUpperCase());
         if (flags.includes("NX") && this.store.has(String(args[0]))) return null;
-        this.store.set(String(args[0]), { type: "string", value: String(args[1]) });
+        const key=String(args[0]); this.expirations.delete(key);
+        const ex=flags.indexOf("EX"),px=flags.indexOf("PX");
+        if(ex>=0)this.expirations.set(key,Date.now()+Number(flags[ex+1])*1000);
+        if(px>=0)this.expirations.set(key,Date.now()+Number(flags[px+1]));
+        this.store.set(key, { type: "string", value: String(args[1]) });
         return "OK";
       }
       case "EVAL": {
+        if(String(args[0]).includes("sourcing-prepare-commit")) {
+          if(this.str(String(args[2]))!==String(args[5]))return 0;
+          this.command(["SET",String(args[3]),String(args[6]),"EX",86400]);
+          this.command(["SET",String(args[4]),String(args[7]),"EX",3600]);
+          this.command(["EXPIRE",String(args[2]),86400]);return 1;
+        }
         if (String(args[0]).includes("sourcing-confirm-commit")) {
           if (this.str(String(args[2])) !== String(args[5])) return 0;
           this.command(["SET",String(args[3]),String(args[6])]);
@@ -150,12 +164,14 @@ export class FakeKvStore {
         for (const k of args) if (this.store.delete(String(k))) n++;
         return n;
       }
+      case "PTTL": {
+        const key=String(args[0]);return !this.store.has(key)?-2:this.expirations.has(key)?this.expirations.get(key)!-Date.now():-1;
+      }
       case "EXPIRE":
-      case "PEXPIRE":
-        // TTL is not modelled (these fixtures run and finish in
-        // milliseconds); presence is acknowledged so callers that check
-        // the return value see the same "key exists" signal Upstash gives.
-        return this.store.has(String(args[0])) ? 1 : 0;
+      case "PEXPIRE": {
+        const key=String(args[0]);if(!this.store.has(key))return 0;
+        this.expirations.set(key,Date.now()+Number(args[1])*(op==="EXPIRE"?1000:1));return 1;
+      }
       case "SADD": {
         const s = this.setEntry(String(args[0]));
         let added = 0;
@@ -257,7 +273,7 @@ export async function withFakeKv<T>(
 ): Promise<T> {
   process.env.KV_REST_API_URL = FAKE_KV_URL;
   process.env.KV_REST_API_TOKEN = FAKE_KV_TOKEN;
-  const store = new FakeKvStore();
+  const store = process.env.NETIFY_TEST_REDIS_PORT ? new (await import("./real-redis-fixture")).RealRedisFixture(process.env.NETIFY_TEST_REDIS_PORT,process.env.NETIFY_TEST_REDIS_CLI||"redis-cli") : new FakeKvStore();
   const before = global.fetch;
   global.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;

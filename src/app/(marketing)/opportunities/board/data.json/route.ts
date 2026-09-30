@@ -30,7 +30,7 @@ export async function GET() {
     "@context": "https://schema.org",
     title: "Live SASE, SSE and SD-WAN opportunity board",
     url: `${SITE_URL}/opportunities/board`,
-    description: "Open buyer opportunities. Verified vendors respond and quote. Pricing amounts are private to the posting buyer.",
+    description: "Open buyer opportunities. Invited suppliers can reply and quote. Pricing amounts are private to the posting buyer.",
     generated: new Date().toISOString(),
     methodology_version: "sase-marketplace-2026.1",
     public_record_note: "Site counts are published exactly unless the combination of an anonymous buyer, a stated sector and a single region could identify the buyer; then the site_band range is published and sites is null. Exact figures always stay with the buyer and participating vendors. Closed and awarded notices remain published permanently in the archived array, each with its closed_at date.",

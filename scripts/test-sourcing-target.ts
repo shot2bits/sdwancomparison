@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {sourcingUndertaking,sourcingServiceSchema,SOURCING_TARGET} from '../src/lib/sourcing-contract';
 const {sourcingToolDefinitions}=await import('../src/lib/mcp-sourcing-tools');
-const fallback='Agree a response target before outreach. If a supplier declines, we report it and agree what happens next.';
+const fallback='Netify reviews your brief, confirms the providers you approve and coordinates requests for written proposals. We agree the response timetable with you before outreach, track replies and report declines or missing responses so you can decide the next step.';
 assert.deepEqual(SOURCING_TARGET,{proposals:null,working_days:null});
 for(const target of [{proposals:null,working_days:null},{proposals:3,working_days:5}]){
  const step3=sourcingUndertaking(target);

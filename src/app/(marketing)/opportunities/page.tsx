@@ -10,11 +10,11 @@ const OVERLAY = "/opportunities/new?prefill=1&engagement=quote_room&scope=sd_wan
 export const metadata: Metadata = {
   title: "Publish a SASE or SD-WAN RFI: Vendor Interest",
   description:
-    "Publish a short SASE or SD-WAN RFI: what you need, where and by when. Verified vendors and service providers respond with interest and indicative pricing. Draft in the clear; sign in only to publish.",
+    "Publish a short SASE or SD-WAN RFI: what you need, where and by when. Invited suppliers can submit interest and indicative pricing. Draft in the clear; sign in only to publish.",
   alternates: { canonical: `${SITE_URL}/opportunities/` },
   openGraph: {
     title: "Publish a SASE or SD-WAN RFI: Vendor Interest",
-    description: "A short public listing of what you need. Verified vendors respond; pricing stays private.",
+    description: "A short public listing of what you need. Invited suppliers can reply; pricing stays private.",
     url: `${SITE_URL}/opportunities`,
     type: "website",
     locale: "en_GB",
@@ -62,7 +62,7 @@ export default function OpportunitiesPage() {
         <h1 id="page-h1" className="mb-4">Publish a SASE or SD-WAN RFI and gather vendor interest.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           An RFI (request for information) is a short public listing: what you need, where and by when. Verified vendors and
-          service providers respond with interest and indicative pricing, and you never write a full document. Draft in the
+          service providers can submit interest and indicative pricing, and you never write a full document. Draft in the
           clear, sign in only to publish, and pricing stays private to you. Need the complete RFP instead?
           The RFP Builder creates one from your answers in about two minutes.
         </p>

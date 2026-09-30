@@ -166,11 +166,8 @@ function partB() {
     expect(occurrences === 0, `[B2] RfpBuilder.tsx (code, comments stripped) contains no "${banned}" (found ${occurrences})`);
   }
 
-  /* ---- B3: `matchInfo.total` is still read at least once, so the whole   */
-  /* evaluated-market-size copy ("the marketplace's N verified vendors")    */
-  /* survives -- this is a redaction of project-specific data, not an       */
-  /* outage of the aggregate, always-safe figure.                          */
-  expect(src.includes("matchInfo.total") || src.includes("matchInfo?.total"), "[B3] RfpBuilder.tsx still reads `matchInfo.total` (the aggregate-safe whole-market size) somewhere");
+  // Aggregate research size must never be described as a committed response panel.
+  expect(!/competing bids|marketplace's \$\{matchInfo\.total\}/i.test(src), "[B3] research counts are not used to promise supplier participation");
 
   /* ---- B4: the fetch effect that populates `matchInfo` type-guards on    */
   /* `total`, never `count` -- proving the client can no longer even        */
@@ -200,7 +197,7 @@ function partB() {
   /* matched vendors" -- matching unlocks only after publication succeeds. */
   expect(src.includes('Publish this opportunity'), "[B6] the pre-publish heading reads generic \"Publish this opportunity\", no count");
   expect(src.includes('{publishing ? "Publishing..." : "Publish opportunity"}'), "[B6] the pre-publish CTA button reads generic \"Publish opportunity\", no count");
-  expect(src.includes("publish this opportunity. Competing bids, no sales calls."), "[B6] the sticky publish bar reads generic copy, no count");
+  expect(src.includes("publish this opportunity. Review the responses received."), "[B6] the sticky publish bar reads generic copy, no count");
 
   /* ---- B7: post-publication vendor results (the "Market Report" panel's */
   /* pre/post gate) use the shared `hasPublished()` predicate, not the     */

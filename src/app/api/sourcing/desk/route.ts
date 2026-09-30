@@ -1,3 +1,4 @@
+import { evidenceReviewHealth } from "@/lib/evidence-review-health";
 import { z } from "zod";
 import {
   notificationStatus,
@@ -25,6 +26,7 @@ export async function GET(req: Request) {
   );
   return Response.json(
     {
+      evidence_reviews: evidenceReviewHealth(),
       requests: await Promise.all(
         records
           .filter((r): r is SourcingRecord => !!r && r.status === "desk_review")

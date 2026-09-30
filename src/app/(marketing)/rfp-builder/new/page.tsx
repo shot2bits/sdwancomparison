@@ -17,12 +17,12 @@ import {
 export const metadata: Metadata = {
   title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
   description:
-    "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched vendors respond with structured answers and private pricing.",
+    "Build a SASE and SD-WAN requirements draft. Use Netify sourcing to approve providers and request comparable written proposals.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/new/` },
   openGraph: {
     title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
     description:
-      "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched vendors respond with structured answers and private pricing.",
+      "Build a SASE and SD-WAN requirements draft. Use Netify sourcing to approve providers and request comparable written proposals.",
     url: `${SITE_URL}/rfp-builder/new/`,
     type: "website",
     locale: "en_GB",
@@ -89,10 +89,10 @@ export default function NewProjectPage() {
             <div className="rounded-2xl border border-[#f3e8d8] bg-[#fffbf5] p-6 sm:p-7">
               <p className="eyebrow mb-2">Start your project</p>
               <h1 id="page-h1" className="mb-3 text-[26px] leading-[1.1] text-[#13294b] sm:text-[30px]">
-                Compare SASE &amp; SD-WAN across 30+ vendors and service providers
+                Build your SASE and SD-WAN requirements
               </h1>
               <p id="page-subhead" className="mb-5 text-[15px] text-[var(--ink-700)]">
-                One two-minute brief and your five best-matched vendors respond with structured
+                Develop your brief, approve supplier requests and compare received
                 answers and <strong>private pricing</strong>, side by side.<sup>1</sup>
               </p>
               <a href="#describe-wizard" className="inline-flex items-center rounded-lg bg-[#13294b] px-7 py-3 text-[15px] font-semibold text-white no-underline transition-colors hover:bg-[#1e3a5f]">

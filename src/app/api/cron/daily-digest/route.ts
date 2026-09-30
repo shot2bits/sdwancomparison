@@ -1,3 +1,4 @@
+import { pendingSourcingNotifications } from "@/lib/sourcing-notifications";
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import {
   kvConfigured,
@@ -145,12 +146,14 @@ export async function GET(req: Request) {
   const prevCombinedPublished =
     snapshot?.published !== undefined && snapshot?.opportunities !== undefined ? snapshot.published + snapshot.opportunities : undefined;
 
+  const sourcingNotifications = await pendingSourcingNotifications();
   const quiet = draftsNew.length === 0 && buyerSessionsNew.length === 0 && combinedPublishedNew === 0;
-  const subject = quiet
+  const subject = sourcingNotifications.desk_pending > 0 ? `Netify: ${sourcingNotifications.desk_pending} sourcing desk notifications need attention` : quiet
     ? "Netify 07:30 digest: quiet 24h (0 published, 0 drafts)"
     : `Netify 07:30 digest: ${combinedPublishedNew} published, ${draftsNew.length} draft${draftsNew.length === 1 ? "" : "s"}, ${buyerSessionsNew.length} buyer sign-in${buyerSessionsNew.length === 1 ? "" : "s"}`;
 
   const lines = [
+    `Sourcing: ${sourcingNotifications.requests} confirmed requests; ${sourcingNotifications.desk_pending} desk notifications pending; ${sourcingNotifications.buyer_pending} buyer notifications pending. Review /sase/admin/sourcing/.`,
     "Published in the last 24 hours (the number that matters):",
     `- Total: ${combinedPublishedNew}`,
     `    - via Project/RFP engine: ${publishedNew.length} (network/SD-WAN: ${publishedBreakdown.network}, security sourcing: ${publishedBreakdown.security_sourcing})`,
@@ -211,6 +214,7 @@ export async function GET(req: Request) {
     ok: true,
     dry,
     sent,
+    sourcing_notifications: sourcingNotifications,
     counts: {
       published_24h: combinedPublishedNew,
       published_24h_rfp_engine: publishedNew.length,

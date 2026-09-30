@@ -39,6 +39,12 @@ async function api(url: string, body?: unknown) {
   return d;
 }
 export default function SourcingDesk() {
+  const [reviews, setReviews] = useState<{
+    pending: number;
+    expiring: number;
+    expired: number;
+    owner_deadline: string;
+  } | null>(null);
   const [rows, setRows] = useState<Row[]>([]),
     [active, setActive] = useState<Row | null>(null),
     [error, setError] = useState(""),
@@ -55,7 +61,10 @@ export default function SourcingDesk() {
     let alive = true;
     api("/sase/api/sourcing/desk/")
       .then((d) => {
-        if (alive) setRows(d.requests);
+        if (alive) {
+          setRows(d.requests);
+          setReviews(d.evidence_reviews);
+        }
       })
       .catch((e) => {
         if (alive) setError(e.message);
@@ -165,6 +174,14 @@ export default function SourcingDesk() {
       {message && (
         <p role="status" className="my-3 text-green-800">
           {message}
+        </p>
+      )}
+      {reviews && (
+        <p role="status">
+          Evidence reviews: {reviews.pending} awaiting sign-off,{" "}
+          {reviews.expiring} due within 14 days, {reviews.expired} overdue.
+          Owner review deadline: {reviews.owner_deadline}. Expired evidence is
+          excluded from matching.
         </p>
       )}
       <div className="grid gap-6 md:grid-cols-[260px_1fr]">

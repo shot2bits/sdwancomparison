@@ -1,5 +1,6 @@
 "use client";
-import type {PublicPanelMember} from "@/lib/response-panel-contract";
+import { sourcingAcquisition } from "@/lib/sourcing-acquisition";
+import type { PublicPanelMember } from "@/lib/response-panel-contract";
 import React, { useRef, useState } from "react";
 import type { ShortlistVendor } from "@/lib/shortlist-core";
 import {
@@ -9,7 +10,12 @@ import {
   REGION_LABELS,
   STATUS_LABELS,
 } from "@/lib/shortlist-core";
-import { SOURCING_ACTION_LABELS, SourcingBriefSchema, type SourcingBrief } from "@/lib/sourcing-contract";
+import {
+  SOURCING_NEED_LABELS,
+  SOURCING_ACTION_LABELS,
+  SourcingBriefSchema,
+  type SourcingBrief,
+} from "@/lib/sourcing-contract";
 type Action = "contacts" | "demo" | "proposals";
 const actions: Action[] = ["contacts", "demo", "proposals"];
 const actionLabels = SOURCING_ACTION_LABELS;
@@ -18,7 +24,7 @@ export default function SourcingEntrance({
   initialSector,
   features,
 }: {
-  vendors: (ShortlistVendor & {response_panel?:PublicPanelMember|null})[];
+  vendors: (ShortlistVendor & { response_panel?: PublicPanelMember | null })[];
   initialSector?: string;
   features: { id: string; name: string }[];
 }) {
@@ -79,8 +85,12 @@ export default function SourcingEntrance({
   }
   async function prepare() {
     if (!SourcingBriefSchema.safeParse(brief).success) {
-      (document.getElementById("sourcing-brief") as HTMLFormElement | null)?.reportValidity();
-      setMessage("Check your sites, users and requirement before preparing the plan.");
+      (
+        document.getElementById("sourcing-brief") as HTMLFormElement | null
+      )?.reportValidity();
+      setMessage(
+        "Check your sites, users and requirement before preparing the plan.",
+      );
       return;
     }
     const version = briefVersion.current;
@@ -89,9 +99,12 @@ export default function SourcingEntrance({
     setMessage("");
     setMatching(true);
     setMatches(null);
-    const summary = `${brief.sites} sites; ${brief.remote_users} remote users; ${REGION_LABELS[brief.region]}; ${brief.sector ? SECTOR_LABELS[brief.sector] : "sector to discuss"}. Required service: ${brief.need}. Timing: ${brief.when}.${brief.uk_provider_only?" UK providers only: evidenced UK headquarters or contracting entity required.":""}`;
+    const summary = `${brief.sites} sites; ${brief.remote_users} remote users; ${REGION_LABELS[brief.region]}; ${brief.sector ? SECTOR_LABELS[brief.sector] : "sector to discuss"}. Required service: ${SOURCING_NEED_LABELS[brief.need]}. Timing: ${brief.when}.${brief.uk_provider_only ? " UK providers only: evidenced UK headquarters or contracting entity required." : ""}`;
     // Preserve buyer edits; reapproval is required after every requirements change.
-    if (!brief.supplier_brief || brief.supplier_brief === generatedBrief.current) {
+    if (
+      !brief.supplier_brief ||
+      brief.supplier_brief === generatedBrief.current
+    ) {
       change("supplier_brief", summary);
       generatedBrief.current = summary;
     }
@@ -105,7 +118,7 @@ export default function SourcingEntrance({
       const r = await fetch("/sase/api/sourcing/plan/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(brief),
+        body: JSON.stringify({ ...brief, acquisition: acquisition() }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error();
@@ -125,16 +138,13 @@ export default function SourcingEntrance({
   }
 
   function acquisition() {
-    const v = new URLSearchParams(window.location.search).get("acquisition");
-    return ["chatgpt", "gemini", "perplexity", "copilot", "other"].includes(
-      v ?? "",
-    )
-      ? v
-      : "web";
+    return sourcingAcquisition(window.location.search, document.referrer);
   }
   async function submit() {
     if (planStale) {
-      setMessage("Prepare the plan again, then review the supplier brief against your changed requirements.");
+      setMessage(
+        "Prepare the plan again, then review the supplier brief against your changed requirements.",
+      );
       return;
     }
     if (!consent) {
@@ -163,7 +173,12 @@ export default function SourcingEntrance({
         }),
       });
       const d = await r.json();
-      if (!r.ok && typeof d.error === "string" && d.error.startsWith("This request has expired")) requestAttempt.current = null;
+      if (
+        !r.ok &&
+        typeof d.error === "string" &&
+        d.error.startsWith("This request has expired")
+      )
+        requestAttempt.current = null;
       setMessage(
         r.ok
           ? d.delivery === "captured_not_sent"
@@ -181,7 +196,10 @@ export default function SourcingEntrance({
     }
   }
   return (
-    <fieldset disabled={busy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+    <fieldset
+      disabled={busy}
+      style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+    >
       <form
         id="sourcing-brief"
         className="sourcing-form"
@@ -192,7 +210,14 @@ export default function SourcingEntrance({
       >
         <h2>What do you need?</h2>
         <p>Start with the essentials. We resolve the detail with you.</p>
-        <label className="sourcing-check"><input type="checkbox" checked={brief.uk_provider_only??false} onChange={e=>change("uk_provider_only",e.target.checked)}/>UK providers only — UK headquarters or contracting entity evidenced</label>
+        <label className="sourcing-check">
+          <input
+            type="checkbox"
+            checked={brief.uk_provider_only ?? false}
+            onChange={(e) => change("uk_provider_only", e.target.checked)}
+          />
+          UK providers only — UK headquarters or contracting entity evidenced
+        </label>
         <div className="sourcing-fields">
           <label>
             Business sites
@@ -319,7 +344,12 @@ export default function SourcingEntrance({
           {brief.sites} sites · {brief.remote_users} remote users ·{" "}
           {REGION_LABELS[brief.region]} · {brief.when}
         </p>
-        {planStale && <p role="alert">Your requirements changed. Prepare the plan again before approving requests.</p>}
+        {planStale && (
+          <p role="alert">
+            Your requirements changed. Prepare the plan again before approving
+            requests.
+          </p>
+        )}
         <p role="status">
           {matching ? "Checking the evidence dataset…" : matchMessage}
         </p>
@@ -348,7 +378,9 @@ export default function SourcingEntrance({
         </label>
         <p className="sourcing-small">
           Remove company names, addresses, personal information and identifying
-          text. Check this brief against your current requirements: your edits are preserved when you refresh the plan. Netify checks it again before sending.
+          text. Check this brief against your current requirements: your edits
+          are preserved when you refresh the plan. Netify checks it again before
+          sending.
         </p>
         <h3>Approved recipients and actions</h3>
         {Object.entries(selected).filter(([, a]) => a.length).length ? (
@@ -414,7 +446,10 @@ export default function SourcingEntrance({
             I ask Netify to review this requirement and approve only the
             supplier requests listed above, using the anonymous brief shown.
           </label>
-          <button className="sourcing-primary" disabled={busy || !consent || planStale || matching}>
+          <button
+            className="sourcing-primary"
+            disabled={busy || !consent || planStale || matching}
+          >
             {busy ? "Preparing confirmation…" : "Email my confirmation link →"}
           </button>
           <p className="sourcing-small">
@@ -442,7 +477,9 @@ export default function SourcingEntrance({
             <article key={v.slug}>
               <div className="sourcing-card-top">
                 <h3>{v.name}</h3>
-                <span>{v.response_panel?"Response panel":"Research only"}</span>
+                <span>
+                  {v.response_panel ? "Response panel" : "Research only"}
+                </span>
               </div>
               <p>{v.category}</p>
               {matches?.includes(v.slug) && (
@@ -460,11 +497,53 @@ export default function SourcingEntrance({
               <p className="sourcing-small">
                 Reviewed {v.last_verified || "date not recorded"}
               </p>
-              {v.projection_provenance?.active_review?.sector_signoff&&<p className="sourcing-small">{v.projection_provenance.active_review.sector_signoff.label}</p>}
+              {v.projection_provenance?.active_review?.sector_signoff && (
+                <p className="sourcing-small">
+                  {v.projection_provenance.active_review.sector_signoff.label}
+                </p>
+              )}
+              {brief.sector && (
+                <p className="sourcing-small">
+                  {SECTOR_LABELS[brief.sector]}:{" "}
+                  {STATUS_LABELS[v.sectors[brief.sector]]} evidence. UK sector
+                  case evidence:{" "}
+                  {v.projection_provenance?.active_review?.uk_sector_evidence?.[
+                    brief.sector
+                  ]
+                    ? "yes"
+                    : "not established"}
+                  .
+                </p>
+              )}
+              {v.projection_provenance?.active_review?.qualification && (
+                <div className="sourcing-small">
+                  <p>{v.projection_provenance.active_review.qualification.split(/(?<=[.!?])\s/)[0]}</p>
+                  <details><summary>Read evidence qualifications</summary><p>{v.projection_provenance.active_review.qualification}</p></details>
+                </div>
+              )}
+              {["review_expired", "source_newer_than_review"].includes(
+                v.projection_provenance?.resolution ?? "",
+              ) && (
+                <p className="sourcing-small">
+                  Evidence needs review:{" "}
+                  {v.projection_provenance?.resolution === "review_expired"
+                    ? "review overdue"
+                    : "source updated since review"}
+                  .
+                </p>
+              )}
               <a href={v.marketplace_url || `/sase/vendors/${v.slug}/`}>
                 Datasheet and evidence ↗
               </a>
-              {v.response_panel&&<p className="sourcing-small">Approved actions routed by Netify to {v.response_panel.contact_name}, {v.response_panel.contact_role} ({v.response_panel.contact_email_domain}). Agreed response: {v.response_panel.agreed_response_working_days} working days.</p>}
+              {v.response_panel && (
+                <p className="sourcing-small">
+                  Approved actions routed by Netify to{" "}
+                  {v.response_panel.contact_name},{" "}
+                  {v.response_panel.contact_role} (
+                  {v.response_panel.contact_email_domain}). Agreed response:{" "}
+                  {v.response_panel.agreed_response_working_days} working days.
+                </p>
+              )}
               <div className="sourcing-actions">
                 {actions.map((action) => (
                   <label key={action} className="sourcing-check">
@@ -497,7 +576,9 @@ export default function SourcingEntrance({
           <summary>Complete capability evidence table</summary>
           <div className="sourcing-table">
             <table>
-              <caption>Provider capability evidence, coverage and sources</caption>
+              <caption>
+                Provider capability evidence, coverage and sources
+              </caption>
               <thead>
                 <tr>
                   <th>Provider</th>

@@ -136,7 +136,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
         <p className="text-sm text-[var(--ink-600)]">
           Bid reviews, goals and approvals belong to the buyer who created this RFP. If that is you, open this page
           from your builder (the Agent review button carries your private key), or sign in with the email you used
-          when creating the RFP. Vendors respond via their response link instead.
+          when creating the RFP. Invited suppliers can reply via their response link instead.
         </p>
       </div>
     );

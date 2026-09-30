@@ -202,7 +202,7 @@ export default function NoticeView({
         </Section>
       )}
 
-      <Section title="How vendors respond">
+      <Section title="How suppliers can reply">
         <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
           <li>
             Response mode: <strong>{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</strong>.

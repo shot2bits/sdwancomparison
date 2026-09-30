@@ -1,3 +1,4 @@
+import {recordSourcingMetric} from "@/lib/sourcing-metrics";
 import {currentSourcingProposals} from '@/lib/sourcing-proposal-scope';
 import {z} from 'zod';
 import {sessionFromRequest} from '@/lib/auth';
@@ -43,6 +44,9 @@ export async function POST(req:Request,ctx:Ctx){
    const next=[...items,{...b,recorded_at:new Date().toISOString(),recorded_by:session.email}];
    await kvSetJson(`rfp:${id}:sourcing-activity`,next);return next;
   });
+  const project=await getProject(id);const requestId=project?.entrance_context?.raw_input.sourcing_request_id;
+  const sourcing=typeof requestId==="string"?await kvGetJson<SourcingRecord>(`sourcing:request:${requestId}`):null;
+  if(sourcing)await recordSourcingMetric(b.stage,sourcing.request.acquisition,`${id}:${b.id}`);
   await recordMarketplaceFunnelEvent({event:b.stage,project_id:id,source:'shortlist',channel:'system'});
   return Response.json({entries:result},{headers});
  }catch{return Response.json({error:'Check the confirmed project, approved recipient, evidence, date and unique event reference.'},{status:422,headers});}

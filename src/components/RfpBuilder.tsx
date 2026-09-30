@@ -1501,8 +1501,7 @@ export default function RfpBuilder({ initialId, privateSourcing = false }: { ini
               Publish this opportunity
             </h2>
             <p className="text-sm text-[var(--ink-700)] mb-2">
-              Publishing lists this requirement as a public opportunity on the Opportunities Board, which is what
-              unlocks the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. Nothing about your company, your matches, or any vendor identity is shared until publication completes. They never see your email or phone number, and your data is only shared with a vetted account manager from each vendor or managed service provider. Every conversation starts in this app, on your terms, only when you choose.
+              Publishing lists this requirement as a public opportunity on the Opportunities Board. Supplier participation is not automatic. For private sourcing, use Netify to review your brief and coordinate the providers you approve. Your contact details are only shared under the permissions you choose.
             </p>
             <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
               {["Indicative pricing, private to you", "Demo requests", "Proof-of-concept scoping", "Message vendors and managed providers in-app", "Evidence, documents and PDF collateral", "Sales and account contact, when you choose", "Independent response scoring"].map((c) => (
@@ -1859,7 +1858,7 @@ export default function RfpBuilder({ initialId, privateSourcing = false }: { ini
             </button>
           )}
           <p className="text-sm text-[var(--ink-500)] mb-1">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.map((c) => securityCodeLabel(c)).join(", ") || "none set"}.</p>
-          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">{privateSourcing ? "Private requirements draft. Use Written proposals above to review responses recorded by Netify." : <>Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and vendors respond.</>}</p>
+          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">{privateSourcing ? "Private requirements draft. Use Written proposals above to review responses recorded by Netify." : <>Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and receive supplier replies.</>}</p>
           <div className="space-y-3">
             {project.rfp_sections.filter((s) => s.included).map((s) => {
               const active = s.questions.filter((q) => q.priority !== "optional");
@@ -2282,7 +2281,7 @@ export default function RfpBuilder({ initialId, privateSourcing = false }: { ini
       {!privateSourcing && !published && !stickyGone && !submitFlow && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-300 bg-white/95 backdrop-blur px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
-            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> {publicationLocked ? "finish publishing this opportunity." : "publish this opportunity. Competing bids, no sales calls."}</span>
+            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> {publicationLocked ? "finish publishing this opportunity." : "publish this opportunity. Review the responses received."}</span>
             <span className="flex items-center gap-2">
               <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : publicationLocked ? "Try again" : "Publish"}</button>
               <button onClick={() => { setStickyGone(true); try { sessionStorage.setItem(`rfp_publish_bar_${project.id}`, "1"); } catch { /* ignore */ } }} aria-label="Hide publish bar" className="text-sm text-[var(--ink-500)] underline">Hide</button>
