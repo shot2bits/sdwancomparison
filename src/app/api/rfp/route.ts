@@ -1,4 +1,4 @@
-import {activityMailFetch} from "@/lib/activity-mail";
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { activityKvBinding } from "@/lib/activity-storage";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
@@ -50,7 +50,7 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
       });
     }
   } catch { /* best effort */ }
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key || !sendEmail) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const link = `${SITE_URL}/rfp-builder/${p.id}/?manage=${p.manage_token}#publish`;

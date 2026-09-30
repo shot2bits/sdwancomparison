@@ -1,4 +1,4 @@
-import {activityMailFetch} from "@/lib/activity-mail";
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { activityKvBinding } from "@/lib/activity-storage";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { buildMarketReport } from "@/lib/market-report";
@@ -25,7 +25,7 @@ async function recordCapture(record: Record<string, unknown>) {
 
 /** Send the draft link via Resend (best effort) — same transport as sendMagicLink. */
 async function sendDraftLink(email: string, p: { id: string; title: string; manage_token: string }, reportLine?: string): Promise<boolean> {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return false;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const link = `${SITE_URL}/rfp-builder/${p.id}/?manage=${p.manage_token}`;

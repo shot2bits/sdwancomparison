@@ -1,4 +1,4 @@
-import {activityMailFetch} from "@/lib/activity-mail";
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, listAllRfpIds, listConnections } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -23,7 +23,7 @@ function authorised(req: Request): boolean {
 }
 
 async function sendBuyerEmail(to: string, subject: string, html: string): Promise<boolean> {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return false;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   try {

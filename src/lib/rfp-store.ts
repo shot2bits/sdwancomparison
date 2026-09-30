@@ -53,7 +53,8 @@ async function kv(command: (string | number)[]): Promise<unknown> {
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`KV command failed: ${res.status}`);
-  const data = (await res.json()) as { result?: unknown };
+  const data = (await res.json()) as { result?: unknown; error?: string };
+  if (data.error) throw new Error("KV command was rejected");
   return data.result;
 }
 

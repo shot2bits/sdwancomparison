@@ -1,4 +1,4 @@
-import {activityMailFetch} from "@/lib/activity-mail";
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { activityKvBinding } from "@/lib/activity-storage";
 export const runtime = "edge";
 
@@ -75,7 +75,7 @@ async function kvStore(lead: Record<string, unknown>) {
 }
 
 function sendEmails(body: LeadBody) {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return;
   const from = process.env.LEAD_FROM_EMAIL ?? "shortlist@mail.netify.co.uk";
   const to = process.env.LEAD_TO_EMAIL ?? "support@netify.com";

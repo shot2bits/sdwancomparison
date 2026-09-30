@@ -1,4 +1,4 @@
-import {activityMailFetch} from "@/lib/activity-mail";
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 /**
  * Auth helpers: cookie handling, magic-link email, session resolution.
  * Cookie is httpOnly; the session token lives in KV. Reading and building
@@ -61,11 +61,9 @@ export function supplierCredentialFromRequest(req: Request, rfpId: string): stri
   return parseCookie(req, supplierCredentialCookieName(rfpId));
 }
 
-/** Whether Resend is configured at all (preview environments without the key
- *  fall back to returning the raw sign-in link in the API response instead
- *  of emailing it). Separate from send success, see sendMagicLink below. */
+/** Whether production delivery or the isolated preview capture transport is configured. */
 export function resendConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY);
+  return Boolean(activityMailKey());
 }
 
 /**
@@ -88,7 +86,7 @@ export function resendConfigured(): boolean {
  * webhook to correlate against later.
  */
 export async function sendMagicLink(email: string, token: string, role: string, returnTo = "", code?: string): Promise<{ ok: boolean; emailId?: string }> {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   // returnTo is validated by the caller (same-app absolute path only); it
   // rides the link so the verify page can send the person back where the
   // sign-in was requested instead of dead-ending.
@@ -143,7 +141,7 @@ export async function notifyNewSignup(
   // (and the admin console signs them in as "buyer"), so they are not real
   // marketplace sign-ups and would only be noise.
   if (isAdminEmail(email) || isNetifyDomain(emailDomain(email) ?? "")) return false;
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return false;
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
@@ -198,7 +196,7 @@ export async function notifyNewSignup(
  */
 export async function notifyCompanyAdded(email: string, name: string | undefined, company: string): Promise<boolean> {
   if (isAdminEmail(email) || isNetifyDomain(emailDomain(email) ?? "")) return false;
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return false;
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";

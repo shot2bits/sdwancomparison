@@ -1,4 +1,4 @@
-import {activityMailFetch} from "@/lib/activity-mail";
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { getProjectsBulk, kvConfigured, kvGetJson, kvMgetJson, kvSetJson, listAllRfpIds } from "@/lib/rfp-store";
 import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
 import { latestPublicationOutcomes, recoveryReminder, type PublicationOutcome } from "@/lib/buyer-recovery";
@@ -39,7 +39,7 @@ export async function GET(req: Request) {
     return Response.json({ error: process.env.CRON_SECRET ? "Unauthorised." : "CRON_SECRET not configured." }, { status: 401 });
   }
   if (!kvConfigured()) return Response.json({ error: "KV not configured." }, { status: 503 });
-  const resendKey = process.env.RESEND_API_KEY;
+  const resendKey = activityMailKey();
   const dry = new URL(req.url).searchParams.get("dry") === "1";
   if (!resendKey && !dry) return Response.json({ error: "RESEND_API_KEY not configured." }, { status: 503 });
 

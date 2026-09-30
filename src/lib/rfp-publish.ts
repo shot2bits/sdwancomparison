@@ -1,4 +1,4 @@
-import {activityMailFetch} from "@/lib/activity-mail";
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { randomUUID } from "node:crypto";
 import { kvRaw } from "@/lib/rfp-store";
 import { currentBuyerFacts, currentPublicBrief, projectWithCurrentBuyerFacts, currentDocumentCounts, currentDocumentIsConsistent } from "@/lib/current-buyer-facts";
@@ -379,7 +379,7 @@ function engineChannelLabel(p: ProjectDetails): string {
 }
 
 async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[], report?: MarketReport) {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";

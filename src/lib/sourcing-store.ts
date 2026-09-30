@@ -11,8 +11,7 @@ import {
   saveProject,
   getProject,
 } from "./rfp-store";
-import { activityMailFetch } from "./activity-mail";
-import { activityEnvironment } from "./activity-provenance";
+import { activityMailFetch, activityMailKey } from "./activity-mail";
 import { isBlockedDomainLive, emailDomain } from "./access-control";
 import { getLiveShortlistDataset } from "./live-shortlist";
 import {
@@ -64,8 +63,7 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
   );
   if (
     !kvConfigured() ||
-    !process.env.RESEND_API_KEY ||
-    activityEnvironment() !== "production"
+    !activityMailKey()
   )
     throw new Error(
       "Request delivery is not enabled in this preview. Research and draft plans remain available.",
@@ -133,7 +131,7 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
   const response = await activityMailFetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      authorization: `Bearer ${activityMailKey()}`,
       "Content-Type": "application/json",
       "Idempotency-Key": `sourcing-${record.id}`,
     },
