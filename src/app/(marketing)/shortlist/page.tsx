@@ -150,6 +150,7 @@ export default async function ShortlistPage({
         </p>
         <div className="sourcing-table">
           <table>
+            <caption>Consented Netify sourcing outcomes</caption>
             <thead>
               <tr>
                 {[

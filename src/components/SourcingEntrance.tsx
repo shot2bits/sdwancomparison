@@ -496,6 +496,7 @@ export default function SourcingEntrance({
           <summary>Complete capability evidence table</summary>
           <div className="sourcing-table">
             <table>
+              <caption>Provider capability evidence, coverage and sources</caption>
               <thead>
                 <tr>
                   <th>Provider</th>
