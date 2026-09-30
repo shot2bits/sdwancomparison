@@ -6,6 +6,17 @@ import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured 
 import { SITE_URL } from "@/lib/structured-data";
 import { MARKETPLACE_EXAMPLES } from "@/lib/marketplace-examples";
 
+// Actual public sourcing content release, not the sitemap fetch time.
+const SOURCING_RELEASE_LASTMOD = "2026-09-30";
+function sourcingLastmod(loc: string): string {
+  return loc === "https://netify.co.uk/sase-sd-wan-rfp-builder/"
+    || loc === `${SITE_URL}/shortlist/`
+    || loc === `${SITE_URL}/best`
+    || loc.startsWith(`${SITE_URL}/best/`)
+    || loc.startsWith(`${SITE_URL}/alternatives/`)
+    ? `<lastmod>${SOURCING_RELEASE_LASTMOD}</lastmod>` : "";
+}
+
 export async function GET() {
   // Public notices are crawlable pages; include them best-effort so the
   // sitemap never fails if KV is unavailable. Closed notices are published
@@ -94,7 +105,7 @@ export async function GET() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
-    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc><priority>${u.priority}</priority></url>`,
+    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc>${sourcingLastmod(u.loc)}<priority>${u.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>`;

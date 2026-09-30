@@ -18,7 +18,7 @@ export const ProviderMatchRecordSchema = z.object({
   capabilities: z.record(z.string(), z.object({ support_state: SupportSchema, freshness_state: FreshnessSchema, confidence: z.string(), qualification: z.string().nullable() })),
   regions: z.record(z.string(), z.object({ support_state: SupportSchema, freshness_state: FreshnessSchema })),
   service_models: z.record(z.string(), z.object({ support_state: SupportSchema, freshness_state: FreshnessSchema })),
-  sectors: z.record(z.string(), z.object({ support_state: SupportSchema, freshness_state: FreshnessSchema, evidence_strength: z.enum(["strong", "moderate", "weak", "none", "unknown"]) })),
+  sectors: z.record(z.string(), z.object({ support_state: SupportSchema, freshness_state: FreshnessSchema, evidence_strength: z.enum(["strong", "moderate", "weak", "none", "unknown"]), named_evidence:z.string().nullable().optional(), qualification:z.string().nullable().optional(), verified_date:z.string().nullable().optional(), evidence_source_ids:z.array(z.string()).optional() })),
 });
 export type ProviderMatchRecord = z.infer<typeof ProviderMatchRecordSchema>;
 

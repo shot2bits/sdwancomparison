@@ -1996,7 +1996,7 @@ async function main() {
     });
     record(resF.applied, "Item 4 (round 4)/direct requirement edit: accepted even though NO WorkspaceFact changed -- direct requirement edits cannot rely on a counter that only advances inside applyMerge()", `reason=${resF.reason}`);
     record(doc4d.version === docBeforeF.version + 1, "Item 4 (round 4)/direct requirement edit: exactly one increment", `before=${docBeforeF.version} after=${doc4d.version}`);
-    record(doc4d.title !== docBeforeF.title, "Item 4 (round 4)/direct requirement edit: the document genuinely changed (title reflects the new sector)", `before=${docBeforeF.title} after=${doc4d.title}`);
+    record(doc4d.title === docBeforeF.title, "Item 4 (round 4)/legacy requirement edit cannot override the confirmed canonical sector", `before=${docBeforeF.title} after=${doc4d.title}`);
 
     // EVENT G: a no-op render / view switch / reopen -- no event at all.
     const docBeforeG = doc4d;

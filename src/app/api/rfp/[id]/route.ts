@@ -1,3 +1,4 @@
+import { projectWithCurrentBuyerFacts } from "@/lib/current-buyer-facts";
 import { sessionFromRequest, supplierCredentialFromRequest } from "@/lib/auth";
 import { resolveSupplierPrincipal } from "@/lib/supplier-capability-access";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
@@ -76,7 +77,7 @@ export async function GET(req: Request, ctx: Ctx) {
   const access = await requireRfpOwner(req, project);
   if (access.ok) {
     const unlock = await getMarketUnlock(id);
-    return Response.json({ ...publicProject(project), market_unlocked: unlock !== null, market_unlock: unlock }, { headers: cors });
+    return Response.json({ ...publicProject(projectWithCurrentBuyerFacts(project)), market_unlocked: unlock !== null, market_unlock: unlock }, { headers: cors });
   }
 
   // Supplier read: requires the share token from the response link.

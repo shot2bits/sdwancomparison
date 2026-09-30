@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
  * Re-scope (Phase D4): the buyer's estate changed; the record accretes.
  * The SAME assessment form and live verdict as creation, pre-filled from
  * the stored requirement, with the version-consequence confirmation
- * before consent. Only sensible before publication: afterwards the
+ * before consent. Only sensible while the notice is a draft: afterwards the
  * machine refuses regeneration anyway (published documents do not change
  * under suppliers).
  */

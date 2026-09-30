@@ -56,7 +56,7 @@ export function projectHealth(p: ProjectDetails, ctx: HealthContext = {}): Proje
     }
     const gaps = openSecurityGaps(p);
     if (gaps.length > 0 && (phase === "drafted" || phase === "drafting" || phase === "scoped")) {
-      return { tone: "amber", label: "Action required", detail: `${gaps.length} scoping gap${gaps.length === 1 ? "" : "s"} to answer or accept before publication.` };
+      return { tone: "amber", label: "Action required", detail: `${gaps.length} scoping gap${gaps.length === 1 ? "" : "s"} to answer or accept while the notice is a draft.` };
     }
   }
 

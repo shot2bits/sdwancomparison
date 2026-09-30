@@ -55,7 +55,7 @@ export async function runApprovalTests(): Promise<ApprovalTestResult> {
     if (publishDecisionGate([signoff("approved")], []).blocked) throw new Error("an approval blocked publication");
   });
 
-  await ok("approval events are legal at drafted and refused after publication", async () => {
+  await ok("approval events are legal at drafted and refused once the notice is published", async () => {
     let p = await f2Drafted();
     p = recordProjectEvent(p, { at: NOW + 10, actor: "buyer", actor_ref: "b@x.com", via: "web", event: "approval.requested", detail: { role: "CISO" }, consent: true });
     p = recordProjectEvent(p, { at: NOW + 11, actor: "buyer", actor_ref: "sam@example.com", via: "web", event: "approval.declined", detail: { role: "CISO" } });
@@ -65,10 +65,10 @@ export async function runApprovalTests(): Promise<ApprovalTestResult> {
     p = advanceProject(p, { at: NOW + 14, actor: "buyer", actor_ref: "b@x.com", via: "web", event: "publish.live", detail: {} });
     try {
       recordProjectEvent(p, { at: NOW + 15, actor: "buyer", actor_ref: "b@x.com", via: "web", event: "approval.requested", detail: {} });
-      throw new Error("approval.requested allowed after publication");
+      throw new Error("approval.requested allowed once the notice is published");
     } catch (e) {
       if (!(e as Error).message.includes("not legal") && !(e as Error).message.includes("No legal")) {
-        if ((e as Error).message === "approval.requested allowed after publication") throw e;
+        if ((e as Error).message === "approval.requested allowed once the notice is published") throw e;
       }
     }
   });

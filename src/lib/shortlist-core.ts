@@ -1,3 +1,4 @@
+import type {SectorSignoff} from "./sector-signoff";
 /**
  * Shortlist engine core. Client-safe: no Node imports, pure functions only.
  *
@@ -23,9 +24,11 @@ export type CapabilityStatus =
   | "partner_integrated"
   | "managed_service_dependent"
   | "not_primary"
-  | "unknown";
+  | "unknown"
+  | "not_confirmed";
 
-export type DeploymentSpeed = "hours" | "days" | "weeks" | "months" | "unknown";
+export type DeploymentSpeed = "hours" | "days" | "weeks" | "months" | "unknown"
+  | "not_confirmed";
 
 export const REGION_KEYS = [
   "uk_ireland",
@@ -173,6 +176,7 @@ export const STATUS_LABELS: Record<CapabilityStatus, string> = {
   managed_service_dependent: "Via managed service",
   not_primary: "Not primary",
   unknown: "Not confirmed",
+  not_confirmed: "Not confirmed",
 };
 
 /** Compact vendor record shipped to the client and used by every surface. */
@@ -185,9 +189,11 @@ export type ShortlistVendor = {
   cost_model: string;
   public_pricing_visibility: "public" | "partial_public" | "quote_based";
   value_tier: "budget" | "value" | "mid" | "premium";
-  uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed";
+  uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed" | "not_confirmed";
+  projection_provenance?: {active_review?:{sector_signoff?:SectorSignoff;reviewed_at:string;review_due:string;reviewer:string;source_urls:string[];qualification:string;sectors:Record<string,CapabilityStatus>;regions:Record<string,CapabilityStatus>};contract:string;governed_revision:string;curated_reviewed_at:string;curated_sectors:Record<string,CapabilityStatus>;curated_uk_delivery:string;curated_uk_basis:string;sector_review_queue:{sector:string;reason:string;support_state:string}[];resolution:string};
   uk_basis: string;
   capabilities: Record<string, CapabilityStatus>;
+  capability_evidence?: Record<string, {source_url: string; reviewed_at: string; review_due: string; qualification: string}>;
   deployment_speed: DeploymentSpeed;
   regions: Record<RegionKey, CapabilityStatus>;
   supported_clouds: Record<CloudKey, CapabilityStatus>;
@@ -266,6 +272,7 @@ export const STATUS_POINTS: Record<CapabilityStatus, number> = {
   managed_service_dependent: 0.65,
   partial: 0.5,
   unknown: 0.15,
+  not_confirmed: 0.15,
   not_primary: 0,
 };
 
@@ -288,6 +295,7 @@ const REGION_FIT_POINTS: Record<CapabilityStatus, number> = {
   partial: 0.4,
   partner_integrated: 0.35,
   unknown: 0,
+  not_confirmed: 0,
   not_primary: 0,
 };
 
@@ -305,6 +313,7 @@ const SPEED_ORDER: Record<DeploymentSpeed, number> = {
   weeks: 3,
   months: 4,
   unknown: 5,
+  not_confirmed: 5,
 };
 
 /** Feature id prefix to category weighting bucket. */
@@ -355,7 +364,10 @@ export type VendorVerdict = {
   uk_basis: string;
 };
 
+export const MATCHING_RULES_VERSION = "shortlist-matching/2026-09-15.1";
+
 export type ShortlistResult = {
+  evaluation: Array<{ slug: string; eligible: boolean; reasons: string[] }>;
   input: ShortlistInput;
   criteria_summary: string;
   considered: number;
@@ -715,6 +727,7 @@ export function buildShortlist(
   return {
     input,
     criteria_summary: describeCriteria(input, featureNames),
+    evaluation: verdicts.map(v => ({ slug: v.slug, eligible: v.eligible, reasons: [...v.gating_failures] })),
     considered: vendors.length,
     excluded: excluded.length,
     shortlist,
@@ -807,6 +820,7 @@ export type CompareRow = {
   /** One-sentence definition of what the row measures, where available. */
   description?: string;
   grades: Record<string, CapabilityStatus | string>;
+  evidence?: ShortlistVendor['capability_evidence'];
 };
 
 export type CompareGroup = { name: string; rows: CompareRow[] };
@@ -816,7 +830,7 @@ export type ComparisonResult = {
   names: Record<string, string>;
   meta: Record<
     string,
-    { category: string; deployment_speed: DeploymentSpeed; cost_model: string; score: number; website: string; marketplace_url: string | null }
+    { category: string; deployment_speed: DeploymentSpeed; cost_model: string; website: string; marketplace_url: string | null }
   >;
   groups: CompareGroup[];
   wins: Record<string, string[]>;
@@ -838,10 +852,6 @@ export function buildComparison(
     .filter((v): v is ShortlistVendor => Boolean(v));
   if (chosen.length < 2) return null;
 
-  const balanced = buildShortlist(vendors, { shortlist_size: 30 }, {});
-  const scoreOf = (slug: string) =>
-    balanced.shortlist.find((x) => x.slug === slug)?.score ?? 0;
-
   const groups: CompareGroup[] = [];
   const categories = Array.from(new Set(featureMeta.map((f) => f.category)));
   for (const cat of categories) {
@@ -854,6 +864,7 @@ export function buildComparison(
           label: f.name,
           description: f.description,
           grades: Object.fromEntries(chosen.map((v) => [v.slug, v.capabilities[f.id] ?? "unknown"])),
+          evidence: Object.fromEntries(chosen.flatMap((v) => v.capability_evidence?.[f.id] ? [[v.slug, v.capability_evidence[f.id]]] : [])),
         })),
     });
   }
@@ -894,26 +905,12 @@ export function buildComparison(
     ],
   });
 
-  // Per-feature wins (clear point advantages on the 40-feature matrix)
-  const wins: Record<string, string[]> = Object.fromEntries(chosen.map((v) => [v.slug, []]));
+  // Compatibility fields remain empty: public comparisons show source grades,
+  // never inferred winners or a computed recommendation.
+  const wins: Record<string, string[]> = Object.fromEntries(chosen.map(v => [v.slug, []]));
   const even: string[] = [];
-  for (const f of featureMeta) {
-    const pts = chosen.map((v) => ({ slug: v.slug, p: STATUS_POINTS[v.capabilities[f.id] ?? "unknown"] }));
-    const max = Math.max(...pts.map((x) => x.p));
-    const leaders = pts.filter((x) => x.p === max);
-    if (leaders.length === 1 && max > 0) {
-      wins[leaders[0].slug].push(f.name);
-    } else {
-      even.push(f.name);
-    }
-  }
-
-  const names = Object.fromEntries(chosen.map((v) => [v.slug, v.name]));
-  const summary = `${chosen
-    .map((v) => `${v.name} scores ${scoreOf(v.slug)}`)
-    .join("; ")} on the Netify 40-feature balanced matrix. ${chosen
-    .map((v) => `${v.name} leads on ${wins[v.slug].length} features`)
-    .join("; ")}; ${even.length} features are level.`;
+  const names = Object.fromEntries(chosen.map(v => [v.slug, v.name]));
+  const summary = "Source evidence shown side by side. Publish a verified project to unlock computed provider fit and rankings.";
 
   return {
     slugs: chosen.map((v) => v.slug),
@@ -925,7 +922,6 @@ export function buildComparison(
           category: v.category,
           deployment_speed: v.deployment_speed,
           cost_model: v.cost_model,
-          score: scoreOf(v.slug),
           website: v.website,
           marketplace_url: v.marketplace_url,
         },

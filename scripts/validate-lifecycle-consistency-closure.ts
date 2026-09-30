@@ -110,7 +110,7 @@ function main() {
     const explainerGate = desk.match(/\{!published && \(\s*<div className="overflow-hidden rounded-\[4px\][\s\S]{0,300}/);
     record(Boolean(explainerGate), "3: the pre-publish explainer card (\"Publish to match this project…\") is gated on `!published`", "");
     record(/Publish to match this project against Netify/.test(desk), "3 setup: the explainer heading string still exists in source (proving the fixture isn't vacuous -- the content exists, just conditionally)", "");
-    record(/What publishing unlocks: your matched vendors/.test(desk), "3 setup: \"What publishing unlocks\" copy still exists in source, same reasoning", "");
+    record(/SOURCING_DESCRIPTION/.test(desk.slice(desk.indexOf("Publish to match this project against Netify"), desk.indexOf("Generate and publish: the only exit"))), "3 setup: shared sourcing description supplies the explainer copy", "");
     // `setPhase` is never called anywhere inside the publish success
     // branch, confirming `phase === "fits"` alone cannot be trusted as a
     // "before publish" signal (this is WHY `!published` is the correct
@@ -216,8 +216,8 @@ function main() {
     // `responseCount === null` (never fetched / fetch failed), since
     // neither is proof that a response exists.
     record(/Published — awaiting supplier responses/.test(desk), "6: published-with-no-confirmed-responses renders \"Published — awaiting supplier responses\"", "");
-    const responseBlock = desk.match(/\{responseCount\s*\?\s*`\$\{responseCount\}[\s\S]{0,220}?:\s*`Published — awaiting supplier responses[\s\S]{0,150}?`\}/);
-    record(Boolean(responseBlock), "6: the response-status text is a single `responseCount ? ... : \"awaiting\"` branch -- `0` and `null` both take the honest \"awaiting\" branch (falsy), never the confirmed-count branch", "");
+    record(/responseCount\s*\?\s*`\$\{responseCount\}/.test(desk), "6: confirmed responses use the real positive count", "");
+    record(/: published\.invited\.length > 0 \? `Published — awaiting supplier responses[\s\S]{0,150}?` : "Published with no supplier invitations\./.test(desk), "6: zero invitations have an explicit state rather than promising supplier responses", "");
     // Fixture 7: only when real stored responses exist does the honest
     // "N have responded" wording appear, with a link to the REAL,
     // already-correct comparison experience (RfpBuilder.tsx) -- never a

@@ -1,3 +1,5 @@
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
+import { publicProviderEvidence } from "@/lib/public-provider-evidence";
 import type { Metadata } from "next";
 import Continuation from "@/components/Continuation";
 import { deriveContinuationSector } from "@/lib/continuation/derive";
@@ -10,8 +12,8 @@ type EditorialPage = { intro?: string; faqs?: { q: string; a: string }[] };
 type EditorialVendor = { commentary: string[]; watch_out?: string };
 type Editorial = Record<string, Record<string, EditorialVendor> & { _page?: EditorialPage }>;
 const EDITORIAL = bestEditorial as unknown as Editorial;
-import { FEATURE_NAMES, getAllVendors, getShortlistDataset } from "@/lib/vendors";
-import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
+import { getAllVendors, getShortlistDataset } from "@/lib/vendors";
+import { encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -55,7 +57,7 @@ export default async function BestPage({ params }: Props) {
   // Writer-authored page copy (Harry, June 2026): intro and FAQ answers
   // override the template text where a rewrite exists, so the visible prose
   // and the FAQPage JSON-LD stay in step.
-  const pageOverride = EDITORIAL[base.slug]?._page;
+  const pageOverride = base.evidenceCopyReviewed ? undefined : EDITORIAL[base.slug]?._page;
   const page = {
     ...base,
     intro: pageOverride?.intro ?? base.intro,
@@ -85,7 +87,7 @@ export default async function BestPage({ params }: Props) {
     month: "long", year: "numeric", timeZone: "UTC",
   });
 
-  const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
+  const result = publicProviderEvidence(getShortlistDataset(), page.input);
   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
   const itemListSchema = {
     "@context": "https://schema.org",
@@ -97,13 +99,14 @@ export default async function BestPage({ params }: Props) {
     numberOfItems: result.shortlist.length,
     itemListElement: result.shortlist.map((v) => ({
       "@type": "ListItem",
-      position: v.rank,
+      position: v.position,
+
       name: v.name,
-      url: `${SITE_URL}/vendors/${v.slug}`,
+      url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
       item: {
         "@type": "Service",
         name: `${v.name} SD-WAN / SASE`,
-        url: `${SITE_URL}/vendors/${v.slug}`,
+        url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
         description: v.key_differentiators[0],
         provider: { "@type": "Organization", name: v.name, url: v.website },
         potentialAction: {
@@ -162,17 +165,18 @@ export default async function BestPage({ params }: Props) {
       ))}
 
       <div className="mb-10 fade-rise">
-        <p className="eyebrow mb-3">Ranked shortlist · Updated {reviewedMonth}</p>
+        <p className="eyebrow mb-3">Provider evidence · Updated {reviewedMonth}</p>
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
+        {page.input.sector === "healthcare" && <p className="mt-3">For the BT/NHS route, see <a className="underline" href="https://netify.co.uk/sd-wan-for-healthcare/">BT SD-WAN and SASE for healthcare</a>.</p>}
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
-          {`Netify's ${reviewedMonth} evaluation ranks: `}
+          {`Netify's ${reviewedMonth} evidence directory, by proven capability count, verification date and name: `}
           {result.shortlist
-            .map((v) => `${v.rank}. ${v.name} (${v.score})`)
+            .map((v) => v.name)
             .join("; ")}
-          {`. Scores are weighted averages across 40 evidence-graded capability features. Buyers can act on this ranking directly: describe the project once at `}
+          {`. Positions are evidence order, not recommendations. Describe your project at `}
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
-          {`, raise it to a full RFP and publish to these providers, then compare structured responses side by side, with pricing kept private to the buyer.`}
+          {". "}{SOURCING_DESCRIPTION}
         </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written by the Netify research team. Reviewed by Robert Sturt, Netify
@@ -185,7 +189,7 @@ export default async function BestPage({ params }: Props) {
             href={builderUrl}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
           >
-            Refine this shortlist interactively
+            Explore provider evidence
             <span aria-hidden="true">→</span>
           </Link>
           <Link
@@ -207,7 +211,7 @@ export default async function BestPage({ params }: Props) {
             sectorKey: page.input.sector as string | undefined,
             sectorLabel: page.input.sector ? SECTOR_LABELS[page.input.sector] : undefined,
             pageTitle: page.title,
-            pins: result.shortlist.slice(0, 5).map((v) => v.slug),
+            pins: [],
           })}
           pageUrl={`${SITE_URL}/best/${page.slug}`}
         />
@@ -217,7 +221,7 @@ export default async function BestPage({ params }: Props) {
         <section className="mb-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5">
           <p className="eyebrow mb-2">Full buyer guide</p>
           <p className="text-sm text-[var(--ink-700)]">
-            This live ranking also powers the full buyer guide, which adds an
+            This provider evidence also supports the full buyer guide, which adds an
             interactive shortlist tool, procurement guidance and FAQs:{" "}
             <a
               href={page.canonicalOverride}
@@ -234,14 +238,15 @@ export default async function BestPage({ params }: Props) {
           this page's vendors and sector into the Workspace, which
           recommends the formal RFP path when the position warrants it. */}
 
-      {/* The extractable form of the ranking above. Added 29 July 2026: the
+      {/* The extractable form of the evidence above. Added 29 July 2026: the
           qualified cuts are where Netify's citation share actually sits (17 to
           43 per cent measured on Bing AI), and every one of these pages was
           rendering scored cards with no table for an engine to lift. */}
       <SourcedTable
         slugs={result.shortlist.map((v) => v.slug)}
         caption={`${page.h1.replace(/\s*\(\d{4}\)\s*$/, "")}: the evidence`}
-        intro="The same ranking as below, as sourced facts rather than scores. Ordered as ranked."
+        intro={SOURCING_DESCRIPTION}
+        ranked={false}
         id="evidence-table"
       />
 
@@ -254,13 +259,13 @@ export default async function BestPage({ params }: Props) {
           return (
           <li
             key={v.slug}
-            id={`rank-${v.rank}-${v.slug}`}
+            id={`provider-${v.slug}`}
             className="border border-[var(--ink-300,#ccc)] rounded-sm p-5"
           >
-            <p className="eyebrow mb-1">No. {v.rank} · Score {v.score}</p>
+            <p className="eyebrow mb-1">Source evidence</p>
             <h2 className="text-xl mb-1">
-              <Link href={`/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
-                {v.name}
+              <Link href={v.marketplace_url ?? `/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+                {v.position}. {v.name}
               </Link>
             </h2>
             <p className="text-sm text-[var(--ink-500)] mb-2">
@@ -271,8 +276,9 @@ export default async function BestPage({ params }: Props) {
                 <p key={pi} className="text-sm text-[var(--ink-700)] mb-2">{para}</p>
               ))
             ) : (
-              <p className="text-sm text-[var(--ink-700)] mb-2">{v.key_differentiators[0]}</p>
+              <p className="text-sm text-[var(--ink-700)] mb-2">{v.key_differentiators[0] || v.product_focus || v.shortlist_summary}</p>
             )}
+            <p className="text-sm text-[var(--ink-500)]">Proven capability items: {v.proven_evidence_count} · Verification: {v.last_verified || "Not recorded"}</p>
             {v.gaps.length > 0 && (
               <p className="text-sm text-[var(--ink-500)]">Evidence caveats: {v.gaps.join("; ")}</p>
             )}
@@ -306,7 +312,7 @@ export default async function BestPage({ params }: Props) {
 
       <section className="mt-14">
         <p className="eyebrow mb-3">Questions</p>
-        <h2 className="mb-6">About this ranking</h2>
+        <h2 className="mb-6">About this evidence</h2>
         <div className="space-y-6">
           {page.faqs.map((f) => (
             <div key={f.q}>
@@ -318,7 +324,7 @@ export default async function BestPage({ params }: Props) {
       </section>
 
       <section className="mt-14 border-t border-[var(--ink-300,#ccc)] pt-8">
-        <p className="eyebrow mb-3">More ranked shortlists</p>
+        <p className="eyebrow mb-3">More provider research</p>
         <div className="flex flex-wrap gap-2">
           {BEST_PAGES.filter((p) => p.slug !== page.slug).slice(0, 12).map((p) => (
             <Link

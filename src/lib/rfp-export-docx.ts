@@ -134,3 +134,8 @@ export async function renderRfpDocx(markdown: string, title: string): Promise<Bu
   });
   return Packer.toBuffer(doc);
 }
+
+/** Browser-only private working copy. No server storage, publication or invitations. */
+export async function renderRfpDocxBlob(markdown: string, title: string): Promise<Blob> {
+  return Packer.toBlob(new Document({ title, creator: "Netify", description: "Private working draft — not published", sections: [{ properties: {}, children: markdownToDocxBlocks(markdown) }] }));
+}

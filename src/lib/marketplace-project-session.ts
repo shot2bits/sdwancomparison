@@ -1,5 +1,7 @@
+import { isMarketUnlocked } from "./market-unlock";
+import { currentBuyerFacts, projectWithCurrentBuyerFacts } from "./current-buyer-facts";
 import { preserveMarketplaceWorkspace, marketplaceWorkspacePayload, MarketplaceEnvelopeError } from "./marketplace-workspace-envelope";
-import { isShortProject, shortProjectReadiness, shortProjectNotice } from "@/lib/short-project";
+import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
 import { createHash, randomBytes } from "node:crypto";
 import { z } from "zod";
 import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
@@ -10,6 +12,7 @@ import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-stor
 import { ProviderMatchInputSchema, PROVIDER_MATCH_METHODOLOGY_VERSION } from "@/lib/provider-matching";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { getStrictLiveShortlistDataset, shortlistInputFromProviderMatchInput } from "@/lib/live-shortlist";
+import { sectorUnconfirmedCoverage } from "./coverage-preview";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { FEATURE_NAMES } from "@/lib/vendors";
 
@@ -21,8 +24,8 @@ const hash = (value: string) => createHash("sha256").update(value).digest("hex")
 const sessionKey = (token: string) => `marketplace:project_session:${hash(token)}`;
 const idempotencyKey = (projectId: string, key: string) => `marketplace:project_update:${projectId}:${hash(key)}`;
 
-export class MarketplaceProjectConflict extends Error { status = 409 as const; }
-export class MarketplaceProjectUnauthorised extends Error { status = 404 as const; }
+import { MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "./marketplace-project-errors";
+export { MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "./marketplace-project-errors";
 
 async function persistSession(token: string, session: MarketplaceSession) {
   await kvRaw(["SET", sessionKey(token), JSON.stringify(session), "EX", SESSION_TTL_SECONDS]);
@@ -59,7 +62,7 @@ export async function startMarketplaceProject(input: { entrance_context: unknown
   const session = SessionSchema.parse({ project_id: saved.id, token_hash: hash(token), revision: 0, created_at: now, expires_at: now + SESSION_TTL_SECONDS * 1000 });
   await persistSession(token, session);
   await recordMarketplaceFunnelEvent({ event: "project_started", project_id: saved.id, source: entrance.source, mode: input.mode, channel: entrance.source === "mcp" ? "mcp" : "web" });
-  return { project_reference: saved.id, project_session_token: token, revision: 0, envelope_revision: saved.envelope_revision, expires_at: session.expires_at, resume_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/?journey=${input.mode}&project=${encodeURIComponent(saved.id)}#project_session=${encodeURIComponent(token)}` };
+  return { analytics: saved.activity?{correlation_id:saved.activity.correlation_id,environment:saved.activity.environment}:null, project_reference: saved.id, project_session_token: token, revision: 0, envelope_revision: saved.envelope_revision, expires_at: session.expires_at, resume_url: `https://netify.co.uk/sase-sd-wan-rfp-builder/?journey=${input.mode}&project=${encodeURIComponent(saved.id)}#project_session=${encodeURIComponent(token)}` };
 }
 
 async function preserveWorkspace(existing: Parameters<typeof preserveMarketplaceWorkspace>[0], raw: Record<string, unknown>) {
@@ -108,8 +111,8 @@ async function previewMarketplaceProjectUnlocked(projectId: string, token: strin
       ? category.includes("technology vendor")
       : /managed service provider|carrier network provider|integrator/.test(category);
   });
-  const result = buildShortlist(scoped, translated.input, FEATURE_NAMES);
-  const eligibleSlugs = new Set(result.shortlist.map((provider) => provider.slug));
+  const result = buildShortlist(scoped, { ...translated.input, ...projectMatchingInput(project) }, FEATURE_NAMES);
+  const eligibleSlugs = new Set(result.evaluation.filter((provider) => provider.eligible).map((provider) => provider.slug));
   const eligible = scoped.filter((provider) => eligibleSlugs.has(provider.slug));
   const satisfies = new Set(["yes", "partial", "partner_integrated", "managed_service_dependent"]);
   const nextRevision = session.revision + 1;
@@ -120,6 +123,7 @@ async function previewMarketplaceProjectUnlocked(projectId: string, token: strin
     eligible_technology_count: eligible.filter((provider) => provider.category.toLowerCase().includes("technology vendor")).length,
     eligible_managed_provider_count: eligible.filter((provider) => /managed service provider|carrier network provider|integrator/.test(provider.category.toLowerCase())).length,
     meets_all_mandatory_count: eligible.length,
+    sector_unconfirmed_count: sectorUnconfirmedCoverage(scoped, result.input),
     capability_coverage: input.mandatory_capabilities.map((code) => {
       const featureId = translated.featureIdFor(code);
       return { code, supported_provider_count: featureId ? scoped.filter((provider) => satisfies.has(provider.capabilities[featureId])).length : 0 };
@@ -163,8 +167,9 @@ export async function readMarketplaceProject(projectId: string, token: string) {
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   return {
     project_reference: project.id, revision: project.marketplace_revision, envelope_revision: project.envelope_revision,
+    buyer_facts: currentBuyerFacts(project), market_unlocked: await isMarketUnlocked(project.id),
     workspace_payload: marketplaceWorkspacePayload(project),
-    expires_at: session.expires_at, buyer: project.buyer, entrance_context: project.entrance_context,
+    expires_at: session.expires_at, buyer: projectWithCurrentBuyerFacts(project).buyer, entrance_context: project.entrance_context,
     notice: isShortProject(project) ? shortProjectNotice(project) : null,
     mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION,
     marketplace_state: project.marketplace_state,

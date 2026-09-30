@@ -100,6 +100,7 @@ export default function NoticeView({
             <>
               <Chip tone="amber">{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</Chip>
               {o.has_full_rfp && <Chip tone="amber">Full RFP included</Chip>}
+              {!o.has_full_rfp && o.rfp_shape && <Chip>Short project brief</Chip>}
             </>
           )}
           {o.eligibility === "open" ? <Chip>Open to verified vendors</Chip> : <Chip>Invite-only</Chip>}

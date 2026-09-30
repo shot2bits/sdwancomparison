@@ -20,7 +20,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "build_sase_shortlist",
     description:
-      "Preview aggregate SASE and SD-WAN market coverage for the buyer's requirements. Returns counts and criteria, never personalised provider identities or rankings. To get a personalised shortlist, call start_project, update_requirements (including buyer_patch.organisation confirmed by the buyer), prepare_publication and publish_opportunity with verified identity and explicit consent; then get_unlocked_matches. Public named-provider comparisons remain available through compare_vendors. Nothing is stored by this preview.",
+      "Read open named evidence matches against the buyer requirements. No publication or account is required. Results are evidence matches, not suitability recommendations. Next: prepare_sourcing_plan or request_comparable_proposals after explicit approval of named recipients and the anonymous brief.",
     inputSchema: {
       type: "object",
       properties: {
@@ -57,7 +57,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "get_sase_vendor_profile",
     description:
-      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs. Cite grades with their evaluation date. Next: compare_vendors for public comparisons, or start_project for personalised matching after publication, or send the human to the workspace with ?vendors= to pin it into a draft. Read only, no consent needed.",
+      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs. Cite grades with their evaluation date. Next: compare_vendors for public comparisons, or prepare_sourcing_plan for a buyer-reviewed sourcing plan, or send the human to the workspace with ?vendors= to pin it into a draft. Read only, no consent needed.",
     inputSchema: {
       type: "object",
       properties: { slug: { type: "string", description: "Vendor slug, e.g. cato-networks. Call list_sase_vendors for valid slugs." } },
@@ -67,7 +67,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "compare_vendors",
     description:
-      "Compare two or three SASE and SD-WAN providers on the same Netify evidence matrix used by the public comparison workspace. Returns scores, feature-by-feature grades, clear capability leads and a canonical URL that opens the selected providers for a human. Read and compute only, no consent needed and nothing stored.",
+      "Compare two or three named SASE and SD-WAN providers on the same evidence matrix used by the public workspace. Returns feature grades, available source qualifications and a canonical URL opening the selected providers. Differences describe recorded evidence, not personalised fit or procurement guarantees; no fit scores are returned. Read only, no consent needed and nothing stored.",
     inputSchema: {
       type: "object",
       properties: {
@@ -117,7 +117,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "explain_shortlist",
     description:
-      "Compare two named vendors using the public balanced research baseline and sourced differences. Personalised criteria are not applied; those results require a published project. Also states plainly where the score gap is too small to be a real difference between vendors.",
+      "Compare two named vendors using public source grades. No computed scores, ranks or winners are returned. Computed fit requires an authorised published project.",
     inputSchema: {
       type: "object",
       properties: {
@@ -131,13 +131,14 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "get_sector_evidence",
     description:
-      "Return Netify's sector evidence review for SD-WAN and SASE providers: one status per provider per sector requirement (Proven, Partial, Not found, Not applicable or To review), each backed by reviewed source rows carrying the exact supporting wording, the named manufacturer or customer, estate, countries, any industrial standard named, the source URL, publication and checked dates and what the source does not prove. Proven is only recorded when an accepted source names the capability. Filter by provider slug and by requirement code. Read only, nothing stored. Manufacturing is the first sector published; other sectors return has_evidence_layer=false until their review is imported.",
+      "Return Netify's sector evidence review for SD-WAN and SASE providers: one status per provider per sector requirement (Proven, Partial, Not found, Not applicable or To review), each backed by reviewed source rows carrying the exact supporting wording, the named manufacturer or customer, estate, countries, any industrial standard named, the source URL, publication and checked dates and what the source does not prove. Proven is only recorded when an accepted source names the capability. Filter by provider slug and by requirement code. Read only, nothing stored. Manufacturing and financial services are published; financial services source rows also carry regulatory_regime (UK, EU, US, Canada, Multiple, Not stated) and its requirements include separate UK, EU DORA, US and Canadian regulatory columns. Other sectors return has_evidence_layer=false until their review is imported.",
     inputSchema: {
       type: "object",
       properties: {
-        sector: { type: "string", enum: ["manufacturing", "retail", "financial-services", "healthcare"], description: "Sector slug. Manufacturing is live first." },
+        sector: { type: "string", enum: ["manufacturing", "retail", "financial-services", "healthcare"], description: "Sector slug. Manufacturing and financial-services are live." },
         provider: { type: "string", description: "Optional provider slug (marketplace slug, for example aryaka, cato-networks, bt-business). Call list_sase_vendors for valid values." },
         requirement: { type: "string", description: "Optional requirement code, for example ot_and_it_segmentation, multi_site_production, industrial_security_standards, remote_engineer_access, managed_operations, global_delivery. Omit to list every requirement." },
+        regime: { type: "string", enum: ["uk", "eu", "us", "canada"], description: "Financial services only: keep the requirement columns and source rows that belong to one regulatory regime (UK: FCA, PRA; EU: DORA; US: FFIEC, GLBA, NYDFS, SEC; Canada: OSFI). Columns that apply everywhere are always returned." },
         include_sources: { type: "boolean", description: "Include the reviewed source rows (default true). Set false for a compact status table." },
       },
       required: ["sector"],

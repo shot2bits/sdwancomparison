@@ -1,3 +1,4 @@
+import { publicationOutcomes } from "@/lib/publication-outcomes";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
@@ -15,7 +16,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  *
  * Living Procurement Canvas Phase 2 (14 Aug 2026), Robert's product rule:
  * publication is the boundary that unlocks a project's matched vendors and
- * service providers, not a UI event. Before publication this route MUST
+ * service providers, not a UI event. while the notice is a draft this route MUST
  * NOT reveal a project-specific ranked match result -- no matched vendor
  * names, no count, no "top three" partial list (the previous
  * `names.slice(0, 3)` preview did exactly this and is the bug this round
@@ -24,7 +25,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  * marketplace, never as this project's matches) -- what publication
  * unlocks, not a taste of it.
  *
- * After publication, every reader of this route sees the SAME frozen
+ * once the notice is published, every reader of this route sees the SAME frozen
  * market report the snapshot cached at publish time (published-
  * snapshot.ts) -- never a freshly recomputed one that could drift from
  * what the board notice, the invited vendors and the exported documents
@@ -58,7 +59,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  *      honestly rather than claiming it is frozen).
  */
 export async function GET(req: Request, ctx: Ctx) {
-  const cors = corsHeaders(req);
+  const cors = { ...corsHeaders(req), "Cache-Control": "private, no-store" };
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
   const project = await getProject(id);
@@ -106,7 +107,11 @@ export async function GET(req: Request, ctx: Ctx) {
     // below (still functions), but a caller must not present that as
     // "exactly as published".
     frozen: snapshot !== null,
-    market_report: snapshot?.market_report ?? buildMarketReport(project),
+    publication_outcomes: await publicationOutcomes(id, snapshot),
+    evaluation: snapshot?.provider_provenance ?? null,
+    published_notice: snapshot?.public_projection.notice ?? null,
+    computed_matches: snapshot?.computed_matches ?? null,
+    market_report: snapshot ? { ...snapshot.market_report, matched: { ...snapshot.market_report.matched, total_evaluated_market: snapshot.provider_provenance?.evaluated_provider_count ?? null } } : { ...buildMarketReport(project), matched: { count: 0, names: [], total_evaluated_market: null } },
     // Round 4, findings 4/5: the REAL matched/invited selection, always
     // present on any real snapshot; the legacy no-snapshot case is honest
     // about not having one (null), rather than inventing a substitute --

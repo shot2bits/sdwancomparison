@@ -1,5 +1,5 @@
-import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
-import { buildShortlist } from "@/lib/shortlist-core";
+import { publicProviderEvidence } from "@/lib/public-provider-evidence";
+import { getShortlistDataset } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const dynamic = "force-static";
@@ -16,10 +16,9 @@ export async function GET(_req: Request, ctx: Ctx) {
   const vendor = all.find((v) => v.slug === slug);
   if (!vendor) return Response.json({ error: "Unknown vendor" }, { status: 404 });
 
-  const result = buildShortlist(
+  const result = publicProviderEvidence(
     all.filter((v) => v.slug !== slug),
     { shortlist_size: 10 },
-    FEATURE_NAMES,
   );
   return Response.json(
     {

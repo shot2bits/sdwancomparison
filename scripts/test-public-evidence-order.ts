@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {getShortlistDataset} from '../src/lib/vendors';
+import {publicEvidenceProviders,provenEvidenceCount,PUBLIC_EVIDENCE_ORDER,publicEvidenceOutput} from '../src/lib/public-provider-evidence';
+const original=getShortlistDataset()[0];
+const row=(slug:string,name:string,date:string,yes:number)=>({...original,slug,name,last_verified:date,capabilities:{...Object.fromEntries(Array.from({length:yes},(_,i)=>['f'+i,'yes' as const])),partial:'partial' as const,missing:'unknown' as const}});
+const rows=[row('z','Zulu','2026-09-01',2),row('b','Beta','2026-09-02',2),row('a','Alpha','2026-09-02',2),row('n','Newest','2026-09-14',1),row('p','Proven','2020-01-01',3),row('x','No date','',2)];
+const result=publicEvidenceProviders(rows);
+assert.deepEqual(result.map(v=>v.slug),['p','a','b','z','x','n']);
+assert.deepEqual(result,publicEvidenceProviders([...rows].reverse()));
+assert.deepEqual(result.map(v=>v.position),[1,2,3,4,5,6]);
+assert.equal(provenEvidenceCount(rows[0]),2);assert.equal(result[0].capabilities.missing,'not_confirmed');
+const polluted={...rows[0],rank:1,score:99,match_percentage:99,default_shortlist:[],top_providers_at_balanced_setting:[]};
+const clean=publicEvidenceOutput(polluted);assert.ok(!('score' in clean));assert.ok(!('rank' in clean));assert.ok(!JSON.stringify(clean).includes('"unknown"'));
+assert.ok(PUBLIC_EVIDENCE_ORDER.includes('last_verified'));
+assert.equal(rows[0].capabilities.missing,'unknown','source ledger unchanged');
+console.log('PASS public order: proven only, date/name ties, missing dates, import permutation, numbering, no scores or unknown status; source grades unchanged');

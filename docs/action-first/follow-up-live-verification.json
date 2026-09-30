@@ -1,0 +1,73 @@
+{
+  "checked_at": "2026-09-30T15:53:30.256512+00:00",
+  "commit": "1f96d9e",
+  "preview": "https://sasecomparison-fk85kosc0-netifymarketplace.vercel.app",
+  "production_changed": false,
+  "sector_checks": [
+    {
+      "sector": "healthcare",
+      "need": "sase",
+      "source": "neon",
+      "eligible_count": 2,
+      "matches": [
+        "Fortinet FortiSASE",
+        "HPE Aruba EdgeConnect"
+      ]
+    },
+    {
+      "sector": "healthcare",
+      "need": "sdwan",
+      "source": "neon",
+      "eligible_count": 1,
+      "matches": [
+        "HPE Aruba EdgeConnect"
+      ]
+    },
+    {
+      "sector": "financial_services",
+      "need": "sdwan",
+      "source": "neon",
+      "eligible_count": 3,
+      "matches": [
+        "Netskope",
+        "HPE Aruba EdgeConnect",
+        "BT"
+      ]
+    },
+    {
+      "sector": "manufacturing",
+      "need": "sdwan",
+      "source": "neon",
+      "eligible_count": 3,
+      "matches": [
+        "Cisco",
+        "Aryaka",
+        "HPE Aruba EdgeConnect"
+      ]
+    },
+    {
+      "sector": "education",
+      "need": "sase",
+      "source": "neon",
+      "eligible_count": 1,
+      "matches": [
+        "Fortinet FortiSASE"
+      ]
+    },
+    {
+      "sector": "transport_logistics",
+      "need": "sdwan",
+      "source": "neon",
+      "eligible_count": 1,
+      "matches": [
+        "Aryaka"
+      ]
+    }
+  ],
+  "mcp_web_parity": true,
+  "preview_noindex": true,
+  "full_local_validation": "passed",
+  "action_first_tests": "passed",
+  "hosted_build": "passed with action-first tests plus full validation",
+  "live_data": "Authenticated Neon with dated source review layer; original Neon rows unchanged"
+}

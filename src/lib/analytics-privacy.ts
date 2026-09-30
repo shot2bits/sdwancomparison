@@ -1,5 +1,5 @@
 /** Analytics uses route categories, never a buyer's query, token or document title. */
-const ROUTES = ["/sase-sd-wan-rfp-builder/", "/sase/home/", "/sase/shortlist/", "/sase/best/", "/sase/compare/", "/sase/vendors/", "/sase/examples/", "/sase/cost-estimator/", "/sase/pricing/", "/sase/circuit-pricing/", "/sase/connector/", "/sase/opportunities/", "/sase/rfp-builder/", "/sase/workspace/", "/sase/account/", "/sase/admin/"];
+const ROUTES = ["/sase/shortlist/sd-wan-vendors/", "/sase/shortlist/sd-wan-providers/", "/sase/shortlist/sd-wan-comparison/", "/sase/shortlist/sase-vendors/", "/sase/shortlist/sase-providers/", "/sase/shortlist/sase-comparison/", "/sase/shortlist/research-methodology/", "/sase/shortlist/confirm/","/sase-sd-wan-rfp-builder/", "/sase/home/", "/sase/shortlist/", "/sase/best/", "/sase/compare/", "/sase/vendors/", "/sase/examples/", "/sase/cost-estimator/", "/sase/pricing/", "/sase/circuit-pricing/", "/sase/connector/", "/sase/opportunities/", "/sase/rfp-builder/", "/sase/workspace/", "/sase/account/", "/sase/admin/"];
 export function analyticsPath(value: string): string {
  try { const path=new URL(value,"https://netify.co.uk").pathname;return ROUTES.find(route=>path===route.slice(0,-1)||path.startsWith(route))??"/sase/"; } catch {return "/sase/";}
 }

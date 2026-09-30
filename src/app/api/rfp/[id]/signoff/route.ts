@@ -1,3 +1,4 @@
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 /**
  * Approval requests (D5): the buyer asks a colleague to approve before
  * publishing. Owner-gated. Typing the approver's email and confirming is
@@ -106,13 +107,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   // One email, consented above. Test mode sends nothing (review target 4).
   let emailed = false;
   if (project.test !== true) {
-    const key = process.env.RESEND_API_KEY;
+    const key = activityMailKey();
     if (key) {
       const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
       const link = `${SITE_URL}/project/${id}/approve?token=${encodeURIComponent(signoff.token)}`;
       const safeTitle = (project.title || "Untitled project").replace(/</g, "&lt;");
       try {
-        await fetch("https://api.resend.com/emails", {
+        await activityMailFetch("https://api.resend.com/emails", {
           method: "POST",
           headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
           body: JSON.stringify({

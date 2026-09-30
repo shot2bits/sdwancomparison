@@ -12,7 +12,7 @@
  * vendors from that project's own PublishedSnapshot instead, never a
  * fresh recompute here -- see ProjectDesk.tsx's `published` state). Per
  * the product rule ("no project-specific vendor names, rankings, MATCH
- * COUNTS, positions, evidence badges... before publication"), this
+ * COUNTS, positions, evidence badges... while the notice is a draft"), this
  * endpoint therefore never returns vendor-identifying OR match-count
  * fields to the browser: `suppliers` (names, slugs, positions, evidence,
  * marketplace links), `directory` (the full named vendor list) and

@@ -1,10 +1,11 @@
+import { recordPublicationVerification } from "@/lib/publication-verification-events";
 import {CircuitSignupIntentSchema} from "@/lib/circuit-schema";
 import {prepareCircuitBuyer, circuitBuyerCanSignIn} from "@/lib/circuit-store";
 import { authReturnPath, publicationProjectFromReturn } from "@/lib/auth-return";
 import { analyticsReferrer, analyticsPath } from "@/lib/analytics-privacy";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { createMagicToken, getProject, getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, kvRaw, listAllRfpIds, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
-import { sendMagicLink, resendConfigured } from "@/lib/auth";
+import { sendMagicLink } from "@/lib/auth";
 import { getBounce, recordResendSend } from "@/lib/email-bounces";
 import {
   isBlockedDomainLive,
@@ -14,7 +15,6 @@ import {
   isAdminEmail,
   emailDomain,
 } from "@/lib/access-control";
-import { SITE_URL } from "@/lib/structured-data";
 import { verifyAuthChallenge } from "@/lib/auth-challenge";
 import { isMarketUnlocked } from "@/lib/market-unlock";
 import { createHash } from "node:crypto";
@@ -242,18 +242,14 @@ export async function POST(req: Request) {
   } catch { code = undefined; /* code is an enhancement; the link still works */ }
 
   const sent = await sendMagicLink(email, token, resolvedRole, returnTo, code);
+  if (sent.ok && rfpId && role === "buyer") await recordPublicationVerification(rfpId, email, "verification_requested");
   // Correlate this send against Resend's own email id so the bounce webhook
   // (which only ever carries that id, never any of this app's own context)
   // can trace a later bounce back to this exact attempt. Best effort: see
   // email-bounces.ts, a failure here only means one send goes untraced.
   await recordResendSend(sent.emailId, { to: email, kind: "magic_link", ts: Date.now(), rfp_id: rfpId });
-  // In preview without Resend configured, return the link so it is testable.
-  // Fix, 11 Aug 2026: this used to key off `!sent`, which also fired on a
-  // genuine production send failure now that sendMagicLink checks Resend's
-  // response status (see that file) — a real buyer whose email failed for a
-  // real reason would have had the raw sign-in token handed back in this
-  // API response. Keyed on Resend actually being configured instead, the
-  // only case this was ever meant to cover.
-  const devLink = resendConfigured() ? undefined : `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
-  return Response.json({ ok: true, emailed: sent.ok, dev_link: devLink, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
+  // Authentication tokens are only available through delivery or the private
+  // preview capture store. Missing delivery must never become an auth bypass.
+  if (!sent.ok) return Response.json({error:"Sign-in delivery is unavailable. Please try again later."}, {status:503,headers:cors});
+  return Response.json({ ok: true, emailed: true, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
 }

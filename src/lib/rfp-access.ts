@@ -15,6 +15,7 @@
  * every supplier link) grants nothing.
  */
 
+import { sourcingAccess } from "./sourcing-access";
 import { sessionFromRequest } from "@/lib/auth";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
@@ -52,6 +53,7 @@ export async function requireRfpOwner(
   project: ProjectDetails,
   body?: Record<string, unknown> | null,
 ): Promise<RfpAccess> {
+  if (await sourcingAccess(req, project.id)) return { ok: true, viaToken: false, session: null };
   const token = manageTokenFrom(req, body);
   const viaToken = Boolean(project.manage_token) && token === project.manage_token;
   if (viaToken) {

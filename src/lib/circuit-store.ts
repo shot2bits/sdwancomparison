@@ -1,3 +1,4 @@
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { randomBytes, createHash } from "node:crypto";
 import { kvRaw, kvGetJson, kvSetJson, saveOpportunity, newId } from "./rfp-store";
@@ -230,10 +231,10 @@ export async function circuitNotify(id: string, quoteId: string, session: AuthSe
     if (!q) throw new CircuitError("Quote not found.", 404);
     if (q.notification === "accepted") return r;
     let accepted = false;
-    const key = process.env.RESEND_API_KEY;
+    const key = activityMailKey();
     if (key)
       try {
-        const res = await fetch("https://api.resend.com/emails", {
+        const res = await activityMailFetch("https://api.resend.com/emails", {
           method: "POST",
           signal: AbortSignal.timeout(12000),
           headers: {
@@ -245,7 +246,7 @@ export async function circuitNotify(id: string, quoteId: string, session: AuthSe
             from: process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk",
             to: r.owner_email,
             subject: "Your circuit pricing is available in Netify",
-            text: `Netify has added a market response to your circuit-pricing request. Sign in with your verified work email to view the private pricing and supporting details:\n\nhttps://netify.co.uk/sase/circuit-pricing/?request=${r.id}&view=quotes\n\nNo order has been placed.`,
+            text: r.id.startsWith("rfp_") ? `Netify has added connectivity pricing to your private sourcing project. Open it in your confirmed browser:\n\nhttps://netify.co.uk/sase/rfp-builder/${r.id}/\n\nNo order has been placed.` : `Netify has added a market response to your circuit-pricing request. Sign in with your verified work email to view the private pricing and supporting details:\n\nhttps://netify.co.uk/sase/circuit-pricing/?request=${r.id}&view=quotes\n\nNo order has been placed.`,
           }),
         });
         accepted = res.ok;
@@ -269,8 +270,8 @@ export async function circuitNotifyTeam(id: string, session: AuthSession) {
     const r = await circuitGet(id, session);
     if(r.status==='draft'||r.team_notification==='accepted') return r;
     let accepted=false;
-    if(process.env.RESEND_API_KEY) try {
-      const res=await fetch('https://api.resend.com/emails',{method:'POST',signal:AbortSignal.timeout(12000),headers:{authorization:`Bearer ${process.env.RESEND_API_KEY}`,'content-type':'application/json','Idempotency-Key':`circuit-published-${id}`},body:JSON.stringify({from:process.env.AUTH_FROM_EMAIL??'no-reply@mail.netify.co.uk',to:process.env.SIGNUP_NOTIFY_EMAIL??'support@netify.com',subject:'New circuit pricing request — Netify sourcing',text:`A verified buyer has published a circuit pricing request. Open the authenticated sourcing queue to review the private requirements and add quotes:\n\nhttps://netify.co.uk/sase/admin/circuit-pricing/?request=${id}\n\n${r.lines.length} requirement groups. No carrier order has been placed.`})});accepted=res.ok;
+    if(activityMailKey()) try {
+      const res=await activityMailFetch('https://api.resend.com/emails',{method:'POST',signal:AbortSignal.timeout(12000),headers:{authorization:`Bearer ${activityMailKey()}`,'content-type':'application/json','Idempotency-Key':`circuit-published-${id}`},body:JSON.stringify({from:process.env.AUTH_FROM_EMAIL??'no-reply@mail.netify.co.uk',to:process.env.SIGNUP_NOTIFY_EMAIL??'support@netify.com',subject:'New circuit pricing request — Netify sourcing',text:`A verified buyer has published a circuit pricing request. Open the authenticated sourcing queue to review the private requirements and add quotes:\n\nhttps://netify.co.uk/sase/admin/circuit-pricing/?request=${id}\n\n${r.lines.length} requirement groups. No carrier order has been placed.`})});accepted=res.ok;
     }catch{/* queue is authoritative; failed transport is reported */}
     return persist({...r,team_notification:accepted?'accepted':'failed'});
   });

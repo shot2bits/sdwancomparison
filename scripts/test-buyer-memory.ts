@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-process.env.KV_REST_API_URL = 'https://memory-test.invalid';
+process.env.KV_REST_API_URL = 'http://127.0.0.1:1';
 process.env.KV_REST_API_TOKEN = 'test-only';
 const db = new Map<string, string>();
 globalThis.fetch = async (input, init) => {

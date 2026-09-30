@@ -1,0 +1,41 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "netify-sourcing",
+  "version": "0.1.0",
+  "description": "Research SD-WAN and SASE providers and prepare buyer-approved requests for Netify sourcing desk review.",
+  "author": {
+    "name": "Netify Group Limited",
+    "email": "support@netify.com",
+    "url": "https://netify.co.uk"
+  },
+  "homepage": "https://netify.co.uk/sase/shortlist/",
+  "keywords": [
+    "SD-WAN",
+    "SASE",
+    "procurement"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Netify Sourcing",
+        "shortDescription": "Plan SD-WAN and SASE sourcing",
+        "longDescription": "Research provider evidence, prepare a sourcing brief and bundle requests for contacts, demonstrations or proposals. Requests require explicit buyer approval and confirmation by work email before Netify desk review. Evidence matches are not supplier-confirmed recommendations. Supplier response commitments are agreed for each sourcing.",
+        "developerName": "Netify Group Limited",
+        "category": "Productivity",
+        "capabilities": [
+          "Research provider evidence",
+          "Prepare a sourcing plan",
+          "Request buyer confirmation"
+        ],
+        "websiteURL": "https://netify.co.uk/sase/shortlist/",
+        "supportURL": "https://netify.co.uk/contact-us/",
+        "privacyPolicyURL": "https://netify.co.uk/privacy-policy/",
+        "termsOfServiceURL": "https://netify.co.uk/terms-conditions/",
+        "defaultPrompt": [
+          "Prepare a sourcing plan for my SD-WAN requirement.",
+          "Help me request comparable SASE proposals."
+        ]
+      }
+    }
+  }
+}

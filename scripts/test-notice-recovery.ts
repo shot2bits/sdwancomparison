@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { cleanPublishedSummary, publishedDeadline } from '../src/lib/notice-presentation';
+import { OpportunitySchema, toPublicOpportunity } from '../src/lib/opportunity-types';
+const text = 'One site. No supplier requirements have been created yet. Describe what you need above to start building this document. Pricing private.';
+assert.equal(cleanPublishedSummary(text),'One site. Pricing private.');
+assert.equal(cleanPublishedSummary('Buyer requires no supplier changes.'),'Buyer requires no supplier changes.');
+assert.equal(publishedDeadline({response_deadline:20,deadline:10}),20);
+assert.equal(publishedDeadline({deadline:10}),10);
+assert.equal(publishedDeadline({}),null);
+const base = OpportunitySchema.parse({id:'fixture',created:1,updated:2,buyer_org:'Private',title:'Hospitality requirement',scope:['sase'],summary:text,buyer_token:'secret',source_rfp_id:'rfp_fixture',response_mode:'indicative_pricing',rfp_shape:{version:'1',total:1,sections:[{title:'Project',questions:1}]}});
+const brief = toPublicOpportunity(base);
+assert.equal(brief.has_full_rfp,false);
+assert.equal(brief.summary,'One site. Pricing private.');
+assert.ok(!('buyer_token' in brief));
+assert.equal(toPublicOpportunity({...base,response_mode:'full_rfp'}).has_full_rfp,true);
+assert.equal(toPublicOpportunity({...base,response_mode:'full_rfp',rfp_shape:null}).has_full_rfp,false);
+assert.equal(toPublicOpportunity({...base,source_rfp_id:''}).summary,text);
+console.log('PASS notice recovery: short/full labels, exact placeholder removal, deadline precedence, privacy');

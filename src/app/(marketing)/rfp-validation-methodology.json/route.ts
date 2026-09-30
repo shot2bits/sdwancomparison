@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { BANK_VERSION, QUESTION_BANK, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import { getAllVendors } from "@/lib/vendors";
 import { RFP_VALIDATION_REVIEWED, RFP_VALIDATION_VERSION, validateRfpText } from "@/lib/workspace/rfp-validator";
@@ -31,7 +32,7 @@ export async function GET() {
       "Coverage assessment does not verify technical correctness, measurable targets, or readiness to issue an RFP.",
       "The validator does not invent unstated buyer requirements.",
       "Recommendations require buyer approval before inclusion.",
-      "Provider matching, downloads and structured responses unlock only after anonymous publication to the Netify Opportunity Board.",
+      SOURCING_DESCRIPTION,
     ],
     source_data: {
       question_bank: "https://netify.co.uk/sase/question-bank.json",

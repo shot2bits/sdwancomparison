@@ -1,0 +1,3 @@
+import {listPublicOutcomes} from '@/lib/market-outcomes';
+export const dynamic='force-dynamic';
+export async function GET(){try{return Response.json({contract_version:'market-record/2.0.0',records:await listPublicOutcomes(),publication_rules:['Buyer permission and redaction review required','Separate buyer permission for the exact version','Staff evidence and anonymity review required','Never publish private project IDs, participant names, emails, addresses, prices or proposal extracts','Declines and incomplete outcomes are included','Withdrawal removes the record from this feed and its public page']},{headers:{'Cache-Control':'no-store'}});}catch{return Response.json({error:'Market Record temporarily unavailable.'},{status:503,headers:{'Cache-Control':'no-store'}});}}

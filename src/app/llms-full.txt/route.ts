@@ -1,18 +1,18 @@
+import { publicProviderEvidence } from "@/lib/public-provider-evidence";
 import { BEST_PAGES } from "@/lib/best-pages";
-import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
-import { buildShortlist } from "@/lib/shortlist-core";
+import { getShortlistDataset } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
 import { datasetVerifiedIso } from "@/lib/dataset-date";
 
 /**
- * llms-full.txt: the complete ranked outputs as plain text for AI agents
+ * llms-full.txt: the complete provider evidence as plain text for AI agents
  * that prefer one fetch over crawling. Every ranking links its canonical
  * page so engines can cite the source URL.
  */
 export async function GET() {
   const vendors = getShortlistDataset();
   const sections: string[] = [
-    "# Netify SASE and SD-WAN rankings: full text version",
+    "# Netify SASE and SD-WAN provider evidence: full text version",
     "",
     `Source: ${SITE_URL} · Publisher: Netify Group Limited (netify.co.uk) · Updated ${datasetVerifiedIso()}`,
     "Methodology: 30 vendors graded on 40 capability features from public evidence (yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0); weighted scores per page criteria. Extended dimensions are indicative desk research; confirm via RFP.",
@@ -21,13 +21,13 @@ export async function GET() {
   ];
 
   for (const page of BEST_PAGES) {
-    const result = buildShortlist(vendors, page.input, FEATURE_NAMES);
+    const result = publicProviderEvidence(vendors, page.input);
     sections.push(`## ${page.title} (2026)`);
     sections.push(`Canonical: ${SITE_URL}/best/${page.slug}`);
     sections.push(result.criteria_summary);
     for (const v of result.shortlist) {
       sections.push(
-        `${v.rank}. ${v.name} (score ${v.score}). ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
+        `${v.name}: ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
       );
     }
     sections.push("");

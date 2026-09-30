@@ -1967,3 +1967,74 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 
 /* Keep input before the notice summary when the workspace stacks. */
 @media(max-width:1150px){.nf-buying-shell .lpos-builder>.nf-guided-main,.nf-buying-shell .lpos-builder>.nf-notice-preview,.nf-buying-shell .lpos-builder>.nf-guided-document{order:0!important}}
+
+/* Private drafts are useful before the buyer chooses to publish. */
+.nf-private-draft{border:1px solid #d8dfe0;border-radius:8px;padding:16px;margin:16px 0;background:#f8faf9;color:#243238;overflow-wrap:anywhere}
+.nf-private-draft p{font-size:14px;line-height:1.5;margin:6px 0 12px}
+.nf-private-draft>div{display:flex;flex-wrap:wrap;gap:10px}
+.nf-private-draft button{padding:10px 14px;border:1px solid #52616a;border-radius:5px;background:white;color:#243238;font-size:14px;min-height:44px;cursor:pointer}
+.nf-private-draft button:disabled{opacity:.5;cursor:default}
+.nf-private-draft button:focus-visible{outline:3px solid #197a77;outline-offset:3px}
+
+/* Marketplace-first entry, with private downloads remaining secondary. */
+.nf-buying-start nav button{min-height:44px;padding:10px 16px;border:1px solid #cbd5df;border-radius:6px;text-decoration:none;background:#fff}
+.nf-buying-start nav button:first-child{background:#263b48;color:#fff;border-color:#263b48}
+.nf-buying-start>p:first-child{font-weight:600}
+.nf-buying-shell .nf-format-options,.nf-buying-shell .nf-private-draft{grid-column:1/-1;margin:8px 0;background:transparent}
+.nf-format-options>summary,.nf-private-draft>summary{cursor:pointer;padding:12px 0;font-size:14px;min-height:44px;color:#344853}
+.nf-private-draft{padding:0;border:0;border-top:1px solid #e2e8f0;border-radius:0;background:transparent}
+.nf-private-draft>.nf-private-draft-content{display:block;padding:8px 0 16px}
+.nf-private-draft-content>div{display:flex;flex-wrap:wrap;gap:10px}
+.nf-notice-privacy{font-size:13px;line-height:1.6}
+.nf-format-options>summary:focus-visible,.nf-private-draft>summary:focus-visible{outline:2px solid #197a77;outline-offset:3px}
+@media(max-width:600px){.nf-buying-start nav{display:grid;grid-template-columns:minmax(0,1fr)}.nf-buying-start nav button{text-align:left}}
+
+/* Brief-first entry: the engine stays mounted to preserve facts and uploads. */
+.nf-brief-engine[hidden] { display:none!important; }
+.nf-inline-brief { max-width:1000px; margin:0 auto; }
+.nf-inline-brief > h1 { font-size:clamp(26px,3vw,38px); line-height:1.2; color:#203442; margin:24px 0; font-weight:650; }
+.nf-inline-brief .nf-brief-panel-body { padding:0; }
+.nf-inline-brief input,.nf-inline-brief select,.nf-inline-brief textarea { font-size:16px; }
+.nf-brief-progress { display:flex; gap:16px; list-style:none; padding:0; margin:0 0 26px; }
+.nf-brief-progress li { flex:1; display:flex; align-items:center; gap:8px; color:#64748b; font-size:14px; border-bottom:2px solid #e2e8f0; padding:12px 0; }
+.nf-brief-progress li[aria-current=step] { color:#203442; border-color:#203442; font-weight:650; }
+.nf-brief-progress li > span { flex:none; border:1px solid currentColor; border-radius:50%; width:25px; height:25px; display:grid; place-items:center; }
+.nf-notice-next ul { padding-left:20px; margin:10px 0; }
+.nf-notice-next li { margin:4px 0; }
+@media(max-width:600px) { .nf-brief-progress { gap:8px; }.nf-brief-progress li { align-items:flex-start; flex-direction:column; font-size:12px; } }
+
+.nf-buying-start nav button[aria-pressed=false] {background:#fff;color:#1c2c42;border-color:#cbd5df}
+.nf-buying-start nav button[aria-pressed=true] {background:#263b48;color:#fff;border-color:#263b48}
+
+.nf-buying-tool-grid .nf-buying-coming-soon { background:#f7f8fa; color:#536174; }
+.nf-buying-tool-grid .nf-buying-status { display:inline-block; border:1px solid #c9d2dc; border-radius:4px; padding:2px 7px; color:#34465a; font-weight:600; }
+.nf-buying-coming-soon p { margin:10px 0 0; font-size:12px; color:#536174; }
+
+/* Keep project publication prominent while retaining research and private downloads. */
+.nf-buying-start > h1 {font-size:clamp(26px,3vw,38px);line-height:1.2;color:#203442;margin:0 0 16px;font-weight:650;max-width:1000px}
+.nf-publication-benefits {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;list-style:none;padding:0;margin:20px 0}
+.nf-publication-benefits li {border-left:3px solid #bacfc5;padding:4px 12px;font-size:14px;line-height:1.5}
+.nf-publication-benefits strong,.nf-publication-benefits span {display:block}
+.nf-publication-benefits span {margin-top:6px;color:#475569}
+.nf-buying-more-navigation summary {cursor:pointer;font-size:14px;font-weight:600;color:#334155;padding:10px 0}
+.nf-buying-more-navigation nav {margin-top:10px}
+.nf-buying-shell[data-collapsed=true] .nf-buying-more-navigation summary {font-size:11px;overflow-wrap:anywhere}
+.nf-prepared-requirements,.nf-publication-outcomes,.nf-publication-verification {margin:22px 0;padding:20px;border:1px solid #d3dee2;border-radius:8px;background:#f8fafb;font-size:14px;line-height:1.6}
+.nf-prepared-requirements h3,.nf-publication-outcomes h3,.nf-publication-verification h3 {font-size:20px;font-weight:650;margin:0 0 10px;color:#203442}
+.nf-prepared-requirements dl > div {margin-top:14px}
+.nf-prepared-requirements dt,.nf-publication-outcomes h4 {font-weight:650}
+.nf-prepared-requirements dd {margin:4px 0 0}
+.nf-publication-outcomes ul:not(.nf-publication-benefits) {list-style:disc;padding-left:22px;margin-top:12px}
+.nf-publication-outcomes li {margin-bottom:10px}
+.nf-publication-outcomes a,.nf-brief-editor-link {text-decoration:underline;text-underline-offset:3px}
+.nf-brief-editor-link {background:none;border:0;color:#234e43;font-size:14px;padding:8px 0;cursor:pointer}
+.nf-matching-example {margin:20px 0;padding:14px;border:1px solid #cbd5df;border-radius:6px;background:#fff}
+.nf-matching-example summary {cursor:pointer;font-weight:650}
+.nf-matching-example p {margin:10px 0}
+.nf-matching-example-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.nf-matching-example article {padding:14px;background:#f8fafb;border-radius:6px}
+.nf-publication-verification > p {margin-bottom:14px}
+@media(max-width:700px){.nf-publication-benefits,.nf-matching-example-grid {grid-template-columns:minmax(0,1fr)}.nf-publication-benefits {gap:10px}.nf-prepared-requirements,.nf-publication-outcomes,.nf-publication-verification {padding:16px}}
+.nf-buying-start .nf-publication-benefits-compact {margin:14px 0}
+.nf-publication-benefits-compact li {padding:3px 10px}
+@media(max-width:700px){.nf-publication-benefits-compact {gap:5px}}

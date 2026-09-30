@@ -42,6 +42,9 @@ import {
   emailDomain,
 } from "@/lib/access-control";
 import type { AuthSession } from "@/lib/rfp-store";
+import { attentionItem, latestPublicationOutcomes, type PublicationOutcome } from "@/lib/buyer-recovery";
+import { activityClassification } from "@/lib/activity-provenance";
+import { publishedDeadline } from "@/lib/notice-presentation";
 
 export const runtime = "nodejs";
 export async function OPTIONS(req: Request) { return preflight(req); }
@@ -149,7 +152,8 @@ export async function GET(req: Request) {
     title: p.title,
     owner_email: p.owner_email || null,
     sector: p.buyer.sector,
-    response_deadline: p.response_deadline ?? null,
+    // Show the same published deadline as the notice; do not expose a private/default window as a published commitment.
+    response_deadline: publishedDeadline(opportunities.find(o => o.source_rfp_id === p.id) ?? {}),
     updated: p.updated,
     suppliers: (brokerConns[i] ?? []).map((c) => ({
       vendor_slug: c.vendor_slug,
@@ -166,7 +170,16 @@ export async function GET(req: Request) {
   // verification evidence, requirement depth and working state. Private to
   // this console; nothing here reaches any public surface.
   const titleById = new Map(projects.map((p) => [p.id, p.title]));
-  const publishLeadsRaw = (await kvGetJson<Array<Record<string, unknown>>>("publish:leads").catch(() => null)) ?? [];
+  const publishLeadsRaw = (await kvGetJson<Array<Record<string, unknown>>>("publish:leads")) ?? [];
+  const latestOutcomes = latestPublicationOutcomes(publishLeadsRaw as PublicationOutcome[]);
+  const reviewProjects = projects.filter(p => {
+    const email = p.owner_email || latestOutcomes.get(p.id)?.email || '';
+    return email && !isAdminEmail(email) && !/@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(email) && activityClassification(p) !== 'test';
+  });
+  const attention = (await Promise.all(reviewProjects.map(async p => {
+    const connections = p.status === 'published' ? await listConnections(p.id) : [];
+    return attentionItem(p, latestOutcomes.get(p.id), connections.length);
+  }))).filter(item => item !== null).sort((a,b) => a.at - b.at);
   const publish_leads = publishLeadsRaw
     .slice(-100)
     .reverse()
@@ -187,6 +200,7 @@ export async function GET(req: Request) {
   return Response.json(
     {
       ok: true,
+      generated_at: Date.now(),
       admin_email: auth.email,
       sessions: sessions.map((s) => ({ token: s.token, role: s.role, email: s.email, vendor_slug: s.vendor_slug, created: s.created, expires: s.expires })),
       users: signups.map((u) => ({
@@ -201,6 +215,7 @@ export async function GET(req: Request) {
       funnel,
       broker_queue,
       publish_leads,
+      attention,
       rfps,
       draft_link_leads: leads.slice(0, 50),
       buyer_allowlist: buyerAllowlist,
@@ -221,7 +236,7 @@ export async function GET(req: Request) {
         bid_count: o.feed.filter((f) => f.type === "pricing").length,
       })),
     },
-    { headers: cors },
+    { headers: { ...cors, "Cache-Control": "private, no-store" } },
   );
 }
 

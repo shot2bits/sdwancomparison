@@ -1,3 +1,4 @@
+import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 /**
  * Definitions for the statically generated listicle landing pages at
  * /best/[slug]. Each page is a server-rendered, citable ranked list
@@ -32,6 +33,7 @@ export type BestPage = {
    * one URL competes for the topic.
    */
   canonicalOverride?: string;
+  evidenceCopyReviewed?: boolean;
 };
 
 const YEAR = "2026";
@@ -123,7 +125,14 @@ const FLAGSHIP_PAGES: BestPage[] = [
 export const BEST_PAGES: BestPage[] = [
   ...FLAGSHIP_PAGES,
   sectorPage("healthcare", "healthcare", "Typical drivers include clinical application performance, site resilience for 24x7 care settings and patient data protection."),
-  sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
+  {
+    ...sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
+    // Financial services evidence page on the main site (Sep 2026): 28
+    // requirements, UK and North American regimes kept separate, regime
+    // filter and regulation map. This page stays its live ranking source and
+    // canonicalises there, as manufacturing and hybrid work do.
+    canonicalOverride: "https://netify.co.uk/sd-wan-sase-for-financial-services/",
+  },
   sectorPage("retail_ecommerce", "retail", "Typical drivers include rapid store rollout, PCI segmentation, cellular backup and centralised management at scale."),
   {
     ...sectorPage("manufacturing", "manufacturing", "Typical drivers include OT and IoT security, plant connectivity, global site coverage and MPLS migration."),
@@ -188,6 +197,20 @@ export const BEST_PAGES: BestPage[] = [
   intentPage("global_expansion", "global-expansion", "Typical needs include private backbones, regional breakout, data residency control and coverage into new markets."),
 ];
 
+const REVIEWED_SECTOR_INTROS: Record<string, string> = {
+  "sd-wan-sase-providers-for-healthcare": "Use this provider evidence to investigate healthcare connectivity and security requirements, including clinical application performance, resilience and patient-data protection. Inclusion does not confirm suitability for your project.",
+  "sd-wan-sase-providers-for-financial-services": "Explore published provider evidence for a financial-services project. Confirm each requirement, deployment scope and supplier claim against your own procurement needs; directory inclusion is not a recommendation or a compliance assurance. Typical drivers in this sector include protecting cardholder data for PCI-DSS, prioritising latency-sensitive traffic (such as trading feeds, SWIFT messaging and core banking ledgers), segmenting ATMs, branch tellers, corporate office traffic and remote wealth management devices, and connectivity to AWS, Azure or Google Cloud without adding policy fragmentation or backhaul delay.",
+  "sd-wan-sase-providers-for-retail": "Use this public provider evidence to investigate retail and e-commerce requirements. The current matching catalogue does not confirm retail/e-commerce suitability. Ask for evidence covering your store operations and online services before treating any provider as a match. Typical drivers in this sector include rapid store rollout, PCI DSS segmentation, cellular backup and centralised management across estates (that can run into hundreds or thousands of sites).",
+  "sd-wan-sase-providers-for-manufacturing": "Explore published provider evidence for manufacturing networks. Assess OT segmentation, plant connectivity, coverage and service ownership against your own requirements; inclusion does not confirm a provider’s suitability. Typical drivers in this sector include OT and IoT network segmentation, plant and factory floor connectivity, global site coverage across production and distribution facilities, and MPLS migration to SD-WAN."
+};
 export function getBestPage(slug: string): BestPage | undefined {
-  return BEST_PAGES.find((p) => p.slug === slug);
+  const base = BEST_PAGES.find((p) => p.slug === slug);
+  const intro = REVIEWED_SECTOR_INTROS[slug];
+  if (!base || !intro) return base;
+  return {...base, intro, evidenceCopyReviewed: true, metaDescription: intro,
+    faqs: [
+      {q: "Does inclusion confirm suitability for my project?", a: "No. This directory presents published provider evidence. Confirm product, sector, region and service scope against your own requirements. Missing evidence remains unconfirmed."},
+      {q: "How is the public directory ordered?", a: "Most proven capability items first, then the most recent verification date, then provider name; slug breaks identical names and missing dates come last. Only yes capability grades count. This is evidence order, not a personalised recommendation."},
+      SHORTLIST_FAQS[0]
+    ]};
 }
