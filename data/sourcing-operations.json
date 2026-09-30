@@ -1,12 +1,8 @@
 {
   "desk_email": "support@netify.com",
-  "overdue_working_hours": null,
-  "working_day_start_hour": null,
-  "working_day_end_hour": null,
+  "overdue_working_hours": 8,
+  "working_day_start_hour": 9,
+  "working_day_end_hour": 17,
   "time_zone": "Europe/London",
-  "owner_required": {
-    "overdue_working_hours": "[OWNER] Supply the overdue threshold in working hours.",
-    "working_day_start_hour": "[OWNER] Confirm the desk working-day start hour (0–23).",
-    "working_day_end_hour": "[OWNER] Confirm the desk working-day end hour (1–24)."
-  }
+  "owner_required": {}
 }
