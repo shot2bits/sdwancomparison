@@ -8,7 +8,7 @@ import {
   REGION_LABELS,
   STATUS_LABELS,
 } from "@/lib/shortlist-core";
-import type { SourcingBrief } from "@/lib/sourcing-contract";
+import { SourcingBriefSchema, type SourcingBrief } from "@/lib/sourcing-contract";
 type Action = "contacts" | "demo" | "proposals";
 const actions: Action[] = ["contacts", "demo", "proposals"];
 const actionLabels = {
@@ -44,6 +44,8 @@ export default function SourcingEntrance({
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
   const briefVersion = useRef(0);
+  const generatedBrief = useRef("");
+  const [planStale, setPlanStale] = useState(false);
   const requestAttempt = useRef<{ payload: string; key: string } | null>(null);
   const [matches, setMatches] = useState<string[] | null>(null),
     [matching, setMatching] = useState(false),
@@ -58,6 +60,7 @@ export default function SourcingEntrance({
     setMessage("");
     if (key !== "supplier_brief") {
       briefVersion.current++;
+      setPlanStale(true);
       setMatches(null);
       setMatchMessage(
         "Your requirements changed. Prepare the plan again to refresh evidence matching.",
@@ -78,16 +81,24 @@ export default function SourcingEntrance({
     setMessage("");
   }
   async function prepare() {
+    if (!SourcingBriefSchema.safeParse(brief).success) {
+      (document.getElementById("sourcing-brief") as HTMLFormElement | null)?.reportValidity();
+      setMessage("Check your sites, users and requirement before preparing the plan.");
+      return;
+    }
     const version = briefVersion.current;
     setPlan(true);
     setConsent(false);
     setMessage("");
     setMatching(true);
     setMatches(null);
-    change(
-      "supplier_brief",
-      `${brief.sites} sites; ${brief.remote_users} remote users; ${REGION_LABELS[brief.region]}; ${brief.sector ? SECTOR_LABELS[brief.sector] : "sector to discuss"}. Required service: ${brief.need}. Timing: ${brief.when}.`,
-    );
+    const summary = `${brief.sites} sites; ${brief.remote_users} remote users; ${REGION_LABELS[brief.region]}; ${brief.sector ? SECTOR_LABELS[brief.sector] : "sector to discuss"}. Required service: ${brief.need}. Timing: ${brief.when}.`;
+    // Preserve buyer edits; reapproval is required after every requirements change.
+    if (!brief.supplier_brief || brief.supplier_brief === generatedBrief.current) {
+      change("supplier_brief", summary);
+      generatedBrief.current = summary;
+    }
+    setPlanStale(false);
     requestAnimationFrame(() =>
       document
         .getElementById("sourcing-plan")
@@ -107,6 +118,7 @@ export default function SourcingEntrance({
         "Evidence matching uses the selected sector, region and service. Site counts, timing and pasted notes still need desk and supplier assessment. No suppliers are automatically approved.",
       );
     } catch {
+      if (version !== briefVersion.current) return;
       setMatchMessage(
         "Evidence matching is temporarily unavailable. Your brief remains available for Netify to review.",
       );
@@ -124,6 +136,10 @@ export default function SourcingEntrance({
       : "web";
   }
   async function submit() {
+    if (planStale) {
+      setMessage("Prepare the plan again, then review the supplier brief against your changed requirements.");
+      return;
+    }
     if (!consent) {
       setMessage("Approve the brief and selected requests before continuing.");
       return;
@@ -150,6 +166,7 @@ export default function SourcingEntrance({
         }),
       });
       const d = await r.json();
+      if (!r.ok && typeof d.error === "string" && d.error.startsWith("This request has expired")) requestAttempt.current = null;
       setMessage(
         r.ok
           ? "Check your work email. The confirmation opens this exact request for your approval. No supplier has been contacted."
@@ -165,7 +182,7 @@ export default function SourcingEntrance({
     }
   }
   return (
-    <>
+    <fieldset disabled={busy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       <form
         id="sourcing-brief"
         className="sourcing-form"
@@ -301,6 +318,7 @@ export default function SourcingEntrance({
           {brief.sites} sites · {brief.remote_users} remote users ·{" "}
           {REGION_LABELS[brief.region]} · {brief.when}
         </p>
+        {planStale && <p role="alert">Your requirements changed. Prepare the plan again before approving requests.</p>}
         <p role="status">
           {matching ? "Checking the evidence dataset…" : matchMessage}
         </p>
@@ -322,13 +340,14 @@ export default function SourcingEntrance({
           Anonymous supplier brief
           <textarea
             rows={5}
+            maxLength={12000}
             value={brief.supplier_brief}
             onChange={(e) => change("supplier_brief", e.target.value)}
           />
         </label>
         <p className="sourcing-small">
           Remove company names, addresses, personal information and identifying
-          text. Netify checks this again before sending.
+          text. Check this brief against your current requirements: your edits are preserved when you refresh the plan. Netify checks it again before sending.
         </p>
         <h3>Approved recipients and actions</h3>
         {Object.entries(selected).filter(([, a]) => a.length).length ? (
@@ -344,6 +363,7 @@ export default function SourcingEntrance({
                     onClick={() => {
                       setSelected((s) => ({ ...s, [slug]: [] }));
                       setConsent(false);
+                      setMessage("");
                     }}
                   >
                     Remove
@@ -379,6 +399,7 @@ export default function SourcingEntrance({
               onChange={(e) => {
                 setEmail(e.target.value);
                 setConsent(false);
+                setMessage("");
               }}
             />
           </label>
@@ -386,12 +407,13 @@ export default function SourcingEntrance({
             <input
               type="checkbox"
               checked={consent}
+              disabled={planStale || matching}
               onChange={(e) => setConsent(e.target.checked)}
             />
             I ask Netify to review this requirement and approve only the
             supplier requests listed above, using the anonymous brief shown.
           </label>
-          <button className="sourcing-primary" disabled={busy || !consent}>
+          <button className="sourcing-primary" disabled={busy || !consent || planStale || matching}>
             {busy ? "Preparing confirmation…" : "Email my confirmation link →"}
           </button>
           <p className="sourcing-small">
@@ -506,6 +528,6 @@ export default function SourcingEntrance({
           </div>
         </details>
       </section>
-    </>
+    </fieldset>
   );
 }

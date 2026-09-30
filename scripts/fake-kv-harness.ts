@@ -102,9 +102,11 @@ export class FakeKvStore {
         if(!e||e.type!=="zset"){e={type:"zset",value:new Map()};this.store.set(key,e)}
         const exists=e.value.has(String(args[2]));e.value.set(String(args[2]),Number(args[1]));return exists?0:1;
       }
+      case "ZREVRANGE":
       case "ZRANGE": {
         const e=this.store.get(String(args[0]));if(!e||e.type!=="zset")return [];
         const sorted=[...e.value].sort((a,b)=>a[1]-b[1]||a[0].localeCompare(b[0])).map(x=>x[0]);
+        if(op === "ZREVRANGE") sorted.reverse();
         const start=Number(args[1]),end=Number(args[2]);return sorted.slice(start,end===-1?undefined:end<0?sorted.length+end+1:end+1);
       }
       case "GET":
@@ -116,6 +118,12 @@ export class FakeKvStore {
         return "OK";
       }
       case "EVAL": {
+        if (String(args[0]).includes("sourcing-confirm-commit")) {
+          if (this.str(String(args[2])) !== String(args[5])) return 0;
+          this.command(["SET",String(args[3]),String(args[6])]);
+          this.command(["ZADD",String(args[4]),String(args[7]),String(args[8])]);
+          return 1;
+        }
         if(String(args[0]).includes('activity-append-once')){const key=String(args[2]);if(this.store.has(key))return 0;this.command(['LPUSH',String(args[3]),String(args[4])]);this.command(['SET',key,'1']);return 1;}
         if(String(args[0]).includes("redis.call('llen',KEYS[1])")){const key=String(args[2]);const rows=this.command(['LRANGE',key,0,-1]) as string[];if(rows.length!==Number(args[3]))return -1;this.command(['RPUSH',key,String(args[4])]);return rows.length+1;}
 

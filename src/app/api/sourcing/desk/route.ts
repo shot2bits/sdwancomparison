@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   return Response.json(
     {
       requests: records
-        .filter((r): r is SourcingRecord => !!r)
+        .filter((r): r is SourcingRecord => !!r && r.status === "desk_review")
         .map((r) => ({
           id: r.id,
           project_id: r.project_id,

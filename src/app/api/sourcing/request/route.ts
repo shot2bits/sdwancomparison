@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       {
         error:
           e instanceof Error &&
-          /^(Request delivery|Use a work email|Too many requests|We could not send|This request key|This request is already)/.test(
+          /^(Request delivery|Use a work email|Too many requests|We could not send|This request key|This request is already|This request has expired|Confirmation delivery)/.test(
             e.message,
           )
             ? e.message

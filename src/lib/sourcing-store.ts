@@ -7,7 +7,6 @@ import {
 import {
   kvRaw,
   kvGetJson,
-  kvSetJson,
   kvConfigured,
   saveProject,
   getProject,
@@ -33,14 +32,14 @@ export type SourcingRecord = {
   created_at: number;
   status: "pending_confirmation" | "desk_review";
   confirmed_at: number | null;
-  mail_sent: boolean;
+  mail_sent?: boolean; // Legacy records only; delivery receipt is stored separately.
 };
 export function assertRequestConfirmation(
   r: SourcingRecord,
   token: string,
   now = Date.now(),
 ) {
-  if (r.token_hash !== digest(token) || r.expires_at < now)
+  if (r.token_hash !== digest(token) || r.expires_at <= now)
     throw new Error("Confirmation expired or invalid. Request a new link.");
   if (r.payload_hash !== digest(JSON.stringify(r.request)))
     throw new Error(
@@ -82,7 +81,11 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
         "This request key was already used for different requirements.",
       );
     const saved = await kvGetJson<SourcingRecord>(`sourcing:request:${existing.id}`);
-    return { request_id: existing.id, status: saved?.status ?? "pending_confirmation" };
+    if (!saved || (saved.status === "pending_confirmation" && saved.expires_at <= Date.now()))
+      throw new Error("This request has expired. Prepare a new request for confirmation.");
+    if (saved.status === "pending_confirmation" && !saved.mail_sent && !(await kvGetJson(`sourcing:mail:${saved.id}`)))
+      throw new Error("Confirmation delivery is not yet confirmed. Check your email before preparing a new request.");
+    return { request_id: existing.id, status: saved.status };
   }
   await limit(`ip:${requestKey}`, 10);
   await limit(`email:${input.email}`, 3);
@@ -146,14 +149,8 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
     await kvRaw(["DEL", `sourcing:request:${record.id}`]);
     throw new Error("We could not send the confirmation. Please try again.");
   }
-  record.mail_sent = true;
-  await kvRaw([
-    "SET",
-    `sourcing:request:${record.id}`,
-    JSON.stringify(record),
-    "EX",
-    86400,
-  ]);
+  // Never rewrite a pending record after mail: a fast buyer may already have confirmed it.
+  await kvRaw(["SET", `sourcing:mail:${record.id}`, JSON.stringify({ accepted: true }), "EX", 86400]);
   return { request_id: record.id, status: "pending_confirmation" };
 }
 export async function readSourcingRequest(id: string, token: string) {
@@ -169,8 +166,11 @@ export async function confirmSourcingRequest(id: string, token: string) {
     throw new Error("Confirmation is already being processed.");
   try {
     const r = await readSourcingRequest(id, token);
-    if (r.status === "desk_review")
+    if (r.status === "desk_review") {
+      // Repair an interrupted queue write without recreating the project or changing credentials.
+      await kvRaw(["ZADD", "sourcing:desk-review", r.confirmed_at ?? r.created_at, id]);
       return { request_id: r.id, status: r.status };
+    }
     const b = r.request.brief;
     const entrance = shortlistEntrance({
       shortlist: ShortlistInputSchema.parse({
@@ -201,8 +201,14 @@ export async function confirmSourcingRequest(id: string, token: string) {
     if (!(await getProject(r.project_id))) await saveProject(project);
     r.status = "desk_review";
     r.confirmed_at = Date.now();
-    await kvSetJson(`sourcing:request:${id}`, r);
-    await kvRaw(["ZADD", "sourcing:desk-review", r.confirmed_at, id]);
+    // Commit confirmation and queue membership together, fenced by the lock owner.
+    const committed = await kvRaw([
+      "EVAL",
+      "-- sourcing-confirm-commit\nif redis.call('GET',KEYS[1])~=ARGV[1] then return 0 end redis.call('SET',KEYS[2],ARGV[2]) redis.call('ZADD',KEYS[3],ARGV[3],ARGV[4]) return 1",
+      3, lock, `sourcing:request:${id}`, "sourcing:desk-review", owner,
+      JSON.stringify(r), r.confirmed_at, id,
+    ]);
+    if (committed !== 1) throw new Error("Confirmation is already being processed. Please retry.");
     // No supplier mail here. Identity confirmation never bypasses desk review.
     return { request_id: id, status: "desk_review" };
   } finally {

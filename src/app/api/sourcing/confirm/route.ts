@@ -10,27 +10,35 @@ const Input = z
     confirm: z.boolean().default(false),
   })
   .strict();
+const privateHeaders = { "Cache-Control": "private, no-store" };
+function json(body: unknown, status = 200) {
+  return Response.json(body, { status, headers: privateHeaders });
+}
 export async function POST(req: Request) {
   if (
     req.headers.get("origin") &&
     req.headers.get("origin") !== new URL(req.url).origin
   )
-    return Response.json({ error: "Origin not allowed." }, { status: 403 });
+    return json({ error: "Origin not allowed." }, 403);
   try {
-    const input = Input.parse(await req.json());
+    if (Number(req.headers.get("content-length") || 0) > 2000)
+      return json({ error: "Confirmation too large." }, 413);
+    const raw = await req.text();
+    if (raw.length > 2000) return json({ error: "Confirmation too large." }, 413);
+    const input = Input.parse(JSON.parse(raw));
     if (input.confirm)
-      return Response.json(await confirmSourcingRequest(input.id, input.token));
+      return json(await confirmSourcingRequest(input.id, input.token));
     const r = await readSourcingRequest(input.id, input.token);
-    return Response.json({
+    return json({
       id: r.id,
       status: r.status,
       brief: r.request.brief.supplier_brief,
       recipients: r.request.recipients,
     });
   } catch {
-    return Response.json(
+    return json(
       { error: "This confirmation is invalid, expired or unavailable." },
-      { status: 403 },
+      403,
     );
   }
 }
