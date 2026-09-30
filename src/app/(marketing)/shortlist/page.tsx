@@ -1,3 +1,5 @@
+import {listPublicOutcomes} from "@/lib/market-outcomes";
+import MarketOutcomeView from "@/components/MarketOutcomeView";
 import type { Metadata } from "next";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import {
@@ -25,6 +27,7 @@ export default async function ShortlistPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const outcomes = await listPublicOutcomes().catch(() => null);
   const query = await searchParams;
   const live = await getLiveShortlistDataset();
   const vendors = publicEvidenceProviders(live.vendors);
@@ -142,30 +145,8 @@ export default async function ShortlistPage({
       </section>
       <section id="market-record">
         <h2>Market Record</h2>
-        <p>
-          Consented sourcing outcomes will be recorded here, including declines
-          and incomplete outcomes. No completed records have been published in
-          this release.
-        </p>
-        <div className="sourcing-table">
-          <table>
-            <caption>Consented Netify sourcing outcomes</caption>
-            <thead>
-              <tr>
-                {[
-                  "Sector / scale",
-                  "Scope",
-                  "Approached / responded / declined",
-                  "Days to proposals",
-                  "Outcome",
-                ].map((h) => (
-                  <th key={h}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody />
-          </table>
-        </div>
+        <p>Buyer-approved anonymous sourcing outcomes, including declines and incomplete outcomes.</p>
+        {outcomes === null ? <p>The Market Record is temporarily unavailable. Please try again later.</p> : outcomes.length === 0 ? <p>No approved outcome records have been published yet.</p> : outcomes.map(record => <div key={record.id}><MarketOutcomeView record={record}/><a href={`/sase/shortlist/outcomes/${record.id}/`}>Read this outcome</a></div>)}
         <a href="/sase/shortlist/market-record.json/">
           Read the record contract and feed
         </a>

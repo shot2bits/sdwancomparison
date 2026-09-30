@@ -1,38 +1,19 @@
+import {listPublicOutcomes} from "@/lib/market-outcomes";
+import MarketOutcomeView from "@/components/MarketOutcomeView";
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 export const metadata = {
   title: "Netify Market Record",
   description:
     "Consented sourcing outcomes, supplier responses and recorded delivery times.",
 };
-export default function Page() {
+export default async function Page() {
+  const records = await listPublicOutcomes().catch(() => null);
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
       <h1>Netify Market Record</h1>
-      <p className="mt-4">
-        Consented sourcing outcomes will appear here. No completed records have
-        been published in this release.
-      </p>
-      <div className="overflow-x-auto">
-        <table className="mt-8 w-full text-left">
-          <thead>
-            <tr>
-              {[
-                "Sector / scale",
-                "Scope",
-                "Providers approached",
-                "Responses / declines",
-                "Days to proposals",
-                "Outcome",
-              ].map((h) => (
-                <th key={h} className="p-3">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody />
-        </table>
-      </div>
+      <p className="mt-4">Buyer-approved anonymous sourcing outcomes, including declines and incomplete outcomes.</p>
+      {records === null ? <p>The Market Record is temporarily unavailable.</p> : records.length === 0 ? <p>No approved outcome records have been published yet.</p> : records.map(record => <div key={record.id}><MarketOutcomeView record={record}/><Link href={`/shortlist/outcomes/${record.id}/`}>Read this outcome</Link></div>)}
       <p className="mt-8">
         <Link href="/shortlist/">Ask Netify to prepare a sourcing plan →</Link>
       </p>

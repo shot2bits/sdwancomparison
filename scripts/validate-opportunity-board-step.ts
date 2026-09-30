@@ -47,7 +47,7 @@ check(
 // Action-first release deliberately replaces the public notice board with the
 // consented Market Record. Legacy publication and private record checks above remain.
 check("public board now presents the Market Record", board.includes("Netify Market Record") && !board.includes("<BoardList"));
-check("empty record does not invent completed sourcing", board.includes("No completed records have") && board.includes("been published in this release."));
+check("empty record does not invent completed sourcing", board.includes("No approved outcome records have been published yet.") && board.includes("records.length === 0") && board.includes("listPublicOutcomes"));
 check("existing private records are retained", board.includes("Records have not been deleted.") && board.includes('href="/shortlist/"'));
 const recordRoute=read("src/app/(marketing)/shortlist/market-record.json/route.ts");
 check("record export retains publication permission and privacy rules", recordRoute.includes("Buyer permission and redaction review required") && recordRoute.includes("Never publish private project IDs"));

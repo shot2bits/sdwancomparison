@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import MarketOutcomeWorkflow from "./MarketOutcomeWorkflow";
 import RfpBuilder from "./RfpBuilder";
 import CircuitPricing from "./procurement/CircuitPricing";
 import BidComparison from "./BidComparison";
@@ -87,7 +88,9 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
         >
           Written proposals
         </button>
+        {" · "}<button onClick={() => setView("outcome")} aria-pressed={view === "outcome"}>Anonymous outcome (optional)</button>
       </nav>
+      {view === "outcome" && <MarketOutcomeWorkflow key={id} id={id}/>}
       {error && <p role="alert">{error}</p>}
       <div hidden={view !== "rfp"}>
         <p>
