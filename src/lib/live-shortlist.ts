@@ -1,3 +1,4 @@
+import geographyReview from '../../data/provider-geography-review.json';
 import publicSnapshot from '@data/shortlist-public-snapshot.json';
 import { applyProjectionReview } from './provider-projection-review';
 import { comparisonSlugForGovernedProvider, shortlistExcerpt } from "@/lib/governed-provider-catalogue";
@@ -239,6 +240,8 @@ export async function getLiveShortlistDataset(): Promise<LiveShortlistDataset> {
     console.error("Live shortlist provider source unavailable, using the reviewed snapshot.", error);
     const normalize = (v: unknown): unknown => v === 'not_confirmed' ? 'unknown' : Array.isArray(v) ? v.map(normalize) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k,x])=>[k,normalize(x)])) : v;
     const snapshot = normalize(publicSnapshot.vendors) as ShortlistVendor[];
+    const regionReviews=new Map(Object.entries(geographyReview.providers).map(([slug,value])=>[comparisonSlugForGovernedProvider(slug),value]));
+    for(const vendor of snapshot){const regional=regionReviews.get(vendor.slug);if(regional){vendor.regions=Object.fromEntries(REGION_KEYS.map(key=>{const row=(regional.regions as Record<string,{support_state:string}>)[key];return [key,row?.support_state==='supported'?'yes':'unknown'];})) as ShortlistVendor['regions'];}vendor.uk_delivery='not_confirmed';vendor.uk_basis='UK contracting entity requires source confirmation.';delete vendor.independent_evidence_source_count;applyProjectionReview(vendor,{revision_id:'public-snapshot-2026-09-30',reviewed_at:vendor.last_verified,sectors:{}},base.find(v=>v.slug===vendor.slug)??vendor);}
     return { vendors: snapshot.length === base.length ? snapshot : base, source: "snapshot_fallback", providerContractVersion: "snapshot", datasetVersions: [], providerRevisions: [], loadedAt };
   }
 }

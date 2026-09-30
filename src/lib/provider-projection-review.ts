@@ -7,6 +7,7 @@ export type ReviewedProjection = {
   source_urls: string[];
   qualification: string;
   sectors?: Partial<ShortlistVendor["sectors"]>;
+  regions?: Partial<ShortlistVendor["regions"]>;
   uk_delivery?: ShortlistVendor["uk_delivery"];
   uk_basis?: string;
   deployment_speed?: ShortlistVendor["deployment_speed"];
@@ -14,11 +15,49 @@ export type ReviewedProjection = {
 };
 /** Only source-checked field resolutions belong here. Historic grades are kept in
  * projection provenance, never blindly promoted over newer governed records. */
+const reviewMeta = {
+  reviewed_at: "2026-09-30T00:00:00Z",
+  review_due: "2026-10-30T00:00:00Z",
+  reviewer: "Codex primary-source review; human release sign-off pending",
+};
 export const REVIEWED_PROVIDER_PROJECTIONS: Record<string, ReviewedProjection> =
-  {};
+  {
+    aryaka: {
+      ...reviewMeta,
+      sectors: { manufacturing: "yes" },
+      regions: { uk_ireland: "partial" },
+      source_urls: [
+        "https://www.aryaka.com/case-study/albemarle/",
+        "https://www.aryaka.com/solution-brief/regional-network/",
+        "https://www.aryaka.com/press/cloud-first-managed-sd-wan-and-sase-pioneer-aryaka-activates-eu-friendly-dublin-services-pop-to-address-growing-customer-demand/",
+      ],
+      qualification:
+        "Published manufacturing customer evidence for managed global WAN and last-mile services. Does not establish UK ten-site commercial fit or current supplier availability.",
+    },
+    cisco: {
+      ...reviewMeta,
+      sectors: { manufacturing: "yes", hospitality_leisure: "yes" },
+      regions: { uk_ireland: "partial" },
+      source_urls: [
+        "https://www.cisco.com/c/dam/en/us/products/security/secure-access/customer-highlight-peco-foods.pdf",
+        "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/mitchells-butlers.html",
+      ],
+      qualification:
+        "Peco Foods is identified as food manufacturing with a Cisco SASE deployment. Manufacturing evidence is US-based. The separate Mitchells and Butlers case documents UK hospitality SASE and Meraki SD-WAN. Regional coverage remains partial: it does not establish coverage of every UK/Ireland site or a contracting entity. Neither case certifies compliance or suitability for a particular estate.",
+    },
+    "bt-business": {
+      ...reviewMeta,
+      sectors: { financial_services: "yes" },
+      source_urls: [
+        "https://business.bt.com/insights/case-studies/financial-services-sd-wan/",
+      ],
+      qualification:
+        "BT documents managed Agile Connect SD-WAN and Fortinet Firewall for a global banking organisation. Does not verify DORA/PCI compliance or a manufacturing deployment.",
+    },
+  };
 export function applyProjectionReview(
   provider: ShortlistVendor,
-  record: ProviderMatchRecord,
+  record: Pick<ProviderMatchRecord, "revision_id" | "reviewed_at" | "sectors">,
   original: ShortlistVendor,
   review = REVIEWED_PROVIDER_PROJECTIONS[provider.slug],
   now = Date.now(),
@@ -47,7 +86,7 @@ export function applyProjectionReview(
         named_evidence: r.named_evidence ?? null,
         evidence_source_ids: r.evidence_source_ids ?? [],
       })),
-    resolution: review ? "reviewed_override" : "source_review_required",
+    resolution: "source_review_required",
   };
   if (
     !review ||
@@ -64,6 +103,9 @@ export function applyProjectionReview(
     return;
   for (const [sector, status] of Object.entries(review.sectors ?? {}))
     provider.sectors[sector as keyof typeof provider.sectors] =
+      status as CapabilityStatus;
+  for (const [region, status] of Object.entries(review.regions ?? {}))
+    provider.regions[region as keyof typeof provider.regions] =
       status as CapabilityStatus;
   if (review.uk_delivery && review.uk_basis) {
     provider.uk_delivery = review.uk_delivery;

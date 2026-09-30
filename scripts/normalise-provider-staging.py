@@ -42,6 +42,23 @@ def support(value):
     if "partial" in v: return "partially_supported"
     if any(x in v for x in ("native","available","supported","included","yes")): return "supported"
     return "unknown"
+def sector_support(value):
+    """Parse the stated sector assessment, never an incidental 'no' in its caveats.
+    These are import candidates: technical/editorial publication review still applies.
+    """
+    v=clean(value).lower().strip()
+    if re.match(r"^(unknown|not assessed|not primary|not_primary)\b",v): return "requires_confirmation"
+    if re.match(r"^(not supported|unsupported|not suitable)\b",v): return "not_supported"
+    if re.match(r"^(conditional|requires confirmation)\b",v): return "requires_confirmation"
+    if re.match(r"^(partially|partial)\b",v): return "partially_supported"
+    if re.match(r"^(strong fit|good fit)\b",v): return "supported"
+    if re.match(r"^(supported|yes)\b",v): return "supported"
+    return "requires_confirmation"
+def sector_case_strength(value):
+    # A nonempty narrative is not an evidence-strength assessment.
+    # Named, anonymised, adjacent-product and quote-only evidence need review.
+    v=clean(value).lower().strip()
+    return "none" if not v or re.match(r"^(none|no case study|not found)\b",v) else "unknown"
 def rows(table):
     headers=[key(x) for x in table["headers"]]
     return [dict(zip(headers,[cell["text"] for cell in row])) for row in table["rows"][1:]]
@@ -128,7 +145,7 @@ def normalise(profile):
         elif bucket=="service_models": base.update({"model":"other","support_state":support(row.get("supported","") or row.get("availability","") or row.get("how_it_works",""))})
         elif bucket=="compliance": base.update({"framework":first,"scope":clean(row.get("scope","")) or None,"support_state":support(row.get("status","")),"expiry_or_review_date":None})
         elif bucket=="integrations": base.update({"integration_name":first,"integration_type":clean(row.get("category","")) or "other","delivery_relationship":"api" if "api" in row.get("native_certified_api_partner","").lower() else "partner" if "partner" in row.get("native_certified_api_partner","").lower() else "native" if "native" in row.get("native_certified_api_partner","").lower() else "certified" if "certified" in row.get("native_certified_api_partner","").lower() else "unknown"})
-        elif bucket=="sector_evidence": base.update({"sector":first,"suitability_state":support(row.get("suitability","")),"named_evidence":clean(row.get("supporting_case_studies","")) or None,"case_study_strength":"strong" if row.get("supporting_case_studies") and "none" not in row.get("supporting_case_studies","").lower() else "none"})
+        elif bucket=="sector_evidence": base.update({"sector":first,"suitability_state":sector_support(row.get("suitability","")),"named_evidence":clean(row.get("supporting_case_studies","")) or None,"case_study_strength":sector_case_strength(row.get("supporting_case_studies",""))})
         elif bucket=="commercial": base.update({"pricing_state":"public" if "yes" in row.get("publicly_disclosed","").lower() else "not_publicly_disclosed","licensing_model":clean(row.get("finding","")) or None,"minimums":None,"caveats":clean(row.get("buyer_questions","")) or None,"restricted":False})
         elif bucket=="case_studies": base.update({"customer_type":clean(row.get("customer_anonymous","")) or None,"named_customer":None,"sector":clean(row.get("sector","")) or None,"geography":clean(row.get("country_region","")) or None,"estate":"; ".join(filter(None,[clean(row.get("users","")),clean(row.get("sites",""))])) or None,"outcome":clean(row.get("measured_outcomes","")) or None,"quantified_result":clean(row.get("measured_outcomes","")) or None})
         else: base.update({"evaluation_type":"summary","finding":" | ".join(values),"buyer_implication":clean(row.get("buyer_implication","") or row.get("buyer_impact","")) or None})

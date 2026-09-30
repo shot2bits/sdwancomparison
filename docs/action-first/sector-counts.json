@@ -1,0 +1,55 @@
+{
+  "source": "snapshot_fallback",
+  "rows": [
+    {
+      "sector": "healthcare",
+      "before": 0,
+      "after": 0
+    },
+    {
+      "sector": "financial_services",
+      "before": 0,
+      "after": 1
+    },
+    {
+      "sector": "retail_ecommerce",
+      "before": 0,
+      "after": 0
+    },
+    {
+      "sector": "manufacturing",
+      "before": 0,
+      "after": 2
+    },
+    {
+      "sector": "energy_utilities",
+      "before": 0,
+      "after": 0
+    },
+    {
+      "sector": "government_public_sector",
+      "before": 0,
+      "after": 0
+    },
+    {
+      "sector": "education",
+      "before": 0,
+      "after": 0
+    },
+    {
+      "sector": "transport_logistics",
+      "before": 1,
+      "after": 1
+    },
+    {
+      "sector": "professional_services",
+      "before": 0,
+      "after": 0
+    },
+    {
+      "sector": "hospitality_leisure",
+      "before": 0,
+      "after": 1
+    }
+  ]
+}
