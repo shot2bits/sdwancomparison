@@ -62,3 +62,9 @@ Generated docs/sector-adjudications-signoff-2026-09-30.md: 36 positive rows plus
 PASS sign-off: 19 provider records, 36 positive rows (27 yes/9 partial), 5 unconfirmed rows preserved; all values unchanged; pending and signed labels verified; Colt slug mapped
 ```
 TypeScript and action-first suite exit 0. [OWNER] all 19 sign-offs remain empty.
+
+## Step 7 — release branch and reconciliation PR
+
+Created release/2026-09-30 from c28fe0b. Vercel SASE Production → Branch Tracking updated and API readback confirms release/2026-09-30. Existing domains/production storage retained. No further pushes to codex/publication-first-comparison. Draft PR: https://github.com/shot2bits/sdwancomparison/pull/8 (75 release-line commits at creation). Main has three independent commits absent from this production line; PR conflicts are in docs/HANDOFF.md and package.json. They are not silently resolved by replacing main or importing unreviewed RFP changes. PR merge is not part of this production deployment.
+
+Final preview c28fe0b READY; public UK review audit has four sourced records; live Neon prepare_sourcing_plan returns all four with uk_provider_only true. TypeScript, action-first suite and full validation passed, and prior hosted confirmation/panel acceptance remains recorded above. Production deployment and apex verification follow below.
