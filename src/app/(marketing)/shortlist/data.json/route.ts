@@ -1,4 +1,6 @@
-import { SOURCING_DESCRIPTION, PUBLIC_SOURCING_TOOLS, COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
+import {publicResponsePanel} from '@/lib/response-panel';
+import {annotateResponsePanel,publicPanelMember} from '@/lib/response-panel-contract';
+import { SOURCING_TARGET, SOURCING_DESCRIPTION, PUBLIC_SOURCING_TOOLS, COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
 import { publicEvidenceProviders, publicEvidenceOutput, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
 import { UK_BUYING_SITUATIONS, PROVIDER_ROLE_GUIDE } from "@/lib/uk-shortlist";
 import { FEATURES } from "@/lib/vendors";
@@ -15,7 +17,8 @@ import { buildShortlistMarketView, SHORTLIST_VIEW_CONTRACT_VERSION, SHORTLIST_VI
  */
 export async function GET(request: Request) {
   const live = await getLiveShortlistDataset();
-  const vendors = publicEvidenceProviders(live.vendors);
+  const panel=await publicResponsePanel();
+  const vendors = annotateResponsePanel(publicEvidenceProviders(live.vendors),panel);
   const lastModified = vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
 
   const generatedAt = new Date().toISOString();
@@ -65,7 +68,7 @@ export async function GET(request: Request) {
         url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${view}/`,
         providers: buildShortlistMarketView(vendors, view),
       }])),
-      service: {description:SOURCING_DESCRIPTION,commission:COMMISSION_DESCRIPTION, response_target:null, response_panel:[], research_requires_identity:false, supplier_disclosure_requires_recipient_consent:true},
+      service: {description:SOURCING_DESCRIPTION,commission:COMMISSION_DESCRIPTION, response_target:SOURCING_TARGET, response_panel:panel.map(publicPanelMember), research_requires_identity:false, supplier_disclosure_requires_recipient_consent:true},
       market_record:`${SITE_URL}/shortlist/market-record.json/`,
       interactiveSurfaces: [{id:'sourcing',kind:'sourcing-service',url:`${SITE_URL}/shortlist/`,description:SOURCING_DESCRIPTION}, {id:'mcp-server',kind:'mcp',url:`${SITE_URL}/api/mcp/`,tools:PUBLIC_SOURCING_TOOLS,description:'Open research and request-specific sourcing actions. No account or publication prerequisite. Supplier disclosure requires confirmed buyer identity and recipient consent.'}],
       distributions: {

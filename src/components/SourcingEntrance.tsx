@@ -1,5 +1,6 @@
 "use client";
-import { useRef, useState } from "react";
+import type {PublicPanelMember} from "@/lib/response-panel-contract";
+import React, { useRef, useState } from "react";
 import type { ShortlistVendor } from "@/lib/shortlist-core";
 import {
   SECTOR_KEYS,
@@ -21,7 +22,7 @@ export default function SourcingEntrance({
   initialSector,
   features,
 }: {
-  vendors: ShortlistVendor[];
+  vendors: (ShortlistVendor & {response_panel?:PublicPanelMember|null})[];
   initialSector?: string;
   features: { id: string; name: string }[];
 }) {
@@ -444,7 +445,7 @@ export default function SourcingEntrance({
             <article key={v.slug}>
               <div className="sourcing-card-top">
                 <h3>{v.name}</h3>
-                <span>Research only</span>
+                <span>{v.response_panel?"Response panel":"Research only"}</span>
               </div>
               <p>{v.category}</p>
               {matches?.includes(v.slug) && (
@@ -465,6 +466,7 @@ export default function SourcingEntrance({
               <a href={v.marketplace_url || `/sase/vendors/${v.slug}/`}>
                 Datasheet and evidence ↗
               </a>
+              {v.response_panel&&<p className="sourcing-small">Approved actions routed by Netify to {v.response_panel.contact_name}, {v.response_panel.contact_role} ({v.response_panel.contact_email_domain}). Agreed response: {v.response_panel.agreed_response_working_days} working days.</p>}
               <div className="sourcing-actions">
                 {actions.map((action) => (
                   <label key={action} className="sourcing-check">

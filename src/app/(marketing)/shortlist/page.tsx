@@ -1,3 +1,5 @@
+import {publicResponsePanel} from '@/lib/response-panel';
+import {annotateResponsePanel} from '@/lib/response-panel-contract';
 import {listPublicOutcomes} from "@/lib/market-outcomes";
 import MarketOutcomeView from "@/components/MarketOutcomeView";
 import type { Metadata } from "next";
@@ -31,7 +33,7 @@ export default async function ShortlistPage({
   const outcomes = await listPublicOutcomes().catch(() => null);
   const query = await searchParams;
   const live = await getLiveShortlistDataset();
-  const vendors = publicEvidenceProviders(live.vendors);
+  const vendors = annotateResponsePanel(publicEvidenceProviders(live.vendors),await publicResponsePanel());
   const schemas = [
     getOrganizationSchema(),
     sourcingServiceSchema(`${SITE_URL}/shortlist/`),

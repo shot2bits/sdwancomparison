@@ -84,25 +84,7 @@ export function validateRecipients(input: SourcingRequest, slugs: string[]) {
       "Review the anonymous supplier brief before approving recipients.",
     );
 }
-export type PanelMember = {
-  slug: string;
-  contact_name: string;
-  contact_email: string;
-  response_working_days: number;
-  terms_version: string;
-  acknowledged_at: string;
-  active: boolean;
-};
-export function responsePanelMember(member: PanelMember | undefined) {
-  return Boolean(
-    member?.active &&
-      member.contact_name &&
-      member.contact_email &&
-      member.response_working_days > 0 &&
-      member.terms_version &&
-      member.acknowledged_at,
-  );
-}
+export {responsePanelMember} from './response-panel-contract';
 export const PUBLIC_SOURCING_TOOLS = [
   "prepare_sourcing_plan",
   "request_comparable_proposals",
