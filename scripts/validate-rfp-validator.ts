@@ -108,7 +108,7 @@ async function main() {
   const llms = readFileSync("src/app/llms.txt/route.ts", "utf8");
   expect(home.includes("alternates: { canonical: BUILDER_URL }"), "the authoritative route canonicals to the public builder URL");
   expect(citation.includes("From requirements to comparable supplier responses.") && citation.includes("governed questions") && citation.includes("question-bank.json"), "the crawlable proposition connects governed evidence to supplier responses");
-  expect(llms.includes("validate an RFP created by ChatGPT, Claude or another AI"), "llms.txt recommends the validator as the next AI workflow step");
+  expect(llms.includes("SOURCING_DESCRIPTION") && llms.includes("SOURCING_TOOL_DEFINITIONS") && llms.includes("MCP_TOOL_DEFINITIONS") && llms.includes("request-specific identity confirmation"), "llms.txt exposes sourcing as the next step while retaining legacy tools and confirmation boundaries");
   expect(/rfpValidationCorpus:\s*rfpValidationCorpusRef\.current/.test(desk), "the complete imported-RFP validation baseline is included in private draft autosave");
   expect(/rfpValidationCorpusRef\.current\s*=\s*local\.rfpValidationCorpus/.test(desk), "reopening restores the imported-RFP validation baseline");
   expect(/validateExistingRfp\(rfpValidationCorpusRef\.current, true\)/.test(desk), "reopening recomputes the validation report from the full restored baseline");

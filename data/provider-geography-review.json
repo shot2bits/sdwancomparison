@@ -1,0 +1,1010 @@
+{
+  "captured_at": "2026-09-30T12:55:25.432Z",
+  "providers": {
+    "aryaka": {
+      "revision_id": "revision:be96a103e360c6122afebb8d",
+      "reviewed_at": "2026-09-01T20:14:49.266Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/aryaka/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed at a specific level - a dedicated Singapore office coordinates APAC operations, reinforced by the confirmed China and 'southeast Asia' case-study evidence above | Direct | Singapore (regional hub), China, Southeast Asia (specific sites confirmed via case studies) | Full regional PoP breakdown not itemised beyond the confirmed specific-country evidence | Medium-High | Genuinely well-evidenced for this region specifically, via both a confirmed regional office and specific, named customer deployment evidence.",
+          "evidence_source_ids": [
+            "evidence:aryaka:24"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed via specific, named customer evidence - a customer's network 'reliability in China' was specifically improved, and a separate case study benchmarked Aryaka's core network 'across physical sites in China, southeast Asia and the U.S.' | Direct | China (specific sites confirmed via customer case studies) | No formal, itemised regional PoP map found beyond the general 40+-PoP global figure | Medium-High | Real, specific, named-case-study evidence for China coverage specifically - stronger evidence than a generic global-coverage claim alone.",
+          "evidence_source_ids": [
+            "evidence:aryaka:22",
+            "evidence:aryaka:24"
+          ]
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "att": {
+      "revision_id": "revision:64f133e38f967549cea8daf5",
+      "reviewed_at": "2026-09-01T20:14:53.262Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/att/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "north_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned network) | United States, comprehensively, reinforced by the confirmed, active Lumen Mass Markets fiber-footprint integration | None identified | High | Genuinely the strongest-evidenced coverage finding in this entire profile - AT&T's confirmed, extensive, actively-expanding US carrier network gives it a structural, national-scale advantage consistent with its core market focus.",
+          "evidence_source_ids": [
+            "evidence:att:12"
+          ]
+        }
+      }
+    },
+    "barracuda-secureedge": {
+      "revision_id": "revision:74eb1c1b2bff395216330596",
+      "reviewed_at": "2026-09-01T20:14:56.747Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/barracuda-secureedge/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific, country-level evidence found in this pass, beyond the general confirmed reliance on Microsoft's global network footprint | Unknown | Not specified | No formal regional PoP map found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap for country-level specificity, though Microsoft's own well-known, extensive Asia-Pacific presence implies real underlying capability.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "bt": {
+      "revision_id": "revision:59b8c21f282ae65477c1c3f8",
+      "reviewed_at": "2026-09-01T18:50:29.009Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/bt/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised for the SASE service specifically in sources reviewed | Unknown | Not specified | No named data centres found for the SASE service specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SASE/SD-WAN service specifically in sources reviewed, though BT Group's own, much larger, established global telecommunications business is highly likely to have some form of China-relevant presence at the parent-company level, not confirmed as unified with the SASE service specifically in this pass | Unknown at the SASE-service-specific level | Not specified for the SASE service specifically | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap for the SASE service specifically, though BT Group's own broader global telecommunications footprint makes some form of parent-company-level China presence plausible.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found for the SASE service specifically in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "uk_ireland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned, via Openreach) | United Kingdom, comprehensively | None identified | High | Genuinely the strongest-evidenced coverage finding in this entire profile - BT's confirmed ownership of Openreach, the UK's dominant last-mile access network, gives it a structural UK-coverage advantage no platform-only SASE vendor can replicate.",
+          "evidence_source_ids": [
+            "evidence:bt:8",
+            "evidence:bt:12"
+          ]
+        }
+      }
+    },
+    "cato-networks": {
+      "revision_id": "revision:0b8c3f42d28c71efefe6ed68",
+      "reviewed_at": "2026-09-01T20:15:00.082Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/cato-networks/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed. | Unknown | Not specified | No named PoPs found | Not found | Low | Same evidence gap as above.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Partially evidenced - China (see above); broader APAC PoP list not found in sources reviewed. Sacra research (2026) notes new PoPs added in Kazakhstan (Central Asia) and Chennai (India, IP ranges) as part of ongoing expansion. | Direct | China; expansion signals in Central Asia and India | Full APAC PoP map not found | Medium | Cato appears to be actively filling APAC gaps rather than having complete coverage already - useful context for buyers with APAC-heavy estates to ask about their specific countries directly.",
+          "evidence_source_ids": [
+            "evidence:cato-networks:8"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Explicitly documented - licensed PoPs in Beijing, Shanghai and Shenzhen, plus a stated government-approved link to Hong Kong. | Direct (licensed in-country presence) | China (3 named cities) + Hong Kong link | Extent of coverage beyond these 3 cities, and details of the regulatory licensing arrangement, not further detailed in sources reviewed | High | This is a genuinely differentiated claim - many SASE/SSE vendors treat China as partner-only or unsupported; Cato's direct licensed PoPs are worth verifying further as a specific buyer-relevant differentiator for multinational China-inclusive estates.",
+          "evidence_source_ids": [
+            "evidence:cato-networks:7"
+          ]
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed, though general global marketing implies presence. | Unknown | Not specified | No named PoPs found | Not found | Low | Same evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "checkpoint": {
+      "revision_id": "revision:745e1446fdf98dad45f0b532",
+      "reviewed_at": "2026-09-01T20:15:03.662Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/checkpoint/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific, country-level evidence found in this pass, beyond the general 100+-PoP global figure | Unknown | Not specified | No formal regional PoP map found beyond the general global-coverage claim | Not found in a Tier 1-2 source in this pass | Low-Medium | Evidence gap for country-level specificity.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "cisco": {
+      "revision_id": "revision:3e7b3c72170a8c6cadaf8368",
+      "reviewed_at": "2026-09-01T20:15:06.968Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/cisco/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap, consistent across all five vendors' profiles for this region.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found, in contrast to Cato's explicit Beijing/Shanghai/Shenzhen PoPs; Cisco's own general corporate materials do reference operating in China as a market, but not specific to Secure Access infrastructure | Not found in a Tier 1-2 source in this pass | Low | Same evidence gap flagged for Zscaler, Netskope and Palo Alto - do not assume parity with Cato's specific China story.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | A genuine gap - weaker than the partial evidence found for Palo Alto (via Grupo Bimbo's Colombian operation).",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "cloudflare-one": {
+      "revision_id": "revision:d0cb15272c6bd7b3354bcf26",
+      "reviewed_at": "2026-09-01T20:15:10.219Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/cloudflare-one/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed with country-level specificity | Unknown | Not specified | Same as above | Not found in a Tier 1-2 source in this pass | Low | Same treatment as Middle East coverage above.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed at a general level - Cloudflare maintains an office in Singapore, and pursued IRAP PROTECTED assessment specifically for Australia (announced February 2025), implying genuine regional investment beyond the general global PoP figure | Direct | Singapore office confirmed; Australia-specific government-security assessment confirmed as pursued | Full regional PoP breakdown not itemised | Medium | Real, specific, dated evidence for this region - stronger than the generic global-PoP-count claim alone.",
+          "evidence_source_ids": [
+            "evidence:cloudflare-one:26"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific, country-level evidence found in this pass | Unknown | Not specified | Same as above | Not found in a Tier 1-2 source in this pass | Low | Same treatment as Middle East coverage above.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "colt": {
+      "revision_id": "revision:a584a69d43415d71a6eb57d0",
+      "reviewed_at": "2026-09-01T20:15:13.456Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/colt/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Not independently confirmed with specific detail in sources reviewed, despite the confirmed 2022 acquisition being described as covering 'Europe, Middle East and Africa' | Direct, per the confirmed EMEA acquisition scope | Confirmed as part of the acquired EMEA business generally, without independently-itemised Africa-specific detail | Specific, itemised Africa coverage detail not independently found in this pass | Not found at this specificity in a Tier 1-2 source in this pass | Low-Medium | A reasonable, though not independently itemised, inference from the confirmed EMEA-scope 2022 acquisition; specific Africa detail wasn't independently confirmed.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Good fit, evidenced via real, verbatim customer testimony specifically naming this region | Direct/partner, per real customer testimony | Asia-Pacific, confirmed directly by real customer testimony as a supplier region alongside Europe | Specific, itemised country-level detail within Asia-Pacific not independently confirmed | Medium-High | A specific, real, independently-hosted customer-testimony confirmation of Asia-Pacific supplier status - genuinely credible evidence, though country-level granularity within the region wasn't independently itemised.",
+          "evidence_source_ids": [
+            "evidence:colt:7"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "europe": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned Colt IQ Network, materially reinforced by the confirmed 2022 Lumen EMEA acquisition) | Europe, comprehensively, reinforced by real customer testimony confirming Colt as 'the main supplier for WAN in Europe and Asia Pacific regions' | None identified | High | Genuinely the strongest-evidenced coverage finding in this entire profile - Colt's confirmed, substantial, historically-established European network, materially reinforced by a real, dated, major acquisition, is corroborated directly by real, independent customer testimony.",
+          "evidence_source_ids": [
+            "evidence:colt:7"
+          ]
+        }
+      }
+    },
+    "comcastbusiness": {
+      "revision_id": "revision:eb912a1b099feb573967e73d",
+      "reviewed_at": "2026-09-01T20:15:17.005Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/comcastbusiness/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Not independently confirmed with specific detail in sources reviewed, for the same reasons noted in the Middle East coverage row above | Unknown at this specificity | Not specified | No named, current Africa-specific presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap for current, specific regional detail - see the Middle East coverage row above for the same underlying dated-figure caveat.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Not independently confirmed with specific detail in sources reviewed, for the same reasons noted above | Unknown at this specificity | Not specified | No named, current Latin America-specific presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap for current, specific regional detail.",
+          "evidence_source_ids": []
+        },
+        "north_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (Comcast's own substantial, confirmed underlying network infrastructure) | United States, comprehensively, reinforced by an extensive, sustained, US-specific analyst-recognition record (Vertical Systems Group's U.S. Carrier Managed SD-WAN Services leaderboard specifically) | None identified | business.comcast.com/about-us/press-releases/2026/cb-strengthens-ent-networking-leadership-top-industry-rankings-across-sd-wan-sase-managed-services | High | Genuinely the strongest-evidenced coverage finding in this entire profile - a specifically-named, dated, US-focused #1 industry ranking (Vertical Systems Group) directly confirms genuine, sustained US market strength.",
+          "evidence_source_ids": [
+            "evidence:comcastbusiness:3"
+          ]
+        }
+      }
+    },
+    "ericsson-cradlepoint": {
+      "revision_id": "revision:6810d536693038af740ed4a9",
+      "reviewed_at": "2026-09-01T20:15:20.451Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/ericsson-cradlepoint/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed at a general level via a named Australian market office, reinforced by Ericsson's own well-established, extensive global telecommunications-infrastructure presence at the parent-company level | Direct (Australia market office confirmed) | Australia confirmed directly; broader Asia-Pacific coverage not itemised with specific detail | Full regional breakdown not itemised beyond the confirmed Australia office | Medium | A real, specific, named regional office confirmation (Australia); broader Asia-Pacific country-level detail wasn't independently itemised in this pass.",
+          "evidence_source_ids": [
+            "evidence:ericsson-cradlepoint:7"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "expereo": {
+      "revision_id": "revision:42ce68f10f362e6b0e6440bf",
+      "reviewed_at": "2026-09-01T20:15:23.742Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/expereo/",
+      "regions": {
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Good fit, evidenced directly via a real, named customer example - Kingspan Insulation's confirmed 90 sites span 28 countries including Asia-Pacific markets, per the confirmed manufacturing-facility framing | Aggregated (via confirmed partner network) | Asia-Pacific, confirmed directly via real customer deployment evidence | Specific, itemised country-level detail within Asia-Pacific not independently confirmed | 01net.it/kingspan-insulation-chooses-expereo-to-unify-connectivity-and-accelerate-growth-across-90-global-sites/ | Medium-High | A specific, real, customer-deployment-evidenced confirmation of genuinely broad, multi-continent reach - genuinely concrete evidence, even without country-by-country itemisation.",
+          "evidence_source_ids": [
+            "evidence:expereo:17"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Not independently confirmed with China-specific detail in sources reviewed, though implied generally via the confirmed 190-plus-country reach | Unknown at this specificity | Not itemised specifically | No named China-specific presence confirmed for the SASE service specifically | Not found at this specificity in a Tier 1-2 source in this pass | Low-Medium | A reasonable, general inference from the confirmed broad country reach; China-specific detail (a market with particular connectivity complexity) wasn't independently itemised.",
+          "evidence_source_ids": []
+        },
+        "europe": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely well-evidenced | Direct (Expereo's own Amsterdam headquarters) and aggregated (via confirmed partner network) | Europe, comprehensively, reinforced by Expereo's own confirmed European headquarters and origin | None identified | mergr.com/company/expereo-international-bv | High | Genuinely well-evidenced via Expereo's own confirmed European origin and headquarters, reinforced by real, multi-country European customer deployment evidence.",
+          "evidence_source_ids": [
+            "evidence:expereo:11"
+          ]
+        },
+        "north_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Good fit, evidenced generally via the confirmed 60% Fortune 500 claim, which by definition implies substantial US enterprise-market penetration | Aggregated (via confirmed partner network) | United States, implied via the confirmed Fortune 500 claim | Specific, itemised North America coverage detail not independently confirmed beyond the general Fortune 500 claim | expereo.com/resources/brochures/sd-wan | Medium-High | A specific, quantified, repeatedly-confirmed claim (60% of Fortune 500) strongly implies substantial North American reach, even without separately-itemised, region-specific coverage detail.",
+          "evidence_source_ids": [
+            "evidence:expereo:5"
+          ]
+        }
+      }
+    },
+    "forcepoint": {
+      "revision_id": "revision:e03c3fdaf8448bdd3558a0fd",
+      "reviewed_at": "2026-09-01T20:15:27.208Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/forcepoint/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass, beyond the general '12,000+ customers across 150 countries' claim, which implies broad global reach without itemising this region specifically | Unknown | Not specified | No formal regional coverage detail found | Low | The general global-customer-count claim is real but doesn't substitute for region-specific coverage detail - worth a direct follow-up.",
+          "evidence_source_ids": [
+            "evidence:forcepoint:40"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "fortinet-fortisase": {
+      "revision_id": "revision:ed65a89afeb5f9b44f4405ca",
+      "reviewed_at": "2026-09-01T20:15:30.599Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/fortinet-fortisase/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Partially evidenced via the confirmed China-specific ordering process; broader APAC coverage detail (Japan, Australia, Southeast Asia by name) not found in this pass | Partner (China specifically); unknown elsewhere in the region | China confirmed; other APAC countries not itemised | No formal regional PoP map found beyond the China-specific process | Low-Medium | The China-specific finding is a genuine, useful data point; broader APAC coverage remains an open question worth closing directly.",
+          "evidence_source_ids": [
+            "evidence:fortinet-fortisase:23"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed as a distinct, separately-ordered service - 'FortiSASE China must be ordered separately via an authorised SASE partner in China', per Fortinet's own ordering guide | Partner (authorised in-country SASE partner) | China, via a named partner-delivery model | The specific partner(s) and licensing arrangement weren't detailed in this pass | High | A specific, primary-sourced, unusually precise piece of evidence - Fortinet's own ordering documentation explicitly separates the China ordering process, which is genuinely useful for a multinational buyer to know upfront.",
+          "evidence_source_ids": [
+            "evidence:fortinet-fortisase:23"
+          ]
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "gtt": {
+      "revision_id": "revision:42a49360534e96d4228b2a27",
+      "reviewed_at": "2026-09-01T20:15:33.929Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/gtt/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Native, confirmed directly and with genuine specificity via the same named Radisson deployment - Africa named explicitly alongside the Middle East | Direct/partner, per the confirmed real deployment | Africa, confirmed directly | None identified | High | Same specific, direct, real-deployment-evidenced confirmation as the Middle East row above - genuinely concrete evidence.",
+          "evidence_source_ids": [
+            "evidence:gtt:16"
+          ]
+        },
+        "asia_pacific": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Native, confirmed directly and with genuine specificity via the same named Radisson deployment - Asia-Pacific named explicitly as the first-listed region | Direct/partner, per the confirmed real deployment | Asia-Pacific, confirmed directly | None identified | High | Same specific, direct, real-deployment-evidenced confirmation - genuinely concrete evidence for this region specifically.",
+          "evidence_source_ids": [
+            "evidence:gtt:16"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "europe": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned Tier 1 network, reinforced by the confirmed Interoute acquisition substantially expanding European fibre) | Europe, comprehensively | None identified | High | Genuinely the strongest-evidenced coverage finding in this entire profile - GTT's confirmed, substantial European fibre-network investment (via the Interoute acquisition), reinforced by confirmed top-tier customer satisfaction ratings across multiple named European markets specifically (Germany, UK, Ireland, Belgium, Luxembourg, Switzerland).",
+          "evidence_source_ids": [
+            "evidence:gtt:2",
+            "evidence:gtt:13"
+          ]
+        }
+      }
+    },
+    "hpe-aruba-edgeconnect": {
+      "revision_id": "revision:40513952c953a0dcc2253c38",
+      "reviewed_at": "2026-09-01T20:15:37.451Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/hpe-aruba-edgeconnect/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Partially evidenced via HPE's own marketplace positioning - 'HPE Aruba delivers support across hybrid WAN architectures' including 'Europe, the Middle East, Africa, and Asia-Pacific Countries' generally, without country-level specificity | Direct | General regional presence claimed, not itemised by specific country | No formal regional PoP map found beyond the general regional-presence claim | Low-Medium | A general, credible regional-presence claim exists, though it doesn't substitute for a specific, itemised country-by-country coverage map.",
+          "evidence_source_ids": [
+            "evidence:hpe-aruba-edgeconnect:35"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "juniper": {
+      "revision_id": "revision:6302afddee37a3625fa05be4",
+      "reviewed_at": "2026-09-01T20:18:52.652Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/juniper/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed at a general level via Juniper's own historical SEC filings describing sales across 'more than 150 countries' in three regions including Asia-Pacific, reinforced by the specific, confirmed China deployment above | Direct | 150+ countries generally claimed (historical, company-wide); China specifically confirmed via a named customer deployment | The 150+-country figure is company-wide (all Juniper products), not confirmed as SASE/SD-WAN-specific | Medium | A real, general, primary-sourced global-reach claim reinforced by specific China evidence; the general figure describes Juniper's company-wide footprint rather than confirmed SASE-specific regional coverage.",
+          "evidence_source_ids": [
+            "evidence:juniper:3"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Native, and genuinely well-evidenced with specific, technical detail - Session Smart SD-WAN is confirmed China Cybersecurity Law (CSL) compliant, deployed in Alibaba Cloud data centres specifically for mainland China connectivity | Direct (via named MSP partner ambiFOX) | Mainland China, via Alibaba Cloud data centres specifically | None identified | High | Genuinely one of the strongest, most specifically-evidenced China-coverage findings in this profile - a named, technically detailed deployment with a specific, confirmed regulatory-compliance claim (CSL).",
+          "evidence_source_ids": [
+            "evidence:juniper:25"
+          ]
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "lumen": {
+      "revision_id": "revision:6d66149079a3a4ab68cf17eb",
+      "reviewed_at": "2026-09-01T20:19:22.385Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/lumen/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found for the SD-WAN/SASE service specifically in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "north_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned network) | United States, comprehensively, reinforced by Lumen's own confirmed, deliberately-retained enterprise fibre backbone | None identified | High | Genuinely the strongest-evidenced coverage finding in this entire profile - Lumen's own primary materials directly confirm this national fibre backbone was specifically retained to support its enterprise, US-anchored strategy.",
+          "evidence_source_ids": [
+            "evidence:lumen:12"
+          ]
+        }
+      }
+    },
+    "netskope": {
+      "revision_id": "revision:922007c7966bdb60d5b68da6",
+      "reviewed_at": "2026-09-01T20:19:26.120Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/netskope/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap, consistent across all three vendors' profiles for this region.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown in named-country detail - the general '67 regions' claim implies broad presence but no specific APAC country/city list was found in this pass | Unknown | Not specified in detail | No named APAC data centres found | Not found in a Tier 1-2 source in this pass | Low | Worth checking Netskope's own NewEdge region map directly before advising APAC-heavy buyers.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found, in contrast to Cato's explicit Beijing/Shanghai/Shenzhen PoPs | Not found in a Tier 1-2 source in this pass | Low | Same evidence gap flagged for Zscaler - do not assume parity with Cato's specific China story.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "ntt-data": {
+      "revision_id": "revision:f32cd79b051e6620156e54b6",
+      "reviewed_at": "2026-09-01T20:19:29.946Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/ntt-data/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Good fit, genuinely well-evidenced via a real, detailed, named customer deployment | Direct/partner, per the confirmed real deployment | South Africa, confirmed directly via a real, detailed customer deployment | Specific, itemised country-level detail beyond South Africa within Africa not independently confirmed | services.global.ntt/en-us/about-us/case-studies/pick-n-pay | High | A specific, real, customer-deployment-evidenced confirmation of South African coverage specifically - genuinely concrete, distinctive evidence, reinforced by NTT DATA's own detailed understanding of the specific, real-world South African infrastructure challenge (loadshedding).",
+          "evidence_source_ids": [
+            "evidence:ntt-data:13",
+            "evidence:ntt-data:20"
+          ]
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Good fit, evidenced at a general level via NTT DATA's own confirmed Japanese origin and headquarters, reinforced by a separately-confirmed IDC MarketScape Leader position specifically for Asia/Pacific Managed SD-WAN/SASE Services | Direct, per NTT DATA's own confirmed Japanese headquarters and origin | Asia-Pacific, reinforced by the confirmed, dedicated regional analyst recognition | None significant identified | nttdata.com/global/en/services/enterprise-networking/managed-network-services | High | Genuinely well-evidenced via both NTT DATA's own confirmed regional headquarters and a separately-confirmed, dedicated, regional-specific analyst Leader recognition (IDC MarketScape Asia/Pacific) - a specific, distinctive regional-strength signal.",
+          "evidence_source_ids": [
+            "evidence:ntt-data:2"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Not independently confirmed with China-specific detail in sources reviewed, though implied generally via the confirmed 190-plus-country SD-WAN reach | Unknown at this specificity | Not itemised specifically | No named China-specific presence confirmed for the SASE service specifically | Not found at this specificity in a Tier 1-2 source in this pass | Low-Medium | A reasonable, general inference from the confirmed broad country reach; China-specific detail wasn't independently itemised.",
+          "evidence_source_ids": []
+        },
+        "europe": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Good fit, evidenced via a real, named customer deployment | Direct/partner, per the confirmed real deployment | Belgium, confirmed directly via a real, named customer deployment (CILE) | Specific, itemised country-level detail beyond Belgium within Europe not independently confirmed | nttdata.com/global/en/services/infrastructure-solutions/secure-networking-solutions | Medium-High | A specific, real, customer-deployment-evidenced confirmation of Belgian coverage specifically; broader European country-by-country detail wasn't independently itemised.",
+          "evidence_source_ids": [
+            "evidence:ntt-data:22"
+          ]
+        }
+      }
+    },
+    "opensystems": {
+      "revision_id": "revision:3f18bb33f360d5fbfab497d9",
+      "reviewed_at": "2026-09-01T20:19:33.605Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/opensystems/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed at a general level via the platform's overall 180+-country deployment claim, reinforced by a real, named customer example (Altana) connecting 60+ global locations, though specific Asia-Pacific country-level detail wasn't independently itemised | Direct | 180+ countries claimed generally; specific Asia-Pacific detail not itemised | No formal regional PoP map found beyond the general global-coverage claim | Medium | A real, general, primary-sourced global-reach claim reinforced by named multi-site customer evidence; country-level Asia-Pacific specificity wasn't independently confirmed.",
+          "evidence_source_ids": [
+            "evidence:opensystems:10"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "europe": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely well-evidenced - the company's own Swiss origin and headquarters, ISO 27001 certification, and confirmed named European customers (Mammut, a Swiss/international apparel brand) together give this region the strongest, most specific evidence in this table | Direct | Switzerland (headquarters), broader Europe implied via named customer base | Full regional PoP breakdown not itemised beyond the confirmed headquarters and customer evidence | High | Genuinely the strongest-evidenced region in this entire table - a real, named European headquarters, a confirmed European compliance certification, and real, named European customer evidence together.",
+          "evidence_source_ids": [
+            "evidence:opensystems:16",
+            "evidence:opensystems:18"
+          ]
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "orangebusiness": {
+      "revision_id": "revision:6d1e16776f3ed56135779cac",
+      "reviewed_at": "2026-09-01T20:19:37.343Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/orangebusiness/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely well-evidenced | Direct (owned network, reinforced by Orange Group's own confirmed, substantial African operations) | Africa, comprehensively, reinforced by Orange Group's own confirmed 'exceptional performance' and double-digit growth (+13.9% H1 2026) in Africa and the Middle East specifically | None identified | investing.com/news/transcripts/earnings-call-transcript-orange-lifts-2026-outlook-after-solid-h1-results-93CH-4817709 | High | Genuinely well-evidenced via Orange Group's own confirmed, substantial, currently-growing African operations - a real, structural, geographic strength, reinforced by current, dated financial performance data.",
+          "evidence_source_ids": [
+            "evidence:orangebusiness:16"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Not independently confirmed with China-specific detail in sources reviewed, though implied generally via the confirmed 200-plus-country reach | Unknown at this specificity | Not itemised specifically | No named China-specific presence confirmed for the SASE service specifically | Not found at this specificity in a Tier 1-2 source in this pass | Low-Medium | A reasonable, general inference from the confirmed broad country reach; China-specific detail wasn't independently itemised.",
+          "evidence_source_ids": []
+        },
+        "europe": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned network across multiple European countries) | France, Spain, Poland, Belgium, Luxembourg, Romania, Slovakia, Moldova, confirmed directly, plus broader EMEA reach | None identified | pitchbook.com/profiles/company/10178-65 | High | Genuinely the strongest-evidenced coverage finding in this entire profile - Orange's own confirmed, extensive, multi-country European telecommunications operations give it a structural, national-and-regional-scale advantage.",
+          "evidence_source_ids": [
+            "evidence:orangebusiness:11"
+          ]
+        }
+      }
+    },
+    "palo-alto-prisma-sase": {
+      "revision_id": "revision:c7cf7997ec576a63c92818da",
+      "reviewed_at": "2026-09-01T20:19:43.120Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/palo-alto-prisma-sase/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap, consistent across all four vendors' profiles for this region.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Partially evidenced via Zespri (a New Zealand-headquartered company) as a named customer, implying real APAC presence, though not itemised as a formal regional PoP map | Direct (implied via customer operational evidence) | New Zealand specifically implied via the Zespri customer relationship | No formal regional PoP map found | Medium | Similar treatment to Latin America - real customer evidence exists without a formal coverage map.",
+          "evidence_source_ids": [
+            "evidence:palo-alto-prisma-sase:24"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found, in contrast to Cato's explicit Beijing/Shanghai/Shenzhen PoPs | Not found in a Tier 1-2 source in this pass | Low | Same evidence gap flagged for Zscaler and Netskope - do not assume parity with Cato's specific China story.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Partially evidenced via Grupo Bimbo's Colombian operation specifically referencing direct-to-app connectivity savings, implying real Latin America coverage, though not itemised as a formal regional PoP map | Direct (implied via customer operational evidence) | Colombia specifically named | No formal regional PoP map found, but real operational evidence exists for at least one Latin American country | paloaltonetworks.com/customers/grupo-bimbo... (Sep 2024) | Medium | Better-evidenced than the equivalent Latin America gap found for the other three vendors - a genuine, named country-level operational proof point, even without a formal coverage map.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "sonicwall-cse": {
+      "revision_id": "revision:53e04f892936ddcabcf1c016",
+      "reviewed_at": "2026-09-01T20:19:46.844Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/sonicwall-cse/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Confirmed at a general, parent-company level only - SonicWall's own materials report more than 500,000 customers across 215 countries and territories company-wide (not confirmed as CSE-specific), providing some general context for likely broad geographic reach | Direct | 215 countries/territories claimed company-wide (not CSE-specific) | The 215-country figure is company-wide (all SonicWall products), not confirmed as CSE-specific regional coverage | Low-Medium | A real, general, primary-sourced global-reach claim exists at the parent-company level; CSE-specific regional coverage detail wasn't independently confirmed in this pass.",
+          "evidence_source_ids": [
+            "evidence:sonicwall-cse:8"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "velocloud": {
+      "revision_id": "revision:f5387b83efff650f5c9acd5b",
+      "reviewed_at": "2026-09-01T20:19:50.425Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/velocloud/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "verizon": {
+      "revision_id": "revision:f524b565e57fd0343b667af0",
+      "reviewed_at": "2026-09-01T20:19:55.150Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/verizon/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found for the SD-WAN/SASE service specifically in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "north_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned network) | United States, comprehensively, reinforced by a real, detailed federal-sector case study spanning 70 US locations | None identified | High | Genuinely the strongest-evidenced coverage finding in this entire profile - Verizon's confirmed, extensive US carrier network, reinforced by a real, detailed, quantified customer example spanning 70 locations directly.",
+          "evidence_source_ids": [
+            "evidence:verizon:19"
+          ]
+        }
+      }
+    },
+    "versa-networks": {
+      "revision_id": "revision:05460064bfddb49a73b78910",
+      "reviewed_at": "2026-09-01T20:19:59.008Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/versa-networks/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Partially evidenced via the Lintasarta case study, a named Indonesian service provider serving 2,400+ corporate customers and 35,000+ networks via Versa Private SASE | Partner (Versa-powered service provider) | Indonesia confirmed; broader APAC coverage not itemised | No formal regional PoP map found beyond the Lintasarta relationship | Medium | A real, specific, named country-level relationship (Indonesia via Lintasarta) gives genuine evidence of APAC presence, though not a formal coverage map.",
+          "evidence_source_ids": [
+            "evidence:versa-networks:18"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "virgin-media-o2": {
+      "revision_id": "revision:121d7b6c883b7450e2526ed3",
+      "reviewed_at": "2026-09-01T20:20:03.045Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/virgin-media-o2/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed | Unknown | Not specified | No named China presence confirmed for the SASE service specifically | Not found in a Tier 1-2 source in this pass at this specificity | Low | Evidence gap - though the underlying Zscaler platform (per Zscaler's own broader materials) may have relevant coverage not confirmed as VMO2-specific in this pass.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found for the SD-WAN/SASE service specifically in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        },
+        "uk_ireland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely the best-evidenced region in this entire table | Direct (owned network) | United Kingdom, comprehensively | None identified | High | Genuinely the strongest-evidenced coverage finding in this entire profile - VMO2's confirmed, substantial, well-invested UK network infrastructure gives it a structural UK-coverage advantage consistent with its core, national market focus.",
+          "evidence_source_ids": [
+            "evidence:virgin-media-o2:8"
+          ]
+        }
+      }
+    },
+    "vodafone": {
+      "revision_id": "revision:cf05ef06bacc5b079425816a",
+      "reviewed_at": "2026-09-01T20:20:06.531Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/vodafone/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "supported",
+          "freshness_state": "current",
+          "qualification": "Native, implied via Vodafone Group's own confirmed, substantial direct operating presence across African markets (via Vodacom and related operations, per the confirmed Group corporate structure), though SD-WAN/SASE-specific African coverage detail wasn't independently itemised | Direct (Group-level African operations) | Multiple African markets, per Vodafone Group's own confirmed structure | SD-WAN/SASE-specific detail for African markets not independently itemised | Medium | A reasonable, well-supported inference from Vodafone Group's own confirmed, substantial direct African market presence; SD-WAN/SASE-service-specific detail for this region wasn't independently itemised.",
+          "evidence_source_ids": [
+            "evidence:vodafone:9"
+          ]
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found for the SD-WAN/SASE service specifically in sources reviewed, though the confirmed 192-country access-network figure implies some form of China-relevant capability may exist | Unknown at this specificity | Potentially included within the confirmed 192-country figure, not independently itemised | No named China-specific presence confirmed | Not found in a Tier 1-2 source in this pass at this specificity | Low-Medium | A reasonable, though unconfirmed, inference from the confirmed 192-country reach; specific China-market detail wasn't independently itemised.",
+          "evidence_source_ids": []
+        },
+        "europe": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Strong fit, genuinely well-evidenced | Direct (owned network across core European markets) | United Kingdom and wider Europe, per Vodafone's own confirmed core market structure | None identified | High | Genuinely well-evidenced via Vodafone's own confirmed, extensive direct European operating presence, reinforced by independent research specifically noting 'strong UK and European market presence' for this exact service.",
+          "evidence_source_ids": [
+            "evidence:vodafone:7"
+          ]
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no specific evidence found for the SD-WAN/SASE service specifically in this pass | Unknown | Not specified | No named data centres or customer evidence found for this region specifically | Not found in a Tier 1-2 source in this pass | Low | Evidence gap.",
+          "evidence_source_ids": []
+        }
+      }
+    },
+    "zscaler": {
+      "revision_id": "revision:44562c0b5225f88ac0275492",
+      "reviewed_at": "2026-09-01T20:20:11.364Z",
+      "source_url": "https://netify.co.uk/api/provider-knowledge/zscaler/",
+      "regions": {
+        "middle_east_africa": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap - same treatment as Cato's equivalent row.",
+          "evidence_source_ids": []
+        },
+        "asia_pacific": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown in named-country detail - general 'six continents' and 'most countries' claims imply presence but no specific APAC country/city list was found in this pass | Unknown | Not specified in detail | No named APAC data centres found | Not found in a Tier 1-2 source in this pass | Low | Evidence gap - worth checking Zscaler's own data-centre location page directly for a country-level breakdown before advising APAC-heavy buyers.",
+          "evidence_source_ids": []
+        },
+        "china_mainland": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - no China-specific data-centre or licensed-PoP detail found in sources reviewed | Unknown | Not specified | No named China presence found, in contrast to Cato's explicit Beijing/Shanghai/Shenzhen PoPs | Not found in a Tier 1-2 source in this pass | Low | A genuine point of comparison for multinational buyers with China-inclusive estates - do not assume parity with Cato's specific China story.",
+          "evidence_source_ids": []
+        },
+        "latin_america": {
+          "support_state": "requires_confirmation",
+          "freshness_state": "current",
+          "qualification": "Unknown - not itemised in sources reviewed, though the 'present in most countries' claim implies some presence | Unknown | Not specified | No named data centres found | Not found in a Tier 1-2 source in this pass | Low | Do not infer specific coverage from the general 'most countries' claim - ask directly.",
+          "evidence_source_ids": []
+        }
+      }
+    }
+  }
+}

@@ -52,7 +52,7 @@ export default function RfpCitationEvidence() {
             <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{questionCount}</strong><span className="text-xs text-[#66635e]">governed questions</span></div>
             <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">8</strong><span className="text-xs text-[#66635e]">procurement areas</span></div>
             <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{providerCount}</strong><span className="text-xs text-[#66635e]">evaluated provider records</span></div>
-            <div className="col-span-2 rounded-lg bg-[#edf5e9] p-4 sm:col-span-3"><strong className="block text-sm">Question bank v{BANK_VERSION}</strong><span className="text-xs text-[#536250]">Includes {SASE_EXTENDED_BANK.questions.length} extended SASE questions and sector packs. Provider matching and downloads unlock only when the buyer publishes anonymously.</span></div>
+            <div className="col-span-2 rounded-lg bg-[#edf5e9] p-4 sm:col-span-3"><strong className="block text-sm">Question bank v{BANK_VERSION}</strong><span className="text-xs text-[#536250]">Includes {SASE_EXTENDED_BANK.questions.length} extended SASE questions and sector packs. Private draft downloads need no publication. Personalised provider matching unlocks after anonymous publication.</span></div>
           </div>
         </div>
 

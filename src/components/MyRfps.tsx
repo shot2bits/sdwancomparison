@@ -1,5 +1,6 @@
 "use client";
 
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 /**
  * MyRfps: the signed-in buyer's saved RFPs (indexed at creation for buyer
  * sessions). Renders nothing when signed out or empty, so it can sit on the
@@ -103,7 +104,7 @@ export default function MyRfps() {
         <h2 className="text-xl mb-1">Your account is ready. Here is what it does.</h2>
         <p className="text-sm text-[var(--ink-700)] mb-3 max-w-2xl">
           Describe your project once and Netify builds it into a living Statement of Requirements you can
-          raise to an RFI or a full RFP. Publishing is free and unlocks supplier matching and your Word and PDF documents.
+          raise to an RFI or a full RFP. {SOURCING_DESCRIPTION}
           Suppliers can then submit structured responses for you to compare, with pricing private to you.
           Responses arrive when suppliers submit them; they are not instant or guaranteed.
           Your identity stays private until you choose to share it. Only vetted vendors and service providers can respond.

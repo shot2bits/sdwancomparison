@@ -22,7 +22,7 @@ type Session = { authenticated: boolean; role?: string; email?: string; vendor_s
  * caller passed one (the publish gates auto-continue), otherwise a full
  * reload so server-rendered surfaces pick up the session.
  */
-export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIntent }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void; publishRfpId?: string; circuitIntent?: CircuitSignupIntent }) {
+export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIntent, publicationVerification = false }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void; publishRfpId?: string; circuitIntent?: CircuitSignupIntent; publicationVerification?: boolean }) {
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState<string | null>(null);
@@ -116,13 +116,13 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
 
   return (
     <div className="rounded-sm border border-[var(--ink-300,#ccc)] p-4 max-w-md">
-      <p className="eyebrow mb-1">{role === "supplier" ? "Vendor sign-in" : "Sign in"}</p>
+      <p className="eyebrow mb-1">{role === "supplier" ? "Vendor sign-in" : publicationVerification ? "Work email verification" : "Sign in"}</p>
       <p className="text-sm text-[var(--ink-600,#555)] mb-2">{prompt ?? (role === "supplier" ? "Sign in with your work email to respond. We verify your email domain against the listed vendor." : "Verify yourself once and everything you build stays yours.")}</p>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <input value={website} onChange={(e) => setWebsite(e.target.value)} name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute h-px w-px overflow-hidden opacity-0 pointer-events-none" />
-        <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@yourcompany.com" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" onKeyDown={(e) => { if (e.key === "Enter") void request(); }} />
-        <button onClick={request} disabled={busy || !email.includes("@") || (role === "buyer" && !challenge)} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{busy ? "Sending…" : "Send link"}</button>
+        <input aria-label="Work email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@yourcompany.com" className="min-w-0 flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" onKeyDown={(e) => { if (e.key === "Enter") void request(); }} />
+        <button onClick={request} disabled={busy || !email.includes("@") || (role === "buyer" && !challenge)} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{busy ? "Sending…" : publicationVerification ? "Send verification email" : "Send link"}</button>
       </div>
       {sent && (
         <>

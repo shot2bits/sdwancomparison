@@ -34,7 +34,7 @@
  * env vars, before this module ever gets a chance to fake them.
  */
 
-export const FAKE_KV_URL = "https://fake-kv.internal.test/redis";
+export const FAKE_KV_URL = "http://127.0.0.1:1/redis";
 export const FAKE_KV_TOKEN = "fake-kv-token-not-real";
 
 type Entry =
@@ -46,6 +46,19 @@ type Entry =
 
 export class FakeKvStore {
   private store = new Map<string, Entry>();
+
+  /** Export synthetic fixtures for the local, read-only preview server. */
+  fixtureCommands(): (string | number)[][] {
+    const commands: (string | number)[][] = [];
+    for (const [key, entry] of this.store) {
+      if (entry.type === 'string') commands.push(['SET',key,entry.value]);
+      if (entry.type === 'list' && entry.value.length) commands.push(['RPUSH',key,...entry.value]);
+      if (entry.type === 'set' && entry.value.size) commands.push(['SADD',key,...entry.value]);
+      if (entry.type === 'hash' && entry.value.size) commands.push(['HSET',key,...[...entry.value].flat()]);
+      if (entry.type === 'zset') for (const [member,score] of entry.value) commands.push(['ZADD',key,score,member]);
+    }
+    return commands;
+  }
 
   private str(key: string): string | null {
     const e = this.store.get(key);
@@ -89,9 +102,11 @@ export class FakeKvStore {
         if(!e||e.type!=="zset"){e={type:"zset",value:new Map()};this.store.set(key,e)}
         const exists=e.value.has(String(args[2]));e.value.set(String(args[2]),Number(args[1]));return exists?0:1;
       }
+      case "ZREVRANGE":
       case "ZRANGE": {
         const e=this.store.get(String(args[0]));if(!e||e.type!=="zset")return [];
         const sorted=[...e.value].sort((a,b)=>a[1]-b[1]||a[0].localeCompare(b[0])).map(x=>x[0]);
+        if(op === "ZREVRANGE") sorted.reverse();
         const start=Number(args[1]),end=Number(args[2]);return sorted.slice(start,end===-1?undefined:end<0?sorted.length+end+1:end+1);
       }
       case "GET":
@@ -103,6 +118,15 @@ export class FakeKvStore {
         return "OK";
       }
       case "EVAL": {
+        if (String(args[0]).includes("sourcing-confirm-commit")) {
+          if (this.str(String(args[2])) !== String(args[5])) return 0;
+          this.command(["SET",String(args[3]),String(args[6])]);
+          this.command(["ZADD",String(args[4]),String(args[7]),String(args[8])]);
+          return 1;
+        }
+        if(String(args[0]).includes('activity-append-once')){const key=String(args[2]);if(this.store.has(key))return 0;this.command(['LPUSH',String(args[3]),String(args[4])]);this.command(['SET',key,'1']);return 1;}
+        if(String(args[0]).includes("redis.call('llen',KEYS[1])")){const key=String(args[2]);const rows=this.command(['LRANGE',key,0,-1]) as string[];if(rows.length!==Number(args[3]))return -1;this.command(['RPUSH',key,String(args[4])]);return rows.length+1;}
+
         if (String(args[0]).includes("netify-funnel-append-once") && Number(args[1]) === 2) {
           const marker=String(args[2]), key=String(args[3]);
           if(this.store.has(marker))return 0;
@@ -110,7 +134,7 @@ export class FakeKvStore {
           list.unshift(String(args[4])); this.store.set(key,{type:"list",value:list.slice(0,10000)});
           this.store.set(marker,{type:"string",value:"1"}); return 1;
         }
-        if (String(args[0]).includes("redis.call('get',KEYS[1])") && Number(args[1]) === 1) {
+        if (String(args[0]).toLowerCase().includes("redis.call('get',keys[1])") && Number(args[1]) === 1) {
           const key = String(args[2]);
           return this.str(key) === String(args[3]) && this.store.delete(key) ? 1 : 0;
         }
@@ -154,6 +178,12 @@ export class FakeKvStore {
         return this.setEntry(String(args[0])).has(String(args[1])) ? 1 : 0;
       case "SMEMBERS":
         return Array.from(this.setEntry(String(args[0])));
+      case "HSET": {
+        const h = this.hashEntry(String(args[0]));
+        let added = 0;
+        for (let i=1;i<args.length;i+=2) { if (!h.has(String(args[i]))) added++; h.set(String(args[i]),String(args[i+1])); }
+        return added;
+      }
       case "HINCRBY": {
         const h = this.hashEntry(String(args[0]));
         const cur = Number(h.get(String(args[1])) ?? "0");
@@ -179,11 +209,13 @@ export class FakeKvStore {
         const keys = Array.from(this.store.keys()).filter((k) => re.test(k));
         return ["0", keys];
       }
+      case "RPUSH":
       case "LPUSH": {
         const key = String(args[0]);
         const current = this.store.get(key);
         const list = current?.type === "list" ? current.value : [];
-        list.unshift(...args.slice(1).map(String));
+        if (op === "RPUSH") list.push(...args.slice(1).map(String));
+        else list.unshift(...args.slice(1).map(String));
         this.store.set(key, { type: "list", value: list });
         return list.length;
       }

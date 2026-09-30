@@ -1,3 +1,7 @@
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
+import { randomUUID } from "node:crypto";
+import { kvRaw } from "@/lib/rfp-store";
+import { currentBuyerFacts, currentPublicBrief, projectWithCurrentBuyerFacts, currentDocumentCounts, currentDocumentIsConsistent } from "@/lib/current-buyer-facts";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
 import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
@@ -6,17 +10,17 @@ import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED_ACTION, ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { inviteSupplier, vendorBySlug } from "@/lib/rfp-connect";
 import { regionHintFromEmail } from "@/lib/region-hint";
-import { buildShortlist } from "@/lib/shortlist-core";
+import { buildShortlist, MATCHING_RULES_VERSION } from "@/lib/shortlist-core";
 import { FEATURE_NAMES } from "@/lib/vendors";
 import { getStrictLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 import { SITE_URL } from "@/lib/structured-data";
 import { emailDomain } from "@/lib/access-control";
-import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
+import { toPublicOpportunity, OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
 import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validate";
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
 import { FOLLOW_UP_NOTE, PROMISES_PARAGRAPH } from "@/lib/publish-promises";
-import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION, livingDocumentToRfpSections } from "@/lib/rfp-document";
+import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
 import {
@@ -173,23 +177,29 @@ function boardScope(p: ProjectDetails): OppScope[] {
 export async function listRfpOnBoard(
   p: ProjectDetails,
   ownerEmail: string,
-  opts: { publishedRevisionId?: string } = {},
+  opts: { publishedRevisionId?: string; responseDeadline?: number | null } = {},
 ): Promise<{ opportunity_id: string; url: string }> {
   const visibility = "public" as const;
   const mapKey = `rfp:${p.id}:board_opp`;
+  p = projectWithCurrentBuyerFacts(p);
   const existingId = await kvGetJson<string>(mapKey);
   const existing = existingId ? await getOpportunity(existingId) : null;
 
   // Count only sections that actually carry active questions (Harry's QA,
   // RFP Builder F3: the notice said "across 5 sections" while the document
   // rendered 2, because included-but-empty sections were being counted).
-  const activeSections = p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
-  const questionCount = activeSections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
-  const sectionCount = activeSections.length;
+  const {questions:questionCount, sections:sectionCount} = currentDocumentCounts(p);
+  const facts = currentBuyerFacts(p);
+  const publicBrief = currentPublicBrief(p);
+  const company = p.buyer.organisation.trim();
+  if (facts.canonical && (/@|https?:\/\//i.test(`${publicBrief.summary} ${publicBrief.timeline}`) || (company.length >= 3 && `${publicBrief.summary} ${publicBrief.timeline}`.toLowerCase().includes(company.toLowerCase())))) {
+    throw new Error("Remove company names, email addresses and website links from the public requirement and timeline before publishing.");
+  }
+  const currentSites = facts.canonical ? facts.sites ?? null : p.buyer.site_count;
   const quickListing = isShortProject(p);
   const summary = quickListing
     ? shortProjectNotice(p).summary
-    : `The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, Netify SASE Methodology v${p.methodology_version}). Vendors respond to the RFP question set with evidence; pricing stays private to the buyer.`;
+    : `${facts.canonical ? publicBrief.summary + " " : ""}The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, Netify SASE Methodology v${p.methodology_version}). Vendors respond to the RFP question set with evidence; pricing stays private to the buyer.`;
 
   // No two identical open titles on the board (Harry's Section 1 finding,
   // 28 Jul 2026): the new listing's title gains one distinguishing stated
@@ -198,9 +208,9 @@ export async function listRfpOnBoard(
     .filter((o) => o.id !== (existing?.id ?? ""))
     .map((o) => o.title);
   const distinctTitle = ensureDistinctNoticeTitle(
-    p.title,
+    publicBrief.title,
     {
-      sites: p.buyer.site_count ?? null,
+      sites: currentSites ?? null,
       regions: p.buyer.regions ?? [],
       created: existing?.created ?? Date.now(),
       // RFP notices list anonymously; the title's site figure follows the
@@ -218,15 +228,16 @@ export async function listRfpOnBoard(
     buyer_org: anonymousBuyerOrganisation(),
     title: distinctTitle,
     scope: boardScope(p),
-    sites: p.buyer.site_count,
+    sites: currentSites,
     regions: p.buyer.regions,
     summary,
     budget_note: existing?.budget_note ?? "",
-    timeline_note: quickListing ? shortProjectNotice(p).timeline_note : existing?.timeline_note ?? "",
+    timeline_note: publicBrief.timeline || (facts.canonical ? "" : existing?.timeline_note ?? ""),
     status: "open",
     engagement_type: "quote_room",
     auction_format: "open",
     deadline: null,
+    response_deadline: opts.responseDeadline ?? p.response_deadline ?? existing?.response_deadline ?? existing?.deadline ?? null,
     eligibility: "open",
     visibility,
     awarded_vendor_slug: existing?.awarded_vendor_slug ?? null,
@@ -241,7 +252,7 @@ export async function listRfpOnBoard(
     buyer_size_band: p.buyer.organisation_size === "any" ? "" : p.buyer.organisation_size,
     compliance_requirements: p.buyer.compliance,
     response_mode: quickListing ? "indicative_pricing" : "full_rfp",
-    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${p.buyer.site_count ? ` across ${p.buyer.site_count} sites` : ""}. ${quickListing ? "A concise opportunity brief has been published; sign in as a verified vendor to register interest." : "A full RFP with methodology-mapped questions has been issued; sign in as a verified vendor to register interest."}`,
+    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${currentSites ? ` across ${currentSites} sites` : ""}. ${quickListing ? "A concise opportunity brief has been published; sign in as a verified vendor to register interest." : "A full RFP with methodology-mapped questions has been issued; sign in as a verified vendor to register interest."}`,
     methodology_version: p.methodology_version,
     // The instrument's true shape rides the notice (Robert's R8 ruling,
     // 28 Jul 2026): section titles and counts only, never the questions;
@@ -249,7 +260,7 @@ export async function listRfpOnBoard(
     rfp_shape: {
       version: p.methodology_version,
       total: questionCount,
-      sections: activeSections.map((s) => ({ title: s.category, questions: s.questions.filter((q) => q.priority !== "optional").length })),
+      sections: (p.procurement_document ? p.procurement_document.responseGroups.map(g => ({category:g.title,questions:g.questions.map(q => ({...q,priority:"required"}))})) : p.rfp_sections.filter(s => s.included)).map((s) => ({ title: s.category, questions: s.questions.filter((q) => q.priority !== "optional").length })),
     },
     owner_email: ownerEmail,
     source_rfp_id: p.id,
@@ -368,7 +379,7 @@ function engineChannelLabel(p: ProjectDetails): string {
 }
 
 async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[], report?: MarketReport) {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
@@ -387,7 +398,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
   ].filter(Boolean).join("<br/>");
 
   const send = (payload: Record<string, unknown>) =>
-    fetch("https://api.resend.com/emails", {
+    activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify(payload),
@@ -432,7 +443,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       `<p>Hello,</p>` +
       `<p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
       `<p><strong>What happens to your information:</strong> ${PROMISES_PARAGRAPH} The vetting standard is published at <a href="${SITE_URL}/supplier-vetting-standard/">${SITE_URL}/supplier-vetting-standard/</a>.</p>` +
-      `<p><strong>What happens next:</strong> ${invited.length} evaluated vendor${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>` +
+      (invited.length === 0 ? "<p><strong>What happens next:</strong> No suppliers have been invited. Publication is complete, but supplier responses are not guaranteed. Review your requirements and the available provider evidence in your workspace.</p>" : `<p><strong>What happens next:</strong> ${invited.length} evaluated vendor${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>`) +
       bandBlock +
       (report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : "") +
       pinnedNoteFor(p) +
@@ -524,7 +535,7 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
       ...(snapshot.public_projection.opportunity_id ? { opportunity_id: snapshot.public_projection.opportunity_id } : {}),
       ...(snapshot.public_projection.url ? { url: snapshot.public_projection.url } : {}),
     },
-    market_report: snapshot.market_report,
+    market_report: { ...snapshot.market_report, matched: { ...snapshot.market_report.matched, total_evaluated_market: snapshot.provider_provenance?.evaluated_provider_count ?? null } },
     matched_vendors: matchedVendorsReplay,
   };
 }
@@ -648,14 +659,22 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
  * resume experience.
  */
 export function minimumContentQuestionCount(project: ProjectDetails): number {
-  return project.envelope && project.procurement_document
-    ? livingDocumentToRfpSections(project.procurement_document).reduce((n, s) => n + s.questions.length, 0)
-    : project.rfp_sections
-        .filter((s) => s.included)
-        .reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+  const counts = currentDocumentCounts(project);
+  return project.procurement_document ? counts.requirements : counts.questions;
 }
 
 export async function executePublish(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
+  const key = `rfp:${project.id}:publication_lock`;
+  const owner = randomUUID();
+  // Longer than this application's request lifetime; compare-and-delete cannot release another owner.
+  if (await kvRaw(["SET", key, owner, "NX", "EX", 600]) !== "OK") {
+    throw new Error("Publication is already in progress. Reload your project before retrying.");
+  }
+  try { return await executePublishLocked(project, sessionEmail, opts); }
+  finally { await kvRaw(["EVAL", "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end", 1, key, owner]); }
+}
+
+async function executePublishLocked(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
   // IDEMPOTENCY (Robert's Phase 2 brief): checked first, before any gate or
   // side effect. If this exact request (same governed content, same
   // options) already completed a successful publish, this is a double-
@@ -669,7 +688,8 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   const priorGovernedState = await loadGovernedRevisionState(project.id);
   if (isPublicationReplay(priorGovernedState.lastAppliedEventId, publishEventIdForRequest)) {
     const priorSnapshot = await getLatestPublishedSnapshot(project.id);
-    if (priorSnapshot) return replayResultFrom(project, priorSnapshot);
+    const pendingAttempt = await getPublicationAttempt(project.id);
+    if (priorSnapshot && (!pendingAttempt || priorSnapshot.id === pendingAttempt.id)) return replayResultFrom(project, priorSnapshot);
     // Governed state says this exact request already applied, but no
     // snapshot exists (a pre-Phase-2 record, or a snapshot write that
     // failed after the state commit) -- fall through to a real publish
@@ -692,6 +712,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   const readiness = isShortProject(project)
     ? shortProjectReadiness(project)
     : publicationReadiness({ baselineReady: essentialBaseline.ready, baselineRemaining: essentialBaseline.remaining, activeQuestionCount });
+  if (!currentDocumentIsConsistent(project)) throw new Error("The saved document does not match your current confirmed facts. Save and review the current revision before publishing. Nothing has been sent.");
   if (!readiness.allowed) {
     throw new Error(`Complete the meaningful ${isShortProject(project) ? "opportunity" : "RFP"} baseline before publishing. Still needed: ${readiness.reasons.join(", ")}. Nothing has been sent.`);
   }
@@ -715,7 +736,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   const publishEmail = sessionEmail || project.owner_email;
   const requirementDepth = {
     questions: activeQuestionCount,
-    sections: project.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional")).length,
+    sections: currentDocumentCounts(project).sections,
   };
   const verification = await verifyBusinessEmail(publishEmail);
   if (!verification.passed) {
@@ -810,7 +831,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       // hard failure, when this project's most recent save predates the
       // field or came from a client build that had not yet started
       // sending it (published-snapshot.ts's own frozen_content comment).
-      frozen_content: { title: working.title, buyer: working.buyer, rfp_sections: working.rfp_sections, living_document: working.procurement_document ?? null },
+      frozen_content: { title: working.title, buyer: projectWithCurrentBuyerFacts(working).buyer, rfp_sections: working.rfp_sections, living_document: working.procurement_document ?? null, facts: working.facts },
       created_at: Date.now(),
     });
     attempt = await savePublicationAttempt({
@@ -836,6 +857,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // already-sealed plan and never recompute it against newer evidence.
   if (opts.list_on_board !== false && (!attempt.invitation_plan || !attempt.provider_evidence || !attempt.match_input)) {
     const live = await getStrictLiveShortlistDataset();
+    if (live.vendors.length === 0) throw new Error("The provider catalogue is empty. Publication has not been completed; retry when provider evidence is available.");
     const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
     const pinSlugs = (working.buyer.pinned_vendors ?? []).filter(Boolean);
     const excluded = new Set(
@@ -845,20 +867,19 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
         .filter((slug) => !pinSlugs.includes(slug)),
     );
     const requestSize = Math.min(12, size + excluded.size);
-    const statedRegions = (working.buyer.regions ?? []).filter(Boolean);
-    const regionHint = statedRegions.length === 0 ? regionHintFromEmail(ownerEmail) : null;
+    const canonicalMatch = projectMatchingInput(working);
+    const statedRegions = canonicalMatch.required_regions.filter(Boolean);
+    const regionHint = !currentBuyerFacts(working).canonical && statedRegions.length === 0 ? regionHintFromEmail(ownerEmail) : null;
     const matchInput = {
-      ...projectMatchingInput(working),
-      sector: working.buyer.sector ?? null,
-      organisation_size: working.buyer.organisation_size ?? "any",
-      service_model: working.buyer.operating_model ?? "any",
+      ...canonicalMatch,
       required_regions: statedRegions,
       ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
       shortlist_size: requestSize,
     };
     const shortlist = buildShortlist(live.vendors, matchInput, FEATURE_NAMES);
     const rankedFill = shortlist.shortlist.map((vendor) => vendor.slug).filter((slug) => !excluded.has(slug));
-    const inviteSlugs = [...new Set([...pinSlugs, ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
+    const eligibleSlugs = new Set(shortlist.evaluation.filter(v => v.eligible).map(v => v.slug));
+    const inviteSlugs = [...new Set([...pinSlugs.filter(slug => eligibleSlugs.has(slug)), ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
     const revisionBySlug = new Map(live.providerRevisions.map((revision) => [revision.slug, revision]));
     const vendorById = new Map(live.vendors.map((vendor) => [vendor.slug, vendor]));
     const evidenceSlugs = [...new Set([...shortlist.shortlist.map((vendor) => vendor.slug), ...inviteSlugs])];
@@ -879,7 +900,13 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       ...attempt,
       invitation_plan: inviteSlugs.map((slug) => ({ slug, name: vendorById.get(slug)?.name ?? slug })),
       provider_evidence: providerEvidence,
+      computed_matches: shortlist.shortlist.map(v => ({ slug: v.slug, rank: v.rank, score: v.score })),
       provider_provenance: {
+        evaluated_provider_count: live.vendors.length,
+        eligible_provider_count: shortlist.considered - shortlist.excluded,
+        evaluated_at: shortlist.generated_at,
+        matching_rules_version: MATCHING_RULES_VERSION,
+        evaluation: shortlist.evaluation,
         shortlist_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
         provider_contract_version: live.providerContractVersion,
         dataset_versions: live.datasetVersions,
@@ -909,7 +936,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     };
   } else {
     try {
-      const listed = await listRfpOnBoard(working, sessionEmail, { publishedRevisionId });
+      const listed = await listRfpOnBoard(working, sessionEmail, { publishedRevisionId, responseDeadline });
       board = { listed: true, ...listed, visibility: "public" as const };
       if (attempt.board_opportunity_id !== listed.opportunity_id) {
         attempt = await savePublicationAttempt({ ...attempt, board_opportunity_id: listed.opportunity_id });
@@ -1160,10 +1187,13 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   let market_report: MarketReport;
   try {
     market_report = buildMarketReport(published, sealedProviderEvidence.map((provider) => provider.record));
+    const matchedSlugs = new Set(attempt.matched_provider_slugs ?? sealedProviderEvidence.map(provider => provider.slug));
+    const matchedEvidence = sealedProviderEvidence.filter(provider => matchedSlugs.has(provider.slug));
+    market_report.matched = { count: matchedSlugs.size, names: matchedEvidence.map(provider => provider.name), total_evaluated_market: attempt.provider_provenance?.evaluated_provider_count ?? null };
   } catch {
     market_report = {
       generated_at: Date.now(),
-      matched: { count: invited.length, names: invited.map((i) => i.name), total_evaluated_market: invited.length },
+      matched: { count: invited.length, names: invited.map((i) => i.name), total_evaluated_market: attempt.provider_provenance?.evaluated_provider_count ?? null },
       estimate: null,
       assumptions: [],
       gaps: [],
@@ -1172,8 +1202,6 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     };
   }
 
-  // Notifications are best effort and never block the publish.
-  try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
 
   // Freeze the published snapshot and COMMIT the governed-revision state
   // (Robert's Phase 2 brief): only now, after every side effect above has
@@ -1208,7 +1236,8 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     const provider = evidenceBySlug.get(slug);
     return provider ? [{ slug, name: provider.name }] : [];
   });
-  if (govResult.applied && govResult.revision) {
+  if ((govResult.applied && govResult.revision) || govResult.reason === "replay") {
+    const publishedNotice = board.opportunity_id ? await getOpportunity(board.opportunity_id) : null;
     const snapshot: PublishedSnapshot = {
       // Market-unlock correction round: the SAME id minted and bound into
       // the MarketUnlock record above (published_revision_id /
@@ -1218,7 +1247,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       // under" must always be the same identity.
       id: publishedRevisionId,
       project_id: published.id,
-      document_version: govResult.revision.cycle,
+      document_version: govResult.revision?.cycle ?? govResult.state.cycle,
       compiler_version: RFP_DOCUMENT_PIPELINE_VERSION,
       methodology_version: published.methodology_version,
       rulebook_version: rulebookVersionOf(published),
@@ -1227,8 +1256,8 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       consent: latestPublishConsent(published),
       content_hash: contentHash(contentSnapshotForEvent),
       // Same treatment as the earlier FrozenRevision (step B) above.
-      frozen_content: { title: published.title, buyer: published.buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null },
-      public_projection: { opportunity_id: board.opportunity_id ?? null, url: board.url ?? null },
+      frozen_content: { title: published.title, buyer: projectWithCurrentBuyerFacts(published).buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null, facts: published.facts },
+      public_projection: { opportunity_id: board.opportunity_id ?? null, url: board.url ?? null, notice: publishedNotice ? toPublicOpportunity(publishedNotice) : null },
       private_requirement: { rfp_id: published.id },
       match_criteria: attempt.match_criteria ?? "",
       matched_vendor_ids: matchedProviderSlugs,
@@ -1236,6 +1265,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       matched_vendors: matchedVendorsFrozen,
       invited_vendors: invited,
       provider_evidence: sealedProviderEvidence,
+      computed_matches: attempt.computed_matches,
       provider_provenance: attempt.provider_provenance,
       provider_match_input: attempt.match_input,
       accepted_assumptions: market_report.assumptions,
@@ -1244,14 +1274,10 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     };
     await savePublishedSnapshot(project.id, snapshot);
   }
-  // A missing `govResult.applied` here would mean this exact eventId was
-  // somehow already the last-applied one despite failing the read at the
-  // top of this function (a race between two truly concurrent identical
-  // requests -- see rfp-governed-revision.ts's own documented limit). The
-  // publish itself has already genuinely succeeded above either way; only
-  // the SNAPSHOT write is skipped to avoid a duplicate version, matching
-  // this function's idempotency contract rather than throwing after the
-  // buyer's vendors have already been invited.
+  // A resumed event repairs a missing snapshot without adding a governed revision.
+
+  // Notify only after the durable snapshot exists. A snapshot-write retry cannot resend these emails.
+  try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
 
   if(!project.test && board.listed && board.opportunity_id && marketUnlockValid) await recordMarketplaceFunnelEvent({event:"publication_completed",project_id:project.id,source:project.journey?.source??"rfp_builder",mode:project.journey?.mode??"build_rfp",channel:project.journey?.source==="mcp"?"mcp":"api",detail:{board_created:true}});
   return { published, invited, criteria: attempt.match_criteria ?? "", board, market_report, matched_vendors: matchedVendorsFrozen };

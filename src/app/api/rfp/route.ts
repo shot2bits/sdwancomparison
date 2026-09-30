@@ -1,3 +1,5 @@
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
+import { activityKvBinding } from "@/lib/activity-storage";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
@@ -14,6 +16,8 @@ import { SITE_URL } from "@/lib/structured-data";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 import { buildEnvelopeUpdate } from "@/lib/workspace/envelope";
+import {sanitiseAttribution} from '@/lib/measurement-contract';
+import {kvRaw} from '@/lib/rfp-store';
 
 /**
  * Early-capture contact email (the wizard's optional "get a link to this RFP
@@ -36,8 +40,8 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
   if (!domain || (await isBlockedDomainLive(domain))) return;
   try { await kvSetJson(`rfp:${p.id}:contact_email`, email); } catch { /* best effort */ }
   try {
-    const url = process.env.KV_REST_API_URL;
-    const token = process.env.KV_REST_API_TOKEN;
+    const url = activityKvBinding().url;
+    const token = activityKvBinding().token;
     if (url && token) {
       await fetch(`${url}/lpush/rfp_draftlink_leads`, {
         method: "POST",
@@ -46,12 +50,12 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
       });
     }
   } catch { /* best effort */ }
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key || !sendEmail) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const link = `${SITE_URL}/rfp-builder/${p.id}/?manage=${p.manage_token}#publish`;
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({
@@ -100,6 +104,7 @@ export async function POST(req: Request) {
     entrance_context?: unknown;
     journey_mode?: unknown;
     sector_profile?: unknown;
+    measurement_attribution?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -238,6 +243,9 @@ export async function POST(req: Request) {
     });
   } catch { /* the history is a record, never a gate */ }
   const saved = await saveProject(project);
+  // Private sidecar: never attach attribution to a project or public snapshot.
+  const attribution=sanitiseAttribution(body.measurement_attribution);
+  if(attribution)try{await kvRaw(['SET',`measurement:attribution:${saved.id}`,JSON.stringify(attribution),'EX',90*86400]);}catch{/* Attribution failure must not invalidate an already saved project. */}
   if (ownerEmail) {
     try { await indexRfpForBuyer(ownerEmail, saved.id); } catch { /* best effort */ }
   }

@@ -1,3 +1,7 @@
+import { publicationOutcomes } from "./publication-outcomes";
+import { mcpConsentError, withMcpConsentSchema } from "./mcp-consent";
+import { livingDocumentToRfpSections } from "./rfp-document";
+import { currentBuyerFacts, projectWithCurrentBuyerFacts } from "./current-buyer-facts";
 /**
  * Agent-to-agent RFP tools for the MCP server. These let a supplier's AI
  * agent fetch a published RFP and submit responses, and let any agent check
@@ -26,10 +30,10 @@ import { executePublish } from "@/lib/rfp-publish";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 
-export const MCP_RFP_TOOL_DEFINITIONS = [
+export const MCP_RFP_TOOL_DEFINITIONS = ([
   { name: "start_project", description: "Create the canonical private ProjectDetails envelope with MCP journey attribution. Anonymous and rate-limited by the MCP transport; returns an expiring opaque project session token.", inputSchema: { type: "object", properties: { entrance_context: { type: "object" }, mode: { type: "string", enum: ["quick_list","find_providers","build_rfp","validate_rfp"] }, sector_profile: { type: "object" } }, required: ["entrance_context","mode"] } },
   { name: "update_requirements", description: "Update a canonical private project using its opaque project session token, optimistic revision and idempotency key.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, idempotency_key: { type: "string" }, buyer_patch: { type: "object" }, raw_input: { type: "object" }, sector_profile: { type: "object" } }, required: ["project_id","project_session_token","base_revision","idempotency_key"] } },
-  { name: "preview_provider_matches", description: "Return aggregate provider coverage only. Never returns provider names, slugs, IDs, scores or hidden rows before publication.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, input: { type: "object" } }, required: ["project_id","project_session_token","base_revision","input"] } },
+  { name: "preview_provider_matches", description: "Return aggregate provider coverage only. Never returns provider names, slugs, IDs, scores or hidden rows while the notice is a draft.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, input: { type: "object" } }, required: ["project_id","project_session_token","base_revision","input"] } },
   { name: "prepare_publication", description: "Record the current versioned anonymous-board consent intent against a private project. Does not publish; verified buyer identity is still required.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" }, marketing_opt_in: { type: "boolean" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
   { name: "publish_opportunity", description: "Publish a prepared project exactly once. Requires the opaque project token, current revision, exact consent and a verified buyer session on the MCP HTTP request; cannot bypass the website policy.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
   { name: "get_project_status", description: "Return private project, board and MarketUnlock status to the verified owner holding the opaque project session token.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" } }, required: ["project_id","project_session_token"] } },
@@ -172,12 +176,18 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
     description: "For a buyer agent: create a draft RFP seeded from a public opportunity notice (scope, sector, estate, compliance and background carried over; methodology sections synthesised). Returns rfp_id, manage_token (KEEP SECRET - it is the buyer credential for publish/invite), share_token, and the builder/preview URLs. Downloading the final document and publishing to suppliers require the buyer to sign in.",
     inputSchema: { type: "object", properties: { opportunity_id: { type: "string" }, title: { type: "string", description: "Optional RFP title; defaults to the notice title." } }, required: ["opportunity_id"] },
   },
-] as const;
+] as const).map(withMcpConsentSchema);
 
 export const RFP_TOOL_NAMES: Set<string> = new Set(MCP_RFP_TOOL_DEFINITIONS.map((t) => t.name as string));
 
+async function projectForDocumentRead(project: NonNullable<Awaited<ReturnType<typeof getProjectByToken>>>) {
+  const snapshot = await getLatestPublishedSnapshot(project.id);
+  if (!snapshot) return projectWithCurrentBuyerFacts(project);
+  return {...project,buyer:snapshot.frozen_content.buyer,rfp_sections:snapshot.frozen_content.rfp_sections,procurement_document:snapshot.frozen_content.living_document ?? undefined,facts:snapshot.frozen_content.facts ?? []};
+}
+
 function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProjectByToken>>>) {
-  return project.rfp_sections
+  return (project.procurement_document ? livingDocumentToRfpSections(project.procurement_document) : project.rfp_sections)
     .filter((s) => s.included)
     .map((s) => ({
       category: s.category,
@@ -189,6 +199,8 @@ function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProje
 }
 
 export async function callRfpTool(name: string, args: Record<string, unknown>, context: { verifiedBuyerEmail?: string; requestKey?: string } = {}): Promise<unknown> {
+  const denied = mcpConsentError(name, args);
+  if (denied) return denied;
   // name validated against RFP_TOOL_NAMES by the caller
   // Public board read: open, no token. Safe before the storage guard.
   if (name === "list_opportunities") {
@@ -236,7 +248,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     if (!project) return { error: "Project not found." };
     const owner = context.verifiedBuyerEmail && project.owner_email.toLowerCase() === context.verifiedBuyerEmail.toLowerCase();
     if (!owner) return { error: "verified_owner_required" };
-    return { project_id: project.id, journey: project.journey, status: project.status, marketplace_state: project.marketplace_state, marketplace_revision: project.marketplace_revision, market_unlocked: await isMarketUnlocked(project.id), response_count: (await listResponses(project.id)).length };
+    return { buyer_facts_scope: "current_draft", buyer_facts: currentBuyerFacts(project), project_id: project.id, journey: project.journey, status: project.status, marketplace_state: project.marketplace_state, marketplace_revision: project.marketplace_revision, market_unlocked: await isMarketUnlocked(project.id), response_count: (await listResponses(project.id)).length, publication_outcomes: await publicationOutcomes(project.id, await getLatestPublishedSnapshot(project.id)) };
   }
   if (name === "get_unlocked_matches") {
     const projectId = String(args.project_id ?? "");
@@ -251,6 +263,9 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     const matched = snapshot.matched_vendors ?? snapshot.matched_vendor_ids.map((slug) => ({ slug, name: evidence.get(slug)?.name ?? slug }));
     return {
       published_revision_id: snapshot.id,
+      publication_outcomes: await publicationOutcomes(projectId, snapshot),
+      buyer_facts: snapshot.market_report.buyer_facts ?? null,
+      market_report: snapshot.market_report,
       match_criteria: snapshot.match_criteria,
       provider_provenance: snapshot.provider_provenance ?? null,
       provider_match_input: snapshot.provider_match_input ?? null,
@@ -258,6 +273,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
         const frozen = evidence.get(provider.slug);
         return {
           rank: index + 1,
+          score: snapshot.computed_matches?.find(v => v.slug === provider.slug)?.score ?? null,
           slug: provider.slug,
           name: provider.name,
           provider_id: frozen?.provider_id ?? null,
@@ -428,7 +444,8 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
   if (!token) return { error: "token is required." };
 
   if (name === "get_rfp") {
-    const p = await getProjectByToken(token);
+    const stored = await getProjectByToken(token);
+    const p = stored ? await projectForDocumentRead(stored) : null;
     if (!p) return { error: "RFP not found for that token." };
     return {
       id: p.id, title: p.title, status: p.status, methodology_version: p.methodology_version,
@@ -440,12 +457,14 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     };
   }
   if (name === "list_rfp_questions") {
-    const p = await getProjectByToken(token);
+    const stored = await getProjectByToken(token);
+    const p = stored ? await projectForDocumentRead(stored) : null;
     if (!p) return { error: "RFP not found for that token." };
     return { sections: activeQuestions(p) };
   }
   if (name === "get_rfp_evidence_draft") {
-    const p = await getProjectByToken(token);
+    const stored = await getProjectByToken(token);
+    const p = stored ? await projectForDocumentRead(stored) : null;
     if (!p) return { error: "RFP not found for that token." };
     const vendorRef = String(args.vendor ?? "").trim();
     if (!vendorRef) return { error: "vendor is required (organisation name or Netify vendor slug)." };

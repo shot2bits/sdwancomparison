@@ -1,3 +1,4 @@
+import { mcpConsentError, withMcpConsentSchema } from "./mcp-consent";
 /**
  * MCP tools for Netify Security Sourcing (Phase A, 21 July 2026).
  * One tool: assess_security_requirement, the Notary read. The page advisor
@@ -187,7 +188,7 @@ const GET_STATUS_DEFINITION = {
       artefact_version: { type: "number", description: "Latest generated document version" },
       confidence: { type: "string" },
       summary: { type: "object" },
-      open_gaps: { type: "number", description: "Scoping gaps still to answer or accept before publication" },
+      open_gaps: { type: "number", description: "Scoping gaps still to answer or accept while the notice is a draft" },
       builder_url: { type: "string" },
       test: { type: "boolean" },
     },
@@ -218,7 +219,7 @@ const GENERATE_RFP_DEFINITION = {
       sections: { type: "number" },
       questions: { type: "number", description: "Answerable questions (informational items are not counted, weighted or scored)" },
       informational_items: { type: "number" },
-      open_gaps: { type: "number", description: "Gaps that must be answered or individually accepted before publication" },
+      open_gaps: { type: "number", description: "Gaps that must be answered or individually accepted while the notice is a draft" },
       builder_url: { type: "string" },
       note: { type: "string" },
       next_step: { type: "string", description: "Names the tool that publishes this Project (publish_rfp) and how its parameters map onto this one's." },
@@ -229,7 +230,7 @@ const GENERATE_RFP_DEFINITION = {
 const RESCOPE_DEFINITION = {
   name: "rescope_security_project",
   description:
-    "Re-scope a Security Sourcing project when the buyer's estate or situation has changed (more users, an acquisition, a new compliance obligation, answering an open gap). Runs the assessment on the updated requirement server-side, attaches Verdict v(n+1) and regenerates the RFP as version m+1; EVERY EARLIER VERSION STAYS IN THE PROJECT RECORD and the project story shows what changed. CONSENT REQUIRED: only call with the buyer's explicit agreement in this conversation; the recorded consent wording (returned as consent_text on refusal) states the version consequence. If the document has buyer edits since the last generation, the tool refuses unless replace_edits_consent: true is passed with the buyer's explicit agreement (their edits are replaced; earlier versions remain recoverable). Refuses at low confidence with the gap questions. Owner-gated: requires project_id and manage_token. Only before publication.",
+    "Re-scope a Security Sourcing project when the buyer's estate or situation has changed (more users, an acquisition, a new compliance obligation, answering an open gap). Runs the assessment on the updated requirement server-side, attaches Verdict v(n+1) and regenerates the RFP as version m+1; EVERY EARLIER VERSION STAYS IN THE PROJECT RECORD and the project story shows what changed. CONSENT REQUIRED: only call with the buyer's explicit agreement in this conversation; the recorded consent wording (returned as consent_text on refusal) states the version consequence. If the document has buyer edits since the last generation, the tool refuses unless replace_edits_consent: true is passed with the buyer's explicit agreement (their edits are replaced; earlier versions remain recoverable). Refuses at low confidence with the gap questions. Owner-gated: requires project_id and manage_token. Only while the notice is a draft.",
   inputSchema: {
     type: "object",
     properties: {
@@ -318,14 +319,14 @@ const CONTINUE_CONVERSATION_DEFINITION = {
   },
 } as const;
 
-export const SECURITY_TOOL_DEFINITIONS_ALL = [
+export const SECURITY_TOOL_DEFINITIONS_ALL = ([
   ...MCP_SECURITY_TOOL_DEFINITIONS,
   CREATE_PROJECT_DEFINITION,
   GENERATE_RFP_DEFINITION,
   RESCOPE_DEFINITION,
   GET_STATUS_DEFINITION,
   CONTINUE_CONVERSATION_DEFINITION,
-] as const;
+] as const).map(withMcpConsentSchema);
 
 export const SECURITY_TOOL_NAMES = new Set<string>(
   SECURITY_TOOL_DEFINITIONS_ALL.map((t) => t.name),
@@ -335,6 +336,8 @@ export async function callSecurityTool(
   name: string,
   args: Record<string, unknown>,
 ): Promise<unknown> {
+  const denied = mcpConsentError(name, args);
+  if (denied) return denied;
   switch (name) {
     case "assess_security_requirement":
       return assessSecurityRequirement((args ?? {}) as SecurityRequirementInput);

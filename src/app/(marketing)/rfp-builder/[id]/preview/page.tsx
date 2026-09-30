@@ -1,10 +1,11 @@
+import { sourcingAccess } from "@/lib/sourcing-access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getProject, getSession, listResponses, kvConfigured, kvGetJson } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
-import { documentSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel, buyerProfileSentence, sectorLabel, regionLabelList, complianceLabelList } from "@/lib/rfp-document";
+import { documentSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel, buyerProfileSentence, livingDocumentToRfpSections, sectorLabel, regionLabelList, complianceLabelList } from "@/lib/rfp-document";
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
 import { PROJECT_PHASE } from "@/lib/rfp-types";
@@ -54,11 +55,13 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { manage, from } = await searchParams;
   if (!kvConfigured()) notFound();
-  const project = await getProject(id);
+  let project = await getProject(id);
   if (!project) notFound();
 
   const jar = await cookies();
   const session = await getSession(jar.get(SESSION_COOKIE)?.value ?? null);
+  const sourcingGrant = await sourcingAccess(new Request("https://netify.co.uk/sase/", {headers:{cookie:jar.toString()}}),id);
+  const privateSourcing = Boolean(project.entrance_context?.raw_input.sourcing_request_id);
   const signedIn = Boolean(session);
 
   const tokenOk = Boolean(project.manage_token) && manage === project.manage_token;
@@ -66,7 +69,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
     Boolean(session) &&
     (session?.role === "netify" ||
       (session?.role === "buyer" && Boolean(project.owner_email) && session.email.toLowerCase() === project.owner_email.toLowerCase()));
-  if (!tokenOk && !sessionOwner) {
+  if (!tokenOk && !sessionOwner && !sourcingGrant) {
     return (
       <div className="mx-auto max-w-xl px-6 py-24">
         <p className="eyebrow mb-2">RFP preview</p>
@@ -82,6 +85,8 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
       </div>
     );
   }
+
+  if (privateSourcing && project.procurement_document) project = {...project,rfp_sections:livingDocumentToRfpSections(project.procurement_document)};
 
   // Carry the manage key through preview links so the anonymous-owner flow survives navigation.
   const keyQs = tokenOk && manage ? `?manage=${encodeURIComponent(manage)}` : "";
@@ -158,7 +163,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
           {/* The return honours where you came from (Harry's Section 1
               finding, 28 Jul 2026: preview opened from the project page
               still said back to the builder). */}
-          {from === "project" ? (
+          {privateSourcing ? <Link href={`/rfp-builder/${id}`} className="underline">← Back to your private project</Link> : from === "project" ? (
             <Link href={`/project/${id}${manage ? `?manage=${encodeURIComponent(manage)}` : ""}`} className="underline">← Back to your project</Link>
           ) : (
             <a href={`/sase/home/?id=${encodeURIComponent(id)}${manage ? `&manage=${encodeURIComponent(manage)}` : ""}`} className="underline">← Back to your workspace</a>
@@ -346,7 +351,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
           <section className="mb-8">
             <h2 className="mb-2 text-lg font-semibold">Submission instructions</h2>
             <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
-              <li>Respond through the Netify marketplace response link provided with this RFP: structured answers per question, evidence uploads, private pricing.</li>
+              <li>{privateSourcing ? "Return written answers, evidence and itemised pricing to the Netify desk using the channel agreed for this project." : "Respond through the Netify marketplace response link provided with this RFP: structured answers per question, evidence uploads, private pricing."}</li>
               <li>Answer every question; mark exceptions explicitly rather than omitting them.</li>
               <li>Pricing submitted through the marketplace stays private to the buyer.</li>
               {project.nda.required && <li>An NDA must be accepted before the full requirement detail and response form unlock.</li>}
@@ -368,7 +373,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
             the room's primary voice now argues for responses. */}
         <aside className="print:hidden">
           <div className="sticky top-6 space-y-4">
-            {engine ? (
+            {privateSourcing ? <div className="rounded-sm border p-5"><h2>Continue your private sourcing</h2><p>Your RFP, connectivity requirements and written proposals remain in this project. A public notice is not required.</p><Link href={`/rfp-builder/${id}`}>Return to your project</Link></div> : engine ? (
               isPublished ? (
                 <div className="rounded-sm border-2 border-emerald-300 bg-emerald-50/50 p-5">
                   <p className="mb-1 text-sm font-semibold text-emerald-900">Published and live</p>
@@ -415,7 +420,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               </div>
             )}
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
-              {signedIn ? (
+              {privateSourcing ? <><p>Download your private draft. This shares nothing with suppliers.</p><a href={`/sase/api/sourcing/projects/${id}/document/?format=doc`}>Download Word</a>{" · "}<a href={`/sase/api/sourcing/projects/${id}/document/`}>Download Markdown</a><PrintButton /></> : signedIn ? (
                 <>
                   <p className="mb-1 text-sm font-medium">Download this RFP</p>
                   <p className="mb-4 text-sm text-[var(--ink-600)]">Signed in as {session?.email}. The document is yours either way; downloading shares nothing with vendors.</p>
@@ -441,10 +446,10 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 text-sm">
               <p className="eyebrow mb-2">Next steps</p>
               <ul className="space-y-1.5">
-                <li><Link href={`/project/${id}${keyQs}`} className="underline">Project home</Link></li>
-                <li><Link href={`/home/?id=${encodeURIComponent(id)}${manage ? `&manage=${encodeURIComponent(manage)}` : ""}`} className="underline">Keep editing in the builder</Link></li>
-                <li><Link href={`/rfp-builder/${id}/review${keyQs}`} className="underline">Agent review and approvals</Link></li>
-                <li><Link href="/opportunities/new" className="underline">Publish a companion project notice</Link></li>
+                <li><Link href={privateSourcing ? `/rfp-builder/${id}` : `/project/${id}${keyQs}`} className="underline">Project home</Link></li>
+                <li><Link href={privateSourcing ? `/rfp-builder/${id}` : `/home/?id=${encodeURIComponent(id)}${manage ? `&manage=${encodeURIComponent(manage)}` : ""}`} className="underline">Keep editing in the builder</Link></li>
+                {!privateSourcing && <li><Link href={`/rfp-builder/${id}/review${keyQs}`} className="underline">Agent review and approvals</Link></li>}
+                {!privateSourcing && <li><Link href="/opportunities/new" className="underline">Publish a companion project notice</Link></li>}
               </ul>
             </div>
           </div>

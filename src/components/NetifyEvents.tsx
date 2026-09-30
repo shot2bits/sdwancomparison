@@ -3,9 +3,11 @@
 // Consent-dependent commercial events. Only route categories and bounded
 // operational properties are sent; server-confirmed outcomes are reported separately.
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { analyticsPath, analyticsReferrer, analyticsLocation, analyticsProps } from '@/lib/analytics-privacy';
+import {getConsent} from '@/lib/cookie-consent';
+import { journeyAttribution } from '@/lib/journey-attribution';
 
 type VaFn = {
  (event: 'event', props: {name:string;data?:Record<string,string>}):void;
@@ -21,20 +23,8 @@ declare global {
 }
 
 function readConsent(): { analytics: boolean; marketing: boolean } {
-  try {
-    const m = document.cookie.match(/(?:^|; )netify_consent=([^;]*)/);
-    const raw = m
-      ? decodeURIComponent(m[1])
-      : window.localStorage.getItem('netify_consent');
-    if (!raw) return { analytics: false, marketing: false };
-    const parsed = JSON.parse(raw) as { categories?: Record<string, boolean> };
-    return {
-      analytics: parsed.categories?.analytics === true,
-      marketing: parsed.categories?.marketing === true,
-    };
-  } catch {
-    return { analytics: false, marketing: false };
-  }
+  const state = getConsent();
+  return {analytics: state?.categories.analytics === true, marketing: state?.categories.marketing === true};
 }
 
 // Enhanced Measurement reads raw search parameters independently of page_location.
@@ -85,6 +75,7 @@ export function fireNetifyEvent(name: string, data: Record<string, string> = {})
  */
 export function firstTouch(): { ref: string; landing: string } | null {
   try {
+    if (!readConsent().analytics) {sessionStorage.removeItem('netify_first_touch'); return null;}
     const raw = sessionStorage.getItem("netify_first_touch");
     if (!raw) return null;
     const t = JSON.parse(raw) as { ref?: string; landing?: string };
@@ -95,8 +86,10 @@ export function firstTouch(): { ref: string; landing: string } | null {
 }
 
 function fire(name: string, data: Record<string, string> = {}): void {
+  if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') return;
   if (!readConsent().analytics) return;
-  const payload = { ...analyticsProps(data), path: analyticsPath(window.location.href) };
+  const journey=journeyAttribution();
+  const payload = { ...analyticsProps(data), path: analyticsPath(window.location.href), measurement_version:'2', ...(journey?{landing_page:journey.landing_page,acquisition:journey.acquisition}:{acquisition:'unknown'}) };
   try {
     window.va?.('event', { name, data: payload });
   } catch {
@@ -105,7 +98,8 @@ function fire(name: string, data: Record<string, string> = {}): void {
   try {
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void })
       .gtag;
-    if(googleAllowed())gtag?.('event', name, { event_category: 'commercial', ...payload, page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
+    const {source, ...googlePayload} = payload as typeof payload & {source?:string};
+    if(googleAllowed())gtag?.('event', name, { event_category: 'commercial', ...googlePayload, ...(source ? {interaction_source:source} : {}), page_location: analyticsLocation(window.location.href), page_referrer: analyticsReferrer(document.referrer), page_title: 'Netify buying platform' });
   } catch {
     /* ignore */
   }
@@ -113,13 +107,22 @@ function fire(name: string, data: Record<string, string> = {}): void {
 
 export default function NetifyEvents() {
   const pathname=usePathname();
+  const [consentRevision, setConsentRevision] = useState(0);
   useEffect(() => {
+    const update = () => setConsentRevision(value => value + 1);
+    window.addEventListener('netify-consent-change', update);
+    return () => window.removeEventListener('netify-consent-change', update);
+  }, []);
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') return;
     installGooglePrivacyGuard();
+    journeyAttribution();
     // First-touch attribution capture, once per browser session (see
     // firstTouch above). Must run before anything else so a visitor who
     // signs in on their landing page still gets attributed.
     try {
-      if (!sessionStorage.getItem("netify_first_touch")) {
+      if (!readConsent().analytics) sessionStorage.removeItem('netify_first_touch');
+      else if (!sessionStorage.getItem("netify_first_touch")) {
         sessionStorage.setItem(
           "netify_first_touch",
           JSON.stringify({ ref: analyticsReferrer(document.referrer), landing: analyticsPath(window.location.href), at: Date.now() }),
@@ -245,7 +248,8 @@ export default function NetifyEvents() {
     const onSubmit = (e: Event) => {
       const form = e.target as Element | null;
       if (!form || form.tagName !== 'FORM') return;
-      fire('form_submit');
+      // DOM submission is an attempt, not server acceptance or a buying enquiry.
+      fire('form_submit_attempt');
     };
 
     document.addEventListener('click', onClick, true);
@@ -256,8 +260,7 @@ export default function NetifyEvents() {
       document.removeEventListener('focusin', onFocusIn, true);
       document.removeEventListener('submit', onSubmit, true);
     };
-  }, [pathname]);
+  }, [pathname, consentRevision]);
 
   return null;
 }
-

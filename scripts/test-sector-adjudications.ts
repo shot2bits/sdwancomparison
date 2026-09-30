@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import audit from '../docs/action-first/sector-adjudications.json';
+import { REVIEWED_PROVIDER_PROJECTIONS } from '../src/lib/provider-projection-review';
+assert.equal(audit.length,72);assert.equal(new Set(audit.map(r=>r.row_id)).size,72);
+assert(audit.every(r=>r.note && r.disposition && r.release_signoff==='pending' && !r.supplier_suitability_confirmed));
+const p=REVIEWED_PROVIDER_PROJECTIONS;
+assert.equal(p.cisco.sectors?.manufacturing,'yes');assert.equal(p.cisco.sectors?.professional_services,'yes');
+assert.equal(p.aryaka.sectors?.manufacturing,'yes','A named case must not be downgraded by an anonymous additional case');
+assert.equal(p.opensystems.sectors?.transport_logistics,'unknown');assert.equal(p.opensystems.sectors?.manufacturing,'yes');
+assert.equal(p['palo-alto-networks'].sectors?.transport_logistics,'unknown');
+assert.equal(p['verizon-business'].sectors?.government_public_sector,'unknown','Video collaboration is not SD-WAN evidence');
+assert.equal(p.fortinet.sectors?.education,'partial','Anonymous case must remain qualified');
+assert.equal(p.lumen.sectors?.manufacturing,'unknown','Planned implementation is not a completed deployment');
+assert(Object.values(p).every(r=>r.source_urls.length && r.qualification && r.review_due));
+console.log('PASS 72 adjudications: classification corrections, anonymous evidence limits, source/date provenance, named-case precedence, no supplier suitability claims');

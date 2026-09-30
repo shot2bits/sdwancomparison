@@ -1,3 +1,4 @@
+import { confirmedBuyerLedger } from "@/lib/current-buyer-facts";
 /**
  * 2030 blueprint, full-unification CLOSURE pass (17 Aug 2026).
  *
@@ -270,7 +271,7 @@ export async function buildEnvelopeUpdate(params: {
   // allowed through, exactly the migration path fixture K exercises.
 
   /* ---- Server-derived inputs (never trusted from the client) ---- */
-  const requirement = requirementFrom(facts);
+  const requirement = requirementFrom(confirmedBuyerLedger(facts));
   // `buying` is its own fact-derived value, NOT part of SecurityRequirementInput
   // (extract.ts's own comment: "procurement.buying/operatingModel...
   // applyUpdates() never writes them into SecurityRequirementInput" -- they
@@ -279,7 +280,7 @@ export async function buildEnvelopeUpdate(params: {
   // (line ~1183: `buying === "managed_security" || buying === null`) and
   // compileProcurementDocument()'s own internals already use -- mirrored
   // here exactly, not reinvented.
-  const buying = buyingOf(facts);
+  const buying = buyingOf(confirmedBuyerLedger(facts));
   const securityScope = buying === "managed_security" || buying === null;
   const verdict = securityScope ? await assessSecurityRequirement(requirement) : null;
   const { noted } = replayDecisionLedger(mergedDecisionLedger);

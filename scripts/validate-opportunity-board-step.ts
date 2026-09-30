@@ -44,18 +44,13 @@ check(
   "the success state links to the discoverable Opportunity Board",
   desk.includes("Open the Opportunity Board") && desk.includes("BOARD_LINK.href"),
 );
-check(
-  "signed-out visitors receive the real anonymous public notice list",
-  board.includes("<BoardList opps={allOpps} />") && !board.includes("const opps = signedIn ? allOpps : []"),
-);
-check(
-  "the board explains the boundary between public notice and gated RFP",
-  board.includes("The anonymous notices are visible below") && board.includes("Buyer identity and all pricing remain private"),
-);
-check(
-  "the public archive is not accidentally hidden from signed-out visitors",
-  board.includes("{allArchived.length > 0") && board.includes("{allArchived.map"),
-);
+// Action-first release deliberately replaces the public notice board with the
+// consented Market Record. Legacy publication and private record checks above remain.
+check("public board now presents the Market Record", board.includes("Netify Market Record") && !board.includes("<BoardList"));
+check("empty record does not invent completed sourcing", board.includes("No approved outcome records have been published yet.") && board.includes("records.length === 0") && board.includes("listPublicOutcomes"));
+check("existing private records are retained", board.includes("Records have not been deleted.") && board.includes('href="/shortlist/"'));
+const recordRoute=read("src/app/(marketing)/shortlist/market-record.json/route.ts");
+check("record export retains publication permission and privacy rules", recordRoute.includes("Buyer permission and redaction review required") && recordRoute.includes("Never publish private project IDs"));
 
 if (failed) {
   console.error(`\n${failed} Step 10 validation${failed === 1 ? "" : "s"} failed.`);

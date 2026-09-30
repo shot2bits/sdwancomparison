@@ -1,3 +1,4 @@
+import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 /**
  * The citable, server-rendered public content of the canonical builder
  * page, https://netify.co.uk/sase-sd-wan-rfp-builder/ (Robert, 3 Sep
@@ -106,7 +107,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is the Netify RFP Builder free?",
-    a: "Yes. Building and validating an SD-WAN or SASE RFP is free for buyers. Final downloads and personalised matches unlock after anonymous publication. Review the notice and confirm publication with a verified work email; supplier pricing is permission-controlled.",
+    a: SHORTLIST_FAQS[0].a,
   },
 ];
 

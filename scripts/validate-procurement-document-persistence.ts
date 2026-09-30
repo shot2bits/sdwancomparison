@@ -135,7 +135,9 @@ function main() {
     const pB = ProjectDetailsSchema.parse(minimalProjectDetails({ procurement_document: s2.doc }));
     const snapA = JSON.stringify(rfpContentSnapshot(pA));
     const snapB = JSON.stringify(rfpContentSnapshot(pB));
-    record(snapA === snapB, "4: rfpContentSnapshot() output is IDENTICAL across two records differing only in procurement_document", snapA === snapB ? "identical, as required" : "DIVERGED -- procurement_document is leaking into the content hash");
+    record(snapA !== snapB, "4: a genuinely changed saved requirement creates a new publication identity", snapA !== snapB ? "changed requirement, changed identity" : "changed requirement was ignored");
+    const metadataOnly = {...pA, procurement_document:{...pA.procurement_document!,version:pA.procurement_document!.version+1}};
+    record(JSON.stringify(rfpContentSnapshot(metadataOnly)) === snapA, "4: document version metadata alone does not create a new publication", "semantic content only");
   }
 
   /* ================================================================ */

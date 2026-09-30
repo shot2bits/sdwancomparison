@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {parseStored,CONSENT_EXPIRY_DAYS,acceptAll} from '../src/lib/cookie-consent';
+const now=Date.now();const valid={...acceptAll(),setAt:new Date(now-1000).toISOString()};
+assert.equal(parseStored(JSON.stringify(valid),now)?.categories.analytics,true);
+assert.equal(parseStored(JSON.stringify({...valid,setAt:new Date(now-CONSENT_EXPIRY_DAYS*86400000).toISOString()}),now),null);
+assert.equal(parseStored(JSON.stringify({...valid,setAt:'broken'}),now),null);
+assert.equal(parseStored(JSON.stringify({...valid,setAt:new Date(now+1000).toISOString()}),now),null);
+assert.equal(parseStored(JSON.stringify({...valid,categories:{necessary:true,analytics:'yes'}}),now),null);
+assert.equal(parseStored(null,now),null);
+console.log('PASS shared consent: valid choices, expiry, future dates and malformed values');

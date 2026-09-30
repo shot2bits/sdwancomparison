@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION, COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
 import { buyerAssistantEnabled } from "@/lib/buyer-assistant";
 import BuyingWorkspaceShell from "@/components/procurement/BuyingWorkspaceShell";
 import PublicComparison from "@/components/procurement/PublicComparison";
@@ -70,14 +71,13 @@ export const ENGINE_ROLE =
  * whole ENGINE_DESCRIPTION paragraph stack (984 characters). */
 export const RFP_META_DESCRIPTION =
   "Build an SD-WAN RFP or SASE RFP with governed supplier questions, validate it, publish anonymously and run a like-for-like vendor evaluation. Free for buyers.";
-export const ENGINE_PROMISE =
-  "Describe your needs, bring an RFP or RFI, or build a Short or Detailed RFP. Review and publish an anonymous project to invite supplier responses. A full RFP is optional.";
+export const ENGINE_PROMISE = SOURCING_DESCRIPTION;
 export const ENGINE_VALUE =
   "Use Netify's question bank and sourced provider comparisons to structure your requirements. Choose your sector, including retail, manufacturing, healthcare, financial services or government, then review the relevant questions against your business needs.";
 export const ENGINE_AGENT =
   "Use public Netify research through a supported MCP client. Prepare requirements with provenance, then continue in Netify for identity checks and publication approval. Private tools require the credentials described by each tool.";
 export const ENGINE_CONTROL =
-  "Free for buyers. Review the anonymous notice before publishing. Your identity and contact details remain private. Publishing does not require you to buy, speak to a supplier or accept a response.";
+  "Research is open. Approve supplier recipients and an anonymous brief before a request. A full RFP is optional.";
 export const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 // State-0 height correction (18 Aug 2026 Constitution): a short, real
@@ -109,7 +109,7 @@ export default function ProcurementEntry({ guidance }: { guidance?: ReactNode } 
           (landmark-no-duplicate-main, landmark-main-is-top-level). A
           plain `<div>` keeps every class/layout unchanged; the page's one
           true main landmark stays exactly where it already was. */}
-      <div className="mx-auto max-w-none px-0 pb-0 pt-0">
+      <div className="mx-auto max-w-none px-0 pb-0 pt-0"><aside className="mx-auto max-w-5xl px-6 py-6"><p>{COMMISSION_DESCRIPTION}</p><a className="underline" href="/sase/shortlist/">Prepare a sourcing plan: brief → approve suppliers → compare written responses</a></aside>
         {/* One visual hierarchy (Robert, 29 Jul, exact-copy prompt): H1,
             supporting paragraph, trust paragraph, input: nothing else.
             All three blocks inline-styled inside CollapsibleHero so global

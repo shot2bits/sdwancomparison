@@ -1,3 +1,4 @@
+import type { ActivityMetadata } from "./activity-provenance";
 /**
  * RFP entity model. Client-safe: pure types and Zod schemas, no Node imports.
  * Shared by the store, the API routes, the agent and the UIs.
@@ -219,6 +220,7 @@ export const ProviderMatchPreviewSchema = z.object({
   eligible_technology_count: z.number().int().min(0),
   eligible_managed_provider_count: z.number().int().min(0),
   meets_all_mandatory_count: z.number().int().min(0),
+  sector_unconfirmed_count: z.number().int().min(0).optional(),
   capability_coverage: z.array(z.object({ code: z.string(), supported_provider_count: z.number().int().min(0) }).strict()),
   unresolved_requirements: z.array(z.string()),
   calculated_at: z.number(),
@@ -364,6 +366,8 @@ export const ProjectDetailsSchema = z.object({
    *  emails, joins no buyer index or moderation queue, and is excluded
    *  from telemetry funnels. */
   test: z.boolean().optional(),
+  activity: z.custom<ActivityMetadata>().optional(),
+  activity_environment: z.enum(["production", "preview", "development", "unknown"]).optional(),
   /**
    * 2030 blueprint, Checkpoint B (17 Aug 2026): the canonical envelope's
    * OWN schema version -- distinct from `methodology_version` (the
@@ -590,6 +594,10 @@ export const CONNECTION_STATUSES = ["invited", "engaged", "demo_requested", "con
 export type ConnectionStatus = (typeof CONNECTION_STATUSES)[number];
 
 export const SupplierConnectionSchema = z.object({
+  activity_environment: z.enum(["production","preview","development","unknown"]).optional(),
+  publication_id: z.string().optional(),
+  opportunity_id: z.string().optional(),
+  first_delivered_at: z.number().optional(),
   id: z.string(),
   rfp_id: z.string(),
   vendor_slug: z.string(),       // ties the supplier to the graded vendor directory
@@ -604,5 +612,11 @@ export const SupplierConnectionSchema = z.object({
   // the link during the brokered phase before supplier registration.
   viewed_at: z.number().optional(),
   forwarded_at: z.number().optional(),
+  // Creating an invitation is not transport delivery. Legacy records stay unknown.
+  delivery: z.object({
+    state: z.enum(["not_attempted", "accepted", "delivered", "failed", "unknown"]),
+    updated_at: z.number(),
+    receipt_ref: z.string().optional(),
+  }).optional(),
 }).strict();
 export type SupplierConnection = z.infer<typeof SupplierConnectionSchema>;

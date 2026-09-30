@@ -1,3 +1,4 @@
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 /**
  * Buyer notifications for supplier activity on an opportunity. Best effort
  * via Resend (same transport as magic links); failures never block the
@@ -40,7 +41,7 @@ const ACTIVITY_LABELS: Partial<Record<FeedType, string>> = {
  * path a buyer used. Best effort: never blocks the publish response.
  */
 export async function notifyOpportunityPublishedLead(opp: Opportunity): Promise<boolean> {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return false;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
@@ -53,7 +54,7 @@ export async function notifyOpportunityPublishedLead(opp: Opportunity): Promise<
     opp.regions.length > 0 && `Regions: ${opp.regions.join(", ")}`,
   ].filter(Boolean).join("<br/>");
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({
@@ -79,7 +80,7 @@ export async function notifyBuyerOfSupplierActivity(
   supplierName: string,
   type: FeedType,
 ): Promise<boolean> {
-  const key = process.env.RESEND_API_KEY;
+  const key = activityMailKey();
   if (!key) return false;
   if (!opp.owner_email) return false; // pre-rebuild opportunities have no owner
   const label = ACTIVITY_LABELS[type];
@@ -98,7 +99,7 @@ export async function notifyBuyerOfSupplierActivity(
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const roomUrl = `${SITE_URL}/opportunities/${opp.id}/room`;
   try {
-    await fetch("https://api.resend.com/emails", {
+    await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({

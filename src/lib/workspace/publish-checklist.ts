@@ -34,6 +34,7 @@
  * PURE: no React, no I/O (Article 17).
  */
 
+import { confirmedBuyerLedger } from "@/lib/current-buyer-facts";
 import { buyingOf, operatingModelOf, type WorkspaceFact } from "@/lib/workspace/draft";
 import { replayDecisionLedger, type DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
 import { siteResilienceClauseExists } from "@/lib/workspace/procurement-outline";
@@ -87,12 +88,12 @@ export function persistedEssentialBaselineChecklist(input: {
   decisionLedger: DecisionLedgerEntry[];
   procurementDocument?: Pick<LivingProcurementDocument, "clauses" | "openDecisions"> | null;
 }): PublishChecklist {
-  const live = input.facts.filter((fact) => !fact.struck);
+  const live = confirmedBuyerLedger(input.facts);
   const hasFact = (path: string) => live.some((fact) => fact.path === path);
   const { noted } = replayDecisionLedger(input.decisionLedger);
   const notedIds = noted.map((item) => item.id);
-  const buying = buyingOf(input.facts);
-  const opModel = operatingModelOf(input.facts);
+  const buying = buyingOf(live);
+  const opModel = operatingModelOf(live);
   const openDecisionIds = new Set(input.procurementDocument?.openDecisions.map((decision) => decision.id) ?? []);
   const clauses = input.procurementDocument?.clauses ?? [];
 

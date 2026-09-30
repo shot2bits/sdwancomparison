@@ -1,3 +1,4 @@
+import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { kvConfigured, kvGetJson, kvSetJson, listAllRfpIds, getProjectsBulk, listSessions } from "@/lib/rfp-store";
 import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
 import { SITE_URL } from "@/lib/structured-data";
@@ -70,7 +71,7 @@ export async function GET(req: Request) {
     return Response.json({ error: process.env.CRON_SECRET ? "Unauthorised." : "CRON_SECRET not configured." }, { status: 401 });
   }
   if (!kvConfigured()) return Response.json({ error: "KV not configured." }, { status: 503 });
-  const resendKey = process.env.RESEND_API_KEY;
+  const resendKey = activityMailKey();
   const dry = new URL(req.url).searchParams.get("dry") === "1";
   if (!resendKey && !dry) return Response.json({ error: "RESEND_API_KEY not configured." }, { status: 503 });
 
@@ -109,7 +110,7 @@ export async function GET(req: Request) {
     const unsubUrl = `${SITE_URL}/api/email/unsubscribe?e=${encodeURIComponent(email)}&t=${signUnsubscribe(email)}`;
     const { text, html } = emailBodies(unsubUrl);
     try {
-      const res = await fetch("https://api.resend.com/emails", {
+      const res = await activityMailFetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${resendKey}`, "content-type": "application/json" },
         body: JSON.stringify({

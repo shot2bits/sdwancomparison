@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:buyer-recovery": "tsx scripts/test-buyer-recovery.ts && tsx scripts/test-notice-recovery.ts",
     "dev": "next dev",
     "build": "node scripts/build-release.mjs",
     "start": "next start",
@@ -49,7 +50,12 @@
     "validate:ui:row8": "node scripts/validate-row8-vendor-disclosure-ui.mjs",
     "validate:ui:setup": "playwright install chromium",
     "test:buying-funnel": "tsx scripts/test-buying-funnel.ts",
-    "test:acceptance-fixes": "tsx scripts/test-acceptance-save-history.ts && tsx scripts/test-acceptance-correction.ts && tsx scripts/test-acceptance-input.ts && tsx scripts/test-acceptance-comparison.tsx && tsx scripts/test-acceptance-auth-return.ts && tsx scripts/test-acceptance-supplier-access.ts && tsx scripts/test-harry-retest-users.ts"
+    "test:acceptance-fixes": "tsx scripts/test-acceptance-save-history.ts && tsx scripts/test-acceptance-correction.ts && tsx scripts/test-acceptance-input.ts && tsx scripts/test-acceptance-comparison.tsx && tsx scripts/test-acceptance-auth-return.ts && tsx scripts/test-acceptance-supplier-access.ts && tsx scripts/test-harry-retest-users.ts",
+    "test:activity-reporting": "tsx scripts/test-reliable-activity.ts && tsx scripts/test-activity-report-access.ts",
+    "test:rfp-conversion": "tsx scripts/test-rfp-conversion-fixes.ts",
+    "test:marketplace-journey": "tsx scripts/test-marketplace-journey.tsx",
+    "test:action-first": "tsx scripts/test-sector-signoff.ts && tsx scripts/test-uk-carrier-review.ts && tsx scripts/test-response-panel.tsx && tsx scripts/test-sourcing-target.ts && tsx scripts/test-sourcing.ts && tsx scripts/test-sourcing-routes.ts && python3 scripts/test-sector-normalisation.py && tsx scripts/test-sector-adjudications.ts && tsx scripts/test-consent-storage.ts && tsx scripts/test-sourcing-comparison-ui.tsx && tsx scripts/test-preview-mail.ts && npm run test:market-outcomes",
+    "test:market-outcomes": "tsx scripts/test-market-outcomes.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

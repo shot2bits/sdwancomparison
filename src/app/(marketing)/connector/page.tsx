@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PRICING_ROUTES } from "@/lib/pricing-routes";
+import { SOURCING_TOOL_DEFINITIONS } from "@/lib/mcp-sourcing-tools";
 import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tool-definitions";
 import { MCP_RFP_TOOL_DEFINITIONS } from "@/lib/mcp-rfp-tools";
 import { MCP_COST_TOOL_DEFINITIONS } from "@/lib/mcp-cost-tools";
@@ -44,13 +45,25 @@ export default function ConnectorPage() {
         <p className="mt-3 text-sm"><a className="underline" href="/sase/.well-known/mcp-server-metadata.json">Server metadata</a> · <a className="underline" href="/sase/capabilities.json">Capabilities and access flags</a> · <a className="underline" href={ENDPOINT}>Endpoint discovery</a></p>
       </section>
 
+      <section className="mt-10" aria-labelledby="mcp-sourcing">
+        <h2 id="mcp-sourcing" className="mb-3 text-xl font-semibold">Turn a shortlist into a sourcing request</h2>
+        <p className="text-sm text-slate-700">Bring a brief or research shortlist into the same Netify service. Requests require buyer-confirmed recipients and request-specific work-email confirmation before desk review. No public listing is required for this private sourcing journey.</p>
+        <ul className="mt-4 space-y-4 text-sm text-slate-700">
+          {SOURCING_TOOL_DEFINITIONS.map((tool) => (
+            <li key={tool.name}><code>{tool.name}</code><p className="mt-1">{tool.description}</p></li>
+          ))}
+        </ul>
+        <p className="mt-4 text-sm text-slate-600">ChatGPT app availability is subject to app approval; the public MCP connection is the integration route.</p>
+        <p className="mt-3 text-sm"><a className="underline" href="/sase/shortlist/#sourcing-requirement">Bring your shortlist on the website</a></p>
+      </section>
+
       <section className="mt-10" aria-labelledby="mcp-evidence">
         <h2 id="mcp-evidence" className="mb-3 text-xl font-semibold">Evidence your assistant can use</h2>
         <ul className="list-disc space-y-2 pl-5 text-sm text-slate-700">
           <li><code>compare_vendors</code> compares two or three named providers and returns a link to continue the comparison on Netify. Public comparison does not require publication.</li>
           <li><code>verify_claim</code> returns source evidence and dates where available; unsupported claims remain unconfirmed. <code>list_exclusions</code> explains excluded or conflicting evidence.</li>
           <li><code>workspace_cycle</code> and <code>workspace_ingest</code> return requirements with provenance, including stated facts and labelled inferences. They do not publish a project.</li>
-          <li><code>build_sase_shortlist</code> previews aggregate coverage. Personalised provider identities are available through <code>get_unlocked_matches</code> only after publication and verified ownership.</li>
+          <li><code>build_sase_shortlist</code> previews aggregate coverage. The legacy published-project tool <code>get_unlocked_matches</code> requires publication and verified ownership. For open named evidence matches without publication, use <code>prepare_sourcing_plan</code> above.</li>
         </ul>
         <p className="mt-4 text-sm"><a className="underline" href="/sase/rfp-builder/questions/">Read the question bank</a> · <a className="underline" href="/sase/question-bank.json">Question data</a> · <a className="underline" href="/sase/rfp-validation-methodology.json">Validation method</a> · <a className="underline" href="/sase/shortlist/">Compare providers</a></p>
       </section>
@@ -81,6 +94,8 @@ export default function ConnectorPage() {
         <p>Use a Short or Detailed RFP, bring an existing RFP or RFI, or publish a basic requirements brief. Keep your bespoke questions and review what suppliers will receive. A project credential is not consent to publish. Supplier RFP submissions currently require the verified web response form.</p>
         <p className="mt-3"><a className="underline" href="https://netify.co.uk/sase-sd-wan-rfp-builder/">Open the buying workspace</a> · <a className="underline" href="/sase/opportunities/board/">View the opportunity board</a> · <a className="underline" href="/sase/cost-estimator/">Estimate cost bands</a></p>
         <h2 className="mb-3 mt-8 text-xl font-semibold">Privacy and permissions</h2>
+        <p className="mb-3">The current service does not provide an OAuth identity bridge. Private actions requiring a verified web session must continue on the website. Never paste session cookies into an assistant. A successful public connection is not proof of directory listing or private-client access.</p>
+        <p className="mb-3">Confirm each action before an agent saves or changes a project. Publication has its own versioned consent. After a timeout, read the saved state before retrying; automatic retries require explicit tool support. Published facts and evidence remain frozen together. Zero confirmed matches means no suppliers were invited.</p>
         <p>Public research does not require sign-in. Stateless tools do not create a project; draft-creation tools store private project data and return a credential. Do not share private tokens or buyer documents without authorization. Buyer identity and supplier pricing are protected by the relevant project permissions.</p>
         <p className="mt-3"><a className="underline" href="https://netify.co.uk/privacy-policy/">Privacy policy</a> · <a className="underline" href="https://netify.co.uk/terms-conditions/">Terms</a> · Support: support@netify.com</p>
         <h2 className="mb-3 mt-8 text-xl font-semibold">BT buying and reseller services</h2>

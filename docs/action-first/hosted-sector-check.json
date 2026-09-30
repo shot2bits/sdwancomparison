@@ -1,0 +1,33 @@
+[
+  {
+    "sector": "healthcare",
+    "need": "sase",
+    "source": "neon",
+    "eligible_count": 0,
+    "matches": []
+  },
+  {
+    "sector": "healthcare",
+    "need": "sdwan",
+    "source": "neon",
+    "eligible_count": 0,
+    "matches": []
+  },
+  {
+    "sector": "manufacturing",
+    "need": "sdwan",
+    "source": "neon",
+    "eligible_count": 2,
+    "matches": [
+      "Cisco",
+      "Aryaka"
+    ]
+  },
+  {
+    "sector": "financial_services",
+    "need": "sdwan",
+    "source": "neon",
+    "eligible_count": 0,
+    "matches": []
+  }
+]

@@ -1,0 +1,12 @@
+import React from 'react';
+import assert from 'node:assert/strict';
+import {renderToStaticMarkup} from 'react-dom/server';
+import BidComparison from '../src/components/BidComparison';
+import {FeedItemSchema} from '../src/lib/opportunity-types';
+const item=FeedItemSchema.parse({id:'synthetic',actor_type:'supplier',actor_slug:'test',actor_name:'Test',type:'pricing',created:1,pricing:{amount:100,model:'total_monthly',currency:'GBP',unit_note:'10 sites, 36 months'},links:['https://supplier.example/proposal','javascript:alert(1)','not a URL']});
+const markup=renderToStaticMarkup(<BidComparison feed={[item]}/>);
+assert(markup.includes('https://supplier.example/proposal'));
+assert(markup.includes('noopener noreferrer'));
+assert(!markup.includes('javascript:'));
+assert(!markup.includes('not a URL'));
+console.log('PASS written proposal evidence is reachable; malformed and executable links are excluded');

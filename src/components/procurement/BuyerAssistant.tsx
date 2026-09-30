@@ -131,7 +131,7 @@ export default function BuyerAssistant({ mode, onCompare, onProject }: { mode: M
           {result.questions.length > 0 && <><h3>Questions to resolve</h3><ul>{result.questions.map((q, i) => <li key={i}>{q}</li>)}</ul></>}
           {result.notes.length > 0 && <details><summary>Extraction notes</summary><ul>{result.notes.map((n, i) => <li key={i}>{n}</li>)}</ul></details>}
           {result.comparison && <><h3>Delivery model comparison</h3><p>General buying guidance from Netify’s <a href="/sase/cost-estimator/">cost methodology</a>. Suitability depends on your team and supplier contract.</p><div className="nf-assistant-table"><table><thead><tr>{result.comparison.columns.map(c => <th key={c}>{c}</th>)}</tr></thead><tbody>{result.comparison.rows.map((row, i) => <tr key={i}>{result.comparison!.columns.map(c => <td key={c}>{row[c]}</td>)}</tr>)}</tbody></table></div></>}
-          <p>Check the requirements above before continuing. The short brief keeps company identity separate and requires your approval before publication.</p>
+          <p>Check the requirements above before continuing. The short brief keeps company identity separate and requires your approval while the notice is a draft.</p>
           <div className="nf-assistant-actions"><button className="nf-buying-primary" disabled={busy || applied} onClick={() => void apply()}>{applied ? 'Added to your brief' : 'Add reviewed requirements to my brief'}</button><button onClick={onCompare}>Compare providers</button></div>
           <p className="nf-assistant-meta">Your current RFP remains available. A full RFP is optional; publishing your project unlocks personalised matches and supplier responses.</p>
         </section>}

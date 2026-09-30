@@ -79,6 +79,6 @@ export async function GET(req: Request) {
       notices: (await sessionFromRequest(req)) ? notices : [],
       counts: { vendors: vendors.length, notices: notices.length },
     },
-    { headers: { ...cors, "cache-control": "public, max-age=120, stale-while-revalidate=600" } },
+    { headers: { ...cors, "cache-control": "private, no-store" } },
   );
 }

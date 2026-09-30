@@ -1,0 +1,56 @@
+{
+  "deployment": "https://sasecomparison-5q8tnvvap-netifymarketplace.vercel.app",
+  "commit": "3562470",
+  "checked_at": "2026-09-30T13:14:28.630Z",
+  "page": {
+    "status": 200,
+    "robots": "noindex, nofollow"
+  },
+  "feed": {
+    "status": 200,
+    "robots": "noindex, nofollow",
+    "vendors": 30,
+    "publication_required": false
+  },
+  "record": {
+    "status": 200,
+    "robots": "noindex, nofollow",
+    "body": {
+      "contract_version": "market-record/1.0.0",
+      "records": [],
+      "publication_rules": [
+        "Buyer permission and redaction review required",
+        "Name suppliers only with naming consent",
+        "Include declined, incomplete and no-proposal outcomes",
+        "Never publish private project IDs, emails, addresses, commercial proposals or internal source references"
+      ],
+      "fields": [
+        "id",
+        "sector",
+        "site_band",
+        "user_band",
+        "scope",
+        "approached",
+        "acknowledged",
+        "responded",
+        "declined",
+        "first_proposal_working_days",
+        "comparable_set_working_days",
+        "outcome",
+        "outcome_description",
+        "participants",
+        "reporting_period",
+        "recorded_at",
+        "updated_at"
+      ]
+    }
+  },
+  "mcp": {
+    "status": 200,
+    "sourcing_tools": [
+      "prepare_sourcing_plan",
+      "request_comparable_proposals",
+      "get_sourcing_request_status"
+    ]
+  }
+}

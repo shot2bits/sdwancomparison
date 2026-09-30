@@ -10,14 +10,16 @@ import {
 
 const vendors = getShortlistDataset();
 assert.equal(vendors.length, 30, "the governed comparison must retain all 30 providers");
-assert.equal(SHORTLIST_VIEW_CONTRACT_VERSION, "shortlist-market-view/1.0.0");
+assert.equal(SHORTLIST_VIEW_CONTRACT_VERSION, "shortlist-market-view/2.0.0");
 
 for (const view of SHORTLIST_VIEW_KEYS) {
   const first = buildShortlistMarketView(vendors, view);
   const second = buildShortlistMarketView(vendors, view);
   assert.ok(first.length > 0, `${view} must return providers`);
   assert.deepEqual(first.map((provider) => provider.slug), second.map((provider) => provider.slug), `${view} must be deterministic`);
-  assert.ok(first.every((provider, index) => provider.rank === index + 1), `${view} ranks must be contiguous`);
+  assert.deepEqual(first, buildShortlistMarketView([...vendors].reverse(), view), `${view} must ignore import order`);
+  assert.deepEqual(first.map(p=>p.position),first.map((_,i)=>i+1));
+  assert.ok(first.every(p => !("rank" in p) && !("score" in p)));
 }
 
 const sdWan = buildShortlistMarketView(vendors, "sd-wan-vendors");
@@ -48,7 +50,7 @@ assert.ok(
 assert.ok(
   page.includes('aria-label="Netify RFP Builder"') &&
     page.includes("https://netify.co.uk/sase-sd-wan-rfp-builder/") &&
-    page.includes("Start my project"),
+    page.includes("Build my provider shortlist"),
   "shortlist page must expose a visible canonical RFP Builder handoff",
 );
 assert.ok(

@@ -26,7 +26,7 @@
  * a user cannot tweak and amend but there has to be an end state."
  * Nothing here freezes the document — every captured answer keeps its
  * Edit affordance, the optional decisions stay answerable below, and
- * after publication the same decisions are reframed as shaping the next
+ * once the notice is published the same decisions are reframed as shaping the next
  * revision (DecisionsStep). What this block ends is the OBLIGATION to
  * keep answering, which is the thing that had no ending.
  *

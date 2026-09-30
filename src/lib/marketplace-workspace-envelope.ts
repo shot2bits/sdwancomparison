@@ -20,7 +20,7 @@ export class MarketplaceEnvelopeError extends Error {
 
 /** Request and durable envelope revisions are distinct from marketplace revisions. */
 export function marketplaceWorkspacePayload(project: ProjectDetails) {
-  if (!project.procurement_document || project.envelope_revision === 0) return undefined;
+  if (!project.procurement_document || (!project.facts.length && project.envelope_revision === 0)) return undefined;
   const raw = project.entrance_context?.raw_input.workspace_payload as { position?: unknown } | undefined;
   return {
     facts: project.facts, receipts: project.receipts,

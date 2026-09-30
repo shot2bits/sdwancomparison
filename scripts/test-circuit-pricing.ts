@@ -128,6 +128,9 @@ await withFakeKv(async () => {
   await assert.rejects(() => readCircuitAccess(id, access.token));
   const oldFetch = global.fetch;
   const oldKey = process.env.RESEND_API_KEY;
+  const oldEnvironment = process.env.NETIFY_ACTIVITY_ENV;
+  // Exercise production mail policy only inside the intercepted transport below.
+  process.env.NETIFY_ACTIVITY_ENV = "production";
   process.env.RESEND_API_KEY = "test-only";
   let sends = 0;
   global.fetch = (async (u, init) => {
@@ -144,6 +147,8 @@ await withFakeKv(async () => {
     assert.equal(sends, 1);
   } finally {
     global.fetch = oldFetch;
+    if (oldEnvironment === undefined) delete process.env.NETIFY_ACTIVITY_ENV;
+    else process.env.NETIFY_ACTIVITY_ENV = oldEnvironment;
     if (oldKey === undefined) delete process.env.RESEND_API_KEY;
     else process.env.RESEND_API_KEY = oldKey;
   }

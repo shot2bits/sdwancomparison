@@ -10,23 +10,23 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "For SASE & SD-WAN vendors and providers",
-  description: "Win SASE, SSE, SD-WAN, circuit and managed service work. See open buyer opportunities, sign in with a verified work email, and bid. Agents can bid over MCP.",
+  description: "Explore published SASE, SSE and SD-WAN requirements. Review participation conditions, verify access and respond through supported supplier tools.",
   alternates: { canonical: `${SITE_URL}/for-suppliers/` },
-  openGraph: { title: "For vendors and providers", description: "See open buyer opportunities and bid. Domain-verified sign-in.", url: `${SITE_URL}/for-suppliers`, type: "website", locale: "en_GB" },
+  openGraph: { title: "For vendors and providers", description: "Explore published opportunities and their participation conditions. Verified access applies.", url: `${SITE_URL}/for-suppliers`, type: "website", locale: "en_GB" },
 };
 
 const VALUE = [
-  ["Real demand, not leads", "Opportunities are posted by buyers describing a live need, from circuits to full managed SASE."],
+  ["Published requirements", "Review the buyer’s stated need and clarify scope before preparing a response."],
   ["Compete on your terms", "Submit a competitive bid in an auction or an indicative quote in a live room. Your pricing stays private to the buyer."],
-  ["Verified, low-noise", "Buyers, vendors and service providers sign in with a domain-verified business email, so you engage with real organisations."],
-  ["Agent-ready", "Your AI agent can read the board and bid over the marketplace MCP, no portal clicking required."],
+  ["Verified access", "Business-email verification supports account access; it does not establish purchasing authority or verified buying intent."],
+  ["Connected agents", "An authorised agent can use supported marketplace MCP tools within the same access rules. Check the opportunity’s participation requirements."],
 ];
 
 const STEPS = [
   ["Browse", "See open opportunities below or on the public board. No sign-in to look."],
   ["Verify", "Sign in with your work email; we verify the domain against your organisation."],
   ["Bid or quote", "Submit a bid or indicative quote, comment, register interest, or decline."],
-  ["Win", "The buyer compares against independent grades and awards."],
+  ["Buyer review", "The buyer reviews responses and decides whether to proceed. An award is not guaranteed."],
 ];
 
 export default async function ForSuppliersPage() {
@@ -40,8 +40,8 @@ export default async function ForSuppliersPage() {
 
       <div className="mb-12 max-w-3xl">
         <p className="eyebrow mb-3">For vendors and providers</p>
-        <h1 id="page-h1" className="mb-4">Win SASE, SSE and SD-WAN work from buyers who are ready to engage.</h1>
-        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Netify buyers post real needs, from underlay circuits and appliances to cloud security and full managed SASE. See what is open, sign in with your work email, and bid or quote. Your prices stay private to the buyer.</p>
+        <h1 id="page-h1" className="mb-4">Explore SASE, SSE and SD-WAN opportunities.</h1>
+        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Browse published requirements and review the participation route for each opportunity. Account verification and access checks apply. Publication does not independently verify a buyer’s intent, budget or readiness to purchase. Invitations depend on confirmed eligibility; participation does not guarantee an award.</p>
       </div>
 
       <section className="mb-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -68,11 +68,11 @@ export default async function ForSuppliersPage() {
             <p className="font-medium mb-1">How verification works</p>
             <ul className="list-disc space-y-1 pl-5">
               <li><strong>Your organisation is already listed</strong> (graded vendor or provider): your work-email domain matches the profile and the sign-in link arrives straight away.</li>
-              <li><strong>Domain not recognised yet</strong> (new provider, MSP or a different domain): your request is queued for the Netify team. Once approved, usually within one working day, your sign-in link is emailed and you can bid on any open opportunity.</li>
+              <li><strong>Domain not recognised yet</strong> (new provider, MSP or a different domain): your request is queued for the Netify team. If approved, your sign-in link is emailed. Participation remains subject to each opportunity’s access rules. Approval timing is not guaranteed.</li>
               <li><strong>No listed profile at all?</strong> The same queue covers you: the Netify team reviews new vendors and service providers and links your domain to a new or claimed profile. You can also email <a className="underline" href="mailto:support@netify.com">support@netify.com</a> with your company name and website to speed it up.</li>
             </ul>
           </div>
-          <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? Your AI agent can read open opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/sase/api/mcp/">/sase/api/mcp/</a>.</p>
+          <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? An authorised agent can use supported tools within their access rules. Read public opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/sase/api/mcp/">/sase/api/mcp/</a>.</p>
         </div>
       </section>
 

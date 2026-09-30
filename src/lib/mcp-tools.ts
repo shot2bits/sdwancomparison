@@ -1,3 +1,4 @@
+import { publicEvidenceOutput, publicEvidenceProviders, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_NOTICE } from "./public-provider-evidence";
 /**
  * MCP tool definitions and handlers. The logic core lives in
  * src/lib/shortlist-core.ts; handlers here only validate and dispatch.
@@ -5,7 +6,7 @@
 
 import { publicShortlistPreview } from "@/lib/public-shortlist";
 import { FEATURES, FEATURE_NAMES, getVendor, getAllVendorSlugs } from "@/lib/vendors";
-import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
+import { buildComparison, DEFAULT_INPUT, encodeScenario, type ShortlistInput, type ShortlistVendor } from "@/lib/shortlist-core";
 import { applyComparisonHandoff } from "@/lib/comparison-handoff";
 import { SITE_URL } from "@/lib/structured-data";
 import { getDemandIndex } from "@/lib/demand-index";
@@ -26,7 +27,8 @@ type SectorEvidenceTwin = {
   summary: Record<string, unknown>;
   status_vocabulary: unknown[];
   evidence_rules: string[];
-  requirements: { code: string; label: string; explanation: string; evidence_rule: string; display_order: number }[];
+  requirements: { code: string; label: string; explanation: string; evidence_rule: string; display_order: number; regimes?: string[] | "all" }[];
+  regulation_map?: unknown;
   providers: {
     slug: string;
     name: string;
@@ -45,8 +47,11 @@ type SectorEvidenceTwin = {
 };
 
 export async function callMcpTool(name: string, args: unknown): Promise<unknown> {
+  return publicEvidenceOutput(await callPublicMcpTool(name,args));
+}
+async function callPublicMcpTool(name: string, args: unknown): Promise<unknown> {
   const live = await getLiveShortlistDataset();
-  const shortlist = live.vendors;
+  const shortlist = publicEvidenceProviders(live.vendors);
   const knownShortlistSlugs = shortlist.map((vendor) => vendor.slug);
   switch (name) {
     case "build_sase_shortlist": {
@@ -67,7 +72,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
           resume_url: resumeUrl,
-          note: "Public comparison remains available. Use start_project to prepare a short notice; get_unlocked_matches returns personalised results after verified publication. The resume URL carries these criteria into the project entrance.",
+          note: "Research and named evidence matches are open. Use prepare_sourcing_plan to prepare a sourcing request; approve named recipients before requesting supplier engagement.",
         },
       };
     }
@@ -85,7 +90,11 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
     case "list_sase_vendors":
       return {
         contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
+        ordered_by: PUBLIC_EVIDENCE_ORDER,
+        notice: PUBLIC_EVIDENCE_NOTICE,
         vendors: shortlist.map((v) => ({
+          position: v.position, proven_evidence_count: v.proven_evidence_count,
+          differentiator: v.key_differentiators[0] || v.shortlist_summary,
           slug: v.slug,
           name: v.name,
           category: v.category,
@@ -147,7 +156,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       );
 
     case "verify_claim":
-      return verifyClaim(args);
+      return verifyClaim(args, live.vendors);
     case "list_exclusions":
       return listExclusions(args);
     case "explain_shortlist":
@@ -159,7 +168,7 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       // tool reads the same document the page renders from: one status per
       // provider per requirement, each with its reviewed source rows. No
       // second copy of the research is kept here.
-      const input = (args ?? {}) as { sector?: string; provider?: string; requirement?: string; include_sources?: boolean };
+      const input = (args ?? {}) as { sector?: string; provider?: string; requirement?: string; regime?: string; include_sources?: boolean };
       const sectorPaths: Record<string, string> = {
         manufacturing: "sd-wan-sase-for-manufacturing",
         retail: "sd-wan-sase-for-retail",
@@ -169,18 +178,26 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       const path = sectorPaths[input.sector ?? ""];
       if (!path) return { error: "Unknown sector. Use manufacturing, retail, financial-services or healthcare." };
       const pageUrl = `https://netify.co.uk/${path}/`;
-      let twin: { sector_evidence?: SectorEvidenceTwin | null } | null = null;
+      let twin: { sector_evidence?: SectorEvidenceTwin | null; regulation_map?: unknown } | null = null;
       try {
         const res = await fetch(`${pageUrl}data.json`, { next: { revalidate: 3600 } });
-        if (res.ok) twin = (await res.json()) as { sector_evidence?: SectorEvidenceTwin | null };
+        if (res.ok) twin = (await res.json()) as { sector_evidence?: SectorEvidenceTwin | null; regulation_map?: unknown };
       } catch {
         twin = null;
       }
       const layer = twin?.sector_evidence ?? null;
       if (!layer) {
-        return { sector: input.sector, has_evidence_layer: false, page_url: pageUrl, note: "No sector evidence review has been published for this sector yet. The manufacturing review is the first." };
+        return { sector: input.sector, has_evidence_layer: false, page_url: pageUrl, note: "No sector evidence review has been published for this sector yet. Manufacturing and financial-services are published." };
       }
       const includeSources = input.include_sources !== false;
+      // Financial services: requirements carry the regimes they belong to and
+      // source rows carry regulatory_regime, so a UK question never gets a US
+      // bank case study as its evidence. Sectors without regimes ignore this.
+      const regime = input.regime?.trim().toLowerCase();
+      const regimeWord: Record<string, string> = { uk: "UK", eu: "EU", us: "US", canada: "Canada" };
+      if (regime && !regimeWord[regime]) return { error: "Unknown regime. Use uk, eu, us or canada." };
+      const inRegime = (r: { regimes?: string[] | "all" }) => !regime || !r.regimes || r.regimes === "all" || r.regimes.includes(regime);
+      const sourceInRegime = (s: { [key: string]: unknown }) => !regime || !s.regulatory_regime || ["Multiple", "Not stated", regimeWord[regime]].includes(String(s.regulatory_regime));
       const requirementFilter = input.requirement?.trim().toLowerCase();
       const providerFilter = input.provider?.trim().toLowerCase();
       if (requirementFilter && !layer.requirements.some((r) => r.code === requirementFilter)) {
@@ -189,10 +206,11 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
       const providers = layer.providers
         .filter((p) => !providerFilter || p.slug === providerFilter)
         .map((p) => {
-          const requirements = p.requirements.filter((r) => !requirementFilter || r.code === requirementFilter);
+          const regimeCodes = new Set(layer.requirements.filter(inRegime).map((r) => r.code));
+          const requirements = p.requirements.filter((r) => (!requirementFilter || r.code === requirementFilter) && regimeCodes.has(r.code));
           const sourceIds = new Set(requirements.flatMap((r) => r.evidence_source_ids));
           const sources = includeSources
-            ? p.sources.filter((s) => (requirementFilter ? s.requirement_codes.includes(requirementFilter) || sourceIds.has(s.id) : true))
+            ? p.sources.filter((s) => sourceInRegime(s) && (requirementFilter ? s.requirement_codes.includes(requirementFilter) || sourceIds.has(s.id) : true))
             : undefined;
           return {
             slug: p.slug,
@@ -218,7 +236,9 @@ export async function callMcpTool(name: string, args: unknown): Promise<unknown>
         summary: layer.summary,
         status_vocabulary: layer.status_vocabulary,
         evidence_rules: layer.evidence_rules,
-        requirements: requirementFilter ? layer.requirements.filter((r) => r.code === requirementFilter) : layer.requirements,
+        requirements: layer.requirements.filter((r) => inRegime(r) && (!requirementFilter || r.code === requirementFilter)),
+        ...(regime ? { regime } : {}),
+        ...(twin?.regulation_map ? { regulation_map: twin.regulation_map } : {}),
         providers,
         _meta: {
           canonicalUrl: pageUrl,
@@ -279,6 +299,8 @@ const CLAIM_ALIASES: Record<string, string> = {
   "delivery model": "delivery_model", type: "delivery_model", vendor_or_provider: "delivery_model",
   backbone: "f21_private_global_backbone", "private backbone": "f21_private_global_backbone",
   "global backbone": "f21_private_global_backbone",
+  "active active": "f11_active_active_link_utilisation", "active-active": "f11_active_active_link_utilisation",
+  "high availability": "f25_high_availability_design", "ha": "f25_high_availability_design",
   managed: "f01_fully_managed_service", "fully managed": "f01_fully_managed_service",
   "co-managed": "f03_co_managed_service", comanaged: "f03_co_managed_service",
   firewall: "f27_integrated_next_generation_firewall", ngfw: "f27_integrated_next_generation_firewall",
@@ -332,7 +354,7 @@ function attributionFor(verifiedOn: string): string {
   return `${ATTRIBUTION_BASE}, verified ${verifiedOn}, netify.co.uk/sase/shortlist`;
 }
 
-export function verifyClaim(args: unknown): unknown {
+export function verifyClaim(args: unknown, liveVendors?: ShortlistVendor[]): unknown {
   const a = (args ?? {}) as { slug?: string; claim?: string; field?: string };
   const slug = (a.slug ?? "").trim();
   if (!getAllVendorSlugs().includes(slug)) {
@@ -343,6 +365,18 @@ export function verifyClaim(args: unknown): unknown {
   const register = registerOf(v);
   const byN = new Map(register.map((e) => [e.n, e]));
   const raw = (a.claim ?? a.field ?? "").trim();
+  const liveVendor = liveVendors?.find(item => item.slug === slug);
+  const reviewedField = resolveClaim(raw, Object.keys(liveVendor?.capability_evidence ?? {}));
+  const correction = reviewedField ? liveVendor?.capability_evidence?.[reviewedField] : undefined;
+  if (reviewedField && correction) return {
+    supplier: v.name, slug, claim: raw, resolved_field: reviewedField,
+    status: 'vendor_documented', value: liveVendor!.capabilities[reviewedField],
+    verified_on: correction.reviewed_at.slice(0, 10), review_due: correction.review_due,
+    quote: null, note: correction.qualification,
+    sources: [{url: correction.source_url, tier: 1, tier_meaning: TIER_MEANING[1], read_on: correction.reviewed_at.slice(0, 10)}],
+    attribution: attributionFor(correction.reviewed_at.slice(0, 10)),
+    _meta: {canonicalUrl: `${SITE_URL}/shortlist/`, note: 'Same dated vendor-documentation correction as the public comparison. Scope is a paraphrase, not a quotation or independent deployment verification.'},
+  };
 
   if (!raw) {
     return {
@@ -355,15 +389,15 @@ export function verifyClaim(args: unknown): unknown {
 
   const field = resolveClaim(raw, Object.keys(facts));
   if (!field) {
-    const caps = (v.capabilities as unknown as Record<string, string>);
+    const caps = (liveVendor?.capabilities ?? v.capabilities) as Record<string, string>;
     const capField = resolveClaim(raw, Object.keys(caps));
     if (capField) {
       return {
         supplier: v.name, slug, claim: raw, resolved_field: capField,
         status: "graded_not_individually_sourced",
         value: caps[capField],
-        verified_on: v.last_verified,
-        note: "This capability carries a grade but was not sourced individually for this vendor. It sits in the market-baseline set, graded from category evidence. Treat it as indicative and confirm it directly with the vendor.",
+        verified_on: liveVendor?.last_verified ?? v.last_verified,
+        note: "This capability has no individually linked source in this response. The grade uses the same available provider record as the comparison; unconfirmed is not proof of absence. Confirm scope directly with the vendor.",
         attribution: attributionFor(v.last_verified),
         _meta: { canonicalUrl: `${SITE_URL}/vendors/${slug}` },
       };
@@ -453,55 +487,9 @@ export function explainShortlist(args: unknown, shortlist?: ShortlistVendor[]): 
   if (!known.includes(slugA) || !known.includes(slugB)) {
     return { error: `Give two known vendor slugs as a and b. Unknown: ${[slugA, slugB].filter((s) => !known.includes(s)).join(", ") || "(none given)"}. Call list_sase_vendors.` };
   }
-  const result = buildShortlist(shortlist ?? [], a.criteria ?? {}, FEATURE_NAMES);
-  // buildShortlist numbers the shortlist and leaves near misses at rank 0. A
-  // model reading rank 0 reports the supplier as ranked zero rather than absent,
-  // which is worse than saying nothing, so placement is stated explicitly and
-  // rank is null whenever the supplier is not on the list. Caught live 29 Jul.
-  const place = (slug: string) => {
-    const onList = result.shortlist.find((x) => x.slug === slug);
-    if (onList) return { rec: onList, rank: onList.rank as number | null, placement: "in_shortlist" };
-    const near = result.near_misses.find((x) => x.slug === slug);
-    if (near) return { rec: near, rank: null, placement: near.eligible ? "eligible_but_outside_shortlist" : "excluded_by_criteria" };
-    return { rec: undefined, rank: null, placement: "not_returned_for_these_criteria" };
-  };
-  const pA = place(slugA), pB = place(slugB);
-  const rA = pA.rec, rB = pB.rec;
-  const vA = getVendor(slugA), vB = getVendor(slugB);
-  const fA = factsOf(vA), fB = factsOf(vB);
-  const regA = new Map(registerOf(vA).map((e) => [e.n, e])), regB = new Map(registerOf(vB).map((e) => [e.n, e]));
-
-  const differences = Object.keys(fA)
-    .filter((k) => fB[k] && fA[k].value !== fB[k].value)
-    .map((k) => ({
-      fact: k,
-      [slugA]: {
-        value: fA[k].value, quote: fA[k].quote || null,
-        source: (fA[k].evidence ?? []).map((n) => regA.get(n)?.url).filter(Boolean)[0] ?? null,
-        confidence: fA[k].confidence,
-      },
-      [slugB]: {
-        value: fB[k].value, quote: fB[k].quote || null,
-        source: (fB[k].evidence ?? []).map((n) => regB.get(n)?.url).filter(Boolean)[0] ?? null,
-        confidence: fB[k].confidence,
-      },
-    }));
-
   return {
-    criteria: result.input,
-    shortlist_size: result.shortlist.length,
-    a: { slug: slugA, name: vA.name, rank: pA.rank, placement: pA.placement, score: rA?.score ?? null, eligible: rA?.eligible ?? null, gating_failures: rA?.gating_failures ?? [] },
-    b: { slug: slugB, name: vB.name, rank: pB.rank, placement: pB.placement, score: rB?.score ?? null, eligible: rB?.eligible ?? null, gating_failures: rB?.gating_failures ?? [] },
-    sourced_differences: differences,
-    differences_count: differences.length,
-    scoring_note: result.methodology_note,
-    honest_limit:
-      "The score is a weighted average across 40 capability grades. Sixteen of those forty no longer separate this market, so a score gap of a point or two is not a meaningful difference between vendors. The sourced differences above are the ones that carry evidence behind them, and they are what should decide a shortlist.",
-    verified_on: vA.last_verified,
-    attribution: attributionFor(vA.last_verified),
-    _meta: {
-      canonicalUrl: `${SITE_URL}/compare/${slugA}-vs-${slugB}`,
-      note: "Every value in sourced_differences carries a quoted sentence and the page it came from, so an answer can attribute rather than assert.",
-    },
+    requires_publication: true,
+    evidence: buildComparison(shortlist ?? [], [slugA, slugB], FEATURES),
+    next_step: "Use get_unlocked_matches with an authorised published project for computed fit and rankings.",
   };
 }

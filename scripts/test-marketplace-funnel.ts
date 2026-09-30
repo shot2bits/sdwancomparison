@@ -4,7 +4,7 @@ const funnel = fs.readFileSync("src/lib/marketplace-funnel.ts", "utf8");
 const sessions = fs.readFileSync("src/lib/marketplace-project-session.ts", "utf8");
 const publish = fs.readFileSync("src/app/api/marketplace/projects/[projectId]/publish/route.ts", "utf8");
 const supplier = fs.readFileSync("src/app/api/opportunity/supplier/[token]/route.ts", "utf8");
-assert.match(funnel, /marketplace-funnel\/1\.0\.0/); assert.doesNotMatch(funnel, /email|company|contact/i);
+assert.match(funnel, /marketplace-funnel\/2\.0\.0/); assert.doesNotMatch(funnel, /email|company|contact/i);
 for (const event of ["project_started","requirements_updated","match_previewed","publication_prepared"]) assert.match(sessions, new RegExp(`event: "${event}"`));
 for (const event of ["publication_completed","publication_incomplete"]) assert.match(publish, new RegExp(`event: "${event}"`));
 assert.match(supplier, /isMarketUnlocked/); assert.match(supplier, /supplier_interest/); assert.match(supplier, /supplier_response/);

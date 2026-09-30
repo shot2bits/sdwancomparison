@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 /**
  * /sase/cost-estimator/: the SASE cost and TCO estimator page.
  *
@@ -87,11 +88,7 @@ export default function Page() {
         <section className="mt-10">
           <h2 className="text-xl font-semibold text-zinc-950">Take your budget to market</h2>
           <p className="mt-3 text-zinc-700 leading-relaxed">
-            Use your estimate to prepare a short brief, a Short or Detailed RFP, or bring your own RFP or RFI.
-            The <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="font-medium underline underline-offset-2">Netify buying workspace</a>{" "}
-            helps you review and publish an anonymous project, then compare supplier responses privately.
-            A full RFP is optional. Publication requires your verified work email and approval;
-            supplier participation and quotations are not guaranteed.
+            {SOURCING_DESCRIPTION}
           </p>
         </section>
 

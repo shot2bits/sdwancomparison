@@ -1,0 +1,8 @@
+{
+  "desk_email": "support@netify.com",
+  "overdue_working_hours": 8,
+  "working_day_start_hour": 9,
+  "working_day_end_hour": 17,
+  "time_zone": "Europe/London",
+  "owner_required": {}
+}

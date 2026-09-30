@@ -1,5 +1,10 @@
 "use client";
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
+import PrivateDraftDownload from "@/components/procurement/PrivateDraftDownload";
+import { privateDraftMarkdown } from "@/lib/private-draft";
 
+
+import { confirmedBuyerLedger, publicBriefFromFacts } from "@/lib/current-buyer-facts";
 import { isUnrelatedBuyingInput } from "@/lib/workspace/extract";
 import {requestBrief, confirmedWorkspaceRegions, workspaceUpdatesFromBrief, type BriefFields, type DocumentPurpose, type WorkspaceProject} from "@/lib/buying-workspace-project";
 import {projectTokenKey} from "@/lib/buying-entry";
@@ -63,6 +68,7 @@ import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import {journeyAttribution} from '@/lib/journey-attribution';
 import { hasPublished } from "@/lib/project-machine";
 /** Living Procurement OS · Phase 3 Stage A (14 Aug 2026): wires the
  *  existing, pure `compileProcurementDocument()` compiler into this real
@@ -980,6 +986,7 @@ export default function ProjectDesk({
    *  combine into the `requirement` this component actually sends. State
    *  (not a bare ref) so the requirement memo below re-derives the instant
    *  resume finishes, even if `facts` itself hasn't changed yet. */
+  const [canonicalLedgerLoaded, setCanonicalLedgerLoaded] = useState(false);
   const [resumeRequirementBase, setResumeRequirementBase] = useState<SecurityRequirementInput | null>(null);
   const resumeRequirementBaseRef = useRef<SecurityRequirementInput | null>(null);
   useEffect(() => { resumeRequirementBaseRef.current = resumeRequirementBase; }, [resumeRequirementBase]);
@@ -1319,7 +1326,7 @@ export default function ProjectDesk({
    *  unconditionally, unaffected by this -- reviewing the full document
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
-  const [documentPurpose,setDocumentPurpose]=useState<DocumentPurpose>("rfp");
+  const [documentPurpose,setDocumentPurpose]=useState<DocumentPurpose>("brief");
   const [workspaceNotice,setWorkspaceNotice]=useState<string|null>(null);
   const [workspaceSessionLoading,setWorkspaceSessionLoading]=useState(false);
   const [workspaceSessionError,setWorkspaceSessionError]=useState("");
@@ -1346,6 +1353,9 @@ export default function ProjectDesk({
    *  through here, including handleCommand's own publish/whoFits/back
    *  cases, so `phase` and the rail can never disagree. */
   const goToStep = (next: WizardStep) => {
+    // Basic projects use the same brief review from every navigation entry.
+    // Existing legacy RFPs retain their original publication workflow.
+    if (next === "review" && documentPurpose === "brief" && !(created && !workspaceEnvelopeId) && requestBrief()) return;
     setStep(next);
     setPhase(next === "publish" || next === "compare" ? "fits" : "live");
   };
@@ -1524,14 +1534,15 @@ export default function ProjectDesk({
    *  here, once, fixes every one of them together. Seventh amendment: now
    *  also carries `resumeRemovals`, the tombstones applyRemovals above
    *  maintains, so an explicit retraction actually leaves the base. */
+  const confirmedFacts = useMemo(() => confirmedBuyerLedger(facts), [facts]);
   const requirement = useMemo(
-    () => mergeRequirementBase(resumeRequirementBase, requirementFrom(facts), resumeRemovals),
-    [facts, resumeRequirementBase, resumeRemovals],
+    () => facts.length || canonicalLedgerLoaded ? requirementFrom(confirmedFacts) : mergeRequirementBase(resumeRequirementBase, {}, resumeRemovals),
+    [facts.length, confirmedFacts, canonicalLedgerLoaded, resumeRequirementBase, resumeRemovals],
   );
-  const buying = buyingOf(facts);
-  const opModel = operatingModelOf(facts);
+  const buying = buyingOf(confirmedFacts);
+  const opModel = operatingModelOf(confirmedFacts);
   const securityScope = buying === "managed_security" || buying === null;
-  const live = standing(facts);
+  const live = confirmedFacts;
   // A published short brief has no full-RFP facts, but its matches and responses are an active project.
   const started = facts.length > 0 || noted.length > 0 || published !== null;
 
@@ -1635,6 +1646,7 @@ export default function ProjectDesk({
     if (p.get("test") === "1") setTestMode(true);
     const resumeId = p.get("id");
     const resumeManage = p.get("manage");
+    if (resumeId || requestedJourney === "build_rfp" || requestedJourney === "check_rfp") setDocumentPurpose("rfp");
     resumedFromUrlRef.current = Boolean(resumeId || p.get("project"));
 
     /* Step 1: restore the exact working ledgers before any link-carried
@@ -1920,6 +1932,7 @@ export default function ProjectDesk({
             setReceipts(proj.receipts);
           }
           envelopeRevisionRef.current = proj.envelope_revision ?? 0;
+          setCanonicalLedgerLoaded(Boolean(proj.envelope_revision));
           /* Round 3 correction, item 6: rehydrate `published` durably for
            * an already-published project, from the SAME frozen sources the
            * report route and every export already read from -- never a
@@ -2088,7 +2101,7 @@ export default function ProjectDesk({
       if(!active)return;
       setLocalDraftStatus("idle");
       setWorkspaceEnvelopeId(id);setWorkspaceCompany(data.buyer?.organisation||'');setAdded(data.buyer?.pinned_vendors||[]);
-      setWorkspaceSessionPublished(data.marketplace_state?.publication_status==='published');
+      setWorkspaceSessionPublished(data.market_unlocked===true || data.marketplace_state?.publication_status==='published');
       const payload=data.workspace_payload ?? data.entrance_context?.raw_input?.workspace_payload;
       if(payload?.position?.rfp_depth)setRfpDepth(payload.position.rfp_depth==="detailed"?"detailed":"short");
       if(payload?.position?.entry_mode==="check"){setRfpEntryMode("check");rfpValidationCorpusRef.current=(payload.source_turns||[]).map((t:{text:string})=>t.text).join("\n\n");}
@@ -2096,13 +2109,14 @@ export default function ProjectDesk({
       if(payload?.facts){factsRef.current=payload.facts;setFacts(payload.facts);setReceipts(payload.receipts||[]);receiptsRef.current=payload.receipts||[];receiptId.current=(payload.receipts||[]).reduce((max:number,item:Receipt)=>Math.max(max,item.id),0);cycleRef.current=(payload.facts||[]).reduce((max:number,item:WorkspaceFact)=>Math.max(max,item.cycle||0),0);const turns=hydrateSourceTurns(payload.source_turns);setSourceTurns(turns);sourceTurnsRef.current=turns;const decisions=payload.decision_turns||[];setDecisionTurns(decisions);decisionTurnsRef.current=decisions;const replay=replayDecisionLedger(decisions);setNoted(replay.noted);setDismissedQuestionIds(replay.dismissedQuestionIds);setDeclinedSuggestionIds(replay.declinedSuggestionIds);if(payload.compiled_document)previousProcurementDocumentRef.current=payload.compiled_document;}
       else {
         const buyer=data.buyer||{}, raw=data.entrance_context?.raw_input||{};
-        const fields:Partial<BriefFields>={sector:buyer.sector,sites:buyer.site_count?String(buyer.site_count):'',scope:raw.solution_scope||(buyer.product_scope==='sdwan_only'?'sdwan':buyer.product_scope==='sse_only'?'sse':buyer.product_scope==='full_sase'?'sase':''),regions:buyer.regions||[],operatingModel:buyer.operating_model,timescale:typeof raw.timescale==='string'?raw.timescale:''};
+        const fields:Partial<BriefFields>={sector:buyer.sector,sites:buyer.site_count?String(buyer.site_count):'',scope:raw.solution_scope||(buyer.product_scope==='sdwan_only'?'sdwan':buyer.product_scope==='sse_only'?'sse':buyer.product_scope==='full_sase'?'sase':''),regions:buyer.regions||[],operatingModel:buyer.operating_model,timescale:typeof data.buyer_facts?.timeline==='string'?data.buyer_facts.timeline:typeof raw.timescale==='string'?raw.timescale:''};
         if(buyer.notes)keepSourceTurn(buyer.notes,'typed');
         applyMerge(workspaceUpdatesFromBrief(fields),'answer');
       }
       setWorkspaceNotice(data.buyer?.notes||null);setSaveDirty(false);
       envelopeRevisionRef.current=data.envelope_revision??payload?.base_revision??0;
       setCheckpointRevision(envelopeRevisionRef.current);
+      setCanonicalLedgerLoaded(Boolean(payload?.facts) || envelopeRevisionRef.current > 0);
       checkpointBaselineRef.current=null;
       try {
         const raw=localStorage.getItem(PROJECT_CHECKPOINT_PREFIX+id);
@@ -2426,7 +2440,7 @@ export default function ProjectDesk({
      genuinely the buyer's own prior intent) and NEVER folds in survivors
      of Netify's own computed ranking, which is exactly the "invitation
      selections" the product rule says must not be exposed or persisted
-     before publication. `keptFits`/`fitSlugs`/`partnerDependent` are
+     while the notice is a draft. `keptFits`/`fitSlugs`/`partnerDependent` are
      retired along with the ranked panel they existed to serve; see the
      locked pre-publish outcome panel and the command handlers below for
      the corresponding removal. */
@@ -3086,7 +3100,7 @@ export default function ProjectDesk({
           // never sees a value this session has already retracted.
           body: JSON.stringify({
             text: trimmed,
-            requirement: mergeRequirementBase(resumeRequirementBaseRef.current, requirementFrom(factsRef.current), resumeRemovalsRef.current),
+            requirement: factsRef.current.length || envelopeRevisionRef.current > 0 ? requirementFrom(confirmedBuyerLedger(factsRef.current)) : mergeRequirementBase(resumeRequirementBaseRef.current, {}, resumeRemovalsRef.current),
           }),
         });
         if (!res.ok) throw new Error(`extract ${res.status}`);
@@ -3426,10 +3440,10 @@ export default function ProjectDesk({
         // partner/integrated -- it operated entirely on the pre-publish
         // ranked fit list, which no longer exists as identifying data in
         // this component (see the fit route's own doc comment). There is
-        // no per-vendor detail to act on before publication, so this is
+        // no per-vendor detail to act on while the notice is a draft, so this is
         // now an honest refusal rather than a silent no-op that would
         // otherwise misleadingly read as "nobody relies on a partner."
-        say("Which vendors and service providers are matched, and how each is evidenced, is part of what publishing unlocks. Publish first, then this becomes something to act on.");
+        say(SOURCING_DESCRIPTION);
         return;
       }
       case "dropName":
@@ -3486,11 +3500,11 @@ export default function ProjectDesk({
         // Living Procurement Canvas Phase 2 correction (14 Aug 2026): "why
         // <vendor>" used to open a ranked-list row's evidence working --
         // that per-vendor detail is exactly what the product rule reserves
-        // for after publication (see the fit route's own doc comment and
+        // for once the notice is published (see the fit route's own doc comment and
         // the locked outcome panel below). No pre-publish path can answer
         // this any more; an honest refusal replaces the old lookup.
         ev("workspace_command", { kind: "why_vendor" });
-        say(`Why a specific vendor or service provider matched, with evidence and dates, is part of what publishing unlocks — “${cap(cmd.name)}” included, if they are among the matches. Publish to see the working.`);
+        say(SOURCING_DESCRIPTION);
         return;
       }
     }
@@ -3549,6 +3563,7 @@ export default function ProjectDesk({
     ].filter(Boolean).join(" ");
     return {
       title: publishTitle,
+      measurement_attribution: journeyAttribution(),
       buyer: {
         sector: sectorKey,
         site_count: requirement.estate?.sites ?? null,
@@ -3832,7 +3847,7 @@ export default function ProjectDesk({
       // `excluded_vendors` used to carry the buyer's pre-publish "drop
       // from direct invites" selections (the removed WHO FITS panel's
       // checkboxes) -- that curation depended on displaying Netify's
-      // computed ranking before publication, which the product rule now
+      // computed ranking while the notice is a draft, which the product rule now
       // forbids, so there is no longer a pre-publish signal to send. The
       // publish route's own `excluded_vendors` option still exists
       // server-side for a future consented mechanism; this call simply
@@ -4666,7 +4681,7 @@ export default function ProjectDesk({
     ?? publishChecklist.remaining[0]
     ?? "Add the next material requirement, constraint or success measure";
   const advisorMessage = !contentReady
-    ? `To unlock publishing, ${publishChecklist.remaining.join(", ").toLowerCase()}. You can answer several in one message.`
+    ? `To develop the full RFP, complete: ${publishChecklist.remaining.join(", ").toLowerCase()}. You can also review a short brief without completing the full RFP.`
     : rfpCoverage.ready
       ? "This document meets the RFP depth standard. Review it, then publish when you are ready."
       : `You can publish this opportunity now. To strengthen the living RFP, add ${rfpCoverage.remainingAnswers} more populated question${rfpCoverage.remainingAnswers === 1 ? "" : "s"} across the included sections. Consider next: ${nextAdvisorQuestion}`;
@@ -4748,6 +4763,7 @@ export default function ProjectDesk({
      Every advertised sentence still works typed; the surface copy
      advertises them where they apply. */
 
+  const canonicalBrief = publicBriefFromFacts(facts, workspaceCompany);
   const sendReady = draft.trim().length > 0 && !busy && !resuming;
   const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
 
@@ -4755,7 +4771,7 @@ export default function ProjectDesk({
     const read=(event:Event)=>{
       const detail=(event as CustomEvent<{value:WorkspaceProject|null}>).detail;
       if(!booted)return;
-      detail.value={id:workspaceEnvelopeId||created?.id||localDraftIdRef.current,legacyProject:!!created&&!workspaceEnvelopeId,documentPurpose,busy:busy||workspaceSessionLoading||!!workspaceSessionError||!!projectCheckpoint,published:!!published||workspaceSessionPublished,fields:{scope:buying==='sdwan'?'sdwan':buying==='sse'?'sse':'sase',sector:wizardSectorKey(requirement.organisation?.sector)||'',sites:requirement.estate?.sites?String(requirement.estate.sites):'',regions:wizardRegions(requirement.organisation?.regions||[]),operatingModel:opModel||'any',outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:''),timescale:requirement.constraints?.timeline||'',company:workspaceCompany},payload:{...rfpPayload(false),document_purpose:documentPurpose}};
+      detail.value={id:workspaceEnvelopeId||created?.id||localDraftIdRef.current,legacyProject:!!created&&!workspaceEnvelopeId,documentPurpose,busy:busy||workspaceSessionLoading||!!workspaceSessionError||!!projectCheckpoint,published:!!published||workspaceSessionPublished,fields:{scope:buying==='sdwan'?'sdwan':buying==='sse'?'sse':buying==='sase'?'sase':'',sector:wizardSectorKey(requirement.organisation?.sector)||'',sites:requirement.estate?.sites?String(requirement.estate.sites):'',regions:wizardRegions(requirement.organisation?.regions||[]),operatingModel:opModel||'any',outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:''),timescale:requirement.constraints?.timeline||'',company:workspaceCompany},payload:{...rfpPayload(false),document_purpose:documentPurpose}};
     };
     const confirm=(event:Event)=>{
       const detail=(event as CustomEvent<{fields:BriefFields;accepted:boolean;error:string}>).detail;
@@ -4764,7 +4780,9 @@ export default function ProjectDesk({
       const f=detail.fields;
       const existingRegions=standing(factsRef.current).filter(x=>x.path==='organisation.regions').map(x=>String(x.value));
       const regions=confirmedWorkspaceRegions(f.regions,existingRegions);
-      const updates=workspaceUpdatesFromBrief(f,existingRegions);
+      const outcomeChanged=f.outcome!==workspaceNotice && f.outcome!==canonicalBrief.outcome && f.outcome!==canvasDocument.summary;
+      const updates=workspaceUpdatesFromBrief({...f,outcome:outcomeChanged?f.outcome:undefined},existingRegions);
+      if(outcomeChanged)for(const old of standing(factsRef.current).filter(x=>x.path==='requirements.bespoke'&&x.value===workspaceNotice))dropFact(old.id);
       for(const fact of standing(factsRef.current).filter(x=>x.path==='organisation.regions'&&!regions.includes(String(x.value))))dropFact(fact.id);
       if(f.operatingModel==='any')for(const fact of standing(factsRef.current).filter(x=>x.path==='procurement.operatingModel'))dropFact(fact.id);
       applyMerge(updates,'answer');
@@ -4799,9 +4817,10 @@ export default function ProjectDesk({
       const action = (event as CustomEvent<string>).detail;
       if (action === "settings") { goToStep("describe"); setDocumentSettingsOpen(true); }
       if (action === "requirements") goToStep("describe");
+      if (action === "brief") { setDocumentPurpose("brief"); setRfpEntryMode("build"); goToStep("describe"); requestBrief(); }
       if (action === "short-rfp" || action === "detailed-rfp") { setDocumentPurpose("rfp"); setRfpEntryMode("build"); changeRfpDepth(action === "short-rfp" ? "short" : "detailed"); goToStep("describe"); }
-      if (action === "import") { setRfpEntryMode("check"); goToStep("describe"); fileRef.current?.click(); }
-      if (action === "review") goToStep(started ? "review" : "describe");
+      if (action === "import") { setRfpEntryMode("check"); setDocumentPurpose((purpose) => purpose === "brief" ? "rfp" : purpose); goToStep("describe"); fileRef.current?.click(); }
+      if (action === "review") goToStep(documentPurpose === "brief" || started ? "review" : "describe");
       if (action === "responses") { if(reachable.has("compare"))goToStep("compare");else {say("Supplier responses become available after you publish and suppliers reply. Review your project to continue.");requestBrief();} }
       if (action === "tools") {
         document.querySelectorAll<HTMLDetailsElement>(".nf-calm-project-tools").forEach((panel) => { panel.open = true; panel.scrollIntoView({ block: "nearest" }); });
@@ -4810,6 +4829,16 @@ export default function ProjectDesk({
     window.addEventListener("netify:workspace-action", receive);
     return () => window.removeEventListener("netify:workspace-action", receive);
   });
+
+  // Presentation follows the restored document, never a second saved-project state.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('netify:workspace-presentation', { detail: {
+      format: rfpEntryMode === 'check' ? 'import' : documentPurpose === 'brief' ? 'brief' : rfpDepth === 'detailed' ? 'detailed-rfp' : 'short-rfp',
+      basic: documentPurpose === 'brief' && rfpEntryMode === 'build' && !(created && !workspaceEnvelopeId),
+      available: booted && !workspaceSessionLoading && !workspaceSessionError && !projectCheckpoint,
+    } })));
+    return () => cancelAnimationFrame(frame);
+  }, [documentPurpose, rfpEntryMode, rfpDepth, created, workspaceEnvelopeId, booted, workspaceSessionLoading, workspaceSessionError, projectCheckpoint]);
 
   if (!booted || workspaceSessionLoading) return <div className="pd-root mt-10" role="status">Loading your project…</div>;
   if(workspaceSessionError)return <p role="alert">{workspaceSessionError}</p>;
@@ -4983,7 +5012,7 @@ export default function ProjectDesk({
   /* enough to read. Same cards, same onClick handlers, same material/   */
   /* optional classification.                                           */
   /* ================================================================== */
-  const publishedFlag = Boolean(published);
+  const publishedFlag = Boolean(published) || workspaceSessionPublished;
   const reachable = reachableSteps({ started, published: publishedFlag, publishReady: contentReady });
   const completed = completedSteps({ started, materialDecisionsRemaining, published: publishedFlag });
   /* Navigation can never strand the buyer on a station that stopped
@@ -5385,9 +5414,9 @@ export default function ProjectDesk({
   }> = [
     { icon: "requirements", label: "Requirements", current: activeStep === "describe" || activeStep === "decisions", onClick: () => goToStep("describe") },
     {
-      icon: "suppliers", label: "Suppliers", current: activeStep === "publish", disabled: !reachable.has("publish"),
+      icon: "suppliers", label: "Suppliers", current: activeStep === "publish", disabled: !reachable.has("publish") && !(workspaceEnvelopeId && !publishedFlag),
       disabledReason: "Complete the essential baseline before reviewing publication and supplier matching.",
-      onClick: () => goToStep("publish"),
+      onClick: () => { if(workspaceEnvelopeId && !publishedFlag){requestBrief();return;} goToStep("publish"); },
     },
     {
       icon: "responses", label: "Responses", current: activeStep === "compare", disabled: !reachable.has("compare"),
@@ -5401,7 +5430,7 @@ export default function ProjectDesk({
     },
     {
       icon: "reports", label: "Reports", current: false, disabled: !publishedFlag,
-      disabledReason: "Reports become available after publication.",
+      disabledReason: SOURCING_DESCRIPTION,
       onClick: () => goToStep("compare"),
     },
     {
@@ -5410,9 +5439,9 @@ export default function ProjectDesk({
       onClick: () => goToStep("review"),
     },
     {
-      icon: "exports", label: "Exports", current: false, disabled: !publishedFlag,
-      disabledReason: "Word and PDF exports unlock after publication.",
-      onClick: () => goToStep("publish"),
+      icon: "exports", label: "Exports", current: false, disabled: !started,
+      disabledReason: "Add your first requirement to download a private draft.",
+      onClick: () => { const downloads = document.querySelector<HTMLDetailsElement>(".nf-private-draft"); if (downloads) { downloads.open = true; downloads.scrollIntoView({ behavior: "smooth", block: "center" }); } if (publishedFlag) goToStep("publish"); },
     },
   ];
 
@@ -5469,7 +5498,7 @@ export default function ProjectDesk({
       {published.shortBrief.timescale && <p className="mt-2"><strong>Timescale:</strong> {published.shortBrief.timescale}</p>}
       <h3 className="mt-6 text-lg font-semibold">Your matched providers</h3>
       <p className="mt-1 text-sm">{published.frozen ? 'Saved at publication.' : 'Matches from your project record.'} {published.invited.length} providers invited directly.</p>
-      {published.matchedVendors.length ? <ul className="mt-3 divide-y">{published.matchedVendors.map((vendor) => <li key={vendor.slug} className="py-3"><strong>{vendor.name}</strong>{published.invited.some((invited) => invited.slug === vendor.slug) && <span className="ml-3 text-sm">Invited</span>}</li>)}</ul> : <p className="mt-3">No providers matched these requirements. Your published brief remains available on the board.</p>}
+      {published.matchedVendors.length ? <ul className="mt-3 divide-y">{published.matchedVendors.map((vendor) => <li key={vendor.slug} className="py-3"><strong>{vendor.name}</strong>{published.invited.some((invited) => invited.slug === vendor.slug) && <span className="ml-3 text-sm">Invited</span>}</li>)}</ul> : <p className="mt-3">No providers have a confirmed match against the recorded requirements and available evidence. No suppliers were invited. Your published brief remains on the board. Review your requirements and ask Netify to review missing provider evidence; responses are not guaranteed.</p>}
       <a className="mt-5 inline-block rounded bg-[#a84412] px-5 py-3 font-semibold text-white" href={`/sase/project/${encodeURIComponent(created.id)}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ''}`}>View project and supplier responses</a>
     </section>;
   }
@@ -5600,7 +5629,7 @@ export default function ProjectDesk({
               <GuidedBuild
                 documentPurpose={documentPurpose}
                 onDocumentPurposeChange={setDocumentPurpose}
-                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
+                briefFields={{company:workspaceCompany,scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
                 card={guidedQuestionCard}
                 ready={contentReady}
                 depthReady={rfpCoverage.ready}
@@ -5611,6 +5640,7 @@ export default function ProjectDesk({
                 position={guidedQuestionCard?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
                 total={sectionProgress.total}
                 documentTitle={canvasDocument.title}
+                privateDraftActions={!publishedFlag ? <PrivateDraftDownload title={canvasDocument.title} markdown={privateDraftMarkdown(canvasDocument)} enabled={facts.length > 0 || sourceTurns.length > 0} /> : undefined}
                 documentSummary={canvasDocument.summary}
                 clauses={canvasDocument.clauses}
                 captured={answeredLog.stated.map((item) => ({ id: item.key, label: item.label, answer: item.answer, path: item.path }))}
@@ -5645,7 +5675,7 @@ export default function ProjectDesk({
                 onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
                 onPublish={() => { if((created&&!workspaceEnvelopeId)||!requestBrief())goToStep("publish"); }}
                 entryMode={rfpEntryMode}
-                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "check") setDocumentPurpose((purpose) => purpose === "brief" ? "rfp" : purpose); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
                 validationReport={rfpValidation}
                 validatingRfp={validatingRfp}
                 validationError={rfpValidationError}
@@ -6085,7 +6115,7 @@ export default function ProjectDesk({
                                   natural point in between, readiness just crossing
                                   threshold, so the payoff stays in view on the way there. */}
                               <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#832f00]">
-                                Next: see what publishing unlocks, then publish to get bids, pricing and vetted responses.
+                                {SOURCING_DESCRIPTION}
                               </div>
                             </div>
                             <button
@@ -6093,7 +6123,7 @@ export default function ProjectDesk({
                               onClick={() => handleCommand({ kind: "whoFits" })}
                               className="flex-none cursor-pointer rounded-[4px] border-0 bg-[#c66000] px-[21px] py-3 text-[15px] font-semibold text-[#110f0d] hover:bg-[#ab4700]"
                             >
-                              See what publishing unlocks
+                              Review your next step
                             </button>
                           </div>
                         )}
@@ -6271,7 +6301,7 @@ export default function ProjectDesk({
                               </div>
                             </div>
                             <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
-                              What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
+                              {SOURCING_DESCRIPTION}
                             </p>
                           </div>
                         )}
@@ -6317,7 +6347,7 @@ export default function ProjectDesk({
                                 <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#110f0d" }}>
                                   {responseCount
                                     ? `${responseCount} of ${published.invited.length || responseCount} invited vendor${responseCount === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
-                                    : `Published — awaiting supplier responses.${published.invited.length > 0 ? ` ${cap(numWord(published.invited.length))} invited so far.` : ""}`}
+                                    : published.invited.length > 0 ? `Published — awaiting supplier responses. ${cap(numWord(published.invited.length))} invited so far.` : "Published with no supplier invitations. Your brief is on the board; review the requirements and available provider evidence."}
                                 </p>
                                 {Boolean(responseCount) && created?.id && (
                                   <p className="m-0 mt-1.5 text-[13px]">
@@ -6367,7 +6397,7 @@ export default function ProjectDesk({
                                   </div>
                                   <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
                                     {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
-                                    {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
+                                    {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from the period preceding publication tracking"}.{" "}
                                     {cap(numWord(published.invited.length))} invited directly.
                                     {published.frozen && !published.namesFrozen && " Vendor names below are resolved from the current marketplace directory, not frozen at the moment of publication."}
                                   </p>
@@ -6692,7 +6722,7 @@ export default function ProjectDesk({
               <div className="nf-2030-command-intro">
                 <span>SASE &amp; SD-WAN procurement</span>
                 <h2><strong>Build</strong> a new RFP or <strong>validate</strong> one created by ChatGPT or another AI.</h2>
-                <p>Netify makes it procurement-ready, then anonymous publication unlocks provider matching, downloads and comparable bids.</p>
+                <p>Prepare your requirement, review the anonymous notice and publish to the Netify Opportunity Board. A short brief is enough to start; publication enables personalised matching and a place to review supplier responses.</p>
               </div>
               {composerBlock}
               <div className="nf-2030-command-actions">
@@ -6715,7 +6745,7 @@ export default function ProjectDesk({
               <ol className="nf-2030-outcomes" aria-label="What Netify produces">
                 <li><span>01</span><div><strong>Build</strong><p>One living SASE or SD-WAN RFI/RFP for your sector.</p></div></li>
                 <li><span>02</span><div><strong>Validate</strong><p>Find missing requirements and improve supplier comparability.</p></div></li>
-                <li><span>03</span><div><strong>Publish &amp; match</strong><p>Publish anonymously to unlock providers, downloads and bids.</p></div></li>
+                <li><span>03</span><div><strong>Publish &amp; match</strong><p>Review your private draft, then publish anonymously when you want supplier proposals.</p></div></li>
               </ol>
             </div>
           </section> : <>
@@ -6724,7 +6754,7 @@ export default function ProjectDesk({
             <GuidedBuild
                 documentPurpose={documentPurpose}
                 onDocumentPurposeChange={setDocumentPurpose}
-                briefFields={{scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : "sase",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:workspaceNotice||((facts.length||sourceTurns.length)?canvasDocument.summary:"")}}
+                briefFields={{company:workspaceCompany,scope:buying === "sdwan" ? "sdwan" : buying === "sse" ? "sse" : buying === "sase" ? "sase" : "",sector:wizardSectorKey(requirement.organisation?.sector)||"",sites:requirement.estate?.sites?String(requirement.estate.sites):"",regions:wizardRegions(requirement.organisation?.regions||[]),timescale:requirement.constraints?.timeline||"",outcome:facts.length ? canonicalBrief.outcome : workspaceNotice||((sourceTurns.length)?canvasDocument.summary:"")}}
               card={guidedQuestionCard}
               ready={contentReady}
               depthReady={rfpCoverage.ready}
@@ -6735,6 +6765,7 @@ export default function ProjectDesk({
               position={activeRowPosition?.["position"] ?? 1}
               total={sectionProgress.total}
               documentTitle={canvasDocument.title}
+                privateDraftActions={!publishedFlag ? <PrivateDraftDownload title={canvasDocument.title} markdown={privateDraftMarkdown(canvasDocument)} enabled={facts.length > 0 || sourceTurns.length > 0} /> : undefined}
               documentSummary={canvasDocument.summary}
               clauses={canvasDocument.clauses}
               captured={answeredLog.stated.map((item) => ({ id: item.key, label: item.label, answer: item.answer, path: item.path }))}
@@ -6767,7 +6798,7 @@ export default function ProjectDesk({
               onSelectSection={(key) => setActiveSection(key)}
               onPublish={() => { if(created&&!workspaceEnvelopeId)goToStep("publish");else requestBrief(); }}
               entryMode={rfpEntryMode}
-              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "check") setDocumentPurpose((purpose) => purpose === "brief" ? "rfp" : purpose); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
               validationReport={rfpValidation}
               validatingRfp={validatingRfp}
               validationError={rfpValidationError}

@@ -23,6 +23,7 @@ import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
 import { publicationReceipt } from "@/lib/publication-receipt";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import {journeyAttribution} from '@/lib/journey-attribution';
 import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
 import FlowStageStrip, { type FlowStage } from "@/components/FlowStageStrip";
 import { hasPublished } from "@/lib/project-machine";
@@ -123,7 +124,7 @@ const EXT_SECTOR_MAP: Record<string, string> = {
   healthcare: "healthcare",
 };
 
-export default function RfpBuilder({ initialId }: { initialId?: string }) {
+export default function RfpBuilder({ initialId, privateSourcing = false }: { initialId?: string; privateSourcing?: boolean }) {
   const [project, setProject] = useState<ProjectDetails | null>(null);
   const [creating, setCreating] = useState(false);
   const [mode, setMode] = useState<"agent" | "manual">("agent");
@@ -548,6 +549,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
    *  sequence too, if this is the first time listing succeeds for this
    *  publish (see retryBoardPublication() in rfp-publish.ts). */
   async function listOnBoardNow() {
+    if (privateSourcing) return;
     if (!project || listingBusy) return;
     setListingBusy(true);
     setListAuthNeeded(false);
@@ -622,7 +624,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function startRfp(buyer?: Record<string, unknown>) {
     setCreating(true); setError(null);
     try {
-      const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buyer ? { buyer } : {}) });
+      const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({...(buyer?{buyer}:{}),measurement_attribution:journeyAttribution()}) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not start an RFP."); }
       const p = (await res.json()) as ProjectDetails;
       applyProject(p); // create returns the full token; persist it client-side
@@ -1052,6 +1054,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }
 
   async function publishToCurated(source: string = "suppliers") {
+    if (privateSourcing) return;
     if (!project || publishing) return;
     // The verify endpoint may have already completed the submission
     // server-side (the wizard's pending_submit rides the draft and executes
@@ -1303,10 +1306,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       : "publish this opportunity, so matched vendors can respond. Nothing is shared until you press publish in the panel below.";
 
   return (
-    <div className={!published && !stickyGone ? "pb-16" : undefined}>
+    <div className={!privateSourcing && !published && !stickyGone ? "pb-16" : undefined}>
       {/* Phase D1: the Project is the navigation root; the builder is one
           surface inside it. Breadcrumb back to the container. */}
-      {project && (() => {
+      {!privateSourcing && project && (() => {
         const homeTok = manageToken.current || project.manage_token || "";
         return (
           <p className="mb-2 text-xs">
@@ -1319,10 +1322,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </p>
         );
       })()}
-      <FlowStageStrip stage={stripStage} now={stripNow} next={stripNext} numberNext={!published} />
+      {!privateSourcing && <FlowStageStrip stage={stripStage} now={stripNow} next={stripNext} numberNext={!published} />}
       {/* Sign-in confirmation strip: persists after the verify redirect so
           the buyer sees what happened (session, claimed drafts, next step). */}
-      {signinNote !== null && (
+      {!privateSourcing && signinNote !== null && (
         <div className="mb-6 rounded-sm border border-emerald-300 bg-emerald-50 p-3 text-sm text-[var(--ink-800)]">
           <strong>You are signed in.</strong>{" "}
           {signinNote > 0
@@ -1339,7 +1342,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
       {/* Generate moment: the Describe wizard hands off here. Document-first
           framing so the buyer reviews and trims rather than builds. */}
-      {generatedWelcome && (
+      {!privateSourcing && generatedWelcome && (
         <div className="mb-6 rounded-sm border border-emerald-300 bg-emerald-50 p-4">
           <p className="text-base font-semibold mb-1">Here is your RFP: {project.title}</p>
           <p className="text-sm text-[var(--ink-700)] mb-3">
@@ -1358,10 +1361,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           benefit plainly, quotes the live match count, carries the sign-in
           when the server asks for one, and flips to a confirmation once the
           RFP is live. */}
+      {!privateSourcing && (
       <section id="publish" ref={publishPanelRef} className={`mb-6 rounded-sm border p-4 ${published ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
         {published ? (
           <div>
-            <p className="text-base font-semibold mb-1">Published. Your RFP is with your vendors now.</p>
+            <p className="text-base font-semibold mb-1">Published. Your project and supplier invitation records are saved.</p>
             <p className="text-sm text-[var(--ink-700)]">
               {connections.length > 0 ? `${connections.filter((c) => c.viewed_at).length} of ${connections.length} vendors have viewed your RFP.` : "Invited vendors hold private response links."}{" "}
               {project.response_deadline ? `Responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left). ` : ""}
@@ -1410,7 +1414,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 )}
                 {marketReport.gaps.length > 0 && (
                   <div className="mb-2 text-sm">
-                    <p className="font-medium mb-0.5">Gaps worth closing (edit below any time; vendors always see the latest version):</p>
+                    <p className="font-medium mb-0.5">Gaps in this published revision (save and republish corrections to update what suppliers see):</p>
                     <ul className="list-disc list-inside space-y-0.5 text-[var(--ink-700)]">
                       {marketReport.gaps.map((g) => <li key={g}>{g}</li>)}
                     </ul>
@@ -1527,11 +1531,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         )}
       </section>
+      )}
 
       {/* The FlowStageStrip above carries orientation (where you are, what
           happens next) from live state, replacing the old static "How this
           works" box. One line of reassurance stays. */}
-      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a vendor until you publish or invite them.</p>
+      <p className="mb-4 text-xs text-[var(--ink-500)]">{privateSourcing ? "Your brief is saved privately. Refine it here or add supplier questions using the agent or question bank. Netify reviews your approved requests before supplier contact." : "Everything saves automatically as you go. Nothing reaches a vendor until you publish or invite them."}</p>
 
       <p className="eyebrow mb-2">Step 1: the basics</p>
       <p className="-mt-1 mb-3 text-xs text-[var(--ink-500)]">All optional. Set what you know; the AI agent fills in the rest as you chat, and you can change any of it later.</p>
@@ -1612,7 +1617,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <a href={`/sase/rfp-builder/${project.id}/preview${keyQs}`} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors no-underline">Preview &amp; download</a>
           <a href={`/sase/rfp-builder/${project.id}/review${keyQs}`} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors no-underline">Agent review</a>
           <button onClick={exportDocument} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Export</button>
-          <button onClick={copyShare} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{copied ? "Copied" : "Response link"}</button>
+          {!privateSourcing && <button onClick={copyShare} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{copied ? "Copied" : "Response link"}</button>}
         </div>
       </div>
 
@@ -1854,7 +1859,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </button>
           )}
           <p className="text-sm text-[var(--ink-500)] mb-1">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.map((c) => securityCodeLabel(c)).join(", ") || "none set"}.</p>
-          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and vendors respond.</p>
+          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">{privateSourcing ? "Private requirements draft. Use Written proposals above to review responses recorded by Netify." : <>Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and vendors respond.</>}</p>
           <div className="space-y-3">
             {project.rfp_sections.filter((s) => s.included).map((s) => {
               const active = s.questions.filter((q) => q.priority !== "optional");
@@ -1937,6 +1942,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       </section>
 
       {/* Suppliers: two-sided marketplace */}
+      {!privateSourcing && <>
       <section id="suppliers" className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
         <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
           <h2 className="text-lg">Vendors and service providers</h2>
@@ -1945,7 +1951,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 suggestSuppliers(), which reveals project-specific vendor
                 matches. Hiding it pre-publish (on top of the function-level
                 guard) means there is no control on the page that can start
-                that disclosure before publication. */}
+                that disclosure while the notice is a draft. */}
             {published && (
               <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit vendors</button>
             )}
@@ -1970,7 +1976,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             // Row-8 hotfix (16 Aug 2026): pre-publish this section may name the
             // marketplace as an aggregate ("Netify's graded marketplace") but
             // must not reveal which vendors match THIS project, or any
-            // supplier identity, before publication.
+            // supplier identity, while the notice is a draft.
             <><strong>Step 3.</strong> Netify&apos;s graded marketplace vendors and service providers are matched to your requirement and invited once you publish. Nothing about your specific match, or any vendor&apos;s identity, is shown here until then.</>
           )}
         </p>
@@ -2254,6 +2260,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         ))}
       </section>
 
+      </>}
+
       {/* Benchmark flywheel signal */}
       {benchmark?.available && (benchmark.total_rfps ?? 0) > 0 && (
         <section className="mt-8 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-4">
@@ -2271,7 +2279,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
       {/* Slim sticky publish bar: keeps the next step visible on a long page.
           Session-dismissible; gone for good once the RFP is published. */}
-      {!published && !stickyGone && !submitFlow && (
+      {!privateSourcing && !published && !stickyGone && !submitFlow && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-300 bg-white/95 backdrop-blur px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
             <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> {publicationLocked ? "finish publishing this opportunity." : "publish this opportunity. Competing bids, no sales calls."}</span>
