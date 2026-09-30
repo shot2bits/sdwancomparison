@@ -835,7 +835,7 @@ await withFakeKv(async (store) => {
   delete process.env.SOURCING_DESK_EMAIL;
   const externalBefore = mails.length;
   assert.equal((await captureConfirm()).status, 200);
-  const { notificationStatus, workingHoursSince } =
+  const { notificationStatus, workingHoursSince, queueAge } =
     await import("../src/lib/sourcing-notifications");
   const hours = {
     working_day_start_hour: 9,
@@ -858,7 +858,14 @@ await withFakeKv(async (store) => {
     ),
     2,
   );
-  assert.equal(workingHoursSince(Date.now(), Date.now()), null);
+  const sameInstant = Date.parse("2026-09-28T08:00:00Z");
+  assert.equal(workingHoursSince(sameInstant, sameInstant), 0);
+  assert.equal(workingHoursSince(sameInstant, sameInstant, {
+    ...hours, working_day_start_hour: null, working_day_end_hour: null,
+  }), null);
+  // Owner-approved schedule: weekdays 09:00–17:00 UK; red after eight working hours.
+  assert.equal(queueAge(sameInstant, Date.parse("2026-09-28T16:00:00Z")).overdue, false);
+  assert.equal(queueAge(sameInstant, Date.parse("2026-09-29T08:01:00Z")).overdue, true);
   assert.equal((await notificationStatus(captureId)).desk, "pending");
   assert.equal((await notificationStatus(captureId)).buyer, "accepted");
   assert.equal(
