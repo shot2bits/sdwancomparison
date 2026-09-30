@@ -32,3 +32,25 @@ PASS sourcing target set: page step 3, Service JSON-LD, llms and MCP agree
 PASS partial or invalid targets stay unpromised; buyer acknowledgement uses the same contract
 ```
 [OWNER] proposals and working_days remain null.
+
+## Step 4 — response-panel records
+
+Empty committed response-panel.json plus isolated/private store; all fields required in the staff-only admin form. Public cards/feed carry only contact identity, role/domain, response time and terms date. Source references and acknowledged_by remain private. Named-contact routing is included in the desk notification; supplier outreach remains a separately reviewed human action.
+```text
+PASS empty panel: 30 Research only cards, 0 Response panel badges
+PASS synthetic panel: one badge, named-contact routing, private acknowledgement evidence excluded
+PASS panel administration: staff only, origin checks, all fields required, future dates and unknown providers rejected
+PASS hosted panel: empty 30/0; synthetic 29/1; named contact in card, feed and captured desk action; private evidence excluded; queue age and both notification receipts present
+PASS preview cleanup: test membership removed; committed panel remains empty; no external mail
+```
+Hosted preview 8a9cef3, dpl_FwMBAqJgEXiycBXbguVQmjHPFtgy. TypeScript and action-first suite exit 0. [OWNER] all actual panel memberships/contacts/commitments remain absent.
+
+## Step 5 — four evidenced UK carrier records
+
+Primary-source corporate/entity records and SD-WAN delivery sources now support the four UK classifications. Comparison IDs are bt-business, virgin-media-o2, vodafone-business and colt-technology-services (the requested Colt and Virgin names use different actual IDs). Source URLs and qualifications are embedded in UK_CARRIER_REVIEWS. UK/Ireland yes is explicitly qualified as UK evidence, not every Irish/UK address. Colt's group entity and UK trading company are distinguished.
+
+Exposed the existing uk_provider_only filter on the sourcing brief and passed it through the web/MCP shared plan and stored project criteria; no matching weights or estimator/RFP algorithms changed.
+```text
+PASS UK-only filter: bt-business, colt-technology-services, virgin-media-o2, vodafone-business; four sourced reviews; other UK grades remain not_confirmed; capability/sector grades unchanged
+```
+TypeScript and action-first suite exit 0. Live audit and four-provider filter acceptance deferred to coordinated Step 7 deployment. [OWNER] none.

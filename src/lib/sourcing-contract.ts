@@ -26,6 +26,7 @@ export const SourcingBriefSchema = z.object({
   sites: z.number().int().min(1).max(100000),
   remote_users: z.number().int().min(0).max(1000000),
   region: z.enum(REGION_KEYS),
+  uk_provider_only: z.boolean().optional(),
   sector: z.enum(SECTOR_KEYS).nullable(),
   need: z.enum(["sdwan", "sase", "secure_access", "help_deciding"]),
   when: z.string().min(1).max(120),

@@ -137,7 +137,8 @@ const source: ProviderMatchRecord = {
 // Match the actual governed slug mapping.
 source.slug = "bt";
 const [projected] = mergeNeonProviderRecords(base, [source]);
-assert.equal(projected.uk_delivery, "not_confirmed");
+assert.equal(projected.uk_delivery, "uk_hq");
+assert(projected.projection_provenance?.active_review?.source_urls.includes("https://find-and-update.company-information.service.gov.uk/company/04190816"));
 assert.equal(projected.independent_evidence_source_count, undefined);
 assert.equal(projected.projection_provenance?.sector_review_queue.length, 10);
 assert.equal(

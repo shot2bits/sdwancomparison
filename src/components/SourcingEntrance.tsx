@@ -93,7 +93,7 @@ export default function SourcingEntrance({
     setMessage("");
     setMatching(true);
     setMatches(null);
-    const summary = `${brief.sites} sites; ${brief.remote_users} remote users; ${REGION_LABELS[brief.region]}; ${brief.sector ? SECTOR_LABELS[brief.sector] : "sector to discuss"}. Required service: ${brief.need}. Timing: ${brief.when}.`;
+    const summary = `${brief.sites} sites; ${brief.remote_users} remote users; ${REGION_LABELS[brief.region]}; ${brief.sector ? SECTOR_LABELS[brief.sector] : "sector to discuss"}. Required service: ${brief.need}. Timing: ${brief.when}.${brief.uk_provider_only?" UK providers only: evidenced UK headquarters or contracting entity required.":""}`;
     // Preserve buyer edits; reapproval is required after every requirements change.
     if (!brief.supplier_brief || brief.supplier_brief === generatedBrief.current) {
       change("supplier_brief", summary);
@@ -116,7 +116,7 @@ export default function SourcingEntrance({
       if (version !== briefVersion.current) return;
       setMatches((d.matches ?? []).map((v: { slug: string }) => v.slug));
       setMatchMessage(
-        "Evidence matching uses the selected sector, region and service. Site counts, timing and pasted notes still need desk and supplier assessment. No suppliers are automatically approved.",
+        "Evidence matching uses the selected sector, region, service and optional UK-provider filter. Site counts, timing and pasted notes still need desk and supplier assessment. No suppliers are automatically approved.",
       );
     } catch {
       if (version !== briefVersion.current) return;
@@ -196,6 +196,7 @@ export default function SourcingEntrance({
       >
         <h2>What do you need?</h2>
         <p>Start with the essentials. We resolve the detail with you.</p>
+        <label className="sourcing-check"><input type="checkbox" checked={brief.uk_provider_only??false} onChange={e=>change("uk_provider_only",e.target.checked)}/>UK providers only — UK headquarters or contracting entity evidenced</label>
         <div className="sourcing-fields">
           <label>
             Business sites

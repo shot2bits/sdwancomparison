@@ -87,6 +87,7 @@ export async function callSourcingTool(
     ...publicShortlistPreview(live.vendors, {
       sector: b.sector,
       required_regions: [b.region],
+      uk_provider_only: b.uk_provider_only ?? false,
       required_features:
         b.need === "sdwan"
           ? ["f09_encrypted_overlay_fabric"]

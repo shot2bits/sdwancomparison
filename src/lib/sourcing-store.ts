@@ -177,6 +177,7 @@ export async function confirmSourcingRequest(id: string, token: string) {
       shortlist: ShortlistInputSchema.parse({
         sector: b.sector,
         required_regions: [b.region],
+        uk_provider_only: b.uk_provider_only ?? false,
         shortlist_size: 30,
       }),
       rankedVendorSlugs: r.request.recipients.map((p) => p.slug),
