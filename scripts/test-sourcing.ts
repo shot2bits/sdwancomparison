@@ -5,10 +5,17 @@ import {
   validateRecipients,
   responsePanelMember,
 } from "../src/lib/sourcing-contract";
-import {
-  assertRequestConfirmation,
-  type SourcingRecord,
-} from "../src/lib/sourcing-store";
+import type { SourcingRecord } from "../src/lib/sourcing-store";
+// @ts-expect-error Node 24 provides registerHooks.
+import { registerHooks } from "node:module";
+registerHooks({
+  resolve(s: string, c: object, n: (s: string, c: object) => { url: string }) {
+    return s === "server-only"
+      ? { url: "data:text/javascript,export {};", shortCircuit: true }
+      : n(s, c);
+  },
+});
+const { assertRequestConfirmation } = await import("../src/lib/sourcing-store");
 import { publicShortlistPreview } from "../src/lib/public-shortlist";
 import { publicEvidenceProviders } from "../src/lib/public-provider-evidence";
 import { getShortlistDataset } from "../src/lib/vendors";

@@ -1,3 +1,4 @@
+import {notifyConfirmedSourcing} from "./sourcing-notifications";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import {
   SourcingRequestSchema,
@@ -168,6 +169,7 @@ export async function confirmSourcingRequest(id: string, token: string) {
       // Repair an interrupted queue write without recreating the project or changing credentials.
       await kvRaw(["ZADD", "sourcing:desk-review", r.confirmed_at ?? r.created_at, id]);
       await recordSourcingConfirmation(r);
+      await notifyConfirmedSourcing(r);
       return { request_id: r.id, status: r.status };
     }
     const b = r.request.brief;
@@ -210,6 +212,7 @@ export async function confirmSourcingRequest(id: string, token: string) {
     ]);
     if (committed !== 1) throw new Error("Confirmation is already being processed. Please retry.");
     await recordSourcingConfirmation(r);
+      await notifyConfirmedSourcing(r);
     // No supplier mail here. Identity confirmation never bypasses desk review.
     return { request_id: id, status: "desk_review" };
   } finally {
