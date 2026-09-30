@@ -10,7 +10,9 @@
     "qualification": "Recovered Cisco George Sink PDF: Secure Connect deployed in a law firm; SD-WAN expansion described as a next step. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "ntt": {
     "sectors": {
@@ -22,7 +24,9 @@
     "qualification": "Recovered NTT Pick n Pay case: Fortinet managed SD-WAN across retail stores; South Africa, not proof of UK delivery. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "hpe-aruba": {
     "sectors": {
@@ -50,7 +54,9 @@
     "reviewer": "Codex primary-source review; human release sign-off pending",
     "regions": {
       "uk_ireland": "partial"
-    }
+    },
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "versa-networks": {
     "sectors": {
@@ -67,7 +73,9 @@
     "qualification": "Versa case index expressly identifies Lambton Area Water Supply Systems deploying SASE for remote offices and cloud data. Canadian utility case only. Versa identifies an anonymous Global-200 pharmaceutical manufacturer using Secure SD-WAN. Retain anonymous evidence, not a named reference. Versa documents an unnamed retailer with over 600 stores using Secure SD-WAN. Do not describe this as named customer proof. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "sonicwall": {
     "sectors": {
@@ -83,7 +91,9 @@
     "reviewed_at": "2026-09-30T15:30:00Z",
     "review_due": "2026-10-30T00:00:00Z",
     "reviewer": "Codex primary-source review; human release sign-off pending",
-    "regions": {}
+    "regions": {},
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "expereo": {
     "sectors": {
@@ -95,7 +105,9 @@
     "qualification": "Recovered Expereo Kingspan Insulation release explicitly documents SD-WAN and underlay at 90 facilities including factories. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "verizon-business": {
     "sectors": {
@@ -112,7 +124,9 @@
     "qualification": "Verizon federal-agency page is secure cloud video collaboration for 20,000 users. The linked case is not SD-WAN/SASE evidence. Verizon manufacturing case explicitly describes SD-WAN design, rollout and traffic segmentation; manufacturer is unnamed. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation. Recovered primary anonymous healthcare SASE deployment: 200 sites, supplier managed. Does not establish UK/NHS delivery or a named customer.",
     "reviewed_at": "2026-09-30T15:40:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "netskope": {
     "sectors": {
@@ -131,7 +145,9 @@
     "reviewer": "Codex primary-source review; human release sign-off pending",
     "regions": {
       "uk_ireland": "partial"
-    }
+    },
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "opensystems": {
     "sectors": {
@@ -146,7 +162,9 @@
     "qualification": "Open Systems labels ALTANA chemicals and documents SASE at 60-plus sites. Correct sector to manufacturing/chemicals, not logistics. Recovered Open Systems customer index identifies Mikron precision manufacturing using SASE. Does not prove every secondary-directory detail. Mammut primary case describes SASE, branch breakouts, VPN and managed network operations for an outdoor retail brand. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "lumen": {
     "sectors": {
@@ -160,7 +178,9 @@
     "qualification": "Recovered Lumen testimonial identifies Valley Cities Behavioral Health Care replacing MPLS/SD-WAN with DIA and SASE. Correct anonymous attribution; compensated supplier-published endorsement. Berridge testimonial explicitly says SASE and EWAS will work together once implementation is complete. It is not evidence of a completed outcome. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "zscaler": {
     "sectors": {
@@ -180,7 +200,9 @@
     "qualification": "NOV case documents ZIA/ZPA and zero-trust access for an energy-industry supplier. Do not infer utility-specific compliance or UK fit. CSC is Australian Commonwealth Superannuation Corporation; ZIA/ZPA deployment confirmed. Government-pension context, not a blanket public-sector accreditation. Baker and Baker case documents ZIA/ZPA alongside a separately adopted SD-WAN. Manufacturing evidence; Zscaler is not identified as the SD-WAN provider. Mindbody is a SaaS software business serving wellness firms. Its ZPA deployment does not establish professional-services or healthcare end-buyer sector evidence. AutoNation confirms ZIA deployment across retail locations. Baker and Baker must not be counted as a second retail case; it is manufacturing. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "cato-networks": {
     "sectors": {
@@ -194,7 +216,9 @@
     "qualification": "Ulta Beauty primary case documents a SASE-led cloud SD-WAN transition and staged store rollout. Do not imply the three-year rollout is complete. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation. Waseda University primary case documents Cato secure remote learning in Japan via GlobalDots. Replacement named education evidence; does not validate the original anonymous quotation or UK education suitability.",
     "reviewed_at": "2026-09-30T15:50:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "orange-business": {
     "sectors": {
@@ -206,7 +230,9 @@
     "qualification": "Recovered Orange Siemens release confirms Cisco-based Flexible SD-WAN at corporate locations. No manufacturing-OT suitability or UK quote inference. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "gtt": {
     "sectors": {
@@ -219,7 +245,9 @@
     "qualification": "GTT Radisson release confirms selection and rollout of managed SASE/SD-WAN for hotels. This is an implementation announcement, not proof of all 800 hotels completed. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "palo-alto-networks": {
     "sectors": {
@@ -235,7 +263,9 @@
     "qualification": "Colgate primary case explicitly identifies Prisma SD-WAN and Prisma Access at a manufacturer. Bimbo corroborates manufacturing security, not a separate logistics sector. Westfield primary case documents Prisma SASE for mall operations and retail access. Evidence relates to a mall operator, not every retail format. Grupo Bimbo is a bakery manufacturer. Its connected supply chain does not make it an independent transport/logistics customer. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
     "reviewed_at": "2026-09-30T00:00:00Z",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewer": "Codex source adjudication; human release sign-off pending"
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "fortinet": {
     "sectors": {
@@ -258,7 +288,9 @@
     "reviewer": "Codex primary-source review; human release sign-off pending",
     "regions": {
       "uk_ireland": "partner_integrated"
-    }
+    },
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "bt-business": {
     "reviewed_at": "2026-09-30T15:30:00Z",
@@ -272,7 +304,9 @@
       "https://business.bt.com/networks-digital-services/sd-wan-sase/sase/",
       "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf"
     ],
-    "qualification": " BT publishes UK managed SASE infrastructure and a Managed Fortinet SD-WAN annex defining Territory as UK. This establishes UK offering, not every UK or Irish address, a specific contracting arrangement or Netify response commitment. Combined UK/Ireland region stays partial."
+    "qualification": " BT publishes UK managed SASE infrastructure and a Managed Fortinet SD-WAN annex defining Territory as UK. This establishes UK offering, not every UK or Irish address, a specific contracting arrangement or Netify response commitment. Combined UK/Ireland region stays partial.",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "colt": {
     "reviewed_at": "2026-09-30T15:30:00Z",
@@ -288,7 +322,9 @@
       "https://www.colt.net/customer-stories/byblos-bank-europe",
       "https://www.colt.net/customer-stories/leading-global-investment-bank"
     ],
-    "qualification": " Named Byblos Bank Europe case documents Colt SD-WAN at Brussels, London and Paris with Zscaler access services. Establishes financial-services deployment and London delivery; not nationwide or Irish access availability. Separate anonymous investment bank evidence is qualified and does not replace the named case."
+    "qualification": " Named Byblos Bank Europe case documents Colt SD-WAN at Brussels, London and Paris with Zscaler access services. Establishes financial-services deployment and London delivery; not nationwide or Irish access availability. Separate anonymous investment bank evidence is qualified and does not replace the named case.",
+    "signed_off_by": "",
+    "signed_off_at": ""
   },
   "aryaka": {
     "sectors": {
@@ -300,6 +336,8 @@
     "qualification": " Transitex freight/logistics primary case documents Aryaka SmartSecure Remote Access through Cloud365 for China connectivity. Supports logistics experience with qualification; not proof of full branch SD-WAN, current UK delivery or the original generic claim.",
     "reviewer": "Codex source adjudication; human release sign-off pending",
     "review_due": "2026-10-30T00:00:00Z",
-    "reviewed_at": "2026-09-30T15:50:00Z"
+    "reviewed_at": "2026-09-30T15:50:00Z",
+    "signed_off_by": "",
+    "signed_off_at": ""
   }
 }

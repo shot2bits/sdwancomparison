@@ -54,3 +54,11 @@ Exposed the existing uk_provider_only filter on the sourcing brief and passed it
 PASS UK-only filter: bt-business, colt-technology-services, virgin-media-o2, vodafone-business; four sourced reviews; other UK grades remain not_confirmed; capability/sector grades unchanged
 ```
 TypeScript and action-first suite exit 0. Live audit and four-provider filter acceptance deferred to coordinated Step 7 deployment. [OWNER] none.
+
+## Step 6 — owner sign-off sheet and visible status
+
+Generated docs/sector-adjudications-signoff-2026-09-30.md: 36 positive rows plus a clearly separated five-row unconfirmed appendix. Added blank signed_off_by/at to all 19 records without changing any sector value. Public provider cards/feed use explicit pending/signed labels. Corrected Colt's governed-to-comparison slug join so its already-reviewed evidence and sign-off state reach the actual card.
+```text
+PASS sign-off: 19 provider records, 36 positive rows (27 yes/9 partial), 5 unconfirmed rows preserved; all values unchanged; pending and signed labels verified; Colt slug mapped
+```
+TypeScript and action-first suite exit 0. [OWNER] all 19 sign-offs remain empty.

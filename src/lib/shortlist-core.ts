@@ -1,3 +1,4 @@
+import type {SectorSignoff} from "./sector-signoff";
 /**
  * Shortlist engine core. Client-safe: no Node imports, pure functions only.
  *
@@ -189,7 +190,7 @@ export type ShortlistVendor = {
   public_pricing_visibility: "public" | "partial_public" | "quote_based";
   value_tier: "budget" | "value" | "mid" | "premium";
   uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed" | "not_confirmed";
-  projection_provenance?: {active_review?:{reviewed_at:string;review_due:string;reviewer:string;source_urls:string[];qualification:string;sectors:Record<string,CapabilityStatus>;regions:Record<string,CapabilityStatus>};contract:string;governed_revision:string;curated_reviewed_at:string;curated_sectors:Record<string,CapabilityStatus>;curated_uk_delivery:string;curated_uk_basis:string;sector_review_queue:{sector:string;reason:string;support_state:string}[];resolution:string};
+  projection_provenance?: {active_review?:{sector_signoff?:SectorSignoff;reviewed_at:string;review_due:string;reviewer:string;source_urls:string[];qualification:string;sectors:Record<string,CapabilityStatus>;regions:Record<string,CapabilityStatus>};contract:string;governed_revision:string;curated_reviewed_at:string;curated_sectors:Record<string,CapabilityStatus>;curated_uk_delivery:string;curated_uk_basis:string;sector_review_queue:{sector:string;reason:string;support_state:string}[];resolution:string};
   uk_basis: string;
   capabilities: Record<string, CapabilityStatus>;
   capability_evidence?: Record<string, {source_url: string; reviewed_at: string; review_due: string; qualification: string}>;

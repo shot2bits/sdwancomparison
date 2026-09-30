@@ -1,3 +1,5 @@
+import { comparisonSlugForGovernedProvider } from "./governed-provider-catalogue";
+import { sectorSignoff, type SectorSignoff } from "./sector-signoff";
 import sectorAdjudications from "../../data/provider-sector-adjudications.json";
 import type { ShortlistVendor, CapabilityStatus } from "./shortlist-core";
 import type { ProviderMatchRecord } from "./provider-matching";
@@ -5,6 +7,7 @@ export type ReviewedProjection = {
   reviewed_at: string;
   review_due: string;
   reviewer: string;
+  sector_signoff?: SectorSignoff;
   source_urls: string[];
   qualification: string;
   sectors?: Partial<ShortlistVendor["sectors"]>;
@@ -56,27 +59,112 @@ export const REVIEWED_PROVIDER_PROJECTIONS: Record<string, ReviewedProjection> =
         "BT documents managed Agile Connect SD-WAN and Fortinet Firewall for a global banking organisation. Does not verify DORA/PCI compliance or a manufacturing deployment.",
     },
   };
-for (const [slug, row] of Object.entries(sectorAdjudications)) {
+for (const [sourceSlug, row] of Object.entries(sectorAdjudications)) {
+  const slug = comparisonSlugForGovernedProvider(sourceSlug);
   const previous = REVIEWED_PROVIDER_PROJECTIONS[slug];
   REVIEWED_PROVIDER_PROJECTIONS[slug] = {
-    ...previous, ...row,
-    sectors: {...previous?.sectors, ...row.sectors} as ReviewedProjection["sectors"],
-    regions: {...previous?.regions, ...((row as ReviewedProjection).regions??{})} as ReviewedProjection["regions"],
-    source_urls: [...new Set([...(previous?.source_urls ?? []), ...row.source_urls])],
-    qualification: [previous?.qualification, row.qualification].filter(Boolean).join(" "),
+    ...previous,
+    ...row,
+    reviewer: sectorSignoff(row).label,
+    sector_signoff: sectorSignoff(row),
+    sectors: {
+      ...previous?.sectors,
+      ...row.sectors,
+    } as ReviewedProjection["sectors"],
+    regions: {
+      ...previous?.regions,
+      ...((row as ReviewedProjection).regions ?? {}),
+    } as ReviewedProjection["regions"],
+    source_urls: [
+      ...new Set([...(previous?.source_urls ?? []), ...row.source_urls]),
+    ],
+    qualification: [previous?.qualification, row.qualification]
+      .filter(Boolean)
+      .join(" "),
   };
 }
 // Comparison slugs are intentionally used here: governed "colt" maps to
 // "colt-technology-services"; Virgin's existing comparison key has no -business.
-export const UK_CARRIER_REVIEWS:Record<string,ReviewedProjection>={
- 'bt-business':{...reviewMeta,reviewed_at:'2026-09-30T19:56:00Z',uk_delivery:'uk_hq',regions:{uk_ireland:'yes'},uk_basis:'BT Group plc is headquartered at 1 Braham Street, London; UK managed SD-WAN is published by BT Business.',source_urls:['https://www.bt.com/about/contact-bt','https://find-and-update.company-information.service.gov.uk/company/04190816','https://business.bt.com/networks-digital-services/sd-wan/'],qualification:'UK headquarters and a published UK SD-WAN offering are confirmed. This is not a quote, site serviceability check or confirmation of the legal entity signing a particular order. The combined UK/Ireland yes flag records UK delivery evidence; Irish coverage must be checked separately.'},
- 'virgin-media-o2':{...reviewMeta,reviewed_at:'2026-09-30T19:56:00Z',uk_delivery:'uk_entity',regions:{uk_ireland:'yes'},uk_basis:'Virgin Media Business Limited, company 01785381, publishes its registered office in Reading and UK business network service terms.',source_urls:['https://www.virginmediabusiness.co.uk/legal/terms-and-conditions/','https://www.virginmediabusiness.co.uk/legal/privacy-policy/'],qualification:'The published business terms name Virgin Media Business Limited and include SD-WAN and UK managed IPVPN schedules. This is evidence of a UK contracting entity, not confirmation of a specific estate, Irish availability, response commitment or the entity used for a separate O2 service.'},
- 'vodafone-business':{...reviewMeta,reviewed_at:'2026-09-30T19:56:00Z',uk_delivery:'uk_entity',regions:{uk_ireland:'yes'},uk_basis:'Vodafone Limited, company 01471587, identifies its registered office in Newbury; the Optos SD-WAN case includes UK operations.',source_urls:['https://www.vodafone.co.uk/privacy','https://www.vodafone.co.uk/business/case-studies/sd-wan-keeps-optos-connected-worldwide'],qualification:'Vodafone Limited UK entity and UK SD-WAN delivery evidence are confirmed. Group branding does not determine the contracting entity for an individual quote. Irish coverage, address availability and current supplier fit require confirmation.'},
- 'colt-technology-services':{...reviewMeta,reviewed_at:'2026-09-30T19:56:00Z',uk_delivery:'uk_entity',regions:{uk_ireland:'yes'},uk_basis:'Colt Technology Services Group Limited, company 03232904, is registered at Colt House, 20 Great Eastern Street, London. Colt publishes a London SD-WAN deployment.',source_urls:['https://docs.colt.net/legal/terms-and-conditions','https://docs.colt.net/legal/colt-group-of-companies','https://find-and-update.company-information.service.gov.uk/company/03232904','https://www.colt.net/customer-stories/byblos-bank-europe'],qualification:'The named UK group entity operates the website; the trading-company list separately identifies Colt Technology Services (02452736) in England and Wales. The group entity is not assumed to sign each service contract. The Byblos Bank Europe case includes London SD-WAN delivery. Actual trading entity, each site and Irish coverage require order-specific confirmation.'},
+export const UK_CARRIER_REVIEWS: Record<string, ReviewedProjection> = {
+  "bt-business": {
+    ...reviewMeta,
+    reviewed_at: "2026-09-30T19:56:00Z",
+    uk_delivery: "uk_hq",
+    regions: { uk_ireland: "yes" },
+    uk_basis:
+      "BT Group plc is headquartered at 1 Braham Street, London; UK managed SD-WAN is published by BT Business.",
+    source_urls: [
+      "https://www.bt.com/about/contact-bt",
+      "https://find-and-update.company-information.service.gov.uk/company/04190816",
+      "https://business.bt.com/networks-digital-services/sd-wan/",
+    ],
+    qualification:
+      "UK headquarters and a published UK SD-WAN offering are confirmed. This is not a quote, site serviceability check or confirmation of the legal entity signing a particular order. The combined UK/Ireland yes flag records UK delivery evidence; Irish coverage must be checked separately.",
+  },
+  "virgin-media-o2": {
+    ...reviewMeta,
+    reviewed_at: "2026-09-30T19:56:00Z",
+    uk_delivery: "uk_entity",
+    regions: { uk_ireland: "yes" },
+    uk_basis:
+      "Virgin Media Business Limited, company 01785381, publishes its registered office in Reading and UK business network service terms.",
+    source_urls: [
+      "https://www.virginmediabusiness.co.uk/legal/terms-and-conditions/",
+      "https://www.virginmediabusiness.co.uk/legal/privacy-policy/",
+    ],
+    qualification:
+      "The published business terms name Virgin Media Business Limited and include SD-WAN and UK managed IPVPN schedules. This is evidence of a UK contracting entity, not confirmation of a specific estate, Irish availability, response commitment or the entity used for a separate O2 service.",
+  },
+  "vodafone-business": {
+    ...reviewMeta,
+    reviewed_at: "2026-09-30T19:56:00Z",
+    uk_delivery: "uk_entity",
+    regions: { uk_ireland: "yes" },
+    uk_basis:
+      "Vodafone Limited, company 01471587, identifies its registered office in Newbury; the Optos SD-WAN case includes UK operations.",
+    source_urls: [
+      "https://www.vodafone.co.uk/privacy",
+      "https://www.vodafone.co.uk/business/case-studies/sd-wan-keeps-optos-connected-worldwide",
+    ],
+    qualification:
+      "Vodafone Limited UK entity and UK SD-WAN delivery evidence are confirmed. Group branding does not determine the contracting entity for an individual quote. Irish coverage, address availability and current supplier fit require confirmation.",
+  },
+  "colt-technology-services": {
+    ...reviewMeta,
+    reviewed_at: "2026-09-30T19:56:00Z",
+    uk_delivery: "uk_entity",
+    regions: { uk_ireland: "yes" },
+    uk_basis:
+      "Colt Technology Services Group Limited, company 03232904, is registered at Colt House, 20 Great Eastern Street, London. Colt publishes a London SD-WAN deployment.",
+    source_urls: [
+      "https://docs.colt.net/legal/terms-and-conditions",
+      "https://docs.colt.net/legal/colt-group-of-companies",
+      "https://find-and-update.company-information.service.gov.uk/company/03232904",
+      "https://www.colt.net/customer-stories/byblos-bank-europe",
+    ],
+    qualification:
+      "The named UK group entity operates the website; the trading-company list separately identifies Colt Technology Services (02452736) in England and Wales. The group entity is not assumed to sign each service contract. The Byblos Bank Europe case includes London SD-WAN delivery. Actual trading entity, each site and Irish coverage require order-specific confirmation.",
+  },
 };
-for(const [slug,uk] of Object.entries(UK_CARRIER_REVIEWS)){
- const previous=REVIEWED_PROVIDER_PROJECTIONS[slug];
- REVIEWED_PROVIDER_PROJECTIONS[slug]={...previous,...uk,sectors:previous?.sectors,regions:{...previous?.regions,...uk.regions},source_urls:[...new Set([...(previous?.source_urls??[]),...uk.source_urls])],qualification:[previous?.qualification,`UK review update (supersedes earlier UK-region qualification): ${uk.qualification}`].filter(Boolean).join(' ')};
+for (const [slug, uk] of Object.entries(UK_CARRIER_REVIEWS)) {
+  const previous = REVIEWED_PROVIDER_PROJECTIONS[slug];
+  REVIEWED_PROVIDER_PROJECTIONS[slug] = {
+    ...previous,
+    ...uk,
+    reviewer: previous?.reviewer ?? uk.reviewer,
+    sector_signoff: previous?.sector_signoff,
+    sectors: previous?.sectors,
+    regions: { ...previous?.regions, ...uk.regions },
+    source_urls: [
+      ...new Set([...(previous?.source_urls ?? []), ...uk.source_urls]),
+    ],
+    qualification: [
+      previous?.qualification,
+      `UK review update (supersedes earlier UK-region qualification): ${uk.qualification}`,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  };
 }
 export function applyProjectionReview(
   provider: ShortlistVendor,
@@ -140,5 +228,14 @@ export function applyProjectionReview(
     provider.independent_evidence_source_count =
       review.independent_evidence_source_count;
   provider.projection_provenance.resolution = "reviewed_override";
-  provider.projection_provenance.active_review = {reviewed_at:review.reviewed_at,review_due:review.review_due,reviewer:review.reviewer,source_urls:review.source_urls,qualification:review.qualification,sectors:review.sectors??{},regions:review.regions??{}};
+  provider.projection_provenance.active_review = {
+    reviewed_at: review.reviewed_at,
+    review_due: review.review_due,
+    reviewer: review.reviewer,
+    sector_signoff: review.sector_signoff,
+    source_urls: review.source_urls,
+    qualification: review.qualification,
+    sectors: review.sectors ?? {},
+    regions: review.regions ?? {},
+  };
 }

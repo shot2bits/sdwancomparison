@@ -464,6 +464,7 @@ export default function SourcingEntrance({
               <p className="sourcing-small">
                 Reviewed {v.last_verified || "date not recorded"}
               </p>
+              {v.projection_provenance?.active_review?.sector_signoff&&<p className="sourcing-small">{v.projection_provenance.active_review.sector_signoff.label}</p>}
               <a href={v.marketplace_url || `/sase/vendors/${v.slug}/`}>
                 Datasheet and evidence ↗
               </a>
