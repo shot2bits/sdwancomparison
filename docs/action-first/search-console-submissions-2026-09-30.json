@@ -1,0 +1,131 @@
+{
+  "accepted_individual_count": 11,
+  "pending_individual_count": 47,
+  "events": [
+    {
+      "url": "https://netify.co.uk/sase/shortlist/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:17:15.601Z"
+    },
+    {
+      "url": "https://netify.co.uk/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:19:39.891Z"
+    },
+    {
+      "url": "https://netify.co.uk/sase-sd-wan-rfp-builder/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:22:10.500Z"
+    },
+    {
+      "url": "https://netify.co.uk/sd-wan-for-healthcare/",
+      "status": "Failed: We had a problem submitting your indexing request. Please try again later.",
+      "at": "2026-09-30T20:23:43.541Z"
+    },
+    {
+      "url": "https://netify.co.uk/sd-wan-sase-for-manufacturing/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:25:23.299Z"
+    },
+    {
+      "url": "https://netify.co.uk/sase/sitemap.xml",
+      "status": "Sitemap submitted successfully",
+      "at": "2026-09-30T20:25:55.886Z"
+    },
+    {
+      "url": "https://netify.co.uk/sitemap.xml",
+      "status": "Sitemap submitted successfully",
+      "at": "2026-09-30T20:27:35.064Z"
+    },
+    {
+      "url": "https://netify.co.uk/sd-wan-sase-for-retail/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:27:35.064Z"
+    },
+    {
+      "url": "https://netify.co.uk/sd-wan-sase-for-financial-services/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:30:02.256Z"
+    },
+    {
+      "url": "https://netify.co.uk/sd-wan-for-healthcare/",
+      "status": "Indexing requested (retry accepted)",
+      "at": "2026-09-30T20:31:31.039Z"
+    },
+    {
+      "url": "https://netify.co.uk/sase/best/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:32:13.713Z"
+    },
+    {
+      "url": "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-healthcare/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:33:04.449Z"
+    },
+    {
+      "url": "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-financial-services/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:33:43.960Z"
+    },
+    {
+      "url": "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-retail/",
+      "status": "Indexing requested",
+      "at": "2026-09-30T20:34:42.470Z"
+    },
+    {
+      "url": "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-manufacturing/",
+      "status": "Blocked: Google indexing quota exceeded",
+      "at": "2026-09-30T20:35:13.915Z"
+    }
+  ],
+  "pending_urls": [
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-manufacturing/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-energy-and-utilities/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-government/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-uk-public-sector/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-education/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-transport-and-logistics/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-professional-services/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-hospitality/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-large-global-enterprises/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-mid-market/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-small-business/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-cost-saving/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-mpls-migration/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-rapid-deployment/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-remote-and-hybrid-work/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-security-consolidation/",
+    "https://netify.co.uk/sase/best/sd-wan-sase-providers-for-global-expansion/",
+    "https://netify.co.uk/sase/alternatives/arista-velocloud/",
+    "https://netify.co.uk/sase/alternatives/aryaka/",
+    "https://netify.co.uk/sase/alternatives/att-business/",
+    "https://netify.co.uk/sase/alternatives/bt-business/",
+    "https://netify.co.uk/sase/alternatives/cato-networks/",
+    "https://netify.co.uk/sase/alternatives/check-point/",
+    "https://netify.co.uk/sase/alternatives/cisco/",
+    "https://netify.co.uk/sase/alternatives/cloudflare-one/",
+    "https://netify.co.uk/sase/alternatives/colt-technology-services/",
+    "https://netify.co.uk/sase/alternatives/comcast-business/",
+    "https://netify.co.uk/sase/alternatives/cradlepoint-ericsson/",
+    "https://netify.co.uk/sase/alternatives/fatpipe-networks/",
+    "https://netify.co.uk/sase/alternatives/forcepoint/",
+    "https://netify.co.uk/sase/alternatives/fortinet/",
+    "https://netify.co.uk/sase/alternatives/gtt/",
+    "https://netify.co.uk/sase/alternatives/hpe-aruba/",
+    "https://netify.co.uk/sase/alternatives/hughes/",
+    "https://netify.co.uk/sase/alternatives/juniper-networks/",
+    "https://netify.co.uk/sase/alternatives/lumen/",
+    "https://netify.co.uk/sase/alternatives/netskope/",
+    "https://netify.co.uk/sase/alternatives/ntt/",
+    "https://netify.co.uk/sase/alternatives/orange-business/",
+    "https://netify.co.uk/sase/alternatives/palo-alto-networks/",
+    "https://netify.co.uk/sase/alternatives/peplink/",
+    "https://netify.co.uk/sase/alternatives/sonicwall/",
+    "https://netify.co.uk/sase/alternatives/telefonica-tech/",
+    "https://netify.co.uk/sase/alternatives/verizon-business/",
+    "https://netify.co.uk/sase/alternatives/versa-networks/",
+    "https://netify.co.uk/sase/alternatives/vodafone-business/",
+    "https://netify.co.uk/sase/alternatives/zscaler/"
+  ],
+  "blocker": "Google Quota Exceeded: daily indexing quota reached; retry after Google resets it. Both sitemaps submitted; not equivalent to individual indexing requests."
+}

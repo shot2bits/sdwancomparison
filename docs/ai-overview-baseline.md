@@ -2,9 +2,9 @@
 
 ## Status and conditions
 
-Baseline incomplete. The first Google query in a newly opened native Chrome Incognito window was blocked by Google's unusual-traffic CAPTCHA at 20:16:41 UTC (21:16 BST), before any answer was returned. Confirmation to complete the challenge was requested; it has not yet been received. No CAPTCHA bypass, signed-in substitute, or fabricated first sentence is used. The existing Chrome Incognito session reported three windows; it is not claimed to be a new isolated browser profile. Target: google.co.uk, English, gl=gb, hl=en, pws=0. UK localisation and Google signed-out state were not yet verified beyond the Incognito indicator because search was blocked.
+Baseline incomplete. The first Google query in a newly opened native Chrome Incognito window was blocked by Google's unusual-traffic CAPTCHA at 20:16:41 UTC (21:16 BST), before any answer was returned. Confirmation to complete the challenge was requested; it has not yet been received. No CAPTCHA bypass, signed-in substitute, or fabricated first sentence is used. A subsequent attempt to open a separate logged-out Copilot test was prevented by the Mac lock screen; manual unlock is required. No Copilot answer was collected. The existing Chrome Incognito session reported three windows; it is not claimed to be a new isolated browser profile. Target: google.co.uk, English, gl=gb, hl=en, pws=0. UK localisation and Google signed-out state were not yet verified beyond the Incognito indicator because search was blocked.
 
-Production during this session: SASE release/2026-09-30 (cec4800 followed by sitemap-only commits); apex codex/bt-reseller-release-1 (1100f9d followed by sitemap-only 9d123ca). This is a deployment-day observation session, not a frozen pre-release causal baseline. Step 9 wording consistency will require a further version annotation. Indexing receipt is not a citation, recommendation, ranking or buyer action.
+Production during this session: SASE release/2026-09-30 (cec4800 followed by sitemap-only commits); apex codex/bt-reseller-release-1 (1100f9d followed by sitemap-only 9d123ca). This is a deployment-day observation session, not a frozen pre-release causal baseline. Final deployed wording version: SASE c56a2a7 and apex d097f64, both READY. No clean search answers have been collected across these versions. Indexing receipt is not a citation, recommendation, ranking or buyer action.
 
 ## Exact query panel
 
@@ -31,7 +31,29 @@ Submission 2026-09-30T20:19:09.418118+00:00: HTTP 200, empty response body, 58 u
 
 ## Search Console
 
-Domain property sc-domain:netify.co.uk, authenticated owner session. Individual URL requests are logged as accepted only after the “Indexing requested” dialog. Full request log will be updated below. Initial accepted URLs: /sase/shortlist/ and /. Remaining requests in progress.
+Domain property sc-domain:netify.co.uk, authenticated owner session. **11 individual URL requests accepted; 47 remain.** Each success below was observed in the “Indexing requested” dialog. Healthcare failed once and succeeded on one later retry. Google then returned **Quota Exceeded** on the manufacturing comparison request: “you've exceeded your daily quota”. No further requests were attempted after that limit. A separate energy comparison inspection loaded but was not submitted.
+
+Both https://netify.co.uk/sase/sitemap.xml and https://netify.co.uk/sitemap.xml returned **Sitemap submitted successfully**, and readback showed 30 September submission dates. Sitemap submission is not equivalent to individual URL indexing requests. All 58 target URLs were verified in live sitemap XML with fixed 2026-09-30 lastmod.
+
+Full timestamped events and the exact remaining queue: [Search Console request log](action-first/search-console-submissions-2026-09-30.json).
+
+| URL | Observed result | UTC timestamp |
+|---|---|---|
+| https://netify.co.uk/sase/shortlist/ | Indexing requested | 2026-09-30T20:17:15.601Z |
+| https://netify.co.uk/ | Indexing requested | 2026-09-30T20:19:39.891Z |
+| https://netify.co.uk/sase-sd-wan-rfp-builder/ | Indexing requested | 2026-09-30T20:22:10.500Z |
+| https://netify.co.uk/sd-wan-for-healthcare/ | Failed: We had a problem submitting your indexing request. Please try again later. | 2026-09-30T20:23:43.541Z |
+| https://netify.co.uk/sd-wan-sase-for-manufacturing/ | Indexing requested | 2026-09-30T20:25:23.299Z |
+| https://netify.co.uk/sase/sitemap.xml | Sitemap submitted successfully | 2026-09-30T20:25:55.886Z |
+| https://netify.co.uk/sitemap.xml | Sitemap submitted successfully | 2026-09-30T20:27:35.064Z |
+| https://netify.co.uk/sd-wan-sase-for-retail/ | Indexing requested | 2026-09-30T20:27:35.064Z |
+| https://netify.co.uk/sd-wan-sase-for-financial-services/ | Indexing requested | 2026-09-30T20:30:02.256Z |
+| https://netify.co.uk/sd-wan-for-healthcare/ | Indexing requested (retry accepted) | 2026-09-30T20:31:31.039Z |
+| https://netify.co.uk/sase/best/ | Indexing requested | 2026-09-30T20:32:13.713Z |
+| https://netify.co.uk/sase/best/sd-wan-sase-providers-for-healthcare/ | Indexing requested | 2026-09-30T20:33:04.449Z |
+| https://netify.co.uk/sase/best/sd-wan-sase-providers-for-financial-services/ | Indexing requested | 2026-09-30T20:33:43.960Z |
+| https://netify.co.uk/sase/best/sd-wan-sase-providers-for-retail/ | Indexing requested | 2026-09-30T20:34:42.470Z |
+| https://netify.co.uk/sase/best/sd-wan-sase-providers-for-manufacturing/ | Blocked: Google indexing quota exceeded | 2026-09-30T20:35:13.915Z |
 
 ## Weekly reading slots
 

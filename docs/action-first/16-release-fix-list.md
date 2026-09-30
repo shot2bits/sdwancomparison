@@ -8,7 +8,7 @@ Acceptance command: `git grep -n -iE "authorised access|after publication|verifi
 
 Output: no lines; exit 1 (no matches). The retained supplier-facing award caveat does not match this expression, so there are zero rather than two expected lines. Both repositories pass TypeScript with no output; action-first suite passes. Main-site affected-page scan has no matches. Live HTML checks are deferred until coordinated release in Step 7, including JSON-LD. Owner items: none for Step 1.
 
-## Step 2 — confirmation notifications (validation in progress)
+## Step 2 — confirmation notifications (accepted)
 
 Desk recipient owner-supplied: support@netify.com. Configure SOURCING_DESK_EMAIL in Vercel Preview and Production. vercel.preview.json documents the preview value. Preview email remains capture-only with NETIFY_PREVIEW_MAIL_CAPTURE=1 and isolated storage; setting the recipient does not enable external preview delivery.
 
@@ -21,7 +21,7 @@ Step 2 acceptance (preview 9a0bdc2, deployment dpl_D2j3mCw2PmU9QCtsbFkfXYH5q5i5)
 PASS confirmation preview capture: both notifications, domain-only desk brief, independent failure/retry, retained queue, staff-only retry, no duplicates, zero external mail
 PASS hosted preview: confirmed project, desk capture to support@netify.com, buyer acknowledgement, domain-only desk brief, private project access, replay without duplicate, no external email
 ```
-TypeScript, action-first suite and full npm validate: exit 0. Legacy copy assertions updated to require the shared description in the same UI block, preserving lifecycle checks. SOURCING_DESK_EMAIL configured in Vercel Production and Preview; production code not yet released.
+TypeScript, action-first suite and full npm validate: exit 0. Legacy copy assertions updated to require the shared description in the same UI block, preserving lifecycle checks. SOURCING_DESK_EMAIL configured in Vercel Production and Preview; production code subsequently released in Step 7.
 
 ## Step 3 — one undertaking setting
 
@@ -100,3 +100,26 @@ Case-insensitive source scan has only the contacts form. Action-first regression
 ## Step 10 — not approved
 
 No side-by-side layout change made.
+
+Final Step 9 deployment: SASE c56a2a7 READY dpl_8KfqXjBhgwYrPzLRwPwnXCrjSWVx; apex d097f64 READY dpl_AAbMGg3SuJFdgP6ouRz9SDzWxfvk.
+```text
+PASS live sitemaps: all 58 target URLs present with fixed 2026-09-30 lastmod
+PASS live contacts wording: /
+PASS live contacts wording: /sase/shortlist/
+PASS live contacts wording: /sase/shortlist/data.json
+PASS live contacts wording: /sase/llms.txt
+PASS live MCP descriptions: pre-sales contacts
+2026-09-30 20:26 UTC  passed 42  failed 0
+```
+Public browser displayed released heading/description and preserved actions; warning/error log empty. No live customer, project confirmation or supplier email sent for verification.
+
+Final Step 8 external status:
+```text
+PASS IndexNow receipt: HTTP 200, 58 URLs
+PASS live sitemap dates: 58/58 target URLs
+PASS Search Console sitemap submission: SASE and apex
+PASS individual Google indexing receipts: 11 URLs
+BLOCKED remaining individual Google requests: 47 URLs; Quota Exceeded
+BLOCKED clean eight-prompt baseline: CAPTCHA confirmation pending; native Mac locked
+```
+The remaining URL queue and actual receipts are saved in search-console-submissions-2026-09-30.json. No indexing, AI recommendation or click uplift is claimed from submission receipts. Owner blanks: overdue working-hour threshold/start/end; proposal count/working-day undertaking; supplier panel commitments; 19 sector sign-offs; Harry editorial approval. Step 10 remains unapproved and unchanged.
