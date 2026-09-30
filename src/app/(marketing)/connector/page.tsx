@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PRICING_ROUTES } from "@/lib/pricing-routes";
+import { SOURCING_TOOL_DEFINITIONS } from "@/lib/mcp-sourcing-tools";
 import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tool-definitions";
 import { MCP_RFP_TOOL_DEFINITIONS } from "@/lib/mcp-rfp-tools";
 import { MCP_COST_TOOL_DEFINITIONS } from "@/lib/mcp-cost-tools";
@@ -44,13 +45,25 @@ export default function ConnectorPage() {
         <p className="mt-3 text-sm"><a className="underline" href="/sase/.well-known/mcp-server-metadata.json">Server metadata</a> · <a className="underline" href="/sase/capabilities.json">Capabilities and access flags</a> · <a className="underline" href={ENDPOINT}>Endpoint discovery</a></p>
       </section>
 
+      <section className="mt-10" aria-labelledby="mcp-sourcing">
+        <h2 id="mcp-sourcing" className="mb-3 text-xl font-semibold">Turn a shortlist into a sourcing request</h2>
+        <p className="text-sm text-slate-700">Bring a brief or research shortlist into the same Netify service. Requests require buyer-confirmed recipients and request-specific work-email confirmation before desk review. No public listing is required for this private sourcing journey.</p>
+        <ul className="mt-4 space-y-4 text-sm text-slate-700">
+          {SOURCING_TOOL_DEFINITIONS.map((tool) => (
+            <li key={tool.name}><code>{tool.name}</code><p className="mt-1">{tool.description}</p></li>
+          ))}
+        </ul>
+        <p className="mt-4 text-sm text-slate-600">ChatGPT app availability is subject to app approval; the public MCP connection is the integration route.</p>
+        <p className="mt-3 text-sm"><a className="underline" href="/sase/shortlist/#sourcing-requirement">Bring your shortlist on the website</a></p>
+      </section>
+
       <section className="mt-10" aria-labelledby="mcp-evidence">
         <h2 id="mcp-evidence" className="mb-3 text-xl font-semibold">Evidence your assistant can use</h2>
         <ul className="list-disc space-y-2 pl-5 text-sm text-slate-700">
           <li><code>compare_vendors</code> compares two or three named providers and returns a link to continue the comparison on Netify. Public comparison does not require publication.</li>
           <li><code>verify_claim</code> returns source evidence and dates where available; unsupported claims remain unconfirmed. <code>list_exclusions</code> explains excluded or conflicting evidence.</li>
           <li><code>workspace_cycle</code> and <code>workspace_ingest</code> return requirements with provenance, including stated facts and labelled inferences. They do not publish a project.</li>
-          <li><code>build_sase_shortlist</code> previews aggregate coverage. Personalised provider identities are available through <code>get_unlocked_matches</code> only after publication and verified ownership.</li>
+          <li><code>build_sase_shortlist</code> previews aggregate coverage. The legacy published-project tool <code>get_unlocked_matches</code> requires publication and verified ownership. For open named evidence matches without publication, use <code>prepare_sourcing_plan</code> above.</li>
         </ul>
         <p className="mt-4 text-sm"><a className="underline" href="/sase/rfp-builder/questions/">Read the question bank</a> · <a className="underline" href="/sase/question-bank.json">Question data</a> · <a className="underline" href="/sase/rfp-validation-methodology.json">Validation method</a> · <a className="underline" href="/sase/shortlist/">Compare providers</a></p>
       </section>

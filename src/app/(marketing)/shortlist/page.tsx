@@ -8,7 +8,6 @@ import {
   SOURCING_TITLE,
   SOURCING_DESCRIPTION,
   COMMISSION_DESCRIPTION,
-  PUBLIC_SOURCING_TOOLS,
 } from "@/lib/sourcing-contract";
 import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 import { SITE_URL, getOrganizationSchema } from "@/lib/structured-data";
@@ -172,23 +171,15 @@ export default async function ShortlistPage({
         </a>
       </section>
       <section>
-        <h2>For AI assistants</h2>
+        <h2>Already have an AI-generated shortlist?</h2>
         <p>
-          Bring a brief or research shortlist into the same Netify service.
-          Requests require buyer-confirmed recipients and request-specific
-          work-email confirmation before desk review.
+          Bring it to Netify. We’ll help check the options, agree which providers
+          to approach and request comparable proposals. You approve who receives
+          your brief.
         </p>
-        <ul>
-          {PUBLIC_SOURCING_TOOLS.map((t) => (
-            <li key={t}>
-              <code>{t}</code>
-            </li>
-          ))}
-        </ul>
-        <a href="/sase/api/mcp/">MCP connection and tools</a>
+        <a className="sourcing-primary" href="#sourcing-requirement">Bring my shortlist →</a>
         <p className="sourcing-small">
-          ChatGPT app availability is subject to app approval; the public MCP
-          connection is the integration route.
+          <a href="/sase/connector/">Connect your AI assistant</a>
         </p>
       </section>
       <section>

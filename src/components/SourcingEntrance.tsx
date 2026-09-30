@@ -287,6 +287,7 @@ export default function SourcingEntrance({
         <label>
           {entry}
           <textarea
+            id="sourcing-requirement"
             rows={3}
             maxLength={12000}
             value={brief.requirement}
