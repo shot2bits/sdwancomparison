@@ -199,7 +199,7 @@ export async function listRfpOnBoard(
   const quickListing = isShortProject(p);
   const summary = quickListing
     ? shortProjectNotice(p).summary
-    : `${facts.canonical ? publicBrief.summary + " " : ""}The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, Netify SASE Methodology v${p.methodology_version}). Vendors respond to the RFP question set with evidence; pricing stays private to the buyer.`;
+    : `${facts.canonical ? publicBrief.summary + " " : ""}The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, Netify SASE Methodology v${p.methodology_version}). Invited suppliers can reply to the RFP question set with evidence; pricing stays private to the buyer.`;
 
   // No two identical open titles on the board (Harry's Section 1 finding,
   // 28 Jul 2026): the new listing's title gains one distinguishing stated

@@ -1,12 +1,15 @@
 "use client";
+import { SOURCING_ACTION_LABELS } from "@/lib/sourcing-contract";
 import { useEffect, useState } from "react";
 export default function SourcingConfirmation() {
   const [result, setResult] = useState<{
     error?: string;
+    already_confirmed?: boolean;
+    sign_in_url?: string;
     status?: string;
     project_url?: string;
     brief?: string;
-    recipients?: { slug: string; actions: string[] }[];
+    recipients?: { name?: string; slug: string; actions: string[] }[];
   } | null>(null);
   const [busy, setBusy] = useState(false);
   async function load(confirm = false) {
@@ -56,21 +59,33 @@ export default function SourcingConfirmation() {
     <div>
       <h1>Confirm your sourcing request</h1>
       {result?.error ? (
-        <p role="alert">{result.error}</p>
+        <div>
+          <p role="alert">{result.error}</p>
+          <button disabled={busy} onClick={() => void load(false)}>
+            Try again
+          </button>
+        </div>
       ) : result?.status === "desk_review" ? (
         <div>
           <p>
             Your request is confirmed and queued for Netify desk review. No
             supplier has been contacted automatically.
           </p>
-          {result.project_url && (
+          {result.already_confirmed && (
+            <p>
+              Already confirmed.{" "}
+              <a href={result.sign_in_url}>Sign in with the same work email</a>{" "}
+              to reopen your private project.
+            </p>
+          )}
+          {result.project_url && !result.already_confirmed && (
             <a className="sourcing-primary" href={result.project_url}>
               Open your private project →
             </a>
           )}
           <p>
-            This browser can reopen this project for 30 days. No account has
-            been created.
+            After first confirmation, this browser can reopen your project for
+            30 days. On another device, sign in with the same work email.
           </p>
         </div>
       ) : result ? (
@@ -83,7 +98,15 @@ export default function SourcingConfirmation() {
           <ul>
             {result.recipients?.map((r) => (
               <li key={r.slug}>
-                {r.slug}: {r.actions.join(", ")}
+                {r.name ?? r.slug}:{" "}
+                {r.actions
+                  .map(
+                    (a) =>
+                      SOURCING_ACTION_LABELS[
+                        a as keyof typeof SOURCING_ACTION_LABELS
+                      ],
+                  )
+                  .join(", ")}
               </li>
             ))}
           </ul>

@@ -90,7 +90,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
         <h1 className="mb-3 text-2xl">This project is private to the buyer</h1>
         <p className="mb-6 text-sm text-[var(--ink-600)]">
           Open it from your builder link (it carries your private key), or sign in with the email that created it.
-          Vendors and service providers respond through the invitation link instead.
+          Invited suppliers use the invitation link instead.
         </p>
         <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this project." /></div>
         <p className="text-sm"><a href="https://netify.co.uk/" className="underline">Start a project on the desk</a></p>

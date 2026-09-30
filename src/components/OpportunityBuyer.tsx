@@ -207,7 +207,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           <input value={form.timeline_note} onChange={(e) => setForm({ ...form, timeline_note: e.target.value })} placeholder="Timeline (optional)" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
 
           <div>
-            <p className="eyebrow mb-2">How should vendors respond?</p>
+            <p className="eyebrow mb-2">How should suppliers reply?</p>
             <div className="grid sm:grid-cols-2 gap-2">
               <button onClick={() => setForm({ ...form, engagement_type: "quote_room" })} className={`text-left p-3 rounded-sm border transition-colors ${form.engagement_type === "quote_room" ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>
                 <span className="block text-sm font-medium">Quote room</span>

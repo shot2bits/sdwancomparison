@@ -1,4 +1,6 @@
-import {notifyConfirmedSourcing} from "./sourcing-notifications";
+import { recordSourcingMetric } from "./sourcing-metrics";
+import { circuitLock } from "./circuit-store";
+import { notifyConfirmedSourcing } from "./sourcing-notifications";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import {
   SOURCING_ACTION_LABELS,
@@ -13,7 +15,11 @@ import {
   saveProject,
   getProject,
 } from "./rfp-store";
-import { activityMailFetch, activityMailKey, previewMailCaptureEnabled } from "./activity-mail";
+import {
+  activityMailFetch,
+  activityMailKey,
+  previewMailCaptureEnabled,
+} from "./activity-mail";
 import { isBlockedDomainLive, emailDomain } from "./access-control";
 import { getLiveShortlistDataset } from "./live-shortlist";
 import {
@@ -40,7 +46,10 @@ export function assertRequestConfirmation(
   token: string,
   now = Date.now(),
 ) {
-  if (r.token_hash !== digest(token) || r.expires_at <= now)
+  if (
+    r.token_hash !== digest(token) ||
+    (r.status !== "desk_review" && r.expires_at <= now)
+  )
     throw new Error("Confirmation expired or invalid. Request a new link.");
   if (r.payload_hash !== digest(JSON.stringify(r.request)))
     throw new Error(
@@ -56,6 +65,44 @@ async function limit(key: string, max: number) {
   if (count > max)
     throw new Error("Too many requests. Please try again later.");
 }
+// Persist the exact transport payload so ambiguous failures reuse both body and key.
+async function deliverConfirmation(record: SourcingRecord) {
+  try {
+    await circuitLock(`sourcing-mail:${record.id}`, async () => {
+      if (await kvGetJson(`sourcing:mail:${record.id}`)) return;
+      const payload = await kvGetJson<{ body: string }>(
+        `sourcing:mail-payload:${record.id}`,
+      );
+      if (!payload) throw new Error("Confirmation payload is unavailable");
+      const response = await activityMailFetch(
+        "https://api.resend.com/emails",
+        {
+          method: "POST",
+          signal: AbortSignal.timeout(10_000),
+          headers: {
+            authorization: `Bearer ${activityMailKey()}`,
+            "Content-Type": "application/json",
+            "Idempotency-Key": `sourcing-${record.id}`,
+          },
+          body: payload.body,
+        },
+      );
+      if (!response.ok)
+        throw new Error("Confirmation transport was not accepted");
+      await kvRaw([
+        "SET",
+        `sourcing:mail:${record.id}`,
+        JSON.stringify({ accepted: true }),
+        "EX",
+        86400,
+      ]);
+    });
+  } catch {
+    throw new Error(
+      "Confirmation delivery is not yet confirmed. Please retry this same request shortly.",
+    );
+  }
+}
 export async function requestSourcing(raw: unknown, requestKey: string) {
   const input = SourcingRequestSchema.parse(raw);
   const live = await getLiveShortlistDataset();
@@ -63,10 +110,7 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
     input,
     live.vendors.map((v) => v.slug),
   );
-  if (
-    !kvConfigured() ||
-    !activityMailKey()
-  )
+  if (!kvConfigured() || !activityMailKey())
     throw new Error(
       "Request delivery is not enabled in this preview. Research and draft plans remain available.",
     );
@@ -80,15 +124,32 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
       throw new Error(
         "This request key was already used for different requirements.",
       );
-    const saved = await kvGetJson<SourcingRecord>(`sourcing:request:${existing.id}`);
-    if (!saved || (saved.status === "pending_confirmation" && saved.expires_at <= Date.now()))
-      throw new Error("This request has expired. Prepare a new request for confirmation.");
-    if (saved.status === "pending_confirmation" && !saved.mail_sent && !(await kvGetJson(`sourcing:mail:${saved.id}`)))
-      throw new Error("Confirmation delivery is not yet confirmed. Check your email before preparing a new request.");
-    return { request_id: existing.id, status: saved.status, delivery: previewMailCaptureEnabled() ? "captured_not_sent" : "accepted" };
+    const saved = await kvGetJson<SourcingRecord>(
+      `sourcing:request:${existing.id}`,
+    );
+    if (!saved)
+      throw new Error(
+        "This request is already being prepared. Please retry shortly.",
+      );
+    if (
+      saved.status === "pending_confirmation" &&
+      saved.expires_at <= Date.now()
+    )
+      throw new Error(
+        "This request has expired. Prepare a new request for confirmation.",
+      );
+    if (
+      saved.status === "pending_confirmation" &&
+      !saved.mail_sent &&
+      !(await kvGetJson(`sourcing:mail:${saved.id}`))
+    )
+      await deliverConfirmation(saved);
+    return {
+      request_id: existing.id,
+      status: saved.status,
+      delivery: previewMailCaptureEnabled() ? "captured_not_sent" : "accepted",
+    };
   }
-  await limit(`ip:${requestKey}`, 10);
-  await limit(`email:${input.email}`, 3);
   const token = randomBytes(32).toString("base64url");
   const record: SourcingRecord = {
     id: randomUUID(),
@@ -110,17 +171,17 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
       JSON.stringify({ id: record.id, hash: payloadHash }),
       "NX",
       "EX",
-      86400,
+      60,
     ])) !== "OK"
   )
     throw new Error("This request is already being prepared.");
-  await kvRaw([
-    "SET",
-    `sourcing:request:${record.id}`,
-    JSON.stringify(record),
-    "EX",
-    86400,
-  ]);
+  try {
+    await limit(`ip:${requestKey}`, 10);
+    await limit(`email:${input.email}`, 3);
+  } catch (error) {
+    await kvRaw(["DEL", lock]);
+    throw error;
+  }
   const link = `${SITE_URL}/shortlist/confirm/#request=${record.id}&token=${token}`;
   const recipients =
     input.recipients
@@ -130,28 +191,29 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
       )
       .join("\n") ||
     "No suppliers approved yet; prepare a sourcing plan for my review.";
-  const response = await activityMailFetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${activityMailKey()}`,
-      "Content-Type": "application/json",
-      "Idempotency-Key": `sourcing-${record.id}`,
-    },
-    body: JSON.stringify({
-      from: process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk",
-      to: input.email,
-      subject: "Confirm your Netify sourcing request",
-      text: `Review and confirm the exact request below. No account is created. Netify checks it before any supplier receives it.\n\n${recipients}\n\nAnonymous supplier brief:\n${input.brief.supplier_brief}\n\n${link}\n\nExpires in one hour. If you did not request this, ignore the email.`,
-    }),
+  const mailBody = JSON.stringify({
+    from: process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk",
+    to: input.email,
+    subject: "Confirm your Netify sourcing request",
+    text: `Review and confirm the exact request below. No account is created. Netify checks it before any supplier receives it.\n\n${recipients}\n\nAnonymous supplier brief:\n${input.brief.supplier_brief}\n\n${link}\n\nExpires in one hour. If you did not request this, ignore the email.`,
   });
-  if (!response.ok) {
-    await kvRaw(["DEL", lock]);
-    await kvRaw(["DEL", `sourcing:request:${record.id}`]);
-    throw new Error("We could not send the confirmation. Please try again.");
-  }
-  // Never rewrite a pending record after mail: a fast buyer may already have confirmed it.
-  await kvRaw(["SET", `sourcing:mail:${record.id}`, JSON.stringify({ accepted: true }), "EX", 86400]);
-  return { request_id: record.id, status: "pending_confirmation", delivery: previewMailCaptureEnabled() ? "captured_not_sent" : "accepted" };
+  const prepared = await kvRaw([
+    "EVAL", `-- sourcing-prepare-commit
+if redis.call('get', KEYS[1]) ~= ARGV[1] then return 0 end
+redis.call('set', KEYS[2], ARGV[2], 'EX', 86400)
+redis.call('set', KEYS[3], ARGV[3], 'EX', 3600)
+redis.call('expire', KEYS[1], 86400)
+return 1`, 3, lock, `sourcing:request:${record.id}`, `sourcing:mail-payload:${record.id}`,
+    JSON.stringify({id:record.id,hash:payloadHash}), JSON.stringify(record), JSON.stringify({body:mailBody}),
+  ]);
+  if(Number(prepared)!==1)throw new Error("This request is already being prepared. Please retry shortly.");
+  await recordSourcingMetric("request", input.acquisition, record.id);
+  await deliverConfirmation(record);
+  return {
+    request_id: record.id,
+    status: "pending_confirmation",
+    delivery: previewMailCaptureEnabled() ? "captured_not_sent" : "accepted",
+  };
 }
 export async function readSourcingRequest(id: string, token: string) {
   const r = await kvGetJson<SourcingRecord>(`sourcing:request:${id}`);
@@ -162,16 +224,32 @@ export async function readSourcingRequest(id: string, token: string) {
 export async function confirmSourcingRequest(id: string, token: string) {
   const lock = `sourcing:confirm-lock:${id}`,
     owner = randomUUID();
-  if ((await kvRaw(["SET", lock, owner, "NX", "EX", 30])) !== "OK")
-    throw new Error("Confirmation is already being processed.");
+  if ((await kvRaw(["SET", lock, owner, "NX", "EX", 30])) !== "OK") {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const current = await readSourcingRequest(id, token);
+      if (current.status === "desk_review")
+        return {
+          request_id: current.id,
+          status: current.status,
+          already_confirmed: true,
+        };
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    throw new Error("Confirmation is already being processed. Retry shortly.");
+  }
   try {
     const r = await readSourcingRequest(id, token);
     if (r.status === "desk_review") {
       // Repair an interrupted queue write without recreating the project or changing credentials.
-      await kvRaw(["ZADD", "sourcing:desk-review", r.confirmed_at ?? r.created_at, id]);
+      await kvRaw([
+        "ZADD",
+        "sourcing:desk-review",
+        r.confirmed_at ?? r.created_at,
+        id,
+      ]);
       await recordSourcingConfirmation(r);
       await notifyConfirmedSourcing(r);
-      return { request_id: r.id, status: r.status };
+      return { request_id: r.id, status: r.status, already_confirmed: true };
     }
     const b = r.request.brief;
     const entrance = shortlistEntrance({
@@ -185,7 +263,18 @@ export async function confirmSourcingRequest(id: string, token: string) {
       requirementText: `${b.supplier_brief}\nRemote users: ${b.remote_users}. Timing: ${b.when}.`,
       sourceUrl: `${SITE_URL}/shortlist/`,
     });
-    entrance.buyer_input = {...entrance.buyer_input, site_count:b.sites, product_scope:b.need==="sdwan"?"sdwan_only":b.need==="sase"?"full_sase":b.need==="secure_access"?"sse_only":"not_stated"};
+    entrance.buyer_input = {
+      ...entrance.buyer_input,
+      site_count: b.sites,
+      product_scope:
+        b.need === "sdwan"
+          ? "sdwan_only"
+          : b.need === "sase"
+            ? "full_sase"
+            : b.need === "secure_access"
+              ? "sse_only"
+              : "not_stated",
+    };
     entrance.raw_input = {
       ...entrance.raw_input,
       sourcing_request_id: r.id,
@@ -209,12 +298,19 @@ export async function confirmSourcingRequest(id: string, token: string) {
     const committed = await kvRaw([
       "EVAL",
       "-- sourcing-confirm-commit\nif redis.call('GET',KEYS[1])~=ARGV[1] then return 0 end redis.call('SET',KEYS[2],ARGV[2]) redis.call('ZADD',KEYS[3],ARGV[3],ARGV[4]) return 1",
-      3, lock, `sourcing:request:${id}`, "sourcing:desk-review", owner,
-      JSON.stringify(r), r.confirmed_at, id,
+      3,
+      lock,
+      `sourcing:request:${id}`,
+      "sourcing:desk-review",
+      owner,
+      JSON.stringify(r),
+      r.confirmed_at,
+      id,
     ]);
-    if (committed !== 1) throw new Error("Confirmation is already being processed. Please retry.");
+    if (committed !== 1)
+      throw new Error("Confirmation is already being processed. Please retry.");
     await recordSourcingConfirmation(r);
-      await notifyConfirmedSourcing(r);
+    await notifyConfirmedSourcing(r);
     // No supplier mail here. Identity confirmation never bypasses desk review.
     return { request_id: id, status: "desk_review" };
   } finally {
@@ -229,8 +325,19 @@ export async function confirmSourcingRequest(id: string, token: string) {
 }
 
 async function recordSourcingConfirmation(r: SourcingRecord) {
+  await recordSourcingMetric("confirmed", r.request.acquisition, r.id);
   try {
-  const {recordMarketplaceFunnelEvent} = await import("./marketplace-funnel");
-  await recordMarketplaceFunnelEvent({event:"sourcing_confirmed", project_id:r.project_id, source:r.request.acquisition==="mcp"?"mcp":"shortlist", channel:r.request.acquisition==="mcp"?"mcp":"web"});
-  } catch { /* The confirmed request remains authoritative. */ }
+    const { recordMarketplaceFunnelEvent } = await import(
+      "./marketplace-funnel"
+    );
+    await recordMarketplaceFunnelEvent({
+      event: "sourcing_confirmed",
+      project_id: r.project_id,
+      source: r.request.acquisition === "mcp" ? "mcp" : "shortlist",
+      channel: r.request.acquisition === "mcp" ? "mcp" : "web",
+      detail: { acquisition: r.request.acquisition },
+    });
+  } catch {
+    /* The confirmed request remains authoritative. */
+  }
 }

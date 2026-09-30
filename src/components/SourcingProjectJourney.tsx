@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import SignIn from "./SignIn";
 import MarketOutcomeWorkflow from "./MarketOutcomeWorkflow";
 import RfpBuilder from "./RfpBuilder";
 import CircuitPricing from "./procurement/CircuitPricing";
@@ -55,7 +56,7 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
     return (
       <div>
         <p>{error || "Opening your private sourcing project…"}</p>
-        {error && <button onClick={() => void refresh()}>Retry</button>}
+        {error && <><SignIn role="buyer" prompt="Sign in with the same work email used for this request." onAuthed={() => void refresh()} /><button onClick={() => void refresh()}>Retry</button></>}
       </div>
     );
   return (

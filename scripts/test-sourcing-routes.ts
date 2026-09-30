@@ -9,7 +9,7 @@ registerHooks({
 });
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { withFakeKv, makeRequest, FAKE_KV_URL } from "./fake-kv-harness";
 // Hermetic: no network passes through; production behaviour is exercised only
 // against the in-memory KV and captured mail. Never import stores before this.
@@ -24,6 +24,8 @@ await withFakeKv(async (store) => {
   let failQueueOnce = false;
   let rejectMail = false;
   let throwMail = false;
+  let throwAfterAcceptance = false;
+  const acceptedMail = new Map<string,string>();
   const fakeFetch = global.fetch;
   const mails: { to: string; text: string; subject: string }[] = [];
   global.fetch = async (input, init) => {
@@ -37,8 +39,12 @@ await withFakeKv(async (store) => {
       if (throwMail) throw new Error("Synthetic mail transport interruption");
       if (rejectMail)
         return Response.json({ error: "rejected" }, { status: 503 });
+      const key=new Headers(init?.headers).get("Idempotency-Key");
+      if(key && acceptedMail.has(key)) {assert.equal(acceptedMail.get(key),String(init?.body),"Idempotent resend body must remain identical");return Response.json({id:"captured-mail"});}
       const mail = JSON.parse(String(init?.body));
       mails.push(mail);
+      if(key)acceptedMail.set(key,String(init?.body));
+      if(throwAfterAcceptance)throw new Error("Synthetic connection lost after acceptance");
       if (onMail) await onMail(mail);
       return Response.json({ id: "captured-mail" });
     }
@@ -90,6 +96,8 @@ await withFakeKv(async (store) => {
   assert.equal(first.status, 200);
   const receipt = await first.json();
   assert.equal(mails.length, 1);
+  assert(Number(store.command(["PTTL",`sourcing:request:${receipt.request_id}`]))>86300000);
+  assert(Number(store.command(["PTTL",`sourcing:mail-payload:${receipt.request_id}`]))>3500000);
   assert(!mails[0].text.includes("PRIVATE ORIGINAL"));
   const repeat = await post();
   assert.equal(repeat.status, 200);
@@ -134,6 +142,7 @@ await withFakeKv(async (store) => {
   assert.equal(accepted.status, 200);
   const acceptedData = await accepted.json();
   assert.equal(acceptedData.status, "desk_review");
+  assert.equal(store.command(["PTTL",`sourcing:request:${receipt.request_id}`]),-1,"Confirmed request must persist beyond pending TTL");
   assert(acceptedData.project_url.includes(before.project_id));
   assert.equal(mails.length, 3);
   assert.equal(mails[1].to, "desk@example.org");
@@ -149,6 +158,8 @@ await withFakeKv(async (store) => {
     ),
   );
   const scopedCookie = accepted.headers.get("set-cookie")!;
+  const grantToken=scopedCookie.split(";")[0].split("=")[1];
+  assert(Number(store.command(["PTTL",`sourcing:access:${createHash("sha256").update(grantToken).digest("hex")}`]))>29*86400000,"Private browser grant has 30-day TTL");
   assert.match(scopedCookie, /HttpOnly/);
   assert.match(scopedCookie, /Secure/);
   assert.match(scopedCookie, /SameSite=Lax/);
@@ -729,8 +740,16 @@ await withFakeKv(async (store) => {
   assert.equal((await failedPost()).status, 422);
   throwMail = false;
   const retry = await failedPost();
-  assert.equal(retry.status, 422);
-  assert.match((await retry.json()).error, /delivery is not yet confirmed/);
+  assert.equal(retry.status, 200);
+  const retriedReceipt = await retry.json();
+  assert.equal((await (await failedPost()).json()).request_id, retriedReceipt.request_id);
+  assert.equal(mails.filter(m => m.to === failedBody.email).length, 1, "retry delivers exactly one confirmation");
+  // Ambiguous transport: provider accepted the first message but our connection failed.
+  const ambiguousBody={...body,email:"ambiguous@example.org",idempotency_key:randomUUID()};
+  const ambiguousPost=()=>requestRoute.POST(makeRequest("POST","https://preview.example/sase/api/sourcing/request/",{body:ambiguousBody}));
+  throwAfterAcceptance=true;assert.equal((await ambiguousPost()).status,422);throwAfterAcceptance=false;
+  assert.equal((await ambiguousPost()).status,200);
+  assert.equal(mails.filter(m=>m.to===ambiguousBody.email).length,1,"Transport uncertainty must deliver exactly once with the same Resend key and body");
   // A definite provider rejection can be retried safely with the same client request key.
   const rejectBody = {
     ...body,
@@ -831,8 +850,8 @@ await withFakeKv(async (store) => {
         { body: { id: captureId, token: captureToken, confirm: true } },
       ),
     );
-  // Missing desk configuration must preserve the request and still notify the buyer.
-  delete process.env.SOURCING_DESK_EMAIL;
+  // An invalid explicit override must preserve the request and still notify the buyer.
+  process.env.SOURCING_DESK_EMAIL = "invalid-test-destination";
   const externalBefore = mails.length;
   assert.equal((await captureConfirm()).status, 200);
   const { notificationStatus, workingHoursSince, queueAge } =
@@ -895,10 +914,11 @@ await withFakeKv(async (store) => {
     captured().filter(
       (c) =>
         c.payload.to === captureBody.email &&
-        c.payload.subject === "Netify has your request",
+        c.payload.subject === "Your Netify request is recorded; desk acknowledgement pending",
     ).length,
     1,
   );
+  assert(captured().some(c=>c.payload.to===captureBody.email&&c.payload.text.includes("Netify has not yet acknowledged")));
   assert.equal((await captureConfirm()).status, 200);
   assert.equal((await retryPost(deskCookie)).status, 200);
   assert.equal(
@@ -935,4 +955,54 @@ await withFakeKv(async (store) => {
   console.log(
     "PASS request/confirmation routes: initial confirmation plus desk and buyer acknowledgement, token binding, expiry, staff-only desk, safe replay, no supplier invitations or mail",
   );
+  // Real authentication request and verification, on a device with no sourcing cookie.
+  delete process.env.NETIFY_PREVIEW_MAIL_CAPTURE;
+  process.env.AUTH_BOT_SECRET = "synthetic-test-secret";
+  const authRequest = await import("../src/app/api/auth/request/route");
+  const authVerify = await import("../src/app/api/auth/verify/route");
+  const { issueAuthChallenge } = await import("../src/lib/auth-challenge");
+  async function signIn(email: string, returnTo?: string) {
+    const now = Date.now;
+    let challenge;
+    try { Date.now = () => now() - 1000; challenge = issueAuthChallenge(); }
+    finally { Date.now = now; }
+    return authRequest.POST(makeRequest("POST", "https://preview.example/sase/api/auth/request", {
+      body: {email, role: "buyer", return_to: returnTo, bot_proof: {challenge, website: ""}},
+    }));
+  }
+  const projectPath = `/sase/rfp-builder/${before.project_id}/`;
+  assert.equal((await signIn("not-the-owner@example.org", projectPath)).status, 403);
+  assert.equal((await signIn(body.email, projectPath)).status, 200);
+  const magicMail = mails.filter(m => m.to === body.email && m.subject === "Your Netify marketplace sign-in link").at(-1) as unknown as {html:string};
+  assert(magicMail);
+  const magic = magicMail.html.match(/verify\?token=([^&"\s]+)/)?.[1];
+  assert(magic);
+  const verified = await authVerify.POST(makeRequest("POST", "https://preview.example/sase/api/auth/verify", {body:{token:magic}}));
+  assert.equal(verified.status, 200);
+  const sessionCookie = verified.headers.get("set-cookie");
+  assert(sessionCookie);
+  const recovered = await rfpRoute.GET(makeRequest("GET", `https://preview.example${projectPath}`, {cookie:sessionCookie.split(";")[0]}), {params:Promise.resolve({id:before.project_id})});
+  assert.equal(recovered.status,200);
+  assert.equal((await signIn(body.email)).status,200);
+  const record = store.peekJson<import("../src/lib/sourcing-store").SourcingRecord>(`sourcing:request:${receipt.request_id}`)!;
+  record.expires_at = Date.now() - 1;
+  store.command(["SET",`sourcing:request:${receipt.request_id}`,JSON.stringify(record)]);
+  const expiredConfirmed = await confirm();
+  assert.equal(expiredConfirmed.status,200);
+  assert.equal(expiredConfirmed.headers.get("set-cookie"),null);
+  assert.equal((await expiredConfirmed.json()).already_confirmed,true);
+  store.command(["SET",`sourcing:confirm-lock:${receipt.request_id}`,"other-confirming-tab","EX",30]);
+  const concurrent=await confirm();assert.equal(concurrent.status,200);assert.equal(concurrent.headers.get("set-cookie"),null);assert.equal((await concurrent.json()).already_confirmed,true);
+  store.command(["DEL",`sourcing:confirm-lock:${receipt.request_id}`]);
+  const reused = await confirm();
+  assert.equal(reused.headers.get("set-cookie"),null);
+  delete process.env.SOURCING_DESK_EMAIL;
+  const fallbackId="00000000-0000-4000-8000-000000000123";
+  const fallbackRecord={...record,id:fallbackId};
+  const {notifyConfirmedSourcing}=await import("../src/lib/sourcing-notifications");
+  await notifyConfirmedSourcing(fallbackRecord);
+  assert.equal((await notificationStatus(fallbackId)).desk,"accepted");
+  assert(mails.some(m=>m.to==="support@netify.com"&&m.subject.includes(fallbackId)),"Unset override uses approved JSON desk destination");
+  console.log("PASS confirmed buyer recovery: actual auth/request and auth/verify, non-owner denied, no-cookie second device, no-return sign-in, expired/reused link without credential issuance");
+
 });

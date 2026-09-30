@@ -6989,7 +6989,7 @@ export default function ProjectDesk({
               <div>
                 <p className="m-0 mb-2 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#83807b]">
                   Saving creates your private project record from this statement. It needs a verified work email; vendors and service
-                  providers respond to verified work emails, so saving uses one too. Nothing is published and nobody is invited by saving.
+                  supplier engagement uses verified work emails, so saving uses one too. Nothing is published and nobody is invited by saving.
                 </p>
                 {signedIn && sessId && !sessId.work && (
                   <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[var(--nf-orange-strong)]">

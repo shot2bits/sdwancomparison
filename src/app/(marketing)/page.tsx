@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION, SOURCING_TITLE } from "@/lib/sourcing-contract";
 import type { Metadata } from "next";
 import Link from "next/link";
 import GuidedStart from "@/components/GuidedStart";
@@ -8,7 +9,7 @@ import { SITE_URL, getOrganizationSchema, getSpeakableSchema } from "@/lib/struc
 export const metadata: Metadata = {
   title: "Netify: SASE, SSE and SD-WAN marketplace and RFP builder",
   description:
-    "Vendor-neutral SASE, SSE and SD-WAN marketplace. Compare 30 graded vendors, run a reverse auction or live quote room, or build an RFP. Browse free, agent-ready.",
+    SOURCING_DESCRIPTION,
   alternates: { canonical: `${SITE_URL}/` },
 };
 
@@ -33,22 +34,21 @@ export default function Home() {
       <div className="mb-12 fade-rise">
         <p className="eyebrow mb-4">SASE, SSE and SD-WAN marketplace</p>
         <h1 id="page-h1" className="display mb-5" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
-          Get competing bids from SASE and SD-WAN vendors and service providers.
+          {SOURCING_TITLE}
         </h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
-          Describe your project in about two minutes. Netify builds the RFP for you and publishes
-          it to a curated list of verified vendors and managed service providers. Bids come back
-          in one place, priced privately to you.
+          {SOURCING_DESCRIPTION}
         </p>
+        <Link href="/shortlist" className="inline-block rounded-full bg-amber-500 px-6 py-3 font-medium mb-6">Research providers and prepare your sourcing request</Link>
         <HomeHeroForm />
         <ol className="mt-8 mb-0 flex list-none flex-wrap items-center gap-x-2 gap-y-1 p-0 text-sm text-[var(--ink-600)]">
           <li>1. Describe your project</li>
           <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
           <li>2. Netify builds the RFP</li>
           <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
-          <li>3. Publish to curated vendors</li>
+          <li>3. Approve supplier requests</li>
           <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
-          <li className="font-medium text-[var(--ink-900)]">4. Compare the bids</li>
+          <li className="font-medium text-[var(--ink-900)]">4. Compare responses received</li>
         </ol>
         <p className="mt-4 text-sm text-[var(--ink-600)]">
           <span className="mr-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800">New</span>
@@ -57,7 +57,7 @@ export default function Home() {
           <Link href="/connector" className="underline">Connect your assistant</Link>
         </p>
         <p className="mt-3 text-sm text-[var(--ink-500)]">
-          {totalCount} verified vendors and MSPs, graded against a {featureCount}-feature framework across {categoryCount} categories. Methodology v2026.1.
+          {totalCount} researched vendors and MSPs, graded against a {featureCount}-feature framework across {categoryCount} categories. Methodology v2026.1.
         </p>
         <div className="flex items-center gap-6 flex-wrap mt-5 text-sm">
           <Link href="/how-it-works" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">How it works</Link>

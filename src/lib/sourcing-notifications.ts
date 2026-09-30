@@ -1,8 +1,13 @@
+import { recordSourcingMetric } from "./sourcing-metrics";
 import "server-only";
 import { publicResponsePanel } from "./response-panel";
-import { SOURCING_ACTION_LABELS, sourcingUndertaking } from "./sourcing-contract";
+import {
+  SOURCING_NEED_LABELS,
+  SOURCING_ACTION_LABELS,
+  sourcingUndertaking,
+} from "./sourcing-contract";
 import { z } from "zod";
-import { kvGetJson, kvSetJson } from "./rfp-store";
+import { kvGetJson, kvSetJson, kvRaw } from "./rfp-store";
 import { activityMailFetch, activityMailKey } from "./activity-mail";
 import { circuitLock } from "./circuit-store";
 import { SITE_URL } from "./structured-data";
@@ -92,15 +97,15 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
       const payloads = {
         desk: {
           from,
-          to: process.env.SOURCING_DESK_EMAIL ?? "",
+          to: process.env.SOURCING_DESK_EMAIL ?? operations.desk_email ?? "",
           subject: `Sourcing request ${record.id} confirmed`,
-          text: `Request: ${record.id}\nProject: ${record.project_id}\nBuyer domain: ${record.request.email.split("@")[1]}\nSector: ${b.sector ?? "Not specified"}\nSites: ${b.sites}\nUsers: ${b.remote_users}\nRegion: ${b.region}\nService: ${b.need}\nApproved recipients:\n${recipients}\n\nAnonymous supplier brief:\n${b.supplier_brief}\n\n${SITE_URL}/admin/sourcing/`,
+          text: `Request: ${record.id}\nProject: ${record.project_id}\nBuyer domain: ${record.request.email.split("@")[1]}\nSector: ${b.sector ?? "Not specified"}\nSites: ${b.sites}\nUsers: ${b.remote_users}\nRegion: ${b.region}\nService: ${SOURCING_NEED_LABELS[b.need]}\nApproved recipients:\n${recipients}\n\nAnonymous supplier brief:\n${b.supplier_brief}\n\n${SITE_URL}/admin/sourcing/`,
         },
         buyer: {
           from,
           to: record.request.email,
           subject: "Netify has your request",
-          text: `Approved recipients:\n${recipients}\n\nNetify reviews every request before any supplier receives it.\n${sourcingUndertaking()}\n\nYour private project status:\n${SITE_URL}/rfp-builder/${record.project_id}/\nOpen this link in the browser where you confirmed your request, or sign in with your buyer account.`,
+          text: `Approved recipients:\n${recipients}\n\nNetify reviews every request before any supplier receives it.\n${sourcingUndertaking()}\n\nYour private project status:\n${SITE_URL}/rfp-builder/${record.project_id}/\nOpen this link in the browser where you confirmed your request, or sign in with the same work email at ${SITE_URL}/account/.`,
         },
       };
       // Each recipient has an independent durable receipt; a failure never drops the queued request.
@@ -111,7 +116,14 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
             `${notificationKey(record.id)}:${channel}:payload`,
           );
           if (!payload) {
-            payload = payloads[channel];
+            payload = { ...payloads[channel] };
+            if (channel === "buyer" && status.desk !== "accepted") {
+              payload.subject =
+                "Your Netify request is recorded; desk acknowledgement pending";
+              payload.text =
+                "Netify has not yet acknowledged this request. It is safely recorded in your private project; desk notification is pending. For help, contact support@netify.com.\n\n" +
+                payload.text;
+            }
             if (!z.email().safeParse(payload.to).success)
               throw Error("Notification destination not configured");
             await kvSetJson(
@@ -134,6 +146,12 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
           );
           if (!response.ok) throw Error("Notification delivery not accepted");
           status[channel] = "accepted";
+          if (channel === "desk")
+            await recordSourcingMetric(
+              "desk_notified",
+              record.request.acquisition,
+              record.id,
+            );
         } catch {
           status[channel] = "pending";
           console.error("Sourcing confirmation notification pending", {
@@ -149,4 +167,19 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
       request_id: record.id,
     });
   }
+}
+
+export async function pendingSourcingNotifications() {
+  const ids = (await kvRaw([
+    "ZRANGE",
+    "sourcing:desk-review",
+    0,
+    -1,
+  ])) as string[];
+  const states = await Promise.all(ids.map(notificationStatus));
+  return {
+    requests: ids.length,
+    desk_pending: states.filter((s) => s.desk !== "accepted").length,
+    buyer_pending: states.filter((s) => s.buyer !== "accepted").length,
+  };
 }

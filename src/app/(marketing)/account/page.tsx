@@ -42,15 +42,14 @@ export default function AccountPage() {
           the invitation to a stranger. */}
       <div className="mb-8 rounded-md border border-[var(--ink-200,#e5e5e5)] p-5">
         <p className="m-0 text-sm text-[var(--ink-600,#555)]">
-          Accounts are created by publishing a project, not before it. If you have not published yet,{" "}
-          <Link href="/#describe" className="underline">describe your project on the front page</Link> and your account is
-          made when you sign the publish.
+          You can return to a confirmed sourcing request, approved circuit-pricing request or published project with the same work email. To start a new requirement,{" "}
+          <Link href="/#describe" className="underline">describe your project on the front page</Link>.
         </p>
       </div>
 
       <div className="mb-8">
-        <p className="eyebrow mb-2">Already published with us?</p>
-        <SignIn role="buyer" prompt="Sign in with the work email you published under, to reach your record and your responses." />
+        <p className="eyebrow mb-2">Already have a confirmed request or project?</p>
+        <SignIn role="buyer" prompt="Sign in with the same work email used for your confirmed request or project." />
         <p className="mt-3 text-xs text-[var(--ink-500)]">
           Vendor or service provider? <Link href="/for-suppliers#register" className="underline">Register or sign in to bid</Link> · your dashboard is at{" "}
           <Link href="/supplier" className="underline">Vendor area</Link>.

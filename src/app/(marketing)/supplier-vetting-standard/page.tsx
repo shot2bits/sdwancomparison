@@ -34,7 +34,7 @@ export default function SupplierVettingStandardPage() {
       <p className="eyebrow mb-3">The standard</p>
       <h1 id="page-h1" className="mb-4">What vetted means on Netify</h1>
       <p className="text-lg text-[var(--ink-700)] mb-8">
-        Buyers publish anonymously and vendors and service providers respond through the platform. A vendor or
+        Buyers publish anonymously and invited suppliers can reply through the platform. A vendor or
         service provider can see and respond to buyer opportunities only after passing every check below. None of
         them reaches a buyer&rsquo;s room, requirement or contact details without them.
       </p>

@@ -1,3 +1,4 @@
+import { confirmedSourcingOwner } from "@/lib/sourcing-access";
 import { recordPublicationVerification } from "@/lib/publication-verification-events";
 import {CircuitSignupIntentSchema} from "@/lib/circuit-schema";
 import {prepareCircuitBuyer, circuitBuyerCanSignIn} from "@/lib/circuit-store";
@@ -124,12 +125,12 @@ export async function POST(req: Request) {
       const belongsToEmail = Boolean(project && (!project.owner_email || project.owner_email.toLowerCase() === email));
       publicationBound = publicationBound || Boolean(
         project && belongsToEmail &&
-        ((project.pending_submit?.list_on_board === true) || (await isMarketUnlocked(project.id)))
+        ((project.pending_submit?.list_on_board === true) || (await isMarketUnlocked(project.id)) || (await confirmedSourcingOwner(project, email)))
       );
     } else {
       const projects = await getProjectsBulk(await listAllRfpIds());
       for (const project of projects.filter((item) => (item.owner_email ?? "").toLowerCase() === email)) {
-        if (await isMarketUnlocked(project.id)) { publicationBound = true; break; }
+        if ((await isMarketUnlocked(project.id)) || (await confirmedSourcingOwner(project, email))) { publicationBound = true; break; }
       }
     }
     if (!publicationBound) publicationBound = await circuitBuyerCanSignIn(email);

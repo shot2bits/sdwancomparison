@@ -40,7 +40,7 @@ export const PROMISES: ReadonlyArray<{ key: string; short: string; full: string 
   },
   {
     key: "vetted_only",
-    short: "Only vetted vendors respond",
+    short: "Responses restricted to vetted suppliers",
     full: "Only vendors and service providers we have vetted can respond.",
   },
   {

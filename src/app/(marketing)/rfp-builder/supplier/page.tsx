@@ -4,7 +4,7 @@ import SignIn from "@/components/SignIn";
 
 export const metadata: Metadata = {
   title: "Respond to an RFP",
-  description: "How vendors and service providers respond to a Netify RFP: open the private link the buyer sent you, or sign in to your vendor dashboard.",
+  description: "How invited suppliers reply to a Netify RFP: open the private link the buyer sent you, or sign in to your vendor dashboard.",
   robots: { index: false, follow: false },
 };
 

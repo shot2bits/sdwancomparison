@@ -40,26 +40,26 @@ function emailBodies(unsubUrl: string) {
   const shortlistUrl = `${SITE_URL}/shortlist/`;
   const benefits = [
     "Answer five quick questions and Netify assembles a complete RFP from its question bank. No document writing.",
-    "Up to five matched vendors and managed service providers respond in the app, structured and side by side against your questions.",
+    "Research provider evidence, approve named recipients and ask Netify to coordinate requests for written proposals. Compare the responses received against your questions.",
     "Pricing stays private to you. No sales calls until you reply, and no obligation to award.",
   ];
   const text = [
     "Your account is ready. Your first project takes about two minutes.",
-    "You signed in to the Netify marketplace earlier but have not started a project yet. Publishing an RFP is the simplest way to compare the market: one submission replaces five separate sales conversations, and the vendors and service providers do the hard work for you.",
+    "You signed in to the Netify marketplace earlier but have not started a project yet. Research is open. Use the shortlist to approve named providers and ask Netify to coordinate your sourcing request; a private project keeps your RFP and the responses received together.",
     ...benefits.map((b) => `- ${b}`),
     `Start your project: ${startUrl}`,
     "Free for buyers. Takes about two minutes.",
-    `Prefer to research first? Compare 30+ providers with the shortlist builder, scored across 40 evidence-graded capabilities, then turn your shortlist into an RFP when you are ready: ${shortlistUrl}`,
+    `Prefer to research first? Compare researched providers with the shortlist builder, scored across 40 evidence-graded capabilities, then turn your shortlist into an RFP when you are ready: ${shortlistUrl}`,
     "Netify",
     `You are receiving this one-off note because you created a buyer account on netify.co.uk. We only email you about your RFPs, opportunities and RFP Builder and Marketplace features.\nUnsubscribe: ${unsubUrl}`,
   ].join("\n\n");
   const html = [
     `<p style="font-size:18px;font-weight:600;color:#13294b;">Your account is ready. Your first project takes about two minutes.</p>`,
-    `<p>You signed in to the Netify marketplace earlier but have not started a project yet. Publishing an RFP is the simplest way to compare the market: one submission replaces five separate sales conversations, and the vendors and service providers do the hard work for you.</p>`,
+    `<p>You signed in to the Netify marketplace earlier but have not started a project yet. Research is open. Use the shortlist to approve named providers and ask Netify to coordinate your sourcing request; a private project keeps your RFP and the responses received together.</p>`,
     `<ul>${benefits.map((b) => `<li style="margin-bottom:6px;">${b}</li>`).join("")}</ul>`,
     `<p style="text-align:center;"><a href="${startUrl}" style="display:inline-block;background:#f59e0b;color:#111;padding:12px 30px;border-radius:999px;text-decoration:none;font-weight:600;">Start your project</a></p>`,
     `<p style="text-align:center;font-size:12px;color:#78716c;">Free for buyers. Takes about two minutes.</p>`,
-    `<p style="border-top:1px solid #eee;padding-top:12px;">Prefer to research first? <a href="${shortlistUrl}">Compare 30+ providers with the shortlist builder</a>, scored across 40 evidence-graded capabilities, then turn your shortlist into an RFP when you are ready.</p>`,
+    `<p style="border-top:1px solid #eee;padding-top:12px;">Prefer to research first? <a href="${shortlistUrl}">Compare researched providers with the shortlist builder</a>, scored across 40 evidence-graded capabilities, then turn your shortlist into an RFP when you are ready.</p>`,
     `<p>Netify</p>`,
     `<p style="font-size:12px;color:#666;">You are receiving this one-off note because you created a buyer account on netify.co.uk. We only email you about your RFPs, opportunities and RFP Builder and Marketplace features. <a href="${unsubUrl}" style="color:#666;">Unsubscribe</a></p>`,
   ].join("");

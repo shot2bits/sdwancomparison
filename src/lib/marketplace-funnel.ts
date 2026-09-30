@@ -15,7 +15,7 @@ redis.call('set', KEYS[1], '1', 'EX', 7776000)
 return 1`;
 export async function recordMarketplaceFunnelEvent(input: { event: MarketplaceFunnelEvent; project_id: string; source?: string; mode?: string; channel: "web" | "api" | "mcp" | "system"; detail?: Record<string, string | number | boolean | null> }) {
  if (!FUNNEL_EVENTS.includes(input.event) || !/^[a-zA-Z0-9_-]{1,100}$/.test(input.project_id)) return;
- const detail = Object.fromEntries(Object.entries(input.detail??{}).filter(([key,value])=>["revision","considered_count","board_created"].includes(key) && (typeof value==="boolean" || (typeof value==="number" && Number.isFinite(value)))));
+ const detail = Object.fromEntries(Object.entries(input.detail??{}).filter(([key,value])=>((key === "acquisition" && ["web","chatgpt","gemini","perplexity","copilot","google","bing","mcp","other"].includes(String(value))) || (["revision","considered_count","board_created"].includes(key) && (typeof value==="boolean" || (typeof value==="number" && Number.isFinite(value)))))));
  const environment = activityEnvironment();
  let project: {activity?:import("./activity-provenance").ActivityMetadata} | null;
  try { project = await kvGetJson(`rfp:${input.project_id}`); } catch { return; /* Reporting must not fail the primary buyer action. */ }
