@@ -15,3 +15,11 @@ Full npm validation suite passed. Action-first route tests passed, including sta
 Browser walkthrough used a loopback-only synthetic database with email and model keys disabled. Reopened a confirmed request, opened the private RFP, navigated written proposals and connectivity, inspected the evidence link, changed the synthetic estate from 10 to 11 sites, and refreshed the comparison. The prior proposal moved into the earlier-scope section; its evidence remained available. Connectivity still exposed the archived revision under the same project.
 
 No real customer records were changed. No supplier requests or email were sent. Production remains frozen. This review verifies implementation behaviour; it does not establish supplier commitments or AI recommendation uplift.
+
+## Hosted verification and remaining blocker
+
+Vercel preview https://sasecomparison-52gerkyi7-netifymarketplace.vercel.app/sase/shortlist/ deployed code 3bc353e successfully, with full validation and build gates. Runtime matching still reports Neon and two healthcare SASE evidence matches.
+
+Hosted private-project access returned HTTP 503. Investigation found no NETIFY_ISOLATED_KV_REST_API_URL / TOKEN configuration on the preview. Existing shared production KV credentials are deliberately rejected outside production by activityKvBinding. Preview email is also deliberately disabled by activityMailFetch. Consequently the hosted preview has NOT passed a real confirmation/private-project journey. That journey has passed locally using isolated synthetic storage and captured email. An isolated preview store and approved test-mail capture route are required before hosted end-to-end sign-off; production credentials must not be reused or safeguards bypassed.
+
+Browser console check on the synthetic journey returned no errors or warnings. Temporary test servers were stopped after verification.
