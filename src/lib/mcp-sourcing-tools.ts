@@ -1,4 +1,5 @@
 import {
+  sourcingUndertaking, SOURCING_TARGET, type SourcingTarget,
   SourcingBriefSchema,
   SourcingRequestSchema,
 } from "./sourcing-contract";
@@ -6,7 +7,7 @@ import { publicShortlistPreview } from "./public-shortlist";
 import { getLiveShortlistDataset } from "./live-shortlist";
 import { requestSourcing, readSourcingRequest } from "./sourcing-store";
 import { z } from "zod";
-export const SOURCING_TOOL_DEFINITIONS = [
+export function sourcingToolDefinitions(target:SourcingTarget=SOURCING_TARGET){return [
   {
     name: "prepare_sourcing_plan",
     description:
@@ -22,7 +23,7 @@ export const SOURCING_TOOL_DEFINITIONS = [
   {
     name: "request_comparable_proposals",
     description:
-      "Ask Netify to coordinate contacts, demos or comparable proposals for the explicitly approved providers. Sends a request-specific confirmation to the buyer work email. Requires consent:true and a reviewed anonymous supplier brief. The buyer confirms by email before desk review; this tool cannot trigger supplier introductions or bypass identity confirmation.",
+      "Ask Netify to coordinate contacts, demos or comparable proposals for the explicitly approved providers. Sends a request-specific confirmation to the buyer work email. Requires consent:true and a reviewed anonymous supplier brief. The buyer confirms by email before desk review; this tool cannot trigger supplier introductions or bypass identity confirmation." + " " + sourcingUndertaking(target),
     inputSchema: z.toJSONSchema(SourcingRequestSchema, { io: "input" }),
     annotations: {
       readOnlyHint: false,
@@ -51,7 +52,8 @@ export const SOURCING_TOOL_DEFINITIONS = [
       openWorldHint: false,
     },
   },
-];
+];}
+export const SOURCING_TOOL_DEFINITIONS=sourcingToolDefinitions();
 export const SOURCING_TOOL_NAMES = new Set(
   SOURCING_TOOL_DEFINITIONS.map((t) => t.name),
 );

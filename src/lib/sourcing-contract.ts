@@ -6,6 +6,20 @@ export const SOURCING_TITLE =
 // Working copy for Harry's editorial approval before production.
 export const SOURCING_DESCRIPTION =
   "Use Netify to request comparable proposals, demos and pre-sales introductions from named SD-WAN and SASE providers. Research is open, and you approve each request before a supplier receives it. SD-WAN provides the connectivity component of SASE.";
+export type SourcingTarget = {proposals:number|null;working_days:number|null};
+// [OWNER] Set both only after agreeing the operational undertaking.
+export const SOURCING_TARGET:SourcingTarget = {proposals:null,working_days:null};
+export function sourcingUndertaking(target:SourcingTarget=SOURCING_TARGET):string {
+ const valid=(n:number|null):n is number=>n!==null&&Number.isSafeInteger(n)&&n>0;
+ return valid(target.proposals)&&valid(target.working_days)
+  ? `${target.proposals} written proposals within ${target.working_days} working days. If a supplier declines, we report it and agree what happens next.`
+  : 'Agree a response target before outreach. If a supplier declines, we report it and agree what happens next.';
+}
+export function sourcingServiceSchema(url:string,target:SourcingTarget=SOURCING_TARGET){return {
+ '@context':'https://schema.org','@type':'Service',name:SOURCING_TITLE,
+ description:`${SOURCING_DESCRIPTION} ${sourcingUndertaking(target)}`,url,
+ provider:{'@type':'Organization',name:'Netify'},
+};}
 export const COMMISSION_DESCRIPTION =
   "Netify is paid by suppliers when an introduction leads to business. Commission never affects the evidence order.";
 export const SourcingBriefSchema = z.object({

@@ -15,3 +15,20 @@ Desk recipient owner-supplied: support@netify.com. Configure SOURCING_DESK_EMAIL
 After atomic confirmation, desk and buyer notifications have independent durable receipts and stable idempotency keys. Failure preserves desk_review and exposes a staff-only retry. Each queue row shows elapsed age. Working hours and red overdue state remain unconfigured until the owner supplies the threshold and working-day schedule (data/sourcing-operations.json). No supplier message is sent by this step.
 
 [OWNER] overdue working-hour threshold, desk start/end hours remain null.
+
+Step 2 acceptance (preview 9a0bdc2, deployment dpl_D2j3mCw2PmU9QCtsbFkfXYH5q5i5):
+```text
+PASS confirmation preview capture: both notifications, domain-only desk brief, independent failure/retry, retained queue, staff-only retry, no duplicates, zero external mail
+PASS hosted preview: confirmed project, desk capture to support@netify.com, buyer acknowledgement, domain-only desk brief, private project access, replay without duplicate, no external email
+```
+TypeScript, action-first suite and full npm validate: exit 0. Legacy copy assertions updated to require the shared description in the same UI block, preserving lifecycle checks. SOURCING_DESK_EMAIL configured in Vercel Production and Preview; production code not yet released.
+
+## Step 3 — one undertaking setting
+
+SOURCING_TARGET drives page step 3, Service JSON-LD, llms, MCP request description and buyer acknowledgement. Invalid or incomplete settings retain the existing response-target wording. Both values remain null.
+```text
+PASS sourcing target unset: page step 3, Service JSON-LD, llms and MCP agree
+PASS sourcing target set: page step 3, Service JSON-LD, llms and MCP agree
+PASS partial or invalid targets stay unpromised; buyer acknowledgement uses the same contract
+```
+[OWNER] proposals and working_days remain null.

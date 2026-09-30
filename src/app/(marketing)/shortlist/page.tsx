@@ -8,6 +8,7 @@ import {
 } from "@/lib/public-provider-evidence";
 import {
   SOURCING_TITLE,
+  sourcingUndertaking, sourcingServiceSchema,
   SOURCING_DESCRIPTION,
   COMMISSION_DESCRIPTION,
 } from "@/lib/sourcing-contract";
@@ -33,14 +34,7 @@ export default async function ShortlistPage({
   const vendors = publicEvidenceProviders(live.vendors);
   const schemas = [
     getOrganizationSchema(),
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      name: SOURCING_TITLE,
-      description: SOURCING_DESCRIPTION,
-      url: `${SITE_URL}/shortlist/`,
-      provider: { "@type": "Organization", name: "Netify" },
-    },
+    sourcingServiceSchema(`${SITE_URL}/shortlist/`),
     {
       "@context": "https://schema.org",
       "@type": "ItemList",
@@ -93,8 +87,7 @@ export default async function ShortlistPage({
         <div>
           <strong>3. Compare the written responses</strong>
           <p>
-            Agree a response target before outreach. If a supplier declines, we
-            report it and agree what happens next.
+            {sourcingUndertaking()}
           </p>
         </div>
       </div>

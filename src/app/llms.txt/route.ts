@@ -1,10 +1,11 @@
 import { MCP_TOOL_DEFINITIONS } from '@/lib/mcp-tool-definitions';
 import { SOURCING_TOOL_DEFINITIONS } from '@/lib/mcp-sourcing-tools';
-import { SOURCING_TITLE,SOURCING_DESCRIPTION,COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
+import { sourcingUndertaking,SOURCING_TITLE,SOURCING_DESCRIPTION,COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
 import { SITE_URL } from '@/lib/structured-data';
 export async function GET(){return new Response(`# ${SOURCING_TITLE}
 
 ${SOURCING_DESCRIPTION}
+${sourcingUndertaking()}
 ${COMMISSION_DESCRIPTION}
 
 Research: ${SITE_URL}/shortlist/data.json

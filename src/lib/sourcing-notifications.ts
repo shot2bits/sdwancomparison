@@ -1,4 +1,5 @@
 import "server-only";
+import {sourcingUndertaking} from "./sourcing-contract";
 import { z } from "zod";
 import { kvGetJson, kvSetJson } from "./rfp-store";
 import { activityMailFetch, activityMailKey } from "./activity-mail";
@@ -97,7 +98,7 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
           from,
           to: record.request.email,
           subject: "Netify has your request",
-          text: `Approved recipients:\n${recipients}\n\nNetify reviews every request before any supplier receives it.\nAgree a response target before outreach. If a supplier declines, we report it and agree what happens next.\n\nYour private project status:\n${SITE_URL}/rfp-builder/${record.project_id}/\nOpen this link in the browser where you confirmed your request, or sign in with your buyer account.`,
+          text: `Approved recipients:\n${recipients}\n\nNetify reviews every request before any supplier receives it.\n${sourcingUndertaking()}\n\nYour private project status:\n${SITE_URL}/rfp-builder/${record.project_id}/\nOpen this link in the browser where you confirmed your request, or sign in with your buyer account.`,
         },
       };
       // Each recipient has an independent durable receipt; a failure never drops the queued request.
