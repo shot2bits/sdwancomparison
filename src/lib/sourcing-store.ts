@@ -73,8 +73,6 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
     );
   if (await isBlockedDomainLive(emailDomain(input.email) ?? ""))
     throw new Error("Use a work email for this request.");
-  await limit(`ip:${requestKey}`, 10);
-  await limit(`email:${input.email}`, 3);
   const lock = `sourcing:idem:${digest(input.email + input.idempotency_key)}`;
   const existing = await kvGetJson<{ id: string; hash: string }>(lock);
   const payloadHash = digest(JSON.stringify(input));
@@ -83,12 +81,15 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
       throw new Error(
         "This request key was already used for different requirements.",
       );
-    return { request_id: existing.id, status: "pending_confirmation" };
+    const saved = await kvGetJson<SourcingRecord>(`sourcing:request:${existing.id}`);
+    return { request_id: existing.id, status: saved?.status ?? "pending_confirmation" };
   }
+  await limit(`ip:${requestKey}`, 10);
+  await limit(`email:${input.email}`, 3);
   const token = randomBytes(32).toString("base64url");
   const record: SourcingRecord = {
     id: randomUUID(),
-    project_id: `rfp_${randomUUID()}`,
+    project_id: `rfp_${randomUUID().replaceAll("-", "")}`,
     request: input,
     payload_hash: payloadHash,
     token_hash: digest(token),
