@@ -94,3 +94,5 @@ export const PUBLIC_SOURCING_TOOLS = [
   "request_comparable_proposals",
   "get_sourcing_request_status",
 ] as const;
+
+export const PRIVATE_CIRCUIT_CONSENT = "Ask Netify to review these private connectivity requirements within my sourcing project. No public notice is created. Supplier recipients and any identifying details must be approved before disclosure. This is not an order.";

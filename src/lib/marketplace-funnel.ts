@@ -24,7 +24,7 @@ export async function recordMarketplaceFunnelEvent(input: { event: MarketplaceFu
  try { classification = activityClassification(await kvGetJson(`rfp:${input.project_id}`)); } catch { /* Unverified is not a confirmed buyer. */ }
  const record={correlation_id:project.activity?.correlation_id??null,environment,classification,version:MARKETPLACE_FUNNEL_VERSION,at:Date.now(),event:input.event,project_id:input.project_id,source:knownValue(input.source,FUNNEL_SOURCES),mode:knownValue(input.mode,FUNNEL_MODES),channel:knownValue(input.channel,FUNNEL_CHANNELS,"system"),detail};
  try {
-  if (["project_started","publication_completed","verification_requested","verification_completed","identity_verified","supplier_response","supplier_interest"].includes(input.event)) {
+  if (["project_started","publication_completed","verification_requested","verification_completed","identity_verified","supplier_response","supplier_interest","sourcing_confirmed"].includes(input.event)) {
    await kvRaw(["EVAL",FUNNEL_APPEND_ONCE,2,`marketplace:funnel:unique:${environment}:${input.event}:${input.project_id}`,"marketplace:funnel:events",JSON.stringify(record)]);
   } else {
    await kvRaw(["LPUSH","marketplace:funnel:events",JSON.stringify(record)]);

@@ -246,7 +246,7 @@ export async function circuitNotify(id: string, quoteId: string, session: AuthSe
             from: process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk",
             to: r.owner_email,
             subject: "Your circuit pricing is available in Netify",
-            text: `Netify has added a market response to your circuit-pricing request. Sign in with your verified work email to view the private pricing and supporting details:\n\nhttps://netify.co.uk/sase/circuit-pricing/?request=${r.id}&view=quotes\n\nNo order has been placed.`,
+            text: r.id.startsWith("rfp_") ? `Netify has added connectivity pricing to your private sourcing project. Open it in your confirmed browser:\n\nhttps://netify.co.uk/sase/rfp-builder/${r.id}/\n\nNo order has been placed.` : `Netify has added a market response to your circuit-pricing request. Sign in with your verified work email to view the private pricing and supporting details:\n\nhttps://netify.co.uk/sase/circuit-pricing/?request=${r.id}&view=quotes\n\nNo order has been placed.`,
           }),
         });
         accepted = res.ok;

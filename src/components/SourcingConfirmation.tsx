@@ -4,6 +4,7 @@ export default function SourcingConfirmation() {
   const [result, setResult] = useState<{
     error?: string;
     status?: string;
+    project_url?: string;
     brief?: string;
     recipients?: { slug: string; actions: string[] }[];
   } | null>(null);
@@ -57,10 +58,21 @@ export default function SourcingConfirmation() {
       {result?.error ? (
         <p role="alert">{result.error}</p>
       ) : result?.status === "desk_review" ? (
-        <p>
-          Your request is confirmed and queued for Netify desk review. No
-          supplier has been contacted automatically.
-        </p>
+        <div>
+          <p>
+            Your request is confirmed and queued for Netify desk review. No
+            supplier has been contacted automatically.
+          </p>
+          {result.project_url && (
+            <a className="sourcing-primary" href={result.project_url}>
+              Open your private project →
+            </a>
+          )}
+          <p>
+            This browser can reopen this project for 30 days. No account has
+            been created.
+          </p>
+        </div>
       ) : result ? (
         <>
           <p>

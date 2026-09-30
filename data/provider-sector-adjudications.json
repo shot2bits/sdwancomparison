@@ -1,0 +1,232 @@
+{
+  "cisco": {
+    "sectors": {
+      "professional_services": "yes"
+    },
+    "source_urls": [
+      "https://cisco.com/site/us/en/solutions/secure-access-service-edge-sase/index.html",
+      "https://www.cisco.com/c/en/us/products/collateral/plus-as-a-service/george-sink-law-customer-cs.pdf"
+    ],
+    "qualification": "Recovered Cisco George Sink PDF: Secure Connect deployed in a law firm; SD-WAN expansion described as a next step. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "ntt": {
+    "sectors": {
+      "retail_ecommerce": "yes"
+    },
+    "source_urls": [
+      "https://services.global.ntt/en-us/campaigns/infrastructure-services"
+    ],
+    "qualification": "Recovered NTT Pick n Pay case: Fortinet managed SD-WAN across retail stores; South Africa, not proof of UK delivery. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "hpe-aruba": {
+    "sectors": {
+      "financial_services": "yes",
+      "healthcare": "yes",
+      "professional_services": "yes"
+    },
+    "source_urls": [
+      "https://hpe.com/us/en/networking/sase.html",
+      "https://www.hpe.com/psnow/doc/a50014000enw",
+      "https://hpe.com/tw/en/aruba-edgeconnect-sd-wan.html",
+      "https://consiliant.com/usana-hpe-aruba-networking-sase-case-study/",
+      "https://www.hpe.com/uk/en/aruba-edgeconnect-sd-wan.html.html",
+      "https://arubanetworks.com/resources/case-studies",
+      "https://hpe.com/psnow/doc/a00108908enw"
+    ],
+    "qualification": "Recovered HPE First Bank case documents EdgeConnect SD-WAN at a US bank; no UK regulatory suitability inference. HPE EdgeConnect page explicitly identifies Universal Health Services using SD-WAN for telehealth. USANA reseller story is not evidence of healthcare delivery. HPE EdgeConnect page identifies Cushman and Wakefield application acceleration and MPLS replacement; professional-services sector evidence. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "versa-networks": {
+    "sectors": {
+      "energy_utilities": "yes",
+      "manufacturing": "partial",
+      "retail_ecommerce": "partial"
+    },
+    "source_urls": [
+      "https://versa-networks.com/customers/case-studies/",
+      "https://versa-networks.com/",
+      "https://aitranslatewpml.versa-networks.com/customers/case-studies/",
+      "https://versa-networks.com/lp/sase-cost-savings/"
+    ],
+    "qualification": "Versa case index expressly identifies Lambton Area Water Supply Systems deploying SASE for remote offices and cloud data. Canadian utility case only. Versa identifies an anonymous Global-200 pharmaceutical manufacturer using Secure SD-WAN. Retain anonymous evidence, not a named reference. Versa documents an unnamed retailer with over 600 stores using Secure SD-WAN. Do not describe this as named customer proof. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "sonicwall": {
+    "sectors": {
+      "professional_services": "partial"
+    },
+    "source_urls": [
+      "https://prnewswire.com/news-releases/sonicwall-partner-ximpleit-deploys-cloud-secure-edge-to-deliver-zero-trust-security-to-legal-industry-clients-302790435.html"
+    ],
+    "qualification": "SonicWall-issued PRNewswire announcement describes XimpleIT deploying Cloud Secure Edge ZTNA for law firms. Named delivery partner; client firms unnamed. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "expereo": {
+    "sectors": {
+      "manufacturing": "yes"
+    },
+    "source_urls": [
+      "https://www.expereo.com/resources/press-releases/kingspan-insulation-chooses-expereo-to-unify-connectivity-and-accelerate-growth-across-90-global-sites"
+    ],
+    "qualification": "Recovered Expereo Kingspan Insulation release explicitly documents SD-WAN and underlay at 90 facilities including factories. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "verizon-business": {
+    "sectors": {
+      "government_public_sector": "unknown",
+      "manufacturing": "partial"
+    },
+    "source_urls": [
+      "https://verizon.com/business/resources/customer-success-stories/federal-agency/",
+      "https://verizon.com/business/resources/articles/s/three-sd-wan-use-cases-for-enterprises/",
+      "https://verizon.com/business/resources/customer-success-stories/manufacturing-giant/"
+    ],
+    "qualification": "Verizon federal-agency page is secure cloud video collaboration for 20,000 users. The linked case is not SD-WAN/SASE evidence. Verizon manufacturing case explicitly describes SD-WAN design, rollout and traffic segmentation; manufacturer is unnamed. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "netskope": {
+    "sectors": {
+      "financial_services": "yes",
+      "professional_services": "yes"
+    },
+    "source_urls": [
+      "https://www.netskope.com/resources/case-studies/care-ratings",
+      "https://www.netskope.com/resources/case-studies/jll"
+    ],
+    "qualification": "CARE Ratings case confirms Netskope CASB, SWG and Private Access deployment at an Indian rating agency. SSE evidence, not proof of SD-WAN. JLL and MinterEllisonRuddWatts primary cases describe SSE/secure remote access in professional services. No UK delivery inference. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "opensystems": {
+    "sectors": {
+      "transport_logistics": "unknown",
+      "manufacturing": "yes",
+      "retail_ecommerce": "yes"
+    },
+    "source_urls": [
+      "https://www.open-systems.com/company/customers/",
+      "https://www.open-systems.com/company/customers/mammut/"
+    ],
+    "qualification": "Open Systems labels ALTANA chemicals and documents SASE at 60-plus sites. Correct sector to manufacturing/chemicals, not logistics. Recovered Open Systems customer index identifies Mikron precision manufacturing using SASE. Does not prove every secondary-directory detail. Mammut primary case describes SASE, branch breakouts, VPN and managed network operations for an outdoor retail brand. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "lumen": {
+    "sectors": {
+      "healthcare": "partial",
+      "manufacturing": "unknown"
+    },
+    "source_urls": [
+      "https://lumen.com/en-us/resources/customer-success-stories.html",
+      "https://www.lumen.com/en-hk/resources/customer-stories/flux.html"
+    ],
+    "qualification": "Recovered Lumen testimonial identifies Valley Cities Behavioral Health Care replacing MPLS/SD-WAN with DIA and SASE. Correct anonymous attribution; compensated supplier-published endorsement. Berridge testimonial explicitly says SASE and EWAS will work together once implementation is complete. It is not evidence of a completed outcome. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "zscaler": {
+    "sectors": {
+      "energy_utilities": "yes",
+      "government_public_sector": "yes",
+      "manufacturing": "yes",
+      "professional_services": "unknown",
+      "retail_ecommerce": "yes"
+    },
+    "source_urls": [
+      "https://zscaler.com/customers/nov",
+      "https://zscaler.com/customers/csc",
+      "https://zscaler.com/customers/baker-baker",
+      "https://zscaler.com/customers/mindbody",
+      "https://zscaler.com/customers/autonation"
+    ],
+    "qualification": "NOV case documents ZIA/ZPA and zero-trust access for an energy-industry supplier. Do not infer utility-specific compliance or UK fit. CSC is Australian Commonwealth Superannuation Corporation; ZIA/ZPA deployment confirmed. Government-pension context, not a blanket public-sector accreditation. Baker and Baker case documents ZIA/ZPA alongside a separately adopted SD-WAN. Manufacturing evidence; Zscaler is not identified as the SD-WAN provider. Mindbody is a SaaS software business serving wellness firms. Its ZPA deployment does not establish professional-services or healthcare end-buyer sector evidence. AutoNation confirms ZIA deployment across retail locations. Baker and Baker must not be counted as a second retail case; it is manufacturing. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "cato-networks": {
+    "sectors": {
+      "retail_ecommerce": "yes"
+    },
+    "source_urls": [
+      "https://www.catonetworks.com/customers/ulta-beauty-reinvents-network-deliver-seamless-retail-experience/"
+    ],
+    "qualification": "Ulta Beauty primary case documents a SASE-led cloud SD-WAN transition and staged store rollout. Do not imply the three-year rollout is complete. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "orange-business": {
+    "sectors": {
+      "manufacturing": "yes"
+    },
+    "source_urls": [
+      "https://www.orange-business.com/en/press/orange-business-services-delivers-flexible-sd-wan-siemens-worldwide-majority-corporate"
+    ],
+    "qualification": "Recovered Orange Siemens release confirms Cisco-based Flexible SD-WAN at corporate locations. No manufacturing-OT suitability or UK quote inference. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "gtt": {
+    "sectors": {
+      "hospitality_leisure": "yes"
+    },
+    "source_urls": [
+      "https://businesswire.com/news/home/20250318895249/en/Radisson-Hotel-Group-Selects-GTT-for-Global-SASE-Deployment",
+      "https://gtt.net/about-us/press-releases/radisson-hotel-group-selects-gtt-for-global-sase-deployment/"
+    ],
+    "qualification": "GTT Radisson release confirms selection and rollout of managed SASE/SD-WAN for hotels. This is an implementation announcement, not proof of all 800 hotels completed. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "palo-alto-networks": {
+    "sectors": {
+      "manufacturing": "yes",
+      "retail_ecommerce": "yes",
+      "transport_logistics": "unknown"
+    },
+    "source_urls": [
+      "https://paloaltonetworks.com/customers/colgate-palmolive-powers-secure-manufacturing-with-palo-alto-networks",
+      "https://paloaltonetworks.com/customers/grupo-bimbo-protects-its-global-connected-supply-chain-with-palo-alto-networks",
+      "https://paloaltonetworks.com/customers/westfield-responds-rapidly-to-a-changing-market-with-prisma-sase"
+    ],
+    "qualification": "Colgate primary case explicitly identifies Prisma SD-WAN and Prisma Access at a manufacturer. Bimbo corroborates manufacturing security, not a separate logistics sector. Westfield primary case documents Prisma SASE for mall operations and retail access. Evidence relates to a mall operator, not every retail format. Grupo Bimbo is a bakery manufacturer. Its connected supply chain does not make it an independent transport/logistics customer. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  },
+  "fortinet": {
+    "sectors": {
+      "education": "partial"
+    },
+    "source_urls": [
+      "https://fortinet.com/blog/customer-stories",
+      "https://fortinet.com/content/dam/fortinet/assets/ebook/eb-sase-customer-stories.pdf"
+    ],
+    "qualification": "Fortinet SASE customer-stories PDF page 10 documents an unnamed US school district with 375,000-plus users. Anonymous case only. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
+    "reviewed_at": "2026-09-30T00:00:00Z",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewer": "Codex source adjudication; human release sign-off pending"
+  }
+}

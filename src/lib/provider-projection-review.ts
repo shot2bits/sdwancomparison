@@ -1,3 +1,4 @@
+import sectorAdjudications from "../../data/provider-sector-adjudications.json";
 import type { ShortlistVendor, CapabilityStatus } from "./shortlist-core";
 import type { ProviderMatchRecord } from "./provider-matching";
 export type ReviewedProjection = {
@@ -55,6 +56,15 @@ export const REVIEWED_PROVIDER_PROJECTIONS: Record<string, ReviewedProjection> =
         "BT documents managed Agile Connect SD-WAN and Fortinet Firewall for a global banking organisation. Does not verify DORA/PCI compliance or a manufacturing deployment.",
     },
   };
+for (const [slug, row] of Object.entries(sectorAdjudications)) {
+  const previous = REVIEWED_PROVIDER_PROJECTIONS[slug];
+  REVIEWED_PROVIDER_PROJECTIONS[slug] = {
+    ...previous, ...row,
+    sectors: {...previous?.sectors, ...row.sectors} as ReviewedProjection["sectors"],
+    source_urls: [...new Set([...(previous?.source_urls ?? []), ...row.source_urls])],
+    qualification: [previous?.qualification, row.qualification].filter(Boolean).join(" "),
+  };
+}
 export function applyProjectionReview(
   provider: ShortlistVendor,
   record: Pick<ProviderMatchRecord, "revision_id" | "reviewed_at" | "sectors">,

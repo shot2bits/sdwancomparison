@@ -1,12 +1,12 @@
 import { activityEnvironment, type ActivityEnvironment } from "./activity-provenance";
 /** Aggregate operational events without exposing project identifiers or free text. */
-export const FUNNEL_EVENTS = ["project_started", "requirements_updated", "match_previewed", "publication_prepared", "verification_requested", "verification_completed", "identity_verified", "publication_completed", "publication_incomplete", "supplier_interest", "supplier_response"] as const;
+export const FUNNEL_EVENTS = ["project_started", "requirements_updated", "match_previewed", "publication_prepared", "verification_requested", "verification_completed", "identity_verified", "publication_completed", "publication_incomplete", "supplier_interest", "supplier_response", "sourcing_confirmed"] as const;
 export type FunnelEvent = typeof FUNNEL_EVENTS[number];
 export const FUNNEL_SOURCES = ["rfp_builder", "shortlist", "marketplace", "sector", "mcp", "circuit_pricing", "notice_builder", "unknown"] as const;
 export const FUNNEL_MODES = ["quick_list", "find_providers", "build_rfp", "check_rfp", "short", "detailed", "circuit", "notice", "unknown"] as const;
 export const FUNNEL_CHANNELS = ["web", "api", "mcp", "system"] as const;
 export const FUNNEL_LABELS: Record<FunnelEvent, string> = {
- project_started: "Project saved", requirements_updated: "Requirements updated", match_previewed: "Match preview requested", publication_prepared: "Publication prepared", verification_requested: "Verification email accepted for sending", verification_completed: "Work email verified", identity_verified: "Business identity verified", publication_completed: "Published on the board", publication_incomplete: "Publication incomplete", supplier_interest: "Supplier interest received", supplier_response: "Supplier response received",
+ sourcing_confirmed: "Sourcing request confirmed (awaiting desk review)", project_started: "Project saved", requirements_updated: "Requirements updated", match_previewed: "Match preview requested", publication_prepared: "Publication prepared", verification_requested: "Verification email accepted for sending", verification_completed: "Work email verified", identity_verified: "Business identity verified", publication_completed: "Published on the board", publication_incomplete: "Publication incomplete", supplier_interest: "Supplier interest received", supplier_response: "Supplier response received",
 };
 export const knownValue = (value: unknown, allowed: readonly string[], fallback = "unknown") => typeof value === "string" && allowed.includes(value) ? value : fallback;
 const emptyCounts = () => Object.fromEntries(FUNNEL_EVENTS.map(e => [e, 0])) as Record<FunnelEvent, number>;

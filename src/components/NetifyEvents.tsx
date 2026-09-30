@@ -3,7 +3,7 @@
 // Consent-dependent commercial events. Only route categories and bounded
 // operational properties are sent; server-confirmed outcomes are reported separately.
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { analyticsPath, analyticsReferrer, analyticsLocation, analyticsProps } from '@/lib/analytics-privacy';
 import { journeyAttribution } from '@/lib/journey-attribution';
@@ -118,6 +118,12 @@ function fire(name: string, data: Record<string, string> = {}): void {
 
 export default function NetifyEvents() {
   const pathname=usePathname();
+  const [consentRevision, setConsentRevision] = useState(0);
+  useEffect(() => {
+    const update = () => setConsentRevision(value => value + 1);
+    window.addEventListener('netify-consent-change', update);
+    return () => window.removeEventListener('netify-consent-change', update);
+  }, []);
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') return;
     installGooglePrivacyGuard();
@@ -265,7 +271,7 @@ export default function NetifyEvents() {
       document.removeEventListener('focusin', onFocusIn, true);
       document.removeEventListener('submit', onSubmit, true);
     };
-  }, [pathname]);
+  }, [pathname, consentRevision]);
 
   return null;
 }

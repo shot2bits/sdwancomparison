@@ -79,6 +79,9 @@ export async function callSourcingTool(
   const live = await getLiveShortlistDataset();
   return {
     brief: b,
+    runtime_provider_source:live.source,
+    provider_contract_version:live.providerContractVersion,
+    provider_dataset_versions:live.datasetVersions,
     ...publicShortlistPreview(live.vendors, {
       sector: b.sector,
       required_regions: [b.region],

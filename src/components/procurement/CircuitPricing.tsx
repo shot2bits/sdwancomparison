@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useCallback, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
+import { PRIVATE_CIRCUIT_CONSENT } from "@/lib/sourcing-contract";
 import SignIn from "@/components/SignIn";
 import {
   CIRCUIT_CONSENT,
@@ -11,7 +12,7 @@ import {
   type CircuitRecord,
   CircuitQuoteSchema,
 } from "@/lib/circuit-schema";
-const endpoint = "/sase/api/circuits/";
+const defaultEndpoint = "/sase/api/circuits/";
 const DRAFT = "netify-circuit-draft-v1";
 const empty: CircuitInput = {
   company: "",
@@ -28,7 +29,8 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
     </label>
   );
 }
-export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
+export default function CircuitPricing({ admin = false, projectId }: { admin?: boolean; projectId?: string }) {
+  const endpoint=projectId?`/sase/api/sourcing/projects/${projectId}/connectivity/`:defaultEndpoint;
   const [input, setInput] = useState<CircuitInput>(empty),
     [record, setRecord] = useState<CircuitRecord | null>(null),
     [id, setId] = useState(""),
@@ -81,6 +83,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
   }, []);
   const refresh = useCallback(async () => {
     try {
+      if(projectId){const res=await fetch(endpoint,{cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error);setSigned(true);setList(data.request?[data.request]:[]);if(data.request)adopt(data.request);return;}
       const sessionResponse = await fetch('/sase/api/auth/session', { cache: "no-store" });
       if (!sessionResponse.ok) throw Error("Could not check your sign-in status. Please retry.");
       const session = await sessionResponse.json();
@@ -98,8 +101,9 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
     } catch (e) {
       setError(String(e instanceof Error ? e.message : e));
     }
-  }, [admin]);
+  }, [admin,projectId,endpoint,adopt]);
   useEffect(() => {
+    if(projectId){setId(projectId);void refresh().finally(()=>setLoaded(true));return;}
     let saved: string | null = null;
     try { saved = localStorage.getItem(DRAFT); }
     catch { setError("This browser cannot save your draft on this device. Enable site storage before leaving this page."); }
@@ -127,13 +131,13 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
           adopt(d.request);
         })
         .catch((e) => setError(e.message));
-  }, [admin,refresh,adopt]); // initial URL/draft hydration only
+  }, [admin,refresh,adopt,projectId,endpoint]); // initial URL/draft hydration only
   useEffect(() => {
-    if (loaded && !frozen && !admin) {
+    if (loaded && !frozen && !admin && !projectId) {
       try { localStorage.setItem(DRAFT, JSON.stringify({ id, input, record })); }
       catch { setError("Your latest changes could not be saved on this device. Keep this page open and enable site storage."); }
     }
-  }, [input, id, loaded, frozen, admin, record]);
+  }, [input, id, loaded, frozen, admin, record, projectId]);
   useEffect(() => {
     if (modal || edit) {
       if (!dialog.current?.open) dialog.current?.showModal();
@@ -151,7 +155,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
           .catch(() => {});
     }, 30000);
     return () => clearInterval(poll);
-  }, [record]);
+  }, [record,endpoint]);
   async function recoverRequest() {
     await refresh();
     const request=new URLSearchParams(location.search).get('request');
@@ -241,6 +245,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
   }
   const locations = input.lines.filter((l) => !l.remote).length,
     remote = input.lines.filter((l) => l.remote).reduce((n, l) => n + l.quantity, 0);
+  if(projectId && !loaded)return <p>Loading private connectivity requirements…</p>;
   return (
     <section className="cp-app">
       <header className="cp-heading">
@@ -250,7 +255,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
           <p>
             {admin
               ? "Review private specifications, add sourced offers and check notification delivery."
-              : "Build your request once. Netify sources the market; quotes arrive in Market responses."}
+              : projectId ? "Private connectivity requirements and sourced quotes on this same project." : "Build your request once. Netify sources the market; quotes arrive in Market responses."}
           </p>
         </div>
         {recoveringRequest && !signed && <div className="cp-info"><h2>Sign in to view your private pricing</h2><SignIn role="buyer" prompt="Use the work email attached to this request." onAuthed={()=>void recoverRequest()}/></div>}
@@ -263,7 +268,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
               setModal("review");
             }}
           >
-            {frozen ? "Request published" : "Review & request pricing →"}
+            {frozen ? "Requirements submitted" : "Review & request pricing →"}
           </button>
         )}
       </header>
@@ -277,7 +282,7 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
         </div>
       )}
       <div className="cp-tabs" role="tablist" aria-label="Circuit pricing views">
-        {["requirements", "quotes", "requests"].map((v) => (
+        {(projectId?["requirements","quotes"]:["requirements", "quotes", "requests"]).map((v) => (
           <button
             role="tab"
             aria-selected={view === v}
@@ -553,17 +558,13 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
             {frozen && (
               <>
                 <p>
-                  Published specifications are retained with your quotes. Create a new request for
-                  changes.
+                  {projectId ? "Submitted specifications are retained with your quotes. Ask the Netify desk to agree a revision before changing approved scope." : "Published specifications are retained with your quotes. Create a new request for changes."}
                 </p>
-                <a href={"/sase/opportunities/" + record?.opportunity_id + "/room/"}>
-                  Open opportunity room ↗
-                </a>
+                {!projectId && record?.opportunity_id && <a href={"/sase/opportunities/" + record.opportunity_id + "/room/"}>Open opportunity room ↗</a>}
               </>
             )}
             <p className="cp-small">
-              Company name, addresses and local contacts stay private. A public anonymous notice
-              describes the buying requirement.
+              {projectId ? "Company name, addresses and local contacts remain private. No public notice is created; disclosure requires approval." : "Company name, addresses and local contacts stay private. A public anonymous notice describes the buying requirement."}
             </p>
           </aside>
         </div>
@@ -910,7 +911,8 @@ export default function CircuitPricing({ admin = false }: { admin?: boolean }) {
             )}
           </>
         )}
-        {modal === "review" && (
+        {modal === "review" && projectId && <><h2>Review private connectivity requirements</h2><p>{PRIVATE_CIRCUIT_CONSENT}</p><label className="cp-check"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>I approve Netify desk review of these requirements.</label><button disabled={busy} onClick={async()=>{if(await save()){setMessage('Private connectivity saved on this project.');setModal('');}}}>Save private draft</button><button className="cp-primary" disabled={busy||!consent} onClick={async()=>{const saved=await save();if(saved&&await action('request_review',{revision:saved.revision,consent:PRIVATE_CIRCUIT_CONSENT})){setMessage('Submitted for Netify desk review. No public notice or supplier message was created.');setModal('');}}}>Submit for private review</button></>}
+        {modal === "review" && !projectId && (
           <>
             <h2>Review your pricing request</h2>
             <p>

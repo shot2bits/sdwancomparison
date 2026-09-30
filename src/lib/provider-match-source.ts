@@ -31,7 +31,7 @@ export async function loadProviderMatchRecordFeed(): Promise<ProviderMatchRecord
   } catch {
     throw new ProviderMatchSourceUnavailable("Provider matching source is unavailable.");
   }
-  if (!response.ok) throw new ProviderMatchSourceUnavailable("Provider matching source rejected the request.");
+  if (!response.ok) throw new ProviderMatchSourceUnavailable(`Provider matching source rejected the request (HTTP ${response.status}).`);
   const parsed = ResponseSchema.safeParse(await response.json());
   if (!parsed.success) throw new ProviderMatchSourceUnavailable("Provider matching source returned an incompatible contract.");
   return { contractVersion: parsed.data.contract_version, providers: parsed.data.providers };

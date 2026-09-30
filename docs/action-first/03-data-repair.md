@@ -1,6 +1,6 @@
 # Data repair — 30 September 2026
 
-The private matching-feed credentials exported empty. The public `/api/provider-knowledge/` endpoint nevertheless exposed all 30 governed profiles, which were retrieved read-only. Local capture: workspace `outputs/action-first-source-audit`. No production database write was performed.
+Sensitive credentials were not readable through export; that did not establish that they were missing. Production authenticated matching was subsequently verified as Neon-backed. The public `/api/provider-knowledge/` endpoint nevertheless exposed all 30 governed profiles, which were retrieved read-only. Local capture: workspace `outputs/action-first-source-audit`. No production database write was performed.
 
 ## Confirmed defects and code changes
 
@@ -12,25 +12,10 @@ The private matching-feed credentials exported empty. The public `/api/provider-
 
 ## Source adjudication
 
-The 72 strong source rows comprise 66 unknown, three requires_confirmation, one partially_supported and two not_supported. `sector-row-review.csv` lists all 72. **Four have been checked against live primary sources; 68 still need adjudication.** This is not a claim that the full data repair is complete.
+All 72 flagged rows have been adjudicated, including the 68 outstanding rows. Complete source links, qualifications, disposition and pending human sign-off appear in sector-adjudications.csv and sector-adjudications.json. The older sector-row-review.csv and sector-counts.json are historical pre-adjudication captures, not current approval or matching counts.
 
-Dated preview overrides: Aryaka manufacturing (Albemarle); Cisco manufacturing (Peco Foods) and hospitality (Mitchells & Butlers); BT financial services (managed SD-WAN banking deployment). Cisco's UK deployment and Aryaka's UK regional-network brief/Dublin service description support partial UK/Ireland evidence; exact-site delivery and contracting remain open checks. All source URLs and qualifications are in `src/lib/provider-projection-review.ts`. Overrides expire 30 October and cannot supersede a later governed revision. No SD-WAN manufacturing grade was inferred from BT's Managed Azure evidence.
+Dispositions: 24 verified named, 6 verified anonymous, 1 partner case, 12 adjacent service, 7 outside taxonomy, 17 insufficient source, 4 wrong sector, 1 planned not delivered. Thus 31 have qualified deployment evidence; this does not prove current UK delivery or suitability for a buyer's brief. Blocked or missing sources are explicitly insufficient, never silently verified.
 
-Authority: published governed source records, corrected projection semantics, and explicitly dated primary-source resolutions. Historic curated grades alone do not overrule newer governed evidence. Source grade means documented evidence, never supplier-confirmed suitability or a current quote.
+Dated preview projections are in data/provider-sector-adjudications.json and merged with the earlier Cisco, Aryaka and BT reviews. Anonymous references remain partial. ALTANA and Bimbo do not establish transport/logistics; Verizon video collaboration does not establish government SD-WAN; Lumen's planned manufacturing deployment is not a completed deployment. Named existing evidence takes precedence over a weaker additional case. No Neon database row was changed.
 
-## Applied sector evidence before / after
-
-| Sector | Before | Preview after |
-|---|---:|---:|
-|healthcare|0|0|
-|financial_services|0|1|
-|retail_ecommerce|0|0|
-|manufacturing|0|2|
-|energy_utilities|0|0|
-|government_public_sector|0|0|
-|education|0|0|
-|transport_logistics|1|1|
-|professional_services|0|0|
-|hospitality_leisure|0|1|
-
-These counts are sector evidence, not suppliers satisfying every requirement of a brief. The public table retains all 30 providers regardless of matches. Manufacturing acceptance separately checks the UK region and SD-WAN feature gates. No source record or prospective supplier was removed to inflate the result.
+Source review and tests are complete at the disposition level. Seventeen insufficient rows still require replacement primary evidence; editorial release approval remains pending for all new adjudications.

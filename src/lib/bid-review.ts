@@ -83,14 +83,14 @@ function requiredQuestions(project: ProjectDetails): { q: RfpQuestion; category:
 function evidenceLayer(project: ProjectDetails, resp: RfpResponse, goal: ProcurementGoal | null) {
   const required = requiredQuestions(project);
   const answeredCount = required.filter(({ q }) => answeredText(resp, q.id).length > 0).length;
-  const coverage = required.length ? answeredCount / required.length : 1;
+  const coverage = required.length ? answeredCount / required.length : 0;
 
   const checks: EvidenceCheck[] = [];
   checks.push({
     key: "mandatory_coverage",
     label: "Required questions answered",
-    pass: coverage >= 0.999,
-    detail: `${answeredCount} of ${required.length} required questions answered (${Math.round(coverage * 100)}%).`,
+    pass: required.length > 0 && coverage >= 0.999,
+    detail: required.length ? `${answeredCount} of ${required.length} required questions answered (${Math.round(coverage * 100)}%).` : "No required questions have been defined; completeness cannot be established.",
   });
 
   // must_have coverage from the goal. A must-have can be a single feature id, a
@@ -211,7 +211,7 @@ async function judgementLayer(project: ProjectDetails, resp: RfpResponse, goal: 
   const qa = required.map(({ q }) => `Q (${q.feature_id}): ${q.text}\nA: ${answeredText(resp, q.id) || "[no answer]"}`).join("\n\n");
   const goalLine = goal?.outcome ? `Buyer goal: ${goal.outcome}. Must-haves: ${goal.must_have.join(", ") || "none stated"}.` : "No explicit buyer goal stated.";
   try {
-    const client = new Anthropic();
+    const client = new Anthropic({ timeout: 20_000, maxRetries: 0 });
     const res = await client.messages.create({
       model: MODEL,
       max_tokens: 600,

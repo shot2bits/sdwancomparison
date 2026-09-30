@@ -1,3 +1,4 @@
+import { issueSourcingAccess } from "@/lib/sourcing-access";
 import { z } from "zod";
 import {
   readSourcingRequest,
@@ -26,9 +27,13 @@ export async function POST(req: Request) {
     const raw = await req.text();
     if (raw.length > 2000) return json({ error: "Confirmation too large." }, 413);
     const input = Input.parse(JSON.parse(raw));
-    if (input.confirm)
-      return json(await confirmSourcingRequest(input.id, input.token));
+    if (input.confirm) {
+      const receipt=await confirmSourcingRequest(input.id,input.token);
+      const record=await readSourcingRequest(input.id,input.token);
+      return Response.json({...receipt,project_url:`/sase/rfp-builder/${record.project_id}/`},{headers:{...privateHeaders,'Set-Cookie':await issueSourcingAccess(record)}});
+    }
     const r = await readSourcingRequest(input.id, input.token);
+    if(r.status==='desk_review') return Response.json({id:r.id,status:r.status,project_url:`/sase/rfp-builder/${r.project_id}/`},{headers:{...privateHeaders,'Set-Cookie':await issueSourcingAccess(r)}});
     return json({
       id: r.id,
       status: r.status,

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import SourcingProjectJourney from "@/components/SourcingProjectJourney";
 import RfpBuilder from "@/components/RfpBuilder";
 import { RFP_PATHS, getRfpPath } from "@/lib/rfp-paths";
 import { getProject } from "@/lib/rfp-store";
@@ -46,6 +47,7 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
     // private matter is rendered server-side.
     const proj = await getProject(id).catch(() => null);
     const isEngine = proj?.engine === "security_sourcing";
+    const isSourcing = Boolean(proj?.entrance_context?.raw_input.sourcing_request_id);
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* The project navigation renders on the builder too (Robert,
@@ -56,8 +58,8 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
             marks Requirement so the way back to the goal stays visible. */}
         {isEngine && <ProjectNav id={id} manage={manage} active="preview" engine />}
         <div className="mb-8">
-          <p className="eyebrow mb-2">{isEngine ? "Security Sourcing" : "Agentic RFP builder"}</p>
-          <h1 className="text-2xl">{isEngine ? "Your Security Sourcing RFP" : "Your SASE and SD-WAN RFP"}</h1>
+          <p className="eyebrow mb-2">{isSourcing ? "Private sourcing project" : isEngine ? "Security Sourcing" : "Agentic RFP builder"}</p>
+          <h1 className="text-2xl">{isSourcing ? "Your SD-WAN and SASE sourcing project" : isEngine ? "Your Security Sourcing RFP" : "Your SASE and SD-WAN RFP"}</h1>
           {isEngine && (
             <p className="mt-2 max-w-2xl text-sm text-[var(--ink-600,#555)]">
               Generated from your security assessment and opened here, in the Netify RFP builder, for review.
@@ -66,7 +68,7 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
             </p>
           )}
         </div>
-        <RfpBuilder initialId={id} />
+        {proj?.entrance_context?.raw_input.sourcing_request_id ? <SourcingProjectJourney key={id} id={id}/> : <RfpBuilder initialId={id} />}
       </div>
     );
   }

@@ -13,7 +13,7 @@ import {
 } from "@/lib/circuit-store";
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "private, no-store" };
-const Id = z.string().uuid();
+const Id = z.union([z.string().uuid(),z.string().regex(/^rfp_[a-z0-9]+$/)]);
 export async function GET(req: Request) {
   try {
     const session = await sessionFromRequest(req);
@@ -65,10 +65,11 @@ export async function POST(req: Request) {
         revision: z.number().int().min(0).optional(),
         input: z.unknown().optional(),
         consent: z.string().optional(),
-        quote_id: Id.optional(),
+        quote_id: z.string().uuid().optional(),
       })
       .strict()
       .parse(JSON.parse(text));
+    if(body.id.startsWith("rfp_") && ["save","publish"].includes(body.action)) throw new CircuitError("Use the private sourcing project to update these requirements.",403);
     let result;
     if (body.action === "save")
       result = await circuitSave(body.id, body.input, body.revision ?? 0, session);

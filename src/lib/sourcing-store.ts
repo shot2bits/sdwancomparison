@@ -169,6 +169,7 @@ export async function confirmSourcingRequest(id: string, token: string) {
     if (r.status === "desk_review") {
       // Repair an interrupted queue write without recreating the project or changing credentials.
       await kvRaw(["ZADD", "sourcing:desk-review", r.confirmed_at ?? r.created_at, id]);
+      await recordSourcingConfirmation(r);
       return { request_id: r.id, status: r.status };
     }
     const b = r.request.brief;
@@ -179,9 +180,10 @@ export async function confirmSourcingRequest(id: string, token: string) {
         shortlist_size: 30,
       }),
       rankedVendorSlugs: r.request.recipients.map((p) => p.slug),
-      requirementText: b.requirement,
+      requirementText: `${b.supplier_brief}\nRemote users: ${b.remote_users}. Timing: ${b.when}.`,
       sourceUrl: `${SITE_URL}/shortlist/`,
     });
+    entrance.buyer_input = {...entrance.buyer_input, site_count:b.sites, product_scope:b.need==="sdwan"?"sdwan_only":b.need==="sase"?"full_sase":b.need==="secure_access"?"sse_only":"not_stated"};
     entrance.raw_input = {
       ...entrance.raw_input,
       sourcing_request_id: r.id,
@@ -209,6 +211,7 @@ export async function confirmSourcingRequest(id: string, token: string) {
       JSON.stringify(r), r.confirmed_at, id,
     ]);
     if (committed !== 1) throw new Error("Confirmation is already being processed. Please retry.");
+    await recordSourcingConfirmation(r);
     // No supplier mail here. Identity confirmation never bypasses desk review.
     return { request_id: id, status: "desk_review" };
   } finally {
@@ -220,4 +223,9 @@ export async function confirmSourcingRequest(id: string, token: string) {
       owner,
     ]);
   }
+}
+
+async function recordSourcingConfirmation(r: SourcingRecord) {
+  const {recordMarketplaceFunnelEvent} = await import("./marketplace-funnel");
+  await recordMarketplaceFunnelEvent({event:"sourcing_confirmed", project_id:r.project_id, source:r.request.acquisition==="mcp"?"mcp":"shortlist", channel:r.request.acquisition==="mcp"?"mcp":"web"});
 }
