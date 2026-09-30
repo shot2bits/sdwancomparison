@@ -28,3 +28,9 @@
 - A React key warning in the first synthetic fixture came from activity rows lacking fixture IDs; fixture rows were corrected. No application key change was needed.
 - Full application validation/build passed; new routes compiled as dynamic. TypeScript and focused lint passed. The new test is part of `test:action-first`.
 - Existing unrelated duplicate source files were left untouched. Duplicate generated type-cache files were preserved outside the compiler path to resolve local type-definition conflicts.
+
+## Live release verification
+
+Source 8c16a8c deployed through the established production Git branch. Vercel deployment dpl_B2P9ud6kCbNemn7E6Mvgo8h74jwH is READY and confirmed as production target.
+
+Public shortlist and Market Record return 200, display the new build and the honest empty state. JSON feed returns market-record/2.0.0 with zero records and Cache-Control: no-store. Unauthenticated private outcome endpoint returns 401; unknown public outcome returns 404. Live browser reports no errors or warnings. No production project mutations or messages were used for release verification.
