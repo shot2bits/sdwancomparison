@@ -58,3 +58,5 @@ Passed action-first regression tests, added preview-mail failure/security tests,
 Production remains `dpl_BuZb88RvYfcxs6CPxdS9XZZyTV6D`, branch `codex/publication-first-comparison`, commit `e850476b92d0a192117be5d139d87f4eb811733c`.
 
 This closes the isolated-storage and captured-mail testing blocker. It does not establish commercial supplier commitments, Harry's approval, a clean search baseline, or AI recommendation/click uplift. Those remain separate release and measurement decisions.
+
+Final browser pass on the deployed code confirmed the private editor, saved agent draft and both project tabs. The old publish-to-unlock prompts and credential-copy text are absent. Preview confirmation explicitly says no email was sent. Browser console returned no errors or warnings. Screenshot saved in the task output directory as `isolated-preview-private-project.png`.

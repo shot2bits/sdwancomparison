@@ -16,7 +16,9 @@
     "Final state: no supplier invitations, no public connectivity notice, all test mail captured privately",
     "Final preview: Neon provider contract and web/MCP matching parity verified",
     "Final preview: saved private RFP, earlier-scope proposals and archived connectivity survive deployment; anonymous read still rejected",
-    "Final preview: new request and retry report captured-not-sent; captured link points to final deployment and confirms successfully"
+    "Final preview: new request and retry report captured-not-sent; captured link points to final deployment and confirms successfully",
+    "Final browser: preview capture wording, private editor without publication prompts, persisted agent draft, connectivity and written-proposal tabs verified",
+    "Final browser console: no errors or warnings"
   ],
   "code_commit": "a9b1b58",
   "synthetic_data_only": true,
