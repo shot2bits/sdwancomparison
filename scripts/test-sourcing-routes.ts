@@ -81,10 +81,13 @@ await withFakeKv(async store=>{
  const buyer=await rfpStore.createSession({role:'buyer',email:body.email,vendor_slug:null});assert.equal((await desk.GET(makeRequest('GET','https://preview.example/sase/api/sourcing/desk/',{cookie:`netify_session=${buyer.token}`}))).status,403);
  delete process.env.ANTHROPIC_API_KEY;
  const privateProject=await import('../src/app/api/sourcing/projects/[id]/route');
- const proposal={id:randomUUID(),vendor_slug:'aryaka',vendor:'Aryaka',answers:{},pricing:{model:'total_monthly',amount:null,currency:'GBP',unit_note:'12-site scope; installation excluded',notes:'Amount not yet confirmed'},evidence_url:'https://supplier.example/proposal.pdf',supplier_confirmed:true};
+ const proposalScope=(await import('../src/lib/sourcing-proposal-scope')).sourcingScopeHash((await rfpStore.getProject(before.project_id))!);
+ const proposal={id:randomUUID(),scope_hash:proposalScope,vendor_slug:'aryaka',vendor:'Aryaka',answers:{},pricing:{model:'total_monthly',amount:null,currency:'GBP',unit_note:'12-site scope; installation excluded',notes:'Amount not yet confirmed'},evidence_url:'https://supplier.example/proposal.pdf',supplier_confirmed:true};
  const proposalPost=(payload:unknown,cookie:string)=>privateProject.POST(makeRequest('POST',`https://preview.example/sase/api/sourcing/projects/${before.project_id}/`,{body:payload,cookie}),ctx);
  assert.equal((await proposalPost(proposal,scopedCookie.split(';')[0])).status,403);
  const deskCookie=`netify_session=${staff.token}`;assert.equal((await proposalPost({...proposal,vendor_slug:'cisco'},deskCookie)).status,422);
+ assert.equal((await proposalPost({...proposal,scope_hash:'0'.repeat(64)},deskCookie)).status,409,'Stale requirement scope rejected');
+ assert.equal((await proposalPost({...proposal,pricing:{...proposal.pricing,unit_note:'   '}},deskCookie)).status,422,'Whitespace is not a comparable charging basis');
  const proposalResult=await proposalPost({...proposal,vendor:'Untrusted submitted name'},deskCookie);assert.equal(proposalResult.status,200);assert.equal((await proposalResult.json()).project_id,before.project_id);assert.equal((await proposalPost({...proposal,vendor:'Untrusted submitted name'},deskCookie)).status,200);assert.equal((await proposalPost(proposal,deskCookie)).status,422,'Payload reuse must reject changes');
  const projectRead=await privateProject.GET(scopedRequest,ctx);assert.equal(projectRead.status,200);const joined=await projectRead.json();assert.equal(joined.feed.length,1);assert.equal(joined.feed[0].actor_name,"Aryaka");assert.equal(joined.feed[0].pricing.amount,null);assert.equal(joined.responses[0].rfp_id,before.project_id);assert.equal(joined.reviews[0].rfp_id,before.project_id);assert.equal(joined.reviews[0].evidence_checks.find((c:{key:string})=>c.key==='mandatory_coverage').pass,false,'No requirements is not full coverage');
  assert.equal((await connectivity.GET(makeRequest('GET','https://preview.example/',{cookie:`netify_session=${buyer.token}`}),ctx)).status,200,'Account ownership recovers private connectivity after browser grant expires');
@@ -104,6 +107,10 @@ await withFakeKv(async store=>{
  assert.equal(mails.length,1,'Desk recording does not send supplier messages');
  console.log('PASS sourcing desk: staff-only, approved recipients, acknowledgement before approach, idempotency, future dates and missing-price comparison gate');
  const pendingReceiptKey=`rfp:${before.project_id}:proposal-receipt:${proposal.id}`;const pendingReceipt=store.peekJson<{payload:string;review:unknown}>(pendingReceiptKey)!;store.command(['SET',pendingReceiptKey,JSON.stringify({...pendingReceipt,review:null})]);assert.equal((await proposalPost({...proposal,vendor:'Untrusted submitted name'},deskCookie)).status,200,'Interrupted receipt recovers existing review');assert.equal((await (await privateProject.GET(scopedRequest,ctx)).json()).reviews.length,1,'Recovery does not duplicate reviews');
+ const unchangedProject=(await rfpStore.getProject(before.project_id))!;
+ await rfpStore.saveProject({...unchangedProject,buyer:{...unchangedProject.buyer,site_count:11}});
+ const changedRead=await (await privateProject.GET(scopedRequest,ctx)).json();assert.equal(changedRead.feed.length,0);assert.equal(changedRead.previous_feed.length,1);assert.equal(changedRead.reviews.length,0,'Previous-scope review cannot appear current');
+ await rfpStore.saveProject(unchangedProject);
  const documentRoute=await import('../src/app/api/sourcing/projects/[id]/document/route');const draft=await documentRoute.GET(scopedRequest,ctx);assert.equal(draft.status,200);assert.match(await draft.text(),/private draft/);
  const outcomeEvents=store.command(['LRANGE','marketplace:funnel:events',0,-1]) as string[];
  const projectEvents=outcomeEvents.map(x=>JSON.parse(x)).filter(x=>x.project_id===before.project_id);

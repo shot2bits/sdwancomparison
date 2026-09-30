@@ -224,7 +224,7 @@ export function CookieBanner() {
         </div>
         <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
           <p className="mb-4 text-sm text-zinc-600">
-            Choose which categories of cookies Netify may use. You can change this any time using the Manage cookies link in the footer. For the full list of cookies and providers, see the{' '}
+            Choose which categories of cookies Netify may use. You can change this any time using the Cookie preferences control. For the full list of cookies and providers, see the{' '}
             <Link
               href="https://netify.co.uk/cookie-policy/"
               className="font-medium text-amber-700 underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600"

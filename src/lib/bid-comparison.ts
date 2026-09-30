@@ -8,6 +8,7 @@ export type ComparableBid = {
   unit_note: string;
   notes: string;
   created: number;
+  evidence_urls: string[];
 };
 /** Keep distinct charging bases and currencies separate. A missing figure is not zero. */
 export function comparableBidGroups(feed: FeedItem[]) {
@@ -33,6 +34,7 @@ export function comparableBidGroups(feed: FeedItem[]) {
         unit_note: basis,
         notes: p.notes,
         created: f.created,
+        evidence_urls: (f.links??[]).filter(url=>{try{return new URL(url).protocol==='https:';}catch{return false;}}),
       });
   }
   const groups = new Map<string, ComparableBid[]>();

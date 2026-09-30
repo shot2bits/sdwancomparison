@@ -1,3 +1,4 @@
+import {sourcingScopeHash,currentSourcingProposals} from "@/lib/sourcing-proposal-scope";
 import {recordMarketplaceFunnelEvent} from "@/lib/marketplace-funnel";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { z } from "zod";
@@ -11,7 +12,7 @@ import {
   listResponses,
   saveResponse,
 } from "@/lib/rfp-store";
-import { circuitLock } from "@/lib/circuit-store";
+import { circuitLock, CircuitError } from "@/lib/circuit-store";
 import { listReviews } from "@/lib/agent-store";
 import { reviewBid } from "@/lib/bid-review";
 import {
@@ -25,13 +26,14 @@ type Ctx = { params: Promise<{ id: string }> };
 const Proposal = z
   .object({
     id: z.string().uuid(),
+    scope_hash: z.string().regex(/^[a-f0-9]{64}$/),
     vendor_slug: z.string().min(1),
     vendor: z.string().min(1).max(200),
     answers: z.record(z.string(), z.string().max(20000)),
     pricing: PricingSchema.extend({
       currency: z.string().regex(/^[A-Z]{3}$/),
       notes: z.string().max(12000),
-      unit_note: z.string().min(1).max(2000),
+      unit_note: z.string().trim().min(1).max(2000),
     }),
     evidence_url: z.url().refine((s) => s.startsWith("https://")),
     supplier_confirmed: z.literal(true),
@@ -56,8 +58,10 @@ export async function GET(req: Request, ctx: Ctx) {
       listResponses(id),
       listReviews(id),
     ]);
+    const scoped=await currentSourcingProposals(p,feed??[]);
+    const currentIds=new Set(scoped.current.map(f=>f.id));
     return Response.json(
-      { project: publicProject(p), feed: feed ?? [], responses, reviews },
+      { project: publicProject(p), scope_hash:scoped.scope_hash, feed:scoped.current, previous_feed:scoped.previous, responses:responses.filter(r=>currentIds.has(r.id)), reviews:reviews.filter(r=>currentIds.has(r.response_id)) },
       { headers },
     );
   } catch {
@@ -109,13 +113,14 @@ export async function POST(req: Request, ctx: Ctx) {
       const feed =
         (await kvGetJson<FeedItem[]>(`rfp:${id}:sourcing-pricing`)) ?? [];
       const receiptKey = `rfp:${id}:proposal-receipt:${b.id}`;
-      const receipt = await kvGetJson<{ payload: string; review: unknown }>(
+      const receipt = await kvGetJson<{ payload: string; review: unknown; scope_hash?: string }>(
         receiptKey,
       );
       if (receipt && receipt.payload !== JSON.stringify(b))
         throw Error("Proposal identifier already used");
       if (receipt?.review)
         return { project_id: id, review: receipt.review, replayed: true };
+      if(b.scope_hash!==sourcingScopeHash(p))throw new CircuitError("Requirements changed. Reload this project and confirm the supplier proposal answers the current requirement before recording it.",409);
       const vendor = (await getLiveShortlistDataset()).vendors.find(
         (v) => v.slug === b.vendor_slug,
       );
@@ -124,6 +129,7 @@ export async function POST(req: Request, ctx: Ctx) {
       if (!receipt)
         await kvSetJson(receiptKey, {
           payload: JSON.stringify(b),
+          scope_hash:b.scope_hash,
           review: null,
         });
       const response = await saveResponse({
@@ -159,6 +165,7 @@ export async function POST(req: Request, ctx: Ctx) {
         : await reviewBid(p, response, null, (await listResponses(id)).length);
       await kvSetJson(receiptKey, {
         payload: JSON.stringify(b),
+          scope_hash:b.scope_hash,
         review: reviewed.review,
       });
       return { project_id: id, review: reviewed.review };
@@ -169,11 +176,11 @@ export async function POST(req: Request, ctx: Ctx) {
     return Response.json(
       {
         error:
-          e instanceof z.ZodError
+          e instanceof CircuitError ? e.message : e instanceof z.ZodError
             ? "Check proposal fields and supplier confirmation."
             : "Unable to record this proposal. Check the approved provider and proposal reference before retrying.",
       },
-      { status: 422, headers },
+      { status: e instanceof CircuitError ? e.status : 422, headers },
     );
   }
 }

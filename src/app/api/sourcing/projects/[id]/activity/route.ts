@@ -1,3 +1,4 @@
+import {currentSourcingProposals} from '@/lib/sourcing-proposal-scope';
 import {z} from 'zod';
 import {sessionFromRequest} from '@/lib/auth';
 import {getProject,kvGetJson,kvSetJson} from '@/lib/rfp-store';
@@ -36,7 +37,7 @@ export async function POST(req:Request,ctx:Ctx){
    if(b.stage==='supplier_approached'&&!items.some(x=>x.stage==='introduction_acknowledged'&&x.supplier_slug===b.supplier_slug&&Date.parse(x.occurred_at)<=Date.parse(b.occurred_at)))throw Error('Introduction acknowledgement required before approach');
    if(b.stage==='comparable_set_ready'){
     const feed=await kvGetJson<FeedItem[]>(`rfp:${id}:sourcing-pricing`)??[];
-    if(![...comparableBidGroups(feed).values()].some(group=>new Set(group.filter(q=>q.amount!==null).map(q=>q.slug??q.supplier)).size>=2))throw Error('Two priced supplier proposals on one basis required');
+    if(![...comparableBidGroups((await currentSourcingProposals(p!,feed)).current).values()].some(group=>new Set(group.filter(q=>q.amount!==null).map(q=>q.slug??q.supplier)).size>=2))throw Error('Two priced supplier proposals on one basis required');
    }
    if(items.length>=1000)throw Error('Activity limit reached');
    const next=[...items,{...b,recorded_at:new Date().toISOString(),recorded_by:session.email}];

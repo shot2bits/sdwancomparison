@@ -11,6 +11,7 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
   const [view, setView] = useState("rfp"),
     [data, setData] = useState<{
       feed: FeedItem[];
+      previous_feed: FeedItem[];
       reviews: BidReview[];
     } | null>(null),
     [error, setError] = useState("");
@@ -114,6 +115,7 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
           <h2>Written proposals on this project</h2>
           <button onClick={() => void refresh()}>Refresh responses</button>
           <BidComparison feed={data.feed} />
+          {!!data.previous_feed?.length&&<details><summary>{data.previous_feed.length} earlier or unbound proposals — excluded from the current comparison</summary><p>Requirements changed or the original scope was not recorded. Ask the supplier to reconfirm before relying on these prices.</p><BidComparison feed={data.previous_feed}/></details>}
           {data.reviews.map((r) => (
             <article key={r.id}>
               <h3>{r.vendor}: evidence review</h3>
