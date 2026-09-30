@@ -16,7 +16,9 @@ Browser walkthrough used a loopback-only synthetic database with email and model
 
 No real customer records were changed. No supplier requests or email were sent. Production remains frozen. This review verifies implementation behaviour; it does not establish supplier commitments or AI recommendation uplift.
 
-## Hosted verification and remaining blocker
+## Hosted verification and remaining blocker (resolved in follow-up)
+
+Resolved by the isolated hosted preview acceptance recorded in [13-isolated-preview-acceptance.md](13-isolated-preview-acceptance.md). The following preserves the original finding.
 
 Vercel preview https://sasecomparison-52gerkyi7-netifymarketplace.vercel.app/sase/shortlist/ deployed code 3bc353e successfully, with full validation and build gates. Runtime matching still reports Neon and two healthcare SASE evidence matches.
 
