@@ -257,12 +257,12 @@ PASS  16.1: architecture has a traceable edge touching the identity node  ->  [{
 PASS  16.1: summary names the voice/Teams Phone requirement  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 supplier requirements are ready for vendors to answer.
 PASS  16.1: summary names the patient-facing application  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 supplier requirements are ready for vendors to answer.
 PASS  16.1: summary names Azure  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 supplier requirements are ready for vendors to answer.
-PASS  16.1: voice continuity clause generated  ->  
-PASS  16.1: application resilience clause generated  ->  
-PASS  16.1: Entra-aware ZTNA clause generated  ->  
-PASS  16.1: DLP clause generated  ->  
-PASS  16.1: fully managed / 24/7 service clause generated  ->  
-PASS  16.1: April 2027 dated transition clause generated  ->  
+PASS  16.1: voice continuity clause generated  ->
+PASS  16.1: application resilience clause generated  ->
+PASS  16.1: Entra-aware ZTNA clause generated  ->
+PASS  16.1: DLP clause generated  ->
+PASS  16.1: fully managed / 24/7 service clause generated  ->
+PASS  16.1: April 2027 dated transition clause generated  ->
 PASS  16.1: voice-continuity clause specifies required evidence  ->  ["Failover time (seconds)","Call-survival test evidence"]
 PASS  16.1: voice-continuity clause has an explicit mandatory/scored classification  ->  mandatory=true
 PASS  16.1: application-resilience clause specifies required evidence  ->  ["Application availability target","Failover test evidence"]
@@ -288,27 +288,27 @@ PASS  16.2: the change set explicitly names the DLP clause as removed  ->  ["SEC
 PASS  16.2: the operating model changes to co-managed  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
 PASS  16.2: 24/7 incident support is kept  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
 PASS  16.2: the change set records the managed-service clause as updated (not silently replaced)  ->  ["OPS-a2e5cbe3"]
-PASS  16.2: unrelated voice-continuity clause survives the correction  ->  
-PASS  16.2: unrelated application-resilience clause survives the correction  ->  
-PASS  16.2: unrelated identity-aware-ztna clause survives the correction  ->  
+PASS  16.2: unrelated voice-continuity clause survives the correction  ->
+PASS  16.2: unrelated application-resilience clause survives the correction  ->
+PASS  16.2: unrelated identity-aware-ztna clause survives the correction  ->
 PASS  16.2: the document version increments exactly once  ->  before=1 after=2
 PASS  16.2: the change ribbon distinguishes removals from updates in the same compile  ->  removed=["SEC-693021ca"] updated=["OPS-a2e5cbe3"]
 PASS  16.2 Prompt B: evaluation categories total exactly 100  ->  total=100
-PASS  16.3: a data-residency clause is generated  ->  
+PASS  16.3: a data-residency clause is generated  ->
 PASS  16.3: the exact buyer wording is retained verbatim  ->  quote=No patient-identifiable data may leave the UK.
 PASS  16.3: the clause is attributed to buyer provenance  ->  origin=buyer
 PASS  16.3: supplier evidence is requested  ->  ["Data-flow diagram","Sub-processor list and locations"]
 PASS  16.3: the compiler does not invent a statute or certification  ->  Data residency constraint stated verbatim by the buyer: "No patient-identifiable data may leave the UK."
 PASS  16.3: the legal interpretation is recorded as an open decision, not asserted as fact  ->  ["OD-data-residency-legal-basis","OD-timeline-unstated"]
 PASS  16.4: no mandatory gate is invented while the operating model conflicts  ->  gates=[]
-PASS  16.4: a visible conflict/open decision is generated  ->  
+PASS  16.4: a visible conflict/open decision is generated  ->
 PASS  16.4: the conflict decision names its reason  ->  The service must be fully managed, but our team must retain sole operational control over all policy changes.
 PASS  16.4: the conflicted managed-service clause is not silently made mandatory  ->  mandatory=false
 PASS  16.4 Prompt D: evaluation categories total exactly 100  ->  total=100
 PASS  14.5: Deterministic -- the same normalized inputs produce byte-identical documents  ->  compared two independent compiles of the same input
-PASS  14.5/Reversible: DLP clause present after it is stated  ->  
-PASS  14.5/Reversible: DLP clause removed after "Remove DLP."  ->  
-PASS  14.5/Reversible: DLP clause resurrects once the buyer restates it in their own words  ->  
+PASS  14.5/Reversible: DLP clause present after it is stated  ->
+PASS  14.5/Reversible: DLP clause removed after "Remove DLP."  ->
+PASS  14.5/Reversible: DLP clause resurrects once the buyer restates it in their own words  ->
 PASS  14.5/Conservative: a bare, non-obligatory mention is never marked mandatory  ->  {"section":"identity","statement":"Identity-aware ZTNA using the buyer's stated identity provider (Entra ID) for access decisions.","supplierResponse":["Describe your ZTNA integration with Entra ID, including device-posture enforcement.","State how a policy change in Entra ID propagates to network access decisions."],"evidence":["Device-posture evidence","Entra ID integration test results"],"acceptanceTest":"Access is denied when device posture fails an Entra-defined compliance policy, evidenced by a live or recorded test.","mandatory":false,"sourceFactIds":[],"origin":"buyer","reason":"The buyer stated Entra ID as the identity provider and required ZTNA.","quote":"We use Entra ID and Azure. ZTNA is available as an option.","sourceTurnIds":[],"sourceNotedIds":[],"templateKey":"identity:entra-ztna","templateId":"identity-aware-ztna","id":"ID-3331f8dc","weight":3}
 PASS  14.5/Balanced: an empty document: evaluation categories total exactly 100  ->  total=100
 PASS  14.5: an empty document compiles with zero clauses, not an error  ->  clauses=0
@@ -320,11 +320,11 @@ PASS  Item 1/insertion-before: DLP alone compiles with a well-formed immutable i
 PASS  Item 1/history-free: a totally independent compile (no shared history whatsoever) of the SAME templateKey produces the IDENTICAL id  ->  chained=SEC-693021ca independent=SEC-693021ca
 PASS  Item 1/insertion-before: adding an alphabetically-earlier clause does NOT change the surviving DLP clause's id  ->  dlp id before=SEC-693021ca after=SEC-693021ca
 PASS  Item 1/insertion-before: the new residency clause gets its own well-formed, distinct id, independent of insertion order  ->  id=SEC-e83fb756
-PASS  Item 1/removal-before: DLP is gone after "Remove DLP."  ->  
+PASS  Item 1/removal-before: DLP is gone after "Remove DLP."  ->
 PASS  Item 1/removal-before: the surviving residency clause retains EXACTLY the same id after an unrelated removal  ->  before=SEC-e83fb756 after=SEC-e83fb756
 PASS  Item 1/THE ROBERT REPRODUCTION: recompiling the identical post-removal state with previousDocument=null (a genuine reload) does NOT renumber the surviving residency clause -- it keeps the exact same id an in-session recompile would  ->  mid-session id=SEC-e83fb756 previousDocument=null id=SEC-e83fb756
-PASS  Item 1/THE ROBERT REPRODUCTION: DLP also stays correctly removed after the previousDocument=null recompile (not resurrected by the reload itself)  ->  
-PASS  Item 1/removed-id-not-reassigned: the ISO 27001 compliance clause compiles  ->  
+PASS  Item 1/THE ROBERT REPRODUCTION: DLP also stays correctly removed after the previousDocument=null recompile (not resurrected by the reload itself)  ->
+PASS  Item 1/removed-id-not-reassigned: the ISO 27001 compliance clause compiles  ->
 PASS  Item 1/removed-id-not-reassigned: the new ISO 27001 clause does NOT inherit DLP's old id (or residency's id)  ->  iso id=SEC-138dd579 dlp(retired)=SEC-693021ca residency=SEC-e83fb756
 PASS  Item 1/resurrection: DLP resurrects with EXACTLY its original id, not a new one and not a collision  ->  original=SEC-693021ca resurrected=SEC-693021ca residency=SEC-e83fb756 iso=SEC-138dd579
 PASS  Item 1: all three surviving security-section clauses carry three DISTINCT ids -- no collision anywhere in this scenario  ->  ids=["SEC-693021ca","SEC-e83fb756","SEC-138dd579"]
@@ -354,9 +354,9 @@ PASS  Item 3/pure: "keep Azure" still classifies as keepName  ->  {"kind":"keepN
 PASS  Item 3/THE FIX: the exact Section 16.2 correction prompt is NOT classified as a drop command (falls through to ordinary procurement content)  ->  parsed=null
 PASS  Item 3/pure: "Remove DLP" ALONE (no trailing correction) still classifies as dropName  ->  {"kind":"dropName","name":"dlp"}
 PASS  Items 2+3: create with the Healthcare/Ethernet/residency turn succeeds through the real route  ->  status=200 error=undefined
-PASS  Items 2+3/before-save baseline: network-architecture-scope compiles from the live session  ->  
-PASS  Items 2+3/before-save baseline: legacy-circuit-coexistence compiles from the live session  ->  
-PASS  Items 2+3/before-save baseline: uk-data-residency compiles from the live session  ->  
+PASS  Items 2+3/before-save baseline: network-architecture-scope compiles from the live session  ->
+PASS  Items 2+3/before-save baseline: legacy-circuit-coexistence compiles from the live session  ->
+PASS  Items 2+3/before-save baseline: uk-data-residency compiles from the live session  ->
 PASS  Items 2+3: resume recovers source_ledger and requirementBase via the real resumeStateFromProject()  ->  resumeState={"sourceLedger":[{"id":"canvas_t1","text":"UK 20 site Healthcare business requires SD-WAN and full SASE. We have 200 remote users. We also have a legacy app that requires a point to point Ethernet private circuit. No patient-identifiable data may leave the UK.","at":1000,"via":"typed"}],"requirementBase":{"organisation":{"sector":"Healthcare & pharma","regions":["uk"]},"estate":{"remoteUsers":200,"sites":20,"existingSecurity":["Defender P2"]},"drivers":["renewal"],"constraints":{"complianceRequirements":["iso27001"],"inHouseSocCapacity":"business_hours"}}}
 PASS  Item 2: the reloaded source_ledger carries the buyer's exact original turn verbatim  ->  [{"id":"canvas_t1","text":"UK 20 site Healthcare business requires SD-WAN and full SASE. We have 200 remote users. We also have a legacy app that requires a point to point Ethernet private circuit. No patient-identifiable data may leave the UK.","at":1000,"via":"typed"}]
 PASS  Item 2/durability: network-architecture-scope survives reopen -- BYTE-EQUIVALENT statement, quote and mandatory classification, with receipts=[] (only source_ledger drove this)  ->  before={"statement":"Network/security architecture scope stated by the buyer (Healthcare & pharma, 20 sites): \"UK 20 site Healthcare business requires SD-WAN and full SASE.\"","quote":"UK 20 site Healthcare business requires SD-WAN and full SASE."} after={"statement":"Network/security architecture scope stated by the buyer (Healthcare & pharma, 20 sites): \"UK 20 site Healthcare business requires SD-WAN and full SASE.\"","quote":"UK 20 site Healthcare business requires SD-WAN and full SASE."}
@@ -369,32 +369,32 @@ PASS  Item 1+2/stable ids across reopen: legacy-circuit-coexistence keeps the SA
 PASS  Item 1/THE ROBERT REPRODUCTION, applied to legacy-circuit-coexistence: previousDocument=null (a genuine reload) and previousDocument=beforeDoc (an in-session recompile) produce the IDENTICAL id -- previousDocument is now OPTIONAL for stability, not required  ->  previousDocument=null id=NET-80af8f52 previousDocument=beforeDoc id=NET-80af8f52
 PASS  Item 1+2/stable ids across reopen: uk-data-residency keeps the SAME public id after reopen, WITH a previousDocument supplied (in-session recompile) -- now merely a confirmation, no longer a requirement, since identity is history-free  ->  before=SEC-e83fb756 after=SEC-e83fb756
 PASS  Item 1/THE ROBERT REPRODUCTION, applied to uk-data-residency: previousDocument=null (a genuine reload) and previousDocument=beforeDoc (an in-session recompile) produce the IDENTICAL id -- previousDocument is now OPTIONAL for stability, not required  ->  previousDocument=null id=SEC-e83fb756 previousDocument=beforeDoc id=SEC-e83fb756
-PASS  Item 2: network-architecture-scope (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->  
-PASS  Item 2: legacy-circuit-coexistence (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->  
-PASS  Item 2: uk-data-residency (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->  
-PASS  Item 2: the NEW turn's own clause (identity-aware-ztna) also compiles  ->  
-PASS  Item 2: the NEW turn's own clause (dlp-coverage) also compiles  ->  
+PASS  Item 2: network-architecture-scope (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->
+PASS  Item 2: legacy-circuit-coexistence (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->
+PASS  Item 2: uk-data-residency (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->
+PASS  Item 2: the NEW turn's own clause (identity-aware-ztna) also compiles  ->
+PASS  Item 2: the NEW turn's own clause (dlp-coverage) also compiles  ->
 PASS  Item 2: re-deriving from the SAME source_ledger twice is byte-identical -- no second store, no hidden state, nothing to fall out of sync  ->  compared two independent derivations of the same ledger
 PASS  Item 3/route: baseline managed-service clause states fully managed  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
-PASS  Item 3/route: the exact correction, re-checked at THIS call site, is not a drop command  ->  
-PASS  Item 3/route: DLP is removed by the correction, reached through the real command-boundary + extraction pipeline  ->  
+PASS  Item 3/route: the exact correction, re-checked at THIS call site, is not a drop command  ->
+PASS  Item 3/route: DLP is removed by the correction, reached through the real command-boundary + extraction pipeline  ->
 PASS  Item 3/route: fully managed becomes co-managed  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
 PASS  Item 3/route: 24/7 incident support is kept  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
 PASS  Item 3/route: the correction saves through the REAL rescope route  ->  rescoped={"rescoped":true,"verdict_version":2,"artefact_version":2,"replaced_edits":false,"open_gaps":3,"verdict":{"rulebookVersion":"SEC-RULES-2026.1","generatedAt":"2026-09-30T22:44:06.450Z","inputDigest":"9212ac9c2ab9e7196e5fdde987ce33eef94c285bcee24b49965752e0b727037f","capabilities":[{"id":"endpoint","needed":"required","reasoning":"Devices exist in every operating business; scale is needed before a route can be recommended (G-1).","evidence":[{"source":"Netify BT Endpoint Threat Protect claim set (public claims, reviewed 20 July 2026)","claim":"NGAV endpoint protection is the baseline control."}],"route":"either","firedRules":["END-1","G-1"]},{"id":"mdr_soc","needed":"not_indicated","reasoning":"You already run a 24/7 SOC; buying another one is waste. SIEM tooling to support it is the better question.","evidence":[{"source":"Existing-control precedence: never replace a graded control without a consolidation driver","claim":"Existing capability precedence."}],"route":null,"firedRules":["MDR-4"]},{"id":"sse","needed":"not_indicated","reasoning":"No declared cloud estate; SSE has nothing to protect here yet.","evidence":[],"route":null,"firedRules":[]},{"id":"siem_logging","needed":"recommended","reasoning":"In-house security operations need the tooling to see with.","evidence":[{"source":"Netify question bank v2026.1, security and monitoring sections","claim":"Monitoring and reporting obligations in the security sections."},{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"SIEM vendor shortlists are compiled per project; grading depth is honest."}],"route":"marketplace_service","routeDetail":"Managed SIEM shortlist compiled with you; Netify's grading is deepest in network security, so confidence is capped (SIEM-2)","firedRules":["SIEM-1","SIEM-2"]},{"id":"managed_firewall","needed":"not_indicated","reasoning":"No premises: there is no perimeter to manage, and buying one would obsolete immediately. The spend belongs in SSE.","evidence":[{"source":"Netify marketplace vendor evidence grades (SSE, SASE, MDR depth)","claim":"Cloud-delivered security replaces the premises perimeter in cloud-first estates."}],"route":null,"firedRules":["FW-4"]},{"id":"awareness","needed":"required","reasoning":"Incident or compliance context makes staff training a required control, not a nice-to-have.","evidence":[{"source":"Netify threat coverage matrix (the Threat Protect advisor rulebook)","claim":"Staff phishing partly mitigated by tooling; Security Awareness Training is the BT route."}],"route":"bt_product","routeDetail":"BT Security Awareness Training, or an equivalent; this never blocks a path","firedRules":["AWA-1","AWA-2"]},{"id":"email_security","needed":"recommended","reasoning":"Incident context makes email controls relevant. Baseline: native Microsoft 365 or Google controls plus awareness training. For a dedicated gateway, Netify does not maintain graded supplier evidence and declines to recommend blind.","evidence":[{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"We recommend only what we can evaluate."}],"route":"out_of_scope","routeDetail":"Native platform controls plus awareness; dedicated gateways via your MSP or direct (EML-2)","firedRules":["EML-1","EML-2"]},{"id":"backup_resilience","needed":"required","reasoning":"Recovery capability decides ransomware outcomes; this is a prerequisite, stated plainly. Netify sells nothing here; it is carried into any RFP as a buyer-side requirement.","evidence":[{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"Outside Netify's graded categories; flagged honestly, never sold."}],"route":"out_of_scope","routeDetail":"Buyer-side requirement; carried into generated RFP documents as a stated line (BCK-2)","firedRules":["BCK-1","BCK-2"]}],"serviceModel":"co_managed","pathRecommendation":null,"againstInterest":[{"capabilityId":"mdr_soc","routeDenied":"marketplace_service","statement":"You have a 24/7 SOC; a managed detection service would duplicate it. Not recommended.","evidence":"Existing-control precedence: never replace a graded control without a consolidation driver"},{"capabilityId":"managed_firewall","routeDenied":"bt_product","statement":"No premises and a cloud-first estate: do not buy firewall management you would immediately obsolete; put the budget into SSE.","evidence":"Netify marketplace vendor evidence grades (SSE, SASE, MDR depth)"},{"capabilityId":"email_security","routeDenied":"marketplace_service","statement":"Netify does not maintain graded evidence for dedicated email security vendors, so we decline the category rather than recommend blind. Source via your MSP or direct.","evidence":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project"}],"assumptions":["No existing controls declared: keep-what-you-have rules are suspended (G-4)."],"gaps":[{"field":"estate.existingSecurity","whyItMatters":"Existing graded controls change verdicts from buy to keep.","question":"What security tooling do you already run (for example Defender P2, CrowdStrike, an MSP service)?"},{"field":"estate.users","whyItMatters":"Scale decides the product-versus-managed-service boundary.","question":"How many staff, and roughly how many computers, mobiles and servers?"},{"field":"constraints.complianceRequirements","whyItMatters":"Compliance regimes decide logging and evidence obligations (G-3 caps SIEM without it).","question":"Which compliance regimes apply (ISO 27001, PCI DSS, Cyber Essentials Plus, FCA, NHS DSPT, none)?"}],"summary":{"recommended":["endpoint","awareness","backup_resilience"],"conditional":["siem_logging","email_security"],"not_recommended":[{"capabilityId":"mdr_soc","reason":"You already run a 24/7 SOC; buying another one is waste. SIEM tooling to support it is the better question.","alternative":"Support the existing SOC with SIEM tooling instead."},{"capabilityId":"sse","reason":"No declared cloud estate; SSE has nothing to protect here yet."},{"capabilityId":"managed_firewall","reason":"No premises: there is no perimeter to manage, and buying one would obsolete immediately. The spend belongs in SSE.","alternative":"Allocate the spend to SSE instead."}]},"confidence":"medium","nextSteps":[{"action":"Product path: BT Endpoint Threat Protect can be quoted and ordered, with a signed contract, on the page.","page":"https://netify.co.uk/bt-endpoint-threat-protect/"}]},"project_path":"/project/rfp_muoozqgg89isv6","envelope_revision":0}
 PASS  Item 3/route: both turns (original + correction) are durable in source_ledger after the real save  ->  ["Fully managed with 24/7 support, live by April 2027.","Remove DLP. Make the service co-managed instead of fully managed, but keep 24/7 incident support."]
-PASS  Item 3/route: after a REAL save+reopen+recompile, DLP is STILL removed (the correction survived)  ->  
+PASS  Item 3/route: after a REAL save+reopen+recompile, DLP is STILL removed (the correction survived)  ->
 PASS  Item 3/route: after reopen, the managed-service clause still reads co-managed with 24/7 incident support  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
 PASS  Round 1-9 preservation: resolveDropTarget('Azure') (the real drop-command matcher, unmodified by this correction) still resolves a live fact  ->  {"kind":"fact","fact":{"id":"estate.cloud:azure","path":"estate.cloud","value":"azure","provenance":"stated","quote":"Azure","struck":false,"source":"extract","cycle":1}}
-PASS  Item 3/THE ROBERT REPRODUCTION: "We require DLP." / "Remove DLP." / "We require DLP." -- the final, byte-identical restatement resurrects DLP (it is a genuinely distinct source-turn occurrence, not a duplicate to be discarded)  ->  
+PASS  Item 3/THE ROBERT REPRODUCTION: "We require DLP." / "Remove DLP." / "We require DLP." -- the final, byte-identical restatement resurrects DLP (it is a genuinely distinct source-turn occurrence, not a duplicate to be discarded)  ->
 PASS  Item 3: the resurrected DLP clause's provenance names the actual restating source-turn id (dlp_t3), not just copied quote text  ->  ["dlp_t1","dlp_t2","dlp_t3"]
-PASS  Item 3: replaying the identical three-turn ledger twice is byte-identical and idempotent  ->  
+PASS  Item 3: replaying the identical three-turn ledger twice is byte-identical and idempotent  ->
 PASS  Item 3/identical repeat, no removal: the SAME requirement stated by two distinct source turns produces exactly ONE clause, not two duplicates  ->  count=1
 PASS  Item 3/identical repeat, no removal: the ONE emitted clause's provenance carries BOTH occurrences' source-turn ids  ->  ["rep_t1","rep_t2"]
 PASS  Item 3/duplicate delivery: the SAME source-turn id delivered twice collapses to ONE occurrence and ONE clause, with sourceTurnIds carrying the id only once  ->  count=1 sourceTurnIds=["dup_t1"]
-PASS  Item 3/save-reopen: the removal saves through the real rescope route  ->  
-PASS  Item 3/save-reopen: the byte-identical restatement saves through the real rescope route as its own distinct turn  ->  
+PASS  Item 3/save-reopen: the removal saves through the real rescope route  ->
+PASS  Item 3/save-reopen: the byte-identical restatement saves through the real rescope route as its own distinct turn  ->
 PASS  Item 3/save-reopen: all three turns (state, remove, byte-identical restate) are durable in source_ledger  ->  ["We require DLP, UK 20 site Healthcare business.","Remove DLP.","We require DLP, UK 20 site Healthcare business."]
-PASS  Item 3/save-reopen: after a REAL save+reopen+recompile through three separate rescope calls, DLP is resurrected (the byte-identical restatement survived as its own occurrence, not discarded)  ->  
+PASS  Item 3/save-reopen: after a REAL save+reopen+recompile through three separate rescope calls, DLP is resurrected (the byte-identical restatement survived as its own occurrence, not discarded)  ->
 PASS  Item 4: a real RfiQuestionSet earns from deriveRfiQuestionSet() for this scenario  ->  canonicalCount=24
 PASS  Item 4/instrument gate: at instrument=sor, every supplier question is generated, none reused from the bank yet  ->  ["generated"]
 PASS  Item 4/instrument gate: readiness names the instrument state (SoR)  ->  ["7 testable requirements compiled.","Operating model stated: fully managed.","Delivery timeline stated.","Budget position not yet stated.","Every mandatory clause carries an acceptance test.","1 high-impact open decision remain.","Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."]
@@ -425,7 +425,7 @@ PASS  Item 4/list-value removal: nothing else is reported as added or updated  -
 PASS  Item 4/compiler-only clause addition: changeSet.clauses.added names the new DLP clause id, on a receipts-only change with facts held constant  ->  {"added":["SEC-693021ca"],"updated":[],"removed":[]}
 PASS  Item 4/compiler-only clause addition: changeSet.facts stays completely flat -- a clause-only change is never misreported as a fact change  ->  {"added":[],"updated":[],"removed":[]}
 PASS  Item 4/one prompt, one increment: the compiler-only clause addition (a receipts-only change) still bumps the version by EXACTLY one  ->  before=5 after=6
-PASS  Item 4/compiler-only clause removal, setup: DLP is now removed  ->  
+PASS  Item 4/compiler-only clause removal, setup: DLP is now removed  ->
 PASS  Item 4/compiler-only clause removal: changeSet.clauses.removed names the retracted DLP clause's own stable id  ->  {"added":[],"updated":[],"removed":["SEC-693021ca"]}
 PASS  Item 4/compiler-only clause removal: changeSet.facts stays completely flat again  ->  {"added":[],"updated":[],"removed":[]}
 PASS  Item 4/one prompt, one increment: the compiler-only clause removal also bumps the version by EXACTLY one  ->  before=6 after=7
@@ -436,45 +436,45 @@ PASS  Item 4/save-reopen, no artificial increment: reopening the SAME saved proj
 PASS  Item 4/save-reopen, no artificial increment: a THIRD reopen lands on the SAME version as the first and second -- version is a function of real change, not of reopen count or previousDocument availability  ->  version=1
 PASS  Item 1/THE ROBERT REPRODUCTION: "fully managed instead of co-managed" resolves to managed, not co_managed  ->  model=managed
 PASS  Item 1/THE ROBERT REPRODUCTION: "change from co-managed to fully managed" resolves to managed  ->  model=managed
-PASS  Item 1: "co-managed instead of fully managed" -> co_managed  ->  
-PASS  Item 1: "fully managed instead of co-managed" -> managed  ->  
-PASS  Item 1: "change from co-managed to fully managed" -> managed  ->  
-PASS  Item 1: "change from fully managed to co-managed" -> co_managed  ->  
-PASS  Item 1: "fully managed rather than co-managed" -> managed  ->  
-PASS  Item 1: "co-managed rather than fully managed" -> co_managed  ->  
-PASS  Item 1: separate chronological turns, co-managed then fully managed -> managed  ->  
-PASS  Item 1: separate chronological turns, fully managed then co-managed -> co_managed  ->  
-PASS  Item 1: an unrelated intervening turn between two directional corrections does not disrupt the LATER one winning  ->  
-PASS  Item 1: identical timestamps resolve by array position -- the LATER array entry wins  ->  
+PASS  Item 1: "co-managed instead of fully managed" -> co_managed  ->
+PASS  Item 1: "fully managed instead of co-managed" -> managed  ->
+PASS  Item 1: "change from co-managed to fully managed" -> managed  ->
+PASS  Item 1: "change from fully managed to co-managed" -> co_managed  ->
+PASS  Item 1: "fully managed rather than co-managed" -> managed  ->
+PASS  Item 1: "co-managed rather than fully managed" -> co_managed  ->
+PASS  Item 1: separate chronological turns, co-managed then fully managed -> managed  ->
+PASS  Item 1: separate chronological turns, fully managed then co-managed -> co_managed  ->
+PASS  Item 1: an unrelated intervening turn between two directional corrections does not disrupt the LATER one winning  ->
+PASS  Item 1: identical timestamps resolve by array position -- the LATER array entry wins  ->
 PASS  Item 1: two models with no directional correction language stays unresolved (model=null), surfaced as ambiguousText  ->  {"model":null,"sourceTurnId":null,"ambiguousText":"We might want fully managed or co-managed, no strong preference either way."}
-PASS  Item 1: the full compile surfaces the ambiguous-correction OpenDecision for two models with no directional language  ->  
+PASS  Item 1: the full compile surfaces the ambiguous-correction OpenDecision for two models with no directional language  ->
 PASS  Item 1: "remove co-managed" does not positively assert co_managed  ->  model=null
 PASS  Item 1: "no longer want co-managed" does not positively assert co_managed  ->  model=null
 PASS  Item 1: assert co-managed, then "Remove co-managed." with no replacement, unsets the model (result.model=null)  ->  {"model":null,"sourceTurnId":null,"ambiguousText":null}
-PASS  Item 1/removal without replacement, end to end: no managed-service clause is compiled once the model is unset (no stale assertion)  ->  
+PASS  Item 1/removal without replacement, end to end: no managed-service clause is compiled once the model is unset (no stale assertion)  ->
 PASS  Item 1/removal without replacement, end to end: the honest OD-operating-model-unstated decision fires -- the existing document contract, not a new mechanism  ->  ["OD-operating-model-unstated","OD-timeline-unstated"]
-PASS  Item 2: "24/7 support" -> true  ->  
+PASS  Item 2: "24/7 support" -> true  ->
 PASS  Item 2: "24/7 incident support" -> hours247=true and incidentSupport247=true  ->  {"hours247":true,"incidentSupport247":true,"sourceTurnId":"t1"}
 PASS  Item 2/THE ROBERT REPRODUCTION: "Support is not 24/7." -> false  ->  hours247=false
 PASS  Item 2/THE ROBERT REPRODUCTION: "We no longer need 24/7 support; business hours only." -> false  ->  hours247=false
-PASS  Item 2: "business hours only" -> false  ->  
-PASS  Item 2: "not 24/7; business hours only" -> false  ->  
-PASS  Item 2: 24/7 followed LATER by business-hours-only -> false  ->  
-PASS  Item 2: business-hours-only followed LATER by 24/7 -> true  ->  
-PASS  Item 2/save-reopen: the negation turn saves through the real rescope route  ->  
+PASS  Item 2: "business hours only" -> false  ->
+PASS  Item 2: "not 24/7; business hours only" -> false  ->
+PASS  Item 2: 24/7 followed LATER by business-hours-only -> false  ->
+PASS  Item 2: business-hours-only followed LATER by 24/7 -> true  ->
+PASS  Item 2/save-reopen: the negation turn saves through the real rescope route  ->
 PASS  Item 2/save-reopen: after a REAL save+reopen+recompile with previousDocument=null, the managed-service clause reads "with an agreed support model" (the negation survived), not 24/7  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
-PASS  Item 3/baseline: compiling with noted=[] produces no noted-selection clause -- THE BUG, confirmed present before the fix's own positive case  ->  
-PASS  Item 3/THE FIX: adding one noted item changes the compiled document -- a real clause is now emitted for it (was byte-identical before)  ->  
+PASS  Item 3/baseline: compiling with noted=[] produces no noted-selection clause -- THE BUG, confirmed present before the fix's own positive case  ->
+PASS  Item 3/THE FIX: adding one noted item changes the compiled document -- a real clause is now emitted for it (was byte-identical before)  ->
 PASS  Item 3: the noted clause's section is honoured and buyer provenance remains explicit  ->  {"section":"operations","origin":"buyer"}
 PASS  Item 3: the clause's templateKey is keyed by the noted item's own STABLE id, not array position or copied label text alone  ->  templateKey=noted:s-247
 PASS  Item 3: the change set reports the noted clause's addition  ->  {"added":["OPS-9ee3a489"],"updated":[],"removed":[]}
-PASS  Item 3: removing the noted item reverses the output -- the clause is gone  ->  
+PASS  Item 3: removing the noted item reverses the output -- the clause is gone  ->
 PASS  Item 3: the change set reports the noted clause's removal  ->  {"added":[],"updated":[],"removed":["OPS-9ee3a489"]}
-PASS  Item 3: an unchanged noted set is idempotent -- two independent compiles produce byte-identical output  ->  
+PASS  Item 3: an unchanged noted set is idempotent -- two independent compiles produce byte-identical output  ->
 PASS  Item 3: array reordering of the noted set does not change semantic identities -- the SAME two ids regardless of order  ->  {"idsAB":["OPS-11d58fca","OPS-9ee3a489"],"idsBA":["OPS-11d58fca","OPS-9ee3a489"]}
-PASS  Item 3/no-duplication, setup: the DLP clause compiles from the buyer's own words via the deterministic template  ->  
-PASS  Item 3/no-duplication: a noted item substantively covered by the DLP template's own clause does NOT emit a second, redundant clause  ->  
-PASS  Item 3/no-duplication: the original DLP template clause is still present, untouched by the suppressed duplicate  ->  
+PASS  Item 3/no-duplication, setup: the DLP clause compiles from the buyer's own words via the deterministic template  ->
+PASS  Item 3/no-duplication: a noted item substantively covered by the DLP template's own clause does NOT emit a second, redundant clause  ->
+PASS  Item 3/no-duplication: the original DLP template clause is still present, untouched by the suppressed duplicate  ->
 PASS  Item 4/THE ROBERT REPRODUCTION baseline: compiling an empty requirement gives title "Sourcing procurement", version 1  ->  title=Sourcing procurement version=1
 PASS  Item 4/THE ROBERT REPRODUCTION: the title genuinely changes with the sector  ->  before=Sourcing procurement after=Healthcare & pharma procurement
 PASS  Item 4/THE ROBERT REPRODUCTION, fixed: under the explicit revision contract, the version now advances even though facts/receipts alone were unchanged  ->  before=1 after=2
@@ -493,7 +493,7 @@ PASS  Item 4/invariant: noted-item edit -- a non-empty change set during an auth
 PASS  Item 4/invariant: requirement/timeline edit -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=false before=4 after=5
 PASS  Item 4/invariant: fact-only correction -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=true before=1 after=2
 PASS  Item 4/invariant: receipt-only change -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=true before=1 after=2
-PASS  Item 4/invariant: at least one authorised revision above produced a genuinely non-empty change set -- the invariant fixture is not vacuous  ->  
+PASS  Item 4/invariant: at least one authorised revision above produced a genuinely non-empty change set -- the invariant fixture is not vacuous  ->
 PASS  Item 4/save-reopen: a genuine reload (previousDocument=null) starts a fresh in-memory chain at version 1  ->  version=1
 PASS  Item 4/save-reopen: a SECOND independent reload also lands on version 1 -- no second persisted document was needed to preserve any counter across reloads  ->  version=1
 PASS  Item 1 (round 4): real noted id "twin-res-all" (real section "estate") does NOT fall into Additional requirements  ->  section=network
@@ -510,45 +510,45 @@ PASS  Item 1 (round 4): real noted id "twin-suppliers-ref" (real section "suppli
 PASS  Item 1 (round 4): real noted id "twin-suppliers-ref" lands in the correct target section per Robert's own mapping  ->  expected=supplier got=supplier
 PASS  Item 1 (round 4): a clicked selection (own=true) is honestly described as "selected", never as typed wording  ->  The buyer selected this from noted options; a structured field has not yet landed for it.
 PASS  Item 1 (round 4): a typed/extracted noted item (own unset) is worded distinctly as the buyer's own words, never claimed to be a click  ->  The buyer's own words state this; a structured field has not yet landed for it.
-PASS  Item 1 (round 4): neither provenance fabricates a verbatim buyer quote for a noted item -- quote stays null either way  ->  
-PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: the buyer's real 24x7-support UI selection visibly changes the compiled document (was byte-identical on 98bfa75)  ->  
+PASS  Item 1 (round 4): neither provenance fabricates a verbatim buyer quote for a noted item -- quote stays null either way  ->
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: the buyer's real 24x7-support UI selection visibly changes the compiled document (was byte-identical on 98bfa75)  ->
 PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION baseline: without the selection, the clause reads the generic "agreed support model"  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
 PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION fixed: with the selection, the managed-service clause reads "including 24/7 support"  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, including 24/7 support.
 PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: the managed-service clause carries a machine-readable sourceNotedIds citation, not just an internal templateKey  ->  ["twin-support-247"]
-PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: no redundant second "noted-selection" clause is created once the managed-service clause already represents the 24/7 selection (explicit template coverage, not generic word overlap)  ->  
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: no redundant second "noted-selection" clause is created once the managed-service clause already represents the 24/7 selection (explicit template coverage, not generic word overlap)  ->
 PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: with no operating model at all, the 24/7 selection still creates its own Operations requirement  ->  section=operations
 PASS  Item 2 (round 4)/THE REPRODUCTION: "We don't need 24/7 support." -> false  ->  got=false
 PASS  Item 2 (round 4)/THE REPRODUCTION: "24/7 support is not required." -> false  ->  got=false
 PASS  Item 2 (round 4)/THE REPRODUCTION: "Remove 24/7 support." -> false  ->  got=false
 PASS  Item 2 (round 4)/THE REPRODUCTION: negation AFTER the mention, separated by a comma/but -> false  ->  got=false
-PASS  Item 2 (round 4)/positive: "24/7 support required." stays true  ->  
-PASS  Item 2 (round 4)/positive: "24/7 support is required." stays true  ->  
-PASS  Item 2 (round 4)/positive: "24/7 incident support" (round 1-3 required fixture) stays true  ->  
-PASS  Item 2 (round 4)/negation after: "not available 24/7"  ->  
-PASS  Item 2 (round 4)/negation after: "never required"  ->  
-PASS  Item 2 (round 4)/negation before: "won't require 24/7"  ->  
-PASS  Item 2 (round 4)/removal before: "cancel the 24/7 support requirement"  ->  
-PASS  Item 2 (round 4)/clause scoping: an unrelated earlier clause with no negation cue does not suppress a later positive mention  ->  
-PASS  Item 2 (round 4)/clause scoping: a "not" in an EARLIER, unrelated clause does not falsely negate a later, plainly positive mention  ->  
-PASS  Item 2 (round 4)/correction order: 24/7 asserted, then LATER negated -> false  ->  
-PASS  Item 2 (round 4)/correction order: negated, then LATER asserted -> true  ->  
+PASS  Item 2 (round 4)/positive: "24/7 support required." stays true  ->
+PASS  Item 2 (round 4)/positive: "24/7 support is required." stays true  ->
+PASS  Item 2 (round 4)/positive: "24/7 incident support" (round 1-3 required fixture) stays true  ->
+PASS  Item 2 (round 4)/negation after: "not available 24/7"  ->
+PASS  Item 2 (round 4)/negation after: "never required"  ->
+PASS  Item 2 (round 4)/negation before: "won't require 24/7"  ->
+PASS  Item 2 (round 4)/removal before: "cancel the 24/7 support requirement"  ->
+PASS  Item 2 (round 4)/clause scoping: an unrelated earlier clause with no negation cue does not suppress a later positive mention  ->
+PASS  Item 2 (round 4)/clause scoping: a "not" in an EARLIER, unrelated clause does not falsely negate a later, plainly positive mention  ->
+PASS  Item 2 (round 4)/correction order: 24/7 asserted, then LATER negated -> false  ->
+PASS  Item 2 (round 4)/correction order: negated, then LATER asserted -> true  ->
 PASS  Item 2 (round 4)/save-reopen: create with the mention-local negation turn succeeds through the real route  ->  status=200 error=undefined
 PASS  Item 2 (round 4)/save-reopen: after a REAL save+reopen+recompile with previousDocument=null, the mention-local negation survives ("with an agreed support model", not 24/7)  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
 PASS  Item 3 (round 4)/THE REPRODUCTION: "Do not remove the fully managed service." resolves to managed, never a removal  ->  got=managed
 PASS  Item 3 (round 4)/THE REPRODUCTION: a double negative via "without" resolves to managed, never null  ->  got=managed
 PASS  Item 3 (round 4)/THE REPRODUCTION: a negated old model followed by an asserted new model resolves to the new model, not ambiguous and not stale co_managed  ->  got=managed
 PASS  Item 3 (round 4): the SAME structure in the OPPOSITE order (asserted new model first, negated old model second) also resolves to the new model  ->  got=managed
-PASS  Item 3 (round 4)/regression: "co-managed instead of fully managed" still resolves to co_managed  ->  
-PASS  Item 3 (round 4)/regression: "fully managed instead of co-managed" still resolves to managed  ->  
-PASS  Item 3 (round 4)/regression: "change from co-managed to fully managed" still resolves to managed  ->  
-PASS  Item 3 (round 4)/regression: a genuine two-model contradiction with no structural marker stays an unresolved OpenDecision (never guessed by the new polarity check)  ->  
+PASS  Item 3 (round 4)/regression: "co-managed instead of fully managed" still resolves to co_managed  ->
+PASS  Item 3 (round 4)/regression: "fully managed instead of co-managed" still resolves to managed  ->
+PASS  Item 3 (round 4)/regression: "change from co-managed to fully managed" still resolves to managed  ->
+PASS  Item 3 (round 4)/regression: a genuine two-model contradiction with no structural marker stays an unresolved OpenDecision (never guessed by the new polarity check)  ->
 PASS  Item 3 (round 4)/double negative: "will not drop" also retains the model  ->  got=co_managed
 PASS  Item 3 (round 4)/double negative: "never cancel" also retains the model  ->  got=managed
-PASS  Item 3 (round 4)/regression: a genuine, unnegated removal still unsets the model  ->  
-PASS  Item 3 (round 4)/regression: "no longer want" (no outer negation) still unsets the model  ->  
+PASS  Item 3 (round 4)/regression: a genuine, unnegated removal still unsets the model  ->
+PASS  Item 3 (round 4)/regression: "no longer want" (no outer negation) still unsets the model  ->
 PASS  Item 3 (round 4): a double-negated removal of one model, alongside an asserted second model, is a genuine contradiction -- correctly left unresolved, never silently guessed  ->  got=null
 PASS  Item 3 (round 4)/end-to-end: the compiled managed-service clause states fully managed, not co-managed, from the single negated-then-asserted occurrence  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
-PASS  Item 4 (round 4): GovernedEvent's own type carries NO caller-asserted changedFactIds field at all -- the adapter always COMPUTES it from real factsBefore/factsAfter snapshots, so a caller cannot supply an untruthful claim even by accident  ->  
+PASS  Item 4 (round 4): GovernedEvent's own type carries NO caller-asserted changedFactIds field at all -- the adapter always COMPUTES it from real factsBefore/factsAfter snapshots, so a caller cannot supply an untruthful claim even by accident  ->
 PASS  Item 4 (round 4)/baseline: before any governed event, a fresh compile is version 1  ->  version=1
 PASS  Item 4 (round 4)/prompt cycle: a successful extraction event is accepted  ->  reason=applied
 PASS  Item 4 (round 4)/prompt cycle: one accepted governed event increments exactly once  ->  before=1 after=2
@@ -761,14 +761,14 @@ PASS  Prompt C: counts.decisions agrees with the Living document's own open-deci
 PASS  Prompt C: Evaluation category weights sum to exactly 100  ->  total=100
 PASS  Prompt C: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
 PASS  Prompt C: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
-PASS  Part A2 (rich wording): voice-continuity clause is generated  ->  
-PASS  Part A2 (rich wording): application-resilience clause is generated  ->  
-PASS  Part A2 (rich wording): identity-aware-ztna clause is generated  ->  
-PASS  Part A2 (rich wording): dlp-coverage clause is generated  ->  
-PASS  Part A2 (rich wording): managed-service-boundary clause is generated  ->  
-PASS  Part A2 (rich wording): dated-transition-plan clause is generated  ->  
-PASS  Part A2 (rich wording): uk-data-residency clause is generated  ->  
-PASS  Part A2 (rich wording): legacy-circuit-coexistence clause is generated  ->  
+PASS  Part A2 (rich wording): voice-continuity clause is generated  ->
+PASS  Part A2 (rich wording): application-resilience clause is generated  ->
+PASS  Part A2 (rich wording): identity-aware-ztna clause is generated  ->
+PASS  Part A2 (rich wording): dlp-coverage clause is generated  ->
+PASS  Part A2 (rich wording): managed-service-boundary clause is generated  ->
+PASS  Part A2 (rich wording): dated-transition-plan clause is generated  ->
+PASS  Part A2 (rich wording): uk-data-residency clause is generated  ->
+PASS  Part A2 (rich wording): legacy-circuit-coexistence clause is generated  ->
 PASS  Part A2: at least one clause carries buyer (green-dot) provenance  ->  ["buyer"]
 PASS  Part A2: clauses span at least 3 different sections (exercises the clause list's section grouping)  ->  ["network","security","identity","application","operations","project"]
 PASS  Part A2 (rich wording): counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=8 clauses.length=8
@@ -781,7 +781,7 @@ PASS  Part A2 (rich wording): every gate references a clause id that genuinely e
 PASS  Prompt D/THE CORRECTION: a visible conflict/open decision describing the single-supplier-vs-best-of-breed-security tension is created  ->  found=true
 PASS  Prompt D: the decision is flagged as a genuine conflict  ->  conflict=true
 PASS  Prompt D: the original buyer wording is retained visibly and verbatim in the decision's own conflictReason  ->  conflictReason=We want a single supplier but also require independent best-of-breed security controls.
-PASS  Prompt D: the decision is included in the document's own conflict-flagged decisions  ->  
+PASS  Prompt D: the decision is included in the document's own conflict-flagged decisions  ->
 PASS  Prompt D/THE CORRECTION: no invented mandatory 'unclassified' clause -- neither side of the conflict is made mandatory before the buyer decides  ->  []
 PASS  Prompt D/THE CORRECTION: no pass/fail gate is invented from the unresolved contradiction  ->  []
 PASS  Prompt D/THE CORRECTION: an unrelated deadline open decision (legitimately also present, since Prompt D alone states no deadline) never SUBSTITUTES for the conflict decision -- both can coexist, but the conflict decision itself is always present  ->  supplierStrategyDecision=true deadlineDecisionAlsoPresent=true
@@ -805,56 +805,56 @@ PASS  Part C/known-vector: templateKey "resilience:application" hashes to the EX
 PASS  Part C/known-vector: templateKey "application:voice-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-9b7bec5f expectedSuffix=9b7bec5f
 PASS  Part C/known-vector: templateKey "network:architecture-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=NET-4f3aa85d expectedSuffix=4f3aa85d
 PASS  Part C/known-vector: a genuine reload (previousDocument=null) reproduces the IDENTICAL clause id for the identical templateKey  ->  before=SEC-693021ca after=SEC-693021ca
-PASS  Part B: ProjectDesk.tsx imports the real compiler module  ->  
-PASS  Part B: ProjectDesk.tsx calls the real compileProcurementDocument()  ->  
-PASS  Part B: the compiler call is fed the desk's own live state variables (facts/requirement/verdict/noted/rfiSet/instrument/receipts/sourceTurns), not fabricated inputs  ->  
-PASS  Part B/THE CORRECTION: the compiler call is fed the explicit governed-revision contract (revision: currentRevision), not left undefined in legacy fallback mode  ->  
-PASS  Part B/THE CORRECTION: ProjectDesk.tsx imports and uses the real resolveGovernedRevision() reducer, not a hand-rolled version counter  ->  
-PASS  Part B/THE CORRECTION: a settle-debounce window batches every applyMerge()/applyRemovals() call inside one buyer submission into exactly one governed event  ->  
-PASS  Part B/THE CORRECTION: applyMerge() opens/extends the submission window before mutating facts  ->  
-PASS  Part B/THE CORRECTION: applyRemovals() also opens/extends the SAME submission window (a removal is a buyer submission too)  ->  
-PASS  Part B/THE CORRECTION: previousProcurementDocumentRef is frozen until a NAMED revision cycle actually lands -- the change ribbon compares complete buyer-event snapshots, not intermediate settling renders  ->  
-PASS  Part B: ProjectDesk.tsx renders the final workspace document projection  ->  
-PASS  Part B: the new canvas is gated on (phase==="live" || phase==="fits") && started -- visible through states 2-5, not just state 2, while still never rendering pre-project-start  ->  
-PASS  Part B: the Phase 2 locked-outcome panel's own header comment is still present, byte-identical marker  ->  
+PASS  Part B: ProjectDesk.tsx imports the real compiler module  ->
+PASS  Part B: ProjectDesk.tsx calls the real compileProcurementDocument()  ->
+PASS  Part B: the compiler call is fed the desk's own live state variables (facts/requirement/verdict/noted/rfiSet/instrument/receipts/sourceTurns), not fabricated inputs  ->
+PASS  Part B/THE CORRECTION: the compiler call is fed the explicit governed-revision contract (revision: currentRevision), not left undefined in legacy fallback mode  ->
+PASS  Part B/THE CORRECTION: ProjectDesk.tsx imports and uses the real resolveGovernedRevision() reducer, not a hand-rolled version counter  ->
+PASS  Part B/THE CORRECTION: a settle-debounce window batches every applyMerge()/applyRemovals() call inside one buyer submission into exactly one governed event  ->
+PASS  Part B/THE CORRECTION: applyMerge() opens/extends the submission window before mutating facts  ->
+PASS  Part B/THE CORRECTION: applyRemovals() also opens/extends the SAME submission window (a removal is a buyer submission too)  ->
+PASS  Part B/THE CORRECTION: previousProcurementDocumentRef is frozen until a NAMED revision cycle actually lands -- the change ribbon compares complete buyer-event snapshots, not intermediate settling renders  ->
+PASS  Part B: ProjectDesk.tsx renders the final workspace document projection  ->
+PASS  Part B: the new canvas is gated on (phase==="live" || phase==="fits") && started -- visible through states 2-5, not just state 2, while still never rendering pre-project-start  ->
+PASS  Part B: the Phase 2 locked-outcome panel's own header comment is still present, byte-identical marker  ->
 PASS  Part B: the workspace document is isolated inside canvasBlock, separate from the phase==="fits" locked market panel  ->  canvasBlockIdx=308637 canvasIdx=313214 fitsIdx=374748
-PASS  Part B: the new component files never reference 'rankedFits' (no vendor-identity leakage surface)  ->  
-PASS  Part B: the new component files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->  
-PASS  Part B: the new component files never reference '.suppliers' (no vendor-identity leakage surface)  ->  
-PASS  Part B: the new component files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->  
-PASS  Part B: the new component files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->  
-PASS  Part B: no hard-coded mockup/example content ('Aryaka') in the new components  ->  
-PASS  Part B: no hard-coded mockup/example content ('BT Business') in the new components  ->  
-PASS  Part B: no hard-coded mockup/example content ('Verizon') in the new components  ->  
-PASS  Part B: no hard-coded mockup/example content ('20 sites, 200 remote users') in the new components  ->  
-PASS  Part B: no hard-coded mockup/example content ('Cato Networks') in the new components  ->  
-PASS  Part B: no hard-coded mockup/example content ('Palo Alto') in the new components  ->  
-PASS  Part B: LivingProcurementCanvas is its own focused component  ->  
-PASS  Part B: ProcurementArchitecture is its own focused component  ->  
-PASS  Part B: ProcurementClauseList is its own focused component  ->  
-PASS  Part B: SupplierPackView is its own focused component  ->  
-PASS  Part B: EvaluationView is its own focused component  ->  
-PASS  Part B: ProcurementClauseList keys clause rows on the compiler's own stable clause.id  ->  
-PASS  Part B: response groups / evaluation categories key on the compiler's own stable group/category key  ->  
-PASS  Part B: supplier questions key on the compiler's own stable question id  ->  
-PASS  Part B: gates key on the compiler's own stable gate id  ->  
-PASS  Part B: architecture nodes key on the compiler's own stable node id  ->  
-PASS  Part B: open decisions key on the compiler's own stable decision id  ->  
-PASS  Part B: LivingProcurementCanvas.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
-PASS  Part B: ProcurementArchitecture.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
-PASS  Part B: ProcurementClauseList.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
-PASS  Part B: SupplierPackView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
-PASS  Part B: EvaluationView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
-PASS  Part B: the Living document / Supplier pack / Evaluation switch uses real tab semantics (role, aria-selected)  ->  
-PASS  Part B: the architecture's accessible text summary is always rendered (not display:none / JS-conditional)  ->  
-PASS  Part B: the shared change-pulse class has a prefers-reduced-motion static fallback (Section 5.6)  ->  
+PASS  Part B: the new component files never reference 'rankedFits' (no vendor-identity leakage surface)  ->
+PASS  Part B: the new component files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->
+PASS  Part B: the new component files never reference '.suppliers' (no vendor-identity leakage surface)  ->
+PASS  Part B: the new component files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->
+PASS  Part B: the new component files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->
+PASS  Part B: no hard-coded mockup/example content ('Aryaka') in the new components  ->
+PASS  Part B: no hard-coded mockup/example content ('BT Business') in the new components  ->
+PASS  Part B: no hard-coded mockup/example content ('Verizon') in the new components  ->
+PASS  Part B: no hard-coded mockup/example content ('20 sites, 200 remote users') in the new components  ->
+PASS  Part B: no hard-coded mockup/example content ('Cato Networks') in the new components  ->
+PASS  Part B: no hard-coded mockup/example content ('Palo Alto') in the new components  ->
+PASS  Part B: LivingProcurementCanvas is its own focused component  ->
+PASS  Part B: ProcurementArchitecture is its own focused component  ->
+PASS  Part B: ProcurementClauseList is its own focused component  ->
+PASS  Part B: SupplierPackView is its own focused component  ->
+PASS  Part B: EvaluationView is its own focused component  ->
+PASS  Part B: ProcurementClauseList keys clause rows on the compiler's own stable clause.id  ->
+PASS  Part B: response groups / evaluation categories key on the compiler's own stable group/category key  ->
+PASS  Part B: supplier questions key on the compiler's own stable question id  ->
+PASS  Part B: gates key on the compiler's own stable gate id  ->
+PASS  Part B: architecture nodes key on the compiler's own stable node id  ->
+PASS  Part B: open decisions key on the compiler's own stable decision id  ->
+PASS  Part B: LivingProcurementCanvas.tsx holds no local state of its own (pure presentational read of the compiled document)  ->
+PASS  Part B: ProcurementArchitecture.tsx holds no local state of its own (pure presentational read of the compiled document)  ->
+PASS  Part B: ProcurementClauseList.tsx holds no local state of its own (pure presentational read of the compiled document)  ->
+PASS  Part B: SupplierPackView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->
+PASS  Part B: EvaluationView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->
+PASS  Part B: the Living document / Supplier pack / Evaluation switch uses real tab semantics (role, aria-selected)  ->
+PASS  Part B: the architecture's accessible text summary is always rendered (not display:none / JS-conditional)  ->
+PASS  Part B: the shared change-pulse class has a prefers-reduced-motion static fallback (Section 5.6)  ->
 PASS  Part B: the change pulse is a real, short (350ms, within the 250-400ms band) CSS animation  ->  350ms confirmed
-PASS  Part B: the existing slot-by-slot Living Statement panel's own header comment is untouched  ->  
-PASS  Part B: the existing TWIN_GROUPS slot-editing render loop is untouched  ->  
-PASS  Part B: the existing drop/clear fact controls are untouched  ->  
-PASS  Part B: the new document mounts in the responsive workspace main area (no fixed-width container)  ->  
-PASS  Part B: the workspace document tabs wrap on wider layouts  ->  
-PASS  Part B: the view-switch tabs scroll horizontally rather than overflow on narrow viewports  ->  
+PASS  Part B: the existing slot-by-slot Living Statement panel's own header comment is untouched  ->
+PASS  Part B: the existing TWIN_GROUPS slot-editing render loop is untouched  ->
+PASS  Part B: the existing drop/clear fact controls are untouched  ->
+PASS  Part B: the new document mounts in the responsive workspace main area (no fixed-width container)  ->
+PASS  Part B: the workspace document tabs wrap on wider layouts  ->
+PASS  Part B: the view-switch tabs scroll horizontally rather than overflow on narrow viewports  ->
 PASS  Fixture A: the manufacturing sector pack activates from the buyer's own words  ->  pack=manufacturing
 PASS  Fixture A: the top-3 next decisions are exactly Operating model / SASE shape / Site resilience, per the blueprint's own required set  ->  top3=["OD-operating-model-unstated","q-sase-shape","q-resilience"]
 PASS  Fixture A: material-decision count matches the blueprint's own target message ('Four material decisions remain')  ->  count=4
@@ -867,9 +867,9 @@ PASS  Fixture M/defect 6: the segmentation suggestion's own reason explicitly st
 PASS  Fixture M/defect 6: the OT/ICS visibility suggestion's own reason carries the SAME disclaimer  ->  reason=manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.
 PASS  Fixture M/defect 6: naming SCADA/PLC directly earns the ot_named flavour's own OT-aware monitoring/MDR suggestion  ->  found=true
 PASS  Fixture M/defect 6: the evidence-based ot_named suggestion carries its OWN reason (the buyer's own words already named the systems), correctly WITHOUT the sector-alone disclaimer  ->  reason=the buyer's own words name OT/ICS systems directly, and generic IT monitoring commonly misses PLC/SCADA-specific threats
-PASS  Fixture M/defect 6: LivingProcurementCanvas.tsx actually reads nq.reason when rendering a NextQuestion card (the reason is not dropped between the projection and the render)  ->  
-PASS  Fixture M/defect 6: the governed-suggestion badge explicitly says 'optional', not just 'Netify suggests'  ->  
-PASS  Fixture A: no irrelevant sector row is shown when no pack is active (this branch: pack IS active, so presence is correct here; absence is proven by Fixture A's own construction when packA is null)  ->  
+PASS  Fixture M/defect 6: LivingProcurementCanvas.tsx actually reads nq.reason when rendering a NextQuestion card (the reason is not dropped between the projection and the render)  ->
+PASS  Fixture M/defect 6: the governed-suggestion badge explicitly says 'optional', not just 'Netify suggests'  ->
+PASS  Fixture A: no irrelevant sector row is shown when no pack is active (this branch: pack IS active, so presence is correct here; absence is proven by Fixture A's own construction when packA is null)  ->
 PASS  Fixture N/defect 2 (pending): after Prompt A alone, the compiled document contains NO sector-pack-suggestion clause -- Robert's exact reproduced defect no longer reproduces  ->  clauses=["network-architecture-scope"]
 PASS  Fixture N/defect 2 (pending): the Requirements count is not inflated by the pending suggestion -- it already equals the real compiled clause count (general coordinated-projection invariant, reconfirmed here for this specific state)  ->  counts.requirements=1 clauses.length=1
 PASS  Fixture N/defect 2 (pending): the unaccepted suggestion produces no supplier response-group question  ->  responseGroupText=Confirm which components are included in scope (e.g. SD-WAN transport, SWG, CASB, ZTNA, FWaaS, DLP) versus SD-WAN transport alone. | Describe your architecture for delivering the stated scope across the buyer's estate.
@@ -886,10 +886,10 @@ PASS  Fixture N/defect 2 (resumed, accepted): a reload (previousDocument: null) 
 PASS  Fixture N/defect 2 (declined): declining creates NO clause  ->  clauses=["network-architecture-scope"]
 PASS  Fixture N/defect 2 (declined): the decline is persisted in the pending-suggestion projection -- visibleSuggestions (fed by declinedSuggestionIds, durable via decision_ledger's decline_suggestion action) drops it  ->  pending=["mf-segmentation"]
 PASS  Fixture N/defect 2 (resumed, declined): after a reload, the declined suggestion does not reappear in the pending-suggestion projection  ->  pending=["mf-segmentation"]
-PASS  Fixture N/defect 2 (resumed, declined): a reload still produces no governed clause for the declined suggestion  ->  
+PASS  Fixture N/defect 2 (resumed, declined): a reload still produces no governed clause for the declined suggestion  ->
 PASS  Fixture N2/release blocker 1: replaying accept-then-decline (recorded order) resolves DECLINED -- declinedSuggestionIds gains the id AND the earlier accepted noted item is genuinely removed, not merely shadowed  ->  replayed={"noted":[],"dismissedQuestionIds":[],"declinedSuggestionIds":["mf-ot-visibility"]}
 PASS  Fixture N2/release blocker 1: after accept -> decline (real ledger replay, not a hand-built noted array), the compiled document contains NO governed clause for the suggestion -- Robert's exact reproduced defect no longer reproduces  ->  clauses=["network-architecture-scope"]
-PASS  Fixture N2/release blocker 1 setup: resumeDecisionsFromProject() accepts the persisted security_sourcing project  ->  
+PASS  Fixture N2/release blocker 1 setup: resumeDecisionsFromProject() accepts the persisted security_sourcing project  ->
 PASS  Fixture N2/release blocker 1 (save -> reload -> compile): after a REAL save (decision_ledger persisted) and a REAL reload (resumeDecisionsFromProject, then a fresh compile from previousDocument: null), no governed clause remains for the declined-after-accepted suggestion  ->  clauses=["network-architecture-scope"]
 PASS  Fixture N2/counter-example: the SAME two entries in the OPPOSITE recorded order (decline THEN accept) resolve ACCEPTED instead -- confirms last-write-wins is genuinely order-driven in both directions  ->  replayed={"noted":[{"id":"ps-mf-ot-visibility","label":"OT/ICS asset visibility and monitoring in scope, alongside IT security","section":"security","own":true}],"dismissedQuestionIds":[],"declinedSuggestionIds":[]}
 PASS  Fixture N2/counter-example: decline THEN a later accept DOES compile the governed clause -- the buyer's most recent choice is honoured either way, not a one-directional patch  ->  clauses=["network-architecture-scope","sector-pack-suggestion"]
@@ -908,7 +908,7 @@ PASS  Fixture K1/production regression: the visible resilience row resolves for 
 PASS  Fixture K1/defect 2: with the SAME materially-applicable requirement but no site-resilience-scope clause present, the row correctly reads Needs decision (proves the row cannot be satisfied by absence of a question alone)  ->  detail=Dual-circuit resilience per site not yet decided.
 PASS  Fixture K1/unknown-site regression: a generic SASE RFP request with no site count cannot confirm resilience  ->  detail=Site count is needed before resilience can be assessed.
 PASS  Fixture K3/defect 1 setup: q-resilience is still materially earned (site count/buying still qualify) after Prompt B -- proves the fixture below is a genuine clause-driven filter, not an artefact of the question no longer being earned at all  ->  earnedIds=["q-contract-end","q-sase-shape","q-sse-scope","q-resilience"]
-PASS  Fixture K3/defect 1 setup: siteResilienceClauseExists reads true against the real compiled document after Prompt B  ->  
+PASS  Fixture K3/defect 1 setup: siteResilienceClauseExists reads true against the real compiled document after Prompt B  ->
 PASS  Fixture K3/defect 1: q-resilience is absent from the FULL ranked NextQuestion list once the canonical site-resilience-scope clause exists  ->  rankedIds=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-timeline-unstated"]
 PASS  Fixture K3/defect 1: q-resilience is absent from the visible top three  ->  top3=["OD-operating-model-unstated","q-sase-shape","q-sse-scope"]
 PASS  Fixture K3/defect 1: materialDecisionsRemaining decreases by exactly one once resilience is correctly excluded (an apples-to-apples comparison against the SAME state with the flag forced off)  ->  resolved=3 unresolved=4
@@ -937,10 +937,10 @@ PASS  Fixture L2/defect 5: resolving SASE shape strictly reduces material-decisi
 PASS  Fixture L3/defect 5: resolving the operating model (opModelOverride: managed) at the Prompt-C state produces a score at least as high as the unresolved state  ->  unresolved=30 resolved=42
 PASS  Fixture E setup: answerNextQuestion's own function body was found in ProjectDesk.tsx (regex still matches the current source)  ->  found=true
 PASS  Fixture E: answering a NextQuestion (any branch: items/note/dismiss/path) never calls keepSourceTurn() -- question selection is UI context, not a source turn  ->  bodyLength=6388
-PASS  Fixture E: answerNextQuestion does land through the desk's own governed state machinery (not a no-op stub)  ->  
+PASS  Fixture E: answerNextQuestion does land through the desk's own governed state machinery (not a no-op stub)  ->
 PASS  Fixture F: a note-only answer (no WorkspaceFact touched) still resolves to exactly one applied governed revision, with an honestly empty changedFactIds  ->  applied=true cycle=1 changedFactIds=[]
 PASS  Fixture F: the compiler itself advances document.version by exactly one for that same note-only revision, end to end  ->  before=1 after=2
-PASS  Fixture G setup: the resilience clause compiled at Prompt B is still present at this later state (facts are cumulative)  ->  
+PASS  Fixture G setup: the resilience clause compiled at Prompt B is still present at this later state (facts are cumulative)  ->
 PASS  Fixture G/neutral setup: the comparison text matches no strict stated-objective phrase at all (a fair test of the general principle, not a coincidence)  ->  matches=[]
 PASS  Fixture G/neutral: genuinely unrelated freeform prose, on its own, does NOT resolve q-sase-shape -- only a structured answer (a click, or the buyer's own strict-phrase wording) may  ->  remaining=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
 PASS  Fixture G/neutral: q-resilience correctly stays excluded at this later state too (the clause-gated filter holds beyond Prompt B, not just at the moment the clause first compiles)  ->  remaining=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
@@ -948,16 +948,16 @@ PASS  Fixture G/structured: once the buyer's SASE-shape choice lands as a genuin
 PASS  Fixture G/structured: a new question is promoted into the top-3 in its place (the list never shrinks to fewer than 3 while unresolved decisions remain)  ->  top3=["OD-operating-model-unstated","q-sse-scope","sector:mf-ot-visibility"]
 PASS  Fixture G/real: Prompt C's own exact wording, through the REAL statedObjectivesIn() extraction (not a manual notedIds injection), produces the SAME obj-unified id the structured-answer case above uses  ->  objectivesFromC=["obj-unified"]
 PASS  Fixture G/real: with the REAL Prompt C fold applied, q-sase-shape no longer appears in the ranked list -- matching the live UI, whose 'Best next decisions' cards never show it after Prompt C (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png)  ->  remaining=["OD-operating-model-unstated","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
-PASS  Fixture H: the new NextQuestion/outline projection files never reference 'rankedFits' (no vendor-identity leakage surface)  ->  
-PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->  
-PASS  Fixture H: the new NextQuestion/outline projection files never reference '.suppliers' (no vendor-identity leakage surface)  ->  
-PASS  Fixture H: the new NextQuestion/outline projection files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->  
-PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->  
-PASS  Fixture K3/defect 1: the site-resilience-scope clause survives a reload (recompiled fresh from the same facts, previousDocument: null) -- resolution is not an artefact of in-memory document state  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'rankedFits' (no vendor-identity leakage surface)  ->
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->
+PASS  Fixture H: the new NextQuestion/outline projection files never reference '.suppliers' (no vendor-identity leakage surface)  ->
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->
+PASS  Fixture K3/defect 1: the site-resilience-scope clause survives a reload (recompiled fresh from the same facts, previousDocument: null) -- resolution is not an artefact of in-memory document state  ->
 PASS  Fixture K3/defect 1: q-resilience stays absent from the ranked list after a reload  ->  rankedIds=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
 PASS  Fixture I: a reload (previousDocument=null) reproduces the identical ranked NextQuestion list and provenance for the identical facts  ->  before=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"] after=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
-PASS  Fixture J: the NextQuestion cards stack to one column under the sm breakpoint (390px-safe) and only become 3 columns at sm and above  ->  
-PASS  Fixture J: the section outline's title column is full-width on mobile (no fixed 190px column below the sm breakpoint)  ->  
+PASS  Fixture J: the NextQuestion cards stack to one column under the sm breakpoint (390px-safe) and only become 3 columns at sm and above  ->
+PASS  Fixture J: the section outline's title column is full-width on mobile (no fixed 190px column below the sm breakpoint)  ->
 PASS  Fixture J: no new UNCONDITIONAL (non-responsive) fixed pixel width at or above 100px that would overflow a 390px viewport  ->  matches=[]
 
 ALL PASS
@@ -1017,17 +1017,17 @@ PASS  3: via="web" does not read as an MCP receipt  ->  isMcp=false
 PASS  3: via="admin" does not read as an MCP receipt  ->  isMcp=false
 PASS  3: via="cron" does not read as an MCP receipt  ->  isMcp=false
 PASS  3: via="system" does not read as an MCP receipt  ->  isMcp=false
-PASS  4: consent=true reads as recorded  ->  
-PASS  4: consent=false does not read as recorded  ->  
-PASS  4: an absent consent field does not read as recorded  ->  
+PASS  4: consent=true reads as recorded  ->
+PASS  4: consent=false does not read as recorded  ->
+PASS  4: an absent consent field does not read as recorded  ->
 
 ALL PASS
 PASS  1: a real compiled document validates against LivingProcurementDocumentSchema  ->  ok
-PASS  1: parseIncomingProcurementDocument accepts the same real document  ->  
-PASS  2: null input drops cleanly (undefined)  ->  
-PASS  2: an empty object drops cleanly (undefined)  ->  
-PASS  2: a type-mismatched real-shaped document drops cleanly (undefined)  ->  
-PASS  2: an extra unexpected field drops cleanly (.strict() rejects it)  ->  
+PASS  1: parseIncomingProcurementDocument accepts the same real document  ->
+PASS  2: null input drops cleanly (undefined)  ->
+PASS  2: an empty object drops cleanly (undefined)  ->
+PASS  2: a type-mismatched real-shaped document drops cleanly (undefined)  ->
+PASS  2: an extra unexpected field drops cleanly (.strict() rejects it)  ->
 PASS  3: a ProjectDetails record with no procurement_document still validates (backward compatible)  ->  ok
 PASS  3: a ProjectDetails record carrying a real procurement_document validates  ->  ok
 PASS  4 setup: the second compile is genuinely a different document (version advanced)  ->  v1=1 v2=2
@@ -1035,7 +1035,7 @@ PASS  4: a genuinely changed saved requirement creates a new publication identit
 PASS  4: document version metadata alone does not create a new publication  ->  semantic content only
 PASS  5: every clause becomes exactly one question (no loss, no duplication)  ->  clauses=2 questions=2
 PASS  5: no empty section is emitted  ->  sections=["Network"]
-PASS  5: every projected question's weight is clamped into RfpQuestion's 1-5 range  ->  
+PASS  5: every projected question's weight is clamped into RfpQuestion's 1-5 range  ->
 PASS  5: a mandatory clause maps to, and only to, a required-priority question  ->  mandatory=2 required=2
 PASS  6: reopening with no new revision this session keeps the SAME persisted version (never resets to 1)  ->  persisted=1 reopened=1
 PASS  6: a genuinely new revision after reopen advances the version by exactly one  ->  persisted=1 afterEdit=2
@@ -1043,12 +1043,12 @@ PASS  6: a genuinely new revision after reopen advances the version by exactly o
 ALL PASS
 PASS  A: the first save (create) is accepted by the real buildEnvelopeUpdate()  ->  "ok"
 PASS  A: the first save lands as envelope_revision 1  ->  envelope_revision=1
-PASS  A: the reopened facts are value-identical to what was saved (order-insensitive; zod's own re-serialization reorders keys, never values)  ->  
-PASS  A: the reopened receipts are value-identical to what was saved  ->  
-PASS  A: the persisted canonical document survives a real KV JSON round trip (JSON.stringify/JSON.parse) byte-identical -- nothing non-serialisable is silently dropped  ->  
+PASS  A: the reopened facts are value-identical to what was saved (order-insensitive; zod's own re-serialization reorders keys, never values)  ->
+PASS  A: the reopened receipts are value-identical to what was saved  ->
+PASS  A: the persisted canonical document survives a real KV JSON round trip (JSON.stringify/JSON.parse) byte-identical -- nothing non-serialisable is silently dropped  ->
 PASS  A: a genuine no-op resave (reopen, change nothing, save again) is accepted  ->  "ok"
 PASS  A: the no-op resave keeps the SAME document version (reopening alone never bumps it)  ->  before=1 after=1
-PASS  A: the no-op resave's clauses are content-identical to what was persisted  ->  
+PASS  A: the no-op resave's clauses are content-identical to what was persisted  ->
 PASS  A: the compiler's own changeSet honestly reports NOTHING added/updated/removed for a genuine no-op resave  ->  {"added":[],"updated":[],"removed":[]}
 PASS  B setup: the site-count fact was genuinely corrected to 25  ->  value=25
 PASS  B: the correction save is accepted  ->  "ok"
@@ -1063,7 +1063,7 @@ PASS  D: the accept-suggestion save is accepted through the real envelope path  
 PASS  D: after accept, the persisted canonical document carries the governed sector-suggestion clause  ->  clauses=["network-architecture-scope","sector-pack-suggestion"]
 PASS  D: the subsequent decline save is accepted through the real envelope path  ->  "ok"
 PASS  D: after the later decline, the persisted canonical document carries NO clause for the suggestion (last-write-wins, real ledger replay, real save/reopen round trip)  ->  clauses=["network-architecture-scope"]
-PASS  D: a reopen (previousDocument: null, replaying the SAME persisted decision_ledger) still shows no clause for the declined suggestion  ->  
+PASS  D: a reopen (previousDocument: null, replaying the SAME persisted decision_ledger) still shows no clause for the declined suggestion  ->
 PASS  E: a stale base_revision (claims 1, current is 2) is rejected with 409, and NOTHING else about the save is trusted  ->  {"participates":true,"ok":false,"status":409,"error":"This project has been saved since you loaded it (your base revision 1, current 2); reload and try again so your edits apply on top of the latest version."}
 PASS  E: an existing envelope with NO base_revision claimed at all is also rejected with 409 (a base revision is mandatory once one exists)  ->  {"participates":true,"ok":false,"status":409,"error":"This project already has a saved canonical envelope; a base revision is required to save again. Reload and try again."}
 PASS  E: a CREATE (no existing record) claiming a base_revision above 0 is rejected -- there is no revision 5 to be based on  ->  {"participates":true,"ok":false,"status":409,"error":"This project does not exist yet, so a base revision above 0 cannot be current; nothing was written."}
@@ -1071,181 +1071,181 @@ PASS  F: a compiled_document that disagrees with the server's own recompute (cla
 PASS  F: a malformed fact ledger (schema violation) is rejected with 422, not silently coerced or partially written  ->  {"participates":true,"ok":false,"status":422,"error":"This save's fact ledger is malformed; nothing was written. Reload and try again."}
 PASS  F: facts present but compiled_document entirely absent is rejected with 422  ->  {"participates":true,"ok":false,"status":422,"error":"This save is missing its compiled document; nothing was written. Reload and try again."}
 PASS  G: the min-content gate's own count, for a canonical-envelope project, exactly matches the export adapter's own count -- one authority, not two  ->  gateCount=2 exportCount=2
-PASS  G: the frozen_content mapping captures the exact canonical revision that was current at publish time, unmutated  ->  
+PASS  G: the frozen_content mapping captures the exact canonical revision that was current at publish time, unmutated  ->
 PASS  G: rfp-publish.ts freezes `procurement_document` (never a re-derived or partial copy) at exactly its two documented freeze sites (first publish, every republish)  ->  sites=2
 PASS  H setup: the later draft save produced a genuinely different canonical document from the one frozen above  ->  frozenVersion=1 laterVersion=2
-PASS  H: the frozen snapshot's own copy is untouched by the later draft edit -- still reads exactly as it did at the moment of publication  ->  
+PASS  H: the frozen snapshot's own copy is untouched by the later draft edit -- still reads exactly as it did at the moment of publication  ->
 PASS  I setup: all four source markers (gate call, commitMarketUnlock, listRfpOnBoard, inviteSupplier) were found inside executePublish()  ->  gate=3063 unlock=19489 list=15573 invite=25116
-PASS  I: the minimum-content gate runs, in source order, strictly BEFORE market-unlock, board-listing and every invite side effect -- a failed gate can reach none of them  ->  
-PASS  J: Procurement Room's own source reads exclusively from getLatestPublishedSnapshot()'s frozen_content.living_document, never a live project field  ->  
+PASS  I: the minimum-content gate runs, in source order, strictly BEFORE market-unlock, board-listing and every invite side effect -- a failed gate can reach none of them  ->
+PASS  J: Procurement Room's own source reads exclusively from getLatestPublishedSnapshot()'s frozen_content.living_document, never a live project field  ->
 PASS  J: every export format is built from ONE `frozenProject`, itself derived from the snapshot's own frozen living document  ->  usesSnapshot=true buildsOnce=true
-PASS  J: no export format branch renders from the live `project` object directly (bypassing the frozen snapshot)  ->  
+PASS  J: no export format branch renders from the live `project` object directly (bypassing the frozen snapshot)  ->
 PASS  K: a save with no `facts` field at all (every pre-pass caller) does not participate in the envelope -- completely unaffected by this pass  ->  {"participates":false}
-PASS  K setup: the legacy project genuinely has no canonical envelope (no `envelope`, no `procurement_document`)  ->  
+PASS  K setup: the legacy project genuinely has no canonical envelope (no `envelope`, no `procurement_document`)  ->
 PASS  K: a legacy record (no envelope) falls back to counting from `rfp_sections` -- the explicitly identified compatibility projection, still readable  ->  count=1
 PASS  K: a project WITH a canonical envelope is gated from procurement_document, not from its (here deliberately stale/empty) rfp_sections -- rfp_sections is not a second authority for a new record  ->  count=2
 
 ALL PASS
-PASS  0: ProjectDesk builds the publish checklist from the same persisted seven-section baseline as the server  ->  
-PASS  0: signLocked is gated on that SAME checklist object, not a parallel re-derivation  ->  
-PASS  0: the final workspace status band reads the canonical section progress projection  ->  
-PASS  0: `ready` is derived from the items themselves, so the count shown and the gate enforced cannot disagree  ->  
-PASS  0: open decisions are NOT part of the gate -- they are advisory and generative, and including them could produce a gate that never empties  ->  
-PASS  1: the true root layout (src/app/layout.tsx) does not import MegaNav  ->  
-PASS  1: the true root layout does not import SiteFooter  ->  
-PASS  1: the true root layout does not import CommercialFooter  ->  
-PASS  2: (marketing)/layout.tsx renders <MegaNav />  ->  
-PASS  2: (marketing)/layout.tsx renders <CommercialFooter />  ->  
-PASS  2: (marketing)/layout.tsx renders <MegaNav /> -- the SAME header the workspace group now uses  ->  
-PASS  3: (workspace)/layout.tsx renders <MegaNav /> (19 Aug restoration)  ->  
-PASS  3: WorkspaceHeader is neither imported nor rendered -- exactly one header, never two stacked sticky bars  ->  
-PASS  3: WorkspaceHeader.tsx is deleted rather than left as dead code (git history holds it)  ->  
-PASS  3: (workspace)/layout.tsx renders <CommercialFooter /> (19 Aug restoration)  ->  
-PASS  3: it is wrapped in <SiteFooter>, the SAME composition (marketing)/layout.tsx uses -- so the workspace footer and the board footer cannot drift apart  ->  
-PASS  4: SiteFooter.tsx does not import from next/navigation (no client-side route-based hiding)  ->  
-PASS  4: MegaNav.tsx contains no /home or /workspace pathname-prefix hiding check  ->  
-PASS  5: src/app/(marketing)/account/page.tsx exists after the restructuring  ->  
-PASS  5: src/app/account/page.tsx (the pre-move path) no longer exists  ->  
-PASS  5: src/app/(marketing)/opportunities/board/page.tsx exists after the restructuring  ->  
-PASS  5: src/app/opportunities/board/page.tsx (the pre-move path) no longer exists  ->  
-PASS  5: src/app/(marketing)/rfp-builder/[id]/preview/download/route.ts exists after the restructuring  ->  
-PASS  5: src/app/rfp-builder/[id]/preview/download/route.ts (the pre-move path) no longer exists  ->  
-PASS  5: src/app/(marketing)/vendors/[slug]/page.tsx exists after the restructuring  ->  
-PASS  5: src/app/vendors/[slug]/page.tsx (the pre-move path) no longer exists  ->  
-PASS  5: src/app/(workspace)/home/page.tsx exists  ->  
-PASS  5: src/app/(workspace)/workspace/page.tsx exists  ->  
-PASS  5: the pre-move src/app/home/page.tsx no longer exists  ->  
-PASS  5: the pre-move src/app/workspace/page.tsx no longer exists  ->  
-PASS  5: src/app/(workspace)/project/[id]/room/page.tsx exists (Room moved into workspace chrome)  ->  
-PASS  5: src/app/(marketing)/project/[id]/room/page.tsx (the pre-move path) no longer exists  ->  
-PASS  5: src/app/(marketing)/project/[id]/story/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->  
-PASS  5: src/app/(marketing)/project/[id]/timeline/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->  
-PASS  5: src/app/(marketing)/project/[id]/approve/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->  
-PASS  5: src/app/(marketing)/project/[id]/assessment/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->  
-PASS  5: src/app/(marketing)/project/[id]/rescope/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->  
-PASS  6: src/app/api/ was left in place (route handlers aren't wrapped by layout.tsx)  ->  
-PASS  6: src/app/api/ was not duplicated into either route group  ->  
+PASS  0: ProjectDesk builds the publish checklist from the same persisted seven-section baseline as the server  ->
+PASS  0: signLocked is gated on that SAME checklist object, not a parallel re-derivation  ->
+PASS  0: the final workspace status band reads the canonical section progress projection  ->
+PASS  0: `ready` is derived from the items themselves, so the count shown and the gate enforced cannot disagree  ->
+PASS  0: open decisions are NOT part of the gate -- they are advisory and generative, and including them could produce a gate that never empties  ->
+PASS  1: the true root layout (src/app/layout.tsx) does not import MegaNav  ->
+PASS  1: the true root layout does not import SiteFooter  ->
+PASS  1: the true root layout does not import CommercialFooter  ->
+PASS  2: (marketing)/layout.tsx renders <MegaNav />  ->
+PASS  2: (marketing)/layout.tsx renders <CommercialFooter />  ->
+PASS  2: (marketing)/layout.tsx renders <MegaNav /> -- the SAME header the workspace group now uses  ->
+PASS  3: (workspace)/layout.tsx renders <MegaNav /> (19 Aug restoration)  ->
+PASS  3: WorkspaceHeader is neither imported nor rendered -- exactly one header, never two stacked sticky bars  ->
+PASS  3: WorkspaceHeader.tsx is deleted rather than left as dead code (git history holds it)  ->
+PASS  3: (workspace)/layout.tsx renders <CommercialFooter /> (19 Aug restoration)  ->
+PASS  3: it is wrapped in <SiteFooter>, the SAME composition (marketing)/layout.tsx uses -- so the workspace footer and the board footer cannot drift apart  ->
+PASS  4: SiteFooter.tsx does not import from next/navigation (no client-side route-based hiding)  ->
+PASS  4: MegaNav.tsx contains no /home or /workspace pathname-prefix hiding check  ->
+PASS  5: src/app/(marketing)/account/page.tsx exists after the restructuring  ->
+PASS  5: src/app/account/page.tsx (the pre-move path) no longer exists  ->
+PASS  5: src/app/(marketing)/opportunities/board/page.tsx exists after the restructuring  ->
+PASS  5: src/app/opportunities/board/page.tsx (the pre-move path) no longer exists  ->
+PASS  5: src/app/(marketing)/rfp-builder/[id]/preview/download/route.ts exists after the restructuring  ->
+PASS  5: src/app/rfp-builder/[id]/preview/download/route.ts (the pre-move path) no longer exists  ->
+PASS  5: src/app/(marketing)/vendors/[slug]/page.tsx exists after the restructuring  ->
+PASS  5: src/app/vendors/[slug]/page.tsx (the pre-move path) no longer exists  ->
+PASS  5: src/app/(workspace)/home/page.tsx exists  ->
+PASS  5: src/app/(workspace)/workspace/page.tsx exists  ->
+PASS  5: the pre-move src/app/home/page.tsx no longer exists  ->
+PASS  5: the pre-move src/app/workspace/page.tsx no longer exists  ->
+PASS  5: src/app/(workspace)/project/[id]/room/page.tsx exists (Room moved into workspace chrome)  ->
+PASS  5: src/app/(marketing)/project/[id]/room/page.tsx (the pre-move path) no longer exists  ->
+PASS  5: src/app/(marketing)/project/[id]/story/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->
+PASS  5: src/app/(marketing)/project/[id]/timeline/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->
+PASS  5: src/app/(marketing)/project/[id]/approve/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->
+PASS  5: src/app/(marketing)/project/[id]/assessment/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->
+PASS  5: src/app/(marketing)/project/[id]/rescope/page.tsx still exists (unrelated project tabs keep marketing chrome)  ->
+PASS  6: src/app/api/ was left in place (route handlers aren't wrapped by layout.tsx)  ->
+PASS  6: src/app/api/ was not duplicated into either route group  ->
 PASS  7: no unexpected top-level entries remain directly under src/app/ (no stray pre-move route)  ->  unexpected=[]
-PASS  8: ProcurementEntry.tsx is the sole declaration site of ENGINE_H1  ->  
-PASS  8: (workspace)/home/page.tsx does not re-declare ENGINE_H1  ->  
-PASS  8: (workspace)/workspace/page.tsx does not re-declare ENGINE_H1  ->  
-PASS  8: (workspace)/home/page.tsx imports from ProcurementEntry.tsx  ->  
-PASS  8: (workspace)/workspace/page.tsx imports from ProcurementEntry.tsx  ->  
-PASS  8: (workspace)/home/page.tsx renders the shared ProcurementEntry (optional server guidance)  ->  
-PASS  8: (workspace)/workspace/page.tsx renders <ProcurementEntry />  ->  
+PASS  8: ProcurementEntry.tsx is the sole declaration site of ENGINE_H1  ->
+PASS  8: (workspace)/home/page.tsx does not re-declare ENGINE_H1  ->
+PASS  8: (workspace)/workspace/page.tsx does not re-declare ENGINE_H1  ->
+PASS  8: (workspace)/home/page.tsx imports from ProcurementEntry.tsx  ->
+PASS  8: (workspace)/workspace/page.tsx imports from ProcurementEntry.tsx  ->
+PASS  8: (workspace)/home/page.tsx renders the shared ProcurementEntry (optional server guidance)  ->
+PASS  8: (workspace)/workspace/page.tsx renders <ProcurementEntry />  ->
 
 ALL PASS
-PASS  1: CollapsibleHero accepts an optional eyebrow prop  ->  
-PASS  1: the pre-start H1 clamp is shrunk to the Constitution's height budget (30-42px, not the earlier 38-58px)  ->  
-PASS  1: the third ("value") paragraph is unconditionally sr-only -- never occupies visible height pre-start  ->  
-PASS  1: page-h1/page-subhead ids are preserved (speakable schema + h1 audit script still find them)  ->  
-PASS  2: the mcMaxHeightPx measurement state is removed (the fixed composer it existed to clear no longer exists)  ->  
-PASS  2: composerDockRef is removed along with the measurement it fed  ->  
-PASS  2: mcCardRef is removed along with the measurement it fed  ->  
-PASS  2: the dark 340px Mission Control rail is retired outright -- no <aside> remains in ProjectDesk.tsx  ->  
-PASS  2: the rail's mobile expand/collapse state is retired with it (a full pane has no 390px overflow to work around)  ->  
-PASS  2: the composer's outer wrapper is relatively positioned in BOTH of its render contexts (no longer fixed/inset-x-0/bottom-0), matching Robert's 19 Aug 2026 request to move it inline near the top  ->  
-PASS  2: once started, the one real composer renders in the global command zone above every procurement view  ->  
-PASS  2: no phone or desktop page-wide composer dock remains  ->  
-PASS  3: no mobile aside branches its bottom padding on mcExpanded (no fixed dock left to conditionally clear)  ->  
-PASS  3: the three-area workspace becomes one clear vertical flow on phones  ->  
-PASS  3: the living document precedes the decision rail on phones  ->  
-PASS  4: the ribbon's eyebrow reads "What changed", matching the Constitution mockups' own label  ->  
-PASS  4: the ribbon box uses the emerald-soft background/border tokens (19 Aug 2026 handoff palette)  ->  
-PASS  4: the earlier "Value created" orange-soft label no longer exists  ->  
-PASS  5: ProjectDesk derives a latestMcpReceipt value  ->  
-PASS  5: latestMcpReceipt is gated on the SAME real isMcp && hasConsent condition McpEvidencePanel.tsx's approvedEvents already uses (not a separate, looser rule)  ->  
-PASS  5: with no real approved MCP event, latestMcpReceipt is genuinely null (renders nothing), never a placeholder  ->  
-PASS  5: the MCP RECEIPT block only renders when latestMcpReceipt is real and non-null  ->  
-PASS  5: the MCP RECEIPT label uses the violet (lilac) token, distinct from the orange "Agent proposed" and cobalt "MCP evidence" tags, in the light-background variant its new surface requires  ->  
-PASS  5: the dark-surface lilac variant is no longer USED in ProjectDesk.tsx -- there is no dark card left to need it  ->  
-PASS  6: the architecture eyebrow reads "Live procurement twin", matching the Constitution mockups  ->  
-PASS  6: the earlier neutral-grey edge/arrow colour is fully replaced  ->  
-PASS  6: the pipeline's connecting arrows use the emerald token, matching the mockups' green connecting lines  ->  
-PASS  6: a node backed by a governed compiled clause carries the emerald-soft border/background pair (the reference's "Confirmed" state)  ->  
-PASS  6: node state is derived from the real sourceClauseIds the compiler already records, never from an invented per-node status field  ->  
-PASS  6: the legend renders only the states actually present, so it can never advertise a category nothing on screen is in  ->  
-PASS  6: the delta caption is an optional, nullable prop -- never a required/always-shown value  ->  
-PASS  6: architectureDeltaCaption is a real function computed from document.changeSet, not inline fabricated text  ->  
-PASS  6: architectureDeltaCaption's function body was located for inspection  ->  
-PASS  6: the mockup's fabricated "evidence requests added" count is deliberately NOT reproduced in the actual rendered caption (this codebase has no real per-change count for it)  ->  
-PASS  6: the delta caption is only passed when hasChange is real and true, null otherwise  ->  
-PASS  7: envelope.ts's canonical-envelope recompute (both create AND update) now trusts the client's own validated lastRevision instead of guessing server-side (fixes a real false-positive 409 on every project's first save AND its next edit-then-save/publish, both confirmed via live Playwright runs against a local KV store)  ->  
-PASS  7: the Decisions station never calls an open decision "blocking" -- they gate nothing, and the real gate is the publish checklist  ->  
-PASS  7: its zero-state heading reads "Nothing open", never a phrase implying a cleared blocker  ->  
-PASS  7: the subhead states plainly that answering is optional and does not hold publishing up  ->  
-PASS  7: the old contradictory "Nothing material outstanding" string is fully removed from ProjectDesk.tsx  ->  
-PASS  7: a non-material decision card carries its own "Not required to publish" chip, so it can never be read as a blocker under a heading that says there are none  ->  
-PASS  7: that chip is computed from the SAME MATERIAL_IMPACTS classification the blocking-decision count uses, so badge and count can never disagree  ->  
-PASS  7: post-publish, the station says publication is complete and frames everything remaining as shaping the next revision, never as outstanding work  ->  
-PASS  7: ProjectDesk's light-background muted/caption text uses #66635e (the 19 Aug 2026 handoff palette's ink-600, axe-core-verified 5.1:1+ across every background this pass measured) instead of the inaccessible #A3A099/#8C8A85 hex literals (2.5:1-3.5:1)  ->  
-PASS  7: no light-background Tailwind text-color class in ProjectDesk.tsx still uses the old sub-4.5:1 #A3A099/#8C8A85 hex literals  ->  
-PASS  7: the main nav's board/account links carry real vertical padding (py-2), not a bare text-line hit area  ->  
-PASS  7: procurement-document.ts has a canonicalJson() helper that sorts object keys recursively before stringifying, making equality checks independent of property-insertion order  ->  
-PASS  7: diffIds() (drives changeSet.clauses/questions/gates) now compares clauses via canonicalJson, not raw JSON.stringify -- fixes a real false-positive "updated" on every unchanged clause surviving a second save, confirmed via a live Playwright run diffing the server's fresh recompute against the actual persisted KV record (identical content, different key order after the schema round-trip)  ->  
-PASS  7: the old key-order-sensitive raw JSON.stringify comparison in diffIds() is fully removed  ->  
-PASS  7: LivingProcurementCanvas now also renders through phase==="fits" (states 3-5), not just "live" (state 2) -- the living document/supplier pack/evaluation views stay visible right where a buyer is about to publish and right after they have, instead of vanishing the moment publishing starts  ->  
-PASS  7: McpEvidencePanel (real project history/provenance) now also renders through phase==="fits", for the same reason and with the same non-leak guarantee (it names no vendor)  ->  
-PASS  7: cors.ts's CORS allowlist no longer grants the retired sase.netify.co.uk subdomain cross-origin access to the agentic APIs  ->  
-PASS  7: the shortlist advisor's own system prompt no longer describes itself as embedded at sase.netify.co.uk -- it names the canonical netify.co.uk host  ->  
-PASS  8: src/app/layout.tsx (sitewide root layout) does not import from next/font/google  ->  
-PASS  8: src/app/layout.tsx does not import from next/font/local either -- the sitewide/marketing surface loads no custom webfont  ->  
-PASS  8: layout.tsx no longer wires up an actual --font-inter variable binding (a comment may still reference the retired identifier by name for context)  ->  
-PASS  8: the (workspace) route group's own layout.tsx no longer imports the retired workspace/fonts module (removed 20 Aug 2026) -- the workspace surface loads no custom webfont either, same rule as the root layout  ->  
-PASS  8: the (workspace) layout's outer div no longer carries the retired workspaceFontVars class (a comment may still reference the retired identifier by name for context)  ->  
-PASS  8: globals.css's font tokens no longer reference var(--font-inter) anywhere  ->  
-PASS  8: globals.css no longer references var(--font-space-grotesk) or var(--font-jetbrains-mono) anywhere -- both retired 20 Aug 2026  ->  
-PASS  8: --nf-font-serif, --nf-font-sans and --nf-font-mono are all plain system stacks (20 Aug 2026 reversal) -- no surface anywhere in the app loads a custom webfont  ->  
-PASS  8: src/lib/workspace/fonts.ts (the self-hosted Space Grotesk/JetBrains Mono declarations) is deleted, not merely unwired  ->  
-PASS  8: the vendored .woff2 font files (src/fonts/) are deleted, not left as dead weight  ->  
-PASS  9: ProjectDesk.tsx scrolls to the top on a successful publish, so State 4 never renders under a scroll position left over from reviewing pre-publish decisions  ->  
-PASS  9: the scroll-to-top runs specifically inside the verified publish-success branch (HTTP success + MarketUnlock + board id), not on every render or on failure  ->  
+PASS  1: CollapsibleHero accepts an optional eyebrow prop  ->
+PASS  1: the pre-start H1 clamp is shrunk to the Constitution's height budget (30-42px, not the earlier 38-58px)  ->
+PASS  1: the third ("value") paragraph is unconditionally sr-only -- never occupies visible height pre-start  ->
+PASS  1: page-h1/page-subhead ids are preserved (speakable schema + h1 audit script still find them)  ->
+PASS  2: the mcMaxHeightPx measurement state is removed (the fixed composer it existed to clear no longer exists)  ->
+PASS  2: composerDockRef is removed along with the measurement it fed  ->
+PASS  2: mcCardRef is removed along with the measurement it fed  ->
+PASS  2: the dark 340px Mission Control rail is retired outright -- no <aside> remains in ProjectDesk.tsx  ->
+PASS  2: the rail's mobile expand/collapse state is retired with it (a full pane has no 390px overflow to work around)  ->
+PASS  2: the composer's outer wrapper is relatively positioned in BOTH of its render contexts (no longer fixed/inset-x-0/bottom-0), matching Robert's 19 Aug 2026 request to move it inline near the top  ->
+PASS  2: once started, the one real composer renders in the global command zone above every procurement view  ->
+PASS  2: no phone or desktop page-wide composer dock remains  ->
+PASS  3: no mobile aside branches its bottom padding on mcExpanded (no fixed dock left to conditionally clear)  ->
+PASS  3: the three-area workspace becomes one clear vertical flow on phones  ->
+PASS  3: the living document precedes the decision rail on phones  ->
+PASS  4: the ribbon's eyebrow reads "What changed", matching the Constitution mockups' own label  ->
+PASS  4: the ribbon box uses the emerald-soft background/border tokens (19 Aug 2026 handoff palette)  ->
+PASS  4: the earlier "Value created" orange-soft label no longer exists  ->
+PASS  5: ProjectDesk derives a latestMcpReceipt value  ->
+PASS  5: latestMcpReceipt is gated on the SAME real isMcp && hasConsent condition McpEvidencePanel.tsx's approvedEvents already uses (not a separate, looser rule)  ->
+PASS  5: with no real approved MCP event, latestMcpReceipt is genuinely null (renders nothing), never a placeholder  ->
+PASS  5: the MCP RECEIPT block only renders when latestMcpReceipt is real and non-null  ->
+PASS  5: the MCP RECEIPT label uses the violet (lilac) token, distinct from the orange "Agent proposed" and cobalt "MCP evidence" tags, in the light-background variant its new surface requires  ->
+PASS  5: the dark-surface lilac variant is no longer USED in ProjectDesk.tsx -- there is no dark card left to need it  ->
+PASS  6: the architecture eyebrow reads "Live procurement twin", matching the Constitution mockups  ->
+PASS  6: the earlier neutral-grey edge/arrow colour is fully replaced  ->
+PASS  6: the pipeline's connecting arrows use the emerald token, matching the mockups' green connecting lines  ->
+PASS  6: a node backed by a governed compiled clause carries the emerald-soft border/background pair (the reference's "Confirmed" state)  ->
+PASS  6: node state is derived from the real sourceClauseIds the compiler already records, never from an invented per-node status field  ->
+PASS  6: the legend renders only the states actually present, so it can never advertise a category nothing on screen is in  ->
+PASS  6: the delta caption is an optional, nullable prop -- never a required/always-shown value  ->
+PASS  6: architectureDeltaCaption is a real function computed from document.changeSet, not inline fabricated text  ->
+PASS  6: architectureDeltaCaption's function body was located for inspection  ->
+PASS  6: the mockup's fabricated "evidence requests added" count is deliberately NOT reproduced in the actual rendered caption (this codebase has no real per-change count for it)  ->
+PASS  6: the delta caption is only passed when hasChange is real and true, null otherwise  ->
+PASS  7: envelope.ts's canonical-envelope recompute (both create AND update) now trusts the client's own validated lastRevision instead of guessing server-side (fixes a real false-positive 409 on every project's first save AND its next edit-then-save/publish, both confirmed via live Playwright runs against a local KV store)  ->
+PASS  7: the Decisions station never calls an open decision "blocking" -- they gate nothing, and the real gate is the publish checklist  ->
+PASS  7: its zero-state heading reads "Nothing open", never a phrase implying a cleared blocker  ->
+PASS  7: the subhead states plainly that answering is optional and does not hold publishing up  ->
+PASS  7: the old contradictory "Nothing material outstanding" string is fully removed from ProjectDesk.tsx  ->
+PASS  7: a non-material decision card carries its own "Not required to publish" chip, so it can never be read as a blocker under a heading that says there are none  ->
+PASS  7: that chip is computed from the SAME MATERIAL_IMPACTS classification the blocking-decision count uses, so badge and count can never disagree  ->
+PASS  7: post-publish, the station says publication is complete and frames everything remaining as shaping the next revision, never as outstanding work  ->
+PASS  7: ProjectDesk's light-background muted/caption text uses #66635e (the 19 Aug 2026 handoff palette's ink-600, axe-core-verified 5.1:1+ across every background this pass measured) instead of the inaccessible #A3A099/#8C8A85 hex literals (2.5:1-3.5:1)  ->
+PASS  7: no light-background Tailwind text-color class in ProjectDesk.tsx still uses the old sub-4.5:1 #A3A099/#8C8A85 hex literals  ->
+PASS  7: the main nav's board/account links carry real vertical padding (py-2), not a bare text-line hit area  ->
+PASS  7: procurement-document.ts has a canonicalJson() helper that sorts object keys recursively before stringifying, making equality checks independent of property-insertion order  ->
+PASS  7: diffIds() (drives changeSet.clauses/questions/gates) now compares clauses via canonicalJson, not raw JSON.stringify -- fixes a real false-positive "updated" on every unchanged clause surviving a second save, confirmed via a live Playwright run diffing the server's fresh recompute against the actual persisted KV record (identical content, different key order after the schema round-trip)  ->
+PASS  7: the old key-order-sensitive raw JSON.stringify comparison in diffIds() is fully removed  ->
+PASS  7: LivingProcurementCanvas now also renders through phase==="fits" (states 3-5), not just "live" (state 2) -- the living document/supplier pack/evaluation views stay visible right where a buyer is about to publish and right after they have, instead of vanishing the moment publishing starts  ->
+PASS  7: McpEvidencePanel (real project history/provenance) now also renders through phase==="fits", for the same reason and with the same non-leak guarantee (it names no vendor)  ->
+PASS  7: cors.ts's CORS allowlist no longer grants the retired sase.netify.co.uk subdomain cross-origin access to the agentic APIs  ->
+PASS  7: the shortlist advisor's own system prompt no longer describes itself as embedded at sase.netify.co.uk -- it names the canonical netify.co.uk host  ->
+PASS  8: src/app/layout.tsx (sitewide root layout) does not import from next/font/google  ->
+PASS  8: src/app/layout.tsx does not import from next/font/local either -- the sitewide/marketing surface loads no custom webfont  ->
+PASS  8: layout.tsx no longer wires up an actual --font-inter variable binding (a comment may still reference the retired identifier by name for context)  ->
+PASS  8: the (workspace) route group's own layout.tsx no longer imports the retired workspace/fonts module (removed 20 Aug 2026) -- the workspace surface loads no custom webfont either, same rule as the root layout  ->
+PASS  8: the (workspace) layout's outer div no longer carries the retired workspaceFontVars class (a comment may still reference the retired identifier by name for context)  ->
+PASS  8: globals.css's font tokens no longer reference var(--font-inter) anywhere  ->
+PASS  8: globals.css no longer references var(--font-space-grotesk) or var(--font-jetbrains-mono) anywhere -- both retired 20 Aug 2026  ->
+PASS  8: --nf-font-serif, --nf-font-sans and --nf-font-mono are all plain system stacks (20 Aug 2026 reversal) -- no surface anywhere in the app loads a custom webfont  ->
+PASS  8: src/lib/workspace/fonts.ts (the self-hosted Space Grotesk/JetBrains Mono declarations) is deleted, not merely unwired  ->
+PASS  8: the vendored .woff2 font files (src/fonts/) are deleted, not left as dead weight  ->
+PASS  9: ProjectDesk.tsx scrolls to the top on a successful publish, so State 4 never renders under a scroll position left over from reviewing pre-publish decisions  ->
+PASS  9: the scroll-to-top runs specifically inside the verified publish-success branch (HTTP success + MarketUnlock + board id), not on every render or on failure  ->
 
 ALL PASS
-PASS  1 (draft): the Decisions station's pre-publish branch renders the real open-decision count, WITHOUT claiming it gates publishing (19 Aug: it never did -- signLocked gates on the publish checklist)  ->  
-PASS  A setup: the Decisions station's <h2> heading block was located for inspection  ->  
-PASS  A setup: the heading's `published ? ... : ...` branch structure was located  ->  
+PASS  1 (draft): the Decisions station's pre-publish branch renders the real open-decision count, WITHOUT claiming it gates publishing (19 Aug: it never did -- signLocked gates on the publish checklist)  ->
+PASS  A setup: the Decisions station's <h2> heading block was located for inspection  ->
+PASS  A setup: the heading's `published ? ... : ...` branch structure was located  ->
 PASS  2 (published): the published-true branch never contains the string "before publish"  ->  materialDecisionsRemaining
             ? `Project published · ${materialDecisionsRemaining} optional refinement${materialDecisionsRemaining === 1 ? "" : "s"} for the next revision`
             : "Project published"
-PASS  2 (published): the published-true branch says "Project published"  ->  
-PASS  2 (published): remaining decisions after publish are labelled "optional refinement(s)", never blockers  ->  
-PASS  2 (published): the Decisions station's body copy has its own published-aware branch ("Publication is already complete...")  ->  
-PASS  3: the pre-publish explainer card ("Publish to match this project…") is gated on `!published`  ->  
-PASS  3 setup: the explainer heading string still exists in source (proving the fixture isn't vacuous -- the content exists, just conditionally)  ->  
-PASS  3 setup: shared sourcing description supplies the explainer copy  ->  
-PASS  B setup: the publish success branch was located for inspection  ->  
-PASS  B: confirms `setPhase` is never called in the publish success path -- `phase` alone cannot detect "already published", so `!published` is the correct, necessary gate  ->  
-PASS  3 (regression guard): the data-publish block's own `published ? (...) : (...)` split (the "Generate and publish" button's own gate) is unchanged  ->  
-PASS  4 setup: the publish-panel's open-decisions stat was located  ->  
-PASS  4: the publish-panel stat now reads `materialDecisionsRemaining` -- the SAME identifier Mission Control's heading uses, not a separately-sourced value  ->  
-PASS  4: no remaining UI DISPLAY reads `unansweredGaps.length` as a "decisions" count (the accept-gap submission loop's own use of `unansweredGaps` is a different, legitimate concern and is untouched)  ->  
-PASS  5: post-publish, the Decisions station states publication is complete instead of labelling anything a blocker -- regardless of `materialDecisionsRemaining`'s own pre-publish material/non-material split  ->  
-PASS  5: remaining post-publish decisions are framed as shaping the next revision, never as outstanding work on a completed publication  ->  
-PASS  5: LivingProcurementCanvas renders no StatTile for the raw, unfiltered open-decisions count -- it cannot compete with the one real progress fraction  ->  
-PASS  5: the three tiles that remain are OUTPUTS (what suppliers receive), not progress -- proving the tile row was narrowed, not deleted wholesale  ->  
-PASS  5: no StatTile or section in LivingProcurementCanvas.tsx is still labelled "Open decisions"  ->  
-PASS  D setup: `responseCount` defaults to `null` ("not yet checked") -- the safe default that renders identically to a real, confirmed zero, never overclaiming  ->  
-PASS  D setup: `loadResponseStatus` reads the real `/api/rfp/[id]/evaluation` endpoint (the SAME real, stored-response-backed endpoint RfpBuilder.tsx's own genuine comparison view already uses)  ->  
-PASS  D: loadResponseStatus calls the real evaluation endpoint, not a placeholder or guessed count  ->  
-PASS  6: published-with-no-confirmed-responses renders "Published — awaiting supplier responses"  ->  
-PASS  6: confirmed responses use the real positive count  ->  
-PASS  6: zero invitations have an explicit state rather than promising supplier responses  ->  
-PASS  7: a real, positive `responseCount` renders "N of M invited vendor(s) have/has responded", using the real fetched count  ->  
-PASS  7: the "Compare responses" link only renders when `responseCount` is real and truthy (never for 0 or null)  ->  
-PASS  7: "Compare responses" links to the real, existing RfpBuilder review route -- not a new or duplicated comparison view  ->  
-PASS  7 (regression guard): RfpBuilder.tsx's own honest "no responses yet" empty state is unchanged  ->  
-PASS  7 (regression guard): RfpBuilder.tsx's own genuine ranked-comparison-matrix rendering (gated on real `evaluations.length > 0`) is unchanged  ->  
+PASS  2 (published): the published-true branch says "Project published"  ->
+PASS  2 (published): remaining decisions after publish are labelled "optional refinement(s)", never blockers  ->
+PASS  2 (published): the Decisions station's body copy has its own published-aware branch ("Publication is already complete...")  ->
+PASS  3: the pre-publish explainer card ("Publish to match this project…") is gated on `!published`  ->
+PASS  3 setup: the explainer heading string still exists in source (proving the fixture isn't vacuous -- the content exists, just conditionally)  ->
+PASS  3 setup: shared sourcing description supplies the explainer copy  ->
+PASS  B setup: the publish success branch was located for inspection  ->
+PASS  B: confirms `setPhase` is never called in the publish success path -- `phase` alone cannot detect "already published", so `!published` is the correct, necessary gate  ->
+PASS  3 (regression guard): the data-publish block's own `published ? (...) : (...)` split (the "Generate and publish" button's own gate) is unchanged  ->
+PASS  4 setup: the publish-panel's open-decisions stat was located  ->
+PASS  4: the publish-panel stat now reads `materialDecisionsRemaining` -- the SAME identifier Mission Control's heading uses, not a separately-sourced value  ->
+PASS  4: no remaining UI DISPLAY reads `unansweredGaps.length` as a "decisions" count (the accept-gap submission loop's own use of `unansweredGaps` is a different, legitimate concern and is untouched)  ->
+PASS  5: post-publish, the Decisions station states publication is complete instead of labelling anything a blocker -- regardless of `materialDecisionsRemaining`'s own pre-publish material/non-material split  ->
+PASS  5: remaining post-publish decisions are framed as shaping the next revision, never as outstanding work on a completed publication  ->
+PASS  5: LivingProcurementCanvas renders no StatTile for the raw, unfiltered open-decisions count -- it cannot compete with the one real progress fraction  ->
+PASS  5: the three tiles that remain are OUTPUTS (what suppliers receive), not progress -- proving the tile row was narrowed, not deleted wholesale  ->
+PASS  5: no StatTile or section in LivingProcurementCanvas.tsx is still labelled "Open decisions"  ->
+PASS  D setup: `responseCount` defaults to `null` ("not yet checked") -- the safe default that renders identically to a real, confirmed zero, never overclaiming  ->
+PASS  D setup: `loadResponseStatus` reads the real `/api/rfp/[id]/evaluation` endpoint (the SAME real, stored-response-backed endpoint RfpBuilder.tsx's own genuine comparison view already uses)  ->
+PASS  D: loadResponseStatus calls the real evaluation endpoint, not a placeholder or guessed count  ->
+PASS  6: published-with-no-confirmed-responses renders "Published — awaiting supplier responses"  ->
+PASS  6: confirmed responses use the real positive count  ->
+PASS  6: zero invitations have an explicit state rather than promising supplier responses  ->
+PASS  7: a real, positive `responseCount` renders "N of M invited vendor(s) have/has responded", using the real fetched count  ->
+PASS  7: the "Compare responses" link only renders when `responseCount` is real and truthy (never for 0 or null)  ->
+PASS  7: "Compare responses" links to the real, existing RfpBuilder review route -- not a new or duplicated comparison view  ->
+PASS  7 (regression guard): RfpBuilder.tsx's own honest "no responses yet" empty state is unchanged  ->
+PASS  7 (regression guard): RfpBuilder.tsx's own genuine ranked-comparison-matrix rendering (gated on real `evaluations.length > 0`) is unchanged  ->
 PASS  11 (response half): `loadResponseStatus` is called from exactly two sites -- the live publish-success path and the reopen/rehydrate path -- so a reopened published project shows real response status too, not just a fresh publish  ->  count=2
-PASS  10: the sector-chip row keeps its real horizontal scroll (`overflow-x-auto`) and gains a right-edge fade mask as the required "clear affordance" -- content itself (every chip's full label) is untouched  ->  
-PASS  10: the fade mask is turned off at `sm`+, where the row switches to `flex-wrap` and has nothing left to hint at  ->  
-PASS  10: a `-webkit-mask-image` fallback is present alongside the standard property for Safari/WebKit  ->  
-PASS  8-9 (regression guard): /api/workspace/fit's own pre-publish vendor-identity boundary is present and unmodified by this pass  ->  
-PASS  8-9: the (now `!published`-gated) pre-publish explainer card itself never names a vendor -- confirmed no vendor-name text appears in that block's own source  ->  
-PASS  12: the pre-publication lifecycle never promises a shortlist that the market boundary has not unlocked  ->  
-PASS  12: the review action is 'Review requirement' before publish and becomes 'View shortlist' only after a real publication  ->  
-PASS  12: after publication, View shortlist opens the station that renders the frozen published matches; before publication it opens document review  ->  
-PASS  12: the separate publish action becomes a disabled completion state after submission instead of duplicating the shortlist destination  ->  
+PASS  10: the sector-chip row keeps its real horizontal scroll (`overflow-x-auto`) and gains a right-edge fade mask as the required "clear affordance" -- content itself (every chip's full label) is untouched  ->
+PASS  10: the fade mask is turned off at `sm`+, where the row switches to `flex-wrap` and has nothing left to hint at  ->
+PASS  10: a `-webkit-mask-image` fallback is present alongside the standard property for Safari/WebKit  ->
+PASS  8-9 (regression guard): /api/workspace/fit's own pre-publish vendor-identity boundary is present and unmodified by this pass  ->
+PASS  8-9: the (now `!published`-gated) pre-publish explainer card itself never names a vendor -- confirmed no vendor-name text appears in that block's own source  ->
+PASS  12: the pre-publication lifecycle never promises a shortlist that the market boundary has not unlocked  ->
+PASS  12: the review action is 'Review requirement' before publish and becomes 'View shortlist' only after a real publication  ->
+PASS  12: after publication, View shortlist opens the station that renders the frozen published matches; before publication it opens document review  ->
+PASS  12: the separate publish action becomes a disabled completion state after submission instead of duplicating the shortlist destination  ->
 
 ALL PASS
 PASS  the publish API refuses to report success without a real board opportunity id
@@ -1281,41 +1281,41 @@ PASS  concurrent stale saves remain rejected with 409
 
 ALL PASS
 PASS  A setup: `landOption` was located in ProjectDesk.tsx  ->  3582 chars
-PASS  A: `landOption` attributes the chosen option to the BUYER (calls sayYou)  ->  
-PASS  A: `landOption` lists `sayYou` in its dependency array (no stale-closure regression)  ->  
-PASS  A: `landOption` no longer speaks the buyer's chosen option in Netify's voice  ->  
+PASS  A: `landOption` attributes the chosen option to the BUYER (calls sayYou)  ->
+PASS  A: `landOption` lists `sayYou` in its dependency array (no stale-closure regression)  ->
+PASS  A: `landOption` no longer speaks the buyer's chosen option in Netify's voice  ->
 PASS  A setup: `pickChip` was located in ProjectDesk.tsx  ->  2274 chars
-PASS  A: `pickChip` attributes the chosen option to the BUYER (calls sayYou)  ->  
-PASS  A: `pickChip` lists `sayYou` in its dependency array (no stale-closure regression)  ->  
-PASS  A: `pickChip` no longer speaks the buyer's chosen option in Netify's voice  ->  
+PASS  A: `pickChip` attributes the chosen option to the BUYER (calls sayYou)  ->
+PASS  A: `pickChip` lists `sayYou` in its dependency array (no stale-closure regression)  ->
+PASS  A: `pickChip` no longer speaks the buyer's chosen option in Netify's voice  ->
 PASS  A setup: `answerNextQuestion` was located in ProjectDesk.tsx  ->  6584 chars
-PASS  A: `answerNextQuestion` attributes the chosen option to the BUYER (calls sayYou)  ->  
-PASS  A: `answerNextQuestion` lists `sayYou` in its dependency array (no stale-closure regression)  ->  
-PASS  A: `answerNextQuestion` no longer speaks the buyer's chosen option in Netify's voice  ->  
+PASS  A: `answerNextQuestion` attributes the chosen option to the BUYER (calls sayYou)  ->
+PASS  A: `answerNextQuestion` lists `sayYou` in its dependency array (no stale-closure regression)  ->
+PASS  A: `answerNextQuestion` no longer speaks the buyer's chosen option in Netify's voice  ->
 PASS  A: `sayYou` still only appends to the transcript -- it never writes the source ledger  ->  setMsgs((ms) => [...ms, { who: "you", text }]);
-PASS  B: answered-log.ts is pure -- no React (Article 17)  ->  
+PASS  B: answered-log.ts is pure -- no React (Article 17)  ->
 PASS  B: a chosen (source "answer") standing fact IS listed  ->  ["estate.sites","organisation.sector","n1"]
-PASS  B: a fact extracted from the buyer's OWN typed sentence IS listed -- they stated it  ->  
-PASS  B: how each was stated is carried per row -- "you chose" and "your words" never collapse into one claim  ->  
-PASS  B: an INFERRED fact is never listed as something the buyer said  ->  
+PASS  B: a fact extracted from the buyer's OWN typed sentence IS listed -- they stated it  ->
+PASS  B: how each was stated is carried per row -- "you chose" and "your words" never collapse into one claim  ->
+PASS  B: an INFERRED fact is never listed as something the buyer said  ->
 PASS  B: an inferred standing fact IS surfaced, in a separate `assumed` list labelled as an assumption  ->  ["estate.cloud"]
-PASS  B: every assumption carries its path, so it can be corrected rather than merely disclosed  ->  
-PASS  B: a STRUCK fact is NOT listed -- a removed answer leaves this panel the instant it leaves the document  ->  
-PASS  B: an `own` noted item IS listed  ->  
-PASS  B: a non-`own` noted item is NOT listed (it was not the buyer's choice)  ->  
+PASS  B: every assumption carries its path, so it can be corrected rather than merely disclosed  ->
+PASS  B: a STRUCK fact is NOT listed -- a removed answer leaves this panel the instant it leaves the document  ->
+PASS  B: an `own` noted item IS listed  ->
+PASS  B: a non-`own` noted item is NOT listed (it was not the buyer's choice)  ->
 PASS  B: rows are labelled in human words via PATH_LABELS, never a raw fact path  ->  Sites: 30
 PASS  B: the answer shown is the value the document carries  ->  30
-PASS  B: an empty document produces an empty log (no invented rows)  ->  
-PASS  C: ProjectDesk projects the answered log off `facts`/`noted` directly  ->  
-PASS  C: CapturedList is handed both halves of the real projection  ->  
-PASS  C: CapturedList takes it as a typed prop  ->  
-PASS  C: it renders in the chat column, directly BELOW the transcript (the mockup's own placement)  ->  
-PASS  C: nothing renders when there is nothing real to show  ->  
-PASS  C: the list caps for the fixed-height pane but ALWAYS offers the rest -- capped, never truncated silently  ->  
-PASS  C: headed as a record of what was captured, not as advice  ->  
-PASS  C: it is NOT also duplicated on the Decisions station (Robert chose one placement, not both)  ->  
-PASS  C: AnswerNext's confirmation strip is announced to screen readers  ->  
-PASS  C: AnswerNext confirms the specific option that was clicked, by name  ->  
+PASS  B: an empty document produces an empty log (no invented rows)  ->
+PASS  C: ProjectDesk projects the answered log off `facts`/`noted` directly  ->
+PASS  C: CapturedList is handed both halves of the real projection  ->
+PASS  C: CapturedList takes it as a typed prop  ->
+PASS  C: it renders in the chat column, directly BELOW the transcript (the mockup's own placement)  ->
+PASS  C: nothing renders when there is nothing real to show  ->
+PASS  C: the list caps for the fixed-height pane but ALWAYS offers the rest -- capped, never truncated silently  ->
+PASS  C: headed as a record of what was captured, not as advice  ->
+PASS  C: it is NOT also duplicated on the Decisions station (Robert chose one placement, not both)  ->
+PASS  C: AnswerNext's confirmation strip is announced to screen readers  ->
+PASS  C: AnswerNext confirms the specific option that was clicked, by name  ->
 
 ALL PASS
 PASS  A: `later` rows are excluded from the denominator -- the target is hittable, not permanently short  ->  total=5 of 7 rows
@@ -1324,40 +1324,40 @@ PASS  A: only `confirmed` required rows count as ready  ->  ready=2
 PASS  A: `next` is the first unconfirmed REQUIRED row, with its position  ->  Current estate @ 3
 PASS  A: one wording, shared -- a fraction, never a percentage  ->  2 of 5 sections ready
 PASS  A: THE END IS REACHABLE -- confirming every required row yields N of N with no `next`  ->  5/5
-PASS  A: a `later` section is given NO position inside the fraction (card and fraction cannot disagree)  ->  
-PASS  A: an unmapped title yields null, never a guessed position  ->  
+PASS  A: a `later` section is given NO position inside the fraction (card and fraction cannot disagree)  ->
+PASS  A: an unmapped title yields null, never a guessed position  ->
 PASS  A: a required section resolves to its 1-based position  ->  {"position":4,"total":5,"state":"needs_decision"}
-PASS  A: a structured resilience selection shown in the living document also completes the resilience outline row  ->  
-PASS  A: the RFP-ready threshold is exactly five populated questions per included section  ->  
-PASS  A: RFP coverage reports the exact incomplete section and remaining answer count  ->  
-PASS  A: publishing remains locked while any essential section still needs input or a decision  ->  
-PASS  A: publishing unlocks when every essential section is confirmed; Later rows remain optional  ->  
-PASS  A: the server rejects an empty or partial persisted envelope across all seven essential sections  ->  
-PASS  A: the server accepts a persisted envelope only when all seven essential sections are evidenced  ->  
-PASS  B: the 0-100 readiness DIAL is no longer rendered on the canvas  ->  
-PASS  B: the raw "Document gaps" tile is gone  ->  
-PASS  B: `buildReadiness` itself is UNTOUCHED -- the compiler, exports and API still carry the score; only the competing DISPLAY was removed  ->  
-PASS  B: the canvas no longer describes advisory decisions as a barrier to pricing (they gate nothing -- publish-checklist.ts does)  ->  
-PASS  C: ProjectDesk derives it from `sectionOutline` -- the same array the canvas renders as a list  ->  
-PASS  C: the primary navigation reads it (only rendered once a project has started)  ->  
-PASS  C: the document header derives it from the outline it is about to render  ->  
-PASS  C: the header uses the shared wording function, not its own sentence  ->  
-PASS  C: the primary nav shows the selected short or detailed populated-question threshold for every section  ->  
-PASS  D: `resolveQuestionCard` resolves each card's section from the same outline  ->  
-PASS  D: null rather than a guess when a question maps to no required section  ->  
-PASS  D: the chat card states section N of M -- the same M as the rail  ->  
-PASS  D: the card says why it is being asked (existing `nq.reason`, newly labelled)  ->  
-PASS  E: opportunity publishing and the selected short/detailed RFP-ready state are separate, explicit gates  ->  
-PASS  E: it is NOT gated on the advisory decision count -- that count is generative and would never reach zero  ->  
-PASS  E: the end state says the document is publishable, in the chat column where the conversation lives  ->  
-PASS  E: its headline TRACKS the fraction -- a live check caught it announcing "everything suppliers need is in the document" over "2 of 8 sections ready"  ->  
-PASS  E: it hands over the two real next actions rather than another question  ->  
-PASS  E: remaining decisions are named optional out loud, not hidden  ->  
-PASS  E: the retained secondary AnswerNext component still supports honest optional framing  ->  
-PASS  E: the publishable handoff shown in activity is driven by the same real gate  ->  
-PASS  E: Publish navigation uses that same completion gate rather than merely checking that a project started  ->  
-PASS  E: an unfinished section receives a guided fallback question instead of the false Review terminal state  ->  
-PASS  E: committing an answer locks the old control surface and shows a receipt before the next options appear  ->  
+PASS  A: a structured resilience selection shown in the living document also completes the resilience outline row  ->
+PASS  A: the RFP-ready threshold is exactly five populated questions per included section  ->
+PASS  A: RFP coverage reports the exact incomplete section and remaining answer count  ->
+PASS  A: publishing remains locked while any essential section still needs input or a decision  ->
+PASS  A: publishing unlocks when every essential section is confirmed; Later rows remain optional  ->
+PASS  A: the server rejects an empty or partial persisted envelope across all seven essential sections  ->
+PASS  A: the server accepts a persisted envelope only when all seven essential sections are evidenced  ->
+PASS  B: the 0-100 readiness DIAL is no longer rendered on the canvas  ->
+PASS  B: the raw "Document gaps" tile is gone  ->
+PASS  B: `buildReadiness` itself is UNTOUCHED -- the compiler, exports and API still carry the score; only the competing DISPLAY was removed  ->
+PASS  B: the canvas no longer describes advisory decisions as a barrier to pricing (they gate nothing -- publish-checklist.ts does)  ->
+PASS  C: ProjectDesk derives it from `sectionOutline` -- the same array the canvas renders as a list  ->
+PASS  C: the primary navigation reads it (only rendered once a project has started)  ->
+PASS  C: the document header derives it from the outline it is about to render  ->
+PASS  C: the header uses the shared wording function, not its own sentence  ->
+PASS  C: the primary nav shows the selected short or detailed populated-question threshold for every section  ->
+PASS  D: `resolveQuestionCard` resolves each card's section from the same outline  ->
+PASS  D: null rather than a guess when a question maps to no required section  ->
+PASS  D: the chat card states section N of M -- the same M as the rail  ->
+PASS  D: the card says why it is being asked (existing `nq.reason`, newly labelled)  ->
+PASS  E: opportunity publishing and the selected short/detailed RFP-ready state are separate, explicit gates  ->
+PASS  E: it is NOT gated on the advisory decision count -- that count is generative and would never reach zero  ->
+PASS  E: the end state says the document is publishable, in the chat column where the conversation lives  ->
+PASS  E: its headline TRACKS the fraction -- a live check caught it announcing "everything suppliers need is in the document" over "2 of 8 sections ready"  ->
+PASS  E: it hands over the two real next actions rather than another question  ->
+PASS  E: remaining decisions are named optional out loud, not hidden  ->
+PASS  E: the retained secondary AnswerNext component still supports honest optional framing  ->
+PASS  E: the publishable handoff shown in activity is driven by the same real gate  ->
+PASS  E: Publish navigation uses that same completion gate rather than merely checking that a project started  ->
+PASS  E: an unfinished section receives a guided fallback question instead of the false Review terminal state  ->
+PASS  E: committing an answer locks the old control surface and shows a receipt before the next options appear  ->
 
 ALL PASS
 PASS  the reported sentence: two qualifiers between the count and its noun  ->  "We need SD-WAN and SASE for 30 UK manufacturing sites, 4000 users, going live within 6 months" -> {"users":4000,"sites":30} (want {"sites":30,"users":4000})
@@ -1380,14 +1380,14 @@ PASS  the negation window still suppresses the match  ->  "We are not adding 40 
 PASS  the gap is bounded at three qualifiers -- it is not an unbounded reach  ->  {}
 
 ALL PASS
-PASS  the sha comes from Vercel's own per-deployment commit variable  ->  
-PASS  both values are inlined from one release environment, shared by every build worker  ->  
-PASS  build-info.ts never substitutes a request-time clock for a missing build time  ->  
+PASS  the sha comes from Vercel's own per-deployment commit variable  ->
+PASS  both values are inlined from one release environment, shared by every build worker  ->
+PASS  build-info.ts never substitutes a request-time clock for a missing build time  ->
 PASS  a missing build time reads as absent rather than being papered over with `now`  ->  an empty value is honest; a fresh one would defeat the entire purpose
-PASS  build-info.ts is pure -- no React (Article 17)  ->  
-PASS  the footer renders the shared stamp function, not its own formatting  ->  
-PASS  the sha is also emitted as page metadata, readable from view-source without scrolling  ->  
-PASS  emitted through Next's metadata API, not a hand-written head element (which risks a second one)  ->  
+PASS  build-info.ts is pure -- no React (Article 17)  ->
+PASS  the footer renders the shared stamp function, not its own formatting  ->
+PASS  the sha is also emitted as page metadata, readable from view-source without scrolling  ->
+PASS  emitted through Next's metadata API, not a hand-written head element (which risks a second one)  ->
 PASS  the sha is shortened to 7 characters  ->  dev
 PASS  the stamp is labelled so it is not mistaken for anything else  ->  build dev
 PASS  a time, when present, is stated in UTC  ->  build dev
@@ -1498,33 +1498,33 @@ PASS  B: with no noted platform-shape choice, q-sase-shape IS earned (reproduces
 PASS  B: once "obj-unified" is a noted id, q-sase-shape is NO LONGER earned -- the exact recompute the fixed click handler must trigger  ->  q-root-sector,q-contract-end,q-sse-scope
 PASS  B: the other option ("obj-bob") also clears it -- either answer resolves the same question  ->  q-root-sector,q-contract-end,q-sse-scope
 PASS  C setup: the "items" branch of answerNextQuestion was located in ProjectDesk.tsx  ->  3035 chars
-PASS  C: the items branch now branches on e.item.path (real path vs. null) instead of treating every itemId identically  ->  
-PASS  C: a null-path item is now routed through setNoted (not silently dropped into applyMerge as a bogus fact)  ->  
-PASS  C: the OLD unconditional push (every itemId -> applyMerge, regardless of path) is gone  ->  
-PASS  C: recordDecision's resultingNoted now carries the real noted adds, not a hardcoded []  ->  
-PASS  C: a noted item's section comes from ITEM_BY_ID's own taxonomy section (e.section) -- structurally correct, not guessed from nq.target  ->  
-PASS  C: a null-path item lands with own: true, same as every other buyer-clicked answer (landOption/pickChip/the note branch) -- so it counts as "stated" in answered-log.ts  ->  
-PASS  D: earned note answers land under the stable qn-<question-id> resolution key  ->  
-PASS  D: the obsolete option-index note id cannot make an answered question reappear  ->  
+PASS  C: the items branch now branches on e.item.path (real path vs. null) instead of treating every itemId identically  ->
+PASS  C: a null-path item is now routed through setNoted (not silently dropped into applyMerge as a bogus fact)  ->
+PASS  C: the OLD unconditional push (every itemId -> applyMerge, regardless of path) is gone  ->
+PASS  C: recordDecision's resultingNoted now carries the real noted adds, not a hardcoded []  ->
+PASS  C: a noted item's section comes from ITEM_BY_ID's own taxonomy section (e.section) -- structurally correct, not guessed from nq.target  ->
+PASS  C: a null-path item lands with own: true, same as every other buyer-clicked answer (landOption/pickChip/the note branch) -- so it counts as "stated" in answered-log.ts  ->
+PASS  D: earned note answers land under the stable qn-<question-id> resolution key  ->
+PASS  D: the obsolete option-index note id cannot make an answered question reappear  ->
 
 ALL PASS
-PASS  A: WizardRail.tsx is deleted, not left as unwired dead code  ->  
-PASS  A: SectionNav.tsx exists  ->  
-PASS  A: ProjectDesk.tsx no longer renders <WizardRail  ->  
-PASS  A: ProjectDesk.tsx renders <SectionNav in its place  ->  
-PASS  A: SectionNav sits in the workspace grid as the primary vertical area rail  ->  
-PASS  A: SectionNav is given the real sectionOutline, not a second computation  ->  
-PASS  A: selecting a row sets the active section, opens the requirement view and returns to the pane it renders in  ->  
-PASS  B setup: the `describe` station's JSX branch was located  ->  
-PASS  B: SectionDetail renders on the `describe` station  ->  
-PASS  B: the full document twin (canvasBlock) still renders on the same station, un-removed  ->  
-PASS  B: the living document leads; optional section guidance follows  ->  
-PASS  B: SectionDetail is given real per-section coaching copy, not invented inline text  ->  
-PASS  B: SectionDetail is given the open questions actually filtered to this section  ->  
-PASS  B correction: optional guidance defaults to collapsed  ->  
-PASS  B correction: SectionDetail, not the document, is gated by the disclosure state  ->  
-PASS  B correction: a real toggle button flips the collapse state (not a dead/decorative control)  ->  
-PASS  B correction: one authoritative document remains unconditionally visible  ->  
+PASS  A: WizardRail.tsx is deleted, not left as unwired dead code  ->
+PASS  A: SectionNav.tsx exists  ->
+PASS  A: ProjectDesk.tsx no longer renders <WizardRail  ->
+PASS  A: ProjectDesk.tsx renders <SectionNav in its place  ->
+PASS  A: SectionNav sits in the workspace grid as the primary vertical area rail  ->
+PASS  A: SectionNav is given the real sectionOutline, not a second computation  ->
+PASS  A: selecting a row sets the active section, opens the requirement view and returns to the pane it renders in  ->
+PASS  B setup: the `describe` station's JSX branch was located  ->
+PASS  B: SectionDetail renders on the `describe` station  ->
+PASS  B: the full document twin (canvasBlock) still renders on the same station, un-removed  ->
+PASS  B: the living document leads; optional section guidance follows  ->
+PASS  B: SectionDetail is given real per-section coaching copy, not invented inline text  ->
+PASS  B: SectionDetail is given the open questions actually filtered to this section  ->
+PASS  B correction: optional guidance defaults to collapsed  ->
+PASS  B correction: SectionDetail, not the document, is gated by the disclosure state  ->
+PASS  B correction: a real toggle button flips the collapse state (not a dead/decorative control)  ->
+PASS  B correction: one authoritative document remains unconditionally visible  ->
 PASS  C setup: the fixture (sector pack active) produces all ten real outline rows  ->  10
 PASS  C: "Organisation and scale" (key organisation_scale) has a real, non-empty coaching entry  ->  present
 PASS  C: "Solution scope" (key solution_scope) has a real, non-empty coaching entry  ->  present
@@ -1536,21 +1536,21 @@ PASS  C: "Operating model and support" (key operating_model_support) has a real,
 PASS  C: "Migration and implementation" (key migration_implementation) has a real, non-empty coaching entry  ->  present
 PASS  C: "Commercial and contractual" (key commercial_contractual) has a real, non-empty coaching entry  ->  present
 PASS  C: "Success and evaluation" (key success_evaluation) has a real, non-empty coaching entry  ->  present
-PASS  C: coaching copy contains no "e.g." example opener (round-6 law)  ->  
-PASS  C: coaching copy contains no "for example" opener (round-6 law)  ->  
-PASS  C: coaching copy contains no quoted sample sentence with a number in it  ->  
+PASS  C: coaching copy contains no "e.g." example opener (round-6 law)  ->
+PASS  C: coaching copy contains no "for example" opener (round-6 law)  ->
+PASS  C: coaching copy contains no quoted sample sentence with a number in it  ->
 PASS  D: a single-section change is diffed as exactly one changed title  ->  ["Organisation and scale"]
 PASS  D: a two-section change is diffed as exactly two changed titles  ->  ["Organisation and scale","Solution scope"]
-PASS  D: an unchanged outline diffs to nothing  ->  
-PASS  D: ProjectDesk only surfaces the banner at >=2 changed sections -- a single-row change stays on its own row, not a banner on every click  ->  
-PASS  D: the banner names the changed sections explicitly, not just a count  ->  
-PASS  D: SectionNav is actually given the live banner state  ->  
-PASS  E: the pre-start welcome/coaching copy states the multi-section mechanism  ->  
-PASS  E: round-6 law held -- the mechanism is described, not demonstrated with an invented example sentence  ->  
-PASS  F: DecisionRail2030 requires a section-jump callback  ->  
-PASS  F: clicking the link jumps by the card's own real section title, not a guess  ->  
-PASS  F: ProjectDesk wires the decision rail to the real section-jump handler  ->  
-PASS  F: the jump handler resolves the title against the SAME live outline, never a stale copy  ->  
+PASS  D: an unchanged outline diffs to nothing  ->
+PASS  D: ProjectDesk only surfaces the banner at >=2 changed sections -- a single-row change stays on its own row, not a banner on every click  ->
+PASS  D: the banner names the changed sections explicitly, not just a count  ->
+PASS  D: SectionNav is actually given the live banner state  ->
+PASS  E: the pre-start welcome/coaching copy states the multi-section mechanism  ->
+PASS  E: round-6 law held -- the mechanism is described, not demonstrated with an invented example sentence  ->
+PASS  F: DecisionRail2030 requires a section-jump callback  ->
+PASS  F: clicking the link jumps by the card's own real section title, not a guess  ->
+PASS  F: ProjectDesk wires the decision rail to the real section-jump handler  ->
+PASS  F: the jump handler resolves the title against the SAME live outline, never a stale copy  ->
 
 ALL PASS
 PASS  a buyer-added question is compiled into the supplier response pack
@@ -1667,8 +1667,8 @@ PASS total and remote user counts stay distinct through extraction, correction, 
   Collecting page data using 7 workers ...
 ⚠ Using edge runtime on a page currently disables static generation for that page
   Generating static pages using 7 workers (0/296) ...
-  Generating static pages using 7 workers (74/296) 
-  Generating static pages using 7 workers (148/296) 
+  Generating static pages using 7 workers (74/296)
+  Generating static pages using 7 workers (148/296)
 Live shortlist provider source unavailable, using the reviewed snapshot. Error: Provider matching source is not configured.
     at h (.next/server/chunks/2832.js:1:2169)
     at z (.next/server/chunks/7622.js:1:259929)
@@ -1679,7 +1679,7 @@ Live shortlist provider source unavailable, using the reviewed snapshot. Error: 
     at z (.next/server/chunks/7622.js:1:259929)
     at async B (.next/server/chunks/7622.js:1:260493)
     at async l (.next/server/chunks/5790.js:1:49612)
-  Generating static pages using 7 workers (222/296) 
+  Generating static pages using 7 workers (222/296)
 ✓ Generating static pages using 7 workers (296/296) in 2.2s
   Finalizing page optimization ...
   Collecting build traces ...
@@ -1917,4 +1917,3 @@ Route (app)                                                       Revalidate  Ex
 ○  (Static)   prerendered as static content
 ●  (SSG)      prerendered as static HTML (uses generateStaticParams)
 ƒ  (Dynamic)  server-rendered on demand
-

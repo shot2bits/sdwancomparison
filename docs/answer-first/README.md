@@ -21,7 +21,7 @@ Status: implementation steps 1–6 completed locally; step 8 preservation checks
 
 ### 1. Existing journey suite plus new entity/evidence checks
 
-Command: `npm run test:action-first`; exit 0. Actual PASS output follows; full output, including the expected local snapshot-fallback diagnostics, is in `logs/action-first.txt`.
+Command: `npm run test:action-first`; exit 0. Actual PASS output follows; full output (terminal whitespace normalised only), including the expected local snapshot-fallback diagnostics, is in `logs/action-first.txt`.
 
 ```text
 PASS answer-first: 30 complete provider rows, best-for labels, 15 complete FAQs, schema parity, blank reviewer, expiry-safe UK sources, feed/llms parity, 4 views, no legacy status or em dash
