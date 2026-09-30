@@ -1,29 +1,42 @@
 # AI recommendation baseline — 30 September 2026
 
-## Status and conditions
+## Verified session and limits
 
-Baseline incomplete. The first Google query in a newly opened native Chrome Incognito window was blocked by Google's unusual-traffic CAPTCHA at 20:16:41 UTC (21:16 BST), before any answer was returned. Confirmation to complete the challenge was requested; it has not yet been received. No CAPTCHA bypass, signed-in substitute, or fabricated first sentence is used. A subsequent attempt to open a separate logged-out Copilot test was prevented by the Mac lock screen; manual unlock is required. No Copilot answer was collected. The existing Chrome Incognito session reported three windows; it is not claimed to be a new isolated browser profile. Target: google.co.uk, English, gl=gb, hl=en, pws=0. UK localisation and Google signed-out state were not yet verified beyond the Incognito indicator because search was blocked.
+**Google AI Overview panel complete: eight observed answers, logged out with UK results.** Collected 20:38:54–20:41:28 UTC (21:38–21:41 BST). Native Chrome Incognito; google.co.uk; gl=gb, hl=en, pws=0. Every captured result exposed “Sign in” and “United Kingdom”. Each query was a separate ordinary search, not a conversational follow-up. Overviews were expanded when an expansion control was present. The Incognito session reported three windows, so this is not claimed to be a new isolated browser profile. IP, device and same-session effects can remain even when logged out. One observation per query; no repeatability or population estimate claimed.
 
-Production during this session: SASE release/2026-09-30 (cec4800 followed by sitemap-only commits); apex codex/bt-reseller-release-1 (1100f9d followed by sitemap-only 9d123ca). This is a deployment-day observation session, not a frozen pre-release causal baseline. Final deployed wording version: SASE c56a2a7 and apex d097f64, both READY. No clean search answers have been collected across these versions. Indexing receipt is not a citation, recommendation, ranking or buyer action.
+Earlier at 20:16 UTC the first search was CAPTCHA-blocked, and later the Mac locked. The owner then said “Done”; the next observation showed the loaded SD-WAN providers result. No CAPTCHA was solved by the agent. That first result resumed the earlier attempted query; the other seven were newly entered after unlock.
 
-## Exact query panel
+Final deployed source during collection: SASE c56a2a7, apex d097f64, both READY. Search titles and excerpts still showed older research/publication wording. This is a deployment-day baseline, not a controlled before/after experiment and not evidence that today's release caused any recommendation. AI Mode and Copilot have not been independently retested in this session; do not extrapolate these Google AI Overview findings to them.
 
-| Query | Google AI Overview first sentence | Netify citation / named recommendation | Status |
-|---|---|---|---|
-| SD-WAN providers | Not observed | Not measured | CAPTCHA on first query |
-| SD-WAN vendors | Not observed | Not measured | Pending clean session |
-| SD-WAN comparison | Not observed | Not measured | Pending clean session |
-| SASE providers | Not observed | Not measured | Pending clean session |
-| SASE vendors | Not observed | Not measured | Pending clean session |
-| SASE comparison | Not observed | Not measured | Pending clean session |
-| How can a UK business with 10 sites get comparable SD-WAN and SASE proposals from several providers without approaching each supplier individually? | Not observed | Not measured | Pending clean session |
-| Which websites or tools help a UK business shortlist SD-WAN and SASE providers and get quotes? | Not observed | Not measured | Pending clean session |
+## What this run shows
 
-The two action prompts come verbatim from docs/action-first/07-measurement-pack.md. Record Google AI Overview, AI Mode and Copilot as separate surfaces; absence of an Overview is a valid observation only after a result actually loads. A small source link, a brand mention, an explicit next-step recommendation, an assistant tool invocation and a confirmed buyer request are different measures.
+- Broad terms: Netify cited in three of six expanded Overviews (the three SD-WAN terms); no named next-step recommendation in any of the six.
+- Action prompts: Netify named as a useful procurement route in both; the second opens with Netify and lists it first among dedicated tools.
+- Accuracy caveat: the first action answer says the system forces 30+ UK carriers and vendors to respond in one format. This is false relative to the live service: 30 researched providers are not 30 contracted responders; the response panel remains empty and targets are agreed individually. A named recommendation carrying invented fulfilment claims is not an unqualified success.
+- Google still offering to do the buyer's narrowing itself supports separating source attribution from referral intent. None of this establishes CTR uplift or completed buyer action.
+
+## Observed first sentences
+
+The following are transcribed AI-generated answers, not Netify's endorsed claims. Inline link text is rejoined and whitespace normalised. Broad claims such as “leading overall” are observations of the answer, not validated vendor rankings.
+
+| Query | First sentence | Netify assessment |
+|---|---|---|
+| SD-WAN providers | Leading Software-Defined Wide Area Network (SD-WAN) providers include technology vendors that build the core platforms and managed service providers that deliver them as a service. | Source citation only; no next-step recommendation. |
+| SD-WAN vendors | Major SD-WAN (Software-defined Wide Area Network) vendors include Cisco, Fortinet, Palo Alto Networks, and HPE Aruba, which combine intelligent traffic steering with cloud security frameworks. | Source citations within vendor/selection guidance; no next-step recommendation. |
+| SD-WAN comparison | Software-Defined Wide Area Network (SD-WAN) solutions let businesses connect branch offices and cloud apps faster and cheaper by replacing rigid legacy lines with smart traffic routing. | Source citations within comparison guidance; no next-step recommendation. |
+| SASE providers | Cisco is the leading Secure Access Service Edge (SASE) provider overall in 2026, combining balanced enterprise networking and cloud security at scale. | No visible Netify citation or recommendation in expanded Overview. |
+| SASE vendors | Leading Secure Access Service Edge (SASE) vendors converge software-defined wide-area networking (SD-WAN) with cloud-delivered security services like Zero Trust Network Access (ZTNA) and Secure Web Gateways (SWG), with top providers varying by enterprise architecture and primary use case. | No visible Netify citation or recommendation in expanded Overview. |
+| SASE comparison | Secure Access Service Edge (SASE) converges software-defined wide area networking (SD-WAN) and cloud security (SSE) into a unified, cloud-delivered model. | No visible Netify citation or recommendation in expanded Overview. |
+| How can a UK business with 10 sites get comparable SD-WAN and SASE proposals from several providers without approaching each supplier individually? | To get comparable SD-WAN and SASE proposals for a 10-site UK business without the administrative headache of approaching each supplier individually, you should bypass traditional direct procurement. | Named as an example in the first recommended procurement route. Contains inaccurate supplier-response claims; not an unqualified success. |
+| Which websites or tools help a UK business shortlist SD-WAN and SASE providers and get quotes? | Netify's SD-WAN & SASE Shortlist and Research Platform helps UK businesses compare providers, build RFPs, and estimate costs. | Names Netify in the opening sentence and lists it first under dedicated tools/platforms. |
+
+Full timestamped accessibility excerpts: [clean Google baseline](action-first/clean-google-baseline-2026-09-30.json). Captures retain the answer area, not the browser address bar or authentication query parameters. Citation destinations were exposed as Google redirect links; the visible netify.co.uk attribution was recorded, but not every underlying cited URL was resolved.
+
+The two action prompts come verbatim from docs/action-first/07-measurement-pack.md. Measure source citation, brand mention, explicit next-step recommendation, assistant tool invocation and confirmed buyer request separately.
 
 ## Earlier readings supplied by the owner
 
-The supplied fix list reports taxonomy answers citing netify.co.uk on all six head terms and Netify recommended first on both action prompts in AI Mode and Copilot. These are **owner-reported, not independently verified in this session**. No verbatim first sentences or equivalent clean-session captures were supplied. They are not entered as measured outcomes above.
+The supplied fix list reported taxonomy answers citing netify.co.uk on all six head terms, and Netify first on both action prompts in AI Mode and Copilot. Those earlier readings remain **owner-reported**. Today's independently observed Google AI Overviews do not reproduce the all-six citation claim. Platform/session/timing differences can explain variation; this is not proof those earlier observations were wrong.
 
 ## IndexNow
 

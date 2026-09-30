@@ -123,3 +123,11 @@ BLOCKED remaining individual Google requests: 47 URLs; Quota Exceeded
 BLOCKED clean eight-prompt baseline: CAPTCHA confirmation pending; native Mac locked
 ```
 The remaining URL queue and actual receipts are saved in search-console-submissions-2026-09-30.json. No indexing, AI recommendation or click uplift is claimed from submission receipts. Owner blanks: overdue working-hour threshold/start/end; proposal count/working-day undertaking; supplier panel commitments; 19 sector sign-offs; Harry editorial approval. Step 10 remains unapproved and unchanged.
+
+## Baseline resumed after owner unlock
+
+At 20:38–20:41 UTC the native Incognito browser exposed signed-out UK Google results for all eight queries. Clean Google AI Overview panel now complete; raw answer excerpts and first sentences saved. Broad terms: 3/6 visible Netify citations, 0/6 named next-step recommendations. Two action prompts: 2/2 named routes; one opens with Netify. First action answer makes false supplier-response claims, explicitly flagged. AI Mode/Copilot not re-tested; no causal attribution to release and no click uplift claim. Google individual indexing quota still blocks 47 URLs.
+```text
+PASS clean Google panel: 8/8 answers; Sign in and United Kingdom visible on every result
+PASS evidence separation: citations, named recommendations and inaccurate claims recorded separately
+```
