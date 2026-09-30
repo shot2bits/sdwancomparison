@@ -188,7 +188,8 @@ export type ShortlistVendor = {
   cost_model: string;
   public_pricing_visibility: "public" | "partial_public" | "quote_based";
   value_tier: "budget" | "value" | "mid" | "premium";
-  uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed";
+  uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed" | "not_confirmed";
+  projection_provenance?: {contract:string;governed_revision:string;curated_reviewed_at:string;curated_sectors:Record<string,CapabilityStatus>;curated_uk_delivery:string;curated_uk_basis:string;sector_review_queue:{sector:string;reason:string;support_state:string}[];resolution:string};
   uk_basis: string;
   capabilities: Record<string, CapabilityStatus>;
   capability_evidence?: Record<string, {source_url: string; reviewed_at: string; review_due: string; qualification: string}>;

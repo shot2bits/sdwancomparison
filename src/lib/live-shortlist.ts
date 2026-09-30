@@ -1,3 +1,5 @@
+import publicSnapshot from '@data/shortlist-public-snapshot.json';
+import { applyProjectionReview } from './provider-projection-review';
 import { comparisonSlugForGovernedProvider, shortlistExcerpt } from "@/lib/governed-provider-catalogue";
 import type { ProviderMatchInput, ProviderMatchRecord } from "@/lib/provider-matching";
 import {
@@ -160,7 +162,7 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     provider.marketplace_url = `https://netify.co.uk/marketplace/${record.slug}/`;
     provider.last_verified = record.reviewed_at?.slice(0, 10) ?? provider.last_verified;
     provider.evidence_source_count = record.evidence_source_count;
-    provider.independent_evidence_source_count = 0;
+    delete provider.independent_evidence_source_count; // Absent evidence is not a measured zero.
 
     provider.capabilities = Object.fromEntries(FEATURES.map((feature) => {
       // Exact feature evidence takes precedence over aliases; never infer a
@@ -194,8 +196,9 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     provider.agent_platforms = { windows: provider.device_posture, macos: provider.device_posture, ios: evidenceStatus([record.capabilities.mobile_devices]), android: evidenceStatus([record.capabilities.mobile_devices]), linux: provider.device_posture, chromeos: provider.device_posture, agentless: evidenceStatus([record.capabilities.clientless_access]) };
     provider.logging = { siem_export: evidenceStatus([record.capabilities.raw_log_access, record.capabilities.security_events]), log_retention_days: null };
     provider.deployment_speed = "unknown";
-    provider.uk_delivery = "global_managed";
+    provider.uk_delivery = "not_confirmed";
     provider.uk_basis = "UK contracting entity is not confirmed by the published Neon provider record.";
+    applyProjectionReview(provider, record, original);
     return provider;
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -234,6 +237,8 @@ export async function getLiveShortlistDataset(): Promise<LiveShortlistDataset> {
     return await loadNeonShortlistDataset();
   } catch (error) {
     console.error("Live shortlist provider source unavailable, using the reviewed snapshot.", error);
-    return { vendors: base, source: "snapshot_fallback", providerContractVersion: "snapshot", datasetVersions: [], providerRevisions: [], loadedAt };
+    const normalize = (v: unknown): unknown => v === 'not_confirmed' ? 'unknown' : Array.isArray(v) ? v.map(normalize) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k,x])=>[k,normalize(x)])) : v;
+    const snapshot = normalize(publicSnapshot.vendors) as ShortlistVendor[];
+    return { vendors: snapshot.length === base.length ? snapshot : base, source: "snapshot_fallback", providerContractVersion: "snapshot", datasetVersions: [], providerRevisions: [], loadedAt };
   }
 }

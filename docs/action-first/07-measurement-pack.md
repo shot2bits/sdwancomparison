@@ -1,0 +1,21 @@
+# Measurement pack — implementation and collection status
+
+Primary: a head-term Google AI Overview opening sentence recommends an action through Netify. Score source link, named mention, named service recommendation and first-sentence action recommendation separately. Keep the complete answer, URLs, screenshot, timestamp, UK location signal, sign-in status, surface and model/version when exposed. Never assign an API result to a consumer surface.
+
+Fixed prompts: SD-WAN providers; SD-WAN vendors; SD-WAN comparison; SASE providers; SASE vendors; SASE comparison. Known-positive arm: "How can a UK business with 10 sites get comparable SD-WAN and SASE proposals from several providers without approaching each supplier individually?"; "Which websites or tools help a UK business shortlist SD-WAN and SASE providers and get quotes?". Sector checks: SD-WAN for healthcare; SD-WAN for manufacturing. Controls: STL Partners SD-WAN providers page; Uswitch energy comparison; Compare the Market energy. Do not infer equivalent purchase behaviour from insurance or energy.
+
+Freeze production for baseline. Record 3 fresh sessions per surface per prompt where practical, without prior Netify conversation. Logged-out UK Google Search and AI Mode are channel observations; API runs with recorded model and search configuration are reproducibility controls. Save answer-first sentence plus full response, not cherry-picked extracts. Baseline before release; repeat monthly for three months, with an additional eight-week review. All rows in baseline.csv are explicitly uncollected until observed. Prior observations in the supplied direction are reported evidence, not a clean new baseline.
+
+Search Console: head terms exact group; action-intent query group (quotes/proposals/demo/pre-sales/sourcing); remaining queries separately. Exclude royal london group and dspm market analysis from the requested investigation. Preserve original exports and filters. Report impressions/clicks/position by canonical landing page, country/device/date. Do not combine generative impressions with traditional search CTR denominators.
+
+Vercel: inspect Web Analytics enabled state on both projects in dashboard. Collection stays consent-dependent. Current code normalises route categories; this branch separates public shortlist view paths from root while removing queries and private tokens. Quantify opt-in collection coverage only where an independent permitted denominator exists; do not invent the unobserved total. Historical aggregated paths cannot be recovered by a future code fix. Read-only Vercel project API verification on 30 September confirms Web Analytics enabled and hasData=true for both sasecomparison and v0-broadband-reseller-framework. This confirms collection exists, not its completeness.
+
+Bing Webmaster: capture AI citations by cited URL and date, independently of site visits. Record consumer answer recommendations separately.
+
+Acquisition parameters: ?acquisition=chatgpt|gemini|perplexity|copilot|other. Treat these as claimed source attribution, not authenticated proof. Referrer classification and self-report retained separately. An MCP-authorised brief counts as assistant acquisition, even without a website click. Never put buyer brief, company, tokens or provider-specific commercial details in analytics URLs.
+
+Server outcomes: request initiated, confirmation delivered, identity confirmed, desk reviewed, supplier approved/approached/declined/responded, comparable set ready, buyer decision, introduction acknowledged. Deduplicate by request and internal project ID. Logs must omit raw emails/briefs/tokens. Preview synthetic traffic never joins production denominators.
+
+Collection outstanding: logged-out baseline, consent denominator quantification, Bing exports. No uplift or clean baseline is claimed by this build.
+
+Baseline attempt on 30 September: the available Google browser showed a signed-in account. It was excluded, without signing the user out. No signed-in answer has been relabelled as a logged-out baseline. Per-surface landing parameters are now captured in sourcing requests; MCP requests are tagged mcp by the server.

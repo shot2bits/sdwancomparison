@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION, PUBLIC_SOURCING_TOOLS, COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
 import { publicEvidenceProviders, publicEvidenceOutput, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
 import { UK_BUYING_SITUATIONS, PROVIDER_ROLE_GUIDE } from "@/lib/uk-shortlist";
 import { FEATURES } from "@/lib/vendors";
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
       last_reviewed: vendors.map((provider) => provider.last_verified).sort().slice(-1)[0],
       evidence: {
         method:
-          "Each public provider profile is a reviewed projection of the governed provider record. Capability states distinguish supported, partial, partner-delivered, unsupported, unknown and requires-confirmation evidence.",
+          "Each public provider profile is a reviewed projection of the governed provider record. Capability states distinguish supported, partial, partner-delivered, unsupported, not-confirmed and requires-confirmation evidence.",
         sources_total: vendors.reduce((n, provider) => n + (provider.evidence_source_count ?? 0), 0),
       },
       faqs: SHORTLIST_FAQS,
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
         url: provider.marketplace_url,
       })),
       public_evidence_contract: PUBLIC_EVIDENCE_CONTRACT,
-      requires_publication: true,
+      requires_publication: false,
       ordered_by: PUBLIC_EVIDENCE_ORDER,
       status_vocabulary: { not_confirmed: "Evidence has not been confirmed; not a negative grade." },
       notice: PUBLIC_EVIDENCE_NOTICE,
@@ -64,34 +65,9 @@ export async function GET(request: Request) {
         url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${view}/`,
         providers: buildShortlistMarketView(vendors, view),
       }])),
-      interactiveSurfaces: [
-        {
-          id: "shortlist-builder",
-          kind: "filter-ui",
-          url: `${SITE_URL}/shortlist/`,
-          description:
-            "Public provider comparison builder. Filter state is encoded in URL query parameters, so any scenario URL is shareable and citable.",
-          backingTool: "build_sase_shortlist",
-          inputs:
-            "service_model, required_features, preferred_features, required_regions, required_clouds, ai_requirements, disaster_recovery_required, max_deployment_speed, weight_preset, shortlist_size",
-        },
-        {
-          id: "mcp-server",
-          kind: "mcp",
-          url: `${SITE_URL}/api/mcp/`,
-          description:
-            "JSON-RPC 2.0 MCP server. tools/list returns available tools; tools/call provides public comparisons and aggregate coverage. Personalised matches require verified project publication.",
-        },
-        {
-          id: "comparison-workspace",
-          kind: "agentic-comparison-ui",
-          url: `${SITE_URL}/shortlist/?compare=bt-business,vodafone-business&question=Which+provider+best+fits+this+project`,
-          contract: "provider-comparison/1.0.0",
-          description:
-            "Select two providers, calculate their deterministic evidence comparison and ask contextual follow-up questions. The compare query parameter accepts two comma-separated vendor slugs.",
-          backingTool: "compare_vendors",
-        },
-      ],
+      service: {description:SOURCING_DESCRIPTION,commission:COMMISSION_DESCRIPTION, response_target:null, response_panel:[], research_requires_identity:false, supplier_disclosure_requires_recipient_consent:true},
+      market_record:`${SITE_URL}/shortlist/market-record.json/`,
+      interactiveSurfaces: [{id:'sourcing',kind:'sourcing-service',url:`${SITE_URL}/shortlist/`,description:SOURCING_DESCRIPTION}, {id:'mcp-server',kind:'mcp',url:`${SITE_URL}/api/mcp/`,tools:PUBLIC_SOURCING_TOOLS,description:'Open research and request-specific sourcing actions. No account or publication prerequisite. Supplier disclosure requires confirmed buyer identity and recipient consent.'}],
       distributions: {
         json: `${SITE_URL}/shortlist/data.json`,
         csv: `${SITE_URL}/shortlist/data.csv`,

@@ -72,7 +72,7 @@ async function callPublicMcpTool(name: string, args: unknown): Promise<unknown> 
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
           resume_url: resumeUrl,
-          note: "Public comparison remains available. Use start_project to prepare a short notice; get_unlocked_matches returns personalised results after verified publication. The resume URL carries these criteria into the project entrance.",
+          note: "Research and named evidence matches are open. Use prepare_sourcing_plan to prepare a sourcing request; approve named recipients before requesting supplier engagement.",
         },
       };
     }

@@ -136,7 +136,7 @@ export const ACCOUNT: NavLink = { label: "My account", href: "/sase/account/" };
 // 2026 (W0 slice 3) it opens the Live Sourcing Workspace, the one door
 // for security, SASE and SD-WAN; the Describe wizard remains reachable
 // from the Get quotes group and the workspace's builder link.
-export const NAV_CTA: NavLink = { label: "Start a project", href: "/sase-sd-wan-rfp-builder/" };
+export const NAV_CTA: NavLink = { label: "Prepare a sourcing plan", href: "/sase/shortlist/" };
 
 /* ── The intent navigation (the final architecture, 23 Jul, Robert's
  * "Please implement"), re-cut on the AI evidence 25 Jul: Find suppliers and
@@ -181,7 +181,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
     columns: 2,
     items: [
       { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/", desc: "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation." },
-      { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Compare public provider evidence; personalised matching follows verified publication." },
+      { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Research providers openly and approve a request for comparable proposals." },
       { label: "Cost and TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership for SASE and SD-WAN." },
       { label: "Request circuit pricing", href: "/sase/circuit-pricing/", desc: "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations." },
       { label: "SD-WAN vendor filter", href: "/sd-wan/vendor-filter/", desc: "Narrow the market by service model, capability and requirement." },
@@ -189,7 +189,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
       { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/", desc: "Model users, licences and calling requirements before a formal quote." },
       { label: "BTnet leased line costs", href: "/bt-leased-line-cost-calculator-tool/", desc: "What a leased line actually costs, by bandwidth, term and install." },
       { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/", desc: "One Phone is switched off: map your usage to the right replacement and price it." },
-      { label: "Opportunities board", href: "/sase/opportunities/board/", desc: "Review current network and security opportunities." },
+      { label: "Market Record", href: "/sase/opportunities/board/", desc: "Review current network and security opportunities." },
     ],
   },
   {
@@ -211,7 +211,7 @@ export const MEGA_GROUPS: MegaGroup[] = [
 ];
 
 /** The board stands alone in the bar: one tap, no dropdown. */
-export const BOARD_LINK: NavLink = { label: "Opportunities board", href: "/sase/opportunities/board/" };
+export const BOARD_LINK: NavLink = { label: "Market Record", href: "/sase/opportunities/board/" };
 
 // ── Active-link + auto-open helpers (pathname is basePath-stripped here) ────
 const norm = (p: string) => p.replace(/\/$/, "");

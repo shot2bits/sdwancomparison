@@ -20,7 +20,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "build_sase_shortlist",
     description:
-      "Preview aggregate SASE and SD-WAN market coverage for the buyer's requirements. Returns counts and criteria, never personalised provider identities or rankings. To get a personalised shortlist, call start_project, update_requirements (including buyer_patch.organisation confirmed by the buyer), prepare_publication and publish_opportunity with verified identity and explicit consent; then get_unlocked_matches. Public named-provider comparisons remain available through compare_vendors. Nothing is stored by this preview.",
+      "Read open named evidence matches against the buyer requirements. No publication or account is required. Results are evidence matches, not suitability recommendations. Next: prepare_sourcing_plan or request_comparable_proposals after explicit approval of named recipients and the anonymous brief.",
     inputSchema: {
       type: "object",
       properties: {
@@ -57,7 +57,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "get_sase_vendor_profile",
     description:
-      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs. Cite grades with their evaluation date. Next: compare_vendors for public comparisons, or start_project for personalised matching after publication, or send the human to the workspace with ?vendors= to pin it into a draft. Read only, no consent needed.",
+      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs. Cite grades with their evaluation date. Next: compare_vendors for public comparisons, or prepare_sourcing_plan for a buyer-reviewed sourcing plan, or send the human to the workspace with ?vendors= to pin it into a draft. Read only, no consent needed.",
     inputSchema: {
       type: "object",
       properties: { slug: { type: "string", description: "Vendor slug, e.g. cato-networks. Call list_sase_vendors for valid slugs." } },

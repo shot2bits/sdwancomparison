@@ -1,3 +1,4 @@
+import { SOURCING_TOOL_DEFINITIONS, SOURCING_TOOL_NAMES, callSourcingTool } from '@/lib/mcp-sourcing-tools';
 import { PROVIDER_CAPABILITY_CONTRACT } from "@/lib/provider-capability-contract";
 import { MCP_TOOL_DEFINITIONS, callMcpTool } from "@/lib/mcp-tools";
 import { MCP_RFP_TOOL_DEFINITIONS, RFP_TOOL_NAMES, callRfpTool } from "@/lib/mcp-rfp-tools";
@@ -88,7 +89,7 @@ const ESTATE_RESOURCES = [
     name: "sase-shortlist",
     title: "The SASE and SD-WAN provider shortlist, machine twin",
     description:
-      "The flagship providers dataset: 30 vendors graded on 40 evidenced capabilities with public source evidence and callable tools; computed fit unlocks after verified project publication. Same content as netify.co.uk/sase/shortlist/. CC BY 4.0 with attribution to Netify.",
+      "The flagship providers dataset: 30 vendors graded on 40 evidenced capabilities with public source evidence and callable tools; named evidence matching is open; requests require buyer confirmation and desk review. Same content as netify.co.uk/sase/shortlist/. CC BY 4.0 with attribution to Netify.",
   },
   {
     path: "/demand/data.json",
@@ -152,7 +153,7 @@ function resourcePathFor(uri: string): string | null {
 
 /** Serve-time merge of titles and behaviour annotations onto the tool definitions. */
 function annotatedTools() {
-  return [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL, ...WORKSPACE_TOOL_DEFINITIONS].map((t) => {
+  return [...SOURCING_TOOL_DEFINITIONS, ...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL, ...WORKSPACE_TOOL_DEFINITIONS].map((t) => {
     const extra = TOOL_ANNOTATIONS[t.name as string];
     return extra ? { ...t, title: extra.title, annotations: extra.annotations } : t;
   });
@@ -204,12 +205,15 @@ export async function POST(req: Request) {
       const args = (body.params?.arguments ?? {}) as Record<string, unknown>;
       // Audit fix (19 July 2026): unknown tools are a protocol error, not a
       // 200 result an agent has to text-parse.
-      if (!COST_TOOL_NAMES.has(name) && !RFP_TOOL_NAMES.has(name) && !PLAIN_TOOL_NAMES.has(name) && !SECURITY_TOOL_NAMES.has(name) && !WORKSPACE_TOOL_NAMES.has(name)) {
+      if (!SOURCING_TOOL_NAMES.has(name) && !COST_TOOL_NAMES.has(name) && !RFP_TOOL_NAMES.has(name) && !PLAIN_TOOL_NAMES.has(name) && !SECURITY_TOOL_NAMES.has(name) && !WORKSPACE_TOOL_NAMES.has(name)) {
         return rpcError(body.id, -32602, `Unknown tool: ${name}`);
       }
       if (!args || typeof args !== "object" || Array.isArray(args)) return rpcError(body.id, -32602, "Tool arguments must be an object.");
+      const started=Date.now();
       try {
-      const result = WORKSPACE_TOOL_NAMES.has(name)
+      const result = SOURCING_TOOL_NAMES.has(name)
+        ? await callSourcingTool(name,args,req.headers.get("x-forwarded-for")?.split(",")[0]||"anonymous")
+        : WORKSPACE_TOOL_NAMES.has(name)
         ? await callWorkspaceTool(name, args)
         : SECURITY_TOOL_NAMES.has(name)
           ? await callSecurityTool(name, args)
@@ -218,8 +222,10 @@ export async function POST(req: Request) {
             : RFP_TOOL_NAMES.has(name)
               ? await callRfpTool(name, args, { verifiedBuyerEmail: await sessionFromRequest(req).then((session) => session && (session.role === "buyer" || session.role === "netify") ? session.email : undefined), requestKey: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous" })
               : await callMcpTool(name, args);
+      console.info(JSON.stringify({event:'mcp_tool_call',tool:name,status:'completed',duration_ms:Date.now()-started,environment:process.env.VERCEL_ENV??'development'}));
       return rpcResult(body.id, mcpToolResult(result), protocol);
       } catch (error) {
+        console.info(JSON.stringify({event:'mcp_tool_call',tool:name,status:'failed',duration_ms:Date.now()-started,environment:process.env.VERCEL_ENV??'development'}));
         // Execution errors belong to the tool result. Do not leak storage or credential details.
         return rpcResult(body.id, mcpToolResult(mcpExecutionError(error)), protocol);
       }

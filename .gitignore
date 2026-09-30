@@ -48,3 +48,4 @@ next-env.d.ts
 /.private/provider-staging/
 /.private/provider-normalised/
 /.private/provider-review/
+.env*.local

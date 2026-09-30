@@ -42,7 +42,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       { label: "How It Works", href: "/sase/how-it-works/" },
       { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/" },
       { label: "Publish a project notice", href: "/sase/opportunities/new/" },
-      { label: "Opportunities board", href: "/sase/opportunities/board/" },
+      { label: "Market Record", href: "/sase/opportunities/board/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "SD-WAN RFI Builder App", href: "/sd-wan-rfi-builder-app/" },

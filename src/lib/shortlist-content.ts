@@ -1,66 +1,10 @@
-/**
- * All copy for the /shortlist route. One source, three consumers:
- * page.tsx, data.json route and llms.txt.
- */
-
-export const SHORTLIST_FAQS: { q: string; a: string }[] = [
-  {
-    q: "How should a UK business compare SD-WAN and SASE providers?",
-    a: "Compare the technology platform and delivery company separately. Confirm connectivity at each site, who deploys and manages the service, support hours, escalation ownership, migration responsibilities and the scope of the contract. Use the provider evidence to prepare questions; confirm project-specific commitments in the supplier proposal.",
-  },
-  {
-    q: "Can I compare providers for UK and overseas offices?",
-    a: "Yes. Choose the UK headquarters with overseas offices buying situation and describe the countries and sites in your project. The public comparison retains the full provider catalogue; selecting a situation does not certify coverage or create a personalised ranking. Confirm local delivery and support for each location with the supplier.",
-  },
-  {
-    q: "Does a UK point of presence confirm UK data residency?",
-    a: "A UK point of presence alone does not establish where all traffic is inspected or logs are stored. Ask the supplier to evidence traffic processing, log storage, administration access and failover locations for the specific service you are buying.",
-  },
-  {
-    q: "Which SD-WAN vendor is best?",
-    a: "There is no single best vendor for every estate. The right shortlist depends on operating model, regions, applications, security requirements and the evidence a supplier can provide for the project.",
-  },
-  {
-    q: "Who are the leading SD-WAN providers?",
-    a: "The SD-WAN vendor view lists public provider evidence by proven capability count, verification date and name. Computed fit against your operating model, regions and requirements unlocks after verified project publication.",
-  },
-  {
-    q: "Is SD-WAN obsolete?",
-    a: "No. SD-WAN remains the network layer in many SASE designs. SASE adds cloud-delivered security and access controls rather than removing the need to control WAN traffic.",
-  },
-  {
-    q: "Should a business choose SD-WAN or MPLS?",
-    a: "Many estates use both during migration. SD-WAN can use internet, cellular and MPLS underlays, while the RFP should define application performance, resilience and any sites that must retain private circuits.",
-  },
-  {
-    q: "Who are the leading SASE vendors?",
-    a: "The SASE vendor view lists providers with public SASE, ZTNA or secure web gateway evidence in published evidence order. Buyers should compare the networking and security components separately before accepting a single-vendor claim.",
-  },
-  {
-    q: "How does the shortlist builder rank vendors?",
-    a: "Public comparison pages show source grades and provider lists ordered by published evidence. After verified publication, the private matching engine evaluates your requirements against the current catalogue and freezes its matching rules, evidence, ranks and scores with that publication.",
-  },
-  {
-    q: "Can I share or save my shortlist?",
-    a: "You can share a public comparison link. Your personalised shortlist is saved in your project and unlocks after verified anonymous publication.",
-  },
-  {
-    q: "What does Build from requirements do?",
-    a: "Describe your estate, review a short project notice and verify your business identity. Publishing anonymously unlocks a personalised shortlist and supplier responses; a full RFP is optional.",
-  },
-  {
-    q: "Is this comparison vendor neutral?",
-    a: "Public comparisons use the same capability definitions and published evidence for every provider. Public positions follow evidence counts, verification date and name, not computed fit. Personalised rankings require authorised access after verified publication. Netify is a BT Authorised Partner and earns commission on some routes to market; those relationships do not determine the public evidence order.",
-  },
-  {
-    q: "How accurate are the extended dimensions?",
-    a: "There are two different levels of evidence here and we would rather be plain about which is which. Eighteen facts per provider were re-sourced on 29 July 2026 from the provider's own published material or an independently accountable record, and each one carries a named source, a reliability tier and a sentence quoted from that source which we then re-checked against the live page: the thirteen capabilities that genuinely separate this market, who owns the underlay, whose security service edge stack it is, whether real compliance documentation exists rather than a general assurance, plus published points of presence and availability SLA. The remaining grades, including regional coverage, cloud support, AI capability and resilience, are still indicative desk research rather than individually sourced, and we say so rather than dress them up. Where we could not evidence something we publish it as unknown with the reason. For anything you are going to sign a contract on, confirm it through a structured RFP, which Netify can create and issue to your shortlisted providers.",
-  },
+import { SOURCING_TITLE, SOURCING_DESCRIPTION } from './sourcing-contract';
+export const SHORTLIST_INTRO={eyebrow:'Netify sourcing service',h1:SOURCING_TITLE,subhead:SOURCING_DESCRIPTION};
+export const SHORTLIST_FAQS=[
+{q:'What does Netify do?',a:'Netify reviews your requirement, agrees a sourcing plan, approaches the providers you approve and coordinates written responses. A full RFP is optional.'},
+{q:'Can I research without an account?',a:'Yes. All provider evidence and research matching are open. A request to share a brief is confirmed separately by work email; no account is created.'},
+{q:'What if a provider declines?',a:'Netify reports the decline or missing response and agrees with you whether to approach another provider. Response targets are agreed for the request.'},
+{q:'How are providers ordered?',a:'By evidence coverage descending, then name. Coverage measures the completeness of capability evidence, not suitability or quality. Commission does not affect this order.'},
+{q:'What is a response panel provider?',a:'A supplier with a named pre-sales contact, an agreed response time and acknowledged introduction terms. Research-only providers can be approached manually by the Netify desk.'},
+{q:'How does SD-WAN relate to SASE?',a:'SD-WAN provides the connectivity component of SASE. Define the network, security, access and management requirements together.'},
 ];
-
-export const SHORTLIST_INTRO = {
-  eyebrow: "For UK IT decision makers",
-  h1: "Compare SD-WAN and SASE providers for UK businesses",
-  subhead:
-    "Compare 30 researched SD-WAN and SASE providers for UK businesses across operating model, network and security capability. Explore the public provider evidence, then review and publish an anonymous project when you are ready. Personalised matching is available through authorised access after publication. Publication does not guarantee invitations or supplier responses. A full RFP is optional.",
-};
