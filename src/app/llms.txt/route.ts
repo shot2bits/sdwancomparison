@@ -1,9 +1,14 @@
+import { shortlistEntity } from "@/lib/shortlist-entity";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { MCP_TOOL_DEFINITIONS } from '@/lib/mcp-tool-definitions';
 import { SOURCING_TOOL_DEFINITIONS } from '@/lib/mcp-sourcing-tools';
 import { sourcingUndertaking,SOURCING_TITLE,SOURCING_DESCRIPTION,COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
 import { SITE_URL } from '@/lib/structured-data';
-export async function GET(){return new Response(`# ${SOURCING_TITLE}
+export async function GET(){const entity=shortlistEntity((await getLiveShortlistDataset()).vendors); return new Response(`${entity.h1}
+${entity.count_sentence}
+${entity.uk_sentence}
 
+## ${SOURCING_TITLE}
 ${SOURCING_DESCRIPTION}
 ${sourcingUndertaking()}
 ${COMMISSION_DESCRIPTION}

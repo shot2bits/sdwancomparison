@@ -1,0 +1,374 @@
+
+> netifymarketplace@0.1.0 test:action-first
+> npm run test:answer-first && tsx scripts/test-corrective-sourcing.ts && tsx scripts/test-sector-signoff.ts && tsx scripts/test-uk-carrier-review.ts && tsx scripts/test-response-panel.tsx && tsx scripts/test-sourcing-target.ts && tsx scripts/test-sourcing.ts && tsx scripts/test-sourcing-routes.ts && python3 scripts/test-sector-normalisation.py && tsx scripts/test-sector-adjudications.ts && tsx scripts/test-consent-storage.ts && tsx scripts/test-sourcing-comparison-ui.tsx && tsx scripts/test-preview-mail.ts && npm run test:market-outcomes
+
+
+> netifymarketplace@0.1.0 test:answer-first
+> tsx scripts/test-answer-first.ts
+
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async main (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-answer-first.ts:36:28)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async GET (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/(marketing)/shortlist/data.json/route.ts:20:16)
+    at async main (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-answer-first.ts:112:5)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async GET (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/llms.txt/route.ts:7:59)
+    at async main (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-answer-first.ts:114:23)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async GET (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/llms-full.txt/route.ts:14:44)
+    at async main (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-answer-first.ts:115:23)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+PASS answer-first: 30 complete provider rows, best-for labels, 15 complete FAQs, schema parity, blank reviewer, expiry-safe UK sources, feed/llms parity, 4 views, no legacy status or em dash
+PASS corrective acceptance: referral mapping, evidence expiry/source changes, 23 owner review warnings, actual TTL expiry, deduplicated weekly metrics, staff-only access and plan throttling
+PASS sign-off: 19 provider records, 36 positive rows (27 yes/9 partial), 5 unconfirmed rows preserved; all values unchanged; pending and signed labels verified; Colt slug mapped
+PASS UK-only filter: bt-business, colt-technology-services, virgin-media-o2, vodafone-business; four sourced reviews; other UK grades remain not_confirmed; capability/sector grades unchanged
+PASS empty panel: 30 Research only cards, 0 Response panel badges
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/panel/route.ts:75:18)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-response-panel.tsx:97:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-response-panel.tsx:21:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/panel/route.ts:75:18)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-response-panel.tsx:98:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-response-panel.tsx:21:1)
+PASS synthetic panel: one badge, named-contact routing, private acknowledgement evidence excluded
+PASS panel administration: staff only, origin checks, all fields required, future dates and unknown providers rejected
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async Module.GET (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/llms.txt/route.ts:7:59)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-target.ts:17:70)
+PASS sourcing target unset: page step 3, Service JSON-LD, llms and MCP agree
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async Module.GET (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/llms.txt/route.ts:7:59)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-target.ts:17:70)
+PASS sourcing target set: page step 3, Service JSON-LD, llms and MCP agree
+PASS partial or invalid targets stay unpromised; buyer acknowledgement uses the same contract
+Sourcing tests passed: explicit consent, request binding, expiry, recipient validation, panel eligibility, all 30 providers, open evidence, sector qualification and private record suppression.
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:95:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:102:18)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:85:24)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async notifyConfirmedSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:81:5)
+    at async confirmSourcingRequest (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:313:5)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/confirm/route.ts:45:23)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:141:20)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+PASS shared-project connectivity: scoped access, same ID, existing store, revision checks, private review consent, no board or mail
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:337:37)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:342:8)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:342:8)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:342:8)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:342:8)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:386:18)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/projects/[id]/route.ts:124:23)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/projects/[id]/route.ts:96:20)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:504:26)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+PASS sourcing desk: staff-only, approved recipients, acknowledgement before approach, idempotency, future dates and missing-price comparison gate
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/projects/[id]/route.ts:124:23)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/projects/[id]/route.ts:96:20)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:638:7)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+PASS one project: owner RFP read, private connectivity, staff-confirmed proposal, existing response/review stores, missing price preserved, private draft export without publication
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:713:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:85:24)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async notifyConfirmedSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:81:5)
+    at async confirmSourcingRequest (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:313:5)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/confirm/route.ts:45:23)
+    at async onMail (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:699:15)
+    at async global.fetch (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:48:19)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:740:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:742:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:745:24)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:750:43)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:751:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:768:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:770:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:784:32)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:794:24)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async callSourcingTool (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/mcp-sourcing-tools.ts:87:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/plan/route.ts:33:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:800:19)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async Module.callSourcingTool (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/mcp-sourcing-tools.ts:87:16)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:806:25)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:824:27)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:85:24)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async notifyConfirmedSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:81:5)
+    at async confirmSourcingRequest (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:313:5)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/confirm/route.ts:45:23)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:856:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+Sourcing confirmation notification pending { request_id: '62695b01-8b72-4ce8-8f5b-ab0b0621e98f', channel: 'desk' }
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:85:24)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async notifyConfirmedSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:81:5)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/desk/route.ts:76:5)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:905:17)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+PASS confirmation preview capture: both notifications, domain-only desk brief, independent failure/retry, retained queue, staff-only retry, no duplicates, zero external mail
+PASS adversarial boundaries: origin, consent, recipient validation, private caching, body size, desk auth, interrupted queue repair, rapid-confirm mail race, ambiguous mail retry, rejected mail retry, web/MCP parity
+PASS request/confirmation routes: initial confirmation plus desk and buyer acknowledgement, token binding, expiry, staff-only desk, safe replay, no supplier invitations or mail
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:85:24)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async notifyConfirmedSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:81:5)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:1003:3)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-sourcing-routes.ts:16:1)
+PASS confirmed buyer recovery: actual auth/request and auth/verify, non-owner denied, no-cookie second device, no-return sign-in, expired/reused link without credential issuance
+PASS sector import does not turn incidental no into unsupported or narrative into strong evidence
+PASS 72 adjudications: classification corrections, anonymous evidence limits, source/date provenance, named-case precedence, no supplier suitability claims
+PASS shared consent: valid choices, expiry, future dates and malformed values
+PASS written proposal evidence is reachable; malformed and executable links are excluded
+PASS preview mail: private capture, no external sending, deployment links, idempotency, conflicts, disabled/unknown fail closed, production unchanged
+
+> netifymarketplace@0.1.0 test:market-outcomes
+> tsx scripts/test-market-outcomes.ts
+
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async requestSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:108:16)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/request/route.ts:15:7)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-market-outcomes.ts:12:16)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-market-outcomes.ts:7:1)
+Live shortlist provider source unavailable, using the reviewed snapshot. ProviderMatchSourceUnavailable [Error]: Provider matching source is not configured.
+    at loadProviderMatchRecordFeed (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/provider-match-source.ts:20:29)
+    at loadNeonShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:211:22)
+    at async getLiveShortlistDataset (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/live-shortlist.ts:238:12)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:85:24)
+    at async circuitLock (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/circuit-store.ts:32:12)
+    at async notifyConfirmedSourcing (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-notifications.ts:81:5)
+    at async confirmSourcingRequest (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/lib/sourcing-store.ts:313:5)
+    at async Module.POST (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/src/app/api/sourcing/confirm/route.ts:45:23)
+    at async <anonymous> (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/test-market-outcomes.ts:14:18)
+    at async withFakeKv (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/fake-kv-harness.ts:295:12)
+PASS outcome workflow: real confirmation grant, staff-only review, exact buyer approval, stale/edited approval denial, separate publication, anonymous projection, withdrawal, origin and cross-project controls

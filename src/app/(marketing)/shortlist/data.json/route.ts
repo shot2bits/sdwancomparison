@@ -1,10 +1,11 @@
+import { shortlistFaqs } from "@/lib/shortlist-faq";
+import { shortlistEntity, bestFor, ukStatus } from "@/lib/shortlist-entity";
 import {publicResponsePanel} from '@/lib/response-panel';
 import {annotateResponsePanel,publicPanelMember} from '@/lib/response-panel-contract';
 import { SOURCING_TARGET, SOURCING_DESCRIPTION, PUBLIC_SOURCING_TOOLS, COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
 import { publicEvidenceProviders, publicEvidenceOutput, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
 import { UK_BUYING_SITUATIONS, PROVIDER_ROLE_GUIDE } from "@/lib/uk-shortlist";
 import { FEATURES } from "@/lib/vendors";
-import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { SITE_URL } from "@/lib/structured-data";
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
 import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
@@ -19,14 +20,16 @@ export async function GET(request: Request) {
   const live = await getLiveShortlistDataset();
   const panel=await publicResponsePanel();
   const vendors = annotateResponsePanel(publicEvidenceProviders(live.vendors),panel);
-  const lastModified = vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
+  const entity = shortlistEntity(vendors);
+  const lastModified = entity.reviewed_at;
 
   const generatedAt = new Date().toISOString();
   const payload = {
       page: `${SITE_URL}/shortlist/`,
-      title: SHORTLIST_INTRO.h1,
-      description: SHORTLIST_INTRO.subhead,
+      title: entity.h1,
+      description: entity.count_sentence,
       publisher: "Netify Group Limited",
+      license: "https://creativecommons.org/licenses/by/4.0/",
       contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
       market_view_contract_version: SHORTLIST_VIEW_CONTRACT_VERSION,
       source_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
@@ -35,16 +38,17 @@ export async function GET(request: Request) {
       provider_dataset_versions: live.datasetVersions,
       provider_loaded_at: generatedAt,
       generated_at: generatedAt,
-      last_reviewed: vendors.map((provider) => provider.last_verified).sort().slice(-1)[0],
+      last_reviewed: entity.reviewed_at,
       evidence: {
         method:
           "Each public provider profile is a reviewed projection of the governed provider record. Capability states distinguish supported, partial, partner-delivered, unsupported, not-confirmed and requires-confirmation evidence.",
         sources_total: vendors.reduce((n, provider) => n + (provider.evidence_source_count ?? 0), 0),
       },
-      faqs: SHORTLIST_FAQS,
+      faqs: shortlistFaqs(vendors),
       uk_buyer_guidance: { situations: UK_BUYING_SITUATIONS, provider_roles: PROVIDER_ROLE_GUIDE, notice: "Buying guidance only. A situation does not certify coverage, filter providers or change evidence grades." },
       features: FEATURES,
-      vendors,
+      entity,
+      vendors: vendors.map(v=>({...v,...bestFor(v),uk_status:ukStatus(v)})),
       governed_provider_profiles: vendors.map((provider) => ({
         comparison_slug: provider.slug,
         name: provider.name,
@@ -66,7 +70,7 @@ export async function GET(request: Request) {
         title: SHORTLIST_VIEWS[view].title,
         answer: SHORTLIST_VIEWS[view].answer,
         url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${view}/`,
-        providers: buildShortlistMarketView(vendors, view),
+        providers: buildShortlistMarketView(vendors, view).map(v=>({...v,...bestFor(v),uk_status:ukStatus(v)})),
       }])),
       service: {description:SOURCING_DESCRIPTION,commission:COMMISSION_DESCRIPTION, response_target:SOURCING_TARGET, response_panel:panel.map(publicPanelMember), research_requires_identity:false, supplier_disclosure_requires_recipient_consent:true},
       market_record:`${SITE_URL}/shortlist/market-record.json/`,

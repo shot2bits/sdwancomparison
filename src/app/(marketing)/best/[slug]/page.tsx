@@ -1,3 +1,7 @@
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
+import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
+import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
+import SourcingActions from "@/components/SourcingActions";
 import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { publicProviderEvidence } from "@/lib/public-provider-evidence";
 import type { Metadata } from "next";
@@ -12,7 +16,7 @@ type EditorialPage = { intro?: string; faqs?: { q: string; a: string }[] };
 type EditorialVendor = { commentary: string[]; watch_out?: string };
 type Editorial = Record<string, Record<string, EditorialVendor> & { _page?: EditorialPage }>;
 const EDITORIAL = bestEditorial as unknown as Editorial;
-import { getAllVendors, getShortlistDataset } from "@/lib/vendors";
+import { getAllVendors } from "@/lib/vendors";
 import { encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
   SITE_URL,
@@ -21,10 +25,9 @@ import {
   getShortlistFaqSchema,
   getSpeakableSchema,
 } from "@/lib/structured-data";
-import { datasetVerifiedLong } from "@/lib/dataset-date";
 import SourcedTable from "@/components/SourcedTable";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -87,7 +90,8 @@ export default async function BestPage({ params }: Props) {
     month: "long", year: "numeric", timeZone: "UTC",
   });
 
-  const result = publicProviderEvidence(getShortlistDataset(), page.input);
+  const result = publicProviderEvidence((await getLiveShortlistDataset()).vendors, page.input);
+  const entity = shortlistEntity(result.shortlist,page.h1);
   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
   const itemListSchema = {
     "@context": "https://schema.org",
@@ -125,27 +129,14 @@ export default async function BestPage({ params }: Props) {
     headline: page.title,
     description: page.metaDescription,
     author: { "@type": "Organization", name: "Netify research team", url: "https://netify.co.uk/about-netify/" },
-    reviewedBy: { "@id": `${SITE_URL}/#person-robert-sturt` },
+    ...(entity.reviewer.name ? {reviewedBy:{"@type":"Person",name:entity.reviewer.name}} : {}),
     publisher: { "@id": `${SITE_URL}/#organization` },
     dateModified: reviewedIso,
     mainEntityOfPage: `${SITE_URL}/best/${page.slug}`,
   };
 
-  const personSchema = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "@id": `${SITE_URL}/#person-robert-sturt`,
-    name: "Robert Sturt",
-    worksFor: { "@id": `${SITE_URL}/#organization` },
-    url: "https://netify.co.uk/about-netify/",
-    sameAs: [
-      "https://netify.co.uk/staff-list/",
-      "https://netify.co.uk/about-netify/",
-    ],
-  };
-
   const schemas = [
-    personSchema,
+    ...(entity.reviewer.name ? [{"@context":"https://schema.org","@type":"Person",name:entity.reviewer.name,jobTitle:entity.reviewer.role}] : []),
     getOrganizationSchema(),
     getBreadcrumbSchema(page.title, `/best/${page.slug}`),
     getSpeakableSchema(`/best/${page.slug}`),
@@ -167,6 +158,7 @@ export default async function BestPage({ params }: Props) {
       <div className="mb-10 fade-rise">
         <p className="eyebrow mb-3">Provider evidence · Updated {reviewedMonth}</p>
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
+        <ShortlistEntityBlock entity={entity}/>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
         {page.input.sector === "healthcare" && <p className="mt-3">For the BT/NHS route, see <a className="underline" href="https://netify.co.uk/sd-wan-for-healthcare/">BT SD-WAN and SASE for healthcare</a>.</p>}
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
@@ -178,12 +170,7 @@ export default async function BestPage({ params }: Props) {
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
           {". "}{SOURCING_DESCRIPTION}
         </p>
-        <p className="text-sm text-[var(--ink-500)] mt-3">
-          Written by the Netify research team. Reviewed by Robert Sturt, Netify
-          Group Limited. Updated {reviewedDate} (vendor records verified{" "}
-          {datasetVerifiedLong()}).
-          capability features; see the FAQ below.
-        </p>
+
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
             href={builderUrl}
@@ -268,6 +255,8 @@ export default async function BestPage({ params }: Props) {
                 {v.position}. {v.name}
               </Link>
             </h2>
+            <p data-best-for={v.slug}><strong>Best for:</strong> {bestFor(v).best_for}</p>
+            <SourcingActions slug={v.slug}/>
             <p className="text-sm text-[var(--ink-500)] mb-2">
               {v.category} · Typical deployment: {v.deployment_speed}
             </p>

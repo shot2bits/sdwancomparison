@@ -1,3 +1,5 @@
+import { ANSWER_FIRST_FIELDS } from "@/lib/shortlist-machine-contract";
+import { SOURCING_TOOL_DEFINITIONS } from "@/lib/mcp-sourcing-tools";
 import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tools";
 import { MCP_RFP_TOOL_DEFINITIONS } from "@/lib/mcp-rfp-tools";
 import { MCP_COST_TOOL_DEFINITIONS } from "@/lib/mcp-cost-tools";
@@ -6,6 +8,7 @@ import { WORKSPACE_TOOL_DEFINITIONS } from "@/lib/mcp-workspace-tools";
 import { SITE_URL } from "@/lib/structured-data";
 
 const allTools = [
+  ...SOURCING_TOOL_DEFINITIONS,
   ...MCP_TOOL_DEFINITIONS,
   ...MCP_RFP_TOOL_DEFINITIONS,
   ...MCP_COST_TOOL_DEFINITIONS,
@@ -16,6 +19,7 @@ const allTools = [
 export async function GET() {
   return Response.json({
     openapi: "3.1.0",
+    "x-shortlist-evidence": ANSWER_FIRST_FIELDS,
     info: {
       title: "Netify SASE and SD-WAN agent tools",
       description: "The public MCP contract and REST mirrors for Netify SASE and SD-WAN research, comparison and procurement.",

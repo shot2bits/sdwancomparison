@@ -1,3 +1,7 @@
+# Answer-first shortlist: local build, not deployed
+
+Work branch `codex/answer-first-shortlist` from main `feb06f6`, retaining the corrective release. Entity-first shortlist, dataset-derived best-for lines, complete FAQs and Organisation/Dataset graph, shared provider sourcing actions on sibling/profile pages, and aligned machine feeds. Local acceptance and actual outputs: [docs/answer-first/README.md](answer-first/README.md). No push/deployment, production data change or external email. Phase-2 UK directory and post-release indexing/14-day search panel remain gated as specified. Reviewer and Harry slots remain blank; owner F5 sign-offs are still outstanding. Existing untracked duplicates in the original checkout are preserved.
+
 # 30 September 2026 — reconcile current production into main
 
 This reconciliation preserves the action-first release and main's previously approved Harry remote-user subset fixes. Current Vercel production branch is release/2026-09-30, not main. Historical deployment statements below describe their dates, not today's configuration. Both sets of validation scripts are retained. This merge is repository reconciliation only; do not deploy it to the release branch while Claude is reviewing the production snapshot.

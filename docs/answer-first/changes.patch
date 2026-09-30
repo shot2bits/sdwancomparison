@@ -1,0 +1,1518 @@
+diff --git a/data/shortlist-review.json b/data/shortlist-review.json
+new file mode 100644
+index 0000000..ed878d2
+--- /dev/null
++++ b/data/shortlist-review.json
+@@ -0,0 +1,8 @@
++{
++  "name": "",
++  "role": "",
++  "reviewed_at": "",
++  "market_structure_sentence": "",
++  "desk_sentence": "",
++  "owner_note": "[OWNER] reviewer name, role and review date; [HARRY] market structure and desk sentences"
++}
+diff --git a/package.json b/package.json
+index e6002ff..665ba93 100644
+--- a/package.json
++++ b/package.json
+@@ -54,9 +54,10 @@
+     "test:activity-reporting": "tsx scripts/test-reliable-activity.ts && tsx scripts/test-activity-report-access.ts",
+     "test:rfp-conversion": "tsx scripts/test-rfp-conversion-fixes.ts",
+     "test:marketplace-journey": "tsx scripts/test-marketplace-journey.tsx",
+-    "test:action-first": "tsx scripts/test-corrective-sourcing.ts && tsx scripts/test-sector-signoff.ts && tsx scripts/test-uk-carrier-review.ts && tsx scripts/test-response-panel.tsx && tsx scripts/test-sourcing-target.ts && tsx scripts/test-sourcing.ts && tsx scripts/test-sourcing-routes.ts && python3 scripts/test-sector-normalisation.py && tsx scripts/test-sector-adjudications.ts && tsx scripts/test-consent-storage.ts && tsx scripts/test-sourcing-comparison-ui.tsx && tsx scripts/test-preview-mail.ts && npm run test:market-outcomes",
++    "test:action-first": "npm run test:answer-first && tsx scripts/test-corrective-sourcing.ts && tsx scripts/test-sector-signoff.ts && tsx scripts/test-uk-carrier-review.ts && tsx scripts/test-response-panel.tsx && tsx scripts/test-sourcing-target.ts && tsx scripts/test-sourcing.ts && tsx scripts/test-sourcing-routes.ts && python3 scripts/test-sector-normalisation.py && tsx scripts/test-sector-adjudications.ts && tsx scripts/test-consent-storage.ts && tsx scripts/test-sourcing-comparison-ui.tsx && tsx scripts/test-preview-mail.ts && npm run test:market-outcomes",
+     "test:market-outcomes": "tsx scripts/test-market-outcomes.ts",
+-    "test:sourcing-real-redis": "node scripts/test-sourcing-real-redis.mjs"
++    "test:sourcing-real-redis": "node scripts/test-sourcing-real-redis.mjs",
++    "test:answer-first": "tsx scripts/test-answer-first.ts"
+   },
+   "dependencies": {
+     "@anthropic-ai/sdk": "^0.104.1",
+diff --git a/scripts/test-answer-first.ts b/scripts/test-answer-first.ts
+new file mode 100644
+index 0000000..2dbe140
+--- /dev/null
++++ b/scripts/test-answer-first.ts
+@@ -0,0 +1,155 @@
++import { sourcingServiceSchema } from "../src/lib/sourcing-contract";
++import { SITE_URL } from "../src/lib/structured-data";
++// @ts-expect-error Node 24 provides registerHooks.
++import { registerHooks } from "node:module";
++registerHooks({
++  resolve(s: string, c: object, n: (s: string, c: object) => { url: string }) {
++    return s === "server-only"
++      ? { url: "data:text/javascript,export {};", shortCircuit: true }
++      : n(s, c);
++  },
++});
++import { withFakeKv } from "./fake-kv-harness";
++import assert from "node:assert/strict";
++import { readFileSync } from "node:fs";
++import { getLiveShortlistDataset } from "../src/lib/live-shortlist";
++import {
++  bestFor,
++  shortlistEntity,
++  ukStatus,
++} from "../src/lib/shortlist-entity";
++import { shortlistFaqs } from "../src/lib/shortlist-faq";
++import { shortlistSchema } from "../src/lib/shortlist-schema";
++import {
++  publicEvidenceProviders,
++  publicEvidenceOutput,
++} from "../src/lib/public-provider-evidence";
++import { SECTOR_KEYS, SECTOR_LABELS } from "../src/lib/shortlist-core";
++import {
++  SHORTLIST_VIEW_KEYS,
++  buildShortlistMarketView,
++} from "../src/lib/shortlist-market-views";
++async function main() {
++  const { GET: feedGet } = await import(
++    "../src/app/(marketing)/shortlist/data.json/route"
++  );
++  const { GET: llmsGet } = await import("../src/app/llms.txt/route");
++  const { GET: fullGet } = await import("../src/app/llms-full.txt/route");
++  const { vendors: raw } = await getLiveShortlistDataset();
++  const vendors = publicEvidenceProviders(raw);
++  const entity = shortlistEntity(vendors);
++  assert.equal(entity.counts.providers, vendors.length);
++  assert.ok(
++    entity.uk_sentence.startsWith(
++      `${vendors.filter((v) => ["uk_hq", "uk_entity"].includes(v.uk_delivery)).length} `,
++    ),
++  );
++  assert.ok(
++    entity.uk_sentence.includes(
++      `${vendors.filter((v) => v.uk_delivery === "not_confirmed").length} UK entity statuses`,
++    ),
++  );
++  for (const v of vendors) {
++    const b = bestFor(v);
++    assert.ok(b.best_for);
++    assert.deepEqual(
++      b.best_for_fields.sectors_yes,
++      SECTOR_KEYS.filter((k) => v.sectors[k] === "yes").map(
++        (k) => SECTOR_LABELS[k],
++      ),
++    );
++    assert.deepEqual(
++      b.best_for_fields.sectors_partial,
++      SECTOR_KEYS.filter((k) => v.sectors[k] === "partial").map(
++        (k) => SECTOR_LABELS[k],
++      ),
++    );
++    for (const label of b.best_for_fields.sectors_partial)
++      assert.ok(b.best_for.includes(`${label} (partial evidence)`));
++  }
++  const empty = {
++    ...vendors[0],
++    sectors: Object.fromEntries(SECTOR_KEYS.map((k) => [k, "not_confirmed"])),
++  } as (typeof vendors)[number];
++  assert.ok(
++    bestFor(empty).best_for.startsWith("Sector evidence not yet reviewed"),
++  );
++  const expired = {
++    ...vendors.find((v) => v.slug === "bt-business")!,
++    uk_delivery: "not_confirmed" as const,
++  };
++  assert.equal(ukStatus(expired).reviewed_at, null);
++  assert.deepEqual(ukStatus(expired).source_urls, []);
++  const faqs = shortlistFaqs(vendors);
++  assert.equal(faqs.length, 15);
++  for (const k of SECTOR_KEYS) {
++    const f = faqs.find(
++      (f) =>
++        f.q === `Which providers have sector evidence for ${SECTOR_LABELS[k]}?`,
++    )!;
++    const yes = vendors.filter((v) => v.sectors[k] === "yes");
++    const partial = vendors.filter((v) => v.sectors[k] === "partial");
++    assert.ok(f.a.startsWith(`${yes.length} with public evidence:`));
++    assert.ok(f.a.includes(`${partial.length} with partial evidence:`));
++    for (const v of [...yes, ...partial]) assert.ok(f.a.includes(v.name));
++  }
++  const graph = shortlistSchema(vendors)["@graph"] as Record<string, any>[];
++  const list = graph.find((g) => g["@type"] === "ItemList")!;
++  assert.equal(list.numberOfItems, vendors.length);
++  assert.deepEqual(
++    list.itemListElement.map((i: any) => i.item.name),
++    vendors.map((v) => v.name),
++  );
++  assert.equal(
++    graph.filter((g) => g["@type"] === "Person").length,
++    entity.reviewer.name ? 1 : 0,
++  );
++  assert.deepEqual(
++    graph
++      .find((g) => g["@type"] === "FAQPage")!
++      .mainEntity.map((q: any) => ({ q: q.name, a: q.acceptedAnswer.text })),
++    faqs,
++  );
++  assert.deepEqual(graph.find(g=>g["@type"]==="Service"),sourcingServiceSchema(`${SITE_URL}/shortlist/`));
++  const feed = await (
++    await feedGet(new Request("http://localhost/sase/shortlist/data.json"))
++  ).json();
++  assert.equal(feed.last_reviewed,feed.entity.reviewed_at);
++  for(const view of Object.values(feed.market_views) as {providers:{best_for:string}[]}[])assert.ok(view.providers.every(v=>v.best_for));
++  const llms = await (await llmsGet()).text();
++  const full = await (await fullGet()).text();
++  assert.equal(llms.split("\n")[0], entity.h1);
++  assert.equal(llms.split("\n")[1], feed.entity.count_sentence);
++  assert.equal(llms.split("\n")[2], feed.entity.uk_sentence);
++  assert.ok(!/\bunknown\b/i.test(full));
++  assert.ok(!full.includes("—"));
++  for (const v of vendors) {
++    assert.equal(
++      feed.vendors.find((r: any) => r.slug === v.slug).best_for,
++      bestFor(v).best_for,
++    );
++    assert.ok(full.includes(bestFor(v).best_for));
++  }
++  for (const view of SHORTLIST_VIEW_KEYS) {
++    const subset = buildShortlistMarketView(raw, view);
++    assert.equal(shortlistEntity(subset).counts.providers, subset.length);
++  }
++  const output = JSON.stringify(
++    publicEvidenceOutput({ entity, faqs, graph, feed }),
++  );
++  assert.ok(!output.includes("—"));
++  assert.ok(!/"unknown"/.test(output));
++  assert.equal(
++    readFileSync("src/components/SourcingEntrance.tsx", "utf8").split(
++      "/sase/api/sourcing/request/",
++    ).length - 1,
++    1,
++  );
++  console.log(
++    `PASS answer-first: ${vendors.length} complete provider rows, best-for labels, 15 complete FAQs, schema parity, blank reviewer, expiry-safe UK sources, feed/llms parity, 4 views, no legacy status or em dash`,
++  );
++}
++withFakeKv(main).catch((e) => {
++  console.error(e);
++  process.exitCode = 1;
++});
+diff --git a/scripts/test-sourcing-target.ts b/scripts/test-sourcing-target.ts
+index 0a8a1aa..80c0f47 100644
+--- a/scripts/test-sourcing-target.ts
++++ b/scripts/test-sourcing-target.ts
+@@ -18,6 +18,6 @@ for(const target of [{proposals:null,working_days:null},{proposals:3,working_day
+  console.log(`PASS sourcing target ${target.proposals===null?'unset':'set'}: page step 3, Service JSON-LD, llms and MCP agree`);
+ }
+ assert.equal(sourcingUndertaking({proposals:3,working_days:null}),fallback);assert.equal(sourcingUndertaking({proposals:0,working_days:5}),fallback);
+-const page=fs.readFileSync('src/app/(marketing)/shortlist/page.tsx','utf8');assert(page.includes('{sourcingUndertaking()}'));assert(page.includes('sourcingServiceSchema(`${SITE_URL}/shortlist/`)'));
++const page=fs.readFileSync('src/app/(marketing)/shortlist/page.tsx','utf8');assert(page.includes('{sourcingUndertaking()}'));assert(page.includes('shortlistSchema(vendors,entity.h1')); assert(fs.readFileSync('src/lib/shortlist-schema.ts','utf8').includes('sourcingServiceSchema(url)'));
+ assert(fs.readFileSync('src/lib/sourcing-notifications.ts','utf8').includes('${sourcingUndertaking()}'));
+ console.log('PASS partial or invalid targets stay unpromised; buyer acknowledgement uses the same contract');
+diff --git a/scripts/verify-answer-first-html.py b/scripts/verify-answer-first-html.py
+new file mode 100644
+index 0000000..7a9291a
+--- /dev/null
++++ b/scripts/verify-answer-first-html.py
+@@ -0,0 +1,69 @@
++"""Read-only HTTP acceptance against a local server; JavaScript is not executed."""
++import json, sys, urllib.request
++from html.parser import HTMLParser
++from pathlib import Path
++base=sys.argv[1] if len(sys.argv)>1 else 'http://localhost:3127/sase'
++def get(path):
++    with urllib.request.urlopen(base+path) as r:
++        assert r.status==200
++        return r.read().decode()
++class Page(HTMLParser):
++    def __init__(self,html):
++        super().__init__(); self.stack=[]; self.text=[]; self.h1=[]; self.h2=[]; self.h3=[]; self.summaries=[]; self.json=[]; self.script=''; self.best={}; self.count=''; self.title=''; self.feed(html)
++    def handle_starttag(self,tag,attrs):
++        a=dict(attrs); self.stack.append((tag,a)) if tag not in ['meta','link','input','img','br','hr','source','wbr'] else None
++        if tag=='script':self.script=''
++    def handle_endtag(self,tag):
++        if tag=='script' and self.stack and self.stack[-1][1].get('type')=='application/ld+json':self.json.append(json.loads(self.script))
++        for i in range(len(self.stack)-1,-1,-1):
++            if self.stack[i][0]==tag:self.stack=self.stack[:i];break
++    def handle_data(self,data):
++        tags=[t for t,a in self.stack]
++        if 'script' in tags:self.script+=data;return
++        if 'style' in tags:return
++        if 'main' in tags:self.text.append(data)
++        if 'h1' in tags:self.h1.append(data)
++        if 'h2' in tags:self.h2.append(data)
++        if 'h3' in tags and 'article' in tags:self.h3.append(data)
++        if 'summary' in tags:self.summaries.append(data)
++        if 'title' in tags:self.title+=data
++        for t,a in self.stack:
++            if 'data-count-sentence' in a:self.count+=data
++            if 'data-best-for' in a:self.best[a['data-best-for']]=self.best.get(a['data-best-for'],'')+data
++feed=json.loads(get('/shortlist/data.json'))
++raw=get('/shortlist/'); p=Page(raw)
++assert ''.join(p.h1)==feed['entity']['h1'],p.h1
++assert p.count==feed['entity']['count_sentence']
++first=' '.join(' '.join(p.text).split()[:80]);assert p.count in first,first
++assert len(p.best)==len(feed['vendors'])
++for v in feed['vendors']:assert p.best[v['slug']]=='Best for: '+v['best_for'],v['slug']
++graph=next(x['@graph'] for x in p.json if '@graph' in x)
++item=next(x for x in graph if x['@type']=='ItemList');assert item['numberOfItems']==len(p.best)
++assert [i['item']['name'] for i in item['itemListElement']]==p.h3
++faq=next(x for x in graph if x['@type']=='FAQPage');assert [q['name'] for q in faq['mainEntity']]==[q for q in p.summaries if q in [f['q'] for f in feed['faqs']]]
++for f in feed['faqs']:assert f['a'] in ''.join(p.text)
++assert not any(x['@type']=='Person' for x in graph)
++assert 'Get comparable SD-WAN and SASE proposals from UK providers' in p.h2
++assert '—' not in ''.join(p.text)
++assert '"unknown"' not in json.dumps(feed)
++llms=get('/llms.txt').splitlines();assert llms[:3]==[feed['entity'][k] for k in ['h1','count_sentence','uk_sentence']]
++print('PASS HTTP: approved H1; count in first 80 main-content words; 30 server-rendered cards and best-for lines; desk H2')
++print('FIRST 80 WORDS:',first)
++print('PASS graph: 30 organisations in card order; FAQ exact visible parity; no Person; no em dash or legacy status')
++print('PASS llms/feed: first three lines byte-identical to entity block')
++for view in ['sd-wan-vendors','sase-vendors','managed-sd-wan']:
++    q=Page(get('/shortlist/'+view+'/'))
++    assert len(q.best)==len(feed['market_views'][view]['providers'])
++    print('PASS sibling:',view,'rows',len(q.best),'title',q.title,'h1',''.join(q.h1))
++print('HTTP acceptance complete; no requests or emails submitted')
++Path('docs/answer-first/shortlist-server.html').write_text(raw)
++if '--all-pages' in sys.argv:
++    import concurrent.futures, re
++    paths=[line.split()[1].rstrip(':') for line in Path('docs/answer-first/all-pages.txt').read_text().splitlines() if line.startswith('PASS ')]
++    def check_vocabulary(path):
++        text=''.join(Page(get(path)).text)
++        assert '\u2014' not in text,path
++        assert not re.search(r'\bunknown\b',text,re.I),path
++    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
++        list(pool.map(check_vocabulary,paths))
++    print(f'PASS {len(paths)} rendered provider/sector pages: no em dash or legacy unknown vocabulary')
+diff --git a/scripts/verify-answer-first-pages.ts b/scripts/verify-answer-first-pages.ts
+new file mode 100644
+index 0000000..180fe1f
+--- /dev/null
++++ b/scripts/verify-answer-first-pages.ts
+@@ -0,0 +1,18 @@
++import assert from 'node:assert/strict';
++import {writeFileSync} from 'node:fs';
++import {BEST_PAGES} from '../src/lib/best-pages';
++async function main(){
++ const base=process.argv[2] ?? 'http://localhost:3127/sase';
++ const feed=await (await fetch(`${base}/shortlist/data.json`)).json();
++ const routes=[...feed.vendors.map((v:{slug:string})=>({path:`/vendors/${v.slug}/`,count:1})),...BEST_PAGES.map(p=>({path:`/best/${p.slug}/`,count:feed.vendors.length}))];
++ const results=[];
++ for(const {path,count} of routes){
++   const response=await fetch(base+path);assert.equal(response.status,200,path);const html=await response.text();
++   assert.equal((html.match(/data-best-for=/g)??[]).length,count,path);
++   for(const action of ['contacts','demo','proposals'])assert.equal(html.split(`&amp;action=${action}#sourcing-brief`).length-1,count,`${path} ${action}`);
++   results.push(`PASS ${path}: HTTP 200; ${count} evidence rows; 3 actions per provider`);
++ }
++ writeFileSync('docs/answer-first/all-pages.txt',results.join('\n')+'\n');
++ console.log(`PASS all ${routes.length} provider and sector pages: HTTP 200; complete evidence rows; all three actions per provider`);
++}
++main().catch(e=>{console.error(e);process.exitCode=1});
+diff --git a/src/app/(marketing)/best/[slug]/page.tsx b/src/app/(marketing)/best/[slug]/page.tsx
+index fdefb9f..174404c 100644
+--- a/src/app/(marketing)/best/[slug]/page.tsx
++++ b/src/app/(marketing)/best/[slug]/page.tsx
+@@ -1,3 +1,7 @@
++import { getLiveShortlistDataset } from "@/lib/live-shortlist";
++import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
++import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
++import SourcingActions from "@/components/SourcingActions";
+ import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
+ import { publicProviderEvidence } from "@/lib/public-provider-evidence";
+ import type { Metadata } from "next";
+@@ -12,7 +16,7 @@ type EditorialPage = { intro?: string; faqs?: { q: string; a: string }[] };
+ type EditorialVendor = { commentary: string[]; watch_out?: string };
+ type Editorial = Record<string, Record<string, EditorialVendor> & { _page?: EditorialPage }>;
+ const EDITORIAL = bestEditorial as unknown as Editorial;
+-import { getAllVendors, getShortlistDataset } from "@/lib/vendors";
++import { getAllVendors } from "@/lib/vendors";
+ import { encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
+ import {
+   SITE_URL,
+@@ -21,10 +25,9 @@ import {
+   getShortlistFaqSchema,
+   getSpeakableSchema,
+ } from "@/lib/structured-data";
+-import { datasetVerifiedLong } from "@/lib/dataset-date";
+ import SourcedTable from "@/components/SourcedTable";
+ 
+-export const dynamic = "force-static";
++export const dynamic = "force-dynamic";
+ 
+ type Props = { params: Promise<{ slug: string }> };
+ 
+@@ -87,7 +90,8 @@ export default async function BestPage({ params }: Props) {
+     month: "long", year: "numeric", timeZone: "UTC",
+   });
+ 
+-  const result = publicProviderEvidence(getShortlistDataset(), page.input);
++  const result = publicProviderEvidence((await getLiveShortlistDataset()).vendors, page.input);
++  const entity = shortlistEntity(result.shortlist,page.h1);
+   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
+   const itemListSchema = {
+     "@context": "https://schema.org",
+@@ -125,27 +129,14 @@ export default async function BestPage({ params }: Props) {
+     headline: page.title,
+     description: page.metaDescription,
+     author: { "@type": "Organization", name: "Netify research team", url: "https://netify.co.uk/about-netify/" },
+-    reviewedBy: { "@id": `${SITE_URL}/#person-robert-sturt` },
++    ...(entity.reviewer.name ? {reviewedBy:{"@type":"Person",name:entity.reviewer.name}} : {}),
+     publisher: { "@id": `${SITE_URL}/#organization` },
+     dateModified: reviewedIso,
+     mainEntityOfPage: `${SITE_URL}/best/${page.slug}`,
+   };
+ 
+-  const personSchema = {
+-    "@context": "https://schema.org",
+-    "@type": "Person",
+-    "@id": `${SITE_URL}/#person-robert-sturt`,
+-    name: "Robert Sturt",
+-    worksFor: { "@id": `${SITE_URL}/#organization` },
+-    url: "https://netify.co.uk/about-netify/",
+-    sameAs: [
+-      "https://netify.co.uk/staff-list/",
+-      "https://netify.co.uk/about-netify/",
+-    ],
+-  };
+-
+   const schemas = [
+-    personSchema,
++    ...(entity.reviewer.name ? [{"@context":"https://schema.org","@type":"Person",name:entity.reviewer.name,jobTitle:entity.reviewer.role}] : []),
+     getOrganizationSchema(),
+     getBreadcrumbSchema(page.title, `/best/${page.slug}`),
+     getSpeakableSchema(`/best/${page.slug}`),
+@@ -167,6 +158,7 @@ export default async function BestPage({ params }: Props) {
+       <div className="mb-10 fade-rise">
+         <p className="eyebrow mb-3">Provider evidence · Updated {reviewedMonth}</p>
+         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
++        <ShortlistEntityBlock entity={entity}/>
+         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
+         {page.input.sector === "healthcare" && <p className="mt-3">For the BT/NHS route, see <a className="underline" href="https://netify.co.uk/sd-wan-for-healthcare/">BT SD-WAN and SASE for healthcare</a>.</p>}
+         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
+@@ -178,12 +170,7 @@ export default async function BestPage({ params }: Props) {
+           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
+           {". "}{SOURCING_DESCRIPTION}
+         </p>
+-        <p className="text-sm text-[var(--ink-500)] mt-3">
+-          Written by the Netify research team. Reviewed by Robert Sturt, Netify
+-          Group Limited. Updated {reviewedDate} (vendor records verified{" "}
+-          {datasetVerifiedLong()}).
+-          capability features; see the FAQ below.
+-        </p>
++
+         <div className="mt-5 flex gap-3 flex-wrap">
+           <Link
+             href={builderUrl}
+@@ -268,6 +255,8 @@ export default async function BestPage({ params }: Props) {
+                 {v.position}. {v.name}
+               </Link>
+             </h2>
++            <p data-best-for={v.slug}><strong>Best for:</strong> {bestFor(v).best_for}</p>
++            <SourcingActions slug={v.slug}/>
+             <p className="text-sm text-[var(--ink-500)] mb-2">
+               {v.category} · Typical deployment: {v.deployment_speed}
+             </p>
+diff --git a/src/app/(marketing)/how-it-works/page.tsx b/src/app/(marketing)/how-it-works/page.tsx
+index 41cac72..399ff36 100644
+--- a/src/app/(marketing)/how-it-works/page.tsx
++++ b/src/app/(marketing)/how-it-works/page.tsx
+@@ -1,3 +1,4 @@
++import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
+ import type { Metadata } from "next";
+ import Link from "next/link";
+ import { SITE_URL } from "@/lib/structured-data";
+@@ -24,5 +25,6 @@ export default function HowItWorksPage() {
+   <p className="my-6">{COMMISSION_DESCRIPTION}</p>
+   <Link href="/shortlist" className="underline">Research providers and prepare your request</Link>
+   {" · "}<Link href="/connector" className="underline">Assistant connection</Link>
++  <section><h2>Questions about the service</h2>{SHORTLIST_FAQS.map(f=><details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>)}</section>
+  </main>;
+ }
+diff --git a/src/app/(marketing)/shortlist/data.json/route.ts b/src/app/(marketing)/shortlist/data.json/route.ts
+index ed2035e..a0fe928 100644
+--- a/src/app/(marketing)/shortlist/data.json/route.ts
++++ b/src/app/(marketing)/shortlist/data.json/route.ts
+@@ -1,10 +1,11 @@
++import { shortlistFaqs } from "@/lib/shortlist-faq";
++import { shortlistEntity, bestFor, ukStatus } from "@/lib/shortlist-entity";
+ import {publicResponsePanel} from '@/lib/response-panel';
+ import {annotateResponsePanel,publicPanelMember} from '@/lib/response-panel-contract';
+ import { SOURCING_TARGET, SOURCING_DESCRIPTION, PUBLIC_SOURCING_TOOLS, COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
+ import { publicEvidenceProviders, publicEvidenceOutput, PUBLIC_EVIDENCE_ORDER, PUBLIC_EVIDENCE_CONTRACT, PUBLIC_EVIDENCE_NOTICE } from "@/lib/public-provider-evidence";
+ import { UK_BUYING_SITUATIONS, PROVIDER_ROLE_GUIDE } from "@/lib/uk-shortlist";
+ import { FEATURES } from "@/lib/vendors";
+-import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
+ import { SITE_URL } from "@/lib/structured-data";
+ import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
+ import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
+@@ -19,14 +20,16 @@ export async function GET(request: Request) {
+   const live = await getLiveShortlistDataset();
+   const panel=await publicResponsePanel();
+   const vendors = annotateResponsePanel(publicEvidenceProviders(live.vendors),panel);
+-  const lastModified = vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
++  const entity = shortlistEntity(vendors);
++  const lastModified = entity.reviewed_at;
+ 
+   const generatedAt = new Date().toISOString();
+   const payload = {
+       page: `${SITE_URL}/shortlist/`,
+-      title: SHORTLIST_INTRO.h1,
+-      description: SHORTLIST_INTRO.subhead,
++      title: entity.h1,
++      description: entity.count_sentence,
+       publisher: "Netify Group Limited",
++      license: "https://creativecommons.org/licenses/by/4.0/",
+       contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
+       market_view_contract_version: SHORTLIST_VIEW_CONTRACT_VERSION,
+       source_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
+@@ -35,16 +38,17 @@ export async function GET(request: Request) {
+       provider_dataset_versions: live.datasetVersions,
+       provider_loaded_at: generatedAt,
+       generated_at: generatedAt,
+-      last_reviewed: vendors.map((provider) => provider.last_verified).sort().slice(-1)[0],
++      last_reviewed: entity.reviewed_at,
+       evidence: {
+         method:
+           "Each public provider profile is a reviewed projection of the governed provider record. Capability states distinguish supported, partial, partner-delivered, unsupported, not-confirmed and requires-confirmation evidence.",
+         sources_total: vendors.reduce((n, provider) => n + (provider.evidence_source_count ?? 0), 0),
+       },
+-      faqs: SHORTLIST_FAQS,
++      faqs: shortlistFaqs(vendors),
+       uk_buyer_guidance: { situations: UK_BUYING_SITUATIONS, provider_roles: PROVIDER_ROLE_GUIDE, notice: "Buying guidance only. A situation does not certify coverage, filter providers or change evidence grades." },
+       features: FEATURES,
+-      vendors,
++      entity,
++      vendors: vendors.map(v=>({...v,...bestFor(v),uk_status:ukStatus(v)})),
+       governed_provider_profiles: vendors.map((provider) => ({
+         comparison_slug: provider.slug,
+         name: provider.name,
+@@ -66,7 +70,7 @@ export async function GET(request: Request) {
+         title: SHORTLIST_VIEWS[view].title,
+         answer: SHORTLIST_VIEWS[view].answer,
+         url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${view}/`,
+-        providers: buildShortlistMarketView(vendors, view),
++        providers: buildShortlistMarketView(vendors, view).map(v=>({...v,...bestFor(v),uk_status:ukStatus(v)})),
+       }])),
+       service: {description:SOURCING_DESCRIPTION,commission:COMMISSION_DESCRIPTION, response_target:SOURCING_TARGET, response_panel:panel.map(publicPanelMember), research_requires_identity:false, supplier_disclosure_requires_recipient_consent:true},
+       market_record:`${SITE_URL}/shortlist/market-record.json/`,
+diff --git a/src/app/(marketing)/shortlist/page.tsx b/src/app/(marketing)/shortlist/page.tsx
+index 19db87a..6c7d5e7 100644
+--- a/src/app/(marketing)/shortlist/page.tsx
++++ b/src/app/(marketing)/shortlist/page.tsx
+@@ -1,30 +1,29 @@
++import { buildShortlistMarketView, parseShortlistMarketView, SHORTLIST_VIEWS } from "@/lib/shortlist-market-views";
++import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
++import { shortlistSchema } from "@/lib/shortlist-schema";
++import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
+ import {publicResponsePanel} from '@/lib/response-panel';
+ import {annotateResponsePanel} from '@/lib/response-panel-contract';
+ import {listPublicOutcomes} from "@/lib/market-outcomes";
+ import MarketOutcomeView from "@/components/MarketOutcomeView";
+ import type { Metadata } from "next";
+ import { getLiveShortlistDataset } from "@/lib/live-shortlist";
+-import {
+-  publicEvidenceProviders,
+-  PUBLIC_EVIDENCE_NOTICE,
+-} from "@/lib/public-provider-evidence";
+ import {
+   SOURCING_TITLE,
+-  sourcingUndertaking, sourcingServiceSchema,
++  sourcingUndertaking,
+   SOURCING_DESCRIPTION,
+   COMMISSION_DESCRIPTION,
+ } from "@/lib/sourcing-contract";
+-import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
+-import { SITE_URL, getOrganizationSchema } from "@/lib/structured-data";
++import { shortlistFaqs } from "@/lib/shortlist-faq";
++import { SITE_URL } from "@/lib/structured-data";
+ import { FEATURES } from "@/lib/vendors";
+ import SourcingEntrance from "@/components/SourcingEntrance";
+ import "./sourcing.css";
+ export const dynamic = "force-dynamic";
+-export const metadata: Metadata = {
+-  title: SOURCING_TITLE,
+-  description: SOURCING_DESCRIPTION,
+-  alternates: { canonical: `${SITE_URL}/shortlist/` },
+-};
++export async function generateMetadata(): Promise<Metadata> {
++  const entity = shortlistEntity((await getLiveShortlistDataset()).vendors);
++  return { title: {absolute: `${entity.h1} | Netify`}, description: `${entity.count_sentence} ${SOURCING_DESCRIPTION}`, alternates: {canonical: `${SITE_URL}/shortlist/`} };
++}
+ export default async function ShortlistPage({
+   searchParams,
+ }: {
+@@ -33,24 +32,11 @@ export default async function ShortlistPage({
+   const outcomes = await listPublicOutcomes().catch(() => null);
+   const query = await searchParams;
+   const live = await getLiveShortlistDataset();
+-  const vendors = annotateResponsePanel(publicEvidenceProviders(live.vendors),await publicResponsePanel());
+-  const schemas = [
+-    getOrganizationSchema(),
+-    sourcingServiceSchema(`${SITE_URL}/shortlist/`),
+-    {
+-      "@context": "https://schema.org",
+-      "@type": "ItemList",
+-      name: "Provider research",
+-      description: PUBLIC_EVIDENCE_NOTICE,
+-      numberOfItems: vendors.length,
+-      itemListElement: vendors.map((v, i) => ({
+-        "@type": "ListItem",
+-        position: i + 1,
+-        name: v.name,
+-        url: v.marketplace_url,
+-      })),
+-    },
+-  ];
++  const view = parseShortlistMarketView(typeof query.view === "string" ? query.view : "all");
++  const vendors = annotateResponsePanel(buildShortlistMarketView(live.vendors,view),await publicResponsePanel());
++  const entity = shortlistEntity(vendors,view === "all" ? undefined : SHORTLIST_VIEWS[view].title);
++  const faqs = shortlistFaqs(vendors);
++  const schemas = [shortlistSchema(vendors,entity.h1,view === "all" ? "/shortlist/" : `/shortlist/${view}/`)];
+   return (
+     <main className="sourcing">
+       {schemas.map((schema, i) => (
+@@ -62,14 +48,11 @@ export default async function ShortlistPage({
+           }}
+         />
+       ))}
+-      {process.env.VERCEL_ENV !== "production" && (
+-        <div className="sourcing-banner">
+-          Implementation preview · Working wording for Harry · Supplier response
+-          commitments and operational acceptance remain release gates.
+-        </div>
+-      )}
+-      <p className="sourcing-eyebrow">Netify · UK connectivity marketplace</p>
+-      <h1>{SOURCING_TITLE}</h1>
++      <header data-entity-block>
++        <h1>{entity.h1}</h1>
++        <ShortlistEntityBlock entity={entity}/>
++      </header>
++      <h2>{SOURCING_TITLE}</h2>
+       <p className="sourcing-lead">{SOURCING_DESCRIPTION}</p>
+       <div className="sourcing-steps">
+         <div>
+@@ -120,7 +103,8 @@ export default async function ShortlistPage({
+       )}
+       <SourcingEntrance
+         features={FEATURES.map(({ id, name }) => ({ id, name }))}
+-        vendors={vendors}
++        vendors={vendors.map(v=>({...v,...bestFor(v)}))}
++        initialSelection={typeof query.provider === "string" && vendors.some(v=>v.slug===query.provider) && typeof query.action === "string" && ["contacts","demo","proposals"].includes(query.action) ? {slug:query.provider,action:query.action as "contacts"|"demo"|"proposals"} : undefined}
+         initialSector={
+           typeof query.sector === "string" ? query.sector : undefined
+         }
+@@ -170,8 +154,9 @@ export default async function ShortlistPage({
+         </a>
+       </section>
+       <section>
+-        <h2>Questions about the service</h2>
+-        {SHORTLIST_FAQS.map((f) => (
++        <p><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 with attribution to Netify</a></p>
++        <h2>Provider questions</h2>
++        {faqs.map((f) => (
+           <details key={f.q}>
+             <summary>{f.q}</summary>
+             <p>{f.a}</p>
+diff --git a/src/app/(marketing)/shortlist/research-methodology/page.tsx b/src/app/(marketing)/shortlist/research-methodology/page.tsx
+index 7e8406f..9231b3d 100644
+--- a/src/app/(marketing)/shortlist/research-methodology/page.tsx
++++ b/src/app/(marketing)/shortlist/research-methodology/page.tsx
+@@ -45,6 +45,7 @@ export default async function ResearchMethodologyPage() {
+     </section>
+     <section className="mt-10">
+       <h2>How to cite and reuse the research</h2>
++      <p><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 with attribution to Netify</a></p>
+       <p className="mt-3 leading-7">Suggested citation: Netify Group Limited, “Netify SD-WAN and SASE provider comparison”, reviewed {reviewed}, <Link className="underline" href="/shortlist/">https://netify.co.uk/sase/shortlist/</Link>.</p>
+       <ul className="mt-4 list-disc space-y-2 pl-5">
+         <li><Link className="underline" href="/shortlist/data.json">JSON dataset</Link></li>
+diff --git a/src/app/(marketing)/vendors/[slug]/page.tsx b/src/app/(marketing)/vendors/[slug]/page.tsx
+index c2c7d4f..4a7d777 100644
+--- a/src/app/(marketing)/vendors/[slug]/page.tsx
++++ b/src/app/(marketing)/vendors/[slug]/page.tsx
+@@ -1,3 +1,6 @@
++import { getLiveShortlistDataset } from "@/lib/live-shortlist";
++import { publicResponsePanel } from "@/lib/response-panel";
++import ProviderEntityBlock from "@/components/ProviderEntityBlock";
+ import Link from "next/link";
+ import { notFound } from "next/navigation";
+ import RecordEditLink from "@/components/RecordEditLink";
+@@ -7,7 +10,7 @@ import {
+   getVendor,
+   getCapabilitiesByCategory,
+   FEATURE_NAMES,
+-  STATUS_LABELS,
++  STATUS_LABELS as SOURCE_STATUS_LABELS,
+   STATUS_DESCRIPTIONS,
+ } from "@/lib/vendors";
+ import {
+@@ -21,6 +24,19 @@ import Continuation from "@/components/Continuation";
+ import { deriveContinuation } from "@/lib/continuation/derive";
+ import { continuationUrl } from "@/lib/continuation/types";
+ 
++export const dynamic = "force-dynamic";
++
++// Display punctuation only; the stored evidence and source quotations remain unchanged.
++const evidenceText = (text: string) => text.replace(/\u2014/g, " - ").replace(/\bunknown\b/gi, "not yet reviewed");
++const STATUS_LABELS: Record<string,string> = {...SOURCE_STATUS_LABELS,unknown:"not yet reviewed"};
++function displayCopy<T>(value:T):T {
++  // Keep internal status enums intact; normalise only displayed prose and punctuation.
++  if (typeof value === "string") return (value === "unknown" ? value : evidenceText(value)) as T;
++  if (Array.isArray(value)) return value.map(displayCopy) as T;
++  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,displayCopy(v)])) as T;
++  return value;
++}
++
+ type Props = { params: Promise<{ slug: string }> };
+ 
+ export async function generateStaticParams() {
+@@ -30,7 +46,7 @@ export async function generateStaticParams() {
+ export async function generateMetadata({ params }: Props): Promise<Metadata> {
+   const { slug } = await params;
+   try {
+-    const vendor = getVendor(slug);
++    const vendor = displayCopy(getVendor(slug));
+     const longTitle = `${vendor.name}: SD-WAN and SASE capability profile`;
+     const title = longTitle.length <= 56 ? longTitle : `${vendor.name}: capability profile`;
+     const description = `${vendor.name} graded on 40 SD-WAN and SASE features: ${vendor.score_summary.yes_count} yes, ${vendor.score_summary.partial_count} partial. Profile, FAQs, alternatives and contact route.`.slice(0, 160);
+@@ -46,17 +62,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
+       },
+     };
+   } catch {
+-    return { title: "Vendor not found" };
++    const provider=(await getLiveShortlistDataset()).vendors.find(v=>v.slug===slug);
++    return provider ? {title:`${provider.name}: capability profile`,alternates:{canonical:`${SITE_URL}/vendors/${slug}/`}} : {title:"Vendor not found"};
+   }
+ }
+ 
+ export default async function VendorPage({ params }: Props) {
+   const { slug } = await params;
++  const liveProvider = (await getLiveShortlistDataset()).vendors.find(v=>v.slug===slug);
++  const panel = await publicResponsePanel();
+   let vendor;
+   try {
+-    vendor = getVendor(slug);
++    vendor = displayCopy(getVendor(slug));
+   } catch {
+-    notFound();
++    if (!liveProvider) notFound();
++    return <main className="max-w-4xl mx-auto px-6 py-16">
++      <h1>{liveProvider.name}</h1>
++      <ProviderEntityBlock vendor={liveProvider} panel={panel.some(p=>p.slug===slug)}/>
++      <h2>Capability matrix</h2>
++      <table><tbody>{Object.entries(liveProvider.capabilities).map(([key,value])=><tr key={key}><th>{FEATURE_NAMES[key] ?? key}</th><td>{value==='unknown'||value==='not_confirmed'?'not yet reviewed':STATUS_LABELS[value]}</td></tr>)}</tbody></table>
++      <a href="/sase/shortlist/">Provider shortlist</a>
++    </main>;
+   }
+   const continuation = deriveContinuation({ kind: "vendor", vendor });
+ 
+@@ -89,6 +115,7 @@ export default async function VendorPage({ params }: Props) {
+       "@type": "Organization",
+       name: vendor.name,
+       url: vendor.website,
++      sameAs: vendor.website,
+     },
+     publisher: {
+       "@type": "Organization",
+@@ -161,6 +188,7 @@ export default async function VendorPage({ params }: Props) {
+             <h1 id="page-h1" className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
+               {vendor.name}
+             </h1>
++            {liveProvider && <ProviderEntityBlock vendor={liveProvider} panel={panel.some(p=>p.slug===slug)}/>}
+             <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-6 max-w-2xl">
+               {vendor.evidence_summary}
+             </p>
+@@ -450,8 +478,8 @@ export default async function VendorPage({ params }: Props) {
+                       </th>
+                       <td className="px-3.5 py-2.5 text-[var(--ink-700)] whitespace-nowrap">
+                         {f.value === "unknown"
+-                          ? "Not found"
+-                          : (STATUS_LABELS[f.value] ?? f.value)}
++                          ? "not yet reviewed"
++                          : evidenceText(STATUS_LABELS[f.value] ?? f.value)}
+                       </td>
+                       <td className="px-3.5 py-2.5 text-[var(--ink-600,#5b636e)] whitespace-nowrap">
+                         {f.evidence.length > 0
+@@ -460,10 +488,10 @@ export default async function VendorPage({ params }: Props) {
+                       </td>
+                       <td className="px-3.5 py-2.5 text-[var(--ink-700)]">
+                         {f.quote ? (
+-                          `"${f.quote}"`
++                          `"${evidenceText(f.quote)}"`
+                         ) : (
+                           <span className="text-[var(--ink-500)]">
+-                            {f.note ?? "Not found in public sources reviewed."}
++                            {evidenceText(f.note ?? "Not found in public sources reviewed.")}
+                           </span>
+                         )}
+                       </td>
+diff --git a/src/app/capabilities.json/route.ts b/src/app/capabilities.json/route.ts
+index 78e8e90..3d2874c 100644
+--- a/src/app/capabilities.json/route.ts
++++ b/src/app/capabilities.json/route.ts
+@@ -1,10 +1,11 @@
++import { ANSWER_FIRST_FIELDS } from "@/lib/shortlist-machine-contract";
+ import { capabilitiesDocument } from "@/lib/capabilities";
+ 
+ export const runtime = "nodejs";
+ 
+ /** Machine-readable capability catalogue for AI engines and agents. */
+ export function GET() {
+-  return Response.json(capabilitiesDocument(), {
++  return Response.json({...capabilitiesDocument(),shortlist_evidence:ANSWER_FIRST_FIELDS}, {
+     headers: { "cache-control": "public, max-age=3600", "access-control-allow-origin": "*" },
+   });
+ }
+diff --git a/src/app/llms-full.txt/route.ts b/src/app/llms-full.txt/route.ts
+index 2b785a4..ce7b933 100644
+--- a/src/app/llms-full.txt/route.ts
++++ b/src/app/llms-full.txt/route.ts
+@@ -1,6 +1,7 @@
+-import { publicProviderEvidence } from "@/lib/public-provider-evidence";
++import { publicProviderEvidence, publicEvidenceProviders } from "@/lib/public-provider-evidence";
+ import { BEST_PAGES } from "@/lib/best-pages";
+-import { getShortlistDataset } from "@/lib/vendors";
++import { getLiveShortlistDataset } from "@/lib/live-shortlist";
++import { bestFor, shortlistEntity } from "@/lib/shortlist-entity";
+ import { SITE_URL } from "@/lib/structured-data";
+ import { datasetVerifiedIso } from "@/lib/dataset-date";
+ 
+@@ -10,9 +11,10 @@ import { datasetVerifiedIso } from "@/lib/dataset-date";
+  * page so engines can cite the source URL.
+  */
+ export async function GET() {
+-  const vendors = getShortlistDataset();
++  const vendors = publicEvidenceProviders((await getLiveShortlistDataset()).vendors);
++  const entity = shortlistEntity(vendors);
+   const sections: string[] = [
+-    "# Netify SASE and SD-WAN provider evidence: full text version",
++    entity.h1, entity.count_sentence, entity.uk_sentence,
+     "",
+     `Source: ${SITE_URL} · Publisher: Netify Group Limited (netify.co.uk) · Updated ${datasetVerifiedIso()}`,
+     "Methodology: 30 vendors graded on 40 capability features from public evidence (yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0); weighted scores per page criteria. Extended dimensions are indicative desk research; confirm via RFP.",
+@@ -27,7 +29,7 @@ export async function GET() {
+     sections.push(result.criteria_summary);
+     for (const v of result.shortlist) {
+       sections.push(
+-        `${v.name}: ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
++        `${v.name}: Best for: ${bestFor(v).best_for}. ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
+       );
+     }
+     sections.push("");
+@@ -35,6 +37,7 @@ export async function GET() {
+ 
+   sections.push("## All 30 vendor profiles");
+   for (const v of vendors) {
++    sections.push(`Best for: ${bestFor(v).best_for}`);
+     sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; verified capability coverage ${Math.round(v.evidence_coverage_pct * 100)}%; cited sources ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
+   }
+   sections.push("");
+diff --git a/src/app/llms.txt/route.ts b/src/app/llms.txt/route.ts
+index acb3c33..e0c6564 100644
+--- a/src/app/llms.txt/route.ts
++++ b/src/app/llms.txt/route.ts
+@@ -1,9 +1,14 @@
++import { shortlistEntity } from "@/lib/shortlist-entity";
++import { getLiveShortlistDataset } from "@/lib/live-shortlist";
+ import { MCP_TOOL_DEFINITIONS } from '@/lib/mcp-tool-definitions';
+ import { SOURCING_TOOL_DEFINITIONS } from '@/lib/mcp-sourcing-tools';
+ import { sourcingUndertaking,SOURCING_TITLE,SOURCING_DESCRIPTION,COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
+ import { SITE_URL } from '@/lib/structured-data';
+-export async function GET(){return new Response(`# ${SOURCING_TITLE}
++export async function GET(){const entity=shortlistEntity((await getLiveShortlistDataset()).vendors); return new Response(`${entity.h1}
++${entity.count_sentence}
++${entity.uk_sentence}
+ 
++## ${SOURCING_TITLE}
+ ${SOURCING_DESCRIPTION}
+ ${sourcingUndertaking()}
+ ${COMMISSION_DESCRIPTION}
+diff --git a/src/app/openapi.json/route.ts b/src/app/openapi.json/route.ts
+index 758d1c4..e145358 100644
+--- a/src/app/openapi.json/route.ts
++++ b/src/app/openapi.json/route.ts
+@@ -1,3 +1,5 @@
++import { ANSWER_FIRST_FIELDS } from "@/lib/shortlist-machine-contract";
++import { SOURCING_TOOL_DEFINITIONS } from "@/lib/mcp-sourcing-tools";
+ import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tools";
+ import { MCP_RFP_TOOL_DEFINITIONS } from "@/lib/mcp-rfp-tools";
+ import { MCP_COST_TOOL_DEFINITIONS } from "@/lib/mcp-cost-tools";
+@@ -6,6 +8,7 @@ import { WORKSPACE_TOOL_DEFINITIONS } from "@/lib/mcp-workspace-tools";
+ import { SITE_URL } from "@/lib/structured-data";
+ 
+ const allTools = [
++  ...SOURCING_TOOL_DEFINITIONS,
+   ...MCP_TOOL_DEFINITIONS,
+   ...MCP_RFP_TOOL_DEFINITIONS,
+   ...MCP_COST_TOOL_DEFINITIONS,
+@@ -16,6 +19,7 @@ const allTools = [
+ export async function GET() {
+   return Response.json({
+     openapi: "3.1.0",
++    "x-shortlist-evidence": ANSWER_FIRST_FIELDS,
+     info: {
+       title: "Netify SASE and SD-WAN agent tools",
+       description: "The public MCP contract and REST mirrors for Netify SASE and SD-WAN research, comparison and procurement.",
+diff --git a/src/components/ProviderEntityBlock.tsx b/src/components/ProviderEntityBlock.tsx
+new file mode 100644
+index 0000000..b4a0df3
+--- /dev/null
++++ b/src/components/ProviderEntityBlock.tsx
+@@ -0,0 +1,55 @@
++import { bestFor, ukStatus } from "@/lib/shortlist-entity";
++import type { ShortlistVendor } from "@/lib/shortlist-core";
++import SourcingActions from "./SourcingActions";
++export default function ProviderEntityBlock({
++  vendor,
++  panel = false,
++}: {
++  vendor: ShortlistVendor;
++  panel?: boolean;
++}) {
++  const uk = ukStatus(vendor);
++  const sector = vendor.projection_provenance?.active_review;
++  return (
++    <section aria-label="Provider evidence and sourcing">
++      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"Organization",name:vendor.name,url:`https://netify.co.uk/sase/vendors/${vendor.slug}/`,sameAs:vendor.website}).replace(/</g,"\\u003c")}}/>
++      <p>
++        {vendor.category} · {uk.label}
++        {uk.reviewed_at && ` · reviewed on ${uk.reviewed_at.slice(0, 10)}`}
++      </p>
++      <p data-best-for={vendor.slug}>
++        <strong>Best for:</strong> {bestFor(vendor).best_for}
++      </p>
++      {uk.reviewed_at && <p>{vendor.uk_basis}</p>}
++      {uk.qualification && <p>{uk.qualification}</p>}
++      <ul>
++        {uk.source_urls.map((url) => (
++          <li key={url}>
++            <a className="underline" href={url}>
++              {url}
++            </a>
++          </li>
++        ))}
++      </ul>
++      {sector && (
++        <>
++          <p>{sector.qualification}</p>
++          <ul>
++            {sector.source_urls.map((url) => (
++              <li key={url}>
++                <a className="underline" href={url}>
++                  {url}
++                </a>
++              </li>
++            ))}
++          </ul>
++        </>
++      )}
++      <p>{panel ? "Response panel" : "Research only"}</p>
++      <a className="underline" href={vendor.website}>
++        {vendor.website}
++      </a>
++      <SourcingActions slug={vendor.slug} />
++    </section>
++  );
++}
+diff --git a/src/components/ShortlistEntityBlock.tsx b/src/components/ShortlistEntityBlock.tsx
+new file mode 100644
+index 0000000..2eb1fb0
+--- /dev/null
++++ b/src/components/ShortlistEntityBlock.tsx
+@@ -0,0 +1,24 @@
++import type { shortlistEntity } from "@/lib/shortlist-entity";
++export default function ShortlistEntityBlock({
++  entity,
++}: {
++  entity: ReturnType<typeof shortlistEntity>;
++}) {
++  return (
++    <div data-entity-block>
++      {entity.reviewer.name && (
++        <p>
++          {entity.reviewer.name}
++          {entity.reviewer.role && ` · ${entity.reviewer.role}`}
++          {entity.reviewer.reviewed_at && ` · ${entity.reviewer.reviewed_at}`}
++        </p>
++      )}
++      <p data-count-sentence>{entity.count_sentence}</p>
++      <p>{entity.uk_sentence}</p>
++      {entity.market_structure_sentence && (
++        <p>{entity.market_structure_sentence}</p>
++      )}
++      {entity.desk_sentence && <p>{entity.desk_sentence}</p>}
++    </div>
++  );
++}
+diff --git a/src/components/SourcingActions.tsx b/src/components/SourcingActions.tsx
+new file mode 100644
+index 0000000..4bc182c
+--- /dev/null
++++ b/src/components/SourcingActions.tsx
+@@ -0,0 +1,46 @@
++"use client";
++import { SOURCING_ACTION_LABELS } from "@/lib/sourcing-contract";
++export type SourcingAction = "contacts" | "demo" | "proposals";
++export const SOURCING_ACTIONS: SourcingAction[] = [
++  "contacts",
++  "demo",
++  "proposals",
++];
++/** All entrances use the existing desk for plan, consent and request submission. */
++export default function SourcingActions({
++  slug,
++  selected = [],
++  onChoose,
++}: {
++  slug: string;
++  selected?: SourcingAction[];
++  onChoose?: (slug: string, action: SourcingAction) => void;
++}) {
++  return (
++    <div
++      className="sourcing-actions flex flex-wrap gap-3"
++      aria-label="Provider sourcing actions"
++    >
++      {SOURCING_ACTIONS.map((action) =>
++        onChoose ? (
++          <label key={action} className="sourcing-check">
++            <input
++              type="checkbox"
++              checked={selected.includes(action)}
++              onChange={() => onChoose(slug, action)}
++            />
++            {SOURCING_ACTION_LABELS[action]}
++          </label>
++        ) : (
++          <a
++            key={action}
++            className="underline"
++            href={`/sase/shortlist/?provider=${encodeURIComponent(slug)}&action=${action}#sourcing-brief`}
++          >
++            {SOURCING_ACTION_LABELS[action]}
++          </a>
++        ),
++      )}
++    </div>
++  );
++}
+diff --git a/src/components/SourcingEntrance.tsx b/src/components/SourcingEntrance.tsx
+index b5f55a2..ced4c7c 100644
+--- a/src/components/SourcingEntrance.tsx
++++ b/src/components/SourcingEntrance.tsx
+@@ -1,4 +1,5 @@
+ "use client";
++import SourcingActions, { type SourcingAction as Action } from "./SourcingActions";
+ import { sourcingAcquisition } from "@/lib/sourcing-acquisition";
+ import type { PublicPanelMember } from "@/lib/response-panel-contract";
+ import React, { useRef, useState } from "react";
+@@ -16,16 +17,16 @@ import {
+   SourcingBriefSchema,
+   type SourcingBrief,
+ } from "@/lib/sourcing-contract";
+-type Action = "contacts" | "demo" | "proposals";
+-const actions: Action[] = ["contacts", "demo", "proposals"];
+ const actionLabels = SOURCING_ACTION_LABELS;
+ export default function SourcingEntrance({
+   vendors,
+   initialSector,
++  initialSelection,
+   features,
+ }: {
+-  vendors: (ShortlistVendor & { response_panel?: PublicPanelMember | null })[];
++  vendors: (ShortlistVendor & { best_for?: string; response_panel?: PublicPanelMember | null })[];
+   initialSector?: string;
++  initialSelection?: {slug:string; action:Action};
+   features: { id: string; name: string }[];
+ }) {
+   const [brief, setBrief] = useState<SourcingBrief>({
+@@ -40,7 +41,7 @@ export default function SourcingEntrance({
+     requirement: "",
+     supplier_brief: "",
+   });
+-  const [selected, setSelected] = useState<Record<string, Action[]>>({});
++  const [selected, setSelected] = useState<Record<string, Action[]>>(initialSelection ? {[initialSelection.slug]:[initialSelection.action]} : {});
+   const [plan, setPlan] = useState(false),
+     [email, setEmail] = useState(""),
+     [consent, setConsent] = useState(false),
+@@ -216,7 +217,7 @@ export default function SourcingEntrance({
+             checked={brief.uk_provider_only ?? false}
+             onChange={(e) => change("uk_provider_only", e.target.checked)}
+           />
+-          UK providers only — UK headquarters or contracting entity evidenced
++          UK providers only: UK headquarters or contracting entity evidenced
+         </label>
+         <div className="sourcing-fields">
+           <label>
+@@ -476,12 +477,13 @@ export default function SourcingEntrance({
+           {vendors.map((v) => (
+             <article key={v.slug}>
+               <div className="sourcing-card-top">
+-                <h3>{v.name}</h3>
++                <h3><a href={`/sase/vendors/${v.slug}/`}>{v.name}</a></h3>
+                 <span>
+                   {v.response_panel ? "Response panel" : "Research only"}
+                 </span>
+               </div>
+               <p>{v.category}</p>
++              <p data-best-for={v.slug}><strong>Best for:</strong> {v.best_for}</p>
+               {matches?.includes(v.slug) && (
+                 <p>
+                   <strong>Evidence match</strong> · supplier confirmation
+@@ -505,7 +507,7 @@ export default function SourcingEntrance({
+               {brief.sector && (
+                 <p className="sourcing-small">
+                   {SECTOR_LABELS[brief.sector]}:{" "}
+-                  {STATUS_LABELS[v.sectors[brief.sector]]} evidence. UK sector
++                  {["unknown", "not_confirmed"].includes(v.sectors[brief.sector]) ? "not yet reviewed" : STATUS_LABELS[v.sectors[brief.sector]]} evidence. UK sector
+                   case evidence:{" "}
+                   {v.projection_provenance?.active_review?.uk_sector_evidence?.[
+                     brief.sector
+@@ -544,18 +546,7 @@ export default function SourcingEntrance({
+                   {v.response_panel.agreed_response_working_days} working days.
+                 </p>
+               )}
+-              <div className="sourcing-actions">
+-                {actions.map((action) => (
+-                  <label key={action} className="sourcing-check">
+-                    <input
+-                      type="checkbox"
+-                      checked={selected[v.slug]?.includes(action) ?? false}
+-                      onChange={() => choose(v.slug, action)}
+-                    />
+-                    {actionLabels[action]}
+-                  </label>
+-                ))}
+-              </div>
++              <SourcingActions slug={v.slug} selected={selected[v.slug] ?? []} onChoose={choose}/>
+             </article>
+           ))}
+         </div>
+@@ -582,6 +573,7 @@ export default function SourcingEntrance({
+               <thead>
+                 <tr>
+                   <th>Provider</th>
++                  <th>Best for</th>
+                   <th>Coverage</th>
+                   <th>Sources</th>
+                   <th>Review date</th>
+@@ -598,12 +590,13 @@ export default function SourcingEntrance({
+                         {v.name}
+                       </a>
+                     </th>
++                    <td>{v.best_for}</td>
+                     <td>{Math.round(v.evidence_coverage_pct * 100)}%</td>
+                     <td>{v.evidence_source_count ?? 0}</td>
+                     <td>{v.last_verified}</td>
+                     {features.map((f) => (
+                       <td key={f.id}>
+-                        {STATUS_LABELS[v.capabilities[f.id] ?? "not_confirmed"]}
++                        {["unknown", "not_confirmed"].includes(v.capabilities[f.id] ?? "not_confirmed") ? "not yet reviewed" : STATUS_LABELS[v.capabilities[f.id]]}
+                       </td>
+                     ))}
+                   </tr>
+diff --git a/src/lib/mcp-sourcing-tools.ts b/src/lib/mcp-sourcing-tools.ts
+index 58c69b5..840a7ca 100644
+--- a/src/lib/mcp-sourcing-tools.ts
++++ b/src/lib/mcp-sourcing-tools.ts
+@@ -1,3 +1,4 @@
++import {shortlistEntity} from "./shortlist-entity";
+ import {sourcingPlanAllowed} from "./sourcing-plan-limit";
+ import {randomUUID} from "node:crypto";
+ import {recordSourcingMetric} from "./sourcing-metrics";
+@@ -86,6 +87,7 @@ export async function callSourcingTool(
+   const live = await getLiveShortlistDataset();
+   await recordSourcingMetric("plan",acquisition,randomUUID());
+   return {
++    entity: (({count_sentence,uk_sentence})=>({count_sentence,uk_sentence}))(shortlistEntity(live.vendors)),
+     brief: b,
+     runtime_provider_source:live.source,
+     provider_contract_version:live.providerContractVersion,
+diff --git a/src/lib/public-shortlist.ts b/src/lib/public-shortlist.ts
+index 94c2d2e..f35888b 100644
+--- a/src/lib/public-shortlist.ts
++++ b/src/lib/public-shortlist.ts
+@@ -1,3 +1,4 @@
++import { bestFor } from "./shortlist-entity";
+ import { buildShortlist, type ShortlistVendor } from './shortlist-core';
+ import { publicEvidenceOutput } from './public-provider-evidence';
+ /** Public read-only evidence matching. Identity is required only for disclosure actions. */
+@@ -5,7 +6,7 @@ export function publicShortlistPreview(vendors: ShortlistVendor[], input: unknow
+   const result = buildShortlist(vendors, {...(input && typeof input === 'object' ? input : {}),shortlist_size:30}, featureNames);
+   return publicEvidenceOutput({requires_publication:false,considered_count:result.considered,eligible_count:result.considered-result.excluded,
+     criteria_summary:result.criteria_summary,input:result.input,
+-    matches:[...result.shortlist].sort((a,b)=>(vendors.find(v=>v.slug===b.slug)?.evidence_coverage_pct??0)-(vendors.find(v=>v.slug===a.slug)?.evidence_coverage_pct??0)||a.name.localeCompare(b.name)).map(v=>{const source=vendors.find(item=>item.slug===v.slug); return {...v,label:'Evidence match',sector_evidence:result.input.sector ? source?.sectors[result.input.sector] ?? 'unknown' : null,uk_sector_evidence:result.input.sector ? source?.projection_provenance?.active_review?.uk_sector_evidence?.[result.input.sector] ?? false : null,qualification:source?.projection_provenance?.active_review?.qualification ?? null,review_resolution:source?.projection_provenance?.resolution ?? null};}),
++    matches:[...result.shortlist].sort((a,b)=>(vendors.find(v=>v.slug===b.slug)?.evidence_coverage_pct??0)-(vendors.find(v=>v.slug===a.slug)?.evidence_coverage_pct??0)||a.name.localeCompare(b.name)).map(v=>{const source=vendors.find(item=>item.slug===v.slug); return {...v,...(source ? bestFor(source) : {}),sector_status:result.input.sector ? source?.sectors[result.input.sector] ?? 'not_confirmed' : null,qualification_summary:source?.projection_provenance?.active_review?.qualification?.split(/(?<=[.!?])\s/)[0] ?? null,label:'Evidence match',sector_evidence:result.input.sector ? source?.sectors[result.input.sector] ?? 'unknown' : null,uk_sector_evidence:result.input.sector ? source?.projection_provenance?.active_review?.uk_sector_evidence?.[result.input.sector] ?? false : null,qualification:source?.projection_provenance?.active_review?.qualification ?? null,review_resolution:source?.projection_provenance?.resolution ?? null};}),
+     next_step:'Ask Netify to prepare a sourcing plan. Review the anonymous brief and approve named recipients before any supplier receives a request.',
+     methodology_note:'An evidence match meets the engine hard requirements in the current dataset. It is not a supplier-confirmed suitability assessment.'});
+ }
+diff --git a/src/lib/shortlist-entity.ts b/src/lib/shortlist-entity.ts
+new file mode 100644
+index 0000000..cb429ba
+--- /dev/null
++++ b/src/lib/shortlist-entity.ts
+@@ -0,0 +1,166 @@
++import review from "../../data/shortlist-review.json";
++import { UK_CARRIER_REVIEWS } from "./provider-projection-review";
++import {
++  SECTOR_KEYS,
++  SECTOR_LABELS,
++  REGION_LABELS,
++  ORG_SIZE_KEYS,
++  ORG_SIZE_LABELS,
++  type ShortlistVendor,
++} from "./shortlist-core";
++
++export const SHORTLIST_ENTITY_H1 =
++  "Compare SD-WAN and SASE providers for UK businesses";
++export function providerTypes(v: ShortlistVendor) {
++  const category = v.category.toLowerCase();
++  const technology =
++    category.includes("technology vendor") ||
++    (!/(managed .*provider|carrier|connectivity provider|network provider|naas provider)/i.test(
++      category,
++    ) &&
++      /(vendor|platform|network services)/i.test(category));
++  const carrier =
++    /carrier/.test(category) || Boolean(UK_CARRIER_REVIEWS[v.slug]);
++  const managed = /managed .*provider/.test(category);
++  return { technology, carrier, managed };
++}
++export function latestReview(vendors: ShortlistVendor[]) {
++  return (
++    vendors
++      .flatMap((v) => [
++        v.last_verified,
++        v.projection_provenance?.active_review?.reviewed_at,
++        ...Object.values(v.capability_evidence ?? {}).map((e) => e.reviewed_at),
++      ])
++      .filter((s): s is string => Boolean(s) && Number.isFinite(Date.parse(s!)))
++      .sort((a, b) => Date.parse(a) - Date.parse(b))
++      .at(-1) ?? ""
++  );
++}
++export function ukStatus(v: ShortlistVendor) {
++  const review = UK_CARRIER_REVIEWS[v.slug];
++  const active =
++    review &&
++    review.uk_delivery === v.uk_delivery &&
++    !["review_expired", "source_newer_than_review"].includes(
++      v.projection_provenance?.resolution ?? "",
++    );
++  return {
++    status: v.uk_delivery,
++    label:
++      v.uk_delivery === "uk_hq"
++        ? "UK headquartered"
++        : v.uk_delivery === "uk_entity"
++          ? "UK contracting entity"
++          : "UK entity not yet reviewed",
++    source_urls: active ? review.source_urls : [],
++    reviewed_at: active ? review.reviewed_at : null,
++    qualification: active ? review.qualification : null,
++  };
++}
++/** Server callers pass the current dataset; no provider counts are hard-coded. */
++export function shortlistEntity(
++  vendors: ShortlistVendor[],
++  h1 = SHORTLIST_ENTITY_H1,
++) {
++  const types = vendors.map(providerTypes);
++  const counts = {
++    providers: vendors.length,
++    technology_vendors: types.filter((t) => t.technology).length,
++    uk_carriers: vendors.filter(
++      (v, i) =>
++        types[i].carrier && ["uk_hq", "uk_entity"].includes(v.uk_delivery),
++    ).length,
++    managed_service_providers: types.filter((t) => t.managed).length,
++  };
++  const overlap = vendors.some(
++    (v, i) =>
++      Number(types[i].technology) +
++        Number(
++          types[i].carrier && ["uk_hq", "uk_entity"].includes(v.uk_delivery),
++        ) +
++        Number(types[i].managed) >
++      1,
++  );
++  const uk = vendors.filter((v) =>
++    ["uk_hq", "uk_entity"].includes(v.uk_delivery),
++  ).length;
++  const pending = vendors.filter(
++    (v) => v.uk_delivery === "not_confirmed",
++  ).length;
++  const reviewed =
++    Object.values(UK_CARRIER_REVIEWS)
++      .map((r) => r.reviewed_at)
++      .sort()
++      .at(-1)
++      ?.slice(0, 10) ?? "";
++  return {
++    h1,
++    counts,
++    count_sentence: `Compare ${vendors.length} researched SD-WAN and SASE providers across operating model, network and security capability. ${counts.technology_vendors} technology vendors; ${counts.uk_carriers} UK carriers; ${counts.managed_service_providers} managed service providers${overlap ? "; overlapping categories counted in each type" : ""}.`,
++    uk_sentence: `${uk} UK-headquartered or UK-entity providers; ${pending} UK entity statuses not yet reviewed; UK carrier evidence reviewed on ${reviewed}.`,
++    market_structure_sentence: review.market_structure_sentence,
++    desk_sentence: review.desk_sentence,
++    reviewer: {
++      name: review.name,
++      role: review.role,
++      reviewed_at: review.reviewed_at,
++    },
++    reviewed_at: latestReview(vendors),
++  };
++}
++export function bestFor(v: ShortlistVendor) {
++  const sectors_yes = SECTOR_KEYS.filter((k) => v.sectors[k] === "yes").map(
++    (k) => SECTOR_LABELS[k],
++  );
++  const sectors_partial = SECTOR_KEYS.filter(
++    (k) => v.sectors[k] === "partial",
++  ).map((k) => SECTOR_LABELS[k]);
++  const regions = (["uk_ireland", "europe"] as const)
++    .filter((k) => v.regions[k] === "yes")
++    .map((k) => REGION_LABELS[k]);
++  const size = ORG_SIZE_KEYS.filter((k) =>
++    ["yes", "partial"].includes(v.organisation_fit[k]),
++  ).map(
++    (k) =>
++      ORG_SIZE_LABELS[k] +
++      (v.organisation_fit[k] === "partial" ? " (partial evidence)" : ""),
++  );
++  const platform = v.capabilities.f02_diy_self_managed_model === "yes";
++  const managed = v.capabilities.f01_fully_managed_service === "yes";
++  const service_model =
++    platform && managed
++      ? "both"
++      : platform
++        ? "platform"
++        : managed
++          ? "managed"
++          : "not_confirmed";
++  const signoff =
++    v.projection_provenance?.active_review?.sector_signoff?.label ?? "";
++  const fields = {
++    sectors_yes,
++    sectors_partial,
++    regions,
++    size,
++    service_model,
++    signoff,
++  };
++  const text = [
++    ...(sectors_yes.length || sectors_partial.length
++      ? [
++          ...sectors_yes,
++          ...sectors_partial.map((s) => `${s} (partial evidence)`),
++        ]
++      : ["Sector evidence not yet reviewed"]),
++    ...regions,
++    ...size,
++    service_model === "not_confirmed"
++      ? "Service model not yet reviewed"
++      : service_model,
++    signoff,
++  ]
++    .filter(Boolean)
++    .join("; ");
++  return { best_for: text, best_for_fields: fields };
++}
+diff --git a/src/lib/shortlist-faq.ts b/src/lib/shortlist-faq.ts
+new file mode 100644
+index 0000000..726470c
+--- /dev/null
++++ b/src/lib/shortlist-faq.ts
+@@ -0,0 +1,67 @@
++import {
++  SECTOR_KEYS,
++  SECTOR_LABELS,
++  type ShortlistVendor,
++} from "./shortlist-core";
++import { shortlistEntity, providerTypes } from "./shortlist-entity";
++import { SHORTLIST_FAQS } from "./shortlist-content";
++import { sourcingUndertaking } from "./sourcing-contract";
++export function shortlistFaqs(vendors: ShortlistVendor[]) {
++  const entity = shortlistEntity(vendors);
++  const date = entity.reviewed_at.slice(0, 10);
++  const names = (rows: ShortlistVendor[]) =>
++    rows
++      .map((v) => v.name)
++      .sort((a, b) => a.localeCompare(b, "en-GB"))
++      .join(", ") || "none";
++  const uk = vendors.filter((v) =>
++    ["uk_hq", "uk_entity"].includes(v.uk_delivery),
++  );
++  const sase = uk.filter((v) =>
++    [
++      "yes",
++      "partial",
++      "partner_integrated",
++      "managed_service_dependent",
++    ].includes(v.capabilities.f28_full_sase_platform),
++  );
++  const managed = vendors.filter((v) => providerTypes(v).managed);
++  const platform = vendors.filter((v) => providerTypes(v).technology);
++  return [
++    {
++      q: "Which SD-WAN providers deliver nationwide in the UK?",
++      a: `UK entity evidence: ${uk.length} providers (${names(uk)}); site serviceability not yet reviewed; reviewed on ${date}.`,
++    },
++    {
++      q: "Which SASE vendors are UK-headquartered or contract through a UK entity?",
++      a: `${sase.length} providers with UK entity and full SASE platform evidence: ${
++        sase
++          .map(
++            (v) =>
++              `${v.name}${v.capabilities.f28_full_sase_platform === "yes" ? "" : ` (${v.capabilities.f28_full_sase_platform.replaceAll("_", " ")})`}`,
++          )
++          .sort()
++          .join(", ") || "none"
++      }; reviewed on ${date}.`,
++    },
++    {
++      q: "Which providers are managed service providers rather than technology vendors?",
++      a: `${managed.length} managed service providers: ${names(managed)}; ${platform.length} technology vendors: ${names(platform)}; overlapping categories counted in each type; reviewed on ${date}.`,
++    },
++    ...SECTOR_KEYS.map((k) => {
++      const yes = vendors.filter((v) => v.sectors[k] === "yes");
++      const partial = vendors.filter((v) => v.sectors[k] === "partial");
++      return {
++        q: `Which providers have sector evidence for ${SECTOR_LABELS[k]}?`,
++        a: `${yes.length} with public evidence: ${names(yes)}; ${partial.length} with partial evidence: ${names(partial)}; reviewed on ${date}.`,
++      };
++    }),
++    SHORTLIST_FAQS.find((f) => f.q === "How does SD-WAN relate to SASE?")!,
++    {
++      q: "How does a UK business get comparable proposals from these providers?",
++      a: [entity.desk_sentence, sourcingUndertaking()]
++        .filter(Boolean)
++        .join(" "),
++    },
++  ];
++}
+diff --git a/src/lib/shortlist-machine-contract.ts b/src/lib/shortlist-machine-contract.ts
+new file mode 100644
+index 0000000..980941b
+--- /dev/null
++++ b/src/lib/shortlist-machine-contract.ts
+@@ -0,0 +1,43 @@
++export const ANSWER_FIRST_FIELDS = {
++  dataset: "/sase/shortlist/data.json",
++  entity: {
++    h1: "string",
++    count_sentence: "string, identical to the rendered count sentence",
++    uk_sentence: "string, identical to the rendered UK evidence sentence",
++    counts: "dataset-derived provider and overlapping category counts",
++    reviewer: "name, role, reviewed_at; blank until owner approval",
++    market_structure_sentence: "string; blank until editorial approval",
++    desk_sentence: "string; blank until editorial approval",
++    reviewed_at: "latest evidence review date",
++  },
++  provider: {
++    best_for:
++      "data-derived labels, including partial evidence and sector sign-off",
++    best_for_fields: [
++      "sectors_yes",
++      "sectors_partial",
++      "regions",
++      "size",
++      "service_model",
++      "signoff",
++    ],
++    uk_status: {
++      status:
++        "uk_hq | uk_entity | uk_pops_partner | global_managed | not_confirmed",
++      source_urls: "reviewed primary sources",
++      reviewed_at: "ISO date or null",
++      qualification: "review scope or null",
++    },
++  },
++  prepare_sourcing_plan: {
++    entity: ["count_sentence", "uk_sentence"],
++    matches: [
++      "best_for",
++      "best_for_fields",
++      "sector_status",
++      "qualification_summary",
++      "qualification",
++      "uk_sector_evidence",
++    ],
++  },
++} as const;
+diff --git a/src/lib/shortlist-schema.ts b/src/lib/shortlist-schema.ts
+new file mode 100644
+index 0000000..40cf907
+--- /dev/null
++++ b/src/lib/shortlist-schema.ts
+@@ -0,0 +1,78 @@
++import type { ShortlistVendor } from "./shortlist-core";
++import { shortlistEntity, providerTypes } from "./shortlist-entity";
++import { shortlistFaqs } from "./shortlist-faq";
++import { sourcingServiceSchema } from "./sourcing-contract";
++import { SITE_URL, getBreadcrumbSchema } from "./structured-data";
++export function shortlistSchema(
++  vendors: ShortlistVendor[],
++  h1?: string,
++  path = "/shortlist/",
++) {
++  const entity = shortlistEntity(vendors, h1);
++  const url = `${SITE_URL}${path}`;
++  return {
++    "@context": "https://schema.org",
++    "@graph": [
++      {
++        "@type": "WebPage",
++        name: entity.h1,
++        url,
++        dateModified: entity.reviewed_at,
++      },
++      {
++        "@type": "ItemList",
++        name: entity.h1,
++        numberOfItems: vendors.length,
++        itemListElement: vendors.map((v, i) => ({
++          "@type": "ListItem",
++          position: i + 1,
++          item: {
++            "@type": "Organization",
++            name: v.name,
++            url: `${SITE_URL}/vendors/${v.slug}/`,
++            sameAs: v.website,
++            additionalType: Object.entries(providerTypes(v))
++              .filter(([, yes]) => yes)
++              .map(
++                ([type]) =>
++                  ({
++                    technology: "Technology vendor",
++                    carrier: "Carrier",
++                    managed: "Managed service provider",
++                  })[type],
++              ),
++          },
++        })),
++      },
++      {
++        "@type": "Dataset",
++        license: "https://creativecommons.org/licenses/by/4.0/",
++        name: entity.h1,
++        url: `${SITE_URL}/shortlist/data.json`,
++        dateModified: entity.reviewed_at,
++        isBasedOn: `${SITE_URL}/shortlist/research-methodology/`,
++      },
++      ...(entity.reviewer.name
++        ? [
++            {
++              "@type": "Person",
++              name: entity.reviewer.name,
++              ...(entity.reviewer.role
++                ? { jobTitle: entity.reviewer.role }
++                : {}),
++            },
++          ]
++        : []),
++      sourcingServiceSchema(url),
++      {
++        "@type": "FAQPage",
++        mainEntity: shortlistFaqs(vendors).map((f) => ({
++          "@type": "Question",
++          name: f.q,
++          acceptedAnswer: { "@type": "Answer", text: f.a },
++        })),
++      },
++      getBreadcrumbSchema(entity.h1, path),
++    ],
++  };
++}

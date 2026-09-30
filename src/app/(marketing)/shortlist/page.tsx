@@ -1,3 +1,7 @@
+import { buildShortlistMarketView, parseShortlistMarketView, SHORTLIST_VIEWS } from "@/lib/shortlist-market-views";
+import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
+import { shortlistSchema } from "@/lib/shortlist-schema";
+import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
 import {publicResponsePanel} from '@/lib/response-panel';
 import {annotateResponsePanel} from '@/lib/response-panel-contract';
 import {listPublicOutcomes} from "@/lib/market-outcomes";
@@ -5,26 +9,21 @@ import MarketOutcomeView from "@/components/MarketOutcomeView";
 import type { Metadata } from "next";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import {
-  publicEvidenceProviders,
-  PUBLIC_EVIDENCE_NOTICE,
-} from "@/lib/public-provider-evidence";
-import {
   SOURCING_TITLE,
-  sourcingUndertaking, sourcingServiceSchema,
+  sourcingUndertaking,
   SOURCING_DESCRIPTION,
   COMMISSION_DESCRIPTION,
 } from "@/lib/sourcing-contract";
-import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
-import { SITE_URL, getOrganizationSchema } from "@/lib/structured-data";
+import { shortlistFaqs } from "@/lib/shortlist-faq";
+import { SITE_URL } from "@/lib/structured-data";
 import { FEATURES } from "@/lib/vendors";
 import SourcingEntrance from "@/components/SourcingEntrance";
 import "./sourcing.css";
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: SOURCING_TITLE,
-  description: SOURCING_DESCRIPTION,
-  alternates: { canonical: `${SITE_URL}/shortlist/` },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const entity = shortlistEntity((await getLiveShortlistDataset()).vendors);
+  return { title: {absolute: `${entity.h1} | Netify`}, description: `${entity.count_sentence} ${SOURCING_DESCRIPTION}`, alternates: {canonical: `${SITE_URL}/shortlist/`} };
+}
 export default async function ShortlistPage({
   searchParams,
 }: {
@@ -33,24 +32,11 @@ export default async function ShortlistPage({
   const outcomes = await listPublicOutcomes().catch(() => null);
   const query = await searchParams;
   const live = await getLiveShortlistDataset();
-  const vendors = annotateResponsePanel(publicEvidenceProviders(live.vendors),await publicResponsePanel());
-  const schemas = [
-    getOrganizationSchema(),
-    sourcingServiceSchema(`${SITE_URL}/shortlist/`),
-    {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      name: "Provider research",
-      description: PUBLIC_EVIDENCE_NOTICE,
-      numberOfItems: vendors.length,
-      itemListElement: vendors.map((v, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        name: v.name,
-        url: v.marketplace_url,
-      })),
-    },
-  ];
+  const view = parseShortlistMarketView(typeof query.view === "string" ? query.view : "all");
+  const vendors = annotateResponsePanel(buildShortlistMarketView(live.vendors,view),await publicResponsePanel());
+  const entity = shortlistEntity(vendors,view === "all" ? undefined : SHORTLIST_VIEWS[view].title);
+  const faqs = shortlistFaqs(vendors);
+  const schemas = [shortlistSchema(vendors,entity.h1,view === "all" ? "/shortlist/" : `/shortlist/${view}/`)];
   return (
     <main className="sourcing">
       {schemas.map((schema, i) => (
@@ -62,14 +48,11 @@ export default async function ShortlistPage({
           }}
         />
       ))}
-      {process.env.VERCEL_ENV !== "production" && (
-        <div className="sourcing-banner">
-          Implementation preview · Working wording for Harry · Supplier response
-          commitments and operational acceptance remain release gates.
-        </div>
-      )}
-      <p className="sourcing-eyebrow">Netify · UK connectivity marketplace</p>
-      <h1>{SOURCING_TITLE}</h1>
+      <header data-entity-block>
+        <h1>{entity.h1}</h1>
+        <ShortlistEntityBlock entity={entity}/>
+      </header>
+      <h2>{SOURCING_TITLE}</h2>
       <p className="sourcing-lead">{SOURCING_DESCRIPTION}</p>
       <div className="sourcing-steps">
         <div>
@@ -120,7 +103,8 @@ export default async function ShortlistPage({
       )}
       <SourcingEntrance
         features={FEATURES.map(({ id, name }) => ({ id, name }))}
-        vendors={vendors}
+        vendors={vendors.map(v=>({...v,...bestFor(v)}))}
+        initialSelection={typeof query.provider === "string" && vendors.some(v=>v.slug===query.provider) && typeof query.action === "string" && ["contacts","demo","proposals"].includes(query.action) ? {slug:query.provider,action:query.action as "contacts"|"demo"|"proposals"} : undefined}
         initialSector={
           typeof query.sector === "string" ? query.sector : undefined
         }
@@ -170,8 +154,9 @@ export default async function ShortlistPage({
         </a>
       </section>
       <section>
-        <h2>Questions about the service</h2>
-        {SHORTLIST_FAQS.map((f) => (
+        <p><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 with attribution to Netify</a></p>
+        <h2>Provider questions</h2>
+        {faqs.map((f) => (
           <details key={f.q}>
             <summary>{f.q}</summary>
             <p>{f.a}</p>
