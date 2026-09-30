@@ -11,6 +11,7 @@ const SOURCING_RELEASE_LASTMOD = "2026-09-30";
 function sourcingLastmod(loc: string): string {
   return loc === "https://netify.co.uk/sase-sd-wan-rfp-builder/"
     || loc === `${SITE_URL}/shortlist/`
+    || loc === `${SITE_URL}/best`
     || loc.startsWith(`${SITE_URL}/best/`)
     || loc.startsWith(`${SITE_URL}/alternatives/`)
     ? `<lastmod>${SOURCING_RELEASE_LASTMOD}</lastmod>` : "";
