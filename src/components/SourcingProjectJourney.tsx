@@ -100,10 +100,10 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
           </a>
         </p>
         <p>
-          Use this editor for your requirements. Public RFP publication is
-          optional; sourcing continues through the project tabs above.
+          Use this editor for your requirements. Your brief, connectivity pricing
+          and written proposals stay together in this private project.
         </p>
-        <RfpBuilder initialId={id} />
+        <RfpBuilder initialId={id} privateSourcing />
       </div>
       {connectivityOpened && (
         <div hidden={view !== "connectivity"}>
