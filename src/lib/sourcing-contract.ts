@@ -5,7 +5,12 @@ export const SOURCING_TITLE =
   "Get comparable SD-WAN and SASE proposals from UK providers";
 // Working copy for Harry's editorial approval before production.
 export const SOURCING_DESCRIPTION =
-  "Use Netify to request comparable proposals, demos and pre-sales introductions from named SD-WAN and SASE providers. Research is open, and you approve each request before a supplier receives it. SD-WAN provides the connectivity component of SASE.";
+  "Use Netify to request comparable proposals, demos and pre-sales contacts from named SD-WAN and SASE providers. Research is open, and you approve each request before a supplier receives it. SD-WAN provides the connectivity component of SASE.";
+export const SOURCING_ACTION_LABELS = {
+  contacts: "Pre-sales contacts",
+  demo: "Demo",
+  proposals: "Include in proposals",
+} as const;
 export type SourcingTarget = {proposals:number|null;working_days:number|null};
 // [OWNER] Set both only after agreeing the operational undertaking.
 export const SOURCING_TARGET:SourcingTarget = {proposals:null,working_days:null};

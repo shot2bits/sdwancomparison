@@ -161,7 +161,7 @@ export default async function ShortlistPage({
       <section>
         <h2>For suppliers</h2>
         <p>
-          Join the response panel with a named pre-sales contact, an agreed
+          Join the response panel with a named contact, an agreed
           response time and acknowledgement of introduction terms. Research
           inclusion alone does not confer panel membership.
         </p>

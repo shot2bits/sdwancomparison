@@ -23,7 +23,7 @@ export function sourcingToolDefinitions(target:SourcingTarget=SOURCING_TARGET){r
   {
     name: "request_comparable_proposals",
     description:
-      "Ask Netify to coordinate contacts, demos or comparable proposals for the explicitly approved providers. Sends a request-specific confirmation to the buyer work email. Requires consent:true and a reviewed anonymous supplier brief. The buyer confirms by email before desk review; this tool cannot trigger supplier introductions or bypass identity confirmation." + " " + sourcingUndertaking(target),
+      "Ask Netify to coordinate pre-sales contacts, demos or comparable proposals for the explicitly approved providers. Sends a request-specific confirmation to the buyer work email. Requires consent:true and a reviewed anonymous supplier brief. The buyer confirms by email before desk review; this tool cannot trigger supplier introductions or bypass identity confirmation." + " " + sourcingUndertaking(target),
     inputSchema: z.toJSONSchema(SourcingRequestSchema, { io: "input" }),
     annotations: {
       readOnlyHint: false,

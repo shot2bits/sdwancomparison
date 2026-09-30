@@ -9,14 +9,10 @@ import {
   REGION_LABELS,
   STATUS_LABELS,
 } from "@/lib/shortlist-core";
-import { SourcingBriefSchema, type SourcingBrief } from "@/lib/sourcing-contract";
+import { SOURCING_ACTION_LABELS, SourcingBriefSchema, type SourcingBrief } from "@/lib/sourcing-contract";
 type Action = "contacts" | "demo" | "proposals";
 const actions: Action[] = ["contacts", "demo", "proposals"];
-const actionLabels = {
-  contacts: "Pre-sales contacts",
-  demo: "Demo",
-  proposals: "Include in proposals",
-};
+const actionLabels = SOURCING_ACTION_LABELS;
 export default function SourcingEntrance({
   vendors,
   initialSector,

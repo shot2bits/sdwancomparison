@@ -1,6 +1,7 @@
 import {notifyConfirmedSourcing} from "./sourcing-notifications";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import {
+  SOURCING_ACTION_LABELS,
   SourcingRequestSchema,
   validateRecipients,
   type SourcingRequest,
@@ -125,7 +126,7 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
     input.recipients
       .map(
         (r) =>
-          `${live.vendors.find((v) => v.slug === r.slug)?.name}: ${r.actions.join(", ")}`,
+          `${live.vendors.find((v) => v.slug === r.slug)?.name}: ${r.actions.map((action) => SOURCING_ACTION_LABELS[action]).join(", ")}`,
       )
       .join("\n") ||
     "No suppliers approved yet; prepare a sourcing plan for my review.";

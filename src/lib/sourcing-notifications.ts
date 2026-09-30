@@ -1,6 +1,6 @@
 import "server-only";
 import { publicResponsePanel } from "./response-panel";
-import { sourcingUndertaking } from "./sourcing-contract";
+import { SOURCING_ACTION_LABELS, sourcingUndertaking } from "./sourcing-contract";
 import { z } from "zod";
 import { kvGetJson, kvSetJson } from "./rfp-store";
 import { activityMailFetch, activityMailKey } from "./activity-mail";
@@ -83,7 +83,7 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
         record.request.recipients
           .map(
             (r) =>
-              `${vendors.find((v) => v.slug === r.slug)?.name ?? r.slug}: ${r.actions.join(", ")}${panel.find((p) => p.slug === r.slug) ? ` — route via Netify to ${panel.find((p) => p.slug === r.slug)!.contact_name} (${panel.find((p) => p.slug === r.slug)!.contact_email_domain})` : " — desk to establish supplier contact and terms"}`,
+              `${vendors.find((v) => v.slug === r.slug)?.name ?? r.slug}: ${r.actions.map((action) => SOURCING_ACTION_LABELS[action]).join(", ")}${panel.find((p) => p.slug === r.slug) ? ` — route via Netify to ${panel.find((p) => p.slug === r.slug)!.contact_name} (${panel.find((p) => p.slug === r.slug)!.contact_email_domain})` : " — desk to establish supplier contact and terms"}`,
           )
           .join("\n") ||
         "No providers approved yet; Netify will prepare a named plan for buyer review.";

@@ -78,3 +78,25 @@ PASS browser: four UK evidence matches; no console warnings or errors
 2026-09-30 20:14 UTC  passed 42  failed 0
 ```
 No synthetic live confirmations or supplier messages. Owner blanks unchanged.
+
+## Step 8 — indexing and baseline (external work outstanding)
+
+Fixed actual 2026-09-30 lastmod dates added on the SASE and apex target sitemaps. Live acceptance found the /best/ hub lacked lastmod; corrected before sign-off (a2e65e1). IndexNow used the already-published apex root ownership file because the SASE key route returned 404. HTTP 200 accepted all 58 target URLs. Search Console requests are being recorded separately in docs/ai-overview-baseline.md; clean Google baseline blocked by CAPTCHA pending user confirmation. Earlier positive readings are owner-reported, not independently verified. Four weekly reading slots recorded; no automation installed.
+```text
+IndexNow: 200 URLs: 58 body: ''
+PASS baseline document: exact eight prompts, blocked observations, reported claims separated, four weekly slots, 58-URL HTTP 200 receipt
+2026-09-30 20:21 UTC  passed 42  failed 0
+```
+Step 8 is not declared complete while clean observations and remaining Google requests are outstanding. Owner: CAPTCHA confirmation requested. Continue the independent Step 9 copy correction.
+
+## Step 9 — consistent pre-sales contacts wording
+
+Selected pre-sales contacts. Existing action button labels now shared unchanged between UI and confirmation/acknowledgement mail. Service schema/feed/llms inherit sourcing description; MCP request description uses the same term. Supplier panel asks for a named contact, preserving its one-contact schema. Apex homepage/generated contract aligned. No matching, estimator, RFP or permission logic changed.
+```text
+PASS wording: pre-sales contacts; action button labels unchanged; shared Service schema consistent
+```
+Case-insensitive source scan has only the contacts form. Action-first regression and TypeScript exit 0. Owner: Harry editorial approval remains separate; no rewrite or invented undertaking. Production verification follows.
+
+## Step 10 — not approved
+
+No side-by-side layout change made.
