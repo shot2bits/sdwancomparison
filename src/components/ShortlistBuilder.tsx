@@ -1,5 +1,6 @@
 "use client";
 
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { UK_BUYING_SITUATIONS, getUKBuyingSituation, withUKBuyingContext } from '@/lib/uk-shortlist';
 import ComparisonAnswer from './ComparisonAnswer';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -107,7 +108,7 @@ export default function ShortlistBuilder({ vendors, features, ukBuyerGuidance = 
     </>}
     <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5">
       <h3 className="text-lg font-semibold">Which providers fit your project?</h3>
-      <p className="mt-2 text-sm">Ask Netify to source proposals against your requirements. Start with a short brief, review the public notice and verify your work email and company before publishing. Supplier participation is developing; responses and prices are not guaranteed. A full RFP is optional.</p>
+      <p className="mt-2 text-sm">{SOURCING_DESCRIPTION}</p>
       {situation && <p className="mt-3 text-sm" role="status">Buying situation carried into your draft: <strong>{getUKBuyingSituation(situation)?.label}</strong>.</p>}
       <label className="mt-3 block text-sm font-semibold">Your requirement (optional)<textarea value={requirement} onChange={(e) => setRequirement(e.target.value)} maxLength={4000} rows={2} placeholder="What does your business need?" className="mt-2 block w-full rounded border border-slate-200 bg-white p-3 font-normal"/></label>
       <p className="mt-3 text-sm text-slate-600">Your selected providers, comparison question and stated requirements travel with your draft as research context. They do not invite suppliers or publish anything.</p>

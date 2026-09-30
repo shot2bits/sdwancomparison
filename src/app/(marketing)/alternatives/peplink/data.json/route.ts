@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { SITE_URL } from "@/lib/structured-data";
 import { peplinkContext, getPeplinkEvidence } from "../content";
 export const dynamic = "force-static";
@@ -10,6 +11,6 @@ export function GET() {
     context: peplinkContext,
     ordered_by: result.ordered_by,
     result,
-    evaluate: { url: "https://netify.co.uk/sase-sd-wan-rfp-builder/", description: "Review and publish an anonymous project. Personalised fit requires authorised access after publication. Zero confirmed matches create no invitations; supplier participation and response times are not guaranteed." },
+    evaluate: { url: "https://netify.co.uk/sase-sd-wan-rfp-builder/", description: SOURCING_DESCRIPTION },
   }, { headers: { "X-Robots-Tag": "noindex" } });
 }

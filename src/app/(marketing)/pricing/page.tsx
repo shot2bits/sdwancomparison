@@ -22,7 +22,7 @@ export default function PricingPage() {
       <h2 className="text-2xl font-semibold">Compare the complete commercial offer</h2>
       <p className="mt-3 leading-7">Ask for recurring charges, installation costs, licences, contract term, currency, tax treatment, exclusions and quote validity. Check what is included in support, resilience and migration before comparing totals.</p>
       <p className="mt-4 leading-7">Circuit requests support site addresses, bandwidth and resilience requirements, or quantities for SIM-only users. International sites need a local contact. Fortinet and Meraki edge options and CrowdStrike device protection are optional UK-only additions. Check the final quote for the service, billing period and terms.</p>
-      <p className="mt-4 leading-7">Publishing shares an anonymous notice, not your private contact details or circuit quotes. Review what suppliers will see before publication.</p>
+      <p className="mt-4 leading-7">Publishing shares an anonymous notice, not your private contact details or circuit quotes. Review what suppliers will see while the notice is a draft.</p>
       <a className="mt-5 inline-block underline underline-offset-4" href="/sase/shortlist/">Still choosing suppliers? Compare vendors and managed service providers</a>
     </section>
   </article>;

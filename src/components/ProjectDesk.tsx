@@ -1,4 +1,5 @@
 "use client";
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import PrivateDraftDownload from "@/components/procurement/PrivateDraftDownload";
 import { privateDraftMarkdown } from "@/lib/private-draft";
 
@@ -2438,7 +2439,7 @@ export default function ProjectDesk({
      genuinely the buyer's own prior intent) and NEVER folds in survivors
      of Netify's own computed ranking, which is exactly the "invitation
      selections" the product rule says must not be exposed or persisted
-     before publication. `keptFits`/`fitSlugs`/`partnerDependent` are
+     while the notice is a draft. `keptFits`/`fitSlugs`/`partnerDependent` are
      retired along with the ranked panel they existed to serve; see the
      locked pre-publish outcome panel and the command handlers below for
      the corresponding removal. */
@@ -3438,10 +3439,10 @@ export default function ProjectDesk({
         // partner/integrated -- it operated entirely on the pre-publish
         // ranked fit list, which no longer exists as identifying data in
         // this component (see the fit route's own doc comment). There is
-        // no per-vendor detail to act on before publication, so this is
+        // no per-vendor detail to act on while the notice is a draft, so this is
         // now an honest refusal rather than a silent no-op that would
         // otherwise misleadingly read as "nobody relies on a partner."
-        say("Which vendors and service providers are matched, and how each is evidenced, is part of what publishing unlocks. Publish first, then this becomes something to act on.");
+        say(SOURCING_DESCRIPTION);
         return;
       }
       case "dropName":
@@ -3498,11 +3499,11 @@ export default function ProjectDesk({
         // Living Procurement Canvas Phase 2 correction (14 Aug 2026): "why
         // <vendor>" used to open a ranked-list row's evidence working --
         // that per-vendor detail is exactly what the product rule reserves
-        // for after publication (see the fit route's own doc comment and
+        // for once the notice is published (see the fit route's own doc comment and
         // the locked outcome panel below). No pre-publish path can answer
         // this any more; an honest refusal replaces the old lookup.
         ev("workspace_command", { kind: "why_vendor" });
-        say(`Why a specific vendor or service provider matched, with evidence and dates, is part of what publishing unlocks — “${cap(cmd.name)}” included, if they are among the matches. Publish to see the working.`);
+        say(SOURCING_DESCRIPTION);
         return;
       }
     }
@@ -3845,7 +3846,7 @@ export default function ProjectDesk({
       // `excluded_vendors` used to carry the buyer's pre-publish "drop
       // from direct invites" selections (the removed WHO FITS panel's
       // checkboxes) -- that curation depended on displaying Netify's
-      // computed ranking before publication, which the product rule now
+      // computed ranking while the notice is a draft, which the product rule now
       // forbids, so there is no longer a pre-publish signal to send. The
       // publish route's own `excluded_vendors` option still exists
       // server-side for a future consented mechanism; this call simply
@@ -5428,7 +5429,7 @@ export default function ProjectDesk({
     },
     {
       icon: "reports", label: "Reports", current: false, disabled: !publishedFlag,
-      disabledReason: "Reports become available after publication.",
+      disabledReason: SOURCING_DESCRIPTION,
       onClick: () => goToStep("compare"),
     },
     {
@@ -6113,7 +6114,7 @@ export default function ProjectDesk({
                                   natural point in between, readiness just crossing
                                   threshold, so the payoff stays in view on the way there. */}
                               <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#832f00]">
-                                Next: see what publishing unlocks, then publish to get bids, pricing and vetted responses.
+                                {SOURCING_DESCRIPTION}
                               </div>
                             </div>
                             <button
@@ -6121,7 +6122,7 @@ export default function ProjectDesk({
                               onClick={() => handleCommand({ kind: "whoFits" })}
                               className="flex-none cursor-pointer rounded-[4px] border-0 bg-[#c66000] px-[21px] py-3 text-[15px] font-semibold text-[#110f0d] hover:bg-[#ab4700]"
                             >
-                              See what publishing unlocks
+                              Review your next step
                             </button>
                           </div>
                         )}
@@ -6299,7 +6300,7 @@ export default function ProjectDesk({
                               </div>
                             </div>
                             <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
-                              What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
+                              {SOURCING_DESCRIPTION}
                             </p>
                           </div>
                         )}
@@ -6395,7 +6396,7 @@ export default function ProjectDesk({
                                   </div>
                                   <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
                                     {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
-                                    {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
+                                    {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from the period preceding publication tracking"}.{" "}
                                     {cap(numWord(published.invited.length))} invited directly.
                                     {published.frozen && !published.namesFrozen && " Vendor names below are resolved from the current marketplace directory, not frozen at the moment of publication."}
                                   </p>

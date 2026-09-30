@@ -101,7 +101,7 @@ export function buildRegeneratedProject(input: RegenerateInput): RegeneratedProj
   };
 
   // At drafted, regeneration is a recorded event (v n+1, no phase change); a
-  // pre-generation record advances scoped -> drafted. After publication the
+  // pre-generation record advances scoped -> drafted. once the notice is published the
   // machine refuses: published documents do not silently change under
   // suppliers (one truth, Article 17) - identical to the pre-extraction code.
   p = projectPhase(p) === "drafted" ? recordProjectEvent(p, event) : advanceProject(p, event);

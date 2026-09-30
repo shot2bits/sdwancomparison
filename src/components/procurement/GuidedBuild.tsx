@@ -1,5 +1,6 @@
 "use client";
 
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import PublicationPreview from "./PublicationPreview";
 import { quickListingReadiness } from "@/lib/publication-policy";
@@ -155,7 +156,7 @@ export default function GuidedBuild({
   onSettingsOpenChange: (open: boolean) => void;
   /** Shortlist to engine handoff (3 Sep 2026): the buyer's own pinned
    *  providers, carried from /shortlist by ?vendors=. Buyer intent, not
-   *  Netify's computed match, so it may show before publication. */
+   *  Netify's computed match, so it may show while the notice is a draft. */
   shortlist?: { vendors: { slug: string; name: string }[]; onRemove: (slug: string) => void } | null;
   published: boolean;
   draftSaveStatus?: { label: string; error: boolean };
@@ -403,7 +404,7 @@ export default function GuidedBuild({
           </div>
           {!published && (
             <p className="lpos-mobile-unlock-note">
-              Private draft downloads are available now. Supplier matching, responses, evidence and reports unlock after anonymous publication.
+              {SOURCING_DESCRIPTION}
             </p>
           )}
           <div className="lpos-own-words lpos-persistent-prompt">
@@ -626,7 +627,7 @@ export default function GuidedBuild({
         </div>
         {!published && (
           <p className="lpos-publish-unlock-note" role="note">
-            <strong>Private draft.</strong> Build and review your RFP now. Download a private Word draft or print to PDF without publishing. Publishing it anonymously unlocks supplier matching, supplier responses, evidence, reports and the published document package.
+            <strong>Private draft.</strong> {SOURCING_DESCRIPTION}
           </p>
         )}
         {validationReport && (
@@ -667,7 +668,7 @@ export default function GuidedBuild({
             <p className="lpos-shortlist-note">These are your own picks. Netify&apos;s evaluated match across the whole market is computed the moment you publish, never before.</p>
           </div>
         )}
-        <div className="lpos-unlock"><span aria-hidden="true">{canReviewPublication ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{canReviewPublication ? "Ready for publication review" : hasStarted ? "Continue building your RFP" : shortlist?.vendors.length ? "Your shortlist is waiting" : "Start your RFP"}</strong><p>{canReviewPublication ? "Your project is ready for review. You can add more RFP detail later. Review your anonymous notice and verify your work email before publication." : hasStarted ? advisorMessage : shortlist?.vendors.length ? "Your providers are pinned. Tell Netify your sector, site count and regions, then publish so they can respond." : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
+        <div className="lpos-unlock"><span aria-hidden="true">{canReviewPublication ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{canReviewPublication ? "Ready for publication review" : hasStarted ? "Continue building your RFP" : shortlist?.vendors.length ? "Your shortlist is waiting" : "Start your RFP"}</strong><p>{canReviewPublication ? "Your project is ready for review. You can add more RFP detail later. Review your anonymous notice and verify your work email while the notice is a draft." : hasStarted ? advisorMessage : shortlist?.vendors.length ? "Your providers are pinned. Tell Netify your sector, site count and regions, then publish so they can respond." : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
         <div className="lpos-document-actions"><button type="button" className="primary" onClick={canReviewPublication ? onPublish : onContinueBuilding}>{canReviewPublication ? "Review my opportunity" : "Continue to next requirement"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
       </aside>
       {settingsOpen && (

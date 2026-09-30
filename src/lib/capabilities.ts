@@ -61,7 +61,7 @@ export const CAPABILITIES: Capability[] = [
   {
     id: "build_shortlist",
     title: "Preview aggregate provider coverage",
-    description: "Preview aggregate market coverage for a sector, region, organisation size, delivery model and requirements. Public named-provider comparisons are separate; personalised matches unlock after publication.",
+    description: "Preview aggregate market coverage for a sector, region, organisation size, delivery model and requirements. Public named-provider comparisons are separate; open named evidence matches are available through prepare_sourcing_plan.",
     access: "open", page: "/shortlist/", api: "/api/openapi/build_sase_shortlist", mcp: "build_sase_shortlist", data: "/shortlist/data.json",
     status: "live", capabilityType: "compute", accessLevel: "public",
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
@@ -90,7 +90,7 @@ export const CAPABILITIES: Capability[] = [
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "none",
     evidence: "POST /api/workspace/extract returns provenance-marked field updates; workspace_cycle returns the same loop's output including the assembled brief.",
-    boundaries: "These workspace drafting tools are stateless; personalised provider identities are not returned before publication. Publishing requires the buyer's recorded consent and a verified work email; no vendor is contacted before that signature. Provenance is never dropped: inferences and assumptions stay labelled all the way to the published notice.",
+    boundaries: "These workspace drafting tools are stateless; personalised provider identities are not returned while the notice is a draft. Publishing requires the buyer's recorded consent and a verified work email; no vendor is contacted before that signature. Provenance is never dropped: inferences and assumptions stay labelled all the way to the published notice.",
   },
   {
     id: "post_opportunity",

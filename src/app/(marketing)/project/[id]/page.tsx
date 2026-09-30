@@ -301,7 +301,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
             ) : (
               <>
                 <p className="m-0 mb-2 text-sm text-[var(--ink-800)]">
-                  {gaps.length} to answer or accept before publication. <Link href={`/project/${id}/rescope${qs}`} className="underline">Answer by re-scoping</Link> (a new verdict and document version, earlier versions kept), or accept below to record the decision.
+                  {gaps.length} to answer or accept while the notice is a draft. <Link href={`/project/${id}/rescope${qs}`} className="underline">Answer by re-scoping</Link> (a new verdict and document version, earlier versions kept), or accept below to record the decision.
                 </p>
                 <GapActions projectId={id} manage={tokenOk ? manage : undefined} gaps={gaps} />
               </>

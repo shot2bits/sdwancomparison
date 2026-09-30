@@ -1,3 +1,4 @@
+import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -62,7 +63,7 @@ export default async function ComparePage({ params }: Props) {
   const faqs = [
     { q: `${c.names[a]} or ${c.names[b]}: how should I compare them?`, a: c.summary },
     { q: `Where can I check ${c.names[a]}'s evidence?`, a: "Read the source grades below and open the provider profile for the supporting evidence. Unknown does not mean unsupported." },
-    { q: `Where can I check ${c.names[b]}'s evidence?`, a: "Read the source grades below and open the provider profile for the supporting evidence. Project-specific recommendations require verified publication." },
+    { q: `Where can I check ${c.names[b]}'s evidence?`, a: SHORTLIST_FAQS[0].a },
   ];
 
   const schemas = [

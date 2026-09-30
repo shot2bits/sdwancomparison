@@ -1951,7 +1951,7 @@ export default function RfpBuilder({ initialId, privateSourcing = false }: { ini
                 suggestSuppliers(), which reveals project-specific vendor
                 matches. Hiding it pre-publish (on top of the function-level
                 guard) means there is no control on the page that can start
-                that disclosure before publication. */}
+                that disclosure while the notice is a draft. */}
             {published && (
               <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit vendors</button>
             )}
@@ -1976,7 +1976,7 @@ export default function RfpBuilder({ initialId, privateSourcing = false }: { ini
             // Row-8 hotfix (16 Aug 2026): pre-publish this section may name the
             // marketplace as an aggregate ("Netify's graded marketplace") but
             // must not reveal which vendors match THIS project, or any
-            // supplier identity, before publication.
+            // supplier identity, while the notice is a draft.
             <><strong>Step 3.</strong> Netify&apos;s graded marketplace vendors and service providers are matched to your requirement and invited once you publish. Nothing about your specific match, or any vendor&apos;s identity, is shown here until then.</>
           )}
         </p>

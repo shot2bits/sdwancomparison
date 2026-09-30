@@ -1,3 +1,4 @@
+import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 import { getShortlistFaqSchema } from "@/lib/structured-data";
 
 /**
@@ -51,15 +52,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Can I use Netify to run a SASE or SD-WAN RFP or RFI?",
-    a: "Yes. Netify writes your requirement up as a document you can download as Word or PDF. What it comes out as depends on what the requirement has earned: a project notice for a straightforward need, an RFI when you are still gathering information, or a full RFP once you have set priorities and made a commercial claim. You do not choose a template and you do not start from a blank page. You review and approve an anonymous notice before publication. Invitations require confirmed eligibility, and supplier responses are not guaranteed.",
+    a: SHORTLIST_FAQS[0].a,
   },
   {
     q: "How does Netify compare vendors and service providers?",
-    a: "Netify publishes source grades for 30 vendors and service providers across 40 capabilities. Personalised fit and rankings require authorised access after verified project publication. Public evidence order uses proven capability counts, then verification date and provider name; it is not a recommendation. Where a capability is not published, the record says so rather than guessing. Netify publishes vendor and provider comparisons you can read in full, including the sources behind each grade and the claims that conflict.",
+    a: SHORTLIST_FAQS[0].a,
   },
   {
     q: "What do I get when I publish a requirement?",
-    a: "Six things. Vendors and service providers ranked against your requirement, with the reason each one is in or out. An indicative price band, computed under the Netify TCO methodology. Your requirement written up as a project notice, an RFI or a full RFP, ready to download as Word or PDF. Your opportunity posted anonymously to the public opportunities board. Full detail released to signed in approved vendors and service providers, while the public never sees your company name or your contact details. And their responses side by side, with pricing private to you.",
+    a: SHORTLIST_FAQS[0].a,
   },
   {
     q: "Can Netify shortlist SASE providers for a multinational organisation?",
@@ -83,7 +84,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need an account to use Netify?",
-    a: "No account is needed to build, paste, upload, check or preview an RFP. A verified work email is required when you publish it anonymously to the Netify Opportunity Board. Publication creates the buyer account and unlocks the final document downloads, provider matching and structured supplier responses.",
+    a: SHORTLIST_FAQS[1].a,
   },
   {
     q: "Can an AI agent use Netify on our behalf?",

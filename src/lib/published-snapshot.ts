@@ -36,7 +36,7 @@
  * AFTER-PUBLICATION EDITS -- the ONE safe rule this file implements (Robert
  * asked for exactly one, chosen and documented, not both): a published
  * snapshot is IMMUTABLE once created. The underlying `ProjectDetails`
- * record MAY still be edited after publication (rescope flows, corrections
+ * record MAY still be edited once the notice is published (rescope flows, corrections
  * -- existing behaviour, unchanged; see rfp-governed-revision.ts for how
  * those edits are tracked) -- draft version N+1 keeps evolving -- but the
  * live board notice, every export route and the market report all read

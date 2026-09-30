@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import type { Metadata } from "next";
 import Link from "next/link";
 import SourcedTable from "@/components/SourcedTable";
@@ -31,7 +32,7 @@ export default function PeplinkAlternatives() {
     </li>)}</ol>
     <section className="mt-10">
       <h2 className="text-xl mb-3">Turn your requirements into a project</h2>
-      <p className="mb-4">Review your anonymous notice before publication. Personalised fit requires authorised access after publication. Where the evaluation confirms no eligible matches, no suppliers are invited. You can review your requirements and the evidence gaps before choosing your next step. Supplier participation and response times are not guaranteed.</p>
+      <p className="mb-4">{SOURCING_DESCRIPTION}</p>
       <Link href="https://netify.co.uk/sase-sd-wan-rfp-builder/">Start or review your project</Link>
       <p className="mt-3"><Link href="/shortlist/">Explore the public provider directory</Link></p>
     </section>

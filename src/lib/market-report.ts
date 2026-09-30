@@ -28,7 +28,7 @@ export type MarketReport = {
    *  Phase 2 (14 Aug 2026): `total_evaluated_market` is the size of the
    *  WHOLE vendor dataset (matchSuppliers()'s own `total`, never
    *  scope/region-filtered) -- the general marketplace figure the publish
-   *  lifecycle brief permits showing before publication, clearly labelled
+   *  lifecycle brief permits showing while the notice is a draft, clearly labelled
    *  as the general market, never as this project's matches. `count` and
    *  `names` remain this project's actual ranked/filtered matches and MUST
    *  stay hidden until publication (see /api/rfp/[id]/report/route.ts). */

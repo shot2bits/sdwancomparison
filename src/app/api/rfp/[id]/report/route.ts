@@ -16,7 +16,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  *
  * Living Procurement Canvas Phase 2 (14 Aug 2026), Robert's product rule:
  * publication is the boundary that unlocks a project's matched vendors and
- * service providers, not a UI event. Before publication this route MUST
+ * service providers, not a UI event. while the notice is a draft this route MUST
  * NOT reveal a project-specific ranked match result -- no matched vendor
  * names, no count, no "top three" partial list (the previous
  * `names.slice(0, 3)` preview did exactly this and is the bug this round
@@ -25,7 +25,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  * marketplace, never as this project's matches) -- what publication
  * unlocks, not a taste of it.
  *
- * After publication, every reader of this route sees the SAME frozen
+ * once the notice is published, every reader of this route sees the SAME frozen
  * market report the snapshot cached at publish time (published-
  * snapshot.ts) -- never a freshly recomputed one that could drift from
  * what the board notice, the invited vendors and the exported documents

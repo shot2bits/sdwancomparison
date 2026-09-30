@@ -1,3 +1,4 @@
+import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 /**
  * Definitions for the statically generated listicle landing pages at
  * /best/[slug]. Each page is a server-rendered, citable ranked list
@@ -210,6 +211,6 @@ export function getBestPage(slug: string): BestPage | undefined {
     faqs: [
       {q: "Does inclusion confirm suitability for my project?", a: "No. This directory presents published provider evidence. Confirm product, sector, region and service scope against your own requirements. Missing evidence remains unconfirmed."},
       {q: "How is the public directory ordered?", a: "Most proven capability items first, then the most recent verification date, then provider name; slug breaks identical names and missing dates come last. Only yes capability grades count. This is evidence order, not a personalised recommendation."},
-      {q: "What happens when I publish a project?", a: "Review your anonymous notice first. Personalised matching requires authorised access after publication. Only selected eligible providers receive invitations. If no match is confirmed, no suppliers are invited. Review the reasons and evidence gaps before deciding whether to revise and republish. Supplier participation and response times are not guaranteed."}
+      SHORTLIST_FAQS[0]
     ]};
 }

@@ -76,7 +76,7 @@ export default function Continuation({ c, pageUrl }: { c: ContinuationData | nul
       </div>
       <p className="m-0 mt-3 text-sm leading-relaxed text-slate-600">
         Opens an editable project. Publish a short brief, build a Short or Detailed RFP,
-        or bring your own RFP or RFI. You review the notice and verify your work email before publication.
+        or bring your own RFP or RFI. You review the notice and verify your work email while the notice is a draft.
       </p>
       <a onClick={() => fireNetifyEvent("continuation_taken", { family: c.family, source: c.source })} href={continuationUrl(sentence.trim().length >= 3 ? sentence.trim() : c.sentence, c.pins)} className="mt-3 inline-block text-sm underline underline-offset-4">Open these requirements in the buying workspace</a>
       <p className="m-0 mt-2.5 border-t border-zinc-100 pt-2 text-[10.5px] leading-relaxed text-zinc-400">

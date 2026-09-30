@@ -17,7 +17,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  * into the response, including `count` (a narrowed match count) and
  * `names`/`slugs` (the actual narrowed vendor list) -- letting any caller,
  * published or not, read out real vendor identities. RfpBuilder.tsx did
- * exactly that, live, before publication.
+ * exactly that, live, while the notice is a draft.
  *
  * This route now returns ONLY `total` (the whole evaluated-market size,
  * filter-independent -- see supplier-match.ts, `total = all.length` before

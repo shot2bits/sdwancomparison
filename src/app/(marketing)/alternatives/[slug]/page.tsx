@@ -1,3 +1,5 @@
+import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { publicProviderEvidence } from "@/lib/public-provider-evidence";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -56,7 +58,7 @@ export default async function AlternativesPage({ params }: Props) {
   const faqs = [
     {
       q: `What are the best alternatives to ${vendor.name}?`,
-      a: `Researched using the Netify 40-feature evidence matrix, verified ${datasetVerifiedLong()}, provider evidence is listed by proven capability count, verification date and name. Close peers in the same category (${vendor.category}) are marked. The right alternative depends on your operating model, sector and regions, with computed fit available after verified publication.`,
+      a: SHORTLIST_FAQS[0].a,
     },
     {
       q: `Why do buyers look beyond ${vendor.name}?`,
@@ -107,7 +109,7 @@ export default async function AlternativesPage({ params }: Props) {
           Top {vendor.name} alternatives (2026): provider evidence
         </h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          Compare source evidence for alternatives to {vendor.name} ({vendor.category}). Review the provider profiles and caveats. Computed fit and rankings unlock after verified project publication.
+          {SOURCING_DESCRIPTION}
         </p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
           {`Netify's ${datasetVerifiedMonth()} evidence directory lists alternatives by proven capability count, verification date and name: `}

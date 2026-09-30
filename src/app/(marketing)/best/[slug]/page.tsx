@@ -1,3 +1,4 @@
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { publicProviderEvidence } from "@/lib/public-provider-evidence";
 import type { Metadata } from "next";
 import Continuation from "@/components/Continuation";
@@ -175,7 +176,7 @@ export default async function BestPage({ params }: Props) {
             .join("; ")}
           {`. Positions are evidence order, not recommendations. Describe your project at `}
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
-          {`. Review the anonymous notice before publication. Personalised matching requires authorised access after publication. Only selected eligible providers receive invitations. If no match is confirmed, no suppliers are invited. Review the reasons and evidence gaps before deciding whether to revise and republish. Supplier participation and response times are not guaranteed. A full RFP is optional.`}
+          {". "}{SOURCING_DESCRIPTION}
         </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written by the Netify research team. Reviewed by Robert Sturt, Netify
@@ -244,7 +245,7 @@ export default async function BestPage({ params }: Props) {
       <SourcedTable
         slugs={result.shortlist.map((v) => v.slug)}
         caption={`${page.h1.replace(/\s*\(\d{4}\)\s*$/, "")}: the evidence`}
-        intro="Source evidence in published evidence order. Computed recommendations unlock after verified publication."
+        intro={SOURCING_DESCRIPTION}
         ranked={false}
         id="evidence-table"
       />

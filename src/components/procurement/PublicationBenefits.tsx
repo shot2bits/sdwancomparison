@@ -1,10 +1,11 @@
+import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import type { BriefFields } from '@/lib/buying-workspace-project';
 import { REGION_LABELS, SECTOR_LABELS } from '@/lib/shortlist-core';
 
 export function PublicationBenefits({ afterPublication = false, compact = false }: { afterPublication?: boolean; compact?: boolean }) {
   return <ul className={`nf-publication-benefits${compact ? " nf-publication-benefits-compact" : ""}`} aria-label={afterPublication ? 'Publication benefits' : 'Your project benefits'}>
     <li><strong>{compact ? "Prepared requirements" : "Your requirements in one place"}</strong>{!compact && <span>A structured brief you can download, with optional supplier questions to build an RFP.</span>}</li>
-    <li><strong>{compact ? "Provider and vendor matching" : "Personalised provider and vendor matching"}</strong>{!compact && <span>{afterPublication ? 'Review matching against available provider evidence in your project workspace.' : 'Publish your approved notice to unlock matching against available provider evidence.'}</span>}</li>
+    <li><strong>{compact ? "Provider and vendor matching" : "Personalised provider and vendor matching"}</strong>{!compact && <span>{SOURCING_DESCRIPTION}</span>}</li>
     <li><strong>{compact ? "Supplier response workspace" : "A route to supplier proposals"}</strong>{!compact && <span>Use your published project to review any responses. Invitations require confirmed eligibility and your approval.</span>}</li>
   </ul>;
 }

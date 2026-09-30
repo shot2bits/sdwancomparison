@@ -593,7 +593,7 @@ export default function DescribeWizard() {
             </p>
             <p className="mb-2 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
               <span aria-hidden="true" className="text-emerald-600 font-bold">✓</span>
-              <span>Publishing lists this RFP <strong>anonymously</strong> as a public opportunity on the Opportunities Board so your matched vendors, and additional verified vendors who register interest, can respond. The board shows your sector, estate size and requirement only, never your company name or contact details, and pricing stays private to you. This is what unlocks matching and invitations, so it is not optional.</span>
+              <span>Publishing lists this RFP <strong>anonymously</strong> as a public opportunity on the Opportunities Board so your matched vendors, and additional verified vendors who register interest, can respond. The board shows your sector, estate size and requirement only, never your company name or contact details, and pricing stays private to you. For private sourcing without a public notice, use the provider shortlist service.</span>
             </p>
             <label className="mb-4 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
               <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5" />
