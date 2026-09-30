@@ -184,13 +184,15 @@
   },
   "cato-networks": {
     "sectors": {
-      "retail_ecommerce": "yes"
+      "retail_ecommerce": "yes",
+      "education": "partial"
     },
     "source_urls": [
-      "https://www.catonetworks.com/customers/ulta-beauty-reinvents-network-deliver-seamless-retail-experience/"
+      "https://www.catonetworks.com/customers/ulta-beauty-reinvents-network-deliver-seamless-retail-experience/",
+      "https://www.catonetworks.com/customers/waseda-university-achieves-universal-secure-remote-learning-and-jumpstarts-digital-transformation-with-cato/"
     ],
-    "qualification": "Ulta Beauty primary case documents a SASE-led cloud SD-WAN transition and staged store rollout. Do not imply the three-year rollout is complete. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation.",
-    "reviewed_at": "2026-09-30T00:00:00Z",
+    "qualification": "Ulta Beauty primary case documents a SASE-led cloud SD-WAN transition and staged store rollout. Do not imply the three-year rollout is complete. This is sector experience only; scope, UK delivery and suitability for the buyer require separate confirmation. Waseda University primary case documents Cato secure remote learning in Japan via GlobalDots. Replacement named education evidence; does not validate the original anonymous quotation or UK education suitability.",
+    "reviewed_at": "2026-09-30T15:50:00Z",
     "review_due": "2026-10-30T00:00:00Z",
     "reviewer": "Codex source adjudication; human release sign-off pending"
   },
@@ -287,5 +289,17 @@
       "https://www.colt.net/customer-stories/leading-global-investment-bank"
     ],
     "qualification": " Named Byblos Bank Europe case documents Colt SD-WAN at Brussels, London and Paris with Zscaler access services. Establishes financial-services deployment and London delivery; not nationwide or Irish access availability. Separate anonymous investment bank evidence is qualified and does not replace the named case."
+  },
+  "aryaka": {
+    "sectors": {
+      "transport_logistics": "partial"
+    },
+    "source_urls": [
+      "https://www.aryaka.com/docs/Transitex-Case-Study-2020.pdf"
+    ],
+    "qualification": " Transitex freight/logistics primary case documents Aryaka SmartSecure Remote Access through Cloud365 for China connectivity. Supports logistics experience with qualification; not proof of full branch SD-WAN, current UK delivery or the original generic claim.",
+    "reviewer": "Codex source adjudication; human release sign-off pending",
+    "review_due": "2026-10-30T00:00:00Z",
+    "reviewed_at": "2026-09-30T15:50:00Z"
   }
 }

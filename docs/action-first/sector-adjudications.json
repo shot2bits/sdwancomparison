@@ -884,14 +884,16 @@
     "row_id": "sector_evidence:8e684f700957dd564f8fe669",
     "sector": "Transportation and logistics",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "General review/served-industry material cannot establish a transport deployment.",
+    "disposition": "replacement_named_evidence",
+    "note": "Transitex freight/logistics primary case documents Aryaka SmartSecure Remote Access through Cloud365 for China connectivity. Supports logistics experience with qualification; not proof of full branch SD-WAN, current UK delivery or the original generic claim.",
     "source_urls": [
-      "https://aryaka.com/sase-reviews/"
+      "https://aryaka.com/sase-reviews/",
+      "https://www.aryaka.com/docs/Transitex-Case-Study-2020.pdf"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 57,
@@ -899,14 +901,16 @@
     "row_id": "sector_evidence:21a084dce7bb898b21e4d2cc",
     "sector": "Education",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Generic Cato platform page does not substantiate the unnamed education quote as a retrievable sector case.",
+    "disposition": "replacement_named_evidence",
+    "note": "Waseda University primary case documents Cato secure remote learning in Japan via GlobalDots. Replacement named education evidence; does not validate the original anonymous quotation or UK education suitability.",
     "source_urls": [
-      "https://catonetworks.com/platform/"
+      "https://catonetworks.com/platform/",
+      "https://www.catonetworks.com/customers/waseda-university-achieves-universal-secure-remote-learning-and-jumpstarts-digital-transformation-with-cato/"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 58,
