@@ -11,7 +11,7 @@ import {
   saveProject,
   getProject,
 } from "./rfp-store";
-import { activityMailFetch, activityMailKey } from "./activity-mail";
+import { activityMailFetch, activityMailKey, previewMailCaptureEnabled } from "./activity-mail";
 import { isBlockedDomainLive, emailDomain } from "./access-control";
 import { getLiveShortlistDataset } from "./live-shortlist";
 import {
@@ -83,7 +83,7 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
       throw new Error("This request has expired. Prepare a new request for confirmation.");
     if (saved.status === "pending_confirmation" && !saved.mail_sent && !(await kvGetJson(`sourcing:mail:${saved.id}`)))
       throw new Error("Confirmation delivery is not yet confirmed. Check your email before preparing a new request.");
-    return { request_id: existing.id, status: saved.status };
+    return { request_id: existing.id, status: saved.status, delivery: previewMailCaptureEnabled() ? "captured_not_sent" : "accepted" };
   }
   await limit(`ip:${requestKey}`, 10);
   await limit(`email:${input.email}`, 3);
@@ -149,7 +149,7 @@ export async function requestSourcing(raw: unknown, requestKey: string) {
   }
   // Never rewrite a pending record after mail: a fast buyer may already have confirmed it.
   await kvRaw(["SET", `sourcing:mail:${record.id}`, JSON.stringify({ accepted: true }), "EX", 86400]);
-  return { request_id: record.id, status: "pending_confirmation" };
+  return { request_id: record.id, status: "pending_confirmation", delivery: previewMailCaptureEnabled() ? "captured_not_sent" : "accepted" };
 }
 export async function readSourcingRequest(id: string, token: string) {
   const r = await kvGetJson<SourcingRecord>(`sourcing:request:${id}`);

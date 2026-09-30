@@ -169,7 +169,9 @@ export default function SourcingEntrance({
       if (!r.ok && typeof d.error === "string" && d.error.startsWith("This request has expired")) requestAttempt.current = null;
       setMessage(
         r.ok
-          ? "Check your work email. The confirmation opens this exact request for your approval. No supplier has been contacted."
+          ? d.delivery === "captured_not_sent"
+            ? "Preview test: confirmation captured privately. No email has been sent. The tester can open the link from the private test inbox. No supplier has been contacted."
+            : "Check your work email. The confirmation opens this exact request for your approval. No supplier has been contacted."
           : d.error ||
               "We could not prepare the request. Your brief is still here.",
       );
