@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { analyticsPath, analyticsReferrer, analyticsLocation, analyticsProps } from '@/lib/analytics-privacy';
+import {getConsent} from '@/lib/cookie-consent';
 import { journeyAttribution } from '@/lib/journey-attribution';
 
 type VaFn = {
@@ -22,20 +23,8 @@ declare global {
 }
 
 function readConsent(): { analytics: boolean; marketing: boolean } {
-  try {
-    const m = document.cookie.match(/(?:^|; )netify_consent=([^;]*)/);
-    const raw = m
-      ? decodeURIComponent(m[1])
-      : window.localStorage.getItem('netify_consent');
-    if (!raw) return { analytics: false, marketing: false };
-    const parsed = JSON.parse(raw) as { categories?: Record<string, boolean> };
-    return {
-      analytics: parsed.categories?.analytics === true,
-      marketing: parsed.categories?.marketing === true,
-    };
-  } catch {
-    return { analytics: false, marketing: false };
-  }
+  const state = getConsent();
+  return {analytics: state?.categories.analytics === true, marketing: state?.categories.marketing === true};
 }
 
 // Enhanced Measurement reads raw search parameters independently of page_location.

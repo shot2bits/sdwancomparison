@@ -196,14 +196,16 @@
     "row_id": "sector_evidence:52fde6e9802e6c69391d3663",
     "sector": "Hospitality",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Unnamed hotel reference linked only to a non-retrievable case index; no attributable product-specific case established.",
+    "disposition": "replacement_named_evidence",
+    "note": "Original anonymous hotel case still unverified. Replaced for sector matching by the named Premier Inn MENA 11-hotel EdgeConnect SD-WAN case, UAE/Qatar, not UK.",
     "source_urls": [
-      "https://arubanetworks.com/resources/case-studies"
+      "https://arubanetworks.com/resources/case-studies",
+      "https://www.hpe.com/psnow/downloadDoc/Finding%20a%20niche%20in%20a%20crowded%20hotel%20sector%20-%20Premier%20Inn%20MENA-a50011126enw.pdf?deepLink=&form=false&hf=regular&id=a50011126enw&isFutureVersion=true&originalObjectName=&prelaunchSection=&preview=false&print=&r=&section=&softrollSection=&ver=1"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 14,
@@ -211,14 +213,16 @@
     "row_id": "sector_evidence:335f94f24860594bd09ada06",
     "sector": "Manufacturing",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "IMMI uptime claim linked only to generic case index; cannot substantiate SD-WAN from the linked record.",
+    "disposition": "verified_named",
+    "note": "Customer interview with IMMI VP of Enterprise Technology documents deployed EdgeConnect linking US data centres and a Chinese plant. HPE-sponsored primary customer account, not independent testing or UK delivery confirmation.",
     "source_urls": [
-      "https://arubanetworks.com/resources/case-studies"
+      "https://arubanetworks.com/resources/case-studies",
+      "https://packetpushers.net/podcasts/tech-bytes/tb-global-manufacturer-taps-aruba-edgeconnect-for-sd-wan-wan-optimization/"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 15,
@@ -291,14 +295,16 @@
     "row_id": "sector_evidence:d57e0da874a42452e5c9fc71",
     "sector": "Insurance / insurance technology",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Lemonade claim links to G2 product reviews, not attributable primary deployment evidence; no upgrade.",
+    "disposition": "verified_named",
+    "note": "Official SonicWall product page names Lemonade using CSE; secure access only. PDF indexed by search but direct retrieval blocked. Insurance maps to financial services, not UK delivery.",
     "source_urls": [
-      "https://g2.com/products/sonicwall-cloud-secure-edge/reviews"
+      "https://g2.com/products/sonicwall-cloud-secure-edge/reviews",
+      "https://www.sonicwall.com/es-mx/products/cloud-secure-edge"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 20,
@@ -336,14 +342,16 @@
     "row_id": "sector_evidence:2554f195b8e1c0c1c00be965",
     "sector": "Manufacturing / industrial (building materials, second division)",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Kingspan Light Air Water is named in the recovered Insulation release, but that alone does not establish the detailed 100-site SD-WAN claim.",
+    "disposition": "adjacent_service",
+    "note": "Kingspan Light Air and Water release establishes broadband, DIA, LEO and expereoOne across its estate. SD-WAN appears only in supplier boilerplate, not the customer deployment. Separate Kingspan Insulation evidence remains independent.",
     "source_urls": [
-      "https://www.expereo.com/resources/press-releases/kingspan-insulation-chooses-expereo-to-unify-connectivity-and-accelerate-growth-across-90-global-sites"
+      "https://www.expereo.com/resources/press-releases/kingspan-insulation-chooses-expereo-to-unify-connectivity-and-accelerate-growth-across-90-global-sites",
+      "https://www.expereo.com/resources/press-releases/kingspan-global-connectivity-solution"
     ],
     "primary_validation_complete": false,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 23,
@@ -366,14 +374,16 @@
     "row_id": "sector_evidence:c51084b44fc79b49306bcaa0",
     "sector": "Healthcare",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Business-security answers page is general marketing. It does not identify the claimed healthcare deployment.",
+    "disposition": "verified_anonymous",
+    "note": "Verizon primary case describes managed SASE for an unnamed global healthcare business, with secure access across 200 sites. Sector evidence is qualified because the buyer is anonymous; no UK, NHS or individual buyer suitability claim.",
     "source_urls": [
-      "https://verizon.com/business/answers/business-security-products/"
+      "https://verizon.com/business/answers/business-security-products/",
+      "https://www.verizon.com/business/resources/articles/sase-helps-healthcare-business-privacy-concerns.pdf"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 25,
@@ -397,14 +407,16 @@
     "row_id": "sector_evidence:f130eab9a33356c3d52ca7b9",
     "sector": "Financial services",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Gartner managed-network review cannot independently establish the named sector/product claim; linked review unavailable.",
+    "disposition": "replacement_named_evidence",
+    "note": "Original Gartner review unverified. Replaced for matching by named Byblos Bank Europe Colt SD-WAN deployment at Brussels, London and Paris.",
     "source_urls": [
-      "https://gartner.com/reviews/market/managed-network-services/vendor/colt/product/colt-managed-network-services"
+      "https://gartner.com/reviews/market/managed-network-services/vendor/colt/product/colt-managed-network-services",
+      "https://www.colt.net/customer-stories/byblos-bank-europe"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 27,
@@ -568,17 +580,19 @@
     "row_id": "sector_evidence:af5b4ada0a17bad1a76713d6",
     "sector": "Government/public sector",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "FedRAMP and public-sector product materials establish authorisation/product context, not the complete named customer deployment claim. Keep scope unresolved.",
+    "disposition": "replacement_named_evidence",
+    "note": "Original FedRAMP references do not prove deployment. Separate named French government department case documents Cloudflare Zero Trust for schools; not US federal or UK certification.",
     "source_urls": [
       "https://cloudflare.com/lp/federal/",
       "https://cf-assets.www.cloudflare.com/slt3lc6tev37/1tRmuTEMJEzTD6myTJJetU/7a047f2da5d255406b369e7f56f226e8/cloudflares-unique-fedramp-architecture-solution-brief.pdf",
       "https://cloudflare.com/learning/privacy/what-is-fedramp/",
-      "https://cloudflare.com/press/press-releases/2025/cloudflare-advances-public-sector-security-worldwide-fedramp-high/"
+      "https://cloudflare.com/press/press-releases/2025/cloudflare-advances-public-sector-security-worldwide-fedramp-high/",
+      "https://www.cloudflare.com/ja-jp/case-studies/department-of-seine-et-marne/"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 38,
@@ -601,15 +615,17 @@
     "row_id": "sector_evidence:f601524f58ba6105954909a0",
     "sector": "Chemicals",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Generic secondary directories do not substantiate a chemicals deployment. A separate ALTANA case is assessed separately.",
+    "disposition": "duplicate_evidence",
+    "note": "Generic chemicals row has no separate attributable deployment. Retire as duplicate; ALTANA chemicals evidence already supports manufacturing and must not count twice.",
     "source_urls": [
       "https://cbinsights.com/compare/open-systems-vs-versa-networks",
-      "https://cxponent.com/directory/vendor/open-systems"
+      "https://cxponent.com/directory/vendor/open-systems",
+      "https://www.open-systems.com/company/customers/"
     ],
     "primary_validation_complete": false,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 40,
@@ -678,14 +694,16 @@
     "row_id": "sector_evidence:046e1b8af78d169d6fd3be36",
     "sector": "Banking / financial services",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Horizon Bank general testimonial/case-index pointer does not, in this review, verify a scoped SD-WAN/SASE deployment. Do not silently upgrade from the quote.",
+    "disposition": "adjacent_service",
+    "note": "Recovered Horizon Bank primary case specifies DIA, DDoS mitigation and professional security services, not SD-WAN or SASE. Paid customer endorsement disclosed. Do not use as SD-WAN sector proof.",
     "source_urls": [
-      "https://lumen.com/en-us/resources/customer-success-stories.html"
+      "https://lumen.com/en-us/resources/customer-success-stories.html",
+      "https://www.lumen.com/en-us/resources/customer-stories/horizon-bank.html"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 45,
@@ -817,14 +835,16 @@
     "row_id": "sector_evidence:6e45feaeed9ff11e2296649d",
     "sector": "Business and professional services",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "KAWO claim links to a broad application-performance resource archive; no matching attributable case established in this review.",
+    "disposition": "wrong_sector",
+    "note": "Recovered KAWO case: Chinese enterprise social-media software platform, marketing/technology. Not professional services; source now identified, no sector upgrade.",
     "source_urls": [
-      "https://aryaka.com/resources/category/application-performance/"
+      "https://aryaka.com/resources/category/application-performance/",
+      "https://www.aryaka.com/case-study/kawo/"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 54,
@@ -1031,14 +1051,16 @@
     "row_id": "sector_evidence:553eb4f3e902089cea444e6e",
     "sector": "Healthcare/NHS",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Guidance Centre reseller URL was not retrievable and no primary deployment record was established. Retain unresolved rather than assert non-support.",
+    "disposition": "verified_named",
+    "note": "Recovered Fortinet primary case: Guidance Center in Long Beach California, mental-health services, FortiSASE. Healthcare evidence; remove NHS interpretation.",
     "source_urls": [
-      "https://avfirewalls.com/case-study-the-guidance-centre.asp"
+      "https://avfirewalls.com/case-study-the-guidance-centre.asp",
+      "https://www.fortinet.com/customers/the-guidance-center"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 68,
@@ -1046,15 +1068,17 @@
     "row_id": "sector_evidence:541e45429b63a6eedb870ba3",
     "sector": "Hospitality",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "IHG was not found in the current linked SD-WAN customer-stories PDF. Generic customer index does not substantiate the claimed 4,000-site figure.",
+    "disposition": "verified_named",
+    "note": "Recovered IHG primary PDF identifies 4,000 Secure SD-WAN locations and a global MSSP-delivered rollout. UK headquarters do not prove coverage of a particular UK estate. Savings and efficiency figures are forecasts, not measured completed outcomes.",
     "source_urls": [
       "https://fortinet.com/customers",
-      "https://fortinet.com/content/dam/fortinet/assets/ebook/eb-sd-wan-customer-stories.pdf"
+      "https://fortinet.com/content/dam/fortinet/assets/ebook/eb-sd-wan-customer-stories.pdf",
+      "https://www.fortinet.com/content/dam/fortinet/assets/case-studies/cs-ihg.pdf"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 69,
@@ -1062,14 +1086,16 @@
     "row_id": "sector_evidence:9b63f081af2dfcb6b895e009",
     "sector": "Transport/logistics",
     "reviewed_at": "2026-09-30",
-    "disposition": "insufficient_source",
-    "note": "Generic airport/bank-ATM narrative links to customer index. Banking ATMs are not transport evidence; no attributable airport deployment established.",
+    "disposition": "replacement_named_evidence",
+    "note": "Original generic airport/ATM narrative unverified. Replaced for transport matching by named IndiGo Secure SD-WAN at airport counters; India, not UK.",
     "source_urls": [
-      "https://fortinet.com/blog/customer-stories"
+      "https://fortinet.com/blog/customer-stories",
+      "https://www.fortinet.com/customers/indigo-airlines"
     ],
-    "primary_validation_complete": false,
+    "primary_validation_complete": true,
     "supplier_suitability_confirmed": false,
-    "release_signoff": "pending"
+    "release_signoff": "pending",
+    "previous_disposition": "insufficient_source"
   },
   {
     "row": 70,

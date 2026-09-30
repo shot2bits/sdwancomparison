@@ -226,6 +226,8 @@ export async function confirmSourcingRequest(id: string, token: string) {
 }
 
 async function recordSourcingConfirmation(r: SourcingRecord) {
+  try {
   const {recordMarketplaceFunnelEvent} = await import("./marketplace-funnel");
   await recordMarketplaceFunnelEvent({event:"sourcing_confirmed", project_id:r.project_id, source:r.request.acquisition==="mcp"?"mcp":"shortlist", channel:r.request.acquisition==="mcp"?"mcp":"web"});
+  } catch { /* The confirmed request remains authoritative. */ }
 }

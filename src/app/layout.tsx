@@ -1,5 +1,6 @@
 import '@/components/procurement/circuit-pricing.css';
 import type { Metadata } from "next";
+import {CookieBanner} from "@/components/CookieBanner";
 import NetifyEvents from "@/components/NetifyEvents";
 import { BUILD_SHA, BUILD_TIME } from "@/lib/build-info";
 import "./globals.css";
@@ -78,6 +79,7 @@ export default function RootLayout({
             workspace included, so it stays at the true root. */}
         <NetifyEvents />
         {children}
+        <CookieBanner />
       </body>
     </html>
   );

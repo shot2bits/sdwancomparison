@@ -61,6 +61,7 @@ for (const [slug, row] of Object.entries(sectorAdjudications)) {
   REVIEWED_PROVIDER_PROJECTIONS[slug] = {
     ...previous, ...row,
     sectors: {...previous?.sectors, ...row.sectors} as ReviewedProjection["sectors"],
+    regions: {...previous?.regions, ...((row as ReviewedProjection).regions??{})} as ReviewedProjection["regions"],
     source_urls: [...new Set([...(previous?.source_urls ?? []), ...row.source_urls])],
     qualification: [previous?.qualification, row.qualification].filter(Boolean).join(" "),
   };
@@ -127,4 +128,5 @@ export function applyProjectionReview(
     provider.independent_evidence_source_count =
       review.independent_evidence_source_count;
   provider.projection_provenance.resolution = "reviewed_override";
+  provider.projection_provenance.active_review = {reviewed_at:review.reviewed_at,review_due:review.review_due,reviewer:review.reviewer,source_urls:review.source_urls,qualification:review.qualification,sectors:review.sectors??{},regions:review.regions??{}};
 }

@@ -51,11 +51,20 @@ export async function GET(req: Request, ctx: Ctx) {
   try {
     const { id } = await ctx.params;
     const session = await identity(req, id);
+    const archiveRevision=new URL(req.url).searchParams.get("archive");
+    if(archiveRevision!==null){
+      if(!/^[0-9]+$/.test(archiveRevision))throw new CircuitError("Invalid revision.",422);
+      const archived=await kvGetJson<CircuitRecord>(`circuits:archive:${id}:${archiveRevision}`);
+      if(!archived)throw new CircuitError("Archived revision not found.",404);
+      return Response.json({archived:true,request:archived},{headers});
+    }
+    const archives=await kvGetJson<number[]>(`circuits:archives:${id}`)??[];
     const exists = await kvGetJson<CircuitRecord>("circuits:record:" + id);
     return Response.json(
       {
         request: exists ? await circuitGet(id, session) : null,
         project_id: id,
+        archived_revisions: archives,
       },
       { headers },
     );
@@ -76,7 +85,7 @@ export async function POST(req: Request, ctx: Ctx) {
     const b = z
       .object({
         id: z.literal(id),
-        action: z.enum(["save", "request_review"]),
+        action: z.enum(["save", "request_review", "reopen"]),
         revision: z.number().int().nonnegative(),
         input: z.unknown().optional(),
         consent: z.string().optional(),
@@ -88,6 +97,22 @@ export async function POST(req: Request, ctx: Ctx) {
         { request: await circuitSave(id, b.input, b.revision, session) },
         { headers },
       );
+    if (b.action === "reopen") {
+      if(b.consent !== "Reopen this scope for amendment; previous quotes are archived and do not apply to the new draft.") throw new CircuitError("Confirm the amendment and quote reset.",422);
+      const record=await circuitLock(id,async()=>{
+        const r=await circuitGet(id,session);
+        if(r.status==="draft" && r.revision===b.revision+1)return r;
+        if(r.revision!==b.revision || r.status==="draft")throw new CircuitError("Requirements changed. Reload before amending.",409);
+        await kvSetJson(`circuits:archive:${id}:${r.revision}`,r);
+        const archives=await kvGetJson<number[]>(`circuits:archives:${id}`)??[];
+        await kvSetJson(`circuits:archives:${id}`,[...new Set([...archives,r.revision])]);
+        const next:CircuitRecord={...r,status:"draft",revision:r.revision+1,updated:Date.now(),quotes:[]};
+        delete next.consent;
+        await kvSetJson("circuits:record:"+id,next);
+        return next;
+      });
+      return Response.json({request:record},{headers});
+    }
     if (b.consent !== PRIVATE_CIRCUIT_CONSENT)
       throw new CircuitError("Approve private connectivity review.", 422);
     const record = await circuitLock(id, async () => {

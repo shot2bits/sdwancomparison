@@ -68,6 +68,7 @@ export default function CircuitPricing({ admin = false, projectId }: { admin?: b
     protection_details: "",
     notes: "",
   });
+  const [archives,setArchives]=useState<number[]>([]);
   const frozen = !!record && record.status !== "draft";
   const adopt = useCallback((r: CircuitRecord) => {
     setRecord(r);
@@ -83,7 +84,7 @@ export default function CircuitPricing({ admin = false, projectId }: { admin?: b
   }, []);
   const refresh = useCallback(async () => {
     try {
-      if(projectId){const res=await fetch(endpoint,{cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error);setSigned(true);setList(data.request?[data.request]:[]);if(data.request)adopt(data.request);return;}
+      if(projectId){const res=await fetch(endpoint,{cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error);setArchives(data.archived_revisions??[]);setSigned(true);setList(data.request?[data.request]:[]);if(data.request)adopt(data.request);return;}
       const sessionResponse = await fetch('/sase/api/auth/session', { cache: "no-store" });
       if (!sessionResponse.ok) throw Error("Could not check your sign-in status. Please retry.");
       const session = await sessionResponse.json();
@@ -251,6 +252,7 @@ export default function CircuitPricing({ admin = false, projectId }: { admin?: b
       <header className="cp-heading">
         <div>
           <p>{admin ? "Netify sourcing desk" : "Connectivity for every location"}</p>
+          {projectId&&archives.length>0&&<p>Previous scopes and quotes (do not apply to this draft): {archives.map(rev=><a className="mr-3 underline" key={rev} href={`${endpoint}?archive=${rev}`} target="_blank" rel="noreferrer">Revision {rev} record</a>)}</p>}
           <h1>{admin ? "Circuit pricing requests" : "Go to market. Get real pricing."}</h1>
           <p>
             {admin
@@ -558,8 +560,9 @@ export default function CircuitPricing({ admin = false, projectId }: { admin?: b
             {frozen && (
               <>
                 <p>
-                  {projectId ? "Submitted specifications are retained with your quotes. Ask the Netify desk to agree a revision before changing approved scope." : "Published specifications are retained with your quotes. Create a new request for changes."}
+                  {projectId ? "Submitted specifications are retained with your quotes. Reopen a draft to change scope; previous quotes are archived and cannot be used for the new requirements." : "Published specifications are retained with your quotes. Create a new request for changes."}
                 </p>
+                {projectId && !admin && <button type="button" disabled={busy} onClick={() => void action("reopen", {revision:record?.revision,consent:"Reopen this scope for amendment; previous quotes are archived and do not apply to the new draft."})}>Reopen scope and archive previous quotes</button>}
                 {!projectId && record?.opportunity_id && <a href={"/sase/opportunities/" + record.opportunity_id + "/room/"}>Open opportunity room ↗</a>}
               </>
             )}
@@ -640,7 +643,7 @@ export default function CircuitPricing({ admin = false, projectId }: { admin?: b
               <p>
                 {frozen
                   ? "Your quotes will appear here. You can leave the page; we’ll email when pricing is added."
-                  : "Publish your request to begin market sourcing."}
+                  : projectId ? "Save your requirements and approve private desk review to start sourcing." : "Publish your request to begin market sourcing."}
               </p>
             </div>
           )}

@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   const vendors = publicEvidenceProviders(live.vendors);
   const lastModified = vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
 
-  const generatedAt = new Date(`${lastModified}T00:00:00.000Z`).toISOString();
+  const generatedAt = new Date().toISOString();
   const payload = {
       page: `${SITE_URL}/shortlist/`,
       title: SHORTLIST_INTRO.h1,
