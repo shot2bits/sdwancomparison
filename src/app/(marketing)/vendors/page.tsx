@@ -1,14 +1,17 @@
+import {getLiveShortlistDataset} from "@/lib/live-shortlist";
+import {researchMetrics} from "@/lib/research-metrics";
+import type {ShortlistVendor} from "@/lib/shortlist-core";
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
-  getVendorsByGroup,
-  getAllVendors,
+  getVendorGroup,
   GROUP_LABELS,
   GROUP_DESCRIPTIONS,
   type VendorGroup,
 } from "@/lib/vendors";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 
+export const dynamic="force-dynamic";
 export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/vendors/` },
   title: "SD-WAN and SASE vendor comparison: all 30 vendors",
@@ -24,10 +27,10 @@ const GROUP_ORDER: VendorGroup[] = [
   "global_managed_providers",
 ];
 
-export default function VendorsPage() {
-  const grouped = getVendorsByGroup();
-  const totalCount = Object.values(grouped).reduce((sum, g) => sum + g.length, 0);
-  const allVendors = getAllVendors();
+export default async function VendorsPage() {
+  const allVendors=(await getLiveShortlistDataset()).vendors;
+  const grouped=Object.fromEntries(GROUP_ORDER.map(g=>[g,allVendors.filter(v=>getVendorGroup(v)===g)])) as Record<VendorGroup,ShortlistVendor[]>;
+  const totalCount=allVendors.length;
 
   const schemas = [
     getOrganizationSchema(),
@@ -67,7 +70,7 @@ export default function VendorsPage() {
         <div className="mt-4 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-3 text-sm text-[var(--ink-600)]">
           <p>
             <strong className="text-[var(--ink-800)]">Same vendors, two different pages.</strong> This index is the{" "}
-            <strong className="text-[var(--ink-800)]">research view</strong>: independent capability grades against the
+            <strong className="text-[var(--ink-800)]">research view</strong>: published capability evidence against the
             40-feature framework, with evidence sources and watch-outs — it powers the{" "}
             <Link href="/shortlist" className="underline">shortlist builder</Link> and RFP evaluation. The{" "}
             <a href="https://netify.co.uk/marketplace/" className="underline">Netify Marketplace</a> is the{" "}
@@ -112,7 +115,7 @@ export default function VendorsPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               {vendors.map((v) => {
-                const yesCount = v.score_summary.yes_count;
+                const yesCount = researchMetrics(v).supported;
                 const totalFeatures = 40;
                 return (
                   <Link
@@ -132,10 +135,10 @@ export default function VendorsPage() {
                       {v.category}
                     </p>
                     <p className="text-sm text-[var(--ink-700)] line-clamp-3">
-                      {v.key_differentiators[0]}
+                      {v.shortlist_summary}
                     </p>
                     <div className="mt-4 pt-4 border-t border-[var(--ink-100)] flex items-center justify-between text-xs text-[var(--ink-500)]">
-                      <span>Evidence coverage {Math.round(v.score_summary.evidence_coverage_pct * 100)}%</span>
+                      <span>Evidence coverage {Math.round(researchMetrics(v).completeness * 100)}%</span>
                       <span className="text-[var(--accent)] group-hover:underline">
                         View profile →
                       </span>

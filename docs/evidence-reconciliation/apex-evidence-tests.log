@@ -1,0 +1,17 @@
+
+> netify-bt-broadband-reseller@0.1.0 test:provider-evidence
+> node --experimental-strip-types scripts/test-provider-reconciliation.ts && node --experimental-strip-types scripts/test-provider-metadata.ts && node scripts/test-provider-feed-parity.cjs && node scripts/test-provider-store.mjs && node scripts/test-provider-match-service.mjs
+
+(node:51767) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/robertsturt/Documents/ChatGPT/The%20Marketplace%20chess%20move/chess-move-warboard/scripts/test-provider-reconciliation.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/chess-move-warboard/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS 30 providers, 399 source-linked repairs; changed, contradictory and expired evidence withheld
+(node:51768) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/robertsturt/Documents/ChatGPT/The%20Marketplace%20chess%20move/chess-move-warboard/scripts/test-provider-metadata.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/chess-move-warboard/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS metadata for all 30 profiles; intact s characters, concise names and descriptions
+PASS actual public/profile and authenticated match store paths agree across all 30 providers; wrong token rejected
+PASS  provider store exposes only fully approved revisions and protects private reviews
+PASS provider match service is private and technical-review gated

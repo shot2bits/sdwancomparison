@@ -357,6 +357,16 @@ function attributionFor(verifiedOn: string): string {
 export function verifyClaim(args: unknown, liveVendors?: ShortlistVendor[]): unknown {
   const a = (args ?? {}) as { slug?: string; claim?: string; field?: string };
   const slug = (a.slug ?? "").trim();
+  if(liveVendors){
+    const current=liveVendors.find(v=>v.slug===slug);
+    if(!current)return {error:`Provider not found in current evidence: ${slug}`};
+    const raw=(a.claim??a.field??'').trim();
+    const field=resolveClaim(raw,Object.keys(current.capabilities));
+    if(!field)return {supplier:current.name,slug,error:raw?'No current capability field matches this claim.':'Give a claim to check.',verifiable_now:Object.keys(current.capabilities),note:'Historic static grades are not used to fill gaps in the current record.'};
+    const evidence=current.capability_evidence?.[field];
+    const value=current.capabilities[field];
+    return {supplier:current.name,slug,claim:raw,resolved_field:field,status:evidence?'vendor_documented':value==='unknown'||value==='not_confirmed'?'not_confirmed':'published_record',value:value==='unknown'?'not_confirmed':value,verified_on:evidence?.reviewed_at.slice(0,10)??current.last_verified,review_due:evidence?.review_due,quote:null,note:evidence?.qualification??'Current published finding; validate the service scope against the provider record before selection.',sources:evidence?[{url:evidence.source_url,tier:1,tier_meaning:TIER_MEANING[1],read_on:evidence.reviewed_at.slice(0,10)}]:[],attribution:attributionFor(evidence?.reviewed_at.slice(0,10)??current.last_verified),_meta:{canonicalUrl:`${SITE_URL}/vendors/${slug}/`,note:'Same current evidence as the profile and shortlist; not an independent deployment verification.'}};
+  }
   if (!getAllVendorSlugs().includes(slug)) {
     return { error: `Unknown vendor slug: ${slug || "(none given)"}. Call list_sase_vendors for valid slugs.` };
   }
@@ -365,19 +375,6 @@ export function verifyClaim(args: unknown, liveVendors?: ShortlistVendor[]): unk
   const register = registerOf(v);
   const byN = new Map(register.map((e) => [e.n, e]));
   const raw = (a.claim ?? a.field ?? "").trim();
-  const liveVendor = liveVendors?.find(item => item.slug === slug);
-  const reviewedField = resolveClaim(raw, Object.keys(liveVendor?.capability_evidence ?? {}));
-  const correction = reviewedField ? liveVendor?.capability_evidence?.[reviewedField] : undefined;
-  if (reviewedField && correction) return {
-    supplier: v.name, slug, claim: raw, resolved_field: reviewedField,
-    status: 'vendor_documented', value: liveVendor!.capabilities[reviewedField],
-    verified_on: correction.reviewed_at.slice(0, 10), review_due: correction.review_due,
-    quote: null, note: correction.qualification,
-    sources: [{url: correction.source_url, tier: 1, tier_meaning: TIER_MEANING[1], read_on: correction.reviewed_at.slice(0, 10)}],
-    attribution: attributionFor(correction.reviewed_at.slice(0, 10)),
-    _meta: {canonicalUrl: `${SITE_URL}/shortlist/`, note: 'Same dated vendor-documentation correction as the public comparison. Scope is a paraphrase, not a quotation or independent deployment verification.'},
-  };
-
   if (!raw) {
     return {
       supplier: v.name, slug,
@@ -389,14 +386,14 @@ export function verifyClaim(args: unknown, liveVendors?: ShortlistVendor[]): unk
 
   const field = resolveClaim(raw, Object.keys(facts));
   if (!field) {
-    const caps = (liveVendor?.capabilities ?? v.capabilities) as Record<string, string>;
+    const caps = v.capabilities as Record<string, string>;
     const capField = resolveClaim(raw, Object.keys(caps));
     if (capField) {
       return {
         supplier: v.name, slug, claim: raw, resolved_field: capField,
         status: "graded_not_individually_sourced",
         value: caps[capField],
-        verified_on: liveVendor?.last_verified ?? v.last_verified,
+        verified_on: v.last_verified,
         note: "This capability has no individually linked source in this response. The grade uses the same available provider record as the comparison; unconfirmed is not proof of absence. Confirm scope directly with the vendor.",
         attribution: attributionFor(v.last_verified),
         _meta: { canonicalUrl: `${SITE_URL}/vendors/${slug}` },

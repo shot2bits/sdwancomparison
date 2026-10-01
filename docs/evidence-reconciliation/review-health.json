@@ -1,0 +1,309 @@
+{
+  "generated_at": "2026-10-01T19:51:20.367Z",
+  "source": "snapshot_fallback",
+  "evidence_issues": [],
+  "dataset_versions": [],
+  "assessments": [
+    {
+      "slug": "aryaka",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "att-business",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "barracuda-secureedge",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "bt-business",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "cato-networks",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "check-point",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "cisco",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "cloudflare-one",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "colt-technology-services",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "comcast-business",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "expereo",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "forcepoint",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "fortinet",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "gtt",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "hpe-aruba",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "juniper-networks",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "lumen",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "netskope",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "ntt",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "opensystems",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "orange-business",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "palo-alto-networks",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "sonicwall",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "arista-velocloud",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "verizon-business",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "versa-networks",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "virgin-media-o2",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "vodafone-business",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    },
+    {
+      "slug": "zscaler",
+      "status": "missing",
+      "reason": "No approved assessment has been supplied."
+    }
+  ],
+  "evidence": {
+    "pending": 23,
+    "expiring": 0,
+    "expired": 0,
+    "owner_deadline": "2026-10-16",
+    "rows": [
+      {
+        "slug": "cisco",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "ntt",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "hpe-aruba",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "versa-networks",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "sonicwall",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "expereo",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "verizon-business",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "netskope",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "opensystems",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "lumen",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "zscaler",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "cato-networks",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "orange-business",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "gtt",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "palo-alto-networks",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "fortinet",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "bt-business",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "colt",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "aryaka",
+        "kind": "sector",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "bt-business",
+        "kind": "uk_carrier",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "virgin-media-o2",
+        "kind": "uk_carrier",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "vodafone-business",
+        "kind": "uk_carrier",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      },
+      {
+        "slug": "colt-technology-services",
+        "kind": "uk_carrier",
+        "due": "2026-10-30T00:00:00Z",
+        "signed": false
+      }
+    ]
+  },
+  "reconciliation": {
+    "version": "provider-reconciliation/2026-10-01",
+    "review_due": "2026-12-30T00:00:00Z",
+    "days_remaining": 90
+  }
+}

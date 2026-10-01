@@ -50,7 +50,7 @@ assert.equal(Object.keys(provider.capabilities).length, FEATURES.length);
 assert.equal(provider.capabilities.f10_dynamic_path_selection, "yes");
 assert.equal(provider.capabilities.f28_full_sase_platform, "yes");
 assert.equal(provider.capabilities.f08_flexible_commercial_model, "unknown", "a legacy grade must not survive without current Neon evidence");
-assert.equal(provider.regions.uk_ireland, "yes");
+assert.equal(provider.regions.uk_ireland, "partial", "dated UK review qualifies the broad regional feed");
 assert.equal(provider.sectors.financial_services, "yes");
 assert.equal(provider.supported_clouds.azure, "yes");
 assert.equal(provider.ai_capability.ai_assistant, "yes");
@@ -82,7 +82,7 @@ console.log("live Neon shortlist tests passed");
 const [canonical] = mergeNeonProviderRecords(base, [{...record, regions: { north_america: supported(), asia_pacific: supported(), uk_ireland: supported(), latin_america: {...supported(), freshness_state: 'stale'} }, sectors: {financial_services: {...supported(), evidence_strength: "strong"}} }]);
 assert.equal(canonical.regions.north_america, 'yes');
 assert.equal(canonical.regions.asia_pacific, 'yes');
-assert.equal(canonical.regions.uk_ireland, 'yes');
+assert.equal(canonical.regions.uk_ireland, 'partial', 'dated UK projection qualifies canonical feed evidence');
 assert.equal(canonical.regions.latin_america, 'unknown', 'stale evidence must not be promoted');
 assert.equal(canonical.sectors.financial_services, 'yes');
 
@@ -126,3 +126,9 @@ assert.equal(expires.capabilities.f21_private_global_backbone, 'unknown', 'expir
 applyReviewedComparisonEvidence(expires, '2026-09-20', Date.parse('2026-09-21T00:00:00Z'));
 assert.equal(expires.capabilities.f21_private_global_backbone, 'unknown', 'new governed reviews supersede corrections');
 console.log('PASS exact mappings, stale evidence, proxy rejection, qualified SASE, reviewed sources, expiry and newer-review precedence');
+
+const [adjacent]=mergeNeonProviderRecords(base,[{...record,capabilities:{wan_optimisation:supported(),brownfield_migration_support:supported()}}]);
+assert.equal(adjacent.capabilities.f14_packet_loss_remediation,'unknown','WAN optimisation alone cannot prove loss remediation');
+assert.equal(adjacent.capabilities.f16_mpls_coexistence_and_migration,'unknown','Generic brownfield support cannot prove MPLS coexistence');
+const {verifyClaim:verify}=await import('../src/lib/mcp-tools');
+const currentClaim=verify({slug:'hpe-aruba',field:'f08_flexible_commercial_model'},[provider]) as {value:string};assert.equal(currentClaim.value,'not_confirmed','MCP must not resurrect a static grade');

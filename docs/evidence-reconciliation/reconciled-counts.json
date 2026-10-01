@@ -1,0 +1,182 @@
+[
+  {
+    "slug": "aryaka",
+    "confirmed": 20,
+    "supported": 16,
+    "qualified_sources": 13
+  },
+  {
+    "slug": "att-business",
+    "confirmed": 21,
+    "supported": 15,
+    "qualified_sources": 17
+  },
+  {
+    "slug": "barracuda-secureedge",
+    "confirmed": 7,
+    "supported": 6,
+    "qualified_sources": 2
+  },
+  {
+    "slug": "bt-business",
+    "confirmed": 13,
+    "supported": 9,
+    "qualified_sources": 10
+  },
+  {
+    "slug": "cato-networks",
+    "confirmed": 24,
+    "supported": 24,
+    "qualified_sources": 6
+  },
+  {
+    "slug": "check-point",
+    "confirmed": 22,
+    "supported": 17,
+    "qualified_sources": 13
+  },
+  {
+    "slug": "cisco",
+    "confirmed": 23,
+    "supported": 21,
+    "qualified_sources": 4
+  },
+  {
+    "slug": "cloudflare-one",
+    "confirmed": 14,
+    "supported": 10,
+    "qualified_sources": 10
+  },
+  {
+    "slug": "colt-technology-services",
+    "confirmed": 17,
+    "supported": 16,
+    "qualified_sources": 15
+  },
+  {
+    "slug": "comcast-business",
+    "confirmed": 12,
+    "supported": 8,
+    "qualified_sources": 9
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "confirmed": 15,
+    "supported": 11,
+    "qualified_sources": 10
+  },
+  {
+    "slug": "expereo",
+    "confirmed": 10,
+    "supported": 8,
+    "qualified_sources": 3
+  },
+  {
+    "slug": "forcepoint",
+    "confirmed": 19,
+    "supported": 14,
+    "qualified_sources": 10
+  },
+  {
+    "slug": "fortinet",
+    "confirmed": 20,
+    "supported": 18,
+    "qualified_sources": 8
+  },
+  {
+    "slug": "gtt",
+    "confirmed": 18,
+    "supported": 14,
+    "qualified_sources": 14
+  },
+  {
+    "slug": "hpe-aruba",
+    "confirmed": 17,
+    "supported": 16,
+    "qualified_sources": 6
+  },
+  {
+    "slug": "juniper-networks",
+    "confirmed": 19,
+    "supported": 13,
+    "qualified_sources": 13
+  },
+  {
+    "slug": "lumen",
+    "confirmed": 26,
+    "supported": 23,
+    "qualified_sources": 19
+  },
+  {
+    "slug": "netskope",
+    "confirmed": 24,
+    "supported": 21,
+    "qualified_sources": 5
+  },
+  {
+    "slug": "ntt",
+    "confirmed": 16,
+    "supported": 12,
+    "qualified_sources": 13
+  },
+  {
+    "slug": "opensystems",
+    "confirmed": 8,
+    "supported": 7,
+    "qualified_sources": 2
+  },
+  {
+    "slug": "orange-business",
+    "confirmed": 19,
+    "supported": 16,
+    "qualified_sources": 13
+  },
+  {
+    "slug": "palo-alto-networks",
+    "confirmed": 24,
+    "supported": 21,
+    "qualified_sources": 6
+  },
+  {
+    "slug": "sonicwall",
+    "confirmed": 3,
+    "supported": 3,
+    "qualified_sources": 1
+  },
+  {
+    "slug": "arista-velocloud",
+    "confirmed": 12,
+    "supported": 6,
+    "qualified_sources": 5
+  },
+  {
+    "slug": "verizon-business",
+    "confirmed": 16,
+    "supported": 11,
+    "qualified_sources": 11
+  },
+  {
+    "slug": "versa-networks",
+    "confirmed": 26,
+    "supported": 22,
+    "qualified_sources": 16
+  },
+  {
+    "slug": "virgin-media-o2",
+    "confirmed": 10,
+    "supported": 9,
+    "qualified_sources": 6
+  },
+  {
+    "slug": "vodafone-business",
+    "confirmed": 17,
+    "supported": 11,
+    "qualified_sources": 12
+  },
+  {
+    "slug": "zscaler",
+    "confirmed": 19,
+    "supported": 15,
+    "qualified_sources": 6
+  }
+]

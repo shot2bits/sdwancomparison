@@ -28,7 +28,7 @@ export const REVIEWED_COMPARISON_EVIDENCE: Record<string, Record<string, Compari
 };
 
 export function applyReviewedComparisonEvidence(provider: ShortlistVendor, governedReview?: string, now = Date.now()): void {
-  provider.capability_evidence = {};
+  provider.capability_evidence ??= {};
   for (const [feature, evidence] of Object.entries(REVIEWED_COMPARISON_EVIDENCE[provider.slug] ?? {})) {
     if (now < Date.parse(evidence.reviewed_at) || now >= Date.parse(evidence.review_due)) continue;
     // A later approved dataset supersedes this bounded correction. No permanent overrides.

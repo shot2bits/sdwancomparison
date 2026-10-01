@@ -158,7 +158,6 @@ export function bestFor(v: ShortlistVendor) {
     service_model === "not_confirmed"
       ? "Service model not yet reviewed"
       : service_model,
-    signoff,
   ]
     .filter(Boolean)
     .join("; ");

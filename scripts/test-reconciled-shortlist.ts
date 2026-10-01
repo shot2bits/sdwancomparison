@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {ProviderMatchRecordSchema} from '../src/lib/provider-matching';
+import {getShortlistDataset} from '../src/lib/vendors';
+import {mergeNeonProviderRecords} from '../src/lib/live-shortlist';
+import {buildShortlistMarketView} from '../src/lib/shortlist-market-views';
+const input=JSON.parse(readFileSync('docs/evidence-reconciliation/reconciled-match-fixture.json','utf8'));
+const records=input.providers.map((r:unknown)=>ProviderMatchRecordSchema.parse(r));
+const vendors=mergeNeonProviderRecords(getShortlistDataset(),records);
+assert.equal(vendors.length,30);
+assert(vendors.every(v=>Object.keys(v.capabilities).length===40));
+assert(buildShortlistMarketView(vendors,'sd-wan-vendors').some(v=>v.slug==='fortinet'));
+for(const slug of ['colt-technology-services','ntt','gtt'])assert(buildShortlistMarketView(vendors,'managed-sd-wan').some(v=>v.slug===slug),slug);
+const before=JSON.parse(readFileSync('docs/evidence-reconciliation/shortlist-before.json','utf8'));
+const report=vendors.map(v=>({slug:v.slug,confirmed:Object.values(v.capabilities).filter(s=>s!=='unknown'&&s!=='not_confirmed').length,supported:Object.values(v.capabilities).filter(s=>s==='yes').length,qualified_sources:Object.keys(v.capability_evidence??{}).length}));
+writeFileSync('docs/evidence-reconciliation/reconciled-counts.json',JSON.stringify(report,null,2)+'\n');
+if(process.argv.includes('--snapshot'))writeFileSync('data/shortlist-public-snapshot.json',JSON.stringify({captured_at:'2026-10-01',source_url:'https://netify.co.uk/api/provider-knowledge/',reconciliation_version:'provider-reconciliation/2026-10-01',note:'Published source records with tested, source-traceable reconciliation; not a live request.',vendors},null,2)+'\n');
+console.log('PASS 1,200 projected fields, 30 matching records, Fortinet and managed Colt/NTT/GTT inclusion');

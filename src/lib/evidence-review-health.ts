@@ -19,7 +19,7 @@ export function evidenceReviewHealth(now = Date.now()) {
   const pending = rows.filter((r) => !r.signed);
   return {
     pending: pending.length,
-    expiring: pending.filter(
+    expiring: rows.filter(
       (r) =>
         Date.parse(r.due) - now <= 14 * 86400000 && Date.parse(r.due) > now,
     ).length,

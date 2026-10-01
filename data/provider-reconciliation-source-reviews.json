@@ -1,0 +1,75 @@
+{
+  "fortinet-fortisase": {
+    "f09_encrypted_overlay_fabric": {
+      "support_state": "supported",
+      "qualification": "FortiGate Secure SD-WAN supports an IPsec overlay. This is a configurable platform capability; it does not establish a managed service or a deployment-specific throughput/SLA.",
+      "source_urls": [
+        "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortinet_secure_sdwan.pdf",
+        "https://docs.fortinet.com/document/fortigate/7.0.0/sd-wan-sd-branch-deployment-guide/605028/creating-ipsec-tunnels-for-the-overlay"
+      ],
+      "source_finding": "Fortinet documents IPsec tunnel configuration for its SD-WAN overlay.",
+      "confidence": "high",
+      "verified_date": "2026-10-01"
+    },
+    "sd_wan": {
+      "support_state": "supported",
+      "qualification": "FortiGate Secure SD-WAN supports an IPsec overlay. This is a configurable platform capability; it does not establish a managed service or a deployment-specific throughput/SLA.",
+      "source_urls": [
+        "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortinet_secure_sdwan.pdf",
+        "https://docs.fortinet.com/document/fortigate/7.0.0/sd-wan-sd-branch-deployment-guide/605028/creating-ipsec-tunnels-for-the-overlay"
+      ],
+      "source_finding": "Fortinet documents IPsec tunnel configuration for its SD-WAN overlay.",
+      "confidence": "high",
+      "verified_date": "2026-10-01"
+    }
+  },
+  "ntt-data": {
+    "f09_encrypted_overlay_fabric": {
+      "support_state": "partner_delivered",
+      "qualification": "NTT DATA documents an encrypted SD-WAN deployment with Cisco and managed services using Viptela/Meraki. Evidence establishes this delivery option, not every NTT platform or UK site availability.",
+      "source_urls": [
+        "https://dam.nttdata.com/api/public/content/Guide-NTT-DATA-and-Cisco-together-we-make-you-unbeatable-perspective-compressed?v=3f355dc9"
+      ],
+      "source_finding": "NTT DATA and Cisco describe an encrypted SD-WAN customer deployment and their managed SD-WAN services.",
+      "confidence": "high",
+      "verified_date": "2026-10-01"
+    }
+  },
+  "colt": {
+    "f09_encrypted_overlay_fabric": {
+      "support_state": "supported",
+      "qualification": "The Colt Versa SD-WAN service guide documents an encrypted overlay using IPsec. Encryption configuration and throughput must be established for the chosen service design.",
+      "source_urls": [
+        "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/"
+      ],
+      "source_finding": "Colt documents an encrypted overlay over private MPLS and public Internet underlay.",
+      "confidence": "high",
+      "verified_date": "2026-10-01"
+    }
+  },
+  "bt": {
+    "f09_encrypted_overlay_fabric": {
+      "support_state": "partner_delivered",
+      "qualification": "BT Secure SD-WAN uses Fortinet IPsec tunnels between branches, data centres and cloud. This evidence applies to that service option; confirm the platform, scope and throughput in the proposal.",
+      "source_urls": [
+        "https://business.bt.com/content/dam/bt-business/pdfs/networks-cloud-digital-services/sd-wan/bt-secure-sd-wan-datasheet.pdf"
+      ],
+      "source_finding": "BT describes an accelerated IPsec overlay in its managed Fortinet Secure SD-WAN service.",
+      "confidence": "high",
+      "verified_date": "2026-10-01"
+    }
+  },
+  "gtt": {
+    "f09_encrypted_overlay_fabric": {
+      "support_state": "partner_delivered",
+      "qualification": "GTT documents encrypted connectivity within its managed SD-WAN offering. Confirm the selected technology, tunnel configuration, resilience and throughput for each site.",
+      "source_urls": [
+        "https://www.gtt.net/resources/glossary/what-is-sd-wan-meaning-benefits-how-it-works/",
+        "https://www.gtt.net/services/secure-networking/managed-sd-wan/"
+      ],
+      "source_finding": "GTT describes its managed SD-WAN service and encrypted connectivity.",
+      "confidence": "high",
+      "verified_date": "2026-10-01"
+    }
+  }
+}
