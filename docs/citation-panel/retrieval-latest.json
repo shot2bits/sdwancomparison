@@ -1,0 +1,73 @@
+{
+  "captured_at": "2026-10-01T12:43:49.382Z",
+  "origin": "https://netify.co.uk",
+  "results": [
+    {
+      "path": "/sase/shortlist/",
+      "status": 200,
+      "url": "https://netify.co.uk/sase/shortlist/",
+      "content_hash": "809160e95dee79ecb4aabcb8d43636e49d6eff5ff78c7cf8c25cae89480acf09",
+      "build": "a8e8c64",
+      "canonical": "https://netify.co.uk/sase/shortlist/",
+      "x_robots_tag": "index, follow",
+      "noindex": false,
+      "provider_count": null
+    },
+    {
+      "path": "/sase/shortlist/data.json/",
+      "status": 200,
+      "url": "https://netify.co.uk/sase/shortlist/data.json",
+      "content_hash": "afa557df0edefe9ebe30d10a0c2e9d189a0318d21c46e80d89589b346fb83ad9",
+      "build": null,
+      "canonical": null,
+      "x_robots_tag": "index, follow",
+      "noindex": false,
+      "provider_count": 30
+    },
+    {
+      "path": "/sase/llms.txt",
+      "status": 200,
+      "url": "https://netify.co.uk/sase/llms.txt",
+      "content_hash": "bba99581c050ce75ebf3f4ad19d6d67e3002302a35c7ed5d55e859dc51f5c15a",
+      "build": null,
+      "canonical": null,
+      "x_robots_tag": "index, follow",
+      "noindex": false,
+      "provider_count": null
+    },
+    {
+      "path": "/sase/llms-full.txt",
+      "status": 200,
+      "url": "https://netify.co.uk/sase/llms-full.txt",
+      "content_hash": "bf3dbf444c45ddb1fc195d4862838b2b5f18b32698483639e4739b5b853a9c94",
+      "build": null,
+      "canonical": null,
+      "x_robots_tag": "index, follow",
+      "noindex": false,
+      "provider_count": null
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "url": "https://netify.co.uk/robots.txt",
+      "content_hash": "cee14abb6b67f4da7e565fae7cfebcfc6ee4486ac48f4f9e434aa054b3df5648",
+      "build": null,
+      "canonical": null,
+      "x_robots_tag": null,
+      "noindex": false,
+      "provider_count": null
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "url": "https://netify.co.uk/sitemap.xml",
+      "content_hash": "ddb7e0e310fc06b87f5dab9f2bf51a638523f255a2d15cbfd6c9d3a6f03f066f",
+      "build": null,
+      "canonical": null,
+      "x_robots_tag": null,
+      "noindex": false,
+      "provider_count": null
+    }
+  ],
+  "scope": "Direct HTTP checks only, not proof of indexing or AI retrieval."
+}

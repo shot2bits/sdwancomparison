@@ -1,3 +1,4 @@
+import { RESEARCH_METRIC_METHOD } from "@/lib/research-metrics";
 import { shortlistEntity } from "@/lib/shortlist-entity";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { MCP_TOOL_DEFINITIONS } from '@/lib/mcp-tool-definitions';
@@ -12,6 +13,9 @@ ${entity.uk_sentence}
 ${SOURCING_DESCRIPTION}
 ${sourcingUndertaking()}
 ${COMMISSION_DESCRIPTION}
+
+${RESEARCH_METRIC_METHOD}
+Methodology: ${SITE_URL}/shortlist/research-methodology/
 
 Research: ${SITE_URL}/shortlist/data.json
 Service: ${SITE_URL}/shortlist/

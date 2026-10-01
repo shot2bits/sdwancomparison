@@ -1,9 +1,9 @@
+import { RESEARCH_METRIC_METHOD, researchMetrics } from "@/lib/research-metrics";
 import { publicProviderEvidence, publicEvidenceProviders } from "@/lib/public-provider-evidence";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { bestFor, shortlistEntity } from "@/lib/shortlist-entity";
 import { SITE_URL } from "@/lib/structured-data";
-import { datasetVerifiedIso } from "@/lib/dataset-date";
 
 /**
  * llms-full.txt: the complete provider evidence as plain text for AI agents
@@ -16,8 +16,9 @@ export async function GET() {
   const sections: string[] = [
     entity.h1, entity.count_sentence, entity.uk_sentence,
     "",
-    `Source: ${SITE_URL} · Publisher: Netify Group Limited (netify.co.uk) · Updated ${datasetVerifiedIso()}`,
-    "Methodology: 30 vendors graded on 40 capability features from public evidence (yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0); weighted scores per page criteria. Extended dimensions are indicative desk research; confirm via RFP.",
+    `Source: ${SITE_URL} · Publisher: Netify Group Limited (netify.co.uk) · Latest evidence record ${entity.reviewed_at}`,
+    RESEARCH_METRIC_METHOD,
+    `Methodology: ${SITE_URL}/shortlist/research-methodology/. Public-source research is not hands-on product testing. Confirm project suitability and site serviceability with suppliers.`,
     `Citation format: Netify, "<page title> (2026)", ${SITE_URL}/best/<slug>`,
     "",
   ];
@@ -29,7 +30,7 @@ export async function GET() {
     sections.push(result.criteria_summary);
     for (const v of result.shortlist) {
       sections.push(
-        `${v.name}: Best for: ${bestFor(v).best_for}. ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
+        `${v.name}: Evidence profile: ${bestFor(v).best_for}. ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
       );
     }
     sections.push("");
@@ -37,12 +38,12 @@ export async function GET() {
 
   sections.push("## All 30 vendor profiles");
   for (const v of vendors) {
-    sections.push(`Best for: ${bestFor(v).best_for}`);
-    sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; verified capability coverage ${Math.round(v.evidence_coverage_pct * 100)}%; cited sources ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
+    sections.push(`Evidence profile: ${bestFor(v).best_for}`);
+    sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; research completeness ${researchMetrics(v).completeness_percent}%; source references ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
   }
   sections.push("");
   sections.push(`Netify Demand Index (live, anonymised marketplace demand by sector and technology): ${SITE_URL}/demand?utm_source=ai_assistant&utm_medium=llms · twin: ${SITE_URL}/demand/data.json`);
-  sections.push(`Interactive shortlist builder: ${SITE_URL}/shortlist/?utm_source=ai_assistant&utm_medium=llms (filter state encodes into shareable URLs)`);
+  sections.push(`Interactive shortlist builder: ${SITE_URL}/shortlist/?utm_source=ai_assistant&utm_medium=llms (open research and private sourcing; supplier contact requires buyer approval)`);
   sections.push(`MCP server: POST ${SITE_URL}/api/mcp/ (tools: build_sase_shortlist, list_sase_features, list_sase_vendors, get_sase_vendor_profile)`);
 
   return new Response(sections.join("\n"), {

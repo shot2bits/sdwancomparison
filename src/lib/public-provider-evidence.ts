@@ -1,12 +1,13 @@
+import { researchMetrics } from "./research-metrics";
 import { ShortlistInputSchema, describeCriteria, type ShortlistVendor } from "./shortlist-core";
 import { PROVIDER_SUMMARY_COPY } from "./provider-summary-copy";
 export const PUBLIC_EVIDENCE_CONTRACT = "public-provider-evidence/4.0.0";
 export const PUBLIC_EVIDENCE_ORDER = "evidence_coverage_pct desc, provider name asc, slug asc";
 export const PUBLIC_EVIDENCE_NOTICE = "All researched providers are ordered by evidence coverage, highest first, then name. Coverage is the proportion of capability fields carrying an evidence grade; it is not fit, quality or a recommendation. Commission does not affect this order. Research and evidence matching are open.";
-export const provenEvidenceCount = (vendor: ShortlistVendor) => Object.values(vendor.capabilities).filter(status => status === "yes").length;
+export const provenEvidenceCount = (vendor: ShortlistVendor) => researchMetrics(vendor).supported;
 const textOrder = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 export function orderPublicEvidence(vendors: ShortlistVendor[]) {
-  return [...vendors].sort((a,b) => b.evidence_coverage_pct-a.evidence_coverage_pct || textOrder(a.name.toLowerCase(),b.name.toLowerCase()) || textOrder(a.slug,b.slug));
+  return vendors.map(v => ({...v, evidence_coverage_pct: researchMetrics(v).completeness})).sort((a,b) => b.evidence_coverage_pct-a.evidence_coverage_pct || textOrder(a.name.toLowerCase(),b.name.toLowerCase()) || textOrder(a.slug,b.slug));
 }
 /** Public status vocabulary preserves uncertainty without publishing the legacy unknown token.
  * Strip scoring outputs defensively, including unexpected imported fields. Source grades stay intact. */
@@ -22,7 +23,7 @@ export function publicEvidenceProviders(vendors: ShortlistVendor[]) {
     return publicEvidenceOutput({...v, ...(copy ? {
       shortlist_summary: copy.summary, key_differentiators: [copy.summary], best_fit_for: [copy.buyerContext],
       summary_source: copy.source,
-    } : {}), position:index+1, proven_evidence_count:provenEvidenceCount(v)});
+    } : {}), position:index+1, research_metrics:researchMetrics(v), proven_evidence_count:researchMetrics(v).supported});
   });
 }
 export function publicProviderEvidence(vendors: ShortlistVendor[], input: unknown = {}) {

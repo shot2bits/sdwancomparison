@@ -1,3 +1,11 @@
+## 1 October 2026 — evidence-led shortlist and article sourcing
+
+User approved the citation-review recommendations. Implementation and verification: [release scope](editorial-review/IMPLEMENTATION.md). Named editorial assessments remain unpublished until real writer/reviewer approval; no owner commitments or historical outcomes are invented. Production release identity will be recorded after Git deployment and public checks.
+
+## 1 October 2026 — recovery batch LIVE
+
+Owner authorised deployment. PR 12 merged; production commit a8e8c64, deployment dpl_CdXV1egaZEc8mGj1H1NgeKFfQVEW READY. GitHub real Redis run 36836753946 passed. Public netify.co.uk build markers and HTTP/access-control checks passed; initial error-log scan empty. Details: [recovery hardening](recovery-hardening-2026-10-01.md). Earlier local-only notes below are historical. Owner evidence adjudications and Harry copy approval remain outstanding; no production backfill or synthetic emails.
+
 ## 1 October 2026 — recovery technical batch LOCAL, not deployed
 
 Branch `codex/sourcing-recovery-hardening`. Approved recovery/account indexing, build-warning policy and email failure handling implemented. Details and limitations: [recovery hardening](recovery-hardening-2026-10-01.md). Real Redis route tests, full action-first suite, rendered confirmation states, TypeScript and focused lint pass. No production mutation, push or deployment. Explicit user approval is required before deployment. Public market wording and owner approvals are outside this batch; the 16 October evidence owner deadline remains.
