@@ -1,0 +1,14 @@
+{
+  "status": "partial baseline, not a complete panel",
+  "observed_window_utc": "2026-10-01T12:20:00Z/2026-10-01T12:23:59Z",
+  "surface": "Google AI Mode",
+  "session": "Chrome incognito, signed out; one existing incognito session, one run per query",
+  "observations": [
+    {"query":"SD-WAN providers","named_judgement":false,"named_next_step":false,"inline_citation":false,"source_list_only":false,"absent":true},
+    {"query":"SASE providers","named_judgement":false,"named_next_step":false,"inline_citation":false,"source_list_only":false,"absent":true},
+    {"query":"insurance providers","named_judgement":false,"named_next_step":false,"inline_citation":false,"source_list_only":false,"absent":true,"control_observation":"Which? named for Recommended Provider assessment; InsurTech Digital inline."},
+    {"query":"MPLS providers","named_judgement":false,"named_next_step":false,"inline_citation":true,"source_list_only":false,"absent":false,"cited_url":"https://netify.co.uk/insights/top-best-mpls-network-providers/"}
+  ],
+  "limitations":"Contemporaneous observations from this task. Other engines and the remaining queries were not retested in this pass. This does not reproduce the earlier named-destination MPLS answer and does not disprove its occurrence.",
+  "retrieval_check":{"live_build":"a8e8c64","earlier_research_tool_version":"2809262321","subsequent_research_tool_version":"0110260934","interpretation":"Retrieval returned different page versions within this investigation. This is not evidence about Google's cache or a causal explanation of clicks."}
+}

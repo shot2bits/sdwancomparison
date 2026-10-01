@@ -1,8 +1,12 @@
 "use client";
+import { parseResearchHandoff } from "@/lib/research-handoff";
+import { fireNetifyEvent } from "@/components/NetifyEvents";
+import { researchMetrics } from "@/lib/research-metrics";
 import SourcingActions, { type SourcingAction as Action } from "./SourcingActions";
 import { sourcingAcquisition } from "@/lib/sourcing-acquisition";
 import type { PublicPanelMember } from "@/lib/response-panel-contract";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import type { ProviderEditorialReview } from "@/lib/provider-editorial-review";
 import type { ShortlistVendor } from "@/lib/shortlist-core";
 import {
   SECTOR_KEYS,
@@ -24,7 +28,7 @@ export default function SourcingEntrance({
   initialSelection,
   features,
 }: {
-  vendors: (ShortlistVendor & { best_for?: string; response_panel?: PublicPanelMember | null })[];
+  vendors: (ShortlistVendor & { best_for?: string; editorial?: ProviderEditorialReview | null; response_panel?: PublicPanelMember | null })[];
   initialSector?: string;
   initialSelection?: {slug:string; action:Action};
   features: { id: string; name: string }[];
@@ -55,6 +59,24 @@ export default function SourcingEntrance({
     [matching, setMatching] = useState(false),
     [matchMessage, setMatchMessage] = useState("");
   const [entry, setEntry] = useState("Describe your requirements");
+  const [articleSource, setArticleSource] = useState("");
+  useEffect(() => {
+    const receive = () => {
+    const incoming = parseResearchHandoff(window.location.hash);
+    if (!incoming) return;
+    // The source is context only. It never selects recipients or grants consent.
+    const contextNames = incoming.provider_context.map(slug=>vendors.find(v=>v.slug===slug)?.name).filter(Boolean);
+    const requirement = [incoming.requirement, `Research article: ${incoming.source}`, contextNames.length ? `Research context, not approved recipients: ${contextNames.join(", ")}.` : ""].filter(Boolean).join("\n\n");
+    setBrief(b => ({...b, requirement: b.requirement || (requirement.length <= 12000 ? requirement : incoming.requirement)}));
+    setArticleSource(incoming.source);
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search + "#sourcing-brief");
+    fireNetifyEvent("research_handoff", {source:"shortlist", intent:"project"});
+    };
+    // Read browser-only context after hydration; accept later same-page handoffs too.
+    const frame = window.requestAnimationFrame(receive);
+    window.addEventListener("hashchange", receive);
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener("hashchange", receive); };
+  }, [vendors]);
   function change<K extends keyof SourcingBrief>(
     key: K,
     value: SourcingBrief[K],
@@ -72,6 +94,7 @@ export default function SourcingEntrance({
     }
   }
   function choose(slug: string, action: Action) {
+    fireNetifyEvent("provider_action_changed", {source:"shortlist", intent:action === "proposals" ? "project" : "research", opt_in:(selected[slug] ?? []).includes(action) ? "no" : "yes"});
     setSelected((old) => {
       const a = old[slug] ?? [];
       return {
@@ -201,6 +224,7 @@ export default function SourcingEntrance({
       disabled={busy}
       style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
     >
+      {articleSource && <p className="sourcing-small">Requirements carried from <a href={articleSource}>your research article</a>. Review and edit them before preparing the plan. No supplier has been selected or contacted.</p>}
       <form
         id="sourcing-brief"
         className="sourcing-form"
@@ -475,7 +499,7 @@ export default function SourcingEntrance({
         </p>
         <div className="sourcing-cards">
           {vendors.map((v) => (
-            <article key={v.slug}>
+            <article key={v.slug} id={`provider-${v.slug}`}>
               <div className="sourcing-card-top">
                 <h3><a href={`/sase/vendors/${v.slug}/`}>{v.name}</a></h3>
                 <span>
@@ -483,7 +507,14 @@ export default function SourcingEntrance({
                 </span>
               </div>
               <p>{v.category}</p>
-              <p data-best-for={v.slug}><strong>Best for:</strong> {v.best_for}</p>
+              {v.editorial && <div>
+                <p><strong>Netify assessment:</strong> {v.editorial.buyer_fit}</p>
+                <h4>Strengths for this buyer</h4><ul>{v.editorial.strengths.map(text=><li key={text}>{text}</li>)}</ul>
+                <h4>Trade-offs to check</h4><ul>{v.editorial.trade_offs.map(text=><li key={text}>{text}</li>)}</ul>
+                <p className="sourcing-small">Editorial review: {v.editorial.reviewer}, {v.editorial.role}, {v.editorial.approved_at.slice(0,10)}.</p>
+                <details><summary>Assessment sources</summary><ul>{v.editorial.source_urls.map(url=><li key={url}><a href={url}>{url}</a></li>)}</ul></details>
+              </div>}
+              <p data-best-for={v.slug}><strong>Evidence profile:</strong> {v.best_for}</p>
               {matches?.includes(v.slug) && (
                 <p>
                   <strong>Evidence match</strong> · supplier confirmation
@@ -492,13 +523,18 @@ export default function SourcingEntrance({
               )}
               <p>
                 <strong>
-                  {Math.round(v.evidence_coverage_pct * 100)}% evidence coverage
+                  {Math.round(researchMetrics(v).completeness * 100)}% research completeness
                 </strong>{" "}
-                · {v.evidence_source_count ?? 0} sources
+                · {v.evidence_source_count ?? 0} source references
               </p>
               <p className="sourcing-small">
-                Reviewed {v.last_verified || "date not recorded"}
+                Provider evidence date: {v.last_verified || "date not recorded"}
               </p>
+              <details className="sourcing-small">
+                <summary>What the research covers</summary>
+                <p>{researchMetrics(v).supported} supported; {researchMetrics(v).partial} partial; {researchMetrics(v).partner_delivered} partner-delivered; {researchMetrics(v).managed_service_dependent} managed-service dependent; {researchMetrics(v).not_primary} not primary; {researchMetrics(v).unconfirmed} unconfirmed. Total: {researchMetrics(v).total} capability fields.</p>
+                <p>An unconfirmed field is an evidence gap, not proof that the provider lacks the capability. Source references can repeat the same document. These figures are not a suitability score.</p>
+              </details>
               {v.projection_provenance?.active_review?.sector_signoff && (
                 <p className="sourcing-small">
                   {v.projection_provenance.active_review.sector_signoff.label}
@@ -573,9 +609,9 @@ export default function SourcingEntrance({
               <thead>
                 <tr>
                   <th>Provider</th>
-                  <th>Best for</th>
-                  <th>Coverage</th>
-                  <th>Sources</th>
+                  <th>Evidence profile</th>
+                  <th>Research completeness</th>
+                  <th>Source references</th>
                   <th>Review date</th>
                   {features.map((f) => (
                     <th key={f.id}>{f.name}</th>
@@ -591,7 +627,7 @@ export default function SourcingEntrance({
                       </a>
                     </th>
                     <td>{v.best_for}</td>
-                    <td>{Math.round(v.evidence_coverage_pct * 100)}%</td>
+                    <td>{Math.round(researchMetrics(v).completeness * 100)}%</td>
                     <td>{v.evidence_source_count ?? 0}</td>
                     <td>{v.last_verified}</td>
                     {features.map((f) => (

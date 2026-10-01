@@ -89,8 +89,8 @@ export function shortlistEntity(
     (v) => v.uk_delivery === "not_confirmed",
   ).length;
   const reviewed =
-    Object.values(UK_CARRIER_REVIEWS)
-      .map((r) => r.reviewed_at)
+    vendors.map(ukStatus)
+      .map((r) => r.reviewed_at).filter((d): d is string => Boolean(d))
       .sort()
       .at(-1)
       ?.slice(0, 10) ?? "";
@@ -98,7 +98,7 @@ export function shortlistEntity(
     h1,
     counts,
     count_sentence: `Compare ${vendors.length} researched SD-WAN and SASE providers across operating model, network and security capability. ${counts.technology_vendors} technology vendors; ${counts.uk_carriers} UK carriers; ${counts.managed_service_providers} managed service providers${overlap ? "; overlapping categories counted in each type" : ""}.`,
-    uk_sentence: `${uk} UK-headquartered or UK-entity providers; ${pending} UK entity statuses not yet reviewed; UK carrier evidence reviewed on ${reviewed}.`,
+    uk_sentence: `${uk} UK-headquartered or UK-entity providers; ${pending} UK entity statuses not yet reviewed; ${reviewed ? `latest UK carrier evidence review ${reviewed}` : "no active dated UK carrier review"}. UK entity evidence does not establish availability at individual sites.`,
     market_structure_sentence: review.market_structure_sentence,
     desk_sentence: review.desk_sentence,
     reviewer: {

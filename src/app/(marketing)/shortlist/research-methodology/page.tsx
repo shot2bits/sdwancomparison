@@ -1,3 +1,4 @@
+import { RESEARCH_METRIC_METHOD } from "@/lib/research-metrics";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FEATURES } from "@/lib/vendors";
@@ -31,8 +32,14 @@ export default async function ResearchMethodologyPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
     <p className="eyebrow mb-3">Research methodology</p>
     <h1>How Netify compares SD-WAN and SASE providers</h1>
-    <p className="mt-4 text-lg leading-8 text-[var(--ink-700)]">The comparison covers {live.vendors.length} providers and {FEATURES.length} capabilities. It uses {sources} cited sources in the current governed records. The latest provider review date is {reviewed}.</p>
+    <p className="mt-4 text-lg leading-8 text-[var(--ink-700)]">The comparison covers {live.vendors.length} providers and {FEATURES.length} capabilities. It uses {sources} source references (which may repeat the same document) in the current governed records. The latest provider review date is {reviewed}.</p>
 
+    <section className="mt-10">
+      <h2>Research completeness is not provider quality</h2>
+      <p>{RESEARCH_METRIC_METHOD}</p>
+      <p>The same published capability framework is used for live records and fallback snapshots. Public-source review is not hands-on product testing. Provider evidence dates describe the records; an editorial review date, where shown, describes a separate human assessment.</p>
+      <p>Sector evidence and UK entity evidence do not establish suitability for a particular deployment. Site serviceability, delivery responsibilities, exclusions and pricing require confirmation against the buyer’s brief.</p>
+    </section>
     <section className="mt-10">
       <h2>What the grades mean</h2>
       <p className="mt-3 leading-7">A capability is recorded as supported, partially supported, partner delivered, managed-service dependent, not primary or not confirmed. Not confirmed means the reviewed public sources did not support the claim. It is not treated as proof that the provider lacks the capability.</p>

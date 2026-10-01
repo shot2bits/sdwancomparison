@@ -1,0 +1,10 @@
+import {writeFile,readFile} from 'node:fs/promises';
+const response=await fetch('https://netify.co.uk/sase/shortlist/data.json/');
+if(!response.ok)throw Error(`Public dataset failed: ${response.status}`);
+const data=await response.json();
+if(data.vendors?.length!==30 || new Set(data.vendors.map(v=>v.slug)).size!==30)throw Error('Expected all 30 distinct providers');
+const catalogue=JSON.parse(await readFile("data/governed-provider-catalogue.json","utf8"));
+const sourceRecord=v=>catalogue.providers.find(r=>v.marketplace_url===`https://netify.co.uk/marketplace/${r.provider.slug}/`);
+const pack={captured_at:new Date().toISOString(),source:data.page,runtime_source:data.runtime_provider_source,dataset_versions:data.provider_dataset_versions,purpose:'Writer and reviewer working pack. No new editorial judgement is approved by this export.',providers:data.vendors.map(v=>({slug:v.slug,name:v.name,evidence_date:v.last_verified,evidence_profile:v.best_for,capabilities:v.capabilities,capability_evidence:v.capability_evidence,projection:v.projection_provenance,existing_summary:v.shortlist_summary, imported_editorial_for_review:sourceRecord(v)?.editorial ?? null, imported_editorial_status:sourceRecord(v)?.revision.editorial_revision ?? null, imported_source_revision:sourceRecord(v)?.revision ?? null, source_register:sourceRecord(v)?.evidence_sources ?? [],source_reference_count:v.evidence_source_count,editorial:{buyer_fit:'',strengths:[],trade_offs:[],source_urls:[],reviewer:'',role:'',approved_at:'',review_due:''}}))};
+await writeFile('docs/editorial-review/provider-review-pack.json',JSON.stringify(pack,null,2)+'\n');
+console.log(`Captured ${pack.providers.length} providers from ${pack.runtime_source}; editorial approval fields remain empty.`);

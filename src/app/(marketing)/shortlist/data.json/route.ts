@@ -1,3 +1,6 @@
+import { approvedEditorialReview } from "@/lib/provider-editorial-review";
+import { buyerDecisionGuide } from "@/lib/buyer-decision-guide";
+import { RESEARCH_METRIC_METHOD } from "@/lib/research-metrics";
 import { shortlistFaqs } from "@/lib/shortlist-faq";
 import { shortlistEntity, bestFor, ukStatus } from "@/lib/shortlist-entity";
 import {publicResponsePanel} from '@/lib/response-panel';
@@ -40,15 +43,18 @@ export async function GET(request: Request) {
       generated_at: generatedAt,
       last_reviewed: entity.reviewed_at,
       evidence: {
+        research_completeness_method: RESEARCH_METRIC_METHOD,
+        source_count_unit: "record references, not unique URLs",
         method:
           "Each public provider profile is a reviewed projection of the governed provider record. Capability states distinguish supported, partial, partner-delivered, unsupported, not-confirmed and requires-confirmation evidence.",
         sources_total: vendors.reduce((n, provider) => n + (provider.evidence_source_count ?? 0), 0),
       },
+      buyer_decisions: buyerDecisionGuide(vendors),
       faqs: shortlistFaqs(vendors),
       uk_buyer_guidance: { situations: UK_BUYING_SITUATIONS, provider_roles: PROVIDER_ROLE_GUIDE, notice: "Buying guidance only. A situation does not certify coverage, filter providers or change evidence grades." },
       features: FEATURES,
       entity,
-      vendors: vendors.map(v=>({...v,...bestFor(v),uk_status:ukStatus(v)})),
+      vendors: vendors.map(v=>({...v,...bestFor(v),editorial:approvedEditorialReview(v),uk_status:ukStatus(v)})),
       governed_provider_profiles: vendors.map((provider) => ({
         comparison_slug: provider.slug,
         name: provider.name,
@@ -70,7 +76,7 @@ export async function GET(request: Request) {
         title: SHORTLIST_VIEWS[view].title,
         answer: SHORTLIST_VIEWS[view].answer,
         url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${view}/`,
-        providers: buildShortlistMarketView(vendors, view).map(v=>({...v,...bestFor(v),uk_status:ukStatus(v)})),
+        providers: buildShortlistMarketView(vendors, view).map(v=>({...v,...bestFor(v),editorial:approvedEditorialReview(v),uk_status:ukStatus(v)})),
       }])),
       service: {description:SOURCING_DESCRIPTION,commission:COMMISSION_DESCRIPTION, response_target:SOURCING_TARGET, response_panel:panel.map(publicPanelMember), research_requires_identity:false, supplier_disclosure_requires_recipient_consent:true},
       market_record:`${SITE_URL}/shortlist/market-record.json/`,

@@ -30,7 +30,7 @@ export function shortlistFaqs(vendors: ShortlistVendor[]) {
   return [
     {
       q: "Which SD-WAN providers deliver nationwide in the UK?",
-      a: `UK entity evidence: ${uk.length} providers (${names(uk)}); site serviceability not yet reviewed; reviewed on ${date}.`,
+      a: `Nationwide delivery cannot be established from a UK address or contracting entity. The current records identify ${uk.length} providers with UK entity evidence (${names(uk)}). Confirm availability at each site, access circuits, resilience, installation lead times and the contracting service before selection. Entity evidence is separate from site serviceability. Latest research evidence date: ${date}.`,
     },
     {
       q: "Which SASE vendors are UK-headquartered or contract through a UK entity?",
