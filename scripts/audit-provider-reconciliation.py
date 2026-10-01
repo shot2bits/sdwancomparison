@@ -62,7 +62,7 @@ def main():
     result={'cells':rows,'parser_candidates':parser,'summary':dict(Counter(r['classification'] for r in rows))}
     (OUT/'capability-audit.json').write_text(json.dumps(result,indent=2)+'\n')
     with (OUT/'capability-audit.csv').open('w') as f:
-        w=csv.DictWriter(f,fieldnames=['slug','feature','legacy_grade','live_grade','classification','legacy_fact_value','legacy_date']);w.writeheader();w.writerows({k:r[k] for k in w.fieldnames} for r in rows)
+        w=csv.DictWriter(f,lineterminator='\n',fieldnames=['slug','feature','legacy_grade','live_grade','classification','legacy_fact_value','legacy_date']);w.writeheader();w.writerows({k:r[k] for k in w.fieldnames} for r in rows)
     print(json.dumps({'cells':len(rows),'summary':result['summary'],'confirmation_parser_candidates':len(parser)},indent=2))
 
 if __name__=='__main__':main()
