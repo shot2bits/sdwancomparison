@@ -1,3 +1,7 @@
+## 1 October 2026 — answer-first release LIVE
+
+SASE 7b2cc80 READY dpl_8beRGsVt1pZ1R9zRB2b4riG1zK6X; apex routing companion 6a023ee READY dpl_JBZMB9Y7NumKqdWRzrgJ5vx4i4ce. Public sign-off pending labels removed; internal review status retained. Live Neon source, all 50 provider/sector pages, feed/schema parity, provider Demo handoff and 42 apex checks passed. Actual logs, initial routing failure and correction: docs/answer-first-release/README.md. Earlier local-only notes below are historical. Wider directory and owner approvals remain separate.
+
 # Answer-first shortlist: local build, not deployed
 
 Work branch `codex/answer-first-shortlist` from main `feb06f6`, retaining the corrective release. Entity-first shortlist, dataset-derived best-for lines, complete FAQs and Organisation/Dataset graph, shared provider sourcing actions on sibling/profile pages, and aligned machine feeds. Local acceptance and actual outputs: [docs/answer-first/README.md](answer-first/README.md). No push/deployment, production data change or external email. Phase-2 UK directory and post-release indexing/14-day search panel remain gated as specified. Reviewer and Harry slots remain blank; owner F5 sign-offs are still outstanding. Existing untracked duplicates in the original checkout are preserved.

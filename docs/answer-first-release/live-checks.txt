@@ -1,0 +1,9 @@
+PASS HTTP: approved H1; count in first 80 main-content words; 30 server-rendered cards and best-for lines; desk H2
+FIRST 80 WORDS: Compare SD-WAN and SASE providers for UK businesses Compare 30 researched SD-WAN and SASE providers across operating model, network and security capability. 19 technology vendors; 4 UK carriers; 9 managed service providers; overlapping categories counted in each type. 4 UK-headquartered or UK-entity providers; 26 UK entity statuses not yet reviewed; UK carrier evidence reviewed on 2026-09-30. Get comparable SD-WAN and SASE proposals from UK providers Use Netify to request comparable proposals, demos and pre-sales contacts from named SD-WAN and SASE
+PASS graph: 30 organisations in card order; FAQ exact visible parity; no Person; no em dash or legacy status
+PASS llms/feed: first three lines byte-identical to entity block
+PASS sibling: sd-wan-vendors rows 16 title SD-WAN vendors compared (2026): 30-Provider Research Dataset | Netify h1 SD-WAN vendors compared
+PASS sibling: sase-vendors rows 17 title SASE vendors compared (2026): 30-Provider Research Dataset | Netify h1 SASE vendors compared
+PASS sibling: managed-sd-wan rows 12 title Managed SD-WAN providers compared (2026): 30-Provider Research Dataset | Netify h1 Managed SD-WAN providers compared
+HTTP acceptance complete; no requests or emails submitted
+PASS 50 rendered provider/sector pages: no em dash or legacy unknown vocabulary

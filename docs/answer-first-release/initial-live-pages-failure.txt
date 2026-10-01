@@ -1,0 +1,13 @@
+AssertionError [ERR_ASSERTION]: /vendors/cato-networks/
+
+0 !== 1
+
+    at main (/Users/robertsturt/Documents/ChatGPT/The Marketplace chess move/.release/sourcing-release-reconcile-20260930/scripts/verify-answer-first-pages.ts:11:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 1,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
