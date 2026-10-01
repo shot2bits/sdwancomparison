@@ -1,5 +1,5 @@
 import { getAllVendors } from "@/lib/vendors";
-import { issueSourcingAccess } from "@/lib/sourcing-access";
+import { issueSourcingAccess, sourcingAccess } from "@/lib/sourcing-access";
 import { z } from "zod";
 import {
   readSourcingRequest,
@@ -13,12 +13,14 @@ const Input = z
   })
   .strict();
 const privateHeaders = { "Cache-Control": "private, no-store" };
-function recovery(id: string) {
+async function recovery(req: Request, id: string) {
+  const access = Boolean(await sourcingAccess(req, id));
   return json({
     status: "desk_review",
     already_confirmed: true,
     message: "Already confirmed. Sign in with the same work email.",
-    sign_in_url: "/sase/account/",
+    access,
+    sign_in_url: `/sase/account/?return_to=${encodeURIComponent(`/sase/rfp-builder/${id}/`)}`,
     project_url: `/sase/rfp-builder/${id}/`,
   });
 }
@@ -40,11 +42,11 @@ export async function POST(req: Request) {
     const input = Input.parse(JSON.parse(raw));
     const initial = await readSourcingRequest(input.id, input.token);
     if (!input.confirm && initial.status === "desk_review")
-      return recovery(initial.project_id);
+      return recovery(req, initial.project_id);
     if (input.confirm) {
       const receipt = await confirmSourcingRequest(input.id, input.token);
       const record = await readSourcingRequest(input.id, input.token);
-      if (receipt.already_confirmed) return recovery(record.project_id);
+      if (receipt.already_confirmed) return recovery(req, record.project_id);
       return Response.json(
         { ...receipt, project_url: `/sase/rfp-builder/${record.project_id}/` },
         {
@@ -56,7 +58,7 @@ export async function POST(req: Request) {
       );
     }
     const r = await readSourcingRequest(input.id, input.token);
-    if (r.status === "desk_review") return recovery(r.project_id);
+    if (r.status === "desk_review") return recovery(req, r.project_id);
     return json({
       id: r.id,
       status: r.status,

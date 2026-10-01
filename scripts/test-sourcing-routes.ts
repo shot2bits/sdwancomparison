@@ -23,6 +23,7 @@ await withFakeKv(async (store) => {
     null;
   let failQueueOnce = false;
   let rejectMail = false;
+  let rejectStatus = 503;
   let throwMail = false;
   let throwAfterAcceptance = false;
   const acceptedMail = new Map<string,string>();
@@ -38,7 +39,7 @@ await withFakeKv(async (store) => {
     if (url === "https://api.resend.com/emails") {
       if (throwMail) throw new Error("Synthetic mail transport interruption");
       if (rejectMail)
-        return Response.json({ error: "rejected" }, { status: 503 });
+        return Response.json({ error: "rejected" }, { status: rejectStatus });
       const key=new Headers(init?.headers).get("Idempotency-Key");
       if(key && acceptedMail.has(key)) {assert.equal(acceptedMail.get(key),String(init?.body),"Idempotent resend body must remain identical");return Response.json({id:"captured-mail"});}
       const mail = JSON.parse(String(init?.body));
@@ -150,7 +151,7 @@ await withFakeKv(async (store) => {
   assert(mails[1].text.includes("Buyer domain: example.org"));
   assert(mails[1].text.includes(before.project_id));
   assert(!mails[1].text.includes("PRIVATE ORIGINAL"));
-  assert.equal(mails[2].subject, "Netify has your request");
+  assert.equal(mails[2].subject, "Your Netify request is recorded");
   assert.equal(mails[2].to, body.email);
   assert(
     mails[2].text.includes(
@@ -158,6 +159,16 @@ await withFakeKv(async (store) => {
     ),
   );
   const scopedCookie = accepted.headers.get("set-cookie")!;
+  const reload = await confirmRoute.POST(makeRequest("POST", "https://preview.example/sase/api/sourcing/confirm/", {body:{id:receipt.request_id,token,confirm:false},cookie:scopedCookie.split(";")[0]}));
+  const reloadBody = await reload.json();
+  assert.equal(reloadBody.access,true);
+  assert.equal(reload.headers.get("set-cookie"),null);
+  assert.equal(reloadBody.project_url,`/sase/rfp-builder/${before.project_id}/`);
+  const otherBrowser = await confirmRoute.POST(makeRequest("POST", "https://preview.example/sase/api/sourcing/confirm/", {body:{id:receipt.request_id,token,confirm:false}}));
+  const otherBody = await otherBrowser.json();
+  assert.equal(otherBody.access,false);
+  assert.equal(new URL(otherBody.sign_in_url,"https://preview.example").searchParams.get("return_to"), reloadBody.project_url);
+  assert.equal(otherBrowser.headers.get("set-cookie"),null);
   const grantToken=scopedCookie.split(";")[0].split("=")[1];
   assert(Number(store.command(["PTTL",`sourcing:access:${createHash("sha256").update(grantToken).digest("hex")}`]))>29*86400000,"Private browser grant has 30-day TTL");
   assert.match(scopedCookie, /HttpOnly/);
@@ -750,7 +761,33 @@ await withFakeKv(async (store) => {
   throwAfterAcceptance=true;assert.equal((await ambiguousPost()).status,422);throwAfterAcceptance=false;
   assert.equal((await ambiguousPost()).status,200);
   assert.equal(mails.filter(m=>m.to===ambiguousBody.email).length,1,"Transport uncertainty must deliver exactly once with the same Resend key and body");
-  // A definite provider rejection can be retried safely with the same client request key.
+  // Definite rejection permits correcting the same request key; no mail was accepted.
+  const definiteBody={...body,email:"definite@example.org",idempotency_key:randomUUID()};
+  const definitePost=(b=definiteBody)=>requestRoute.POST(makeRequest("POST","https://preview.example/sase/api/sourcing/request/",{body:b,headers:{"x-forwarded-for":b.email}}));
+  rejectMail=true;rejectStatus=422;
+  const definite=await definitePost();assert.equal(definite.status,422);assert.match((await definite.json()).error,/Check your work email/);
+  rejectMail=false;rejectStatus=503;
+  const corrected={...definiteBody,brief:{...definiteBody.brief,supplier_brief:"Corrected synthetic supplier brief for ten offices"}};
+  assert.equal((await definitePost(corrected)).status,200);
+  assert.equal(mails.filter(m=>m.to===definiteBody.email).length,1);
+  // After an uncertain send a later rejection must NOT free the original key.
+  const uncertainBody={...body,email:"uncertain-rejection@example.org",idempotency_key:randomUUID()};
+  const uncertainPost=(b=uncertainBody)=>requestRoute.POST(makeRequest("POST","https://preview.example/sase/api/sourcing/request/",{body:b,headers:{"x-forwarded-for":b.email}}));
+  throwAfterAcceptance=true;assert.equal((await uncertainPost()).status,422);throwAfterAcceptance=false;
+  rejectMail=true;rejectStatus=403;assert.equal((await uncertainPost()).status,422);
+  rejectMail=false;rejectStatus=503;
+  assert.equal((await uncertainPost({...uncertainBody,brief:{...uncertainBody.brief,supplier_brief:"Changed scope must not release an ambiguous delivery"}})).status,422);
+  assert.equal((await uncertainPost()).status,200);
+  assert.equal(mails.filter(m=>m.to===uncertainBody.email).length,1);
+  // Provider concurrency and throttle responses retain the exact body and key.
+  for (const status of [408,409,429]) {
+    const b={...body,email:`retry${status}@example.org`,idempotency_key:randomUUID()};
+    const post=()=>requestRoute.POST(makeRequest("POST","https://preview.example/sase/api/sourcing/request/",{body:b,headers:{"x-forwarded-for":b.email}}));
+    rejectMail=true;rejectStatus=status;assert.equal((await post()).status,422);
+    rejectMail=false;rejectStatus=503;assert.equal((await post()).status,200);
+    assert.equal(mails.filter(m=>m.to===b.email).length,1);
+  }
+  // A transient provider rejection can be retried safely with the same client request key.
   const rejectBody = {
     ...body,
     email: "rejected@example.org",
@@ -914,11 +951,11 @@ await withFakeKv(async (store) => {
     captured().filter(
       (c) =>
         c.payload.to === captureBody.email &&
-        c.payload.subject === "Your Netify request is recorded; desk acknowledgement pending",
+        c.payload.subject === "Your Netify request is recorded",
     ).length,
     1,
   );
-  assert(captured().some(c=>c.payload.to===captureBody.email&&c.payload.text.includes("Netify has not yet acknowledged")));
+  assert(captured().some(c=>c.payload.to===captureBody.email&&c.payload.text.includes("current desk status")));
   assert.equal((await captureConfirm()).status, 200);
   assert.equal((await retryPost(deskCookie)).status, 200);
   assert.equal(
@@ -983,6 +1020,14 @@ await withFakeKv(async (store) => {
   assert(sessionCookie);
   const recovered = await rfpRoute.GET(makeRequest("GET", `https://preview.example${projectPath}`, {cookie:sessionCookie.split(";")[0]}), {params:Promise.resolve({id:before.project_id})});
   assert.equal(recovered.status,200);
+  const mine = await import("../src/app/api/rfp/mine/route");
+  const mineResponse = await mine.GET(makeRequest("GET", "https://preview.example/sase/api/rfp/mine", {cookie:sessionCookie.split(";")[0]}));
+  assert.equal(mineResponse.status,200);
+  assert((await mineResponse.json()).rfps.some((p:{id:string})=>p.id===before.project_id), "Real sign-in must expose the sourcing project in the account list");
+  store.command(["DEL", `buyer:${body.email.toLowerCase()}:rfps`]);
+  await desk.POST(makeRequest("POST", "https://preview.example/sase/api/sourcing/desk/", {body:{id:receipt.request_id},cookie:deskCookie}));
+  assert((await (await mine.GET(makeRequest("GET", "https://preview.example/sase/api/rfp/mine", {cookie:sessionCookie.split(";")[0]}))).json()).rfps.some((p:{id:string})=>p.id===before.project_id), "Desk retry repairs legacy account index even after notifications were accepted");
+
   assert.equal((await signIn(body.email)).status,200);
   const record = store.peekJson<import("../src/lib/sourcing-store").SourcingRecord>(`sourcing:request:${receipt.request_id}`)!;
   record.expires_at = Date.now() - 1;

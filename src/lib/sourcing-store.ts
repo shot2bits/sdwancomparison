@@ -65,15 +65,21 @@ async function limit(key: string, max: number) {
   if (count > max)
     throw new Error("Too many requests. Please try again later.");
 }
+class ConfirmationRejected extends Error {}
 // Persist the exact transport payload so ambiguous failures reuse both body and key.
 async function deliverConfirmation(record: SourcingRecord) {
   try {
     await circuitLock(`sourcing-mail:${record.id}`, async () => {
       if (await kvGetJson(`sourcing:mail:${record.id}`)) return;
-      const payload = await kvGetJson<{ body: string }>(
+      const payload = await kvGetJson<{ body: string; attempted?: boolean }>(
         `sourcing:mail-payload:${record.id}`,
       );
       if (!payload) throw new Error("Confirmation payload is unavailable");
+      // Persist before sending: a crash or missing receipt must never permit a fresh key.
+      const uncertainEarlierAttempt = payload.attempted !== false;
+      const ttl = Number(await kvRaw(["PTTL", `sourcing:mail-payload:${record.id}`]));
+      if (ttl <= 0) throw new Error("Confirmation payload has expired");
+      await kvRaw(["SET", `sourcing:mail-payload:${record.id}`, JSON.stringify({...payload, attempted:true}), "PX", ttl]);
       const response = await activityMailFetch(
         "https://api.resend.com/emails",
         {
@@ -87,8 +93,27 @@ async function deliverConfirmation(record: SourcingRecord) {
           body: payload.body,
         },
       );
-      if (!response.ok)
+      if (!response.ok) {
+        // 408/409/429/5xx may be retryable or refer to a previously accepted request.
+        if ([400,401,403,404,405,422].includes(response.status)) {
+          if (!uncertainEarlierAttempt) {
+            const idem = `sourcing:idem:${digest(record.request.email + record.request.idempotency_key)}`;
+            await kvRaw(["EVAL", `-- sourcing-rejected-cleanup
+if redis.call('GET',KEYS[1])~=ARGV[1] or redis.call('EXISTS',KEYS[4])==1 then return 0 end
+local raw=redis.call('GET',KEYS[2])
+if not raw or cjson.decode(raw).status~='pending_confirmation' then return 0 end
+return redis.call('DEL',KEYS[1],KEYS[2],KEYS[3])`, 4,
+              idem, `sourcing:request:${record.id}`, `sourcing:mail-payload:${record.id}`, `sourcing:mail:${record.id}`,
+              JSON.stringify({id:record.id,hash:record.payload_hash})]);
+          }
+          throw new ConfirmationRejected(uncertainEarlierAttempt
+            ? "We could not send your confirmation. An earlier attempt may have been accepted; keep this request and contact support@netify.com."
+            : [400,422].includes(response.status)
+              ? "We could not send your confirmation. Check your work email and request details, or contact support@netify.com."
+              : "We could not send your confirmation because the email service rejected it. Contact support@netify.com.");
+        }
         throw new Error("Confirmation transport was not accepted");
+      }
       await kvRaw([
         "SET",
         `sourcing:mail:${record.id}`,
@@ -97,7 +122,8 @@ async function deliverConfirmation(record: SourcingRecord) {
         86400,
       ]);
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof ConfirmationRejected) throw error;
     throw new Error(
       "Confirmation delivery is not yet confirmed. Please retry this same request shortly.",
     );
@@ -204,7 +230,7 @@ redis.call('set', KEYS[2], ARGV[2], 'EX', 86400)
 redis.call('set', KEYS[3], ARGV[3], 'EX', 3600)
 redis.call('expire', KEYS[1], 86400)
 return 1`, 3, lock, `sourcing:request:${record.id}`, `sourcing:mail-payload:${record.id}`,
-    JSON.stringify({id:record.id,hash:payloadHash}), JSON.stringify(record), JSON.stringify({body:mailBody}),
+    JSON.stringify({id:record.id,hash:payloadHash}), JSON.stringify(record), JSON.stringify({body:mailBody,attempted:false}),
   ]);
   if(Number(prepared)!==1)throw new Error("This request is already being prepared. Please retry shortly.");
   await recordSourcingMetric("request", input.acquisition, record.id);
