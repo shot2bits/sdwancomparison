@@ -1,6 +1,6 @@
 # Recovery hardening — 1 October 2026
 
-Status: implemented locally on `codex/sourcing-recovery-hardening`. Not pushed or deployed. User approval is required before deployment.
+Status: LIVE following owner approval. PR 12 merged; production commit `a8e8c64da3a97a2c38ebe8fed57cf801f572d2ea`, deployment `dpl_CdXV1egaZEc8mGj1H1NgeKFfQVEW` READY. Public shortlist, account and confirmation pages serve build `a8e8c64`.
 
 ## Approved technical batch
 
@@ -23,3 +23,7 @@ The production build passed again after the final display correction. Expected f
 No production backfill has run. Existing account-index omissions are repaired when the relevant confirmed request is retried through the desk/notification path; this is not a claim that every historic production project has already been repaired.
 
 Provider lists, UK wording, classifications, score labels, schema and public sign-off labels are unchanged. Harry copy approval and evidence owner adjudications remain outstanding. Operational email/error messages changed only within this approved recovery batch. These fixes address reliability; they do not establish an improvement in AI citations or search clicks.
+
+## Production verification
+
+GitHub real Redis run 36836753946 succeeded. Hosted preview checks passed before merge. Live netify.co.uk shortlist, account, confirmation and llms.txt return 200. Unauthenticated account API returns 401; malformed confirmation returns 403 with no cookie and private no-store caching. The production alias points to the expected deployment. Deployment error-log scan immediately after release found no entries; this is a short observation window. Successful sign-in and mail retry paths were tested hermetically, not by sending synthetic production emails. No historic production index backfill was run.
