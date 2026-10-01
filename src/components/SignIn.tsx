@@ -1,5 +1,6 @@
 "use client";
 
+import { sourcingReturnPath } from "@/lib/sourcing-return-path";
 import { useEffect, useState } from "react";
 import { firstTouch } from "@/components/NetifyEvents";
 import type {CircuitSignupIntent} from "@/lib/circuit-schema";
@@ -62,7 +63,7 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
     try {
       // Where sign-in was requested from: carried through the magic link so
       // the verify page can send the person straight back here afterwards.
-      const return_to = circuitIntent ? `/sase/circuit-pricing/?request=${encodeURIComponent(circuitIntent.id)}` : publishRfpId ? `/sase/rfp-builder/${publishRfpId}/?welcome=submitting` : window.location.pathname + window.location.search;
+      const return_to = circuitIntent ? `/sase/circuit-pricing/?request=${encodeURIComponent(circuitIntent.id)}` : publishRfpId ? `/sase/rfp-builder/${publishRfpId}/?welcome=submitting` : sourcingReturnPath(window.location.search) ?? window.location.pathname + window.location.search;
       const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, ...(circuitIntent ? {circuit_intent:circuitIntent} : {}), attribution: firstTouch(), ...(role === "buyer" ? { bot_proof: { challenge, website } } : {}) }) });
       const data = await res.json();
       if (!res.ok) {
@@ -102,7 +103,11 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
     // reload so the whole page renders signed in.
     fetch("/sase/api/auth/session").then((r) => r.json()).then(setSession).catch(() => {});
     if (onAuthed) onAuthed();
-    else window.location.reload();
+    else {
+      const destination = sourcingReturnPath(window.location.search);
+      if (destination) window.location.assign(destination);
+      else window.location.reload();
+    }
   }
 
   if (session?.authenticated) {

@@ -1,0 +1,60 @@
+PASS  MCP tool build_sase_shortlist is live
+PASS  MCP tool get_sector_evidence is live
+PASS  /best/ manufacturing canonical -> sector page
+PASS  sector page data.json has sector_evidence
+PASS  301 /insights/how-to-choose-sd-wan-for-manufacturing/
+PASS  301 /insights/compliance-and-regulatory-considerations-for-sd-wan-in-manufacturing/
+PASS  301 /insights/uk-north-american-sdwan-vendors-for-manufacturing/
+PASS  301 /insights/how-sd-wan-supports-manufacturing-factory-automation/
+PASS  301 /insights/top-sd-wan-features-that-benefit-manufacturers/
+PASS  301 /insights/enhancing-operational-efficiency-with-sd-wan-in-manufacturing/
+PASS  ?ref stripped on sector page
+PASS  shortlist sends Link rel=mcp-server
+PASS  shortlist has a captioned table
+PASS  shortlist data.json has contract_version
+PASS  datasets sitemap lists the manufacturing data.json
+PASS  llms.txt lists the manufacturing data.json
+PASS  financial services page has the regulation map
+PASS  financial services matrix carries regime columns
+PASS  financial services data.json has sector_evidence
+PASS  financial services data.json honours ?regime=uk
+PASS  /best/ financial services canonical -> sector page
+PASS  datasets sitemap lists the financial services data.json
+PASS  llms.txt lists the financial services data.json
+PASS  retail data.json has sector_evidence
+PASS  retail data.json has 15 requirements
+PASS  retail page has provider evidence
+PASS  datasets sitemap lists the retail data.json
+PASS  llms.txt lists the retail data.json
+PASS  menu capitalises Healthcare
+PASS  reseller index has the wholesale evidence section
+PASS  reseller index has the change log
+PASS  reseller index has the route tool
+PASS  reseller index data.json has wholesale_evidence
+PASS  reseller index data.json honours ?since
+PASS  netify MCP tool get_wholesale_route_evidence is live
+PASS  netify MCP tool check_wholesale_serviceability is live
+PASS  datasets sitemap lists the reseller index data.json
+PASS  postcode check is switched on
+PASS  reseller index renders the postcode check
+PASS  home page leads with the marketplace
+PASS  home page has no managed Meraki or Fortinet framing
+{
+  "url": "https://netify.co.uk/tools/bt-cloud-voice-pricing-calculator/",
+  "status": 200,
+  "http_200": true,
+  "price_cta": true,
+  "estimated_price_explanation": true,
+  "through_netify_column": true,
+  "old_phone_count": 0,
+  "all_tel_links_correct": true,
+  "tel_links": [
+    "tel:+443332021011",
+    "tel:+443332021011",
+    "tel:+443332021011"
+  ],
+  "calculator_before_rate_card_before_faq": true
+}
+PASS  Cloud Voice call CTA, discount column, phone format and rate-card position
+
+2026-10-01 07:28 UTC  passed 42  failed 0

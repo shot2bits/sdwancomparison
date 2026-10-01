@@ -1,3 +1,4 @@
+import { repairSourcingBuyerIndex } from "./sourcing-buyer-index";
 import { recordSourcingMetric } from "./sourcing-metrics";
 import "server-only";
 import { publicResponsePanel } from "./response-panel";
@@ -77,6 +78,8 @@ export function queueAge(confirmed: number, now = Date.now()) {
 }
 export async function notifyConfirmedSourcing(record: SourcingRecord) {
   if (record.status !== "desk_review") return;
+  try { await repairSourcingBuyerIndex(record); }
+  catch { console.error("Sourcing buyer index repair pending", { request_id: record.id }); }
   try {
     await circuitLock(`sourcing-notifications:${record.id}`, async () => {
       const status = await notificationStatus(record.id);
@@ -104,8 +107,8 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
         buyer: {
           from,
           to: record.request.email,
-          subject: "Netify has your request",
-          text: `Approved recipients:\n${recipients}\n\nNetify reviews every request before any supplier receives it.\n${sourcingUndertaking()}\n\nYour private project status:\n${SITE_URL}/rfp-builder/${record.project_id}/\nOpen this link in the browser where you confirmed your request, or sign in with the same work email at ${SITE_URL}/account/.`,
+          subject: "Your Netify request is recorded",
+          text: `Your request is recorded. Open your private project for the current desk status.\n\nApproved recipients:\n${recipients}\n\nNetify reviews every request before any supplier receives it.\n${sourcingUndertaking()}\n\nYour private project status:\n${SITE_URL}/rfp-builder/${record.project_id}/\nOpen this link in the browser where you confirmed your request, or sign in with the same work email at ${SITE_URL}/account/.`,
         },
       };
       // Each recipient has an independent durable receipt; a failure never drops the queued request.
@@ -117,13 +120,7 @@ export async function notifyConfirmedSourcing(record: SourcingRecord) {
           );
           if (!payload) {
             payload = { ...payloads[channel] };
-            if (channel === "buyer" && status.desk !== "accepted") {
-              payload.subject =
-                "Your Netify request is recorded; desk acknowledgement pending";
-              payload.text =
-                "Netify has not yet acknowledged this request. It is safely recorded in your private project; desk notification is pending. For help, contact support@netify.com.\n\n" +
-                payload.text;
-            }
+            // An immutable receipt describes recording, not a desk state that can change on retry.
             if (!z.email().safeParse(payload.to).success)
               throw Error("Notification destination not configured");
             await kvSetJson(

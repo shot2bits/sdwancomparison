@@ -126,6 +126,13 @@ export class FakeKvStore {
         return "OK";
       }
       case "EVAL": {
+        if(String(args[0]).includes("sourcing-rejected-cleanup")) {
+          const idem=String(args[2]),record=String(args[3]),payload=String(args[4]),receipt=String(args[5]);
+          if(this.str(idem)!==String(args[6]) || this.store.has(receipt))return 0;
+          const raw=this.str(record);
+          if(!raw || JSON.parse(raw).status!=="pending_confirmation")return 0;
+          return this.command(["DEL",idem,record,payload]);
+        }
         if(String(args[0]).includes("sourcing-prepare-commit")) {
           if(this.str(String(args[2]))!==String(args[5]))return 0;
           this.command(["SET",String(args[3]),String(args[6]),"EX",86400]);

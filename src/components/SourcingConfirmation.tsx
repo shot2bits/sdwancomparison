@@ -5,6 +5,7 @@ export default function SourcingConfirmation() {
   const [result, setResult] = useState<{
     error?: string;
     already_confirmed?: boolean;
+    access?: boolean;
     sign_in_url?: string;
     status?: string;
     project_url?: string;
@@ -71,14 +72,14 @@ export default function SourcingConfirmation() {
             Your request is confirmed and queued for Netify desk review. No
             supplier has been contacted automatically.
           </p>
-          {result.already_confirmed && (
+          {result.already_confirmed && !result.access && (
             <p>
               Already confirmed.{" "}
               <a href={result.sign_in_url}>Sign in with the same work email</a>{" "}
               to reopen your private project.
             </p>
           )}
-          {result.project_url && !result.already_confirmed && (
+          {result.project_url && (!result.already_confirmed || result.access) && (
             <a className="sourcing-primary" href={result.project_url}>
               Open your private project →
             </a>
