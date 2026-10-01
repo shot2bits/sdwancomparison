@@ -523,7 +523,7 @@ export default function SourcingEntrance({
               )}
               <p>
                 <strong>
-                  {Math.round(researchMetrics(v).completeness * 100)}% research completeness
+                  {researchMetrics(v).completeness_percent}% research completeness
                 </strong>{" "}
                 · {v.evidence_source_count ?? 0} source references
               </p>
@@ -627,7 +627,7 @@ export default function SourcingEntrance({
                       </a>
                     </th>
                     <td>{v.best_for}</td>
-                    <td>{Math.round(researchMetrics(v).completeness * 100)}%</td>
+                    <td>{researchMetrics(v).completeness_percent}%</td>
                     <td>{v.evidence_source_count ?? 0}</td>
                     <td>{v.last_verified}</td>
                     {features.map((f) => (

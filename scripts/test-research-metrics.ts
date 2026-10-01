@@ -35,3 +35,5 @@ assert.equal(approvedEditorialReview(evidence,{...review,reviewer:''},now),null)
 assert.equal(approvedEditorialReview(evidence,review,Date.parse('2026-10-16')),null);
 assert.equal(approvedEditorialReview(evidence,review,Date.parse('2026-09-30')),null);
 console.log('PASS editorial approval scope, changed evidence, empty reviewer and expiry guards');
+
+assert.equal(researchMetrics({capabilities:Object.fromEntries(ids.slice(0,23).map(id=>[id,"yes" as const]))}).completeness_percent,58);

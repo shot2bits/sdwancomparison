@@ -1,4 +1,4 @@
-import { RESEARCH_METRIC_METHOD } from "@/lib/research-metrics";
+import { RESEARCH_METRIC_METHOD, researchMetrics } from "@/lib/research-metrics";
 import { publicProviderEvidence, publicEvidenceProviders } from "@/lib/public-provider-evidence";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
@@ -39,7 +39,7 @@ export async function GET() {
   sections.push("## All 30 vendor profiles");
   for (const v of vendors) {
     sections.push(`Evidence profile: ${bestFor(v).best_for}`);
-    sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; research completeness ${Math.round(v.evidence_coverage_pct * 100)}%; source references ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
+    sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; research completeness ${researchMetrics(v).completeness_percent}%; source references ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
   }
   sections.push("");
   sections.push(`Netify Demand Index (live, anonymised marketplace demand by sector and technology): ${SITE_URL}/demand?utm_source=ai_assistant&utm_medium=llms · twin: ${SITE_URL}/demand/data.json`);

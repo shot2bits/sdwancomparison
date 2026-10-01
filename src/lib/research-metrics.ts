@@ -17,5 +17,5 @@ export function researchMetrics(v: Pick<ShortlistVendor, 'capabilities'>) {
   }
   const total = definitions.features.length;
   const reviewed = total - counts.unconfirmed;
-  return { ...counts, total, reviewed, completeness: total ? reviewed / total : 0 };
+  return { ...counts, total, reviewed, completeness_percent: total ? Math.round(reviewed * 100 / total) : 0, completeness: total ? reviewed / total : 0 };
 }
