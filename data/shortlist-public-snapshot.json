@@ -263,6 +263,16 @@
             ]
           },
           {
+            "sector": "transport_logistics",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced at a general level | Multi-site, multi-cloud connectivity plausibly relevant | Not assessed for sector-specific frameworks | Confirmed directly as a served sector generally: 'customers span... transportation, logistics... industries with complex multi-site, multi-cloud network requirements' | N/A | General sector confirmation exists without a named individual customer example | A real, primary-sourced confirmation of sector fit, though without a named individual customer example to reinforce it directly.",
+            "named_evidence": "Confirmed directly as a served sector generally: 'customers span... transportation, logistics... industries with complex multi-site, multi-cloud network requirements'",
+            "evidence_source_ids": [
+              "evidence:aryaka:16"
+            ]
+          },
+          {
             "sector": "manufacturing",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -272,16 +282,6 @@
               "evidence:aryaka:16",
               "evidence:aryaka:23",
               "evidence:aryaka:24"
-            ]
-          },
-          {
-            "sector": "transport_logistics",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced at a general level | Multi-site, multi-cloud connectivity plausibly relevant | Not assessed for sector-specific frameworks | Confirmed directly as a served sector generally: 'customers span... transportation, logistics... industries with complex multi-site, multi-cloud network requirements' | N/A | General sector confirmation exists without a named individual customer example | A real, primary-sourced confirmation of sector fit, though without a named individual customer example to reinforce it directly.",
-            "named_evidence": "Confirmed directly as a served sector generally: 'customers span... transportation, logistics... industries with complex multi-site, multi-cloud network requirements'",
-            "evidence_source_ids": [
-              "evidence:aryaka:16"
             ]
           }
         ],
@@ -1242,16 +1242,6 @@
         "curated_uk_basis": "No UK HQ (Israel and US). Delivers in the UK from London and Manchester PoPs; contract direct or through UK partners including Netify routes.",
         "sector_review_queue": [
           {
-            "sector": "education",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Referenced in a customer quote ('reorganize our entire security portfolio... for our students, professors, and administrators') | General SASE consolidation value referenced qualitatively | Not assessed | One qualitative customer quote found (unnamed institution) on catonetworks.com/platform/ | N/A | Quote-level evidence only, not a structured case study with metrics | Treat as a weak signal only - a single unattributed quote is not the same standard of evidence as the Ulta Beauty case study; do not over-weight it.",
-            "named_evidence": "One qualitative customer quote found (unnamed institution) on catonetworks.com/platform/",
-            "evidence_source_ids": [
-              "evidence:cato-networks:9"
-            ]
-          },
-          {
             "sector": "retail_ecommerce",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -1260,6 +1250,16 @@
             "evidence_source_ids": [
               "evidence:cato-networks:24",
               "evidence:cato-networks:25"
+            ]
+          },
+          {
+            "sector": "education",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Referenced in a customer quote ('reorganize our entire security portfolio... for our students, professors, and administrators') | General SASE consolidation value referenced qualitatively | Not assessed | One qualitative customer quote found (unnamed institution) on catonetworks.com/platform/ | N/A | Quote-level evidence only, not a structured case study with metrics | Treat as a weak signal only - a single unattributed quote is not the same standard of evidence as the Ulta Beauty case study; do not over-weight it.",
+            "named_evidence": "One qualitative customer quote found (unnamed institution) on catonetworks.com/platform/",
+            "evidence_source_ids": [
+              "evidence:cato-networks:9"
             ]
           }
         ],
@@ -1748,15 +1748,17 @@
         "curated_uk_basis": "No UK HQ (US). Extensive UK channel; Catalyst and Meraki widely delivered as UK managed services.",
         "sector_review_queue": [
           {
-            "sector": "government_public_sector",
+            "sector": "manufacturing",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
-            "qualification": "Good fit, evidenced | FedRAMP Moderate across Secure Access, ThousandEyes, Duo and Catalyst SD-WAN together | FedRAMP Moderate (multiple named components) | Indiana Office of Technology (ThousandEyes specifically, not confirmed for the full Secure Access stack) | Coherent multi-component FedRAMP story, capped at Moderate | Weaker than Zscaler's or Palo Alto's FedRAMP High/DoD IL evidence | A genuinely multi-product, coherent public-sector compliance story, though it caps out at a lower assurance level (Moderate) than two of the other four vendors profiled - a specific, worth-stating nuance.",
-            "named_evidence": "Indiana Office of Technology (ThousandEyes specifically, not confirmed for the full Secure Access stack)",
+            "qualification": "Strong fit, evidenced | Distributed-facility SD-WAN and security consolidation; ThousandEyes for multi-site assurance | Not assessed for sector-specific frameworks | Peco Foods (poultry processing, 7,500+ employees, 20 facilities across the Southeast US) | Multi-facility deployment evidenced directly | US-centric case evidence; single company rather than the multi-country breadth of Palo Alto's Grupo Bimbo evidence | A genuinely credible, named, quoted manufacturing case study - not as expansive as Grupo Bimbo's 35-country story, but solid, specific evidence (a 200% user-experience improvement, named IT manager) for a real distributed-facility food-processing operation.",
+            "named_evidence": "Peco Foods (poultry processing, 7,500+ employees, 20 facilities across the Southeast US)",
             "evidence_source_ids": [
-              "evidence:cisco:16",
-              "evidence:cisco:17",
-              "evidence:cisco:21"
+              "evidence:cisco:31",
+              "evidence:cisco:32",
+              "evidence:cisco:34",
+              "evidence:cisco:35",
+              "evidence:cisco:37"
             ]
           },
           {
@@ -1780,20 +1782,6 @@
             ]
           },
           {
-            "sector": "manufacturing",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Strong fit, evidenced | Distributed-facility SD-WAN and security consolidation; ThousandEyes for multi-site assurance | Not assessed for sector-specific frameworks | Peco Foods (poultry processing, 7,500+ employees, 20 facilities across the Southeast US) | Multi-facility deployment evidenced directly | US-centric case evidence; single company rather than the multi-country breadth of Palo Alto's Grupo Bimbo evidence | A genuinely credible, named, quoted manufacturing case study - not as expansive as Grupo Bimbo's 35-country story, but solid, specific evidence (a 200% user-experience improvement, named IT manager) for a real distributed-facility food-processing operation.",
-            "named_evidence": "Peco Foods (poultry processing, 7,500+ employees, 20 facilities across the Southeast US)",
-            "evidence_source_ids": [
-              "evidence:cisco:31",
-              "evidence:cisco:32",
-              "evidence:cisco:34",
-              "evidence:cisco:35",
-              "evidence:cisco:37"
-            ]
-          },
-          {
             "sector": "professional_services",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -1801,6 +1789,18 @@
             "named_evidence": "George Sink, P.A. (law firm)",
             "evidence_source_ids": [
               "evidence:cisco:31"
+            ]
+          },
+          {
+            "sector": "government_public_sector",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced | FedRAMP Moderate across Secure Access, ThousandEyes, Duo and Catalyst SD-WAN together | FedRAMP Moderate (multiple named components) | Indiana Office of Technology (ThousandEyes specifically, not confirmed for the full Secure Access stack) | Coherent multi-component FedRAMP story, capped at Moderate | Weaker than Zscaler's or Palo Alto's FedRAMP High/DoD IL evidence | A genuinely multi-product, coherent public-sector compliance story, though it caps out at a lower assurance level (Moderate) than two of the other four vendors profiled - a specific, worth-stating nuance.",
+            "named_evidence": "Indiana Office of Technology (ThousandEyes specifically, not confirmed for the full Secure Access stack)",
+            "evidence_source_ids": [
+              "evidence:cisco:16",
+              "evidence:cisco:17",
+              "evidence:cisco:21"
             ]
           }
         ],
@@ -2061,6 +2061,16 @@
         "curated_uk_basis": "No UK HQ (US). Multiple UK edge locations; self-serve or via UK partners.",
         "sector_review_queue": [
           {
+            "sector": "professional_services",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Conditional - one named, if thinly detailed, case reference exists | Not assessed in detail | Not assessed | Applied Systems (referenced specifically for 'legacy vendor costs avoided', per Cloudflare's own SASE product page) | N/A | Thin detail beyond the named customer and general cost-avoidance framing | A real, named customer reference, though with less quantified detail than the government-sector evidence above.",
+            "named_evidence": "Applied Systems (referenced specifically for 'legacy vendor costs avoided', per Cloudflare's own SASE product page)",
+            "evidence_source_ids": [
+              "evidence:cloudflare-one:32"
+            ]
+          },
+          {
             "sector": "government_public_sector",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -2071,16 +2081,6 @@
               "evidence:cloudflare-one:27",
               "evidence:cloudflare-one:29",
               "evidence:cloudflare-one:30"
-            ]
-          },
-          {
-            "sector": "professional_services",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Conditional - one named, if thinly detailed, case reference exists | Not assessed in detail | Not assessed | Applied Systems (referenced specifically for 'legacy vendor costs avoided', per Cloudflare's own SASE product page) | N/A | Thin detail beyond the named customer and general cost-avoidance framing | A real, named customer reference, though with less quantified detail than the government-sector evidence above.",
-            "named_evidence": "Applied Systems (referenced specifically for 'legacy vendor costs avoided', per Cloudflare's own SASE product page)",
-            "evidence_source_ids": [
-              "evidence:cloudflare-one:32"
             ]
           }
         ],
@@ -2846,6 +2846,16 @@
         "curated_uk_basis": "No UK HQ (US, Ericsson-owned). UK delivery via mobile operators and partners.",
         "sector_review_queue": [
           {
+            "sector": "energy_utilities",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Conditional - evidenced via a single, smaller technographic reference | Not assessed in specific technical detail for this sector | Not assessed for sector-specific frameworks | Roanoke Electric Cooperative (a smaller, US-based utility, confirmed as a real-world NetCloud Manager customer via independent technographic sales-intelligence data) | N/A | A single, smaller-scale technographic reference rather than a full narrative case study | A real, named customer reference exists, though at a smaller scale than the manufacturing/retail technographic references found elsewhere in this table.",
+            "named_evidence": "Roanoke Electric Cooperative (a smaller, US-based utility, confirmed as a real-world NetCloud Manager customer via independent technographic sales-intelligence data)",
+            "evidence_source_ids": [
+              "evidence:ericsson-cradlepoint:20"
+            ]
+          },
+          {
             "sector": "manufacturing",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -2868,6 +2878,17 @@
             ]
           },
           {
+            "sector": "transport_logistics",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Strong fit, evidenced | The confirmed in-vehicle telemetry API/SDK integration example, multi-carrier active failover, and location-based performance analysis are all directly and specifically relevant to fleet and transportation use cases | Not assessed for sector-specific frameworks | Confirmed directly as a served sector generally; a dedicated 'Transportation' content section on the company's own site reinforces this sector focus specifically | N/A | Real, confirmed sector-specific product content and API examples exist; a named, individual transportation-company case study with quantified outcomes wasn't found | A genuinely well-evidenced sector fit at the product-and-capability level - the confirmed in-vehicle telemetry integration and fleet-specific content demonstrate real, deliberate sector focus, even without a single, quoted named customer story.",
+            "named_evidence": "Confirmed directly as a served sector generally; a dedicated 'Transportation' content section on the company's own site reinforces this sector focus specifically",
+            "evidence_source_ids": [
+              "evidence:ericsson-cradlepoint:12",
+              "evidence:ericsson-cradlepoint:15"
+            ]
+          },
+          {
             "sector": "retail_ecommerce",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -2883,27 +2904,6 @@
             "support_state": "unknown",
             "qualification": "Good fit, evidenced via technographic data | SD-WAN and branch/POS connectivity plausibly relevant | Not assessed for sector-specific frameworks | Fuzzy's Taco Shop and Evereve (both confirmed as real-world NetCloud Manager customers via independent technographic sales-intelligence data) | N/A | The evidence here is technographic (confirmed technology usage) rather than a full narrative case study with quoted outcomes | Two real, named, independently-confirmed customers in this sector via technographic data - a real, if not narratively detailed, evidentiary base.",
             "named_evidence": "Fuzzy's Taco Shop and Evereve (both confirmed as real-world NetCloud Manager customers via independent technographic sales-intelligence data)",
-            "evidence_source_ids": [
-              "evidence:ericsson-cradlepoint:20"
-            ]
-          },
-          {
-            "sector": "transport_logistics",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Strong fit, evidenced | The confirmed in-vehicle telemetry API/SDK integration example, multi-carrier active failover, and location-based performance analysis are all directly and specifically relevant to fleet and transportation use cases | Not assessed for sector-specific frameworks | Confirmed directly as a served sector generally; a dedicated 'Transportation' content section on the company's own site reinforces this sector focus specifically | N/A | Real, confirmed sector-specific product content and API examples exist; a named, individual transportation-company case study with quantified outcomes wasn't found | A genuinely well-evidenced sector fit at the product-and-capability level - the confirmed in-vehicle telemetry integration and fleet-specific content demonstrate real, deliberate sector focus, even without a single, quoted named customer story.",
-            "named_evidence": "Confirmed directly as a served sector generally; a dedicated 'Transportation' content section on the company's own site reinforces this sector focus specifically",
-            "evidence_source_ids": [
-              "evidence:ericsson-cradlepoint:12",
-              "evidence:ericsson-cradlepoint:15"
-            ]
-          },
-          {
-            "sector": "energy_utilities",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Conditional - evidenced via a single, smaller technographic reference | Not assessed in specific technical detail for this sector | Not assessed for sector-specific frameworks | Roanoke Electric Cooperative (a smaller, US-based utility, confirmed as a real-world NetCloud Manager customer via independent technographic sales-intelligence data) | N/A | A single, smaller-scale technographic reference rather than a full narrative case study | A real, named customer reference exists, though at a smaller scale than the manufacturing/retail technographic references found elsewhere in this table.",
-            "named_evidence": "Roanoke Electric Cooperative (a smaller, US-based utility, confirmed as a real-world NetCloud Manager customer via independent technographic sales-intelligence data)",
             "evidence_source_ids": [
               "evidence:ericsson-cradlepoint:20"
             ]
@@ -3090,8 +3090,8 @@
             "sector": "manufacturing",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
-            "qualification": "Strong fit, genuinely the best-evidenced sector in this entire profile | Confirmed SD-WAN, DIA, broadband, and LEO satellite (under consideration) capabilities directly deployed and confirmed operational across a real, named manufacturing customer spanning 42 factories | Not assessed for sector-specific frameworks | Kingspan Insulation - named individual, named company, direct quote (Liam Waters, Divisional IT Operations Manager) on unifying connectivity and accelerating growth across 90 sites, 28 countries, 42 factories | Global, confirmed directly across 28 countries | None significant identified beyond the general, profile-wide compliance considerations | A real, named, individually-attributable customer reference at genuine, quantified scale - genuinely strong evidence, reinforced by the confirmed LEO satellite option's specific relevance to remote manufacturing sites.",
-            "named_evidence": "Kingspan Insulation - named individual, named company, direct quote (Liam Waters, Divisional IT Operations Manager) on unifying connectivity and accelerating growth across 90 sites, 28 countries, 42 factories",
+            "qualification": "Strong fit, evidenced via a second, distinct, real case study within the same corporate family | Confirmed network-complexity reduction and resilience improvement across a real customer spanning 100 sites worldwide | Not assessed for sector-specific frameworks | Kingspan Light, Air + Water - named individual, named company, direct quote (Fergal Moore, Divisional Head of Infrastructure & Cyber Security) on removing network complexity and boosting resilience across 100 sites worldwide | Global, confirmed directly ('100 Sites Worldwide') | None significant identified beyond the general, profile-wide compliance considerations | A second, real, named, individually-attributable customer reference - genuinely reinforcing the manufacturing-sector fit confirmed by the first Kingspan case study, within a short, recent time window (December 2025 and February 2026).",
+            "named_evidence": "Kingspan Light, Air + Water - named individual, named company, direct quote (Fergal Moore, Divisional Head of Infrastructure & Cyber Security) on removing network complexity and boosting resilience across 100 sites worldwide",
             "evidence_source_ids": []
           }
         ],
@@ -3564,27 +3564,6 @@
         "curated_uk_basis": "No UK HQ (US). Strong UK channel and FortiSASE PoPs; widely delivered as a UK managed service by BT, Vodafone and UK MSPs.",
         "sector_review_queue": [
           {
-            "sector": "education",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Strong fit, evidenced | Large-scale, phased deployment (Secure SD-WAN, then NAC, then FortiSASE) at genuine scale | Not assessed for sector-specific frameworks | A named top-five-largest US school district, 375,000+ students and staff | Single-country (US) evidence; UK/EU education-specific case studies not found in this pass | No case-study limitations beyond the single-country evidence noted | A genuinely large, well-evidenced, named-scale customer story - one of the strongest sector-fit findings in this profile, given both the scale (375K+) and the specific, credible multi-stage adoption narrative.",
-            "named_evidence": "A named top-five-largest US school district, 375,000+ students and staff",
-            "evidence_source_ids": [
-              "evidence:fortinet-fortisase:26",
-              "evidence:fortinet-fortisase:27"
-            ]
-          },
-          {
-            "sector": "energy_utilities",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Unknown - not assessed in detail, though Fortinet's own customer-story index references a power grid operator by category (not named) deploying a Fortinet SecOps solution for zero-day protection and IT/OT convergence | IT/OT convergence relevant per the referenced use case | Not assessed | Referenced but not independently detailed (unnamed power grid operator) | N/A | Reference exists but wasn't followed up to a named, detailed case study in this pass | A real, relevant use case is referenced in Fortinet's own materials but wasn't independently verified to the same depth as the hospitality or education evidence in this pass.",
-            "named_evidence": "Referenced but not independently detailed (unnamed power grid operator)",
-            "evidence_source_ids": [
-              "evidence:fortinet-fortisase:26"
-            ]
-          },
-          {
             "sector": "healthcare",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -3604,6 +3583,27 @@
             "evidence_source_ids": [
               "evidence:fortinet-fortisase:19",
               "evidence:fortinet-fortisase:21"
+            ]
+          },
+          {
+            "sector": "energy_utilities",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Unknown - not assessed in detail, though Fortinet's own customer-story index references a power grid operator by category (not named) deploying a Fortinet SecOps solution for zero-day protection and IT/OT convergence | IT/OT convergence relevant per the referenced use case | Not assessed | Referenced but not independently detailed (unnamed power grid operator) | N/A | Reference exists but wasn't followed up to a named, detailed case study in this pass | A real, relevant use case is referenced in Fortinet's own materials but wasn't independently verified to the same depth as the hospitality or education evidence in this pass.",
+            "named_evidence": "Referenced but not independently detailed (unnamed power grid operator)",
+            "evidence_source_ids": [
+              "evidence:fortinet-fortisase:26"
+            ]
+          },
+          {
+            "sector": "education",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Strong fit, evidenced | Large-scale, phased deployment (Secure SD-WAN, then NAC, then FortiSASE) at genuine scale | Not assessed for sector-specific frameworks | A named top-five-largest US school district, 375,000+ students and staff | Single-country (US) evidence; UK/EU education-specific case studies not found in this pass | No case-study limitations beyond the single-country evidence noted | A genuinely large, well-evidenced, named-scale customer story - one of the strongest sector-fit findings in this profile, given both the scale (375K+) and the specific, credible multi-stage adoption narrative.",
+            "named_evidence": "A named top-five-largest US school district, 375,000+ students and staff",
+            "evidence_source_ids": [
+              "evidence:fortinet-fortisase:26",
+              "evidence:fortinet-fortisase:27"
             ]
           },
           {
@@ -4163,13 +4163,13 @@
             ]
           },
           {
-            "sector": "financial_services",
+            "sector": "manufacturing",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "requires_confirmation",
-            "qualification": "Conditional - one named customer reference exists, but no PCI-DSS or DORA-specific certification was confirmed for the SASE/SSE platform specifically | SD-WAN cost-reduction and application-performance capabilities plausibly relevant | PCI confirmed for Central's cloud infrastructure specifically (Table 13); DORA not confirmed | First Bank (SASE-based SD-WAN, cost reduction, application performance, cloud-smart technology strategy) | N/A | Compliance evidence is narrower than the named customer evidence would suggest is needed for full sector confidence | A real, named financial-services customer exists, though Netify should be precise that platform-wide PCI/DORA-specific certification for the SASE/SSE components specifically wasn't independently confirmed.",
-            "named_evidence": "First Bank (SASE-based SD-WAN, cost reduction, application performance, cloud-smart technology strategy)",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced | SD-WAN reliability directly relevant to distributed manufacturing operations | Not assessed for sector-specific frameworks | IMMI (99%+ uptime ratio reported across all branches using EdgeConnect as a turn-key, out-of-the-box solution) | N/A | Single case study, though genuinely specific and quantified | A specific, quantified (99%+ uptime), named manufacturing customer reference - genuinely credible, concrete sector evidence.",
+            "named_evidence": "IMMI (99%+ uptime ratio reported across all branches using EdgeConnect as a turn-key, out-of-the-box solution)",
             "evidence_source_ids": [
-              "evidence:hpe-aruba-edgeconnect:14"
+              "evidence:hpe-aruba-edgeconnect:30"
             ]
           },
           {
@@ -4195,13 +4195,13 @@
             ]
           },
           {
-            "sector": "manufacturing",
+            "sector": "financial_services",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced | SD-WAN reliability directly relevant to distributed manufacturing operations | Not assessed for sector-specific frameworks | IMMI (99%+ uptime ratio reported across all branches using EdgeConnect as a turn-key, out-of-the-box solution) | N/A | Single case study, though genuinely specific and quantified | A specific, quantified (99%+ uptime), named manufacturing customer reference - genuinely credible, concrete sector evidence.",
-            "named_evidence": "IMMI (99%+ uptime ratio reported across all branches using EdgeConnect as a turn-key, out-of-the-box solution)",
+            "support_state": "requires_confirmation",
+            "qualification": "Conditional - one named customer reference exists, but no PCI-DSS or DORA-specific certification was confirmed for the SASE/SSE platform specifically | SD-WAN cost-reduction and application-performance capabilities plausibly relevant | PCI confirmed for Central's cloud infrastructure specifically (Table 13); DORA not confirmed | First Bank (SASE-based SD-WAN, cost reduction, application performance, cloud-smart technology strategy) | N/A | Compliance evidence is narrower than the named customer evidence would suggest is needed for full sector confidence | A real, named financial-services customer exists, though Netify should be precise that platform-wide PCI/DORA-specific certification for the SASE/SSE components specifically wasn't independently confirmed.",
+            "named_evidence": "First Bank (SASE-based SD-WAN, cost reduction, application performance, cloud-smart technology strategy)",
             "evidence_source_ids": [
-              "evidence:hpe-aruba-edgeconnect:30"
+              "evidence:hpe-aruba-edgeconnect:14"
             ]
           },
           {
@@ -4808,8 +4808,8 @@
             "sector": "healthcare",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
-            "qualification": "Good fit, evidenced via a real, named company testimonial | Confirmed voice, network and security applications directly relevant to healthcare data security and privacy requirements | HIPAA not confirmed (Table 13), despite the direct, confirmed healthcare-sector customer testimony | Savista - named healthcare company, direct quote emphasising 'quality, data security and privacy' as reasons for trusting Lumen | N/A | The testimonial is disclosed directly by Lumen as a compensated endorsement; the confirmed HIPAA gap is a specific, worth-flagging limitation for this sector specifically | A real, named healthcare-sector customer reference exists, tempered by both the confirmed compensated-endorsement disclosure and the confirmed absence of a formal HIPAA attestation.",
-            "named_evidence": "Savista - named healthcare company, direct quote emphasising 'quality, data security and privacy' as reasons for trusting Lumen",
+            "qualification": "Good fit, evidenced via a real, though not individually-named, customer account | Confirmed DIA (Dedicated Internet Access) and SASE solutions directly improving 'telehealth capabilities' specifically named | HIPAA not confirmed (Table 13) | An anonymous (within the specific snippet reviewed) customer account confirming replacement of aging MPLS/SD-WAN with modern DIA and SASE, directly citing improved 'telehealth capabilities' | N/A | The customer's individual name was not extracted in this specific research pass; the confirmed HIPAA gap remains a specific, worth-flagging limitation | A real, specific, primary-sourced account directly naming telehealth as an improved capability - genuinely concrete evidence for this sector-adjacent use case, even without full individual attribution confirmed in this pass.",
+            "named_evidence": "An anonymous (within the specific snippet reviewed) customer account confirming replacement of aging MPLS/SD-WAN with modern DIA and SASE, directly citing improved 'telehealth capabilities'",
             "evidence_source_ids": [
               "evidence:lumen:17"
             ]
@@ -5053,17 +5053,6 @@
         "curated_uk_basis": "No UK HQ (US). UK NewEdge presence; delivered direct or via UK security MSPs.",
         "sector_review_queue": [
           {
-            "sector": "financial_services",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced | DLP, CASB, PCI DSS v4.0.1 certification | PCI DSS v4.0.1 explicitly certified; DORA explicitly named on the Compliance Centre | CARE Ratings (credit rating agency, India) | N/A | Single named case study, though the PCI-DSS and DORA compliance evidence is genuinely strong | The best-evidenced sector-compliance combination across all three vendors profiled so far - explicit PCI-DSS and DORA naming, plus a real financial-services case study.",
-            "named_evidence": "CARE Ratings (credit rating agency, India)",
-            "evidence_source_ids": [
-              "evidence:netskope:15",
-              "evidence:netskope:30"
-            ]
-          },
-          {
             "sector": "professional_services",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -5072,6 +5061,17 @@
             "evidence_source_ids": [
               "evidence:netskope:31",
               "evidence:netskope:32"
+            ]
+          },
+          {
+            "sector": "financial_services",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced | DLP, CASB, PCI DSS v4.0.1 certification | PCI DSS v4.0.1 explicitly certified; DORA explicitly named on the Compliance Centre | CARE Ratings (credit rating agency, India) | N/A | Single named case study, though the PCI-DSS and DORA compliance evidence is genuinely strong | The best-evidenced sector-compliance combination across all three vendors profiled so far - explicit PCI-DSS and DORA naming, plus a real financial-services case study.",
+            "named_evidence": "CARE Ratings (credit rating agency, India)",
+            "evidence_source_ids": [
+              "evidence:netskope:15",
+              "evidence:netskope:30"
             ]
           }
         ],
@@ -5356,6 +5356,14 @@
         "curated_uk_basis": "UK contracting entity (NTT DATA UK) of a Japanese parent, with UK delivery and operations.",
         "sector_review_queue": [
           {
+            "sector": "energy_utilities",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced via a real, named customer reference with IoT-specific detail | Confirmed IoT gateway deployment connecting 'sensors and water metres to the regional LoRaWAN network', via the named Cisco partnership specifically | Not assessed for sector-specific frameworks | CILE (Compagnie Intercommunale Liégeoise des Eaux) - named, real Belgian water utility, with specific, named technical partnership detail (Cisco, LoRaWAN) | Belgium, confirmed directly | This reference centres on IoT/sensor connectivity specifically rather than core SD-WAN/SASE; direct sector-fit evidence for the core service examined in this profile is more limited | A real, named, technically-specific customer reference exists for adjacent IoT/NaaS capability; direct evidence for the core SD-WAN/SASE service specifically in this sector is comparatively thinner.",
+            "named_evidence": "CILE (Compagnie Intercommunale Liégeoise des Eaux) - named, real Belgian water utility, with specific, named technical partnership detail (Cisco, LoRaWAN)",
+            "evidence_source_ids": []
+          },
+          {
             "sector": "retail_ecommerce",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -5369,14 +5377,6 @@
             "support_state": "unknown",
             "qualification": "Good fit, evidenced via a real, named customer reference | Confirmed 'intelligent, software-defined network' enabling data access, collaboration, and secure remote work | Not assessed for sector-specific frameworks | Frucor Suntory - named, real beverage manufacturing company, brief but real customer reference | Not itemised by specific country/region | The confirmed reference is brief relative to the detailed Pick n Pay case study; specific quantified outcomes weren't itemised for this reference specifically | A real, named customer reference exists, though with less narrative and quantified detail than the confirmed Pick n Pay case study.",
             "named_evidence": "Frucor Suntory - named, real beverage manufacturing company, brief but real customer reference",
-            "evidence_source_ids": []
-          },
-          {
-            "sector": "energy_utilities",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced via a real, named customer reference with IoT-specific detail | Confirmed IoT gateway deployment connecting 'sensors and water metres to the regional LoRaWAN network', via the named Cisco partnership specifically | Not assessed for sector-specific frameworks | CILE (Compagnie Intercommunale Liégeoise des Eaux) - named, real Belgian water utility, with specific, named technical partnership detail (Cisco, LoRaWAN) | Belgium, confirmed directly | This reference centres on IoT/sensor connectivity specifically rather than core SD-WAN/SASE; direct sector-fit evidence for the core service examined in this profile is more limited | A real, named, technically-specific customer reference exists for adjacent IoT/NaaS capability; direct evidence for the core SD-WAN/SASE service specifically in this sector is comparatively thinner.",
-            "named_evidence": "CILE (Compagnie Intercommunale Liégeoise des Eaux) - named, real Belgian water utility, with specific, named technical partnership detail (Cisco, LoRaWAN)",
             "evidence_source_ids": []
           }
         ],
@@ -5574,13 +5574,13 @@
         "curated_uk_basis": "Confirm UK delivery scope through RFP.",
         "sector_review_queue": [
           {
-            "sector": "transport_logistics",
+            "sector": "retail_ecommerce",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
-            "qualification": "Strong fit, evidenced via a real, named, quantified customer example | SD-WAN and Mission Control's global, multi-site management capability directly relevant, evidenced via genuine, quantified scale (60+ locations) | Not assessed for sector-specific frameworks | Altana (named customer, connecting 60+ locations worldwide and integrating new acquisitions) | Global, per the confirmed 60+-location customer example | A single, though genuinely specific and quantified, named case study | Genuinely well-evidenced via a real, named, specifically-quantified (60+ locations) customer example directly relevant to large-scale, distributed, multi-site operations.",
-            "named_evidence": "Altana (named customer, connecting 60+ locations worldwide and integrating new acquisitions)",
+            "qualification": "Good fit, evidenced via a real, named, well-known customer | Not assessed in specific technical detail for this sector beyond the confirmed WAN-replacement and internet-breakout capabilities evidenced directly | Not assessed for sector-specific frameworks | Mammut (named, well-known international outdoor-apparel brand, with specific, quantified deployment detail: WAN replacement completed in under two months) | N/A | A single, though genuinely well-known, named, and specifically-quantified case study | A real, credible, named customer - Mammut is a well-known international outdoor-apparel brand - reinforced by specific, quantified deployment-timeline detail, making this a genuinely strong reference despite being a single example.",
+            "named_evidence": "Mammut (named, well-known international outdoor-apparel brand, with specific, quantified deployment detail: WAN replacement completed in under two months)",
             "evidence_source_ids": [
-              "evidence:opensystems:10"
+              "evidence:opensystems:16"
             ]
           },
           {
@@ -5594,13 +5594,13 @@
             ]
           },
           {
-            "sector": "retail_ecommerce",
+            "sector": "transport_logistics",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
-            "qualification": "Good fit, evidenced via a real, named, well-known customer | Not assessed in specific technical detail for this sector beyond the confirmed WAN-replacement and internet-breakout capabilities evidenced directly | Not assessed for sector-specific frameworks | Mammut (named, well-known international outdoor-apparel brand, with specific, quantified deployment detail: WAN replacement completed in under two months) | N/A | A single, though genuinely well-known, named, and specifically-quantified case study | A real, credible, named customer - Mammut is a well-known international outdoor-apparel brand - reinforced by specific, quantified deployment-timeline detail, making this a genuinely strong reference despite being a single example.",
-            "named_evidence": "Mammut (named, well-known international outdoor-apparel brand, with specific, quantified deployment detail: WAN replacement completed in under two months)",
+            "qualification": "Strong fit, evidenced via a real, named, quantified customer example | SD-WAN and Mission Control's global, multi-site management capability directly relevant, evidenced via genuine, quantified scale (60+ locations) | Not assessed for sector-specific frameworks | Altana (named customer, connecting 60+ locations worldwide and integrating new acquisitions) | Global, per the confirmed 60+-location customer example | A single, though genuinely specific and quantified, named case study | Genuinely well-evidenced via a real, named, specifically-quantified (60+ locations) customer example directly relevant to large-scale, distributed, multi-site operations.",
+            "named_evidence": "Altana (named customer, connecting 60+ locations worldwide and integrating new acquisitions)",
             "evidence_source_ids": [
-              "evidence:opensystems:16"
+              "evidence:opensystems:10"
             ]
           }
         ],
@@ -6123,6 +6123,16 @@
         "curated_uk_basis": "No UK HQ (US). UK Prisma Access presence; delivered direct or via UK partners and carriers.",
         "sector_review_queue": [
           {
+            "sector": "retail_ecommerce",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced | Cost reduction and productivity capabilities relevant to a 'changing market' retail context | Not assessed for sector-specific frameworks | Westfield (shopping centre/retail property operator) | N/A | Single case study; less quantified in the source snippet reviewed than Grupo Bimbo specifically | Westfield is a genuine, named retail-sector customer - weaker in detail than Cato's Ulta Beauty or Zscaler's AutoNation, but a real evidence point rather than a total gap.",
+            "named_evidence": "Westfield (shopping centre/retail property operator)",
+            "evidence_source_ids": [
+              "evidence:palo-alto-prisma-sase:23"
+            ]
+          },
+          {
             "sector": "manufacturing",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -6131,16 +6141,6 @@
             "evidence_source_ids": [
               "evidence:palo-alto-prisma-sase:25",
               "evidence:palo-alto-prisma-sase:27"
-            ]
-          },
-          {
-            "sector": "retail_ecommerce",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced | Cost reduction and productivity capabilities relevant to a 'changing market' retail context | Not assessed for sector-specific frameworks | Westfield (shopping centre/retail property operator) | N/A | Single case study; less quantified in the source snippet reviewed than Grupo Bimbo specifically | Westfield is a genuine, named retail-sector customer - weaker in detail than Cato's Ulta Beauty or Zscaler's AutoNation, but a real evidence point rather than a total gap.",
-            "named_evidence": "Westfield (shopping centre/retail property operator)",
-            "evidence_source_ids": [
-              "evidence:palo-alto-prisma-sase:23"
             ]
           }
         ],
@@ -6829,6 +6829,17 @@
         "curated_uk_basis": "UK contracting entity (Verizon Business has UK operations), though US headquartered, with real UK and European delivery.",
         "sector_review_queue": [
           {
+            "sector": "manufacturing",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced via a real (if anonymised) case study | SD-WAN and network segmentation directly relevant to protecting sensitive manufacturing data and streamlining traffic | Not assessed for sector-specific frameworks | A real, detailed (anonymised) 'global manufacturer' case study confirming data protection and traffic streamlining | N/A | The case study is real and specific in its narrative but does not disclose the customer's name | Real, credible sector-fit evidence via a genuine case study, reinforced by Verizon's own dedicated manufacturing-sector SD-WAN use-case content.",
+            "named_evidence": "A real, detailed (anonymised) 'global manufacturer' case study confirming data protection and traffic streamlining",
+            "evidence_source_ids": [
+              "evidence:verizon:17",
+              "evidence:verizon:20"
+            ]
+          },
+          {
             "sector": "government_public_sector",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -6846,17 +6857,6 @@
             "named_evidence": "A real, referenced (anonymised) 'large healthcare business' SASE deployment optimising security operations",
             "evidence_source_ids": [
               "evidence:verizon:21"
-            ]
-          },
-          {
-            "sector": "manufacturing",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced via a real (if anonymised) case study | SD-WAN and network segmentation directly relevant to protecting sensitive manufacturing data and streamlining traffic | Not assessed for sector-specific frameworks | A real, detailed (anonymised) 'global manufacturer' case study confirming data protection and traffic streamlining | N/A | The case study is real and specific in its narrative but does not disclose the customer's name | Real, credible sector-fit evidence via a genuine case study, reinforced by Verizon's own dedicated manufacturing-sector SD-WAN use-case content.",
-            "named_evidence": "A real, detailed (anonymised) 'global manufacturer' case study confirming data protection and traffic streamlining",
-            "evidence_source_ids": [
-              "evidence:verizon:17",
-              "evidence:verizon:20"
             ]
           }
         ],
@@ -7158,6 +7158,16 @@
         "curated_uk_basis": "No UK HQ (US). Delivered in the UK through carrier and MSP partners building managed services on Versa.",
         "sector_review_queue": [
           {
+            "sector": "manufacturing",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced | SASE-ready architecture, TCO reduction relevant to distributed manufacturing operations | Not assessed | A Global-200 pharmaceutical manufacturing company, described as achieving a SASE-ready architecture and TCO savings | Not itemised in detail beyond the Global-200 scale reference | Single case reference, anonymised (described by scale/category rather than named) | A real, credible, if anonymised, large-scale manufacturing reference - worth a direct follow-up to get the specific customer name and quantified outcomes if Netify needs a fully named case study for this sector.",
+            "named_evidence": "A Global-200 pharmaceutical manufacturing company, described as achieving a SASE-ready architecture and TCO savings",
+            "evidence_source_ids": [
+              "evidence:versa-networks:18"
+            ]
+          },
+          {
             "sector": "energy_utilities",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -7165,16 +7175,6 @@
             "named_evidence": "Lambton Area Water Supply Systems (Ontario, Canada) - deployed Versa SASE to secure remote and headquarter offices while migrating sensitive data to cloud environments; a named practitioner quote from a General Manager, Information Systems in Energy and Utilities also references one-touch edge deployment",
             "evidence_source_ids": [
               "evidence:versa-networks:7",
-              "evidence:versa-networks:18"
-            ]
-          },
-          {
-            "sector": "manufacturing",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced | SASE-ready architecture, TCO reduction relevant to distributed manufacturing operations | Not assessed | A Global-200 pharmaceutical manufacturing company, described as achieving a SASE-ready architecture and TCO savings | Not itemised in detail beyond the Global-200 scale reference | Single case reference, anonymised (described by scale/category rather than named) | A real, credible, if anonymised, large-scale manufacturing reference - worth a direct follow-up to get the specific customer name and quantified outcomes if Netify needs a fully named case study for this sector.",
-            "named_evidence": "A Global-200 pharmaceutical manufacturing company, described as achieving a SASE-ready architecture and TCO savings",
-            "evidence_source_ids": [
               "evidence:versa-networks:18"
             ]
           },
@@ -7893,13 +7893,13 @@
         "curated_uk_basis": "No UK HQ (US). UK PoPs in the Zero Trust Exchange; delivered direct or via UK partners and carriers.",
         "sector_review_queue": [
           {
-            "sector": "energy_utilities",
+            "sector": "professional_services",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
-            "qualification": "Conditional fit | Global remote-access capability plausibly relevant | Not assessed | NOV (oilfield services/energy, 27,500 users, global remote-access rollout during COVID-19) | Global distributed workforce use case well evidenced | Single case study, but a genuinely substantial, named, metric-rich one | NOV is a strong, credible case study for this sector specifically - a real enterprise-scale (27,500-user) deployment with a clear before/after narrative.",
-            "named_evidence": "NOV (oilfield services/energy, 27,500 users, global remote-access rollout during COVID-19)",
+            "qualification": "Conditional fit | Not assessed | Not assessed | Mindbody (business software/services company) | N/A | Single case study, not sector-specific in focus | Some evidence exists but isn't a deep sector-specific case.",
+            "named_evidence": "Mindbody (business software/services company)",
             "evidence_source_ids": [
-              "evidence:zscaler:21"
+              "evidence:zscaler:19"
             ]
           },
           {
@@ -7913,6 +7913,17 @@
             ]
           },
           {
+            "sector": "retail_ecommerce",
+            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
+            "support_state": "unknown",
+            "qualification": "Good fit, evidenced | SD-WAN/ZIA for distributed sites, M365 security | Not assessed | AutoNation (retail/automotive dealerships), Baker & Baker (food manufacturing/retail supply) | Multi-site retail benefits from ZIA's direct-to-cloud model avoiding centralised backhaul | US-centric case evidence; UK/EU retail-specific case studies not found in this pass | Reasonably well evidenced via AutoNation specifically, though not as singularly strong as Cato's Ulta Beauty story.",
+            "named_evidence": "AutoNation (retail/automotive dealerships), Baker & Baker (food manufacturing/retail supply)",
+            "evidence_source_ids": [
+              "evidence:zscaler:17",
+              "evidence:zscaler:18"
+            ]
+          },
+          {
             "sector": "manufacturing",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
@@ -7923,24 +7934,13 @@
             ]
           },
           {
-            "sector": "professional_services",
+            "sector": "energy_utilities",
             "reason": "Strong case-study evidence and non-positive suitability require source-level review",
             "support_state": "unknown",
-            "qualification": "Conditional fit | Not assessed | Not assessed | Mindbody (business software/services company) | N/A | Single case study, not sector-specific in focus | Some evidence exists but isn't a deep sector-specific case.",
-            "named_evidence": "Mindbody (business software/services company)",
+            "qualification": "Conditional fit | Global remote-access capability plausibly relevant | Not assessed | NOV (oilfield services/energy, 27,500 users, global remote-access rollout during COVID-19) | Global distributed workforce use case well evidenced | Single case study, but a genuinely substantial, named, metric-rich one | NOV is a strong, credible case study for this sector specifically - a real enterprise-scale (27,500-user) deployment with a clear before/after narrative.",
+            "named_evidence": "NOV (oilfield services/energy, 27,500 users, global remote-access rollout during COVID-19)",
             "evidence_source_ids": [
-              "evidence:zscaler:19"
-            ]
-          },
-          {
-            "sector": "retail_ecommerce",
-            "reason": "Strong case-study evidence and non-positive suitability require source-level review",
-            "support_state": "unknown",
-            "qualification": "Good fit, evidenced | SD-WAN/ZIA for distributed sites, M365 security | Not assessed | AutoNation (retail/automotive dealerships), Baker & Baker (food manufacturing/retail supply) | Multi-site retail benefits from ZIA's direct-to-cloud model avoiding centralised backhaul | US-centric case evidence; UK/EU retail-specific case studies not found in this pass | Reasonably well evidenced via AutoNation specifically, though not as singularly strong as Cato's Ulta Beauty story.",
-            "named_evidence": "AutoNation (retail/automotive dealerships), Baker & Baker (food manufacturing/retail supply)",
-            "evidence_source_ids": [
-              "evidence:zscaler:17",
-              "evidence:zscaler:18"
+              "evidence:zscaler:21"
             ]
           }
         ],
