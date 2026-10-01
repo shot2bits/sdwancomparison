@@ -58,7 +58,7 @@
         "Syslog",
         "Vodafone Fiji"
       ],
-      "evidence_source_count": 40,
+      "evidence_source_count": 46,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -776,7 +776,7 @@
         "Splunk",
         "Syslog"
       ],
-      "evidence_source_count": 26,
+      "evidence_source_count": 29,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -2174,7 +2174,7 @@
         "VMware (historical)",
         "Versa Networks"
       ],
-      "evidence_source_count": 26,
+      "evidence_source_count": 30,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -2923,7 +2923,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 61,
+      "evidence_source_count": 62,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "unknown",
@@ -3601,7 +3601,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 37,
+      "evidence_source_count": 44,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -4409,7 +4409,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 64,
+      "evidence_source_count": 66,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -5101,7 +5101,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 70,
+      "evidence_source_count": 75,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -5523,20 +5523,6 @@
           "confidence": "unresolved",
           "qualification": "Not confirmed"
         },
-        "f01_fully_managed_service": {
-          "support_state": "not_supported",
-          "freshness_state": "current",
-          "qualification": "Cloudflare sells Cloudflare One as a self-administered cloud platform. No page read describes Cloudflare designing, operating, changing and reporting on the service end to end for the customer; ongoing delivery is positioned through authorised service delivery partners. Pages read: sase, professional services, partners/services, partners/managed-service-providers.",
-          "confidence": "medium",
-          "verified_date": "2026-07-29",
-          "source_urls": [
-            "https://www.cloudflare.com/professional-services/"
-          ],
-          "source_finding": "Cloudflare authorized service delivery partners have a strong track record of delivering excellent customer experiences and in-depth knowledge of our services to customers.",
-          "reconciliation_basis": "source_quote_recovered",
-          "reconciliation_version": "provider-reconciliation/2026-10-01",
-          "reconciliation_review_due": "2026-12-30T00:00:00Z"
-        },
         "f04_multi_tenant_msp_white_label_support": {
           "support_state": "partially_supported",
           "freshness_state": "current",
@@ -5776,7 +5762,6 @@
           "capacity_path_optimisation",
           "dynamic_path_selection",
           "security_events",
-          "f01_fully_managed_service",
           "f04_multi_tenant_msp_white_label_support",
           "f19_public_cloud_gateways",
           "f20_private_pops_dedicated_pops",
@@ -6523,7 +6508,7 @@
         "Silver Peak (now HPE)",
         "Splunk"
       ],
-      "evidence_source_count": 22,
+      "evidence_source_count": 24,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -7150,7 +7135,7 @@
         "US Cellular",
         "Verizon"
       ],
-      "evidence_source_count": 35,
+      "evidence_source_count": 38,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -8510,7 +8495,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 57,
+      "evidence_source_count": 61,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "supported",
@@ -8997,20 +8982,6 @@
           "confidence": "unresolved",
           "qualification": "Not confirmed"
         },
-        "f01_fully_managed_service": {
-          "support_state": "not_supported",
-          "freshness_state": "current",
-          "qualification": "Forcepoint's own SD-WAN page defines managed SD-WAN generically as something 'a provider' delivers, and does not claim Forcepoint itself designs, deploys, monitors and reports on the service end to end. The partner programme page frames managed services as certified partner revenue. No Forcepoint-operated fully managed offer was found on the vendor pages reviewed.",
-          "confidence": "medium",
-          "verified_date": "2026-07-29",
-          "source_urls": [
-            "https://www.forcepoint.com/product/secure-sd-wan"
-          ],
-          "source_finding": "A managed SD-WAN is a service where a provider handles the deployment, configuration, monitoring and optimisation of your WAN.",
-          "reconciliation_basis": "source_quote_recovered",
-          "reconciliation_version": "provider-reconciliation/2026-10-01",
-          "reconciliation_review_due": "2026-12-30T00:00:00Z"
-        },
         "f04_multi_tenant_msp_white_label_support": {
           "support_state": "partially_supported",
           "freshness_state": "current",
@@ -9233,7 +9204,6 @@
           "mobile_devices",
           "unmanaged_byod_devices",
           "dlp_events",
-          "f01_fully_managed_service",
           "f04_multi_tenant_msp_white_label_support",
           "f05_professional_services_and_migration_support",
           "f07_lifecycle_management",
@@ -9299,7 +9269,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 55,
+      "evidence_source_count": 60,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -10024,7 +9994,7 @@
         "Splunk",
         "Syslog"
       ],
-      "evidence_source_count": 34,
+      "evidence_source_count": 37,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -10811,7 +10781,7 @@
         "Terraform",
         "Zscaler"
       ],
-      "evidence_source_count": 44,
+      "evidence_source_count": 46,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -11520,7 +11490,7 @@
         "Terraform",
         "Third-party SSE vendors (general)"
       ],
-      "evidence_source_count": 38,
+      "evidence_source_count": 40,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "supported",
@@ -12255,7 +12225,7 @@
         "Syslog",
         "Versa Networks"
       ],
-      "evidence_source_count": 25,
+      "evidence_source_count": 31,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -13107,7 +13077,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 62,
+      "evidence_source_count": 66,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "supported",
@@ -13814,7 +13784,7 @@
         "ServiceNow",
         "Splunk"
       ],
-      "evidence_source_count": 27,
+      "evidence_source_count": 32,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -15161,7 +15131,7 @@
         "Syslog",
         "Zscaler"
       ],
-      "evidence_source_count": 30,
+      "evidence_source_count": 36,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -15871,7 +15841,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 60,
+      "evidence_source_count": 65,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "supported",
@@ -17213,7 +17183,7 @@
         "Terraform",
         "Zscaler"
       ],
-      "evidence_source_count": 32,
+      "evidence_source_count": 35,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -17861,7 +17831,7 @@
         "Versa Networks",
         "Zscaler"
       ],
-      "evidence_source_count": 32,
+      "evidence_source_count": 37,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -18617,7 +18587,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 44,
+      "evidence_source_count": 51,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -20122,7 +20092,7 @@
         "Splunk",
         "Zscaler"
       ],
-      "evidence_source_count": 38,
+      "evidence_source_count": 42,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "requires_confirmation",
@@ -20863,7 +20833,7 @@
         "Syslog",
         "Terraform"
       ],
-      "evidence_source_count": 76,
+      "evidence_source_count": 81,
       "capabilities": {
         "ai_assistant_copilot": {
           "support_state": "unknown",
@@ -21348,20 +21318,6 @@
           "reconciliation_basis": "source_quote_recovered",
           "reconciliation_version": "provider-reconciliation/2026-10-01",
           "reconciliation_review_due": "2026-12-30T00:00:00Z"
-        },
-        "f21_private_global_backbone": {
-          "support_state": "not_supported",
-          "freshness_state": "current",
-          "qualification": "No claim of a vendor-owned or vendor-controlled inter-region backbone was found on any Zscaler page read. The published architecture is peering-based: the reference architecture states many data centres are in internet exchange peering points with other cloud infrastructure and application providers, such as Microsoft, Amazon, and Google. The only global-WAN backbone material found was a 2023 blog describing the Teridion Liquid Network, which is a third party's infrastructure and is Tier 3 corroboration only (register 20), so it cannot support a grade. Graded not_primary rather than unknown because the vendor's own architecture documents describe an internet-and-peering model, but confidence is low since this is read off architecture description rather than an explicit vendor statement about backbone ownership.",
-          "confidence": "low",
-          "verified_date": "2026-07-29",
-          "source_urls": [
-            "https://www.zscaler.com/resources/data-sheets/zscaler-internet-access.pdf"
-          ],
-          "source_finding": "Direct peering with major internet and SaaS providers and public cloud destinations ensures the fastest traffic path possible.",
-          "reconciliation_basis": "source_quote_recovered",
-          "reconciliation_version": "provider-reconciliation/2026-10-01",
-          "reconciliation_review_due": "2026-12-30T00:00:00Z"
         }
       },
       "regions": {
@@ -21509,8 +21465,7 @@
           "f04_multi_tenant_msp_white_label_support",
           "f17_cellular_and_5g_support",
           "f19_public_cloud_gateways",
-          "f20_private_pops_dedicated_pops",
-          "f21_private_global_backbone"
+          "f20_private_pops_dedicated_pops"
         ],
         "issues": []
       }

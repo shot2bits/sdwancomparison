@@ -166,8 +166,8 @@ Consider Cloudflare One where its documented capabilities match the deployment. 
 - Private PoPs / dedicated PoPs: Choose the location of the data centers where your traffic is inspected. The Data Localization Suite offers regional control over which of Cloudflare's own data centres inspect traffic, which addresses sovereignty of the processing location. That remains region selection inside the shared multi-tenant network. No offer of customer-hosted or physically dedicated PoPs was found on the pages read.
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
+- Fully managed service requires further evidence before using it as a selection criterion.
 - Co-managed service requires further evidence before using it as a selection criterion.
-- Last-mile circuit management requires further evidence before using it as a selection criterion.
 
 - https://developers.cloudflare.com/tenant/
 - https://cloudflare.com/enterprise/
@@ -177,7 +177,7 @@ Consider Cloudflare One where its documented capabilities match the deployment. 
 - https://www.cloudflare.com/plans/enterprise/
 - https://www.cloudflare.com/sase/
 
-Evidence fingerprint: e15723cfe2e4dbf791e88805dc36b755fe30cd22c5895a3e2681801790ce26ba
+Evidence fingerprint: f19f57e5cdb3761b180e05767fac1db631f2c2c2e086518419f1a3f8b391021a
 
 ## Colt Technology Services
 
@@ -266,8 +266,8 @@ Consider Forcepoint where its documented capabilities match the deployment. The 
 - Cellular and 5G support: For LTE without Wi-Fi, Forcepoint offers the 120L model with LTE support and 125L model with LTE/5G support. The 120 Series datasheet also states 'Optional Wi-Fi and LTE/5G connectivity' and lists supported LTE and 5G NR band tables, so integrated cellular is a shipped hardware capability. SIM management and signal monitoring specifics were not located in the pages reviewed.
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
+- Fully managed service requires further evidence before using it as a selection criterion.
 - Co-managed service requires further evidence before using it as a selection criterion.
-- Last-mile circuit management requires further evidence before using it as a selection criterion.
 
 - https://www.forcepoint.com/resources/datasheets/flexedge-secure-sd-wan-manager
 - https://www.forcepoint.com/services/implementation-packages
@@ -277,7 +277,7 @@ Consider Forcepoint where its documented capabilities match the deployment. The 
 - https://forcepoint.com/use-case/incident-and-breach-response
 - https://cyberdefensemagazine.com/innovator-spotlight-forcepoints-data-security-cloud-redefining-data-protection-in-the-ai-era/
 
-Evidence fingerprint: a2bff3272c4ac92be414415cd85234f46f27d2b35906c37614bd045379c008f2
+Evidence fingerprint: 8e3584f6ec08d868e0a2b224d39661e1fb60aa56c0d7b80c150316841935d7e7
 
 ## Fortinet FortiSASE
 
@@ -649,4 +649,4 @@ Consider Zscaler where its documented capabilities match the deployment. The sel
 - https://www.zscaler.com/press/zscaler-significantly-expands-global-sovereignty-zero-trust-exchange-platform
 - https://www.zscaler.com/resources/reference-architectures/traffic-forwarding-in-zscaler-internet-access.pdf
 
-Evidence fingerprint: 2a9589c4b326832a7c12db6caf84367255af526e676500d0134206a136b18eae
+Evidence fingerprint: 6abdc1a93f4bd6184d62bd8ba4d4e424636ac4b35d5924cc47b30e82e07c7e86

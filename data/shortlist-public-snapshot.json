@@ -152,7 +152,7 @@
       ],
       "evidence_coverage_pct": 0.5,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 40,
+      "evidence_source_count": 46,
       "capability_evidence": {
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://www.aryaka.com/datasheet/smartmanage-datasheet/",
@@ -464,7 +464,7 @@
       ],
       "evidence_coverage_pct": 0.525,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 26,
+      "evidence_source_count": 29,
       "capability_evidence": {
         "f05_professional_services_and_migration_support": {
           "source_url": "https://www.business.att.com/content/dam/attbusiness/briefs/sd-wan-product-brief.pdf",
@@ -910,7 +910,7 @@
       ],
       "evidence_coverage_pct": 0.325,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 26,
+      "evidence_source_count": 30,
       "capability_evidence": {
         "f09_encrypted_overlay_fabric": {
           "source_url": "https://business.bt.com/content/dam/bt-business/pdfs/networks-cloud-digital-services/sd-wan/bt-secure-sd-wan-datasheet.pdf",
@@ -1183,7 +1183,7 @@
       ],
       "evidence_coverage_pct": 0.6,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 61,
+      "evidence_source_count": 62,
       "capability_evidence": {
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://support.catonetworks.com/hc/en-us/articles/7790698733341",
@@ -1439,7 +1439,7 @@
       ],
       "evidence_coverage_pct": 0.55,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 37,
+      "evidence_source_count": 44,
       "capability_evidence": {
         "f01_fully_managed_service": {
           "source_url": "https://www.checkpoint.com/services/managed-security/managed-firewall/",
@@ -1701,7 +1701,7 @@
       ],
       "evidence_coverage_pct": 0.575,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 64,
+      "evidence_source_count": 66,
       "capability_evidence": {
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://documentation.meraki.com/Platform_Management/Managed_Service_Provider_Resources/Dashboard_Branding_for_MSPs",
@@ -1848,7 +1848,7 @@
       "uk_delivery": "not_confirmed",
       "uk_basis": "UK contracting entity is not confirmed by the published Neon provider record.",
       "capabilities": {
-        "f01_fully_managed_service": "not_primary",
+        "f01_fully_managed_service": "unknown",
         "f02_diy_self_managed_model": "yes",
         "f03_co_managed_service": "unknown",
         "f04_multi_tenant_msp_white_label_support": "partial",
@@ -1982,16 +1982,10 @@
         "Less mature for very large branch estates with complex underlay requirements.",
         "Managed and co-managed service models are partner-led; this is primarily a self-service platform."
       ],
-      "evidence_coverage_pct": 0.35,
+      "evidence_coverage_pct": 0.325,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 70,
+      "evidence_source_count": 75,
       "capability_evidence": {
-        "f01_fully_managed_service": {
-          "source_url": "https://www.cloudflare.com/professional-services/",
-          "reviewed_at": "2026-07-29",
-          "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Cloudflare authorized service delivery partners have a strong track record of delivering excellent customer experiences and in-depth knowledge of our services to customers. Cloudflare sells Cloudflare One as a self-administered cloud platform. No page read describes Cloudflare designing, operating, changing and reporting on the service end to end for the customer; ongoing delivery is positioned through authorised service delivery partners. Pages read: sase, professional services, partners/services, partners/managed-service-providers."
-        },
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://developers.cloudflare.com/tenant/",
           "reviewed_at": "2026-07-29",
@@ -2543,7 +2537,7 @@
       ],
       "evidence_coverage_pct": 0.3,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 22,
+      "evidence_source_count": 24,
       "capability_evidence": {
         "f07_lifecycle_management": {
           "source_url": "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan",
@@ -2769,7 +2763,7 @@
       ],
       "evidence_coverage_pct": 0.375,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 35,
+      "evidence_source_count": 38,
       "capability_evidence": {
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://cradlepoint.ericsson.com/about/how-to-buy",
@@ -3138,7 +3132,7 @@
       "uk_delivery": "not_confirmed",
       "uk_basis": "UK contracting entity is not confirmed by the published Neon provider record.",
       "capabilities": {
-        "f01_fully_managed_service": "not_primary",
+        "f01_fully_managed_service": "unknown",
         "f02_diy_self_managed_model": "yes",
         "f03_co_managed_service": "unknown",
         "f04_multi_tenant_msp_white_label_support": "partial",
@@ -3271,16 +3265,10 @@
         "Full SASE platform completeness has partial public evidence; SSE module depth should be confirmed.",
         "Managed delivery is partner-led; co-managed and white-label support require partner validation."
       ],
-      "evidence_coverage_pct": 0.475,
+      "evidence_coverage_pct": 0.45,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 57,
+      "evidence_source_count": 61,
       "capability_evidence": {
-        "f01_fully_managed_service": {
-          "source_url": "https://www.forcepoint.com/product/secure-sd-wan",
-          "reviewed_at": "2026-07-29",
-          "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "A managed SD-WAN is a service where a provider handles the deployment, configuration, monitoring and optimisation of your WAN. Forcepoint's own SD-WAN page defines managed SD-WAN generically as something 'a provider' delivers, and does not claim Forcepoint itself designs, deploys, monitors and reports on the service end to end. The partner programme page frames managed services as certified partner revenue. No Forcepoint-operated fully managed offer was found on the vendor pages reviewed."
-        },
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://www.forcepoint.com/resources/datasheets/flexedge-secure-sd-wan-manager",
           "reviewed_at": "2026-07-29",
@@ -3505,7 +3493,7 @@
       ],
       "evidence_coverage_pct": 0.5,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 55,
+      "evidence_source_count": 60,
       "capability_evidence": {
         "f01_fully_managed_service": {
           "source_url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/managed-fortigate-svc.pdf",
@@ -3815,7 +3803,7 @@
       ],
       "evidence_coverage_pct": 0.45,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 34,
+      "evidence_source_count": 37,
       "capability_evidence": {
         "f01_fully_managed_service": {
           "source_url": "https://www.gtt.net/services/secure-networking/managed-sd-wan/",
@@ -4106,7 +4094,7 @@
       ],
       "evidence_coverage_pct": 0.425,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 44,
+      "evidence_source_count": 46,
       "capability_evidence": {
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://docs.axissecurity.com/docs/tenants-management",
@@ -4419,7 +4407,7 @@
       ],
       "evidence_coverage_pct": 0.475,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 38,
+      "evidence_source_count": 40,
       "capability_evidence": {
         "f01_fully_managed_service": {
           "source_url": "https://www.juniper.net/us/en/services.html",
@@ -4670,7 +4658,7 @@
       ],
       "evidence_coverage_pct": 0.65,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 25,
+      "evidence_source_count": 31,
       "capability_evidence": {
         "f07_lifecycle_management": {
           "source_url": "https://assets.lumen.com/is/content/Lumen/SD-WAN___Managed_Equipment_Service_Guide",
@@ -5012,7 +5000,7 @@
       ],
       "evidence_coverage_pct": 0.6,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 62,
+      "evidence_source_count": 66,
       "capability_evidence": {
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://www.netskope.com/press-releases/netskope-enables-msps-to-generate-revenue-faster-with-launch-of-new-catalyst-msp-sp-program-and-netskope-partner-orchestrator",
@@ -5267,7 +5255,7 @@
       ],
       "evidence_coverage_pct": 0.4,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 27,
+      "evidence_source_count": 32,
       "capability_evidence": {
         "f03_co_managed_service": {
           "source_url": "https://www.nttglobal.net/services/sd-wan",
@@ -5794,7 +5782,7 @@
       ],
       "evidence_coverage_pct": 0.475,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 30,
+      "evidence_source_count": 36,
       "capability_evidence": {
         "f07_lifecycle_management": {
           "source_url": "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international",
@@ -6076,7 +6064,7 @@
       ],
       "evidence_coverage_pct": 0.6,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 60,
+      "evidence_source_count": 65,
       "capability_evidence": {
         "f04_multi_tenant_msp_white_label_support": {
           "source_url": "https://www.paloaltonetworks.com/sase/managed-sase",
@@ -6549,7 +6537,7 @@
       ],
       "evidence_coverage_pct": 0.3,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 32,
+      "evidence_source_count": 35,
       "capability_evidence": {
         "f01_fully_managed_service": {
           "source_url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Data-Sheet.pdf",
@@ -6752,7 +6740,7 @@
       ],
       "evidence_coverage_pct": 0.4,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 32,
+      "evidence_source_count": 37,
       "capability_evidence": {
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://verizon.com/business/resources/lp/secure-access-service-edge/",
@@ -7051,7 +7039,7 @@
       ],
       "evidence_coverage_pct": 0.65,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 44,
+      "evidence_source_count": 51,
       "capability_evidence": {
         "f01_fully_managed_service": {
           "source_url": "https://versa-networks.com/documents/solution-briefs/versa-sase.pdf",
@@ -7593,7 +7581,7 @@
       ],
       "evidence_coverage_pct": 0.425,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 38,
+      "evidence_source_count": 42,
       "capability_evidence": {
         "f07_lifecycle_management": {
           "source_url": "https://www.vodafone.com/news/newsroom/technology/vodafone-business-and-fortinet-expand-global-partnership-to-secure-hybrid-work",
@@ -7737,7 +7725,7 @@
         "f18_cloud_on_ramp": "yes",
         "f19_public_cloud_gateways": "yes",
         "f20_private_pops_dedicated_pops": "yes",
-        "f21_private_global_backbone": "not_primary",
+        "f21_private_global_backbone": "unknown",
         "f22_regional_breakout_and_data_residency": "unknown",
         "f23_multi_cloud_transit_fabric": "yes",
         "f24_flexible_edge_form_factors": "unknown",
@@ -7850,9 +7838,9 @@
         "Premium pricing; typically per-user/workload/location with security modules adding cost.",
         "Buyers needing one vendor for both SD-WAN and security may prefer a converged platform (Cato, FortiSASE, Prisma)."
       ],
-      "evidence_coverage_pct": 0.475,
+      "evidence_coverage_pct": 0.45,
       "last_verified": "2026-09-01",
-      "evidence_source_count": 76,
+      "evidence_source_count": 81,
       "capability_evidence": {
         "f01_fully_managed_service": {
           "source_url": "https://www.zscaler.com/partners/service-providers",
@@ -7883,12 +7871,6 @@
           "reviewed_at": "2026-07-29",
           "review_due": "2026-12-30T00:00:00Z",
           "qualification": "ZIA Private Service Edge and ZIA Virtual Service Edge devices extend the Zscaler cloud into your data center. Directly meets the definition: customer-hosted and dedicated deployments exist alongside the shared multi-tenant Public Service Edges. The March 2026 sovereignty press release additionally describes Private Service Edges as single-tenant, customer-hosted, and Zscaler-managed appliances, plus dedicated control and logging planes in six countries, which covers the sovereign case."
-        },
-        "f21_private_global_backbone": {
-          "source_url": "https://www.zscaler.com/resources/data-sheets/zscaler-internet-access.pdf",
-          "reviewed_at": "2026-07-29",
-          "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Direct peering with major internet and SaaS providers and public cloud destinations ensures the fastest traffic path possible. No claim of a vendor-owned or vendor-controlled inter-region backbone was found on any Zscaler page read. The published architecture is peering-based: the reference architecture states many data centres are in internet exchange peering points with other cloud infrastructure and application providers, such as Microsoft, Amazon, and Google. The only global-WAN backbone material found was a 2023 blog describing the Teridion Liquid Network, which is a third party's infrastructure and is Tier 3 corroboration only (register 20), so it cannot support a grade. Graded not_primary rather than unknown because the vendor's own architecture documents describe an internet-and-peering model, but confidence is low since this is read off architecture description rather than an explicit vendor statement about backbone ownership."
         }
       },
       "projection_provenance": {
