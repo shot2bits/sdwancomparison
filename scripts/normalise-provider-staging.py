@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 CONTRACT_VERSION = "provider-knowledge/1.0.0"
-NORMALISER_VERSION = "provider-normaliser/1.0.0"
+NORMALISER_VERSION = "provider-normaliser/1.0.1"
 
 def clean(value): return re.sub(r"\s*\[\d+\]", "", value or "").strip()
 def key(value): return re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
@@ -34,13 +34,15 @@ def confidence(value):
         if token in v: return token
     return "unresolved"
 def support(value):
-    v=(value or "").lower()
-    if "not publicly" in v: return "not_publicly_disclosed"
-    if "requires confirmation" in v or "confirm" in v: return "requires_confirmation"
-    if re.search(r"\bnot supported\b|\bno\b",v): return "not_supported"
-    if "partner" in v: return "partner_delivered"
-    if "partial" in v: return "partially_supported"
-    if any(x in v for x in ("native","available","supported","included","yes")): return "supported"
+    # Parse the stated finding, not incidental words inside its qualification.
+    # In particular, 'confirmed directly' is not 'requires confirmation'.
+    v=re.sub(r"\s+", " ", (value or "").lower()).strip()
+    if re.match(r"^(not publicly|not disclosed)",v): return "not_publicly_disclosed"
+    if re.match(r"^(not (?:independently |publicly |fully )?confirmed|unconfirmed|requires? confirmation|to be confirmed|confirm\b|unknown|not assessed)",v): return "requires_confirmation"
+    if re.match(r"^(not supported|unsupported|no\b)",v): return "not_supported"
+    if re.match(r"^(partial|partially|conditional)\b",v): return "partially_supported"
+    if re.match(r"^(partner(?:[- ]delivered|[- ]integrated)?\b|(?:available|supported|yes|confirmed)\s+(?:only\s+)?(?:via|through|by)\s+(?:a\s+)?partner)",v): return "partner_delivered"
+    if re.match(r"^(native|available|supported|included|yes|confirmed)\b",v): return "supported"
     return "unknown"
 def sector_support(value):
     """Parse the stated sector assessment, never an incidental 'no' in its caveats.

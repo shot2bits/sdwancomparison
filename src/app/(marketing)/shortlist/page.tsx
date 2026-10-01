@@ -53,6 +53,7 @@ export default async function ShortlistPage({
       <header data-entity-block>
         <h1>{entity.h1}</h1>
         <ShortlistEntityBlock entity={entity}/>
+        {view!=="all" && <p>{SHORTLIST_VIEWS[view].answer}</p>}
       </header>
       <BuyerDecisionGuide vendors={vendors}/>
       <h2>{SOURCING_TITLE}</h2>
@@ -99,7 +100,7 @@ export default async function ShortlistPage({
       </nav>
       {live.source === "snapshot_fallback" && (
         <p className="sourcing-small">
-          Research snapshot captured 30 September 2026. A live source connection
+          Saved research snapshot. A live source connection
           is not currently available; the dates on each provider refer to its
           original review.
         </p>

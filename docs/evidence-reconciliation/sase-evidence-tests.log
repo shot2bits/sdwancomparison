@@ -1,0 +1,10 @@
+
+> netifymarketplace@0.1.0 test:provider-evidence
+> python3 scripts/test-provider-support-parser.py && tsx scripts/test-evidence-health.ts && tsx scripts/test-reconciled-shortlist.ts && tsx scripts/test-live-shortlist.ts && tsx scripts/test-shortlist-market-views.ts
+
+PASS: 13 support-parser regression cases
+PASS invalidation, approval validity, expiry visibility and expired-evidence release gate
+PASS 1,200 projected fields, 30 matching records, Fortinet and managed Colt/NTT/GTT inclusion
+live Neon shortlist tests passed
+PASS exact mappings, stale evidence, proxy rejection, qualified SASE, reviewed sources, expiry and newer-review precedence
+PASS 4 governed views, actual counts, distinct descriptions, duplicate label removal and honest empty evidence

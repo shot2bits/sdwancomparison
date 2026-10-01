@@ -13,7 +13,7 @@ export function shortlistFaqs(vendors: ShortlistVendor[]) {
     rows
       .map((v) => v.name)
       .sort((a, b) => a.localeCompare(b, "en-GB"))
-      .join(", ") || "none";
+      .join(", ") || "no current confirmed records; this does not mean no providers offer the service";
   const uk = vendors.filter((v) =>
     ["uk_hq", "uk_entity"].includes(v.uk_delivery),
   );
@@ -41,7 +41,7 @@ export function shortlistFaqs(vendors: ShortlistVendor[]) {
               `${v.name}${v.capabilities.f28_full_sase_platform === "yes" ? "" : ` (${v.capabilities.f28_full_sase_platform.replaceAll("_", " ")})`}`,
           )
           .sort()
-          .join(", ") || "none"
+          .join(", ") || "no current confirmed records; this does not mean no providers offer the service"
       }; reviewed on ${date}.`,
     },
     {

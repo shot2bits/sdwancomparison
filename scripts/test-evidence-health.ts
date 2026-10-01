@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {getShortlistDataset} from '../src/lib/vendors';
+import {editorialReviewStatus,providerEvidenceFingerprint,type ProviderEditorialReview} from '../src/lib/provider-editorial-review';
+import {evidenceReviewHealth} from '../src/lib/evidence-review-health';
+import {validateSourcingOperations} from './validate-sourcing-operations';
+const v=getShortlistDataset()[0],now=Date.parse('2026-10-01');
+const r:ProviderEditorialReview={buyer_fit:'Synthetic test only',strengths:['Test strength'],trade_offs:['Test limit'],source_urls:['https://example.com/evidence'],reviewer:'Synthetic test reviewer',role:'Test',approved_at:'2026-09-30',review_due:'2026-10-30',evidence_fingerprint:providerEvidenceFingerprint(v)};
+assert.equal(editorialReviewStatus(v,r,now).status,'approved');
+assert.equal(editorialReviewStatus({...v,last_verified:'2026-10-01'},r,now).status,'invalidated');
+assert.equal(editorialReviewStatus(v,r,Date.parse('2026-10-31')).status,'expired');
+assert.equal(editorialReviewStatus(v,{...r,reviewer:''},now).status,'invalid');
+assert(evidenceReviewHealth(Date.parse('2026-10-20')).expiring>=23);
+assert.throws(()=>validateSourcingOperations(Date.parse('2026-10-31'),'support@netify.com'),/Expired evidence/);
+console.log('PASS invalidation, approval validity, expiry visibility and expired-evidence release gate');

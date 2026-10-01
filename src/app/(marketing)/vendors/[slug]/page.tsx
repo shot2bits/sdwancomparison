@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { publicResponsePanel } from "@/lib/response-panel";
 import ProviderEntityBlock from "@/components/ProviderEntityBlock";
@@ -25,6 +26,7 @@ import { deriveContinuation } from "@/lib/continuation/derive";
 import { continuationUrl } from "@/lib/continuation/types";
 
 export const dynamic = "force-dynamic";
+const loadCurrentDataset=cache(getLiveShortlistDataset);
 
 // Display punctuation only; the stored evidence and source quotations remain unchanged.
 const evidenceText = (text: string) => text.replace(/\u2014/g, " - ").replace(/\bunknown\b/gi, "not yet reviewed");
@@ -45,6 +47,12 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const current=(await loadCurrentDataset()).vendors.find(v=>v.slug===slug);
+  if(current){
+    const title=`${current.name}: SD-WAN and SASE capability profile`;
+    const description=`Compare ${current.name} using the same current evidence as Netify’s shortlist: capabilities, source qualifications and questions to confirm before requesting proposals.`;
+    return {title,description,alternates:{canonical:`${SITE_URL}/vendors/${slug}/`},openGraph:{title,description,type:'article',url:`${SITE_URL}/vendors/${slug}/`}};
+  }
   try {
     const vendor = displayCopy(getVendor(slug));
     const longTitle = `${vendor.name}: SD-WAN and SASE capability profile`;
@@ -69,20 +77,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function VendorPage({ params }: Props) {
   const { slug } = await params;
-  const liveProvider = (await getLiveShortlistDataset()).vendors.find(v=>v.slug===slug);
+  const dataset=await loadCurrentDataset();
+  const liveProvider = dataset.vendors.find(v=>v.slug===slug);
   const panel = await publicResponsePanel();
+  if(liveProvider) return <main className="max-w-5xl mx-auto px-6 py-16 space-y-8">
+    <header><p className="text-sm text-slate-500">Provider evidence</p><h1 className="text-4xl font-semibold">{liveProvider.name}</h1><p className="mt-4">{evidenceText(liveProvider.shortlist_summary)}</p></header>
+    <ProviderEntityBlock vendor={liveProvider} panel={panel.some(p=>p.slug===slug)}/>
+    <p>These capabilities use the same evidence as the provider shortlist and matching. A missing finding is not evidence that a provider lacks the capability.{dataset.source==='snapshot_fallback'?' Live research is temporarily unavailable; this is the last saved research snapshot.':''}</p>
+    <section><h2 className="text-2xl font-semibold">Capability evidence</h2><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr><th className="p-3">Capability</th><th className="p-3">Finding</th><th className="p-3">Evidence and qualification</th></tr></thead><tbody>{Object.entries(liveProvider.capabilities).map(([key,value])=>{const evidence=liveProvider.capability_evidence?.[key];return <tr key={key} className="border-t border-slate-200"><th className="p-3 font-medium">{FEATURE_NAMES[key] ?? key}</th><td className="p-3">{value==='unknown'||value==='not_confirmed'?'Not confirmed':STATUS_LABELS[value]}</td><td className="p-3 text-sm">{evidence ? <><p>{evidenceText(evidence.qualification)}</p><a className="underline" href={evidence.source_url}>Source</a><span> · Evidence dated {evidence.reviewed_at.slice(0,10)}</span></> : 'See the published provider record for source context; confirm the scope for your deployment.'}</td></tr>})}</tbody></table></div></section>
+    <nav className="flex flex-wrap gap-6"><Link href="/shortlist/">Compare providers</Link><a href={liveProvider.marketplace_url ?? undefined}>Full published provider record</a><Link href={`/shortlist/?provider=${encodeURIComponent(slug)}&action=proposals#sourcing-brief`}>Build a shortlist and request proposals</Link></nav>
+  </main>;
   let vendor;
   try {
     vendor = displayCopy(getVendor(slug));
   } catch {
-    if (!liveProvider) notFound();
-    return <main className="max-w-4xl mx-auto px-6 py-16">
-      <h1>{liveProvider.name}</h1>
-      <ProviderEntityBlock vendor={liveProvider} panel={panel.some(p=>p.slug===slug)}/>
-      <h2>Capability matrix</h2>
-      <table><tbody>{Object.entries(liveProvider.capabilities).map(([key,value])=><tr key={key}><th>{FEATURE_NAMES[key] ?? key}</th><td>{value==='unknown'||value==='not_confirmed'?'not yet reviewed':STATUS_LABELS[value]}</td></tr>)}</tbody></table>
-      <a href="/sase/shortlist/">Provider shortlist</a>
-    </main>;
+    notFound();
   }
   const continuation = deriveContinuation({ kind: "vendor", vendor });
 

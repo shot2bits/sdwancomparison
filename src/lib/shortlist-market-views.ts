@@ -1,4 +1,4 @@
-import { publicEvidenceProviders, PUBLIC_EVIDENCE_NOTICE } from "./public-provider-evidence";
+import { publicEvidenceProviders } from "./public-provider-evidence";
 import {
   DEFAULT_INPUT,
   type ShortlistInput,
@@ -35,14 +35,14 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   all: {
     label: "All providers",
     title: "All SD-WAN and SASE providers",
-    answer: PUBLIC_EVIDENCE_NOTICE,
+    answer: 'Compare the researched SD-WAN and SASE market: technology platforms, managed service providers and connectivity carriers.',
     input: {},
     eligible: () => true,
   },
   "sd-wan-vendors": {
     label: "SD-WAN vendors",
     title: "SD-WAN vendors compared",
-    answer: PUBLIC_EVIDENCE_NOTICE,
+    answer: 'Compare technology vendors with published SD-WAN capability evidence. Check platform features, deployment requirements and management options.',
     input: {
       required_features: ["f09_encrypted_overlay_fabric"],
       preferred_features: ["f10_dynamic_path_selection", "f12_application_aware_routing", "f13_qos_and_traffic_shaping", "f18_cloud_on_ramp", "f25_high_availability_design"],
@@ -53,7 +53,7 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   "sase-vendors": {
     label: "SASE vendors",
     title: "SASE vendors compared",
-    answer: PUBLIC_EVIDENCE_NOTICE,
+    answer: 'Compare technology vendors with published SASE or SSE capability evidence. Check security scope and whether SD-WAN is included or requires integration.',
     input: {
       preferred_features: ["f28_full_sase_platform", "f30_zero_trust_network_access", "f31_secure_web_gateway", "f32_casb_capability", "f33_data_loss_prevention", "f36_centralised_orchestration"],
       weight_preset: "security_led",
@@ -63,7 +63,7 @@ export const SHORTLIST_VIEWS: Record<ShortlistMarketView, ViewDefinition> = {
   "managed-sd-wan": {
     label: "Managed SD-WAN providers",
     title: "Managed SD-WAN providers compared",
-    answer: PUBLIC_EVIDENCE_NOTICE,
+    answer: 'Compare providers with evidence for managed service delivery and SD-WAN. Check operational responsibilities, connectivity and proposal scope.',
     input: {
       service_model: "managed",
       required_features: ["f01_fully_managed_service", "f09_encrypted_overlay_fabric"],
@@ -95,4 +95,9 @@ export function buildShortlistMarketView(vendors: ShortlistVendor[], view: Short
 export function firstUnconfirmedDecision(provider: ShortlistVendor): string {
   const feature = Object.entries(provider.capabilities).find(([, state]) => (state === "unknown" || state === "not_confirmed"));
   return feature ? FEATURE_NAMES[feature[0]] ?? "Commercial and delivery detail" : "Commercial and delivery detail";
+}
+
+export function shortlistViewMetadata(vendors:ShortlistVendor[],view:ShortlistMarketView) {
+  const count=buildShortlistMarketView(vendors,view).length;
+  return {count,title:`${SHORTLIST_VIEWS[view].title} (${count} providers)`,description:`${count} providers in this view. ${SHORTLIST_VIEWS[view].answer}`};
 }

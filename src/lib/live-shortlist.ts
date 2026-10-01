@@ -23,6 +23,7 @@ export type LiveShortlistDataset = {
   datasetVersions: string[];
   providerRevisions: Array<{ providerId: string; slug: string; revisionId: string; datasetVersion: string }>;
   loadedAt: string;
+  evidenceIssues?: string[];
 };
 
 const FEATURE_CODES: Record<string, string[]> = {
@@ -39,9 +40,9 @@ const FEATURE_CODES: Record<string, string[]> = {
   f11_active_active_link_utilisation: ["active_active_link_utilisation"],
   f12_application_aware_routing: ["application_aware_routing", "application_identification"],
   f13_qos_and_traffic_shaping: ["qos_and_traffic_engineering"],
-  f14_packet_loss_remediation: ["forward_error_correction_packet_duplication", "wan_optimisation"],
+  f14_packet_loss_remediation: ["forward_error_correction_packet_duplication"],
   f15_local_internet_breakout: ["local_internet_breakout"],
-  f16_mpls_coexistence_and_migration: ["brownfield_migration_support"],
+  f16_mpls_coexistence_and_migration: ["mpls_coexistence_and_migration"],
   f17_cellular_and_5g_support: ["cap_5g_lte_support"],
   f18_cloud_on_ramp: ["multi_cloud_networking", "virtual_cloud_edge_support"],
   f19_public_cloud_gateways: ["virtual_cloud_edge_support"],
@@ -178,6 +179,12 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
       if (feature.id === "f04_multi_tenant_msp_white_label_support") return [feature.id, namedStatus(record.service_models, ["msp", "white label", "multi tenant"] )];
       return [feature.id, evidenceStatus(codes.map((code) => record.capabilities[code]))];
     }));
+    provider.capability_evidence = {};
+    for (const feature of FEATURES) {
+      const candidates=record.capabilities[feature.id] ? [record.capabilities[feature.id]] : (FEATURE_CODES[feature.id] ?? []).map(code=>record.capabilities[code]);
+      const evidence=candidates.find(item=>item?.freshness_state==='current' && item.source_urls?.length && evidenceStatus([item])===provider.capabilities[feature.id]);
+      if(evidence?.source_urls?.[0] && evidence.verified_date && evidence.reconciliation_review_due) provider.capability_evidence[feature.id]={source_url:evidence.source_urls[0],reviewed_at:evidence.verified_date,review_due:evidence.reconciliation_review_due,qualification:[evidence.source_finding,evidence.qualification].filter(Boolean).join(' ')};
+    }
     applyReviewedComparisonEvidence(provider, record.reviewed_at);
     provider.evidence_coverage_pct = Object.values(provider.capabilities).filter((state) => state !== "unknown").length / FEATURES.length;
 
@@ -214,6 +221,7 @@ async function loadNeonShortlistDataset(): Promise<LiveShortlistDataset> {
   const vendors = mergeNeonProviderRecords(base, records);
   return {
     vendors,
+    evidenceIssues: records.flatMap(record=>record.reconciliation?.issues??[]),
     source: "neon",
     providerContractVersion: feed.contractVersion,
     datasetVersions: [...new Set(records.map((record) => record.dataset_version))].sort(),
@@ -241,7 +249,10 @@ export async function getLiveShortlistDataset(): Promise<LiveShortlistDataset> {
     const normalize = (v: unknown): unknown => v === 'not_confirmed' ? 'unknown' : Array.isArray(v) ? v.map(normalize) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k,x])=>[k,normalize(x)])) : v;
     const snapshot = normalize(publicSnapshot.vendors) as ShortlistVendor[];
     const regionReviews=new Map(Object.entries(geographyReview.providers).map(([slug,value])=>[comparisonSlugForGovernedProvider(slug),value]));
-    for(const vendor of snapshot){const regional=regionReviews.get(vendor.slug);if(regional){vendor.regions=Object.fromEntries(REGION_KEYS.map(key=>{const row=(regional.regions as Record<string,{support_state:string}>)[key];return [key,row?.support_state==='supported'?'yes':'unknown'];})) as ShortlistVendor['regions'];}vendor.uk_delivery='not_confirmed';vendor.uk_basis='UK contracting entity requires source confirmation.';delete vendor.independent_evidence_source_count;applyProjectionReview(vendor,{revision_id:'public-snapshot-2026-09-30',reviewed_at:vendor.last_verified,sectors:{}},base.find(v=>v.slug===vendor.slug)??vendor);}
+    for(const vendor of snapshot){const regional=regionReviews.get(vendor.slug);if(regional){vendor.regions=Object.fromEntries(REGION_KEYS.map(key=>{const row=(regional.regions as Record<string,{support_state:string}>)[key];return [key,row?.support_state==='supported'?'yes':'unknown'];})) as ShortlistVendor['regions'];}vendor.uk_delivery='not_confirmed';vendor.uk_basis='UK contracting entity requires source confirmation.';delete vendor.independent_evidence_source_count;applyProjectionReview(vendor,{revision_id:`public-snapshot-${publicSnapshot.captured_at}`,reviewed_at:vendor.last_verified,sectors:{}},base.find(v=>v.slug===vendor.slug)??vendor);}
+    for(const vendor of snapshot) for(const [feature,evidence] of Object.entries(vendor.capability_evidence ?? {})) {
+      if(Date.parse(evidence.review_due)<=Date.now()){vendor.capabilities[feature]='unknown';delete vendor.capability_evidence![feature];}
+    }
     return { vendors: snapshot.length === base.length ? snapshot : base, source: "snapshot_fallback", providerContractVersion: "snapshot", datasetVersions: [], providerRevisions: [], loadedAt };
   }
 }

@@ -1,0 +1,2784 @@
+{
+  "checked_on": "2026-10-01",
+  "method": "HTTP retrieval and exact normalized quote verification. A match is not semantic validation of the complete capability definition.",
+  "sources": {
+    "https://about.att.com/story/2025/palo-alto-networks-dynamic-defense.html": {
+      "error": "HTTPError",
+      "http_status": 403
+    },
+    "https://aryaka.com/platform": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/unified-sase-platform/",
+      "sha256": "275d7f92831256daed2afdd0ce1827279a70c67dc4641a3f7ad1eadb2e52bad1",
+      "error": null
+    },
+    "https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-14/documents/93536/786241083904469-service-definition-document-2024-04-29-1330.pdf": {
+      "http_status": 200,
+      "final_url": "https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-14/documents/93536/786241083904469-service-definition-document-2024-04-29-1330.pdf",
+      "sha256": "3e5d0c5de32b9ed709c3190d0fac1f5a818a88f9ead69ac50027ae1ae39d46f7",
+      "error": null
+    },
+    "https://assets.lumen.com/is/content/Lumen/SD-WAN___Managed_Equipment_Service_Guide": {
+      "http_status": 200,
+      "final_url": "https://assets.lumen.com/is/content/Lumen/SD-WAN___Managed_Equipment_Service_Guide",
+      "sha256": "969c38911e9b42bf99299fed3720265f3e26c180e7add5e80c70bbe0b3b82a09",
+      "error": null
+    },
+    "https://assets.lumen.com/is/content/Lumen/lumen-sase-solutions-faq": {
+      "http_status": 200,
+      "final_url": "https://assets.lumen.com/is/content/Lumen/lumen-sase-solutions-faq",
+      "sha256": "16f22d334b31c586e3fbd5519a1a2c812f39875653e0d609514a6dc2767816ab",
+      "error": null
+    },
+    "https://assets.lumen.com/is/content/Lumen/lumen-service-level-agreementpdf?Creativeid=dc0beb0f-83c4-46d5-8684-85af0333edbe": {
+      "http_status": 200,
+      "final_url": "https://assets.lumen.com/is/content/Lumen/lumen-service-level-agreementpdf?Creativeid=dc0beb0f-83c4-46d5-8684-85af0333edbe",
+      "sha256": "2e42080a8ef90c775758af3fa0a96dd7a69335cb0ce7de7bccdc8b81f7cfe6c6",
+      "error": null
+    },
+    "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615": {
+      "http_status": 200,
+      "final_url": "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615",
+      "sha256": "8146919d3cf5a83f009a78fa25890df06db56548b79c99337107eb63dbdb5048",
+      "error": null
+    },
+    "https://assets.lumen.com/is/content/Lumen/sd-wan-service-schedule?Creativeid=914be424-577f-4a0d-97cd-3c9c00a783e4": {
+      "http_status": 200,
+      "final_url": "https://assets.lumen.com/is/content/Lumen/sd-wan-service-schedule?Creativeid=914be424-577f-4a0d-97cd-3c9c00a783e4",
+      "sha256": "8d62f379555b72b74a4aca04d049be68800749294b955e97aa56b0b4c3545d92",
+      "error": null
+    },
+    "https://blog.cloudflare.com/cloudflare-backbone-internet-fast-lane/": {
+      "http_status": 200,
+      "final_url": "https://blog.cloudflare.com/cloudflare-backbone-internet-fast-lane/",
+      "sha256": "276d803da5ea4e00e2af16cbc41ddc293dcca746ca79a03a897ffe9e36d69633",
+      "error": null
+    },
+    "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-A-31-01-2025-v3.pdf": {
+      "http_status": 200,
+      "final_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-A-31-01-2025-v3.pdf",
+      "sha256": "0d430a063582597fafe5c420116bc162e41901fb8aeb795b0f5d7a3ff32f3e22",
+      "error": null
+    },
+    "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-B-31-01-2025-v3.pdf": {
+      "http_status": 200,
+      "final_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-B-31-01-2025-v3.pdf",
+      "sha256": "91aaf1cebdbe6910e4826770f4aab25b284bed1d44bfb1ecff8669e1225f88e4",
+      "error": null
+    },
+    "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/digital-workplace/BT-Fortinet-SD-WAN-Service-Schedule-Part-B-31.03.2025-V4.pdf": {
+      "http_status": 200,
+      "final_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/digital-workplace/BT-Fortinet-SD-WAN-Service-Schedule-Part-B-31.03.2025-V4.pdf",
+      "sha256": "980a5ec911b0ca3b6ac3e8b7cd640ec908894e6720f76695ca68bb14cc455fc6",
+      "error": null
+    },
+    "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-bt-mngd-cisco-sd-wan-annex-to-mngd-srvcs-sch.pdf": {
+      "http_status": 200,
+      "final_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-bt-mngd-cisco-sd-wan-annex-to-mngd-srvcs-sch.pdf",
+      "sha256": "0eadb4eb3543e1d80662636cfb84dc30578b80676b5915507f8534f88a3bcab0",
+      "error": null
+    },
+    "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf": {
+      "http_status": 200,
+      "final_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+      "sha256": "85b6f0748527ad21ba92f3732a966c606e68416dd35622b1766189fb7ae447b3",
+      "error": null
+    },
+    "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-mngdsrvcsch-published-28-november-2024.pdf": {
+      "http_status": 200,
+      "final_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-mngdsrvcsch-published-28-november-2024.pdf",
+      "sha256": "ab9e6d7120a70c63327ba3860bcfd7577e1e8dfbb6ebff3b43b3f9ae8ff80b1d",
+      "error": null
+    },
+    "https://business.comcast.com/about-us/our-network": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://business.comcast.com/about-us/press-releases/2021/comcast-business-to-acquire-masergy": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://business.comcast.com/about-us/press-releases/2022/comcast-business-partners-with-fortinet-to-secure-enterprise-application-access": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://business.comcast.com/about-us/press-releases/2023/comcast-business-fortinet-and-exclusive-networks-expand-masergy": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://business.comcast.com/enterprise/products-services/cybersecurity-services": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan": {
+      "http_status": 200,
+      "final_url": "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan",
+      "sha256": "2f5755ced51d2466ce4add834ad35cd45b0d0820512ff92d677d8564119f2720",
+      "error": null
+    },
+    "https://business.comcast.com/enterprise/products-services/secure-networking/sd-wan": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://business.comcast.com/~/media/business_comcast_com/PDFs/SDN---SD-WAN/Masergy/Product%20Sheet%20%20Masergy%20Managed%20SDWAN%20Secure.pdf": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/": {
+      "http_status": 200,
+      "final_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
+      "sha256": "e8f8fb56cb61a5c93ef900d0a081d6a310eacd340899e6fcae84384db0a5ef5b",
+      "error": null
+    },
+    "https://corporate.comcast.com/press/releases/comcast-business-fortinet-secure-enterprise-application-access-sase-sse-solutions": {
+      "http_status": 200,
+      "final_url": "https://corporate.comcast.com/press/releases/comcast-business-fortinet-secure-enterprise-application-access-sase-sse-solutions",
+      "sha256": "d7f74cda79722e6ace33e464249af5f0723cbae0dd2141b9fdb59a1bd9a7165c",
+      "error": null
+    },
+    "https://cradlepoint.com/about/trust/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/about/trust/",
+      "sha256": "90837f5b5e5febf366fa46a7801b2bfa008f4be68bcf8bc640c1acf82bd523e0",
+      "error": null
+    },
+    "https://cradlepoint.com/about/trust/security/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/about/trust/security/",
+      "sha256": "70153d4672598922e8110c4d3bdb000b3effe0b618e153b01c40527d6116c537",
+      "error": null
+    },
+    "https://cradlepoint.com/datasheet/ncx-service-gateway/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/datasheet/netcloud-sase/",
+      "sha256": "8be10c7c6a139a122e24a6711f607efc6d06593aa9e8b583be72bc8fabfab3e6",
+      "error": null
+    },
+    "https://cradlepoint.com/datasheet/netcloud-sase/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/datasheet/netcloud-sase/",
+      "sha256": "8be10c7c6a139a122e24a6711f607efc6d06593aa9e8b583be72bc8fabfab3e6",
+      "error": null
+    },
+    "https://cradlepoint.com/partners/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.com/partners/for-partners/",
+      "sha256": "55c58a53038a7ae04615bd68b639ba0bd65a565203755348da10473502f3ced3",
+      "error": null
+    },
+    "https://cradlepoint.com/partners/for-partners/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.com/partners/for-partners/",
+      "sha256": "c1b58ffa60d2a2aec6a6de8d64696363c3e147f104e0eba4a391ab8a53782020",
+      "error": null
+    },
+    "https://cradlepoint.com/products/netcloud-sase/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/products/netcloud/netcloud-sase/",
+      "sha256": "1eedc4b6797512f87909a1092a960a0f17162adb858fbeb4272b6ebf10883461",
+      "error": null
+    },
+    "https://cradlepoint.com/products/netcloud-service/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/products/netcloud/netcloud-service/",
+      "sha256": "655f64bc9294988074cd84ae783649ab74ac6b0ac5747e5fe1812aeae6d9f1c1",
+      "error": null
+    },
+    "https://cradlepoint.com/products/wireless-wan/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/products/wireless-wan/",
+      "sha256": "b4ebad40e2e347bf214d0a47bc517dc9f59fa40da63b4c66af336b3bb3b1bb6a",
+      "error": null
+    },
+    "https://cradlepoint.com/support/": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/support/",
+      "sha256": "86b628445a203cd9c550aa8fce5e99ac86769d9a22f053496a9b980e82fc0250",
+      "error": null
+    },
+    "https://cradlepoint.ericsson.com/about/how-to-buy": {
+      "http_status": 200,
+      "final_url": "https://cradlepoint.ericsson.com/about/how-to-buy/",
+      "sha256": "086be7806d2cff957cd972c85adbd62cd2eaa5fd0aafd7c6a8e6036b38fd6a65",
+      "error": null
+    },
+    "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf": {
+      "http_status": 200,
+      "final_url": "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf",
+      "sha256": "1cee5d5f8746d51edffa76682ccea451be7d960fd3735fdefa3da67ca1259bc5",
+      "error": null
+    },
+    "https://developers.cloudflare.com/cloudflare-one/policies/gateway/": {
+      "http_status": 200,
+      "final_url": "https://developers.cloudflare.com/cloudflare-one/traffic-policies/",
+      "sha256": "6b0d80fa2497c09afd5b86cd74276ba7bd75d9ec979e596cd912f98437040c07",
+      "error": null
+    },
+    "https://developers.cloudflare.com/magic-wan/": {
+      "http_status": 200,
+      "final_url": "https://developers.cloudflare.com/cloudflare-wan/",
+      "sha256": "aa42c45c1835b48ba3970e857bc32855197453955a1b7c71dc57b2eafde3098c",
+      "error": null
+    },
+    "https://developers.cloudflare.com/tenant/": {
+      "http_status": 200,
+      "final_url": "https://developers.cloudflare.com/tenant/",
+      "sha256": "264313b729f44ff8a7dc127d169d46ccfe1535773bf8e13ea058b033e3fb7805",
+      "error": null
+    },
+    "https://docs.axissecurity.com/docs/pops": {
+      "http_status": 200,
+      "final_url": "https://docs.axissecurity.com/docs/pops",
+      "sha256": "a96c39bb8ce4c9ee09b16063661a44a657afecefebaedf60957ffa9e66b73f0e",
+      "error": null
+    },
+    "https://docs.axissecurity.com/docs/tenants-management": {
+      "http_status": 200,
+      "final_url": "https://docs.axissecurity.com/docs/tenants-management",
+      "sha256": "0bb80040863bcf216a7f662d5840774177f158950c305b90c84bf3d3fe9090c6",
+      "error": null
+    },
+    "https://docs.colt.net/datasheets/networking/sd-wan": {
+      "http_status": 200,
+      "final_url": "https://docs.colt.net/datasheets/wan/sd-wan",
+      "sha256": "e2bd6ffdcab4bb23fe79d9bbbe0871ebdbc3b8bc38606068b7bf3b832a32a29c",
+      "error": null
+    },
+    "https://docs.fortinet.com/document/fortisase/7.4.0/unified-sase-for-mssp-architecture-guide/169721/multitenancy": {
+      "http_status": 200,
+      "final_url": "https://docs.fortinet.com/document/fortisase/7.4.0/unified-sase-for-mssp-architecture-guide/169721/multitenancy",
+      "sha256": "e7730b2f8af3d97fae95731959196c300c03bb4e3de263136cb13d5684b2fc61",
+      "error": null
+    },
+    "https://docs.paloaltonetworks.com/prisma-access/administration/colo-connect-in-prisma-access": {
+      "http_status": 200,
+      "final_url": "https://docs.paloaltonetworks.com/prisma-access/administration/colo-connect-in-prisma-access",
+      "sha256": "0f3fddea56051bf233679b02e6f66b5424403eb75fd2c94646960de9da2b6980",
+      "error": null
+    },
+    "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview": {
+      "http_status": 200,
+      "final_url": "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview",
+      "sha256": "4dae30f460ae69e9cb12751abd7474ef8a339b7ff6d2bc83ca6cde7eb3a329df",
+      "error": null
+    },
+    "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview/list-of-prisma-access-locations": {
+      "http_status": 200,
+      "final_url": "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview/list-of-prisma-access-locations",
+      "sha256": "d4c37ef13c157d035a7484cbb7ac756a0608427005442e39ef32309973cc45ce",
+      "error": null
+    },
+    "https://docs.paloaltonetworks.com/prisma-access/administration/sase-private-location": {
+      "http_status": 200,
+      "final_url": "https://docs.paloaltonetworks.com/prisma-access/administration/sase-private-location",
+      "sha256": "70bf09f6b4232c98130948dc63b9945cd7569e1f7052bd9857df821192986356",
+      "error": null
+    },
+    "https://docs.versa-networks.com/Hardware/Hardware_Maintenance_and_Support/01Hardware_Support_Overview": {
+      "http_status": 200,
+      "final_url": "https://docs.versa-networks.com/Hardware/Hardware_Maintenance_and_Support/01Hardware_Support_Overview",
+      "sha256": "a32e16dd5a6d46a134667e1e001e6b123715cea41ece4e192b8ebde3b47e1099",
+      "error": null
+    },
+    "https://docs.versa-networks.com/Management_and_Orchestration/Versa_Concerto_Orchestrator/01_Getting_Started/01_Versa_Concerto_Overview": {
+      "http_status": 200,
+      "final_url": "https://docs.versa-networks.com/Secure_SD-WAN/02_Configuration_from_Concerto/Secure_SD-WAN_Configuration_(Releases_12.2.2_and_Earlier)/01_Versa_Concerto_for_SD-WAN",
+      "sha256": "12716669c6cdc89d534aca79f0fb96ddc92510b7577d230d3659a3836e14e41d",
+      "error": null
+    },
+    "https://docs.versa-networks.com/Secure_SD-WAN/01_Configuration_from_Director/Common_Configuration/Configure_WWAN": {
+      "http_status": 200,
+      "final_url": "https://docs.versa-networks.com/Secure_SD-WAN/01_Configuration_from_Director/Common_Configuration/Configure_WWAN",
+      "sha256": "bb1b9ee58b59ac5dc7798871f8662ff04ee3b01ad01762010be143b9220134b5",
+      "error": null
+    },
+    "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Concerto/Configure_Data_Loss_Prevention_in_Concerto": {
+      "http_status": 200,
+      "final_url": "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Concerto/Configure_Data_Loss_Prevention_in_Concerto",
+      "sha256": "ea8b904d9e817f2e374757bfc159b5a79cb0778da4135d29b3b47843e7c1aea7",
+      "error": null
+    },
+    "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Director/Ecosystem/Versa_SASE_Ecosystem": {
+      "http_status": 200,
+      "final_url": "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Director/Ecosystem/Versa_SASE_Ecosystem",
+      "sha256": "f7b5e0bfd2d3d4d6d840abbf662b3009a1ccfa2fe1f87c5c6f869d143dc035e3",
+      "error": null
+    },
+    "https://documentation.meraki.com/CiscoPlusSecureConnect/Cisco___Secure_Connect_Pre-configuration_Checklist/Data_Centers": {
+      "http_status": 200,
+      "final_url": "https://documentation.meraki.com/SASE_and_SD-WAN/Cisco_Secure_Connect/Install_and_Get_Started/Secure_Connect_-_Getting_Started/Data_Centers",
+      "sha256": "a03df02434ef3e9ee347912cd571d18952abc98e7d059deb740730f8f6ac2af9",
+      "error": null
+    },
+    "https://documentation.meraki.com/Platform_Management/Managed_Service_Provider_Resources/Dashboard_Branding_for_MSPs": {
+      "http_status": 200,
+      "final_url": "https://documentation.meraki.com/Platform_Management/Managed_Service_Provider_Resources/Dashboard_Branding_for_MSPs",
+      "sha256": "2c8d1746cf8e2614e78f3762cd126c9f050946d5c3602e3c67a63a9c3fa327e7",
+      "error": null
+    },
+    "https://go.catonetworks.com/rs/245-RJK-441/images/Cato_Managed_Detection_and_Response-MDR-Service.pdf": {
+      "http_status": 200,
+      "final_url": "https://go.catonetworks.com/rs/245-RJK-441/images/Cato_Managed_Detection_and_Response-MDR-Service.pdf",
+      "sha256": "76d696892b7461cbaad89395ac3ef4d4fd97244c83ca4d28eb68f4405c0f0baf",
+      "error": null
+    },
+    "https://ir.lumen.com/news/news-details/2024/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution/default.aspx": {
+      "http_status": 200,
+      "final_url": "https://ir.lumen.com/news/news-details/2024/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution/default.aspx",
+      "sha256": "162febeb8c1537103a3b469510693fe20de903e6bfb3d14290191803bd9f1745",
+      "error": null
+    },
+    "https://ir.lumen.com/news/news-details/2025/Lumen-Accelerates-Multi-Billion-Dollar-Network-Expansion-to-Meet-Soaring-AI-Demand/default.aspx": {
+      "http_status": 200,
+      "final_url": "https://ir.lumen.com/news/news-details/2025/Lumen-Accelerates-Multi-Billion-Dollar-Network-Expansion-to-Meet-Soaring-AI-Demand/default.aspx",
+      "sha256": "474b0baa33ef8664e8ca79e20a54b43ce587befd24ac65c939f5d5cfc2546583",
+      "error": null
+    },
+    "https://meraki.cisco.com/managedserviceproviders": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://newsroom.bt.com/bt-launches-a-new-managed-sase-service-powered-by-fortinet/": {
+      "http_status": 200,
+      "final_url": "https://newsroom.bt.com/bt-launches-a-new-managed-sase-service-powered-by-fortinet/",
+      "sha256": "aa2f9f5ea01810cd25d868a5f9f6f85b647ac0d74c349adee8b47400f7c531eb",
+      "error": null
+    },
+    "https://newsroom.bt.com/bt-readies-customers-for-global-fabric-so-they-can-hit-the-cloud-running/": {
+      "http_status": 200,
+      "final_url": "https://newsroom.bt.com/bt-readies-customers-for-global-fabric-so-they-can-hit-the-cloud-running/",
+      "sha256": "d2a93fa6f32065aae6344c940f69f58539768816f7d6e0aaf071a1d5b73ea9b7",
+      "error": null
+    },
+    "https://newsroom.bt.com/bt-wraps-multi-cloud-in-a-new-global-fabric/": {
+      "http_status": 200,
+      "final_url": "https://newsroom.bt.com/bt-wraps-multi-cloud-in-a-new-global-fabric/",
+      "sha256": "9673d65d237e079aea9f694e0d457b31da7c1b5abd2f3748c8f680103a21fc51",
+      "error": null
+    },
+    "https://newsroom.bt.com/bts-global-fabric-goes-live-with-customer-traffic/": {
+      "http_status": 200,
+      "final_url": "https://newsroom.bt.com/bts-global-fabric-goes-live-with-customer-traffic/",
+      "sha256": "9c15d6e978bb498c790402235c2d368e8b08397aa38caa6074d8cd9bdde1403d",
+      "error": null
+    },
+    "https://s21.q4cdn.com/756714007/files/doc_news/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution-2024.pdf": {
+      "http_status": 200,
+      "final_url": "https://s21.q4cdn.com/756714007/files/doc_news/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution-2024.pdf",
+      "sha256": "7f1e055847b7f0936b25917e85e50ce9da27909a73c6b4068c0e2042a4efc065",
+      "error": null
+    },
+    "https://support.catonetworks.com/hc/en-us/articles/16308182518173-X1600-Cellular-Connectivity-Troubleshooting": {
+      "http_status": 200,
+      "final_url": "https://knowledge.catonetworks.com/docs/en/x1600-cellular-connectivity-troubleshooting",
+      "sha256": "259a0a4150ce969a0e0e0ce867edf6bfc3d9a5cc4edc3b7fde847cc67f4e7a7c",
+      "error": null
+    },
+    "https://umbrella.cisco.com/cisco-umbrella-global-cloud-architecture": {
+      "http_status": 200,
+      "final_url": "https://umbrella.cisco.com/cisco-umbrella-global-cloud-architecture",
+      "sha256": "cea1c8c0b94eb7c7c1f90bf391d6e4608083e4c2b5c26a0ee219836109bc57f3",
+      "error": null
+    },
+    "https://umbrella.cisco.com/why-umbrella/global-network-and-traffic": {
+      "http_status": 200,
+      "final_url": "https://umbrella.cisco.com/why-umbrella/global-network-and-traffic",
+      "sha256": "21259bb59766ffdf5b378cd97a288ef1bbc7ca95f3cdeaee4d52129a9a8dc811",
+      "error": null
+    },
+    "https://versa-networks.com/documents/Versa-Hosted-SASE-SLA.pdf": {
+      "http_status": 200,
+      "final_url": "https://versa-networks.com/documents/Versa-Hosted-SASE-SLA.pdf",
+      "sha256": "079e449541842e9bfd0f8b72d47811822f1ff8e196c3eca74dddb7d443926f29",
+      "error": null
+    },
+    "https://versa-networks.com/documents/datasheets/versa-networks-hosted-and-managed-head-end.pdf": {
+      "http_status": 200,
+      "final_url": "https://versa-networks.com/documents/datasheets/versa-networks-hosted-and-managed-head-end.pdf",
+      "sha256": "39fceaf35eef61a2d42e9c75d251b68c6eade330a17c9c9f24da8e547cc89004",
+      "error": null
+    },
+    "https://versa-networks.com/documents/datasheets/versa-premier-service.pdf": {
+      "http_status": 200,
+      "final_url": "https://versa-networks.com/documents/datasheets/versa-premier-service.pdf",
+      "sha256": "662609c994b01b7c85c3db1e345114d9f565875d382505ebb8032b0993de8fcd",
+      "error": null
+    },
+    "https://versa-networks.com/documents/datasheets/versa-sdwan.pdf": {
+      "http_status": 200,
+      "final_url": "https://versa-networks.com/documents/datasheets/versa-sdwan.pdf",
+      "sha256": "4c93a79044c4dcb2e0bd18fe0f7c8fa7b138755f4008c867035635a6913e8224",
+      "error": null
+    },
+    "https://versa-networks.com/documents/datasheets/versa-secure-access-fabric.pdf": {
+      "http_status": 200,
+      "final_url": "https://versa-networks.com/documents/datasheets/versa-secure-access-fabric.pdf",
+      "sha256": "23335f6d148ef925e38d902059f89fa510724d40a6dbef1aeb425480581ed1eb",
+      "error": null
+    },
+    "https://versa-networks.com/documents/solution-briefs/versa-sase.pdf": {
+      "http_status": 200,
+      "final_url": "https://versa-networks.com/documents/solution-briefs/versa-sase.pdf",
+      "sha256": "503ae1478a15f695cc15119796bac39473a8903280894512235b4a144046fde3",
+      "error": null
+    },
+    "https://versa-networks.com/products/": {
+      "http_status": 200,
+      "final_url": "https://versa-networks.com/products/",
+      "sha256": "9df4a9eeeb91f98eb9f43db98d782b61bea2a3748402fd1c83877ec9744c9cbf",
+      "error": null
+    },
+    "https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-7x0-Series.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-7x0-Series.pdf",
+      "sha256": "97959b2d5501d699f5aafe7fd6993663aa92c673f5df99e9a6e843187c553d24",
+      "error": null
+    },
+    "https://www.arista.com/assets/data/pdf/SD-WAN-Solution-Overview.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/assets/data/pdf/SD-WAN-Solution-Overview.pdf",
+      "sha256": "077e5b8827da8151fa429bb7d817d07e5b57e87c06f540d890691b47f0960604",
+      "error": null
+    },
+    "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Data-Sheet.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Data-Sheet.pdf",
+      "sha256": "d6bf0d3cd73747ae47db07107cd536f2c25ea11279c2439d569bdaab9f1127a5",
+      "error": null
+    },
+    "https://www.arista.com/en/company/company-overview": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/company/company-overview",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/company/news/press-release/24357-pr-20260721": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/company/news/press-release/24357-pr-20260721",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/partner/partner-program": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/partner/partner-program",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/products/security-services": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/products/security-services",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/products/velocloud-4100-5100-series": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/products/velocloud-4100-5100-series",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/products/velocloud-7x0-series": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/products/velocloud-7x0-series",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/solutions/sd-wan": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/solutions/sd-wan",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/solutions/sd-wan/sd-wan-security": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/solutions/sd-wan/sd-wan-security",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.arista.com/en/support/customer-support": {
+      "http_status": 200,
+      "final_url": "https://www.arista.com/en/support/customer-support",
+      "sha256": "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea",
+      "error": null
+    },
+    "https://www.aryaka.com/about-us/global-pop-locations/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/about-us/global-pop-locations/",
+      "sha256": "0c531db4dfe8e509a551de3bb0bc23d0c168630b855fe7ccacae59c16f18dfd8",
+      "error": null
+    },
+    "https://www.aryaka.com/aryaka-service-level-agreement/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/aryaka-service-level-agreement/",
+      "sha256": "629f3dae15cd63e62e119a488f5782512fad4213d2ba2c6a206ba6b83652f8e7",
+      "error": null
+    },
+    "https://www.aryaka.com/datasheet/anap-datasheet/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/datasheet/anap-datasheet/",
+      "sha256": "6e5a98a24265085f5c7f6f7a1d8e833f6a6bb7d8c84b46a3d63c58fcd5256ed4",
+      "error": null
+    },
+    "https://www.aryaka.com/datasheet/global-connectivity-solution/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/datasheet/global-connectivity-solution/",
+      "sha256": "2c73805348e46cb1103028ed1e2e79bf710527d649847bbcc01715058bb2a98f",
+      "error": null
+    },
+    "https://www.aryaka.com/datasheet/high-availability-solution/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/datasheet/high-availability-solution/",
+      "sha256": "0492f5b2097b2fe396702ba073170621cfe1917bc6635f52223d81c40ef8e9a4",
+      "error": null
+    },
+    "https://www.aryaka.com/datasheet/managed-wan-services/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/datasheet/smartmanage-datasheet/",
+      "sha256": "c42e4466308eff34fb469315dbd0efcfbf51b18c868b4b3428a485a45edf40f0",
+      "error": null
+    },
+    "https://www.aryaka.com/datasheet/ngfw-swg-solution/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/datasheet/ngfw-swg-solution/",
+      "sha256": "bd845829614edd030e87bdcbddde5f95ae0c6884b0495d061fb0868eea1e80a5",
+      "error": null
+    },
+    "https://www.aryaka.com/datasheet/smartmanage-datasheet/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/datasheet/smartmanage-datasheet/",
+      "sha256": "c42e4466308eff34fb469315dbd0efcfbf51b18c868b4b3428a485a45edf40f0",
+      "error": null
+    },
+    "https://www.aryaka.com/datasheet/smartsecure-hosted-vm-firewall-service/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/datasheet/smartsecure-hosted-vm-firewall-service/",
+      "sha256": "77404a6e7445e2d547b50eb46c4caaf13552624c13ee09c08d83eabb71e2704c",
+      "error": null
+    },
+    "https://www.aryaka.com/last-mile-connectivity/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/last-mile-connectivity/",
+      "sha256": "5a69f74872fdca83d9c745a29f0461fbf2ffa805c18b360dd9d40f899cef3379",
+      "error": null
+    },
+    "https://www.aryaka.com/partners/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/partners/accelerate-program/",
+      "sha256": "d647ca03841fad3b8165947c0089000776849227eba05474ef4b8a1191d3bd80",
+      "error": null
+    },
+    "https://www.aryaka.com/products-and-services/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/products-and-services/",
+      "sha256": "9d74c53c3b7579f42e2e9d96aee9371086c28254d3d839395e1742c7c63bc243",
+      "error": null
+    },
+    "https://www.aryaka.com/services-terms/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/services-terms/",
+      "sha256": "fe8b7ebe6a59889dddb7300b13dc69347ccc84fb85e9177753e4e7c79424054d",
+      "error": null
+    },
+    "https://www.aryaka.com/use-cases/integrated-next-gen-firewall/": {
+      "http_status": 200,
+      "final_url": "https://www.aryaka.com/use-cases/integrated-next-gen-firewall/",
+      "sha256": "b556d1e6fd8fbac3872ffc70f6c5d17edad9e2293d1b895e8e752cd001889309",
+      "error": null
+    },
+    "https://www.att.com/scmsassets/business/help/pdf/sla_qg_ADI-credit_updBC.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.att.com/scmsassets/business/help/pdf/sla_qg_ADI-credit_updBC.pdf",
+      "sha256": "9fc946dfeebd81f308a516ea79d69e49f8a2ac5ec361853d964c19d09200c55e",
+      "error": null
+    },
+    "https://www.business.att.com/categories/att-managed-services.html": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/categories/att-managed-services.html",
+      "sha256": "93be10da5fcf8eb8c972db8f80515babbca93ee07c0d60cd5701127e740a1e0d",
+      "error": null
+    },
+    "https://www.business.att.com/collateral/att-sd-wan-with-cisco.html": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/collateral/att-sd-wan-with-cisco.html",
+      "sha256": "80d7f649abd4f8cf9e7ccfee4a304b62e0adc755cd4552e5c8c1599d3425dab9",
+      "error": null
+    },
+    "https://www.business.att.com/content/dam/attbusiness/briefs/att-flexware-applications-brief.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-flexware-applications-brief.pdf",
+      "sha256": "d3558875b01dda8300dd51deff3991a170841ab0640f1c4650b04a0e08f9421c",
+      "error": null
+    },
+    "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-branch-with-fortinet-solution-brief.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-branch-with-fortinet-solution-brief.pdf",
+      "sha256": "1ea35a2019cad610e5ac1da0da5cefb03f6137dae1c2fcef6823804618ca8c67",
+      "error": null
+    },
+    "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-with-pan-solution-brief.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-with-pan-solution-brief.pdf",
+      "sha256": "4290cc0410335c168af7785e0e694cd011a8f06dd5a211037f130f6b7e44669d",
+      "error": null
+    },
+    "https://www.business.att.com/content/dam/attbusiness/briefs/att-sd-wan-with-vmware-product-brief.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-sd-wan-with-vmware-product-brief.pdf",
+      "sha256": "05ac391f4c1840b3c2a48dddcd1b17e52dcfa9cfeea05d6e4ec80182974bcd69",
+      "error": null
+    },
+    "https://www.business.att.com/content/dam/attbusiness/briefs/sd-wan-product-brief.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/content/dam/attbusiness/briefs/sd-wan-product-brief.pdf",
+      "sha256": "1947a0523a605a42120d7c80e72f57bfc416850c30ada0ab4fec3cd49de00328",
+      "error": null
+    },
+    "https://www.business.att.com/industries/att-global-business.html": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/industries/att-global-business.html",
+      "sha256": "b6c4d6cc5915b1436490781167cafe9b46c86840cd9b337e400f04e40c6fe9fe",
+      "error": null
+    },
+    "https://www.business.att.com/industries/partner-solutions/att-partner-exchange.html": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/industries/partner-solutions/att-partner-exchange.html",
+      "sha256": "f4540e302a04bbe6f5a25fe64abac50c6b72651e1f2940a4c63c739a7d44d7c8",
+      "error": null
+    },
+    "https://www.business.att.com/products/dedicated-internet.html": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/products/att-dedicated-internet.html",
+      "sha256": "c6a5edb2cd4022201ce4a7d8c34603d3d77c5ae41fe56a2475921719176ef9b0",
+      "error": null
+    },
+    "https://www.business.att.com/products/sd-wan.html": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/products/sd-wan.html",
+      "sha256": "049641e24bd2ac8a09dcab71daa5925fbe3cd3465cc95f00e8412debaf88a57e",
+      "error": null
+    },
+    "https://www.business.att.com/products/security-operations-center.html": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/products/security-operations-center.html",
+      "sha256": "ac034b922134dd67c9a4817f2dd296e10bcffb7f0c47a8b92b35b62d21057a0f",
+      "error": null
+    },
+    "https://www.businesswire.com/news/home/20230202005142/en/NTT-Enhances-Its-Managed-Campus-Networks-Portfolio-With-Palo-Alto-Networks-Prisma-SASE-to-Address-Networking-Security-and-Business-Management-Challenges": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.catonetworks.com/careers/careers-post/4526572101/professional-services-engineer/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/careers/careers-post/4526572101/professional-services-engineer/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.catonetworks.com/msa/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/msa/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.catonetworks.com/news/cato-empowers-service-providers-deliver-true-sase-services-with-cato-private-pop/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/news/cato-empowers-service-providers-deliver-true-sase-services-with-cato-private-pop/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.catonetworks.com/partners/managed-services-provider/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/partners/managed-services-provider/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.catonetworks.com/platform/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/platform/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.catonetworks.com/platform/global-private-backbone/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/platform/global-private-backbone/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.catonetworks.com/services/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/services/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.catonetworks.com/services/managed-sase/": {
+      "http_status": 200,
+      "final_url": "https://www.catonetworks.com/services/managed-sase/",
+      "sha256": "d02032286070b4dd9d8fbd985a7bdca8af8edf52b89ff177db3bfcb2c8a9c43d",
+      "error": null
+    },
+    "https://www.checkpoint.com/harmony/sase/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/harmony/sase/",
+      "sha256": "976a32c71cabd341718b905d7d1e405485f849055e844c5629cadc891a3a7223",
+      "error": null
+    },
+    "https://www.checkpoint.com/harmony/sase/internet-access/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/harmony/sase/internet-access/",
+      "sha256": "16059fea65331acf112ebc13acc41b96fb313794fce7c0c5eca20857d8d46774",
+      "error": null
+    },
+    "https://www.checkpoint.com/harmony/sase/private-access/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/harmony/sase/private-access/",
+      "sha256": "8f964380f4a53730024b4ec65996c386155b5b5a9c13967e78beab3a304d198e",
+      "error": null
+    },
+    "https://www.checkpoint.com/partners/mssp-program/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/partners/msp-program/",
+      "sha256": "f2905e25c5a62b5d4e95b52fb7c7f0dc03c146d1f5cb415b6133e4395b6273d4",
+      "error": null
+    },
+    "https://www.checkpoint.com/quantum/next-generation-firewall/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/quantum/next-generation-firewall/",
+      "sha256": "e0585e8b5261d2a1348202bf39ad77117bbc2df8101d2912142d98a64c66bcb1",
+      "error": null
+    },
+    "https://www.checkpoint.com/services/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/services/",
+      "sha256": "b22d6300f30d4c46c3f0e32e39bfe53483d8b7dc92a43577de058369ce81c50f",
+      "error": null
+    },
+    "https://www.checkpoint.com/services/managed-security/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/services/managed-security/",
+      "sha256": "c91cb12d488aa02637af347e1d453cef42fa1197b6a7f8003f57505ff86653ac",
+      "error": null
+    },
+    "https://www.checkpoint.com/services/managed-security/managed-firewall/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/services/managed-security/managed-firewall/",
+      "sha256": "05ac657812fec31a4ddfda990248c32390b51131d877b996a1e87466c6f3fde6",
+      "error": null
+    },
+    "https://www.checkpoint.com/services/professional-services/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/services/professional-services/",
+      "sha256": "362c71d17601ff28b18f4631980bc3e0883279991e91737e66378a325fc9f6ed",
+      "error": null
+    },
+    "https://www.checkpoint.com/support-services/support-plans/": {
+      "http_status": 200,
+      "final_url": "https://www.checkpoint.com/support-services/support-plans/",
+      "sha256": "928aeaae23613b350cf2c118e3eecbd59f69b86851580ee38c3c81faa0882b97",
+      "error": null
+    },
+    "https://www.cisco.com/c/dam/en_us/about/doing_business/legal/OfferDescriptions/Cisco-Secure-Access-Product-Description.pdf": {
+      "error": "HTTPError",
+      "http_status": 403
+    },
+    "https://www.cisco.com/c/dam/en_us/solutions/global-partners/ntt-data-cisco-sase-brochure.pdf": {
+      "error": "HTTPError",
+      "http_status": 403
+    },
+    "https://www.cisco.com/c/en/us/products/collateral/security/secure-access/secure-access-ds.html": {
+      "error": "HTTPError",
+      "http_status": 403
+    },
+    "https://www.cisco.com/site/us/en/services/index.html": {
+      "error": "HTTPError",
+      "http_status": 403
+    },
+    "https://www.cisco.com/site/us/en/services/support/index.html": {
+      "error": "HTTPError",
+      "http_status": 403
+    },
+    "https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html": {
+      "error": "HTTPError",
+      "http_status": 403
+    },
+    "https://www.cloudflare.com/data-localization/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/data-localization/",
+      "sha256": "197506de3c96e02bbd3c23c190a79146ae7813cce3cb438414a2b7785222fe4e",
+      "error": null
+    },
+    "https://www.cloudflare.com/network-services/products/magic-firewall/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/products/network-firewall/",
+      "sha256": "fa4f8a7aa1b330dde0fa958d7845802b693f57b82b0f18e674949649a623c201",
+      "error": null
+    },
+    "https://www.cloudflare.com/network/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/network/",
+      "sha256": "959311dd20a191e9d1c63f7915474036b8e1f18c15d5c5ec73daca06e3b7a8c3",
+      "error": null
+    },
+    "https://www.cloudflare.com/partners/managed-service-providers/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/partners/power-up-program/",
+      "sha256": "4b686ce866b6025d8ad4472d320421d841074cfb0a70219cde82e95e6b5db450",
+      "error": null
+    },
+    "https://www.cloudflare.com/partners/services/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/partners/power-up-program/",
+      "sha256": "2f249de3daf923c014a02efe990c3b4096427ceeedf2f2718b99ec27c8145337",
+      "error": null
+    },
+    "https://www.cloudflare.com/plans/enterprise/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/plans/enterprise/externa/",
+      "sha256": "10734d0e1bd77989f930b41cfde5e1955bab58a235cfdc9805dff54d370e9221",
+      "error": null
+    },
+    "https://www.cloudflare.com/professional-services/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/professional-services/",
+      "sha256": "20dbd58340e215d3cd2e16b721a3d28855ca83a7ec4b5a3616a2c90d628dcbba",
+      "error": null
+    },
+    "https://www.cloudflare.com/sase/": {
+      "http_status": 200,
+      "final_url": "https://www.cloudflare.com/sase/",
+      "sha256": "70fc8be2cb6eaa34a6d5df0c6e961500219bb6786d8b806f3e8d0b1169720855",
+      "error": null
+    },
+    "https://www.colt.net/cybersecurity/": {
+      "error": "HTTPError",
+      "http_status": 404
+    },
+    "https://www.colt.net/help/security.html": {
+      "error": "HTTPError",
+      "http_status": 404
+    },
+    "https://www.colt.net/products/networking/sd-wan": {
+      "http_status": 200,
+      "final_url": "https://www.colt.net/products/networking/sd-wan",
+      "sha256": "0a857f2ae525575acfdd35193a86ea963e81a65e719bc10fc3af86af45295f3b",
+      "error": null
+    },
+    "https://www.colt.net/solutions/professional-services/": {
+      "error": "HTTPError",
+      "http_status": 404
+    },
+    "https://www.corp.att.com/worldwide/why-att/": {
+      "http_status": 200,
+      "final_url": "https://www.business.att.com/industries/att-global-business.html",
+      "sha256": "b6c4d6cc5915b1436490781167cafe9b46c86840cd9b337e400f04e40c6fe9fe",
+      "error": null
+    },
+    "https://www.forcepoint.com/cybersecurity-services": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/cybersecurity-services",
+      "sha256": "d15dfe53bcb706dd8db356ea35ea0b8db7d38dc6ade92d3081bc4e9ad07e28cf",
+      "error": null
+    },
+    "https://www.forcepoint.com/partners/forcepoint-global-partner-program": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/partners/forcepoint-global-partner-program",
+      "sha256": "6267256b3df4bb58c01a9bb1cf8f3ef3d91f538ad4142d3247680e6f35884adb",
+      "error": null
+    },
+    "https://www.forcepoint.com/product/secure-sd-wan": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/product/secure-sd-wan",
+      "sha256": "7b35d16439dc0dc8292abedd7c57643b02733e062e7bd5a27b3121d2652505e3",
+      "error": null
+    },
+    "https://www.forcepoint.com/product/secure-web-gateway-swg": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/product/secure-web-gateway-swg",
+      "sha256": "27d84ef6946f714ee19c1c7252cc095299c00665b60ba2ef9009558fd07a6fe0",
+      "error": null
+    },
+    "https://www.forcepoint.com/resources/datasheets/flexedge-secure-sd-wan-manager": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/sites/default/files/2025-05/datasheet-forcepoint-security-management-center-en.pdf",
+      "sha256": "3477dc5144f388420604e076466ffd0472b087dac81828987c50ad85e03b6f44",
+      "error": null
+    },
+    "https://www.forcepoint.com/resources/datasheets/forcepoint-ngfw-120-series-appliance": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/sites/default/files/2026-08/datasheet-forcepoint-network-security-120-series-en.pdf",
+      "sha256": "6954091558a3631e6f40e8757176f3eefaefe56f15730270b74e123e3c2e764b",
+      "error": null
+    },
+    "https://www.forcepoint.com/resources/datasheets/forcepoint-technical-support-offerings": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/sites/default/files/2026-01/datasheet-forcepoint-support-programs-en.pdf",
+      "sha256": "c11f809173123f5fd6ddbb1ed609a186e8ba2679f35694c3829f2653251965e1",
+      "error": null
+    },
+    "https://www.forcepoint.com/services/implementation-packages": {
+      "http_status": 200,
+      "final_url": "https://www.forcepoint.com/services/implementation-packages",
+      "sha256": "d8f1a547d9b4b95f03a666a9769f588603b906a24a10ecd826fbd05b18d8b2d5",
+      "error": null
+    },
+    "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortisase.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortisase.pdf",
+      "sha256": "0716457f73f0fbd153c13c925846576c92f0cf4be9cf659e9aeb688e6b8ee689",
+      "error": null
+    },
+    "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/managed-fortigate-svc.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/managed-fortigate-svc.pdf",
+      "sha256": "344ad687e5cb29a5d58d3a818f99a7742773f8a4f3ce5ff2c074e73783cc3ae0",
+      "error": null
+    },
+    "https://www.fortinet.com/corporate/about-us/newsroom/press-releases/2023/fortinet-expands-global-sase-points-of-presence-with-google-cloud": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/corporate/about-us/newsroom/press-releases/2023/fortinet-expands-global-sase-points-of-presence-with-google-cloud",
+      "sha256": "8e6a85e46de01ea40f313cf1488e9ad1354b16b30d089b06e27ea6cd793e2681",
+      "error": null
+    },
+    "https://www.fortinet.com/products/extender": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/products/extender",
+      "sha256": "7ed6058aad5b67983064aad5a02422b919f50e2cccab76fa8d92ee83ba672941",
+      "error": null
+    },
+    "https://www.fortinet.com/products/sase": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/products/sase",
+      "sha256": "8db9e87e123bf22014dabbf66591e7e4edb4792fd3399a7736ff6befd3b7c2a9",
+      "error": null
+    },
+    "https://www.fortinet.com/products/sd-wan": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/products/sd-wan",
+      "sha256": "b63d30c86b698b390231bdd1a30d2c92e0e14026f7ef055a5029a86165bccd24",
+      "error": null
+    },
+    "https://www.fortinet.com/solutions/enterprise-midsize-business/security-as-a-service/managed-fortigate-service": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/solutions/enterprise-midsize-business/security-as-a-service/managed-fortigate-service",
+      "sha256": "c39c4ae0b605794c2d0a6519826638463d630cbba320dc3b11bac2b3ef732677",
+      "error": null
+    },
+    "https://www.fortinet.com/solutions/service-provider/managed-secure-sd-wan-service-with-fortinet": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/solutions/service-provider/managed-secure-sd-wan-service-with-fortinet",
+      "sha256": "a737a5451f1e13456cb0cdfa51aa2429a872c65a42c957575f6da9c1c0393142",
+      "error": null
+    },
+    "https://www.fortinet.com/support": {
+      "http_status": 200,
+      "final_url": "https://www.fortinet.com/support",
+      "sha256": "b602b04e193b0ea0c3b2dbad3311e089db9c962a74bedea19de28f752e71acb8",
+      "error": null
+    },
+    "https://www.gin.ntt.net/": {
+      "http_status": 200,
+      "final_url": "https://www.gin.ntt.net/",
+      "sha256": "7c4957ebc5236d0fddcc53430a813a199d4ce5f9b1d1f0b0edd707de16427b1e",
+      "error": null
+    },
+    "https://www.gin.ntt.net/support-center/service-level-agreements-slas/our-global-ip-network/": {
+      "http_status": 200,
+      "final_url": "https://www.gin.ntt.net/support-center/service-level-agreements-slas/our-global-ip-network/",
+      "sha256": "3c484ed70be9dc3f7818a30090a53e5c2d7ec11e4a53740e7725763f98edfe2c",
+      "error": null
+    },
+    "https://www.gin.ntt.net/support/service-level-agreement/": {
+      "http_status": 200,
+      "final_url": "https://www.gin.ntt.net/support-center/service-level-agreements-slas/",
+      "sha256": "57533f91d3b377e8cb0771bcfc9398818a8b817afcd1d7e58aa77f8f588aa7c5",
+      "error": null
+    },
+    "https://www.gtt.net/about-us/press-releases/gtt-partners-with-palo-alto-networks-to-power-its-sase-platform/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/about-us/press-releases/gtt-partners-with-palo-alto-networks-to-power-its-sase-platform/",
+      "sha256": "7a448334821b4d0824418e12587d018a5a4ca00313b0ec0e45240045dd9e6428",
+      "error": null
+    },
+    "https://www.gtt.net/connect/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/connect/",
+      "sha256": "c8470cfab441c4d0ab8bf7346256fcb8f2ff15c4e5586ddcd8c4f21e57fb2525",
+      "error": null
+    },
+    "https://www.gtt.net/envision/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/envision/",
+      "sha256": "d9048dce4fb369c87dd728a4a3830f5b58713c10a93b11ea9f49af884d270ec2",
+      "error": null
+    },
+    "https://www.gtt.net/services/managed-networking/internet/5g-services/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/services/managed-networking/internet/5g-services/",
+      "sha256": "36c9ac70ae688eb7295730f3f24f5f6d98fdb9780f7c593ca53caa315787ccef",
+      "error": null
+    },
+    "https://www.gtt.net/services/professional-services/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/services/professional-services/",
+      "sha256": "7191e7fcfc7b3e1db6475b7755df43af2bc64bf95fd83d033518480582e9dc36",
+      "error": null
+    },
+    "https://www.gtt.net/services/professional-services/service-management/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/services/professional-services/service-management/",
+      "sha256": "18f07f7f225212aaab16562ff1ad0e33a21179a0017d91f4d4e86dadd388b13b",
+      "error": null
+    },
+    "https://www.gtt.net/services/secure-networking/cloud-security/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/services/secure-networking/cloud-security/",
+      "sha256": "a508c263a4ff72e0decc4551d5f519df43cb47088d9911c132feba59c985bad2",
+      "error": null
+    },
+    "https://www.gtt.net/services/secure-networking/cloud-security/cloud-access-security-broker-casb/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/services/secure-networking/cloud-security/cloud-access-security-broker-casb/",
+      "sha256": "b12f30d2e8370d020a6350652617f28c5c62d4183850eb17e965a9e609f9dca5",
+      "error": null
+    },
+    "https://www.gtt.net/services/secure-networking/managed-sd-wan/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/services/secure-networking/managed-sd-wan/",
+      "sha256": "d7ae76c31d97f7441e062e93bdc5f07abfa09ae151ca08aa07d3a1bbe48f605d",
+      "error": null
+    },
+    "https://www.gtt.net/services/secure-networking/sase-secure-connect/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/services/secure-networking/sase-secure-connect/",
+      "sha256": "f512a9cf1e27e9b389a2b5c022e1f38f2509b0bf9550cb4c3efcfa79ff92b03a",
+      "error": null
+    },
+    "https://www.gtt.net/us-en/about-us/press-releases/gtt-expands-its-sase-portfolio-with-fortinet-to-offer-enterprises-a-robust-suite-of-security-solutions-uniquely-enabled-by-gtts-global-tier-1-ip-backbone/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/about-us/press-releases/gtt-expands-its-sase-portfolio-with-fortinet-to-offer-enterprises-a-robust-suite-of-security-solutions-uniquely-enabled-by-gtts-global-tier-1-ip-backbone/",
+      "sha256": "16bc79aa8f1b8c9eea93b7277cfe7e2512efef72b82fdf23c70e96fffc138725",
+      "error": null
+    },
+    "https://www.gtt.net/us-en/about-us/press-releases/gtt-expands-partnership-with-palo-alto-networks/": {
+      "http_status": 200,
+      "final_url": "https://www.gtt.net/about-us/press-releases/gtt-expands-partnership-with-palo-alto-networks/",
+      "sha256": "0d4f7558309dbd5b3e44b32b8ac144d7588e1d8b3999552ffcac7e8c3993122d",
+      "error": null
+    },
+    "https://www.hpe.com/us/en/aruba-networking-sse.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.hpe.com/us/en/greenlake.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.hpe.com/us/en/networking/hpe-aruba-networking-services.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.hpe.com/us/en/networking/hpe-aruba-networking-support-services.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.hpe.com/us/en/networking/partner-programs.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.hpe.com/us/en/services.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.hpe.com/us/en/services/advisory-and-professional.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.hpe.com/us/en/services/remote-infrastructure-monitoring.html": {
+      "error": "TimeoutError",
+      "http_status": null
+    },
+    "https://www.juniper.net/documentation/product/us/en/juniper-secure-edge/": {
+      "http_status": 200,
+      "final_url": "https://www.juniper.net/documentation/product/us/en/juniper-secure-edge/",
+      "sha256": "b0423028a8b429e746139e74b692305b88fc82b06bc7cbdc38f23a690cd237ec",
+      "error": null
+    },
+    "https://www.juniper.net/us/en/products/security.html": {
+      "http_status": 200,
+      "final_url": "https://www.juniper.net/us/en/products/security.html",
+      "sha256": "506e713c336b1e7057578aca37801f935d6b769bade4701ac98172912164bf97",
+      "error": null
+    },
+    "https://www.juniper.net/us/en/services.html": {
+      "http_status": 200,
+      "final_url": "https://www.juniper.net/us/en/services.html",
+      "sha256": "bbea187d307cc41359ba5849510381297577800fadc9b9c447e8fd6f3d301d61",
+      "error": null
+    },
+    "https://www.juniper.net/us/en/solutions/sase.html": {
+      "http_status": 200,
+      "final_url": "https://www.juniper.net/us/en/solutions/secure-ai-native-edge/sase.html",
+      "sha256": "20ad6808637db2e7f51d801c1c97ae485be37dcc47931c24df09584f9ddd0193",
+      "error": null
+    },
+    "https://www.juniper.net/us/en/solutions/sd-wan.html": {
+      "http_status": 200,
+      "final_url": "https://www.juniper.net/us/en/solutions/sd-wan.html",
+      "sha256": "66b5a94bfcae2c3445decf39c94d99984101359ce04933d4ee673868b631b6a8",
+      "error": null
+    },
+    "https://www.juniper.net/us/en/solutions/sd-wan/managed-sd-wan.html": {
+      "http_status": 200,
+      "final_url": "https://www.juniper.net/us/en/solutions/sd-wan/managed-sd-wan.html",
+      "sha256": "4a8615f4000000db444bc5da40044c8f000da3e229bc35b2be3ecaa22639a1c0",
+      "error": null
+    },
+    "https://www.lumen.com/en-us/services/sase.html": {
+      "http_status": 200,
+      "final_url": "https://www.lumen.com/en-us/services/sase.html",
+      "sha256": "97e1ce1b8f3cee854f65077da60e155cf81d488776b4ec3fa0ab4d87cc790a2c",
+      "error": null
+    },
+    "https://www.lumen.com/en-us/services/sdwan-cisco-meraki.html": {
+      "http_status": 200,
+      "final_url": "https://www.lumen.com/en-us/services/sdwan-cisco-meraki.html",
+      "sha256": "c1fef79cea8a1df350f6c89e1abb2b114d9cc1f48fc6e4ae5bf3ea9812317292",
+      "error": null
+    },
+    "https://www.lumen.com/en-us/solutions/use-case/reliable-secure-connectivity.html": {
+      "http_status": 200,
+      "final_url": "https://www.lumen.com/en-us/services/dedicated-internet-access.html",
+      "sha256": "0455d058b6653f3241f16329943e0e7d3525fdd6b018ffe6032b4c3937481598",
+      "error": null
+    },
+    "https://www.netskope.com/customer-solutions": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/customer-solutions",
+      "sha256": "adf737b7921d0660fb6593184370c895054b6a8d81cc471aa3b5deab8561b66b",
+      "error": null
+    },
+    "https://www.netskope.com/netskope-technical-support": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/netskope-technical-support",
+      "sha256": "0c1bd62613968c0572040c26f2c02a5035ec624f4f66751e7bc8b83e163c513f",
+      "error": null
+    },
+    "https://www.netskope.com/press-releases/netskope-enables-msps-to-generate-revenue-faster-with-launch-of-new-catalyst-msp-sp-program-and-netskope-partner-orchestrator": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/press-releases/netskope-enables-msps-to-generate-revenue-faster-with-launch-of-new-catalyst-msp-sp-program-and-netskope-partner-orchestrator",
+      "sha256": "934f01fd2b3dc3eecbce9f3670e10e18ba90ff5aebde871dcafb360c62007349",
+      "error": null
+    },
+    "https://www.netskope.com/press-releases/netskope-raises-the-bar-with-expanded-data-sovereignty-support-in-two-dozen-countries": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/press-releases/netskope-raises-the-bar-with-expanded-data-sovereignty-support-in-two-dozen-countries",
+      "sha256": "e9686739d613629445c221f578a7ce3e9528d66ed152f51aff747f6bf689e7c6",
+      "error": null
+    },
+    "https://www.netskope.com/press-releases/netskope-sets-new-industry-benchmarks-for-cloud-security-performance": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/press-releases/netskope-sets-new-industry-benchmarks-for-cloud-security-performance",
+      "sha256": "d9e372946c34beb7133f98ee342c438d6b14126a6a18b98cecd277871b4a9d2f",
+      "error": null
+    },
+    "https://www.netskope.com/products/converged-gateway": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/products/converged-gateway",
+      "sha256": "dc142e1d29727b38d8aaf86e8921458e4e9959196abf4a2fdaa4730ad23ae3a7",
+      "error": null
+    },
+    "https://www.netskope.com/products/wireless-wan": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/products/wireless-wan",
+      "sha256": "a6a83150e5cd834dd69bfe05fe89778118c028df0d9dcf79c40191be05826988",
+      "error": null
+    },
+    "https://www.netskope.com/wp-content/uploads/2022/07/2025-06-Netskope-One-SD-WAN-DS-607-9.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/wp-content/uploads/2022/07/2025-06-Netskope-One-SD-WAN-DS-607-9.pdf",
+      "sha256": "a334bb19389bdc9e74600db3784e0cb98a6fdd309be5d62a55367851e210bd38",
+      "error": null
+    },
+    "https://www.netskope.com/wp-content/uploads/2026/03/2026-03-NewEdge-DS-333-12.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.netskope.com/wp-content/uploads/2026/03/2026-03-NewEdge-DS-333-12.pdf",
+      "sha256": "ef4cdc0a579736e6a37939eb144298d0eb769e9444bb81dab412c4f9c872b737",
+      "error": null
+    },
+    "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/": {
+      "http_status": 200,
+      "final_url": "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/",
+      "sha256": "efd716111c7f1d5fb1cf19617d381644321f814d54826ff48675849f534d981b",
+      "error": null
+    },
+    "https://www.nttglobal.net/services/sd-wan": {
+      "http_status": 200,
+      "final_url": "https://www.nttglobal.net/services/sd-wan/",
+      "sha256": "8f4142745a30d47e877b1710eed3310e9ab0cc743e0d086e8409b950d1afce52",
+      "error": null
+    },
+    "https://www.orange-business.com/be-en/expertise/enjoy-scalable-responsive-secure-digital-infrastructure/sase-secure-access-service-edge": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/be-en/expertise/enjoy-scalable-responsive-secure-digital-infrastructure/sase-secure-access-service-edge",
+      "sha256": "0c5ff090b00a7cde2d5d21d8fc7cf9afe28a6bca7a19eef4e2faf642657beb85",
+      "error": null
+    },
+    "https://www.orange-business.com/en/about-us/partners/fortinet": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/about-us/partners/fortinet",
+      "sha256": "e5a7175b8dbb29c3f3730137255a0161d892989972845f56533d3b88286218bd",
+      "error": null
+    },
+    "https://www.orange-business.com/en/press/orange-business-orange-cyberdefense-palo-alto-networks-join-forces-deliver-cloud-native": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/press/orange-business-orange-cyberdefense-palo-alto-networks-join-forces-deliver-cloud-native",
+      "sha256": "9fdccbbf365fa225796f2767f8f444c3b2abf43c17bf7f126580f1181ee4690d",
+      "error": null
+    },
+    "https://www.orange-business.com/en/press/orange-business-services-and-fortinet-partner-sase-create-secure-seamless-and-scalable-cloud": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/press/orange-business-services-and-fortinet-partner-sase-create-secure-seamless-and-scalable-cloud",
+      "sha256": "4b2016eec812cfa3e134317c14cb08ba22a6fdff1c87b3abb695518f3e304649",
+      "error": null
+    },
+    "https://www.orange-business.com/en/products/business-vpn-galerie": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/solutions/cloud/galerie",
+      "sha256": "14254e023b0d77f2dd0c429811fdb323b7985701d316a6f11bfefef4f5cec081",
+      "error": null
+    },
+    "https://www.orange-business.com/en/products/secure-gateway": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/solutions/security/secure-gateway",
+      "sha256": "f4935084eda145c240fdd7b19b9cc7893f516164e4d898c7f673a1ddc0a2df55",
+      "error": null
+    },
+    "https://www.orange-business.com/en/solutions/internet-networks/business-vpn": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/solutions/internet-networks/business-vpn",
+      "sha256": "c60cbef43abc34bb60bcfb0044bfe6bad9051ba12a423f1a6e2b369a2a50dbed",
+      "error": null
+    },
+    "https://www.orange-business.com/en/solutions/internet-networks/business-vpn-internet": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/solutions/internet-networks/business-vpn-internet",
+      "sha256": "9bd3e9ed872918ea7d04eaa7f80381fcf6fa65c5db3dd806775f432bfd574af8",
+      "error": null
+    },
+    "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international",
+      "sha256": "f761e74089efdae2c9057e471fcf2fa20b934f4b9c85415f8c339ef1ddcb4caa",
+      "error": null
+    },
+    "https://www.orange-business.com/en/solutions/network-solutions": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en",
+      "sha256": "d6646aead6f7275571ac50286c67d8bccd6b3a7af1155022b9386cb5b5b37d87",
+      "error": null
+    },
+    "https://www.orange-business.com/en/solutions/security/secure-gateway": {
+      "http_status": 200,
+      "final_url": "https://www.orange-business.com/en/solutions/security/secure-gateway",
+      "sha256": "8533febe777904cc7e20450767008b2b2e667fed17f8ccd45798f0fc40de55e0",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/blog/sase/fast-track-enterprise-digital-transformation-with-managed-prisma-sase/": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/blog/sase/fast-track-enterprise-digital-transformation-with-managed-prisma-sase/",
+      "sha256": "c1db75ceaa734874c8fc59bf27f757bdf2920b64e61b1e31d1221de990ae093b",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/blog/sase/the-architecture-behind-prisma-sase-99999-uptime/": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/blog/sase/the-architecture-behind-prisma-sase-99999-uptime/",
+      "sha256": "7fd58986884f09f31f85b62e5512b392a6457c1c0bd33d624522704e433a0647",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/blog/sase/why-sovereign-sase-is-the-new-standard-for-the-modern-enterprise/": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/blog/sase/why-sovereign-sase-is-the-new-standard-for-the-modern-enterprise/",
+      "sha256": "b9ab9f51048d224df278551bf3c0dd20003523f01b643d332c2e1d08ea14ef18",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/company/press/2022/palo-alto-networks-introduces-industry-s-most-complete-sase-solution-for-msps": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/company/press/2022/palo-alto-networks-introduces-industry-s-most-complete-sase-solution-for-msps",
+      "sha256": "3d06cda33342643d968b3830aab55f71d459c7b024c8db14eeb813d8e7ac3b1f",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/content/dam/pan/en_US/assets/pdf/datasheets/support/prisma-access-service-sla.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/content/dam/pan/en_US/assets/pdf/datasheets/support/prisma-access-service-sla.pdf",
+      "sha256": "35703e15e2efb5bd84b72fc8fb0b4108a8b5486573352d03fe270b15a926d49d",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/sase/access": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/sase/access",
+      "sha256": "21bfdfb6ff70a61a74b61564fa4f4f705649488f948a888d0e064d6658e81424",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/sase/managed-sase": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/sase/managed-sase",
+      "sha256": "154de8b3076f511e2065bcbf5c68ea1960d207275a79d47a52ec7e40fcdfb077",
+      "error": null
+    },
+    "https://www.paloaltonetworks.com/services/support/support-policies": {
+      "http_status": 200,
+      "final_url": "https://www.paloaltonetworks.com/services/support/support-policies",
+      "sha256": "44ba78f7ed3010fdddcd56f5583f990fa578ec6ef4ef0ceede12312bb7386b77",
+      "error": null
+    },
+    "https://www.sonicwall.com/partners/msp-mssp-service-providers": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/partners/partner-enabled-services": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/cloud-secure-edge": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/firewalls": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/firewalls/entry-level": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/firewalls/managed-protection-security-suite": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/firewalls/security-services": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/secure-email/cloud-email-security": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/secure-internet-access": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/secure-private-access": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/sonicsentry-mdr-for-network": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/sonicsentry-mxdr": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/products/sonicwall-unified-management": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/solutions/use-cases/secure-sd-branch": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/solutions/use-cases/secure-sd-wan": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.sonicwall.com/support/product-lifecycle-tables": {
+      "error": "URLError",
+      "http_status": null
+    },
+    "https://www.verizon.com/business/en-gb/products/security/network-cloud-security/advanced-secure-access-service-edge/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/en-en/products/security/network-cloud-security/sase-management/",
+      "sha256": "4499f9009260ede9d4f8789a297cf58a7264e556803c6f0d189452fde06702ef",
+      "error": null
+    },
+    "https://www.verizon.com/business/en-nl/products/networks/edge-solutions/verizon-care/": {
+      "error": "HTTPError",
+      "http_status": 404
+    },
+    "https://www.verizon.com/business/products/networks/connectivity/private-ip/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/products/networks/connectivity/private-ip/",
+      "sha256": "50f82fb591e3c2afb3e3888fa852e7a1d5930fec57a4e5c8dda6ef57fb547cec",
+      "error": null
+    },
+    "https://www.verizon.com/business/products/networks/cpe-and-subscription-services/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/products/networks/cpe-and-subscription-services/",
+      "sha256": "64a1dddbfd1868204b4b1aa464a217e56353361da41f189927efce9738b7425a",
+      "error": null
+    },
+    "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-branch/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-branch/",
+      "sha256": "4026ba0a7d999ced0dc870692c2af6972243b1329e2a69ab5a5a3ebbd87f766a",
+      "error": null
+    },
+    "https://www.verizon.com/business/products/security/advanced-security-operations-center-services/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/products/security/advanced-security-operations-center-services/",
+      "sha256": "a17fd0229ac42f09b7eba83e1b6ae82fbcf4a3519f5ffa1aa1efb1d9a1a13bf1",
+      "error": null
+    },
+    "https://www.verizon.com/business/products/security/network-cloud-security/sase-management/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/products/security/network-cloud-security/sase-management/",
+      "sha256": "011ad5eeba9ea3911facbd2f53ec36371746f86a09b3d0b81b0902f526e441de",
+      "error": null
+    },
+    "https://www.verizon.com/business/resources/lp/secure-access-service-edge": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/resources/lp/secure-access-service-edge/",
+      "sha256": "832661817817741edcb21d1b80da8908946b58a7db6dc78ba9c9ec9831d6daf4",
+      "error": null
+    },
+    "https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/",
+      "sha256": "8ffee93bbed32ae06cb2b84a594bfd36cf19f4e31924f2cf5a0c0a89d2618bba",
+      "error": null
+    },
+    "https://www.verizon.com/business/service_guide/reg/NaaS-SLA-2026JAN15-mk.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/service_guide/reg/NaaS-SLA-2026JAN15-mk.pdf",
+      "sha256": "ecbd50e2482e2c3b80b264af2c59b54fe82aefe55aa1c6e00959d081a25530c0",
+      "error": null
+    },
+    "https://www.verizon.com/business/service_guide/reg/cp-adaptive-network-fabric-sla-2026JUL15.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/service_guide/reg/cp-adaptive-network-fabric-sla-2026JUL15.pdf",
+      "sha256": "2e97124184ba9f24ff6f026fe4c37647d2a25cb544e2bfb0766dd412d72eefac",
+      "error": null
+    },
+    "https://www.verizon.com/business/service_guide/reg/cp/pip/plus/sla.htm": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/service_guide/reg/cp/pip/plus/sla.htm",
+      "sha256": "0bcc389e8f2a613f2616241f3ddef2f7235b3401061c4b4b941c86f9e147360e",
+      "error": null
+    },
+    "https://www.verizon.com/business/service_guide/reg/zscaler_product_description.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/service_guide/reg/zscaler_product_description.pdf",
+      "sha256": "b886a22d184917ea35ed686f1b2e52f6759b14e6271baeb82c9d8c3acc9cc07f",
+      "error": null
+    },
+    "https://www.verizon.com/business/solutions/global-integrated-solutions/": {
+      "http_status": 200,
+      "final_url": "https://www.verizon.com/business/solutions/global-integrated-solutions/",
+      "sha256": "c9c77876308bf6410cb8cb4d8ee004d0c8a7d067321a7b548d507906248f8bf6",
+      "error": null
+    },
+    "https://www.vodafone.co.uk/business/cloud-solutions/managed-security-services": {
+      "http_status": 200,
+      "final_url": "https://www.vodafone.co.uk/business/cyber-security-solutions/managed-security-services",
+      "sha256": "b14ba31e860432ccbcaeac748c4b3fe6bc0cb8486dc6cfd8bab29836e04d098e",
+      "error": null
+    },
+    "https://www.vodafone.co.uk/business/sdn/sd-wan": {
+      "http_status": 200,
+      "final_url": "https://www.vodafone.co.uk/business/sdn/sd-wan",
+      "sha256": "ae7d6e6d4dde6bd5871aabcfd7b0c888a349584d6573f494500bca6058be03e5",
+      "error": null
+    },
+    "https://www.vodafone.co.uk/business/sdn/secure-access-service-edge": {
+      "http_status": 200,
+      "final_url": "https://www.vodafone.co.uk/business/sdn/secure-access-service-edge",
+      "sha256": "0e2d1a4b67aa371511f02ea30b0e7cf40dbec54d58286e64898a4ebb398e09a4",
+      "error": null
+    },
+    "https://www.vodafone.co.uk/newscentre/press-release/zscaler-smes-cloud/": {
+      "http_status": 200,
+      "final_url": "https://www.vodafone.co.uk/newscentre/press-release/zscaler-smes-cloud/",
+      "sha256": "3a554f53afc192f2b1789886e583218a475ae208e043890be48fc620740d7247",
+      "error": null
+    },
+    "https://www.vodafone.com/news/newsroom/services/vodafone-expands-high-speed-network-connections-enterprise-americas": {
+      "http_status": 200,
+      "final_url": "https://www.vodafone.com/news/newsroom/services/vodafone-expands-high-speed-network-connections-enterprise-americas",
+      "sha256": "dae89af941a43cc171246d870489ccf8336d5ec10e64fa8b3c80db16ad5ddf9b",
+      "error": null
+    },
+    "https://www.vodafone.com/news/newsroom/technology/vodafone-business-and-fortinet-expand-global-partnership-to-secure-hybrid-work": {
+      "http_status": 200,
+      "final_url": "https://www.vodafone.com/news/newsroom/technology/vodafone-business-and-fortinet-expand-global-partnership-to-secure-hybrid-work",
+      "sha256": "0bc1815fcca45453f5435ef96dbffde17ef68b3c6bfd431d2edb2d93028198d5",
+      "error": null
+    },
+    "https://www.zscaler.com/blogs/product-insights/streamlining-multi-tenant-management-announcing-integration-multi-tenant": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/blogs/product-insights/streamlining-multi-tenant-management-announcing-integration-multi-tenant",
+      "sha256": "c01d7ee634740f2d8c37722482183455a0afe4d461610c1085f6631fd32fc6dc",
+      "error": null
+    },
+    "https://www.zscaler.com/legal/sla-support": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/legal/sla-support",
+      "sha256": "10e8b9b6504edfcb53006cdfed364d9728045f11afbb44f79aff2dc1ea4bfc05",
+      "error": null
+    },
+    "https://www.zscaler.com/partners/service-providers": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/partners/service-providers",
+      "sha256": "ae3cdd50b079de83b00ba87ad33d27454c86b28d92d9391b2e7aaf8a386b9051",
+      "error": null
+    },
+    "https://www.zscaler.com/press/zscaler-extends-zero-trust-platform-enable-cellular-communications-iot-ot-simply-sim-card-no": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/press/zscaler-extends-zero-trust-platform-enable-cellular-communications-iot-ot-simply-sim-card-no",
+      "sha256": "c3fb66761abb9a0d9aef49461efd84f962c7ea738d8512a099946da1c12b6191",
+      "error": null
+    },
+    "https://www.zscaler.com/press/zscaler-significantly-expands-global-sovereignty-zero-trust-exchange-platform": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/press/zscaler-significantly-expands-global-sovereignty-zero-trust-exchange-platform",
+      "sha256": "43f7bfd1b9f688c34d34d9566b9aaf5591969523ace3f8853e6507efc8b32c81",
+      "error": null
+    },
+    "https://www.zscaler.com/products-and-solutions/managed-detection-and-response": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/products-and-solutions/managed-detection-and-response",
+      "sha256": "7241438df27a8cc2583d9624c5a5dcbfd95964cc8bed9673004f25477b3bb7aa",
+      "error": null
+    },
+    "https://www.zscaler.com/products-and-solutions/private-5G": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/products-and-solutions/private-5G",
+      "sha256": "a14cf2f06ed53b9f78e93b00621f241a3ff6b0dfabc11dd36ae2e76fad6db2bd",
+      "error": null
+    },
+    "https://www.zscaler.com/products-and-solutions/zscaler-cellular": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/products-and-solutions/zscaler-cellular",
+      "sha256": "889cc91040520d11dbacac37f787cf4b7c503453a8aa4e27316db618d6a3d7ce",
+      "error": null
+    },
+    "https://www.zscaler.com/resources/brochures/zscaler-managed-detection-and-response-mdr.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/resources/brochures/zscaler-managed-detection-and-response-mdr.pdf",
+      "sha256": "28ad4549232f123cf2c76482718ef2b57ea28e26a38355d3ec671de7350d8112",
+      "error": null
+    },
+    "https://www.zscaler.com/resources/data-sheets/zscaler-internet-access.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/resources/data-sheets/zscaler-internet-access.pdf",
+      "sha256": "fcbac87827757c0d60a1f1e9b9072aacf4362c4167d78e52bc80946f74a93774",
+      "error": null
+    },
+    "https://www.zscaler.com/resources/data-sheets/zscaler-zero-trust-sd-wan-datasheet.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/resources/data-sheets/zscaler-zero-trust-branch.pdf",
+      "sha256": "df8bec4f627eaad605ce981905f9cfdc9e0d9f7510177ce4e300365078b7ff29",
+      "error": null
+    },
+    "https://www.zscaler.com/resources/reference-architectures/traffic-forwarding-in-zscaler-internet-access.pdf": {
+      "http_status": 200,
+      "final_url": "https://www.zscaler.com/resources/reference-architectures/traffic-forwarding-in-zscaler-internet-access.pdf",
+      "sha256": "947a323f6fb1c04931ecd35079bbbca920b0d08f9e0d959a89ce9b7b539cb165",
+      "error": null
+    }
+  },
+  "quote_matches": [
+    {
+      "slug": "aryaka",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://aryaka.com/platform"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://aryaka.com/platform"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/datasheet/smartmanage-datasheet/"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/last-mile-connectivity/"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/products-and-services/"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/datasheet/global-connectivity-solution/"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/datasheet/smartmanage-datasheet/",
+        "https://www.aryaka.com/datasheet/managed-wan-services/"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/datasheet/ngfw-swg-solution/"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f33_data_loss_prevention",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/products-and-services/"
+      ]
+    },
+    {
+      "slug": "aryaka",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.aryaka.com/datasheet/global-connectivity-solution/"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.business.att.com/collateral/att-sd-wan-with-cisco.html"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-with-pan-solution-brief.pdf"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://www.business.att.com/content/dam/attbusiness/briefs/sd-wan-product-brief.pdf"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.business.att.com/categories/att-managed-services.html"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-branch-with-fortinet-solution-brief.pdf"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.business.att.com/products/dedicated-internet.html"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-branch-with-fortinet-solution-brief.pdf"
+      ]
+    },
+    {
+      "slug": "att-business",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-branch-with-fortinet-solution-brief.pdf"
+      ]
+    },
+    {
+      "slug": "bt-business",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/digital-workplace/BT-Fortinet-SD-WAN-Service-Schedule-Part-B-31.03.2025-V4.pdf",
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-B-31-01-2025-v3.pdf"
+      ]
+    },
+    {
+      "slug": "bt-business",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-mngdsrvcsch-published-28-november-2024.pdf"
+      ]
+    },
+    {
+      "slug": "bt-business",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf"
+      ]
+    },
+    {
+      "slug": "bt-business",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-B-31-01-2025-v3.pdf",
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/digital-workplace/BT-Fortinet-SD-WAN-Service-Schedule-Part-B-31.03.2025-V4.pdf"
+      ]
+    },
+    {
+      "slug": "bt-business",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://newsroom.bt.com/bts-global-fabric-goes-live-with-customer-traffic/"
+      ]
+    },
+    {
+      "slug": "bt-business",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://newsroom.bt.com/bt-launches-a-new-managed-sase-service-powered-by-fortinet/"
+      ]
+    },
+    {
+      "slug": "cato-networks",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://support.catonetworks.com/hc/en-us/articles/16308182518173-X1600-Cellular-Connectivity-Troubleshooting"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/services/managed-security/managed-firewall/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/services/managed-security/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/partners/mssp-program/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/services/professional-services/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/support-services/support-plans/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/harmony/sase/",
+        "https://www.checkpoint.com/harmony/sase/private-access/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/harmony/sase/private-access/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/harmony/sase/private-access/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/support-services/support-plans/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/quantum/next-generation-firewall/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f33_data_loss_prevention",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/harmony/sase/",
+        "https://www.checkpoint.com/harmony/sase/private-access/",
+        "https://www.checkpoint.com/harmony/sase/internet-access/"
+      ]
+    },
+    {
+      "slug": "check-point",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.checkpoint.com/services/managed-security/"
+      ]
+    },
+    {
+      "slug": "cisco",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://documentation.meraki.com/Platform_Management/Managed_Service_Provider_Resources/Dashboard_Branding_for_MSPs"
+      ]
+    },
+    {
+      "slug": "cisco",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://documentation.meraki.com/CiscoPlusSecureConnect/Cisco___Secure_Connect_Pre-configuration_Checklist/Data_Centers"
+      ]
+    },
+    {
+      "slug": "cisco",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://documentation.meraki.com/CiscoPlusSecureConnect/Cisco___Secure_Connect_Pre-configuration_Checklist/Data_Centers"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.cloudflare.com/professional-services/"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://developers.cloudflare.com/tenant/"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://developers.cloudflare.com/magic-wan/"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f20_private_pops_dedicated_pops",
+      "matched_primary_urls": [
+        "https://www.cloudflare.com/data-localization/"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://blog.cloudflare.com/cloudflare-backbone-internet-fast-lane/"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.cloudflare.com/plans/enterprise/"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.cloudflare.com/sase/"
+      ]
+    },
+    {
+      "slug": "cloudflare-one",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.cloudflare.com/plans/enterprise/"
+      ]
+    },
+    {
+      "slug": "colt-technology-services",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/"
+      ]
+    },
+    {
+      "slug": "colt-technology-services",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/"
+      ]
+    },
+    {
+      "slug": "colt-technology-services",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/"
+      ]
+    },
+    {
+      "slug": "colt-technology-services",
+      "feature": "f20_private_pops_dedicated_pops",
+      "matched_primary_urls": [
+        "https://www.colt.net/products/networking/sd-wan"
+      ]
+    },
+    {
+      "slug": "colt-technology-services",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/"
+      ]
+    },
+    {
+      "slug": "comcast-business",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan"
+      ]
+    },
+    {
+      "slug": "comcast-business",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan"
+      ]
+    },
+    {
+      "slug": "comcast-business",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan"
+      ]
+    },
+    {
+      "slug": "comcast-business",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://corporate.comcast.com/press/releases/comcast-business-fortinet-secure-enterprise-application-access-sase-sse-solutions"
+      ]
+    },
+    {
+      "slug": "comcast-business",
+      "feature": "f33_data_loss_prevention",
+      "matched_primary_urls": [
+        "https://corporate.comcast.com/press/releases/comcast-business-fortinet-secure-enterprise-application-access-sase-sse-solutions"
+      ]
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://cradlepoint.ericsson.com/about/how-to-buy"
+      ]
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://cradlepoint.ericsson.com/about/how-to-buy"
+      ]
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://cradlepoint.ericsson.com/about/how-to-buy"
+      ]
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://cradlepoint.com/products/netcloud-service/"
+      ]
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://cradlepoint.com/products/netcloud-sase/"
+      ]
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://cradlepoint.com/support/"
+      ]
+    },
+    {
+      "slug": "forcepoint",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.forcepoint.com/product/secure-sd-wan"
+      ]
+    },
+    {
+      "slug": "forcepoint",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.forcepoint.com/resources/datasheets/flexedge-secure-sd-wan-manager"
+      ]
+    },
+    {
+      "slug": "forcepoint",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://www.forcepoint.com/services/implementation-packages"
+      ]
+    },
+    {
+      "slug": "forcepoint",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.forcepoint.com/resources/datasheets/forcepoint-technical-support-offerings"
+      ]
+    },
+    {
+      "slug": "forcepoint",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.forcepoint.com/resources/datasheets/forcepoint-ngfw-120-series-appliance"
+      ]
+    },
+    {
+      "slug": "forcepoint",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.forcepoint.com/resources/datasheets/forcepoint-technical-support-offerings"
+      ]
+    },
+    {
+      "slug": "fortinet",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/managed-fortigate-svc.pdf"
+      ]
+    },
+    {
+      "slug": "fortinet",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortisase.pdf"
+      ]
+    },
+    {
+      "slug": "fortinet",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/managed-fortigate-svc.pdf"
+      ]
+    },
+    {
+      "slug": "fortinet",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.fortinet.com/products/extender"
+      ]
+    },
+    {
+      "slug": "fortinet",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortisase.pdf"
+      ]
+    },
+    {
+      "slug": "fortinet",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.fortinet.com/products/sd-wan"
+      ]
+    },
+    {
+      "slug": "fortinet",
+      "feature": "f33_data_loss_prevention",
+      "matched_primary_urls": [
+        "https://www.fortinet.com/products/sase"
+      ]
+    },
+    {
+      "slug": "gtt",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.gtt.net/services/secure-networking/managed-sd-wan/"
+      ]
+    },
+    {
+      "slug": "gtt",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.gtt.net/envision/"
+      ]
+    },
+    {
+      "slug": "gtt",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.gtt.net/services/managed-networking/internet/5g-services/"
+      ]
+    },
+    {
+      "slug": "gtt",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.gtt.net/services/secure-networking/managed-sd-wan/"
+      ]
+    },
+    {
+      "slug": "gtt",
+      "feature": "f33_data_loss_prevention",
+      "matched_primary_urls": [
+        "https://www.gtt.net/services/secure-networking/cloud-security/",
+        "https://www.gtt.net/services/secure-networking/cloud-security/cloud-access-security-broker-casb/"
+      ]
+    },
+    {
+      "slug": "hpe-aruba",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://docs.axissecurity.com/docs/tenants-management"
+      ]
+    },
+    {
+      "slug": "hpe-aruba",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://docs.axissecurity.com/docs/pops"
+      ]
+    },
+    {
+      "slug": "juniper-networks",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.juniper.net/us/en/services.html"
+      ]
+    },
+    {
+      "slug": "juniper-networks",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.juniper.net/us/en/solutions/sd-wan/managed-sd-wan.html"
+      ]
+    },
+    {
+      "slug": "juniper-networks",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://www.juniper.net/us/en/services.html"
+      ]
+    },
+    {
+      "slug": "juniper-networks",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.juniper.net/us/en/services.html"
+      ]
+    },
+    {
+      "slug": "juniper-networks",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.juniper.net/us/en/solutions/sd-wan.html"
+      ]
+    },
+    {
+      "slug": "juniper-networks",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.juniper.net/us/en/solutions/sase.html"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/sd-wan-service-schedule?Creativeid=914be424-577f-4a0d-97cd-3c9c00a783e4"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/SD-WAN___Managed_Equipment_Service_Guide"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/SD-WAN___Managed_Equipment_Service_Guide"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://ir.lumen.com/news/news-details/2024/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution/default.aspx",
+        "https://s21.q4cdn.com/756714007/files/doc_news/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution-2024.pdf"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f20_private_pops_dedicated_pops",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/sd-wan-service-schedule?Creativeid=914be424-577f-4a0d-97cd-3c9c00a783e4"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://ir.lumen.com/news/news-details/2024/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution/default.aspx",
+        "https://s21.q4cdn.com/756714007/files/doc_news/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution-2024.pdf"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/lumen-service-level-agreementpdf?Creativeid=dc0beb0f-83c4-46d5-8684-85af0333edbe"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f33_data_loss_prevention",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615"
+      ]
+    },
+    {
+      "slug": "lumen",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://assets.lumen.com/is/content/Lumen/SD-WAN___Managed_Equipment_Service_Guide",
+        "https://assets.lumen.com/is/content/Lumen/sd-wan-service-schedule?Creativeid=914be424-577f-4a0d-97cd-3c9c00a783e4",
+        "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615"
+      ]
+    },
+    {
+      "slug": "netskope",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.netskope.com/press-releases/netskope-enables-msps-to-generate-revenue-faster-with-launch-of-new-catalyst-msp-sp-program-and-netskope-partner-orchestrator"
+      ]
+    },
+    {
+      "slug": "netskope",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.netskope.com/wp-content/uploads/2022/07/2025-06-Netskope-One-SD-WAN-DS-607-9.pdf"
+      ]
+    },
+    {
+      "slug": "netskope",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.netskope.com/products/wireless-wan"
+      ]
+    },
+    {
+      "slug": "netskope",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.netskope.com/press-releases/netskope-sets-new-industry-benchmarks-for-cloud-security-performance"
+      ]
+    },
+    {
+      "slug": "netskope",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.netskope.com/netskope-technical-support"
+      ]
+    },
+    {
+      "slug": "ntt",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://www.nttglobal.net/services/sd-wan",
+        "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/"
+      ]
+    },
+    {
+      "slug": "ntt",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.nttglobal.net/services/sd-wan",
+        "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/"
+      ]
+    },
+    {
+      "slug": "ntt",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.nttglobal.net/services/sd-wan"
+      ]
+    },
+    {
+      "slug": "ntt",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.nttglobal.net/services/sd-wan",
+        "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/"
+      ]
+    },
+    {
+      "slug": "ntt",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.gin.ntt.net/"
+      ]
+    },
+    {
+      "slug": "ntt",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.gin.ntt.net/support-center/service-level-agreements-slas/our-global-ip-network/"
+      ]
+    },
+    {
+      "slug": "ntt",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.nttglobal.net/services/sd-wan",
+        "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/internet-networks/business-vpn"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f05_professional_services_and_migration_support",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/internet-networks/business-vpn-internet"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/network-solutions",
+        "https://www.orange-business.com/en/products/business-vpn-galerie",
+        "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international",
+        "https://www.orange-business.com/en/solutions/internet-networks/business-vpn"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/security/secure-gateway",
+        "https://www.orange-business.com/en/products/secure-gateway"
+      ]
+    },
+    {
+      "slug": "orange-business",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.orange-business.com/en/solutions/security/secure-gateway"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://www.paloaltonetworks.com/blog/sase/fast-track-enterprise-digital-transformation-with-managed-prisma-sase/"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.paloaltonetworks.com/sase/managed-sase"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://docs.paloaltonetworks.com/prisma-access/administration/sase-private-location"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f20_private_pops_dedicated_pops",
+      "matched_primary_urls": [
+        "https://docs.paloaltonetworks.com/prisma-access/administration/sase-private-location"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.paloaltonetworks.com/blog/sase/the-architecture-behind-prisma-sase-99999-uptime/"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.paloaltonetworks.com/content/dam/pan/en_US/assets/pdf/datasheets/support/prisma-access-service-sla.pdf"
+      ]
+    },
+    {
+      "slug": "palo-alto-networks",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview"
+      ]
+    },
+    {
+      "slug": "arista-velocloud",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Data-Sheet.pdf"
+      ]
+    },
+    {
+      "slug": "arista-velocloud",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.arista.com/assets/data/pdf/SD-WAN-Solution-Overview.pdf"
+      ]
+    },
+    {
+      "slug": "arista-velocloud",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-7x0-Series.pdf"
+      ]
+    },
+    {
+      "slug": "arista-velocloud",
+      "feature": "f20_private_pops_dedicated_pops",
+      "matched_primary_urls": [
+        "https://www.arista.com/assets/data/pdf/SD-WAN-Solution-Overview.pdf"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-branch/"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-branch/"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-branch/"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/en-gb/products/security/network-cloud-security/advanced-secure-access-service-edge/",
+        "https://www.verizon.com/business/products/security/network-cloud-security/sase-management/"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/products/networks/connectivity/private-ip/"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/service_guide/reg/NaaS-SLA-2026JAN15-mk.pdf"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/"
+      ]
+    },
+    {
+      "slug": "verizon-business",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://versa-networks.com/documents/solution-briefs/versa-sase.pdf"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://versa-networks.com/documents/solution-briefs/versa-sase.pdf"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://versa-networks.com/documents/datasheets/versa-networks-hosted-and-managed-head-end.pdf"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://docs.versa-networks.com/Secure_SD-WAN/01_Configuration_from_Director/Common_Configuration/Configure_WWAN"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Director/Ecosystem/Versa_SASE_Ecosystem"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f20_private_pops_dedicated_pops",
+      "matched_primary_urls": [
+        "https://versa-networks.com/products/"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Director/Ecosystem/Versa_SASE_Ecosystem"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://versa-networks.com/documents/Versa-Hosted-SASE-SLA.pdf"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://versa-networks.com/documents/datasheets/versa-sdwan.pdf"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f33_data_loss_prevention",
+      "matched_primary_urls": [
+        "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Concerto/Configure_Data_Loss_Prevention_in_Concerto"
+      ]
+    },
+    {
+      "slug": "versa-networks",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://versa-networks.com/documents/datasheets/versa-premier-service.pdf"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.vodafone.co.uk/business/sdn/sd-wan"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f03_co_managed_service",
+      "matched_primary_urls": [
+        "https://www.vodafone.co.uk/business/sdn/secure-access-service-edge"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f07_lifecycle_management",
+      "matched_primary_urls": [
+        "https://www.vodafone.com/news/newsroom/technology/vodafone-business-and-fortinet-expand-global-partnership-to-secure-hybrid-work"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.vodafone.co.uk/newscentre/press-release/zscaler-smes-cloud/"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.vodafone.co.uk/business/sdn/secure-access-service-edge"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f26_sla_backed_service_fabric",
+      "matched_primary_urls": [
+        "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f27_integrated_next_generation_firewall",
+      "matched_primary_urls": [
+        "https://www.vodafone.com/news/newsroom/technology/vodafone-business-and-fortinet-expand-global-partnership-to-secure-hybrid-work"
+      ]
+    },
+    {
+      "slug": "vodafone-business",
+      "feature": "f40_managed_service_assurance",
+      "matched_primary_urls": [
+        "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf"
+      ]
+    },
+    {
+      "slug": "zscaler",
+      "feature": "f01_fully_managed_service",
+      "matched_primary_urls": [
+        "https://www.zscaler.com/partners/service-providers"
+      ]
+    },
+    {
+      "slug": "zscaler",
+      "feature": "f04_multi_tenant_msp_white_label_support",
+      "matched_primary_urls": [
+        "https://www.zscaler.com/blogs/product-insights/streamlining-multi-tenant-management-announcing-integration-multi-tenant"
+      ]
+    },
+    {
+      "slug": "zscaler",
+      "feature": "f17_cellular_and_5g_support",
+      "matched_primary_urls": [
+        "https://www.zscaler.com/products-and-solutions/zscaler-cellular"
+      ]
+    },
+    {
+      "slug": "zscaler",
+      "feature": "f19_public_cloud_gateways",
+      "matched_primary_urls": [
+        "https://www.zscaler.com/press/zscaler-significantly-expands-global-sovereignty-zero-trust-exchange-platform"
+      ]
+    },
+    {
+      "slug": "zscaler",
+      "feature": "f20_private_pops_dedicated_pops",
+      "matched_primary_urls": [
+        "https://www.zscaler.com/resources/reference-architectures/traffic-forwarding-in-zscaler-internet-access.pdf"
+      ]
+    },
+    {
+      "slug": "zscaler",
+      "feature": "f21_private_global_backbone",
+      "matched_primary_urls": [
+        "https://www.zscaler.com/resources/data-sheets/zscaler-internet-access.pdf"
+      ]
+    }
+  ]
+}
