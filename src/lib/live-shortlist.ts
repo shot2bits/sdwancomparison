@@ -1,3 +1,5 @@
+import {applyAdviceConsistency,joinedEvidenceText} from './provider-advice-consistency';
+import {applyUKEvidence} from './uk-evidence';
 import geographyReview from '../../data/provider-geography-review.json';
 import publicSnapshot from '@data/shortlist-public-snapshot.json';
 import { applyProjectionReview } from './provider-projection-review';
@@ -183,7 +185,7 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     for (const feature of FEATURES) {
       const candidates=record.capabilities[feature.id] ? [record.capabilities[feature.id]] : (FEATURE_CODES[feature.id] ?? []).map(code=>record.capabilities[code]);
       const evidence=candidates.find(item=>item?.freshness_state==='current' && item.source_urls?.length && evidenceStatus([item])===provider.capabilities[feature.id]);
-      if(evidence?.source_urls?.[0] && evidence.verified_date && evidence.reconciliation_review_due) provider.capability_evidence[feature.id]={source_url:evidence.source_urls[0],reviewed_at:evidence.verified_date,review_due:evidence.reconciliation_review_due,qualification:[evidence.source_finding,evidence.qualification].filter(Boolean).join(' ')};
+      if(evidence?.source_urls?.[0] && evidence.verified_date && evidence.reconciliation_review_due) provider.capability_evidence[feature.id]={source_url:evidence.source_urls[0],reviewed_at:evidence.verified_date,review_due:evidence.reconciliation_review_due,qualification:joinedEvidenceText(evidence.source_finding,evidence.qualification)};
     }
     applyReviewedComparisonEvidence(provider, record.reviewed_at);
     provider.evidence_coverage_pct = Object.values(provider.capabilities).filter((state) => state !== "unknown").length / FEATURES.length;
@@ -207,6 +209,8 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     provider.uk_delivery = "not_confirmed";
     provider.uk_basis = "UK contracting entity is not confirmed by the published Neon provider record.";
     applyProjectionReview(provider, record, original);
+    applyUKEvidence(provider);
+    applyAdviceConsistency(provider,original,Object.fromEntries(FEATURES.map(f=>[f.id,f.name])));
     return provider;
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -253,6 +257,7 @@ export async function getLiveShortlistDataset(): Promise<LiveShortlistDataset> {
     for(const vendor of snapshot) for(const [feature,evidence] of Object.entries(vendor.capability_evidence ?? {})) {
       if(Date.parse(evidence.review_due)<=Date.now()){vendor.capabilities[feature]='unknown';delete vendor.capability_evidence![feature];}
     }
+    for(const vendor of snapshot) {applyUKEvidence(vendor);applyAdviceConsistency(vendor,base.find(v=>v.slug===vendor.slug)??vendor,Object.fromEntries(FEATURES.map(f=>[f.id,f.name])));}
     return { vendors: snapshot.length === base.length ? snapshot : base, source: "snapshot_fallback", providerContractVersion: "snapshot", datasetVersions: [], providerRevisions: [], loadedAt };
   }
 }

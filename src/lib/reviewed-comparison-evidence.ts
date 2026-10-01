@@ -16,6 +16,7 @@ const aryaka = 'https://www.aryaka.com/unified-sase-platform/';
 const cato = 'https://knowledge.catonetworks.com/docs/hardware';
 export const REVIEWED_COMPARISON_EVIDENCE: Record<string, Record<string, ComparisonEvidence>> = {
   aryaka: {
+    f02_diy_self_managed_model:{source_url:'https://www.aryaka.com/use-cases/network-and-security-convergence/',reviewed_at:'2026-10-01T00:00:00Z',review_due:'2026-12-30T00:00:00Z',qualification:'Aryaka explicitly offers fully managed, co-managed and self-managed delivery. Confirm the buyer’s retained tasks and service scope; self-management is not evidence of a standalone appliance purchase.'},
     f01_fully_managed_service: { source_url: aryaka, reviewed_at: reviewed, review_due: due, qualification: 'Aryaka-managed delivery is an available service model; scope and responsibilities must be agreed in the service contract.' },
     f03_co_managed_service: { source_url: aryaka, reviewed_at: reviewed, review_due: due, qualification: 'Co-managed delivery is offered; confirm the division of responsibilities with Aryaka or its delivery partner.' },
     f21_private_global_backbone: { source_url: aryaka, reviewed_at: reviewed, review_due: due, qualification: 'Aryaka documents a global private network. This does not establish private last-mile access, every-country coverage or a site-specific SLA.' },

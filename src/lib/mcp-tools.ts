@@ -68,6 +68,7 @@ async function callPublicMcpTool(name: string, args: unknown): Promise<unknown> 
       return {
         ...result,
         engine_url: engineUrl,
+        sourcing_handoff:{tool:'prepare_sourcing_plan',endpoint:`${SITE_URL}/api/mcp/`,website_url:`${SITE_URL}/shortlist/#sourcing-brief`,requires_publication:false,requires_supplier_consent:true,fallback:'If prepare_sourcing_plan is not exposed by the installed connector, continue at website_url. Do not substitute a public opportunity or supplier invitation.'},
         resume_url: resumeUrl,
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,
@@ -139,6 +140,7 @@ async function callPublicMcpTool(name: string, args: unknown): Promise<unknown> 
       return {
         ...comparison,
         engine_url: engineUrl,
+        sourcing_handoff:{tool:'prepare_sourcing_plan',endpoint:`${SITE_URL}/api/mcp/`,website_url:`${SITE_URL}/shortlist/#sourcing-brief`,requires_publication:false,requires_supplier_consent:true,fallback:'If prepare_sourcing_plan is not exposed by the installed connector, continue at website_url. Do not substitute a public opportunity or supplier invitation.'},
         resume_url: resumeUrl,
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist/`,

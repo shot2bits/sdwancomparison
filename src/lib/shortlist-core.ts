@@ -1,3 +1,4 @@
+import type {UKEvidence} from './uk-evidence';
 import type {SectorSignoff} from "./sector-signoff";
 /**
  * Shortlist engine core. Client-safe: no Node imports, pure functions only.
@@ -192,6 +193,7 @@ export type ShortlistVendor = {
   uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed" | "not_confirmed";
   projection_provenance?: {active_review?:{uk_sector_evidence?:Record<string,boolean>;sector_signoff?:SectorSignoff;reviewed_at:string;review_due:string;reviewer:string;source_urls:string[];qualification:string;sectors:Record<string,CapabilityStatus>;regions:Record<string,CapabilityStatus>};contract:string;governed_revision:string;curated_reviewed_at:string;curated_sectors:Record<string,CapabilityStatus>;curated_uk_delivery:string;curated_uk_basis:string;sector_review_queue:{sector:string;reason:string;support_state:string}[];resolution:string};
   uk_basis: string;
+  uk_evidence?: UKEvidence;
   capabilities: Record<string, CapabilityStatus>;
   capability_evidence?: Record<string, {source_url: string; reviewed_at: string; review_due: string; qualification: string}>;
   deployment_speed: DeploymentSpeed;
@@ -362,6 +364,7 @@ export type VendorVerdict = {
   value_tier: string;
   uk_delivery: string;
   uk_basis: string;
+  uk_evidence?: UKEvidence;
 };
 
 export const MATCHING_RULES_VERSION = "shortlist-matching/2026-09-15.1";
@@ -590,7 +593,7 @@ export function buildShortlist(
     // Gate 6b: UK contracting entity only (opt-in sovereignty filter)
     if (input.uk_provider_only) {
       if (v.uk_delivery !== "uk_hq" && v.uk_delivery !== "uk_entity") {
-        gating.push("No UK contracting entity (UK-based providers only is on)");
+        gating.push("UK contracting entity not evidenced in this dataset; this does not establish absence or UK service unavailability");
       } else {
         matched.push(v.uk_delivery === "uk_hq" ? "UK headquartered" : "UK contracting entity");
       }
@@ -710,6 +713,7 @@ export function buildShortlist(
       value_tier: v.value_tier,
       uk_delivery: v.uk_delivery,
       uk_basis: v.uk_basis,
+      uk_evidence: v.uk_evidence,
     });
   }
 

@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {getShortlistDataset} from '../src/lib/vendors';
+import {mergeNeonProviderRecords} from '../src/lib/live-shortlist';
+import {ProviderMatchRecordSchema} from '../src/lib/provider-matching';
+import {applyUKEvidence} from '../src/lib/uk-evidence';
+import {publicShortlistPreview} from '../src/lib/public-shortlist';
+const fixture=JSON.parse(readFileSync('docs/evidence-reconciliation/reconciled-match-fixture.json','utf8'));
+const vendors=mergeNeonProviderRecords(getShortlistDataset(),fixture.providers.map((p:unknown)=>ProviderMatchRecordSchema.parse(p)));
+const cato=vendors.find(v=>v.slug==='cato-networks')!;
+assert.equal(cato.uk_delivery,'uk_entity');assert.equal(cato.uk_evidence?.entity.status,'evidenced');assert.equal(cato.uk_evidence?.buyer_contract.status,'requires_supplier_confirmation');
+assert(cato.uk_evidence?.entity.source_urls.includes('https://www.catonetworks.com/msa/'));
+const result=publicShortlistPreview(vendors,{uk_provider_only:true}) as any;
+assert(result.matches.some((v:any)=>v.slug==='cato-networks'));assert.equal(result.eligible_count,5);
+assert(result.uk_entity_exclusions.length===25);assert(result.uk_entity_exclusions.every((v:any)=>v.reason.includes('not ruled out')));
+const expired=structuredClone(cato);applyUKEvidence(expired,Date.parse('2027-01-01'));assert.equal(expired.uk_delivery,'not_confirmed');assert.equal(expired.uk_evidence?.entity.status,'expired');assert.deepEqual(expired.regions,cato.regions);
+console.log('PASS UK entity, delivery and buyer contract separation; Cato inclusion; unknown exclusions and expiry');
+
+const aryaka=vendors.find(v=>v.slug==='aryaka')!;
+assert.equal(aryaka.capabilities.f02_diy_self_managed_model,'yes');
+assert(!aryaka.watch_outs.some(s=>/self.managed.*limited evidence/i.test(s)));
+assert(!aryaka.watch_outs.some(s=>/CASB and DLP capabilities have partial/i.test(s)));
+assert(aryaka.capability_evidence?.f02_diy_self_managed_model.source_url.includes('aryaka.com'));
+assert(!cato.shortlist_summary.endsWith('...'));assert(/[.!?]$/.test(cato.shortlist_summary));
+const {applyAdviceConsistency,joinedEvidenceText}=await import('../src/lib/provider-advice-consistency');
+assert.equal(joinedEvidenceText('Native, confirmed [9]','Native, confirmed'),'Native, confirmed [9]');
+const changed=structuredClone(aryaka);changed.capabilities.f02_diy_self_managed_model='unknown';
+applyAdviceConsistency(changed,getShortlistDataset().find(v=>v.slug==='aryaka')!,{'f02_diy_self_managed_model':'Self managed'});
+assert(changed.watch_outs.some(s=>s.includes('Self managed: not confirmed')));
+console.log('PASS narrative updates follow capability changes; complete summaries; duplicate evidence removed');
+assert.equal(joinedEvidenceText(null,null),'');
+assert.equal(joinedEvidenceText('Confirmed.',null),'Confirmed.');
+const {callMcpTool}=await import('../src/lib/mcp-tools');
+const originalFetch=globalThis.fetch;
+globalThis.fetch=async()=>{throw new Error('Hermetic test: live source unavailable');};
+try {
+ const mcp=await callMcpTool('build_sase_shortlist',{uk_provider_only:true}) as any;
+ assert.equal(mcp.eligible_count,5);
+ assert.equal(mcp.sourcing_handoff.requires_publication,false);
+ assert.equal(mcp.sourcing_handoff.tool,'prepare_sourcing_plan');
+ assert.equal(mcp.sourcing_handoff.website_url,'https://netify.co.uk/sase/shortlist/#sourcing-brief');
+ assert(mcp.matches.every((v:any)=>!v.summary.includes('weighted')));
+}finally{globalThis.fetch=originalFetch;}
+console.log('PASS older connector uses private sourcing fallback without a publication gate; null evidence accepted');

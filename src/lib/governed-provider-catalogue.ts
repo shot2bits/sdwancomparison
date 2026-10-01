@@ -69,7 +69,10 @@ export function shortlistExcerpt(overview: string, fallback = "") {
   const selected = sentences.slice(0, 2).join(" ").replace(/\s+/g, " ").trim();
   const looksLikeHeading = /^(suitability matrix|executive summary|overview|who should\b)/i.test(selected);
   const usable = selected && !looksLikeHeading ? selected : fallback.trim().replace(/(\d)\.\s+(\d)/g, "$1.$2");
-  return usable.length <= 700 ? usable : `${usable.slice(0, 697).trimEnd()}...`;
+  if(usable.length<=700)return usable;
+  const complete=usable.match(/[^.!?]+[.!?](?:[”"’'])?(?:\s|$)/g)??[];
+  let result="";for(const sentence of complete){if(result && (result+sentence).length>700)break;result+=sentence;}
+  return result.trim()||usable; // Preserve a whole sentence rather than a cut-off claim.
 }
 
 function blank(record: GovernedRecord): ShortlistVendor {

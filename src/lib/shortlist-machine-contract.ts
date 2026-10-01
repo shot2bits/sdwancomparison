@@ -21,6 +21,8 @@ export const ANSWER_FIRST_FIELDS = {
       "service_model",
       "signoff",
     ],
+    uk_delivery_compatibility:'Legacy alias for UK-entity classification, not service availability. Use uk_evidence for separated meanings.',
+    uk_evidence:{entity:'Legal entity evidence with source, scope and review dates',regional_delivery:'UK and Ireland regional evidence, not site coverage',buyer_contract:'Supplier confirmation required for the actual purchase'},
     uk_status: {
       status:
         "uk_hq | uk_entity | uk_pops_partner | global_managed | not_confirmed",

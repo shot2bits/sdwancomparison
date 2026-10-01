@@ -11,7 +11,7 @@ Consider Aryaka where its documented capabilities match the deployment. The sele
 - Multi-tenant MSP / white-label support: Utilizes the Aryaka Network Management and Control (ANMC) system for scalable, multi-tenant automation and orchestration Multi-tenant orchestration is confirmed at platform level, the partner programme names Managed Service Providers and System Integrators as a partner category, and co-management can be delegated to an Aryaka partner. However I found no vendor statement about white-label or partner-branded portals, delegated administration roles or tenant templates on the partners page or elsewhere, so this falls short of the full definition.
 - Cellular and 5G support: Aryaka provides truly global last mile services including wireline and 4G/5G wireless connectivity 4G and 5G are confirmed as supported and procurable last mile transport. Graded partial rather than yes because the ANAP appliance datasheet contains no mention of LTE, 5G, cellular, SIM or modem, and the High Availability datasheet describes redundancy only as dual ISP links, so integrated modem, SIM management and signal monitoring are not evidenced in the sources reviewed.
 - Public cloud gateways: Aryaka Secure Remote Access provides integrated, managed VPN as a service connecting users to the nearest Aryaka POP. The gateways are Aryaka's own infrastructure, not a resold third party's. Corroborated by "a global private network interconnected in a mesh service fabric of over 40 Points of Presence (PoPs) across the globe" and by the NGFW being hosted on the ANAP and on Aryaka's POP, so SaaS acceleration, remote access and security enforcement all run on vendor operated PoPs.
-- Flexible edge form factors: Native, confirmed with genuine specificity - the Aryaka Network Access Point (ANAP), included as part of the service rather than sold as separate hardware [9] Native, confirmed with genuine specificity - the Aryaka Network Access Point (ANAP), included as part of the service rather than sold as separate hardware
+- Flexible edge form factors: Native, confirmed with genuine specificity - the Aryaka Network Access Point (ANAP), included as part of the service rather than sold as separate hardware [9]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Last-mile circuit management requires further evidence before using it as a selection criterion.
@@ -26,8 +26,9 @@ Consider Aryaka where its documented capabilities match the deployment. The sele
 - https://aryaka.com/sase/sase-architecture/
 - https://aryaka.com/case-study/electronics-company/
 - https://www.aryaka.com/datasheet/global-connectivity-solution/
+- https://www.aryaka.com/use-cases/network-and-security-convergence/
 
-Evidence fingerprint: 3bb7c37babf79d0ea67d1cd7e3935dc0e084f74760030a93d9452b47475028e1
+Evidence fingerprint: ee93eca852ea9aba923b05056c156f97ae440000e89ffcebfbd9d4ac3fa8c3eb
 
 ## AT&T Business
 
@@ -35,8 +36,8 @@ Consider AT&T Business where its documented capabilities match the deployment. T
 
 - Professional services and migration support: Engineers also support initial installations and LAN migrations and create and fine-tune business policies. The Managed SD-WAN product brief also states "AT&T supports the entire continuum of the customer lifecycle from design and delivery to ongoing network management." and assigns "Dedicated resources are assigned to each implementation, including project managers". Discovery, pilots, staging, runbooks and rollback plans are not itemised in the material reviewed, so the grade rests on the design, installation and LAN migration wording.
 - Lifecycle management: With comprehensive support and maintenance included, your systems and connectivity services stay smooth and efficient. Maintenance is stated to be included in AT&T managed services, and the FlexWare brief covers AT&T managed universal CPE. No AT&T page reviewed names hardware replacement, firmware upgrades, patching, renewals or end-of-life planning. The words "maintenance", "replacement" and "firmware" do not appear in the Managed SD-WAN product brief, and "lifecycle" does not appear on the managed services category page. Graded partial on that gap.
-- Dynamic path selection: Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' and 'Improve performance, reliability, and reduce latency with intelligent routing and local breakout capabilities' [4] Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' and 'Improve performance, reliability, and reduce latency with intelligent routing and local breakout capabilities'
-- Application-aware routing: Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' named as a core managed-service capability [4] None identified
+- Dynamic path selection: Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' and 'Improve performance, reliability, and reduce latency with intelligent routing and local breakout capabilities' [4]
+- Application-aware routing: Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' named as a core managed-service capability [4]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - DIY / self-managed model requires further evidence before using it as a selection criterion.
@@ -51,14 +52,14 @@ Consider AT&T Business where its documented capabilities match the deployment. T
 - https://www.business.att.com/products/dedicated-internet.html
 - https://business.att.com/learn/articles/sase-vs-sd-wan.html
 
-Evidence fingerprint: f86c446f0657a2d832744cf2152a72e67319ab56dd9456608b834135117cc684
+Evidence fingerprint: 8801f9e37389b7cf5a689d2fe011ca11b0a075be8a2160256c9ef2ef92dd3e18
 
 ## Barracuda SecureEdge
 
 Consider Barracuda SecureEdge where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
-- Professional services and migration support: Native, confirmed directly via the specifically-named, dated (March 2026) phased-adoption approach - a defined four-step migration path allowing organisations to 'prioritize immediate needs and expand over time' rather than requiring a single, forced cutover [15] Native, confirmed directly via the specifically-named, dated (March 2026) phased-adoption approach - a defined four-step migration path allowing organisations to 'prioritize immediate needs and expand over time' rather than requiring a single, forced cutover
-- Centralised orchestration: Native, confirmed directly and with genuine specificity - 'With zero-touch deployment capabilities, you can remotely deliver SASE and network security services without sending technicians onsite' [4] [17] Native, confirmed directly and with genuine specificity - 'With zero-touch deployment capabilities, you can remotely deliver SASE and network security services without sending technicians onsite'
+- Professional services and migration support: Native, confirmed directly via the specifically-named, dated (March 2026) phased-adoption approach - a defined four-step migration path allowing organisations to 'prioritize immediate needs and expand over time' rather than requiring a single, forced cutover [15]
+- Centralised orchestration: Native, confirmed directly and with genuine specificity - 'With zero-touch deployment capabilities, you can remotely deliver SASE and network security services without sending technicians onsite' [4] [17]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Fully managed service requires further evidence before using it as a selection criterion.
@@ -67,14 +68,14 @@ Consider Barracuda SecureEdge where its documented capabilities match the deploy
 - https://blog.barracuda.com/2026/03/25/barracudaone-secureedge-access-and-security-service-edge-adoption
 - https://barracuda.com/products/network-protection/secureedge
 
-Evidence fingerprint: 593170195edb13d03acad2749e5e9a6d06225b3e7a5bdf806d8d7dc44b204f45
+Evidence fingerprint: d8ede58d8bdc0971e6a916c393006dacbdd0948c6bd78293d6577ee647c68ba7
 
 ## BT
 
 Consider BT where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
 - Encrypted overlay fabric: BT describes an accelerated IPsec overlay in its managed Fortinet Secure SD-WAN service. BT Secure SD-WAN uses Fortinet IPsec tunnels between branches, data centres and cloud. This evidence applies to that service option; confirm the platform, scope and throughput in the proposal.
-- Dynamic path selection: Native, confirmed directly - 'elastic SD-WAN' dynamically steers traffic, and 'traffic is prioritised from your devices to the SASE cloud node, avoiding public internet congestion' [5] [6] Native, confirmed directly - 'elastic SD-WAN' dynamically steers traffic, and 'traffic is prioritised from your devices to the SASE cloud node, avoiding public internet congestion'
+- Dynamic path selection: Native, confirmed directly - 'elastic SD-WAN' dynamically steers traffic, and 'traffic is prioritised from your devices to the SASE cloud node, avoiding public internet congestion' [5] [6]
 - Cellular and 5G support: Active-Active Mobile Data Access is only available over 5G where 5G is available to you. 5G and 4G are contractually defined transport, with a fallback ladder: the annex defines Mobile Network as a 5G or 4G communication network, 4G where 5G is not available and 3G where 4G is not available. SIM management is covered both ways, with a Customer Managed Mobile Data Access option where the customer provides the SIM. Two caveats worth carrying: Part B limits BT-provided Mobile Data Access to UK sites only, and BT explicitly disclaims mobile network degradation, congestion and interference. Signal monitoring specifically is not evidenced.
 - Public cloud gateways: The service is only available with the FortiSASE PoPs plus selected PoPs. This is the key ownership call. The cloud security enforcement points are Fortinet's FortiSASE PoPs, not BT infrastructure, so partner_integrated rather than yes. Computer Weekly (Tier 2, named author, dated) confirms the SSE functions of firewall as a service, secure web gateway, CASB and ZTNA come from Fortinet technology. Do not confuse this with BT's Global Fabric PoPs, which BT does operate itself but which are a cloud interconnect fabric rather than a SaaS optimisation or security enforcement gateway service.
 
@@ -89,14 +90,14 @@ Consider BT where its documented capabilities match the deployment. The selected
 - https://newsroom.bt.com/bts-global-fabric-goes-live-with-customer-traffic/
 - https://newsroom.bt.com/bt-launches-a-new-managed-sase-service-powered-by-fortinet/
 
-Evidence fingerprint: 4b15f85bb2c6dd665df60dede53224f8b86a1fa4395665e1cf3bc6f69fd15ad9
+Evidence fingerprint: 918f4cb1ff45700bf8509ce32d633c2ed7339d031f3b59fd40d9b9c7de1245c0
 
 ## Cato Networks
 
 Consider Cato Networks where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
-- QoS and traffic shaping: Native - Network Rules let admins assign a bandwidth-priority QoS tier to business-critical traffic, alongside acceleration/optimisation and transport-path settings, confirmed directly in Cato's admin documentation. [46] Native - Network Rules let admins assign a bandwidth-priority QoS tier to business-critical traffic, alongside acceleration/optimisation and transport-path settings, confirmed directly in Cato's admin documentation.
-- Packet loss remediation: Native - packet duplication for packet loss mitigation, confirmed directly in Cato's own documentation: TCP packets duplicated across active links, UDP packets duplicated across active or standby links. [44] [45] [46] Native - packet duplication for packet loss mitigation, confirmed directly in Cato's own documentation: TCP packets duplicated across active links, UDP packets duplicated across active or standby links.
+- QoS and traffic shaping: Native - Network Rules let admins assign a bandwidth-priority QoS tier to business-critical traffic, alongside acceleration/optimisation and transport-path settings, confirmed directly in Cato's admin documentation. [46]
+- Packet loss remediation: Native - packet duplication for packet loss mitigation, confirmed directly in Cato's own documentation: TCP packets duplicated across active links, UDP packets duplicated across active or standby links. [44] [45] [46]
 - Cellular and 5G support: Socket X1600 now has a hardware version that supports Cellular (LTE/5G) connections Cato's own Learning Center documents integrated LTE/5G on the X1600 Socket, dual SIM management ("By default, SIM Slot 1 is the active one, while Slot 2 is standby.") and signal monitoring via RSSI, RSRP, SINR and RSRQ. The platform page corroborates transport choice: "Customers can choose any mix of fiber, cable, xDSL, and cellular connections." All three definition elements (transport, SIM management, signal monitoring) are met.
 - Observability and digital experience monitoring: Confirmed - DEM's AI-powered engines correlate real-user monitoring and synthetic probing [16] Requires DEM licence
 
@@ -110,7 +111,7 @@ Consider Cato Networks where its documented capabilities match the deployment. T
 - https://catonetworks.com/platform/digital-experience-monitoring-dem/
 - https://knowledge.catonetworks.com/docs/hardware
 
-Evidence fingerprint: d1a9900c09e405c7a6ce9f6d0e03419fe0e90311431553a0d857706e5246508c
+Evidence fingerprint: a26897078007ebbe790ba59e69cd2b1c313afdacd3a2767f7ee4bfcbda0dfaed
 
 ## Check Point
 
@@ -135,14 +136,14 @@ Consider Check Point where its documented capabilities match the deployment. The
 - https://checkpoint.com/harmony/sase/
 - https://sase.checkpoint.com/solutions/compliance/soc-2
 
-Evidence fingerprint: 27e8a2e338871f7b6d77071924738b74e8e6089dd7365009f6d6f417ba3b8d7f
+Evidence fingerprint: 03bc65321af05533d88f2111889b17db9e7a86e356787307263967f64637a11c
 
 ## Cisco
 
 Consider Cisco where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
 - Multi-tenant MSP / white-label support: Managed Service Providers (MSPs) can now take advantage of custom branding options within the Cisco Meraki Dashboard. All four elements of the definition are evidenced. Branded portals from the Meraki dashboard branding documentation, which also states "Any logos that are applied to Dashboard should be the logo of the MSP and not of the end customer." Tenant isolation and delegated administration from multi-organisation management, corroborated on the Secure Access datasheet: "Large enterprise customers can manage multiple organizations (orgs) through a single user interface, with central access and license management." Branding is configured per organisation and can be cloned to new organisations as a template.
-- Packet loss remediation: Native, specifically confirmed in the AI-traffic context - the February 2026 AI-aware SASE announcement explicitly names 'packet duplication' as an AI traffic optimization technique [25] Native, specifically confirmed in the AI-traffic context - the February 2026 AI-aware SASE announcement explicitly names 'packet duplication' as an AI traffic optimization technique
+- Packet loss remediation: Native, specifically confirmed in the AI-traffic context - the February 2026 AI-aware SASE announcement explicitly names 'packet duplication' as an AI traffic optimization technique [25]
 - Public cloud gateways: Cisco Secure Connect services operate in the Cisco Umbrella global cloud architecture which is network of data centers located throughout the world interconnected with a high speed, low latency backbone. Yes rather than partner_integrated. This is Cisco's own service infrastructure, not a third party's PoPs that Cisco resells: Cisco owns and operates the Umbrella global cloud architecture, publishes its data centre list, and enforces security and delivers remote access from it. Corroborated by the Umbrella global network page, "The Cisco Umbrella global cloud architecture serves more than 30,000 customers daily in 190+ countries." AWS, Azure and GCP connectivity was disregarded as it does not meet the definition.
 - Private global backbone: Cisco Secure Connect services operate in the Cisco Umbrella global cloud architecture which is network of data centers located throughout the world interconnected with a high speed, low latency backbone. Partial rather than yes. A global, not national, footprint is clearly evidenced and the documentation states the data centres are interconnected by a backbone. What is not evidenced is the ownership or control test in the definition: no page reviewed states that Cisco owns or controls that backbone rather than buying transit or leased capacity. The Umbrella global cloud architecture page instead emphasises internet peering and anycast, "Umbrella peers directly with more than 1000 organizations", which points towards an internet-peering-centric design. Graded partial on the ownership gap. See conflicts.
 
@@ -154,14 +155,14 @@ Consider Cisco where its documented capabilities match the deployment. The selec
 - https://investor.cisco.com/news/news-details/2026/Cisco-Redefines-Security-for-the-Agentic-Era-with-AI-Defence-Expansion-and-AI-Aware-SASE/default.aspx
 - https://documentation.meraki.com/CiscoPlusSecureConnect/Cisco___Secure_Connect_Pre-configuration_Checklist/Data_Centers
 
-Evidence fingerprint: 2174612f140dd8d81860626459394f1dcdd50e56c8189fe4187edb09459616bc
+Evidence fingerprint: 5dcd7d99da2ae6de03ae76d07a75a30417472b66a4ad4e5faf1ed1f9eb92d206
 
 ## Cloudflare One
 
 Consider Cloudflare One where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
 - Multi-tenant MSP / white-label support: The Cloudflare Tenant API is a provisioning mechanism to help Channel and Alliance partners set up and manage Cloudflare accounts and services for their customers. The Tenant Platform gives partners per-customer account provisioning and delegated administration, which covers tenant isolation. No evidence found on the pages read of branded portals or white-label templates letting an MSP operate the platform under its own brand.
-- Dynamic path selection: Native, via the confirmed Argo Smart Routing capability, which dynamically routes traffic across Cloudflare's own network for optimal performance [33] Native, via the confirmed Argo Smart Routing capability, which dynamically routes traffic across Cloudflare's own network for optimal performance
+- Dynamic path selection: Native, via the confirmed Argo Smart Routing capability, which dynamically routes traffic across Cloudflare's own network for optimal performance [33]
 - Public cloud gateways: Instead of backhauling traffic through a central data center or maintaining dedicated MPLS circuits at every site, your traffic routes through the nearest Cloudflare data center where security policies apply inline. The enforcement points are Cloudflare's own data centres, not a third party's infrastructure that Cloudflare resells. The SASE page states Cloudflare delivers full SASE from 300+ cities and the network page states 337 cities and 8 regions.
 - Private PoPs / dedicated PoPs: Choose the location of the data centers where your traffic is inspected. The Data Localization Suite offers regional control over which of Cloudflare's own data centres inspect traffic, which addresses sovereignty of the processing location. That remains region selection inside the shared multi-tenant network. No offer of customer-hosted or physically dedicated PoPs was found on the pages read.
 
@@ -177,7 +178,7 @@ Consider Cloudflare One where its documented capabilities match the deployment. 
 - https://www.cloudflare.com/plans/enterprise/
 - https://www.cloudflare.com/sase/
 
-Evidence fingerprint: b846234864b11485f47a7233a0a78d0f2a118d023fa9a6eac8b9ebec0ea4e494
+Evidence fingerprint: f4459b7aafaa3fb55229a4038dcb1f0f36d19d63736d4e410a30b008805a53d6
 
 ## Colt Technology Services
 
@@ -186,7 +187,7 @@ Consider Colt Technology Services where its documented capabilities match the de
 - Co-managed service: Customers can choose to do (add/edit/delete) all their policy configurations anytime via the secure Colt SD WAN portal This is a textbook shared-responsibility split: Colt runs the platform, CPE and support while the customer retains live policy and change rights through the portal. The guide also states customers can add branch sites in hours and upgrade bandwidth in real time themselves.
 - Multi-tenant MSP / white-label support: For the Wholesale SD WAN service, both wholesale customers and end customers will benefit from a customized look and feel, setting wholesale customer's own logo, background image, links and contact details, so that their end-customer experience doesn't differ from the rest of their services offered. All four elements of the definition are evidenced on one page: branded portal (logo, background, links), delegated administration (the carrier holds end-customer credentials and handles resets), tenant isolation (IPC* tenant identifiers in Versa Director) and hierarchy templates (customizable portal, branding and further hierarchy levels). Colt sells this explicitly as a Wholesale SD WAN solution for partners to resell.
 - Encrypted overlay fabric: Colt documents an encrypted overlay over private MPLS and public Internet underlay. The Colt Versa SD-WAN service guide documents an encrypted overlay using IPsec. Encryption configuration and throughput must be established for the chosen service design.
-- Local internet breakout: Native, confirmed directly by name - 'secure local internet breakout' named explicitly as a core integrated-firewall capability [4] Native, confirmed directly by name - 'secure local internet breakout' named explicitly as a core integrated-firewall capability
+- Local internet breakout: Native, confirmed directly by name - 'secure local internet breakout' named explicitly as a core integrated-firewall capability [4]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - DIY / self-managed model requires further evidence before using it as a selection criterion.
@@ -196,7 +197,7 @@ Consider Colt Technology Services where its documented capabilities match the de
 - https://www.colt.net/products/networking/sd-wan
 - https://colt.net/resources/insights/colt-technology-services-brings-together-sd-wan-and-sse-features-in-new-integrated-full-sase-solution
 
-Evidence fingerprint: c3d88738943db83be44af3d3cc908ee9c55b22acdaf8edc9c8ecdb51ed4ce961
+Evidence fingerprint: 734f20c11e21f592ac6d950d535d0a73bf3053aa6ea5c8b6d561103ba2a95257
 
 ## Comcast Business
 
@@ -205,7 +206,7 @@ Consider Comcast Business where its documented capabilities match the deployment
 - Lifecycle management: Equipment replacement SLA — 24x7x4 (On-Net) and 8X5XNBD (Off-Net) Hardware replacement is contractually covered as part of the managed service. No statement found on the pages reviewed covering firmware upgrades, patching, renewals or end-of-life planning, so graded partial. CPE is Fortinet hardware per the Masergy product sheet.
 - Cellular and 5G support: Help keep your network running with 4G LTE backup. 4G LTE is documented as a backup transport. No evidence found on the pages reviewed for 5G, for cellular as a primary transport, or for SIM management and signal monitoring, so graded partial.
 - Public cloud gateways: Comcast Business Secure Gateways are hosted across the United States at Equinix data centers, offering up to 10 gigabits per second (Gbps) of cloud connectivity for public, private, or hybrid cloud deployments. Comcast Business brands and operates the Secure Gateways, but the enforcement stack is Fortinet technology and the hosting fabric is Equinix, per the same release: "Fortinet's security-driven networking technology and Equinix's flexible cloud connection Equinix Fabric™ for a complete secure network service." Under the definition this is partner_integrated, not yes. Footprint stated as United States only.
-- Integrated next-generation firewall: Native, confirmed directly by name - 'Firewall as a Service: Next-generation Firewall for network traffic inspection and security' None identified
+- Integrated next-generation firewall: Native, confirmed directly by name - 'Firewall as a Service: Next-generation Firewall for network traffic inspection and security'
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - DIY / self-managed model requires further evidence before using it as a selection criterion.
@@ -216,7 +217,7 @@ Consider Comcast Business where its documented capabilities match the deployment
 - https://business.comcast.com/resources/enterprise/articles/uniting-managed-sase-and-connectivity-for-scalable-networking-and-security
 - https://business.comcast.com/enterprise/products-services/secure-networking/sase
 
-Evidence fingerprint: 579ebb47ba3066ede963075679148d72f9a8c27f6eddc845031de7c8d6ee4ab0
+Evidence fingerprint: 70ac5623743c876c4f773e8cadba228527cde82bc4f1b1bfbd4567b5403e4997
 
 ## Ericsson Cradlepoint
 
@@ -225,7 +226,7 @@ Consider Ericsson Cradlepoint where its documented capabilities match the deploy
 - Multi-tenant MSP / white-label support: Enterprise Wireless products are sold through our world-class global ecosystem of distributors, resellers, managed service providers, and integrators. Managed service providers are an explicit channel and the partner programme names a service provider category that builds managed offerings on the platform, which implies multi customer operation. However no page reviewed documents tenant isolation, delegated administration, branded portals or templates under the partner's own brand, so this is graded partial rather than yes. NetCloud Manager subaccount structure is referenced in the security page bullets but not in language firm enough to quote for white labelling.
 - Professional services and migration support: These specialized partners have deep knowledge of our products and offer an array of high-value services. Design, integration and implementation services are attributed to the reseller and integrator channel rather than to an Ericsson Cradlepoint professional services organisation. The vendor supplies training and certification directly, but no discovery, pilot, staging, migration runbook or rollback offering was found on the pages reviewed, so the capability is graded as delivered through partners.
 - Lifecycle management: Your wireless edge routers and adapters, or endpoints, include a product warranty for the duration of your active NetCloud Essential or Advanced subscription. Hardware warranty runs for the life of the subscription and the same page states that NetCloud Manager continuously delivers real time cloud and device operating software updates to 5G and LTE endpoints, so firmware and software currency are part of the subscription. End of life planning and renewal management are implied by the subscription continuity wording but are not separately documented.
-- Dynamic path selection: Native, confirmed directly via the named cellular-attribute-based traffic steering capability [15] Native, confirmed directly via the named cellular-attribute-based traffic steering capability
+- Dynamic path selection: Native, confirmed directly via the named cellular-attribute-based traffic steering capability [15]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Co-managed service requires further evidence before using it as a selection criterion.
@@ -236,15 +237,15 @@ Consider Ericsson Cradlepoint where its documented capabilities match the deploy
 - https://cradlepoint.com/products/netcloud-sase/
 - https://cradlepoint.com/support/
 
-Evidence fingerprint: 34ef470034468df995ad605af61712de28d05935c20debbeabcc105fd1144487
+Evidence fingerprint: f65d91e4f8ebd0ed2f6d16309a65297cca98f701b6c27e5cb14ffd1a50a2893c
 
 ## Expereo
 
 Consider Expereo where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
-- Dynamic path selection: Native, confirmed directly by name - 'AI-enabled dynamic routing for reliable and predictable networks' Native, confirmed directly by name - 'AI-enabled dynamic routing for reliable and predictable networks'
-- QoS and traffic shaping: Native, confirmed directly - 'Easier management with the ability to set routing, traffic thresholds and access policies to suit your business' Native, confirmed directly - 'Easier management with the ability to set routing, traffic thresholds and access policies to suit your business'
-- Integrated next-generation firewall: Native, confirmed directly - 'Includes integrated security features such as encryption and firewall capabilities' None identified
+- Dynamic path selection: Native, confirmed directly by name - 'AI-enabled dynamic routing for reliable and predictable networks'
+- QoS and traffic shaping: Native, confirmed directly - 'Easier management with the ability to set routing, traffic thresholds and access policies to suit your business'
+- Integrated next-generation firewall: Native, confirmed directly - 'Includes integrated security features such as encryption and firewall capabilities'
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - DIY / self-managed model requires further evidence before using it as a selection criterion.
@@ -254,7 +255,7 @@ Consider Expereo where its documented capabilities match the deployment. The sel
 - https://expereo.com/services/sd-wan
 - https://expereo.com/sd-wan
 
-Evidence fingerprint: 30a171af44d2d2e2f309c00ed48a4030d094ce7030b0415dc2ba728df2f17c69
+Evidence fingerprint: 91db8f8490746dc6779a94ec00cd5bbac1fbce53269c4cbaa25b841066b7a71f
 
 ## Forcepoint
 
@@ -277,7 +278,7 @@ Consider Forcepoint where its documented capabilities match the deployment. The 
 - https://forcepoint.com/use-case/incident-and-breach-response
 - https://cyberdefensemagazine.com/innovator-spotlight-forcepoints-data-security-cloud-redefining-data-protection-in-the-ai-era/
 
-Evidence fingerprint: 8e3584f6ec08d868e0a2b224d39661e1fb60aa56c0d7b80c150316841935d7e7
+Evidence fingerprint: 1ebcf2d1138d2491dbd53663a9f32ca19fcbf6ce25a350b0a76922c787527f8f
 
 ## Fortinet FortiSASE
 
@@ -299,7 +300,7 @@ Consider Fortinet FortiSASE where its documented capabilities match the deployme
 - https://www.fortinet.com/products/sd-wan
 - https://www.fortinet.com/products/sase
 
-Evidence fingerprint: ee4690a4e8df37f48d5995fee624947ecc52525f87710791784ea49a270ab1cf
+Evidence fingerprint: a1447bbda0e5ffa233f889b7e28f28c85e5e2f65f47c50f85128e679db5aced9
 
 ## GTT
 
@@ -308,7 +309,7 @@ Consider GTT where its documented capabilities match the deployment. The selecte
 - Fully managed service: We manage the underlay (network) and the cloud-based overlay (SD-WAN) as a unified service GTT positions Managed SD-WAN as an end to end managed service covering circuit installation, hardware delivery, zero touch provisioning and 24/7/365 proactive monitoring under one bill and one support team. Corroborated by the GTT SD-WAN datasheet (register 18, Tier 3 host) which states GTT experts design, implement, install and optimise the service.
 - Lifecycle management: Lifecycle operations for SD-WAN/SASE, internet, voice, cloud connect, plus performance tuning and change control GTT Envision advertises lifecycle operations and change control, and Professional Services covers 'throughout the lifecycle of your deployment'. Graded partial because exact string checks on the Managed SD-WAN page returned ABSENT for both 'firmware' and 'hardware replacement', and no published statement was found on patching, renewals or end of life planning being included in the service.
 - Encrypted overlay fabric: GTT describes its managed SD-WAN service and encrypted connectivity. GTT documents encrypted connectivity within its managed SD-WAN offering. Confirm the selected technology, tunnel configuration, resilience and throughput for each site.
-- Dynamic path selection: Native, confirmed directly - 'SD-WAN dynamically routes traffic across any connection based on real-time performance and policy' [10] Native, confirmed directly - 'SD-WAN dynamically routes traffic across any connection based on real-time performance and policy'
+- Dynamic path selection: Native, confirmed directly - 'SD-WAN dynamically routes traffic across any connection based on real-time performance and policy' [10]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Multi-tenant MSP / white-label support requires further evidence before using it as a selection criterion.
@@ -324,16 +325,16 @@ Consider GTT where its documented capabilities match the deployment. The selecte
 - https://gtt.net/services/secure-networking/sase-secure-connect/
 - https://www.gtt.net/services/secure-networking/cloud-security/
 
-Evidence fingerprint: 03db9afb7283a6e10d690fe7a4c83610d13b0658a6ceaa41821739238d106217
+Evidence fingerprint: 2e7b76a21b63498ccd347485005c58ba959f54fd78772bf565a5ca5f83066cf3
 
 ## HPE Aruba EdgeConnect
 
 Consider HPE Aruba EdgeConnect where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
 - Multi-tenant MSP / white-label support: Managing multiple tenants can be useful when you are an MSSP and you manage several separate clients, or otherwise your company has several organizational units it prefers to keep separate. Tenant isolation and cross-tenant admin roles are documented for HPE Networking SSE, and the same documentation page states this is a limited release feature. No evidence of branded or white-label portals, custom logos or reseller templates was found on the documentation or partner programme pages reviewed, so graded partial rather than yes.
-- Cloud on-ramp: Native, confirmed for specific named hyperscalers [15] [19] None identified
+- Cloud on-ramp: Native, confirmed for specific named hyperscalers [15] [19]
 - Public cloud gateways: The HPE Aruba Networking SSE service utilizes both onramps and Points of Presence (PoPs) to enhance connectivity. The PoPs are documented as part of the HPE Aruba Networking SSE service itself, which is HPE's own security service edge infrastructure following the Axis Security acquisition, so this is the vendor's own service infrastructure rather than a resold third party gateway. Several PoP locations carry hyperscaler region names such as Northern Virginia, Oregon and Iowa, which suggests hosting inside public cloud regions, but the service and enforcement layer are HPE's.
-- Multi-cloud transit fabric: Native, confirmed for specific named hyperscalers [15] [19] None identified
+- Multi-cloud transit fabric: Native, confirmed for specific named hyperscalers [15] [19]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Fully managed service requires further evidence before using it as a selection criterion.
@@ -345,7 +346,7 @@ Consider HPE Aruba EdgeConnect where its documented capabilities match the deplo
 - https://buy.hpe.com/in/en/cloud/private-hybrid-cloud/hpe-aruba-networking-connectivity-saas/hpe-aruba-networking-connectivity/hpe-aruba-networking-edgeconnect-10106-1g-2x-sfp-2x-combo-1g-2x-rj45-poe-sd%E2%80%91wan-gateway/p/s0e22a
 - https://hpe.com/us/en/networking/sase.html
 
-Evidence fingerprint: 5deac460478e78a80b4e3dafa5c2cc90bfad22273e2cdf6c024852ce97d969b7
+Evidence fingerprint: c4f6c9db987cb9ba9c48bb7ceaf1d1bd77d82a6a2660c20a479e92eaccfb9d97
 
 ## Juniper Networks
 
@@ -354,7 +355,7 @@ Consider Juniper Networks where its documented capabilities match the deployment
 - Fully managed service: Our highly trained experts, backed by AI-Native and automated insights, can help you design, deploy, and proactively manage your network to deliver seamless experiences for all. Juniper Services offers design, deployment and proactive management assistance, but the Juniper pages reviewed position end-to-end managed SD-WAN/SASE as something MSPs and service providers deliver using Juniper technology rather than something Juniper operates itself. The managed SD-WAN page is written to MSPs as the operator. No Juniper page reviewed described Juniper owning day-to-day operations, change execution and service reporting for a customer end to end. Graded partial rather than yes for that reason.
 - Multi-tenant MSP / white-label support: engineered specifically for forward-thinking MSPs ready to scale Juniper explicitly targets MSPs with its managed SD-WAN proposition, which is why this is not graded unknown. However none of the three specific tests in the definition were evidenced on pages reviewed: tenant isolation, delegated administration and branded (white-label) portals are not described. The Juniper Mist MSP dashboard documentation URL attempted returned HTTP 404, so multi-tenant administration could not be verified in this task.
 - Lifecycle management: Achieve simplicity and reliability at scale across your wired, wireless, and SD-WAN environments with AI-Native operations and support from Juniper Services, using AI for a comprehensive, proactive approach across the full network life cycle. Juniper claims a full network life cycle approach through Juniper Services. The specific components in the definition (hardware replacement/RMA, firmware upgrades, patching, renewals and end-of-life planning handled as part of the service) were not individually evidenced; the technical services page that would carry them returned HTTP 404 on attempt. Graded partial on that basis.
-- Dynamic path selection: Native, confirmed via the platform's core, service-based routing architecture - 'sessions are delivered based on identity and context to relevant parties based on real-time policies' [10] Native, confirmed via the platform's core, service-based routing architecture - 'sessions are delivered based on identity and context to relevant parties based on real-time policies'
+- Dynamic path selection: Native, confirmed via the platform's core, service-based routing architecture - 'sessions are delivered based on identity and context to relevant parties based on real-time policies' [10]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Co-managed service requires further evidence before using it as a selection criterion.
@@ -370,16 +371,16 @@ Consider Juniper Networks where its documented capabilities match the deployment
 - https://juniper.net/us/en/solutions/secure-ai-native-edge.html
 - https://juniper.net/content/dam/www/assets/white-papers/us/en/routers/session-smart-routing-how-it-works.pdf
 
-Evidence fingerprint: 131539f4547ee1e4eeb2f726c77f0ed5e9342f7dea74c322058d11b8872f9cb5
+Evidence fingerprint: b164b3151ef0345ae7c5823620c022bfa6f2b61c55c9ce0c07646f9a664ed937
 
 ## Lumen
 
 Consider Lumen where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
 - Lifecycle management: Lifecycle management – notification of end of sale/end of support. The same service guide lists CPE break/fix (RMA) warranty support for failed devices and processing of return material authorisation replacement requests, plus patch management for all hardware and software. The SD-WAN service schedule states that during the initial service term purchased CPE is eligible for the Managed Device Replacement Service Level in the Lumen Service Level Agreement, so replacement is contractual rather than best effort.
-- Dynamic path selection: Native, confirmed directly - 'Route traffic over the most efficient connection for high performance' [3] Native, confirmed directly - 'Route traffic over the most efficient connection for high performance'
-- Application-aware routing: Native, confirmed directly - 'Route traffic over the most efficient connection for high performance, and update routing and security rules in real time as network needs change' [3] None identified
-- QoS and traffic shaping: Native, confirmed directly and with genuine specificity - 'the ability to intelligently use lower cost Internet connections to achieve MPLS-like QoS' [2] Native, confirmed directly and with genuine specificity - 'the ability to intelligently use lower cost Internet connections to achieve MPLS-like QoS'
+- Dynamic path selection: Native, confirmed directly - 'Route traffic over the most efficient connection for high performance' [3]
+- Application-aware routing: Native, confirmed directly - 'Route traffic over the most efficient connection for high performance, and update routing and security rules in real time as network needs change' [3]
+- QoS and traffic shaping: Native, confirmed directly and with genuine specificity - 'the ability to intelligently use lower cost Internet connections to achieve MPLS-like QoS' [2]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Multi-tenant MSP / white-label support requires further evidence before using it as a selection criterion.
@@ -396,7 +397,7 @@ Consider Lumen where its documented capabilities match the deployment. The selec
 - https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615
 - https://lumen.com/en-us/services/sase.html
 
-Evidence fingerprint: 22e71c3e3a0abf631fbe2a10ac8721a11e4f1b06be4f29d9c717fd2d3cf7d526
+Evidence fingerprint: 87d20bd14c70b2b2cb6fa17c642634df8f5bf3111627ea05598ee2b4f2c92c82
 
 ## Netskope
 
@@ -417,14 +418,14 @@ Consider Netskope where its documented capabilities match the deployment. The se
 - https://www.netskope.com/press-releases/netskope-sets-new-industry-benchmarks-for-cloud-security-performance
 - https://www.netskope.com/netskope-technical-support
 
-Evidence fingerprint: f00a0cd49feda79348179319ec2c2a77c616401d37cd3a7c57cb97e5c5074713
+Evidence fingerprint: 035a0b30caf8a115b52fa5c006d48e8cd20014b01dbc3530499f531fa8955192
 
 ## NTT DATA
 
 Consider NTT DATA where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
 - Co-managed service: Customers have the option to self-manage via a web portal or NTT can offer managed services. The published wording describes an either/or choice (customer self-manages via portal, OR NTT manages) rather than an explicitly shared-responsibility co-managed model. The NTT DATA/Cisco managed SASE brochure describes people-augmented, technology-augmented and hybrid operating models, which implies shared operation, but no page reviewed states which policy or change rights the customer retains. Graded partial rather than yes for that reason.
-- Professional services and migration support: Native, confirmed directly and with genuine specificity - 'Move from outdated, end-of-life infrastructure to a modern, scalable network - with a tailored roadmap built around your current environment and future needs' Native, confirmed directly and with genuine specificity - 'Move from outdated, end-of-life infrastructure to a modern, scalable network - with a tailored roadmap built around your current environment and future needs'
+- Professional services and migration support: Native, confirmed directly and with genuine specificity - 'Move from outdated, end-of-life infrastructure to a modern, scalable network - with a tailored roadmap built around your current environment and future needs'
 - Lifecycle management: NTT's Infrastructure Management Services provide full life cycle: architecture, design, implementation, upgrades, and full proactive 24×7 management of a customer's global network and security infrastructure. Quote uses a multiplication sign in 24×7 as printed on the page. Upgrades and full lifecycle management are stated as part of the service. The NTT DATA/Cisco SASE brochure adds decommissioning and refresh to the same lifecycle. Hardware replacement and end-of-life planning are not named in those exact terms.
 - Encrypted overlay fabric: NTT DATA and Cisco describe an encrypted SD-WAN customer deployment and their managed SD-WAN services. NTT DATA documents an encrypted SD-WAN deployment with Cisco and managed services using Viptela/Meraki. Evidence establishes this delivery option, not every NTT platform or UK site availability.
 
@@ -442,13 +443,13 @@ Consider NTT DATA where its documented capabilities match the deployment. The se
 - https://services.global.ntt/en-us/campaigns/managed-campus-networks-with-prisma-sase
 - https://nttdata.com/global/en/insights/reports/ntt-data-is-a-leader-in-managed-network-services
 
-Evidence fingerprint: ffc7352c4063ae7b902538e52d1aa3845cd0c5961876db07b8f7d12c972cb38b
+Evidence fingerprint: a2f3757ec2550a0e36e592d68e4fffca461ed76a95d5e3fcdbd312a4f30d01a4
 
 ## Open Systems
 
 Consider Open Systems where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
-- Local internet breakout: Native, confirmed directly via real, named customer-deployment detail - 'low-cost and secure internet breakouts' specifically described in the Mammut case study [16] Native, confirmed directly via real, named customer-deployment detail - 'low-cost and secure internet breakouts' specifically described in the Mammut case study
+- Local internet breakout: Native, confirmed directly via real, named customer-deployment detail - 'low-cost and secure internet breakouts' specifically described in the Mammut case study [16]
 - CASB capability: Native, confirmed as part of the broader converged security stack [7] Specific inline-versus-API-mode technical detail not itemised
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
@@ -458,16 +459,16 @@ Consider Open Systems where its documented capabilities match the deployment. Th
 - https://open-systems.com/company/customers/mammut/
 - https://eqtgroup.com/about/current-portfolio/open-systems
 
-Evidence fingerprint: ed9bc7b5d20fdba47f27852c7bb85400141af9f9d64edb028110bbe9ca5be892
+Evidence fingerprint: ec760d75b6fb6f8f0de570e65e738715aa03aa46cd423eb78ce43fbc14fd814a
 
 ## Orange Business
 
 Consider Orange Business where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
 - Lifecycle management: Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours. Break-fix and repair commitments are documented (five hour issue resolution on Flexible SD-WAN, "4-hour guaranteed time to repair (GTTR)" on Galerie, "5 hour Guaranteed Time To Repair" on Business VPN), and Orange performs on-site installation. No page reviewed states that firmware upgrades, patching, licence renewals or end-of-life planning are included in the service, so this is graded partial rather than yes.
-- Dynamic path selection: Native, confirmed directly by name - 'adaptive routing mechanisms' and 'centralized controllers to direct network traffic in an intelligent and efficient manner' Native, confirmed directly by name - 'adaptive routing mechanisms' and 'centralized controllers to direct network traffic in an intelligent and efficient manner'
-- Application-aware routing: Native, confirmed directly - 'centralized controllers to direct network traffic in an intelligent and efficient manner... to make the most of your network resources' None identified
-- QoS and traffic shaping: Native, confirmed directly - 'dynamic bandwidth management' named explicitly Native, confirmed directly - 'dynamic bandwidth management' named explicitly
+- Dynamic path selection: Native, confirmed directly by name - 'adaptive routing mechanisms' and 'centralized controllers to direct network traffic in an intelligent and efficient manner'
+- Application-aware routing: Native, confirmed directly - 'centralized controllers to direct network traffic in an intelligent and efficient manner... to make the most of your network resources'
+- QoS and traffic shaping: Native, confirmed directly - 'dynamic bandwidth management' named explicitly
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - DIY / self-managed model requires further evidence before using it as a selection criterion.
@@ -481,7 +482,7 @@ Consider Orange Business where its documented capabilities match the deployment.
 - https://www.orange-business.com/en/solutions/security/secure-gateway
 - https://orange-business.com/en/news-and-events/articles/orange-powers-digital-trust-sase-sd-wan-strategies
 
-Evidence fingerprint: de6b47dc736fc73f155acd3ca4d3b3e27ce962aaadbccfef0657c669089224dc
+Evidence fingerprint: 8335b135188367fd2295015ff536ecf6d949ffc7d5194d1a554687911128d23f
 
 ## Palo Alto Networks Prisma SASE
 
@@ -502,13 +503,13 @@ Consider Palo Alto Networks Prisma SASE where its documented capabilities match 
 - https://www.paloaltonetworks.com/blog/sase/the-architecture-behind-prisma-sase-99999-uptime/
 - https://www.paloaltonetworks.com/content/dam/pan/en_US/assets/pdf/datasheets/support/prisma-access-service-sla.pdf
 
-Evidence fingerprint: e89db5cd07e842d63429d33236f6fd4f26871703401bd24ec126c800c96b7cb3
+Evidence fingerprint: ea6ba8322d80e1b8161bfc2cea38190dbe0459cbc254c713f225839b759c67a1
 
 ## SonicWall Cloud Secure Edge
 
 Consider SonicWall Cloud Secure Edge where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
-- Professional services and migration support: Native, and genuinely one of the platform's clearest, most specifically-evidenced capabilities - explicit 'no rip-and-replace' positioning, confirmed 'guided migration, coexistence mode, and partner playbooks', and a real, named, dated 2026 case study describing exactly this scenario at an MSP [22] Native, and genuinely one of the platform's clearest, most specifically-evidenced capabilities - explicit 'no rip-and-replace' positioning, confirmed 'guided migration, coexistence mode, and partner playbooks', and a real, named, dated 2026 case study describing exactly this scenario at an MSP
+- Professional services and migration support: Native, and genuinely one of the platform's clearest, most specifically-evidenced capabilities - explicit 'no rip-and-replace' positioning, confirmed 'guided migration, coexistence mode, and partner playbooks', and a real, named, dated 2026 case study describing exactly this scenario at an MSP [22]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Fully managed service requires further evidence before using it as a selection criterion.
@@ -516,7 +517,7 @@ Consider SonicWall Cloud Secure Edge where its documented capabilities match the
 
 - https://prnewswire.com/news-releases/sonicwall-partner-ximpleit-deploys-cloud-secure-edge-to-deliver-zero-trust-security-to-legal-industry-clients-302790435.html
 
-Evidence fingerprint: 6b6982d7e503163d1806c8392e0ee660bf82b48c5e3fd0c916574b2a8e887dc1
+Evidence fingerprint: ee259d60f4fb6d9ebc114bba0afe6085308fe53ecf5d81be8244f3f4c22a4729
 
 ## VeloCloud
 
@@ -536,15 +537,15 @@ Consider VeloCloud where its documented capabilities match the deployment. The s
 - https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-7x0-Series.pdf
 - https://networkworld.com/article/4199622/arista-debuts-unified-sd-wan-edge-platform.html
 
-Evidence fingerprint: ff4b12b7179cbf66bfce209720a5856b5fb1d1342dacc0d9686b1f27b389d855
+Evidence fingerprint: cf263eafddbf52f2b2aebe7498144d1bccf9f9eff3d5c4176a7053e30ad5cf8e
 
 ## Verizon Business
 
 Consider Verizon Business where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
-- QoS and traffic shaping: Native, confirmed directly - 'increase your overall performance through a combination of caching, application organization' and prioritisation mechanisms [18] Native, confirmed directly - 'increase your overall performance through a combination of caching, application organization' and prioritisation mechanisms
+- QoS and traffic shaping: Native, confirmed directly - 'increase your overall performance through a combination of caching, application organization' and prioritisation mechanisms [18]
 - Cellular and 5G support: Whether you have Verizon wireline or wireless access, SD Branch can support both. Graded partial rather than yes. Wireless access as a supported transport is stated plainly, and the same page describes a wireless backup option, which covers the failover half of the definition. However the words '5G', '4G' and 'LTE' do not appear in this context, and SIM management and signal monitoring were not found on any page reviewed (sources 3, 4, 8, 9, 21). Verizon is of course a mobile network operator, but that is prior knowledge and cannot be graded from; only what the pages state is reflected here.
-- Cloud on-ramp: Native, confirmed directly via the specifically-named Virtual Network Services (VNS) platform and its VNS Application Edge capability [6] Native, confirmed directly via the specifically-named Virtual Network Services (VNS) platform and its VNS Application Edge capability
+- Cloud on-ramp: Native, confirmed directly via the specifically-named Virtual Network Services (VNS) platform and its VNS Application Edge capability [6]
 - Public cloud gateways: Integrates network operation centers (NOCs) and security operation centers (SOCs) with our Managed SD WAN and Virtual Network Services (VNS), and supports Versa, Cisco cEdge and vEdge, Zscaler ZIA, Zscaler ZPA and Palo Alto Prisma Access. This is the pivotal judgement in the record. The cloud gateways that actually enforce security and deliver remote access in Verizon's SASE service are Zscaler Internet Access, Zscaler Private Access and Palo Alto Prisma Access, all of which run on those vendors' own global PoP estates, not Verizon's. Verizon's service guide carries a Zscaler product description (source 12) confirming it resells those subscriptions. Verizon operates substantial infrastructure of its own, but that is the MPLS and IP transport layer, not a Verizon-built cloud security edge, so the definition forces partner_integrated rather than yes. An identical vendor list was found on both the UK and US product pages, so this is not a regional arrangement.
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
@@ -560,7 +561,7 @@ Consider Verizon Business where its documented capabilities match the deployment
 - https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/
 - https://verizon.com/business/products/security/network-cloud-security/sase-management/
 
-Evidence fingerprint: f20a4d459d5d431f43cae449c4135b1d1b346afed9533281edf26843a6320e52
+Evidence fingerprint: daa7bdf4a7f84b0c5cc9675feccade1ea80cbfb00fb7c58b1e8df5d7880d5e67
 
 ## Versa Networks
 
@@ -569,7 +570,7 @@ Consider Versa Networks where its documented capabilities match the deployment. 
 - Fully managed service: In this model Versa NOC is responsible for managing and maintaining Versa SASE, while the customer IT team is responsible for management and monitoring of the CPEs. Versa does operate a NOC and a hosted, managed head-end and gateway service under its own SLA, so part of the estate is genuinely run by Versa. But its own solution brief places CPE management with the customer IT team in that model, and the alternative model places configuration management and monitoring with a Service Provider. End-to-end design, deploy, change, support and report by Versa itself for the whole service is not evidenced, so partial rather than yes.
 - Co-managed service: In this model Versa NOC is responsible for managing and maintaining Versa SASE, while the customer IT team is responsible for management and monitoring of the CPEs. This is a textbook split of responsibility: Versa runs the platform and the customer retains CPE operations. Concerto's provider-level and tenant-level roles document the same shared model in the tooling.
 - Lifecycle management: Head-end server hardware OS and security patch upgrades and updates For the hosted head-end, Versa documents software upgrades of Director, Analytics, Controller, Concerto and VMS plus OS and security patching, which is lifecycle handled as part of the service. Separately, hardware documentation covers a two-year limited warranty, next-business-day and same-business-day advance replacement, DOA handling and an end-of-life policy. Graded partial rather than yes because branch CPE firmware upgrades and renewals in a typical Versa deployment sit with the customer or the service provider partner, and hardware replacement coverage is a purchased support tier rather than something evidenced as included in the service by default.
-- Application-aware routing: Native, per-application SLA-based routing confirmed specifically via the Adobe deployment [19] Native, per-application SLA-based routing confirmed specifically via the Adobe deployment
+- Application-aware routing: Native, per-application SLA-based routing confirmed specifically via the Adobe deployment [19]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - Multi-tenant MSP / white-label support requires further evidence before using it as a selection criterion.
@@ -589,16 +590,16 @@ Consider Versa Networks where its documented capabilities match the deployment. 
 - https://versa-networks.com/
 - https://versa-networks.com/documents/datasheets/versa-premier-service.pdf
 
-Evidence fingerprint: c89584e425884c4056188a6be62f04bb241a0021957b635d941a66e68d2e286e
+Evidence fingerprint: b69db132647f8920f24148b8a540523876648a1aa7601b39716ce87a958dba9c
 
 ## Virgin Media O2 Business
 
 Consider Virgin Media O2 Business where its documented capabilities match the deployment. The selected service, operating responsibilities, geography and commercial fit need confirmation for the buyer's brief.
 
-- Dynamic path selection: Native, confirmed directly by name - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13] Native, confirmed directly by name - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing'
-- Application-aware routing: Native, confirmed directly and with genuine specificity - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13] None identified
-- QoS and traffic shaping: Native, confirmed directly - 'prioritising applications, focussing on critical services' and 'boost peak time performance and cut the need for MPLS circuits' [10] [13] Native, confirmed directly - 'prioritising applications, focussing on critical services' and 'boost peak time performance and cut the need for MPLS circuits'
-- Cellular and 5G support: Native, confirmed directly by name as a supported WAN underlay [10] [13] Native, confirmed directly by name as a supported WAN underlay
+- Dynamic path selection: Native, confirmed directly by name - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13]
+- Application-aware routing: Native, confirmed directly and with genuine specificity - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13]
+- QoS and traffic shaping: Native, confirmed directly - 'prioritising applications, focussing on critical services' and 'boost peak time performance and cut the need for MPLS circuits' [10] [13]
+- Cellular and 5G support: Native, confirmed directly by name as a supported WAN underlay [10] [13]
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
 - DIY / self-managed model requires further evidence before using it as a selection criterion.
@@ -606,7 +607,7 @@ Consider Virgin Media O2 Business where its documented capabilities match the de
 
 - https://virginmediao2business.co.uk/connectivity/sd-wan/
 
-Evidence fingerprint: 5d8536a5ea17ea05faec6b4e958063481158eb2625bc4f484a1e13056220af3c
+Evidence fingerprint: a2317afd7368774f567e617d591ea130dc228545e2593a6d115c56f5fa1404fc
 
 ## Vodafone Business
 
@@ -614,7 +615,7 @@ Consider Vodafone Business where its documented capabilities match the deploymen
 
 - Lifecycle management: Vodafone Business Secure Firewall with Fortinet delivers a comprehensive managed security service to setup, operate, run, manage and maintain customer firewalls in a highly secure manner. Graded partial, and the gap matters. What is documented is estate scale and ongoing maintenance: the datasheet claims 45,000 managed CPEs, includes Release Management and Vulnerability Management in the managed service list, and states Zero-touch provisioning reduces engineer time on site. Release and Vulnerability Management reasonably imply firmware upgrades and patching in service. What I could not evidence anywhere is the harder half of the definition: hardware replacement or RMA, renewals, and end-of-life planning. None of those terms appear in the datasheet or on any product page reviewed. A buyer should treat hardware refresh and EoL as an open contractual question rather than assume it is included.
 - Cellular and 5G support: Replace expensive private links with low-cost internet/5G Graded partial rather than yes because the evidence establishes only the transport half of the definition. The datasheet positions 5G as a substitute for private circuits and lists 4/5G among access options, so cellular as primary or failover transport is evidenced. I found no published detail on integrated versus external modems, SIM management, or signal monitoring. This is a case where prior knowledge would be tempting, since Vodafone is a mobile network operator and self-evidently manages SIMs at scale, but no page I fetched in this task documents SIM management as part of the SD-WAN service, so I have not graded it.
-- Cloud on-ramp: Native, confirmed directly - 'secure overlay connectivity between customer sites and extending to cloud service provider environments e.g. Microsoft Azure, Amazon Web Services' [2] None identified
+- Cloud on-ramp: Native, confirmed directly - 'secure overlay connectivity between customer sites and extending to cloud service provider environments e.g. Microsoft Azure, Amazon Web Services' [2]
 - Public cloud gateways: Vodafone Business Secure Gateway Access is underpinned by the Zscaler Zero Trust Exchange™ Platform. This is the distinction the definition is built around, and it falls clearly on the partner side. The cloud enforcement points behind Vodafone Business Secure Access Gateway ZIA and ZPA are Zscaler's, and the 2025 Fortinet announcement adds FortiSASE, described by Fortinet as FortiSASE cloud-based security solutions. Both are another company's PoP estate that Vodafone resells and manages. Vodafone Cloud Connect was also checked and offers connectivity to AWS, Google Cloud, IBM, Microsoft Azure and Oracle, which the definition expressly excludes as evidence. No Vodafone-operated shared SASE gateway estate was found.
 
 - Published capability evidence does not confirm site availability, contractual scope or price.
@@ -628,7 +629,7 @@ Consider Vodafone Business where its documented capabilities match the deploymen
 - https://www.vodafone.co.uk/business/sdn/secure-access-service-edge
 - https://vodafone.com/news/newsroom/technology/vodafone-business-and-fortinet-expand-global-partnership-to-secure-hybrid-work
 
-Evidence fingerprint: 4b43a8ec6b3214062e7fb7a0de035a3e29eae2e27583511a7dfad32697406a01
+Evidence fingerprint: b7d2445993a8a5b30ddb8f41c3b3957e3ebe989c125c181896c44b5d4b736ead
 
 ## Zscaler
 
@@ -649,4 +650,4 @@ Consider Zscaler where its documented capabilities match the deployment. The sel
 - https://www.zscaler.com/press/zscaler-significantly-expands-global-sovereignty-zero-trust-exchange-platform
 - https://www.zscaler.com/resources/reference-architectures/traffic-forwarding-in-zscaler-internet-access.pdf
 
-Evidence fingerprint: 1660291be8d077a8e1b740347871390039c99f80c66c982688821c36a7fe41a6
+Evidence fingerprint: 51604b91043a93f3437774d6bef5f8053cb1efc2b2224d9b295218c64320f9d0
