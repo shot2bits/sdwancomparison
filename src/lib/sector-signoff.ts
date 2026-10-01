@@ -25,7 +25,7 @@ export function sectorSignoff(
     };
   return {
     status: "pending",
-    label: "Sector evidence: source-reviewed, sign-off pending",
+    label: "Sector evidence: source-reviewed",
     signed_off_by: null,
     signed_off_at: null,
   };
