@@ -43,9 +43,9 @@
   },
   {
     "slug": "cloudflare-one",
-    "confirmed": 14,
+    "confirmed": 13,
     "supported": 10,
-    "qualified_sources": 10
+    "qualified_sources": 9
   },
   {
     "slug": "colt-technology-services",
@@ -73,9 +73,9 @@
   },
   {
     "slug": "forcepoint",
-    "confirmed": 19,
+    "confirmed": 18,
     "supported": 14,
-    "qualified_sources": 10
+    "qualified_sources": 9
   },
   {
     "slug": "fortinet",
@@ -175,8 +175,8 @@
   },
   {
     "slug": "zscaler",
-    "confirmed": 19,
+    "confirmed": 18,
     "supported": 15,
-    "qualified_sources": 6
+    "qualified_sources": 5
   }
 ]

@@ -12,7 +12,7 @@ quotes={(r['slug'],r['feature']):r['matched_primary_urls'] for r in checks['quot
 mapping=dict(re.findall(r'"?([a-z0-9-]+)"?: "([a-z0-9-]+)"',(ROOT/'src/lib/governed-provider-catalogue.ts').read_text().split('const NAMES')[0]))
 docs=json.loads((ROOT/'docs/provider-source-manifest.json').read_text())['documents']
 raw={n.provider_slug(d['source_document_id']):a.source_rows(ROOT/'.private/provider-source/reconciliation/profiles'/d['supplied_filename']) for d in docs}
-grade={'yes':'supported','partial':'partially_supported','partner_integrated':'partner_delivered','not_primary':'not_supported'}
+grade={'yes':'supported','partial':'partially_supported','partner_integrated':'partner_delivered'}
 result={};decisions=[]
 for p in records:
  slug=p['provider']['slug'];comparison=mapping.get(slug,slug);sources={s['id']:s for s in p['evidence_sources']};caps={c['capability_code']:c for c in p['capabilities']};fixes={}

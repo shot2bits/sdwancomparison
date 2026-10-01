@@ -1962,1411 +1962,1411 @@
   {
     "slug": "cloudflare-one",
     "feature": "f01_fully_managed_service",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "not_primary",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f02_diy_self_managed_model",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f03_co_managed_service",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f04_multi_tenant_msp_white_label_support",
     "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f05_professional_services_and_migration_support",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f06_last_mile_circuit_management",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partner_integrated",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f07_lifecycle_management",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f08_flexible_commercial_model",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f09_encrypted_overlay_fabric",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f10_dynamic_path_selection",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f11_active_active_link_utilisation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f12_application_aware_routing",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f13_qos_and_traffic_shaping",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f14_packet_loss_remediation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f15_local_internet_breakout",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f16_mpls_coexistence_and_migration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f17_cellular_and_5g_support",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f18_cloud_on_ramp",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f19_public_cloud_gateways",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f20_private_pops_dedicated_pops",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f21_private_global_backbone",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f22_regional_breakout_and_data_residency",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f23_multi_cloud_transit_fabric",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f24_flexible_edge_form_factors",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f25_high_availability_design",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f26_sla_backed_service_fabric",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f27_integrated_next_generation_firewall",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f28_full_sase_platform",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f29_sse_ecosystem_integration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f30_zero_trust_network_access",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f31_secure_web_gateway",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f32_casb_capability",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f33_data_loss_prevention",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f34_remote_user_access",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f35_soc_siem_soar_integration",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f36_centralised_orchestration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f37_customer_portal_and_rbac",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f38_observability_and_digital_experience_monitoring",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f39_apis_and_automation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cloudflare-one",
+    "feature": "f40_managed_service_assurance",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f01_fully_managed_service",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f02_diy_self_managed_model",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f03_co_managed_service",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f04_multi_tenant_msp_white_label_support",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f05_professional_services_and_migration_support",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f06_last_mile_circuit_management",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f07_lifecycle_management",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f08_flexible_commercial_model",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f09_encrypted_overlay_fabric",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f10_dynamic_path_selection",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f11_active_active_link_utilisation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f12_application_aware_routing",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f13_qos_and_traffic_shaping",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f14_packet_loss_remediation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f15_local_internet_breakout",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f16_mpls_coexistence_and_migration",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f17_cellular_and_5g_support",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f18_cloud_on_ramp",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f19_public_cloud_gateways",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f20_private_pops_dedicated_pops",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f21_private_global_backbone",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f22_regional_breakout_and_data_residency",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f23_multi_cloud_transit_fabric",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f24_flexible_edge_form_factors",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f25_high_availability_design",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f26_sla_backed_service_fabric",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f27_integrated_next_generation_firewall",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partner_integrated",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f28_full_sase_platform",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f29_sse_ecosystem_integration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f30_zero_trust_network_access",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f31_secure_web_gateway",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f32_casb_capability",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f33_data_loss_prevention",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f34_remote_user_access",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f35_soc_siem_soar_integration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f36_centralised_orchestration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f37_customer_portal_and_rbac",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f38_observability_and_digital_experience_monitoring",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f39_apis_and_automation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "colt-technology-services",
+    "feature": "f40_managed_service_assurance",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f01_fully_managed_service",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f02_diy_self_managed_model",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f03_co_managed_service",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f04_multi_tenant_msp_white_label_support",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f05_professional_services_and_migration_support",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f06_last_mile_circuit_management",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f07_lifecycle_management",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f08_flexible_commercial_model",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f09_encrypted_overlay_fabric",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f10_dynamic_path_selection",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f11_active_active_link_utilisation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f12_application_aware_routing",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f13_qos_and_traffic_shaping",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f14_packet_loss_remediation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f15_local_internet_breakout",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f16_mpls_coexistence_and_migration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f17_cellular_and_5g_support",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f18_cloud_on_ramp",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f19_public_cloud_gateways",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partner_integrated",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f20_private_pops_dedicated_pops",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f21_private_global_backbone",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f22_regional_breakout_and_data_residency",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f23_multi_cloud_transit_fabric",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f24_flexible_edge_form_factors",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f25_high_availability_design",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f26_sla_backed_service_fabric",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f27_integrated_next_generation_firewall",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partner_integrated",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f28_full_sase_platform",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "partial"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f29_sse_ecosystem_integration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f30_zero_trust_network_access",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f31_secure_web_gateway",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f32_casb_capability",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f33_data_loss_prevention",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partner_integrated",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f34_remote_user_access",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f35_soc_siem_soar_integration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f36_centralised_orchestration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f37_customer_portal_and_rbac",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f38_observability_and_digital_experience_monitoring",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f39_apis_and_automation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "comcast-business",
+    "feature": "f40_managed_service_assurance",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f01_fully_managed_service",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "not_primary",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f02_diy_self_managed_model",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f03_co_managed_service",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f04_multi_tenant_msp_white_label_support",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f05_professional_services_and_migration_support",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partner_integrated",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f06_last_mile_circuit_management",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partner_integrated",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f07_lifecycle_management",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f08_flexible_commercial_model",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f09_encrypted_overlay_fabric",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "yes",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f10_dynamic_path_selection",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f11_active_active_link_utilisation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f12_application_aware_routing",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f13_qos_and_traffic_shaping",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f14_packet_loss_remediation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f15_local_internet_breakout",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f16_mpls_coexistence_and_migration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f17_cellular_and_5g_support",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f18_cloud_on_ramp",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f19_public_cloud_gateways",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f20_private_pops_dedicated_pops",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f21_private_global_backbone",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f22_regional_breakout_and_data_residency",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f23_multi_cloud_transit_fabric",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f24_flexible_edge_form_factors",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f25_high_availability_design",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f26_sla_backed_service_fabric",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f27_integrated_next_generation_firewall",
+    "decision": "retain_live_pending_new_field_review",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f28_full_sase_platform",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "partial"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f29_sse_ecosystem_integration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f30_zero_trust_network_access",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f31_secure_web_gateway",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f32_casb_capability",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f33_data_loss_prevention",
+    "decision": "retain_live_evidence",
+    "legacy_grade": "unknown",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f34_remote_user_access",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f35_soc_siem_soar_integration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f36_centralised_orchestration",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f37_customer_portal_and_rbac",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f38_observability_and_digital_experience_monitoring",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "yes",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f39_apis_and_automation",
+    "decision": "withhold_unsourced_legacy_grade",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "cradlepoint-ericsson",
+    "feature": "f40_managed_service_assurance",
+    "decision": "recover_source_linked_field",
+    "legacy_grade": "partial",
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f01_fully_managed_service",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f02_diy_self_managed_model",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f03_co_managed_service",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f04_multi_tenant_msp_white_label_support",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f05_professional_services_and_migration_support",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f06_last_mile_circuit_management",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f07_lifecycle_management",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f08_flexible_commercial_model",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f09_encrypted_overlay_fabric",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "partner_integrated"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f10_dynamic_path_selection",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f11_active_active_link_utilisation",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f12_application_aware_routing",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f13_qos_and_traffic_shaping",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f14_packet_loss_remediation",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f15_local_internet_breakout",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f16_mpls_coexistence_and_migration",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f17_cellular_and_5g_support",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f18_cloud_on_ramp",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f19_public_cloud_gateways",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f20_private_pops_dedicated_pops",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f21_private_global_backbone",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f22_regional_breakout_and_data_residency",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f23_multi_cloud_transit_fabric",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f24_flexible_edge_form_factors",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f25_high_availability_design",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f26_sla_backed_service_fabric",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f27_integrated_next_generation_firewall",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f28_full_sase_platform",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "partial"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f29_sse_ecosystem_integration",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f30_zero_trust_network_access",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f31_secure_web_gateway",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f32_casb_capability",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f33_data_loss_prevention",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f34_remote_user_access",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f35_soc_siem_soar_integration",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f36_centralised_orchestration",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f37_customer_portal_and_rbac",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f38_observability_and_digital_experience_monitoring",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "yes"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f39_apis_and_automation",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "expereo",
+    "feature": "f40_managed_service_assurance",
+    "decision": "retain_live_evidence",
+    "legacy_grade": null,
+    "previous_live_grade": "not_confirmed"
+  },
+  {
+    "slug": "forcepoint",
+    "feature": "f01_fully_managed_service",
+    "decision": "retain_live_pending_new_field_review",
     "legacy_grade": "not_primary",
     "previous_live_grade": "not_confirmed"
   },
   {
-    "slug": "cloudflare-one",
-    "feature": "f02_diy_self_managed_model",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f03_co_managed_service",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f04_multi_tenant_msp_white_label_support",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f05_professional_services_and_migration_support",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f06_last_mile_circuit_management",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partner_integrated",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f07_lifecycle_management",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f08_flexible_commercial_model",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f09_encrypted_overlay_fabric",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f10_dynamic_path_selection",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f11_active_active_link_utilisation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f12_application_aware_routing",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f13_qos_and_traffic_shaping",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f14_packet_loss_remediation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f15_local_internet_breakout",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f16_mpls_coexistence_and_migration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f17_cellular_and_5g_support",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f18_cloud_on_ramp",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f19_public_cloud_gateways",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f20_private_pops_dedicated_pops",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f21_private_global_backbone",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f22_regional_breakout_and_data_residency",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f23_multi_cloud_transit_fabric",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f24_flexible_edge_form_factors",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f25_high_availability_design",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f26_sla_backed_service_fabric",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f27_integrated_next_generation_firewall",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f28_full_sase_platform",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f29_sse_ecosystem_integration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f30_zero_trust_network_access",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f31_secure_web_gateway",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f32_casb_capability",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f33_data_loss_prevention",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f34_remote_user_access",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f35_soc_siem_soar_integration",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f36_centralised_orchestration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f37_customer_portal_and_rbac",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f38_observability_and_digital_experience_monitoring",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f39_apis_and_automation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cloudflare-one",
-    "feature": "f40_managed_service_assurance",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f01_fully_managed_service",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f02_diy_self_managed_model",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f03_co_managed_service",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f04_multi_tenant_msp_white_label_support",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f05_professional_services_and_migration_support",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f06_last_mile_circuit_management",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f07_lifecycle_management",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f08_flexible_commercial_model",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f09_encrypted_overlay_fabric",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f10_dynamic_path_selection",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f11_active_active_link_utilisation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f12_application_aware_routing",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f13_qos_and_traffic_shaping",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f14_packet_loss_remediation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f15_local_internet_breakout",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f16_mpls_coexistence_and_migration",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f17_cellular_and_5g_support",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f18_cloud_on_ramp",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f19_public_cloud_gateways",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f20_private_pops_dedicated_pops",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f21_private_global_backbone",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f22_regional_breakout_and_data_residency",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f23_multi_cloud_transit_fabric",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f24_flexible_edge_form_factors",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f25_high_availability_design",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f26_sla_backed_service_fabric",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f27_integrated_next_generation_firewall",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partner_integrated",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f28_full_sase_platform",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f29_sse_ecosystem_integration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f30_zero_trust_network_access",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f31_secure_web_gateway",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f32_casb_capability",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f33_data_loss_prevention",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f34_remote_user_access",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f35_soc_siem_soar_integration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f36_centralised_orchestration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f37_customer_portal_and_rbac",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f38_observability_and_digital_experience_monitoring",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f39_apis_and_automation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "colt-technology-services",
-    "feature": "f40_managed_service_assurance",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f01_fully_managed_service",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f02_diy_self_managed_model",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f03_co_managed_service",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f04_multi_tenant_msp_white_label_support",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f05_professional_services_and_migration_support",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f06_last_mile_circuit_management",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f07_lifecycle_management",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f08_flexible_commercial_model",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f09_encrypted_overlay_fabric",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f10_dynamic_path_selection",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f11_active_active_link_utilisation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f12_application_aware_routing",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f13_qos_and_traffic_shaping",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f14_packet_loss_remediation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f15_local_internet_breakout",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f16_mpls_coexistence_and_migration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f17_cellular_and_5g_support",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f18_cloud_on_ramp",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f19_public_cloud_gateways",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partner_integrated",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f20_private_pops_dedicated_pops",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f21_private_global_backbone",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f22_regional_breakout_and_data_residency",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f23_multi_cloud_transit_fabric",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f24_flexible_edge_form_factors",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f25_high_availability_design",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f26_sla_backed_service_fabric",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f27_integrated_next_generation_firewall",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partner_integrated",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f28_full_sase_platform",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "partial"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f29_sse_ecosystem_integration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f30_zero_trust_network_access",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f31_secure_web_gateway",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f32_casb_capability",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f33_data_loss_prevention",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partner_integrated",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f34_remote_user_access",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f35_soc_siem_soar_integration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f36_centralised_orchestration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f37_customer_portal_and_rbac",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f38_observability_and_digital_experience_monitoring",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f39_apis_and_automation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "comcast-business",
-    "feature": "f40_managed_service_assurance",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f01_fully_managed_service",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "not_primary",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f02_diy_self_managed_model",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f03_co_managed_service",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f04_multi_tenant_msp_white_label_support",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f05_professional_services_and_migration_support",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partner_integrated",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f06_last_mile_circuit_management",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partner_integrated",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f07_lifecycle_management",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f08_flexible_commercial_model",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f09_encrypted_overlay_fabric",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "yes",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f10_dynamic_path_selection",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f11_active_active_link_utilisation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f12_application_aware_routing",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f13_qos_and_traffic_shaping",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f14_packet_loss_remediation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f15_local_internet_breakout",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f16_mpls_coexistence_and_migration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f17_cellular_and_5g_support",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f18_cloud_on_ramp",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f19_public_cloud_gateways",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f20_private_pops_dedicated_pops",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f21_private_global_backbone",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f22_regional_breakout_and_data_residency",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f23_multi_cloud_transit_fabric",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f24_flexible_edge_form_factors",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f25_high_availability_design",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f26_sla_backed_service_fabric",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f27_integrated_next_generation_firewall",
-    "decision": "retain_live_pending_new_field_review",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f28_full_sase_platform",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "partial"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f29_sse_ecosystem_integration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f30_zero_trust_network_access",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f31_secure_web_gateway",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f32_casb_capability",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f33_data_loss_prevention",
-    "decision": "retain_live_evidence",
-    "legacy_grade": "unknown",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f34_remote_user_access",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f35_soc_siem_soar_integration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f36_centralised_orchestration",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f37_customer_portal_and_rbac",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f38_observability_and_digital_experience_monitoring",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "yes",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f39_apis_and_automation",
-    "decision": "withhold_unsourced_legacy_grade",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "cradlepoint-ericsson",
-    "feature": "f40_managed_service_assurance",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "partial",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f01_fully_managed_service",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f02_diy_self_managed_model",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f03_co_managed_service",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f04_multi_tenant_msp_white_label_support",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f05_professional_services_and_migration_support",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f06_last_mile_circuit_management",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f07_lifecycle_management",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f08_flexible_commercial_model",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f09_encrypted_overlay_fabric",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "partner_integrated"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f10_dynamic_path_selection",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f11_active_active_link_utilisation",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f12_application_aware_routing",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f13_qos_and_traffic_shaping",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f14_packet_loss_remediation",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f15_local_internet_breakout",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f16_mpls_coexistence_and_migration",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f17_cellular_and_5g_support",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f18_cloud_on_ramp",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f19_public_cloud_gateways",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f20_private_pops_dedicated_pops",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f21_private_global_backbone",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f22_regional_breakout_and_data_residency",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f23_multi_cloud_transit_fabric",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f24_flexible_edge_form_factors",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f25_high_availability_design",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f26_sla_backed_service_fabric",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f27_integrated_next_generation_firewall",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f28_full_sase_platform",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "partial"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f29_sse_ecosystem_integration",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f30_zero_trust_network_access",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f31_secure_web_gateway",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f32_casb_capability",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f33_data_loss_prevention",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f34_remote_user_access",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f35_soc_siem_soar_integration",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f36_centralised_orchestration",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f37_customer_portal_and_rbac",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f38_observability_and_digital_experience_monitoring",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "yes"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f39_apis_and_automation",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "expereo",
-    "feature": "f40_managed_service_assurance",
-    "decision": "retain_live_evidence",
-    "legacy_grade": null,
-    "previous_live_grade": "not_confirmed"
-  },
-  {
-    "slug": "forcepoint",
-    "feature": "f01_fully_managed_service",
-    "decision": "recover_source_linked_field",
-    "legacy_grade": "not_primary",
-    "previous_live_grade": "not_confirmed"
-  },
-  {
     "slug": "forcepoint",
     "feature": "f02_diy_self_managed_model",
     "decision": "retain_live_evidence",
@@ -8262,7 +8262,7 @@
   {
     "slug": "zscaler",
     "feature": "f21_private_global_backbone",
-    "decision": "recover_source_linked_field",
+    "decision": "retain_live_pending_new_field_review",
     "legacy_grade": "not_primary",
     "previous_live_grade": "not_confirmed"
   },

@@ -1357,20 +1357,6 @@
           "source_finding": "Native, well-evidenced via the confirmed, massive-scale, continuous global threat-telemetry operation (47.1 million DDoS attacks mitigated in 2025, 230 billion threats blocked daily per Cloudflare's own reporting) [33] [10]",
           "basis": "parser_repair"
         },
-        "f01_fully_managed_service": {
-          "expected_state": null,
-          "expected_qualification": null,
-          "support_state": "not_supported",
-          "qualification": "Cloudflare sells Cloudflare One as a self-administered cloud platform. No page read describes Cloudflare designing, operating, changing and reporting on the service end to end for the customer; ongoing delivery is positioned through authorised service delivery partners. Pages read: sase, professional services, partners/services, partners/managed-service-providers.",
-          "confidence": "medium",
-          "verified_date": "2026-07-29",
-          "source_urls": [
-            "https://www.cloudflare.com/professional-services/"
-          ],
-          "reason": "Recover field-specific historic evidence; primary-source quote checked 2026-10-01. Original evidence date retained.",
-          "source_finding": "Cloudflare authorized service delivery partners have a strong track record of delivering excellent customer experiences and in-depth knowledge of our services to customers.",
-          "basis": "source_quote_recovered"
-        },
         "f04_multi_tenant_msp_white_label_support": {
           "expected_state": null,
           "expected_qualification": null,
@@ -2395,20 +2381,6 @@
           "reason": "Restore the explicit source finding misclassified by the confirmation substring parser.",
           "source_finding": "Native, confirmed - Forcepoint DLP provides 'continuous monitoring' across data at rest, in use, and in transit, per Forcepoint's own materials and independent analyst recognition [36]",
           "basis": "parser_repair"
-        },
-        "f01_fully_managed_service": {
-          "expected_state": null,
-          "expected_qualification": null,
-          "support_state": "not_supported",
-          "qualification": "Forcepoint's own SD-WAN page defines managed SD-WAN generically as something 'a provider' delivers, and does not claim Forcepoint itself designs, deploys, monitors and reports on the service end to end. The partner programme page frames managed services as certified partner revenue. No Forcepoint-operated fully managed offer was found on the vendor pages reviewed.",
-          "confidence": "medium",
-          "verified_date": "2026-07-29",
-          "source_urls": [
-            "https://www.forcepoint.com/product/secure-sd-wan"
-          ],
-          "reason": "Recover field-specific historic evidence; primary-source quote checked 2026-10-01. Original evidence date retained.",
-          "source_finding": "A managed SD-WAN is a service where a provider handles the deployment, configuration, monitoring and optimisation of your WAN.",
-          "basis": "source_quote_recovered"
         },
         "f04_multi_tenant_msp_white_label_support": {
           "expected_state": null,
@@ -5816,20 +5788,6 @@
           ],
           "reason": "Recover field-specific historic evidence; primary-source quote checked 2026-10-01. Original evidence date retained.",
           "source_finding": "ZIA Private Service Edge and ZIA Virtual Service Edge devices extend the Zscaler cloud into your data center.",
-          "basis": "source_quote_recovered"
-        },
-        "f21_private_global_backbone": {
-          "expected_state": null,
-          "expected_qualification": null,
-          "support_state": "not_supported",
-          "qualification": "No claim of a vendor-owned or vendor-controlled inter-region backbone was found on any Zscaler page read. The published architecture is peering-based: the reference architecture states many data centres are in internet exchange peering points with other cloud infrastructure and application providers, such as Microsoft, Amazon, and Google. The only global-WAN backbone material found was a 2023 blog describing the Teridion Liquid Network, which is a third party's infrastructure and is Tier 3 corroboration only (register 20), so it cannot support a grade. Graded not_primary rather than unknown because the vendor's own architecture documents describe an internet-and-peering model, but confidence is low since this is read off architecture description rather than an explicit vendor statement about backbone ownership.",
-          "confidence": "low",
-          "verified_date": "2026-07-29",
-          "source_urls": [
-            "https://www.zscaler.com/resources/data-sheets/zscaler-internet-access.pdf"
-          ],
-          "reason": "Recover field-specific historic evidence; primary-source quote checked 2026-10-01. Original evidence date retained.",
-          "source_finding": "Direct peering with major internet and SaaS providers and public cloud destinations ensures the fastest traffic path possible.",
           "basis": "source_quote_recovered"
         }
       }
