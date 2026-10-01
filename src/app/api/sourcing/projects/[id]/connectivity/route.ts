@@ -1,3 +1,4 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import { z } from "zod";
 import { sourcingAccess } from "@/lib/sourcing-access";
 import { requireRfpOwner } from "@/lib/rfp-access";
@@ -74,8 +75,7 @@ export async function GET(req: Request, ctx: Ctx) {
 }
 export async function POST(req: Request, ctx: Ctx) {
   try {
-    const origin = req.headers.get("origin");
-    if (origin && origin !== new URL(req.url).origin)
+    if (!requestOriginAllowed(req))
       throw new CircuitError("Origin not allowed.", 403);
     const { id } = await ctx.params;
     const session = await identity(req, id);

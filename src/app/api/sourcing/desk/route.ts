@@ -1,3 +1,4 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import { evidenceReviewHealth } from "@/lib/evidence-review-health";
 import { z } from "zod";
 import {
@@ -55,8 +56,7 @@ export async function POST(req: Request) {
       { status: 403 },
     );
   if (
-    req.headers.get("origin") &&
-    req.headers.get("origin") !== new URL(req.url).origin
+    !requestOriginAllowed(req)
   )
     return Response.json({ error: "Origin not allowed." }, { status: 403 });
   try {

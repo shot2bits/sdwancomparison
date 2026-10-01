@@ -89,8 +89,8 @@ await withFakeKv(async (store) => {
     requestRoute.POST(
       makeRequest(
         "POST",
-        "https://preview.example/sase/api/sourcing/request/",
-        { body },
+        "https://project-8q2xb.vercel.app/sase/api/sourcing/request/",
+        { body, headers: {origin:"https://netify.co.uk"} },
       ),
     );
   const first = await post();
@@ -108,7 +108,8 @@ await withFakeKv(async (store) => {
   assert(match);
   const token = match[2];
   const read = await confirmRoute.POST(
-    makeRequest("POST", "https://preview.example/sase/api/sourcing/confirm/", {
+    makeRequest("POST", "https://project-8q2xb.vercel.app/sase/api/sourcing/confirm/", {
+      headers: {origin:"https://netify.co.uk"},
       body: { id: receipt.request_id, token, confirm: false },
     }),
   );
@@ -127,8 +128,8 @@ await withFakeKv(async (store) => {
     confirmRoute.POST(
       makeRequest(
         "POST",
-        "https://preview.example/sase/api/sourcing/confirm/",
-        { body: { id: receipt.request_id, token, confirm: true } },
+        "https://project-8q2xb.vercel.app/sase/api/sourcing/confirm/",
+        { body: { id: receipt.request_id, token, confirm: true }, headers: {origin:"https://netify.co.uk"} },
       ),
     );
   failQueueOnce = true;

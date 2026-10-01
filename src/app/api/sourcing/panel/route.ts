@@ -1,3 +1,4 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import { sessionFromRequest } from "@/lib/auth";
 import { getResponsePanel, saveResponsePanel } from "@/lib/response-panel";
 import { ResponsePanelRowSchema } from "@/lib/response-panel-contract";
@@ -35,8 +36,7 @@ export async function POST(req: Request) {
       { status: 403, headers },
     );
   if (
-    req.headers.get("origin") &&
-    req.headers.get("origin") !== new URL(req.url).origin
+    !requestOriginAllowed(req)
   )
     return Response.json(
       { error: "Origin not allowed." },

@@ -1,8 +1,8 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import { requestSourcing } from "@/lib/sourcing-store";
 export async function POST(req: Request) {
   if (
-    req.headers.get("origin") &&
-    req.headers.get("origin") !== new URL(req.url).origin
+    !requestOriginAllowed(req)
   )
     return Response.json({ error: "Origin not allowed." }, { status: 403 });
   if (Number(req.headers.get("content-length") || 0) > 40000)

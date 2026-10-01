@@ -1,3 +1,4 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import {sourcingScopeHash,currentSourcingProposals} from "@/lib/sourcing-proposal-scope";
 import {recordMarketplaceFunnelEvent} from "@/lib/marketplace-funnel";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
@@ -73,8 +74,7 @@ export async function GET(req: Request, ctx: Ctx) {
 }
 export async function POST(req: Request, ctx: Ctx) {
   try {
-    const origin = req.headers.get("origin");
-    if (origin && origin !== new URL(req.url).origin)
+    if (!requestOriginAllowed(req))
       return Response.json(
         { error: "Origin not allowed." },
         { status: 403, headers },

@@ -1,3 +1,4 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import { getAllVendors } from "@/lib/vendors";
 import { issueSourcingAccess, sourcingAccess } from "@/lib/sourcing-access";
 import { z } from "zod";
@@ -29,8 +30,7 @@ function json(body: unknown, status = 200) {
 }
 export async function POST(req: Request) {
   if (
-    req.headers.get("origin") &&
-    req.headers.get("origin") !== new URL(req.url).origin
+    !requestOriginAllowed(req)
   )
     return json({ error: "Origin not allowed." }, 403);
   try {
