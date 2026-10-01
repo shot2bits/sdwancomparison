@@ -1,3 +1,4 @@
+import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_URL } from "@/lib/structured-data";
@@ -24,5 +25,6 @@ export default function HowItWorksPage() {
   <p className="my-6">{COMMISSION_DESCRIPTION}</p>
   <Link href="/shortlist" className="underline">Research providers and prepare your request</Link>
   {" · "}<Link href="/connector" className="underline">Assistant connection</Link>
+  <section><h2>Questions about the service</h2>{SHORTLIST_FAQS.map(f=><details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>)}</section>
  </main>;
 }

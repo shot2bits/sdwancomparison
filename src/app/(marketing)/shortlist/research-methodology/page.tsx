@@ -45,6 +45,7 @@ export default async function ResearchMethodologyPage() {
     </section>
     <section className="mt-10">
       <h2>How to cite and reuse the research</h2>
+      <p><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 with attribution to Netify</a></p>
       <p className="mt-3 leading-7">Suggested citation: Netify Group Limited, “Netify SD-WAN and SASE provider comparison”, reviewed {reviewed}, <Link className="underline" href="/shortlist/">https://netify.co.uk/sase/shortlist/</Link>.</p>
       <ul className="mt-4 list-disc space-y-2 pl-5">
         <li><Link className="underline" href="/shortlist/data.json">JSON dataset</Link></li>

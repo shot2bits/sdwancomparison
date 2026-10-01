@@ -1,3 +1,4 @@
+import {shortlistEntity} from "./shortlist-entity";
 import {sourcingPlanAllowed} from "./sourcing-plan-limit";
 import {randomUUID} from "node:crypto";
 import {recordSourcingMetric} from "./sourcing-metrics";
@@ -86,6 +87,7 @@ export async function callSourcingTool(
   const live = await getLiveShortlistDataset();
   await recordSourcingMetric("plan",acquisition,randomUUID());
   return {
+    entity: (({count_sentence,uk_sentence})=>({count_sentence,uk_sentence}))(shortlistEntity(live.vendors)),
     brief: b,
     runtime_provider_source:live.source,
     provider_contract_version:live.providerContractVersion,

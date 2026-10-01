@@ -18,6 +18,6 @@ for(const target of [{proposals:null,working_days:null},{proposals:3,working_day
  console.log(`PASS sourcing target ${target.proposals===null?'unset':'set'}: page step 3, Service JSON-LD, llms and MCP agree`);
 }
 assert.equal(sourcingUndertaking({proposals:3,working_days:null}),fallback);assert.equal(sourcingUndertaking({proposals:0,working_days:5}),fallback);
-const page=fs.readFileSync('src/app/(marketing)/shortlist/page.tsx','utf8');assert(page.includes('{sourcingUndertaking()}'));assert(page.includes('sourcingServiceSchema(`${SITE_URL}/shortlist/`)'));
+const page=fs.readFileSync('src/app/(marketing)/shortlist/page.tsx','utf8');assert(page.includes('{sourcingUndertaking()}'));assert(page.includes('shortlistSchema(vendors,entity.h1')); assert(fs.readFileSync('src/lib/shortlist-schema.ts','utf8').includes('sourcingServiceSchema(url)'));
 assert(fs.readFileSync('src/lib/sourcing-notifications.ts','utf8').includes('${sourcingUndertaking()}'));
 console.log('PASS partial or invalid targets stay unpromised; buyer acknowledgement uses the same contract');

@@ -39,7 +39,7 @@ assert.equal(positive.filter((v) => v === "partial").length, 9);
 assert.equal((sheet.match(/\| unknown \|/g) ?? []).length, 5);
 assert.equal(
   sectorSignoff({ signed_off_by: "", signed_off_at: "" }).label,
-  "Sector evidence: source-reviewed, sign-off pending",
+  "Sector evidence: source-reviewed",
 );
 assert.equal(
   sectorSignoff({

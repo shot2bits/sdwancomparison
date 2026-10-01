@@ -1,3 +1,6 @@
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
+import { publicResponsePanel } from "@/lib/response-panel";
+import ProviderEntityBlock from "@/components/ProviderEntityBlock";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import RecordEditLink from "@/components/RecordEditLink";
@@ -7,7 +10,7 @@ import {
   getVendor,
   getCapabilitiesByCategory,
   FEATURE_NAMES,
-  STATUS_LABELS,
+  STATUS_LABELS as SOURCE_STATUS_LABELS,
   STATUS_DESCRIPTIONS,
 } from "@/lib/vendors";
 import {
@@ -21,6 +24,19 @@ import Continuation from "@/components/Continuation";
 import { deriveContinuation } from "@/lib/continuation/derive";
 import { continuationUrl } from "@/lib/continuation/types";
 
+export const dynamic = "force-dynamic";
+
+// Display punctuation only; the stored evidence and source quotations remain unchanged.
+const evidenceText = (text: string) => text.replace(/\u2014/g, " - ").replace(/\bunknown\b/gi, "not yet reviewed");
+const STATUS_LABELS: Record<string,string> = {...SOURCE_STATUS_LABELS,unknown:"not yet reviewed"};
+function displayCopy<T>(value:T):T {
+  // Keep internal status enums intact; normalise only displayed prose and punctuation.
+  if (typeof value === "string") return (value === "unknown" ? value : evidenceText(value)) as T;
+  if (Array.isArray(value)) return value.map(displayCopy) as T;
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,displayCopy(v)])) as T;
+  return value;
+}
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
@@ -30,7 +46,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const vendor = getVendor(slug);
+    const vendor = displayCopy(getVendor(slug));
     const longTitle = `${vendor.name}: SD-WAN and SASE capability profile`;
     const title = longTitle.length <= 56 ? longTitle : `${vendor.name}: capability profile`;
     const description = `${vendor.name} graded on 40 SD-WAN and SASE features: ${vendor.score_summary.yes_count} yes, ${vendor.score_summary.partial_count} partial. Profile, FAQs, alternatives and contact route.`.slice(0, 160);
@@ -46,17 +62,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     };
   } catch {
-    return { title: "Vendor not found" };
+    const provider=(await getLiveShortlistDataset()).vendors.find(v=>v.slug===slug);
+    return provider ? {title:`${provider.name}: capability profile`,alternates:{canonical:`${SITE_URL}/vendors/${slug}/`}} : {title:"Vendor not found"};
   }
 }
 
 export default async function VendorPage({ params }: Props) {
   const { slug } = await params;
+  const liveProvider = (await getLiveShortlistDataset()).vendors.find(v=>v.slug===slug);
+  const panel = await publicResponsePanel();
   let vendor;
   try {
-    vendor = getVendor(slug);
+    vendor = displayCopy(getVendor(slug));
   } catch {
-    notFound();
+    if (!liveProvider) notFound();
+    return <main className="max-w-4xl mx-auto px-6 py-16">
+      <h1>{liveProvider.name}</h1>
+      <ProviderEntityBlock vendor={liveProvider} panel={panel.some(p=>p.slug===slug)}/>
+      <h2>Capability matrix</h2>
+      <table><tbody>{Object.entries(liveProvider.capabilities).map(([key,value])=><tr key={key}><th>{FEATURE_NAMES[key] ?? key}</th><td>{value==='unknown'||value==='not_confirmed'?'not yet reviewed':STATUS_LABELS[value]}</td></tr>)}</tbody></table>
+      <a href="/sase/shortlist/">Provider shortlist</a>
+    </main>;
   }
   const continuation = deriveContinuation({ kind: "vendor", vendor });
 
@@ -89,6 +115,7 @@ export default async function VendorPage({ params }: Props) {
       "@type": "Organization",
       name: vendor.name,
       url: vendor.website,
+      sameAs: vendor.website,
     },
     publisher: {
       "@type": "Organization",
@@ -161,6 +188,7 @@ export default async function VendorPage({ params }: Props) {
             <h1 id="page-h1" className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
               {vendor.name}
             </h1>
+            {liveProvider && <ProviderEntityBlock vendor={liveProvider} panel={panel.some(p=>p.slug===slug)}/>}
             <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-6 max-w-2xl">
               {vendor.evidence_summary}
             </p>
@@ -450,8 +478,8 @@ export default async function VendorPage({ params }: Props) {
                       </th>
                       <td className="px-3.5 py-2.5 text-[var(--ink-700)] whitespace-nowrap">
                         {f.value === "unknown"
-                          ? "Not found"
-                          : (STATUS_LABELS[f.value] ?? f.value)}
+                          ? "not yet reviewed"
+                          : evidenceText(STATUS_LABELS[f.value] ?? f.value)}
                       </td>
                       <td className="px-3.5 py-2.5 text-[var(--ink-600,#5b636e)] whitespace-nowrap">
                         {f.evidence.length > 0
@@ -460,10 +488,10 @@ export default async function VendorPage({ params }: Props) {
                       </td>
                       <td className="px-3.5 py-2.5 text-[var(--ink-700)]">
                         {f.quote ? (
-                          `"${f.quote}"`
+                          `"${evidenceText(f.quote)}"`
                         ) : (
                           <span className="text-[var(--ink-500)]">
-                            {f.note ?? "Not found in public sources reviewed."}
+                            {evidenceText(f.note ?? "Not found in public sources reviewed.")}
                           </span>
                         )}
                       </td>

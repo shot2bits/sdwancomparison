@@ -1,4 +1,5 @@
 "use client";
+import SourcingActions, { type SourcingAction as Action } from "./SourcingActions";
 import { sourcingAcquisition } from "@/lib/sourcing-acquisition";
 import type { PublicPanelMember } from "@/lib/response-panel-contract";
 import React, { useRef, useState } from "react";
@@ -16,16 +17,16 @@ import {
   SourcingBriefSchema,
   type SourcingBrief,
 } from "@/lib/sourcing-contract";
-type Action = "contacts" | "demo" | "proposals";
-const actions: Action[] = ["contacts", "demo", "proposals"];
 const actionLabels = SOURCING_ACTION_LABELS;
 export default function SourcingEntrance({
   vendors,
   initialSector,
+  initialSelection,
   features,
 }: {
-  vendors: (ShortlistVendor & { response_panel?: PublicPanelMember | null })[];
+  vendors: (ShortlistVendor & { best_for?: string; response_panel?: PublicPanelMember | null })[];
   initialSector?: string;
+  initialSelection?: {slug:string; action:Action};
   features: { id: string; name: string }[];
 }) {
   const [brief, setBrief] = useState<SourcingBrief>({
@@ -40,7 +41,7 @@ export default function SourcingEntrance({
     requirement: "",
     supplier_brief: "",
   });
-  const [selected, setSelected] = useState<Record<string, Action[]>>({});
+  const [selected, setSelected] = useState<Record<string, Action[]>>(initialSelection ? {[initialSelection.slug]:[initialSelection.action]} : {});
   const [plan, setPlan] = useState(false),
     [email, setEmail] = useState(""),
     [consent, setConsent] = useState(false),
@@ -216,7 +217,7 @@ export default function SourcingEntrance({
             checked={brief.uk_provider_only ?? false}
             onChange={(e) => change("uk_provider_only", e.target.checked)}
           />
-          UK providers only — UK headquarters or contracting entity evidenced
+          UK providers only: UK headquarters or contracting entity evidenced
         </label>
         <div className="sourcing-fields">
           <label>
@@ -476,12 +477,13 @@ export default function SourcingEntrance({
           {vendors.map((v) => (
             <article key={v.slug}>
               <div className="sourcing-card-top">
-                <h3>{v.name}</h3>
+                <h3><a href={`/sase/vendors/${v.slug}/`}>{v.name}</a></h3>
                 <span>
                   {v.response_panel ? "Response panel" : "Research only"}
                 </span>
               </div>
               <p>{v.category}</p>
+              <p data-best-for={v.slug}><strong>Best for:</strong> {v.best_for}</p>
               {matches?.includes(v.slug) && (
                 <p>
                   <strong>Evidence match</strong> · supplier confirmation
@@ -505,7 +507,7 @@ export default function SourcingEntrance({
               {brief.sector && (
                 <p className="sourcing-small">
                   {SECTOR_LABELS[brief.sector]}:{" "}
-                  {STATUS_LABELS[v.sectors[brief.sector]]} evidence. UK sector
+                  {["unknown", "not_confirmed"].includes(v.sectors[brief.sector]) ? "not yet reviewed" : STATUS_LABELS[v.sectors[brief.sector]]} evidence. UK sector
                   case evidence:{" "}
                   {v.projection_provenance?.active_review?.uk_sector_evidence?.[
                     brief.sector
@@ -544,18 +546,7 @@ export default function SourcingEntrance({
                   {v.response_panel.agreed_response_working_days} working days.
                 </p>
               )}
-              <div className="sourcing-actions">
-                {actions.map((action) => (
-                  <label key={action} className="sourcing-check">
-                    <input
-                      type="checkbox"
-                      checked={selected[v.slug]?.includes(action) ?? false}
-                      onChange={() => choose(v.slug, action)}
-                    />
-                    {actionLabels[action]}
-                  </label>
-                ))}
-              </div>
+              <SourcingActions slug={v.slug} selected={selected[v.slug] ?? []} onChoose={choose}/>
             </article>
           ))}
         </div>
@@ -582,6 +573,7 @@ export default function SourcingEntrance({
               <thead>
                 <tr>
                   <th>Provider</th>
+                  <th>Best for</th>
                   <th>Coverage</th>
                   <th>Sources</th>
                   <th>Review date</th>
@@ -598,12 +590,13 @@ export default function SourcingEntrance({
                         {v.name}
                       </a>
                     </th>
+                    <td>{v.best_for}</td>
                     <td>{Math.round(v.evidence_coverage_pct * 100)}%</td>
                     <td>{v.evidence_source_count ?? 0}</td>
                     <td>{v.last_verified}</td>
                     {features.map((f) => (
                       <td key={f.id}>
-                        {STATUS_LABELS[v.capabilities[f.id] ?? "not_confirmed"]}
+                        {["unknown", "not_confirmed"].includes(v.capabilities[f.id] ?? "not_confirmed") ? "not yet reviewed" : STATUS_LABELS[v.capabilities[f.id]]}
                       </td>
                     ))}
                   </tr>

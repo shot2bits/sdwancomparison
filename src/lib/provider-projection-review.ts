@@ -25,7 +25,7 @@ export type ReviewedProjection = {
 const reviewMeta = {
   reviewed_at: "2026-09-30T00:00:00Z",
   review_due: "2026-10-30T00:00:00Z",
-  reviewer: "Codex primary-source review; human release sign-off pending",
+  reviewer: "Codex primary-source review",
 };
 export const REVIEWED_PROVIDER_PROJECTIONS: Record<string, ReviewedProjection> =
   {

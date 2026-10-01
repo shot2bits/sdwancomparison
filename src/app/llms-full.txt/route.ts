@@ -1,6 +1,7 @@
-import { publicProviderEvidence } from "@/lib/public-provider-evidence";
+import { publicProviderEvidence, publicEvidenceProviders } from "@/lib/public-provider-evidence";
 import { BEST_PAGES } from "@/lib/best-pages";
-import { getShortlistDataset } from "@/lib/vendors";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
+import { bestFor, shortlistEntity } from "@/lib/shortlist-entity";
 import { SITE_URL } from "@/lib/structured-data";
 import { datasetVerifiedIso } from "@/lib/dataset-date";
 
@@ -10,9 +11,10 @@ import { datasetVerifiedIso } from "@/lib/dataset-date";
  * page so engines can cite the source URL.
  */
 export async function GET() {
-  const vendors = getShortlistDataset();
+  const vendors = publicEvidenceProviders((await getLiveShortlistDataset()).vendors);
+  const entity = shortlistEntity(vendors);
   const sections: string[] = [
-    "# Netify SASE and SD-WAN provider evidence: full text version",
+    entity.h1, entity.count_sentence, entity.uk_sentence,
     "",
     `Source: ${SITE_URL} · Publisher: Netify Group Limited (netify.co.uk) · Updated ${datasetVerifiedIso()}`,
     "Methodology: 30 vendors graded on 40 capability features from public evidence (yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0); weighted scores per page criteria. Extended dimensions are indicative desk research; confirm via RFP.",
@@ -27,7 +29,7 @@ export async function GET() {
     sections.push(result.criteria_summary);
     for (const v of result.shortlist) {
       sections.push(
-        `${v.name}: ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
+        `${v.name}: Best for: ${bestFor(v).best_for}. ${v.key_differentiators[0]} Typical deployment: ${v.deployment_speed}. Watch out: ${v.watch_outs[0]}`,
       );
     }
     sections.push("");
@@ -35,6 +37,7 @@ export async function GET() {
 
   sections.push("## All 30 vendor profiles");
   for (const v of vendors) {
+    sections.push(`Best for: ${bestFor(v).best_for}`);
     sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; verified capability coverage ${Math.round(v.evidence_coverage_pct * 100)}%; cited sources ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
   }
   sections.push("");
