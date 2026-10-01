@@ -38,6 +38,7 @@ export function latestReview(vendors: ShortlistVendor[]) {
   );
 }
 export function ukStatus(v: ShortlistVendor) {
+  if(v.uk_evidence) return {status:v.uk_delivery,label:v.uk_evidence.entity.status==='evidenced' ? (v.uk_delivery==='uk_hq'?'UK headquartered':'UK contracting entity') : v.uk_evidence.entity.status==='expired'?'UK entity evidence expired':'UK entity not yet reviewed',source_urls:v.uk_evidence.entity.source_urls,reviewed_at:v.uk_evidence.entity.checked_at,qualification:v.uk_evidence.entity.qualification};
   const review = UK_CARRIER_REVIEWS[v.slug];
   const active =
     review &&
@@ -98,7 +99,7 @@ export function shortlistEntity(
     h1,
     counts,
     count_sentence: `Compare ${vendors.length} researched SD-WAN and SASE providers across operating model, network and security capability. ${counts.technology_vendors} technology vendors; ${counts.uk_carriers} UK carriers; ${counts.managed_service_providers} managed service providers${overlap ? "; overlapping categories counted in each type" : ""}.`,
-    uk_sentence: `${uk} UK-headquartered or UK-entity providers; ${pending} UK entity statuses not yet reviewed; ${reviewed ? `latest UK carrier evidence review ${reviewed}` : "no active dated UK carrier review"}. UK entity evidence does not establish availability at individual sites.`,
+    uk_sentence: `${uk} UK-headquartered or UK-entity providers; ${pending} UK entity statuses not yet reviewed; ${reviewed ? `latest UK entity evidence review ${reviewed}` : "no active dated UK entity review"}. UK entity evidence does not establish availability at individual sites.`,
     market_structure_sentence: review.market_structure_sentence,
     desk_sentence: review.desk_sentence,
     reviewer: {

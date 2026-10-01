@@ -1,20 +1,71 @@
 {
   "version": "netify-citation-panel/1",
   "purpose": "Test named recommendation and buyer action separately from source visibility. No before/after observation alone establishes causality.",
-  "queries": ["SD-WAN providers", "SD-WAN vendors", "SD-WAN comparison", "SASE providers", "SASE vendors", "SASE comparison", "MPLS providers", "insurance providers"],
-  "surfaces": ["Google UK traditional results", "Google AI Mode", "ChatGPT consumer search", "Perplexity consumer search", "Bing Copilot"],
+  "queries": [
+    "SD-WAN providers",
+    "SD-WAN vendors",
+    "SD-WAN comparison",
+    "SASE providers",
+    "SASE vendors",
+    "SASE comparison",
+    "MPLS providers",
+    "insurance providers"
+  ],
+  "surfaces": [
+    "Google UK traditional results",
+    "Google AI Mode",
+    "ChatGPT consumer search",
+    "Perplexity consumer search",
+    "Bing Copilot"
+  ],
   "session_rule": "Fresh conversation for every query. Signed out wherever available. Record sign-in state, actual engine/surface/model, locale, timestamp and visible personalisation. A blocked surface is untested, not absent. API tests remain separate from consumer tests.",
   "repetitions": "Three independent conversations per query per surface per weekly collection; report run-level results and variability, not only the strongest answer. No Netify name or leading follow-up in the prompt.",
-  "record_fields": ["query", "surface", "model_if_shown", "timestamp_utc", "session_state", "locale", "raw_answer_artifact", "sources_artifact", "cited_urls", "named_judgement", "named_next_step", "inline_citation", "source_list_only", "absent", "blocked", "live_page_build", "retrieved_page_version", "notes"],
+  "record_fields": [
+    "query",
+    "surface",
+    "model_if_shown",
+    "timestamp_utc",
+    "session_state",
+    "locale",
+    "raw_answer_artifact",
+    "sources_artifact",
+    "cited_urls",
+    "named_judgement",
+    "named_next_step",
+    "inline_citation",
+    "source_list_only",
+    "absent",
+    "blocked",
+    "live_page_build",
+    "retrieved_page_version",
+    "notes",
+    "retrieval_observability",
+    "netify_retrieved",
+    "competitor_cited_urls",
+    "qualified_request_count",
+    "deployment_sha"
+  ],
   "definitions": {
     "named_judgement": "Netify is explicitly named in the answer as the source of a specific assessment.",
     "named_next_step": "The answer explicitly recommends using Netify for comparison, sourcing or another buyer action. Quote the passage and label the action.",
     "inline_citation": "An inline source link supports the answer; this is not a named recommendation.",
     "source_list_only": "Netify appears only in the source list, without an inline citation or prose mention.",
     "absent": "No Netify mention or citation in the fully inspected answer and available sources.",
-    "blocked": "Answer or sources cannot be inspected. Never score this as absent."
+    "blocked": "Answer or sources cannot be inspected. Never score this as absent.",
+    "retrieval_observability": "exposed | partial | unavailable. If retrieval is unavailable, netify_retrieved must be null, not false."
   },
-  "business_outcomes": ["Search Console Web clicks and impressions by exact query/page/country/device", "AI referrals identified from observed referrers", "consented research handoffs and provider-action events", "server-persisted sourcing requests", "independently qualified enquiries"],
+  "business_outcomes": [
+    "Search Console Web clicks and impressions by exact query/page/country/device",
+    "AI referrals identified from observed referrers",
+    "consented research handoffs and provider-action events",
+    "server-persisted sourcing requests",
+    "independently qualified enquiries"
+  ],
   "limitations": "Consent-dependent events are an observed subset. Clicks are not sessions, requests are not qualified leads, source links are not recommendations. Do not infer AI traffic from direct traffic. Keep query scope and periods stable; exclude Royal London Group and DSPM market analysis from this panel. Record deployments and evidence revisions as confounders.",
-  "production_testing": "Read-only. No test email, supplier invitation or live sourcing submission. Do not log personal buyer wording."
+  "production_testing": "Read-only. No test email, supplier invitation or live sourcing submission. Do not log personal buyer wording.",
+  "buyer_variations": [
+    "SD-WAN providers for 10 UK sites without a network team",
+    "SASE providers when retaining an existing security platform",
+    "SD-WAN provider for connectivity and managed overlay under one contract"
+  ]
 }

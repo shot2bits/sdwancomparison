@@ -35,7 +35,7 @@ export default function ConnectorPage() {
       <p className="mb-2 text-sm text-slate-600">Netify connector · Model Context Protocol</p>
       <h1 id="page-h1" className="mb-3">Use Netify research from your AI assistant</h1>
       <p id="answer" className="max-w-3xl text-lg text-slate-700">{DESCRIPTION}</p>
-      <p className="mt-4 text-slate-700">An assistant can help prepare an RFP or a basic statement of requirements. Netify adds a governed question bank, sourced provider comparisons and a shared process for reviewing an anonymous notice and receiving supplier responses. Publication requires the verified buyer&apos;s approval.</p>
+      <p className="mt-4 text-slate-700">An assistant can help prepare an RFP or a basic statement of requirements. Netify adds a governed question bank, sourced provider comparisons and a private sourcing process for approving named recipients and requesting supplier responses. A public marketplace opportunity is a separate, optional journey with its own buyer approval.</p>
 
       <section className="mt-7 rounded-lg border border-slate-200 bg-slate-50 p-5" aria-labelledby="mcp-endpoint">
         <h2 id="mcp-endpoint" className="mb-2 text-lg font-semibold">Connect public research</h2>
@@ -53,7 +53,7 @@ export default function ConnectorPage() {
             <li key={tool.name}><code>{tool.name}</code><p className="mt-1">{tool.description}</p></li>
           ))}
         </ul>
-        <p className="mt-4 text-sm text-slate-600">ChatGPT app availability is subject to app approval; the public MCP connection is the integration route.</p>
+        <p className="mt-4 text-sm text-slate-600">The public server exposes these actions through tools/list. Installed connectors may expose an older catalogue. If prepare_sourcing_plan is unavailable, refresh the client connection or continue on the website below; do not publish an opportunity as a substitute for a private request. ChatGPT app availability is subject to app approval.</p>
         <p className="mt-3 text-sm"><a className="underline" href="/sase/shortlist/#sourcing-requirement">Bring your shortlist on the website</a></p>
       </section>
 

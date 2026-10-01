@@ -243,6 +243,7 @@ export default function SourcingEntrance({
           />
           UK providers only: UK headquarters or contracting entity evidenced
         </label>
+        {brief.uk_provider_only && <p>This filter excludes providers whose UK entity we have not yet evidenced. It does not mean they cannot serve UK sites. Leave it off if UK service availability is your requirement.</p>}
         <div className="sourcing-fields">
           <label>
             Business sites

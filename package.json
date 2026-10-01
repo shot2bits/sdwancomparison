@@ -59,7 +59,7 @@
     "test:sourcing-real-redis": "node scripts/test-sourcing-real-redis.mjs",
     "test:answer-first": "tsx scripts/test-research-metrics.ts && tsx scripts/test-answer-first.ts",
     "test:research-evidence": "tsx scripts/test-research-metrics.ts",
-    "test:provider-evidence": "python3 scripts/test-provider-support-parser.py && tsx scripts/test-evidence-health.ts && tsx scripts/test-reconciled-shortlist.ts && tsx scripts/test-live-shortlist.ts && tsx scripts/test-shortlist-market-views.ts"
+    "test:provider-evidence": "python3 scripts/test-provider-support-parser.py && tsx scripts/test-evidence-health.ts && tsx scripts/test-reconciled-shortlist.ts && tsx scripts/test-live-shortlist.ts && tsx scripts/test-shortlist-market-views.ts && tsx scripts/test-citation-consistency.ts && tsx scripts/test-citation-protocol.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

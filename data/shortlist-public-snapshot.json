@@ -147,8 +147,8 @@
       ],
       "watch_outs": [
         "Smaller PoP footprint and partner ecosystem than the hyperscale SASE vendors; coverage must match your geographic profile.",
-        "DIY/self-managed model has limited evidence; this is a managed-service-first proposition.",
-        "CASB and DLP capabilities have partial public evidence; depth should be confirmed in RFP."
+        "DIY / self-managed model: supported. Confirm which operating tasks your team retains and what Aryaka operates.",
+        "CASB capability: supported; Data loss prevention: supported. Confirm inspection modes, licences and policy depth in the proposal."
       ],
       "evidence_coverage_pct": 0.5,
       "last_verified": "2026-09-01",
@@ -176,7 +176,7 @@
           "source_url": "https://aryaka.com/unified-sase-platform/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine specificity - the Aryaka Network Access Point (ANAP), included as part of the service rather than sold as separate hardware [9] Native, confirmed with genuine specificity - the Aryaka Network Access Point (ANAP), included as part of the service rather than sold as separate hardware"
+          "qualification": "Native, confirmed with genuine specificity - the Aryaka Network Access Point (ANAP), included as part of the service rather than sold as separate hardware [9]"
         },
         "f25_high_availability_design": {
           "source_url": "https://www.aryaka.com/unified-sase-platform/",
@@ -200,7 +200,7 @@
           "source_url": "https://aryaka.com/sase/sase-architecture/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed as part of the unified single-pass stack [6] None identified"
+          "qualification": "Native, confirmed as part of the unified single-pass stack [6]"
         },
         "f38_observability_and_digital_experience_monitoring": {
           "source_url": "https://aryaka.com/case-study/electronics-company/",
@@ -213,6 +213,12 @@
           "reviewed_at": "2026-07-29",
           "review_due": "2026-12-30T00:00:00Z",
           "qualification": "Aryaka operates its own 24/7 NOC (Network Operations Center) to manage, orchestrate, and monitor all traffic The 24/7 NOC half of the definition is well evidenced: Aryaka runs its own NOCs \"24x7x365 to maintain industry-leading SLAs for uptime, latency, jitter and packet loss globally\", provides \"24x7 proactive Link Monitoring and management of Customer's procured last mile links\" and \"24x7 health monitoring and handle incident management issues related to the ZTNA Gateways\". Graded partial because the Services Description and Terms explicitly excludes a managed SOC from at least one offering: \"managed SOC (Security Operation Center) are not part of the scope of the Managed Firewall Service offering, and Customer is solely responsible for these functions.\" No published evidence found for root cause analysis commitments or structured service review and change governance."
+        },
+        "f02_diy_self_managed_model": {
+          "source_url": "https://www.aryaka.com/use-cases/network-and-security-convergence/",
+          "reviewed_at": "2026-10-01T00:00:00Z",
+          "review_due": "2026-12-30T00:00:00Z",
+          "qualification": "Aryaka explicitly offers fully managed, co-managed and self-managed delivery. Confirm the buyer’s retained tasks and service scope; self-management is not evidence of a standalone appliance purchase."
         },
         "f01_fully_managed_service": {
           "source_url": "https://www.aryaka.com/unified-sase-platform/",
@@ -313,6 +319,24 @@
           "regions": {
             "uk_ireland": "partial"
           }
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "partial",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -482,19 +506,19 @@
           "source_url": "https://business.att.com/products/sase.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' and 'Improve performance, reliability, and reduce latency with intelligent routing and local breakout capabilities' [4] Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' and 'Improve performance, reliability, and reduce latency with intelligent routing and local breakout capabilities'"
+          "qualification": "Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' and 'Improve performance, reliability, and reduce latency with intelligent routing and local breakout capabilities' [4]"
         },
         "f12_application_aware_routing": {
           "source_url": "https://business.att.com/products/sase.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' named as a core managed-service capability [4] None identified"
+          "qualification": "Native, confirmed directly - 'Intelligent network routing and optimization with SD-WAN' named as a core managed-service capability [4]"
         },
         "f15_local_internet_breakout": {
           "source_url": "https://business.att.com/products/sase.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'local breakout capabilities' named specifically alongside intelligent routing [4] Native, confirmed directly by name - 'local breakout capabilities' named specifically alongside intelligent routing"
+          "qualification": "Native, confirmed directly by name - 'local breakout capabilities' named specifically alongside intelligent routing [4]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-branch-with-fortinet-solution-brief.pdf",
@@ -518,7 +542,7 @@
           "source_url": "https://business.att.com/content/dam/attbusiness/briefs/next-generation-networking-use-case.pdf",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - AT&T's own use-case materials confirm 'SLAs for equipment availability' as a standard commercial commitment [17] Native, confirmed directly and with genuine specificity - AT&T's own use-case materials confirm 'SLAs for equipment availability' as a standard commercial commitment"
+          "qualification": "Native, confirmed directly and with genuine specificity - AT&T's own use-case materials confirm 'SLAs for equipment availability' as a standard commercial commitment [17]"
         },
         "f26_sla_backed_service_fabric": {
           "source_url": "https://www.business.att.com/products/dedicated-internet.html",
@@ -536,7 +560,7 @@
           "source_url": "https://business.att.com/products/sase.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'Helps ensure that only the right team members have access to the right apps, no matter where they access the network' and 'enforce strict identity verification regardless of location' [4] None identified"
+          "qualification": "Native, confirmed directly - 'Helps ensure that only the right team members have access to the right apps, no matter where they access the network' and 'enforce strict identity verification regardless of location' [4]"
         },
         "f31_secure_web_gateway": {
           "source_url": "https://business.att.com/products/sase.html",
@@ -554,7 +578,7 @@
           "source_url": "https://business.att.com/categories/network-as-a-service.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'Software-defined networking (SDN) and network function virtualization (NFV) technologies enable zero-touch provisioning and seamlessly automate service changes' [8] Native, confirmed directly and with genuine specificity - 'Software-defined networking (SDN) and network function virtualization (NFV) technologies enable zero-touch provisioning and seamlessly automate service changes'"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'Software-defined networking (SDN) and network function virtualization (NFV) technologies enable zero-touch provisioning and seamlessly automate service changes' [8]"
         },
         "f38_observability_and_digital_experience_monitoring": {
           "source_url": "https://business.att.com/products/sase.html",
@@ -589,6 +613,24 @@
         "curated_uk_basis": "No UK HQ (US). UK sites served through AT&T's global managed network and partners, not UK-native infrastructure.",
         "sector_review_queue": [],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -731,13 +773,13 @@
           "source_url": "https://blog.barracuda.com/2026/03/25/barracudaone-secureedge-access-and-security-service-edge-adoption",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly via the specifically-named, dated (March 2026) phased-adoption approach - a defined four-step migration path allowing organisations to 'prioritize immediate needs and expand over time' rather than requiring a single, forced cutover [15] Native, confirmed directly via the specifically-named, dated (March 2026) phased-adoption approach - a defined four-step migration path allowing organisations to 'prioritize immediate needs and expand over time' rather than requiring a single, forced cutover"
+          "qualification": "Native, confirmed directly via the specifically-named, dated (March 2026) phased-adoption approach - a defined four-step migration path allowing organisations to 'prioritize immediate needs and expand over time' rather than requiring a single, forced cutover [15]"
         },
         "f36_centralised_orchestration": {
           "source_url": "https://barracuda.com/products/network-protection/secureedge",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'With zero-touch deployment capabilities, you can remotely deliver SASE and network security services without sending technicians onsite' [4] [17] Native, confirmed directly and with genuine specificity - 'With zero-touch deployment capabilities, you can remotely deliver SASE and network security services without sending technicians onsite'"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'With zero-touch deployment capabilities, you can remotely deliver SASE and network security services without sending technicians onsite' [4] [17]"
         }
       },
       "projection_provenance": {
@@ -760,6 +802,24 @@
         "curated_uk_basis": "Confirm UK delivery scope through RFP.",
         "sector_review_queue": [],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -922,7 +982,7 @@
           "source_url": "https://business.bt.com/networks-digital-services/sd-wan-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'elastic SD-WAN' dynamically steers traffic, and 'traffic is prioritised from your devices to the SASE cloud node, avoiding public internet congestion' [5] [6] Native, confirmed directly - 'elastic SD-WAN' dynamically steers traffic, and 'traffic is prioritised from your devices to the SASE cloud node, avoiding public internet congestion'"
+          "qualification": "Native, confirmed directly - 'elastic SD-WAN' dynamically steers traffic, and 'traffic is prioritised from your devices to the SASE cloud node, avoiding public internet congestion' [5] [6]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
@@ -952,13 +1012,13 @@
           "source_url": "https://business.bt.com/networks-digital-services/sd-wan-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine sector-specific detail - explicitly named for financial services as 'secure, identity-based access through ZTNA' supporting data residency [5] [6] None identified"
+          "qualification": "Native, confirmed with genuine sector-specific detail - explicitly named for financial services as 'secure, identity-based access through ZTNA' supporting data residency [5] [6]"
         },
         "f30_zero_trust_network_access": {
           "source_url": "https://business.bt.com/networks-digital-services/sd-wan-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine sector-specific detail - explicitly named for financial services as 'secure, identity-based access through ZTNA' supporting data residency [5] [6] None identified"
+          "qualification": "Native, confirmed with genuine sector-specific detail - explicitly named for financial services as 'secure, identity-based access through ZTNA' supporting data residency [5] [6]"
         },
         "f31_secure_web_gateway": {
           "source_url": "https://newsroom.bt.com/bt-launches-a-new-managed-sase-service-powered-by-fortinet/",
@@ -1032,6 +1092,31 @@
             "uk_ireland": "yes"
           }
         }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "evidenced",
+          "name": null,
+          "source_urls": [
+            "https://business.bt.com/insights/case-studies/financial-services-sd-wan/",
+            "https://business.bt.com/networks-digital-services/sd-wan-sase/sase/",
+            "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+            "https://www.bt.com/about/contact-bt",
+            "https://find-and-update.company-information.service.gov.uk/company/04190816",
+            "https://business.bt.com/networks-digital-services/sd-wan/"
+          ],
+          "checked_at": "2026-09-30T19:56:00Z",
+          "review_due": "2026-10-30T00:00:00Z",
+          "qualification": "BT Group plc is headquartered at 1 Braham Street, London; UK managed SD-WAN is published by BT Business."
+        },
+        "regional_delivery": {
+          "status": "yes",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -1043,8 +1128,8 @@
       "cost_model": "Quote-based subscription; typically site/user/bandwidth/security bundle based.",
       "public_pricing_visibility": "quote_based",
       "value_tier": "mid",
-      "uk_delivery": "not_confirmed",
-      "uk_basis": "UK contracting entity is not confirmed by the published Neon provider record.",
+      "uk_delivery": "uk_entity",
+      "uk_basis": "The Cato Master Service Agreement, section 1.4, lists this UK contracting party. The entity identified in the buyer’s order determines the actual counterparty; this does not establish site coverage or managed-service scope.",
       "capabilities": {
         "f01_fully_managed_service": "unknown",
         "f02_diy_self_managed_model": "yes",
@@ -1165,7 +1250,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/cato-networks/",
-      "shortlist_summary": "Cato Networks is frequently scored by us at Netify as being one of the easiest platforms to actually use, and they’re often considered a more integrated offering than most of the competition, which is primarily down to building their SASE solution from the ground up rather than bolting security onto an existing networking product, or the other way round. If you’re looking to collapse a fragmented maze of legacy firewalls, MPLS circuits, and point-product security tools into a single, cloud-native operational plane, Cato is one of the more compelling single-vendor SASE offerings on the market, though its middle-mile-centric architecture and fairly opaque licensing model mean it requires ca...",
+      "shortlist_summary": "Cato Networks is frequently scored by us at Netify as being one of the easiest platforms to actually use, and they’re often considered a more integrated offering than most of the competition, which is primarily down to building their SASE solution from the ground up rather than bolting security onto an existing networking product, or the other way round.",
       "key_differentiators": [
         "Single converged platform with no policy or log fragmentation across SD-WAN and security functions.",
         "100+ PoP global private backbone reduces internet variability and provides predictable performance for SaaS-heavy traffic.",
@@ -1189,13 +1274,13 @@
           "source_url": "https://support.catonetworks.com/hc/en-us/articles/7790698733341",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native - Network Rules let admins assign a bandwidth-priority QoS tier to business-critical traffic, alongside acceleration/optimisation and transport-path settings, confirmed directly in Cato's admin documentation. [46] Native - Network Rules let admins assign a bandwidth-priority QoS tier to business-critical traffic, alongside acceleration/optimisation and transport-path settings, confirmed directly in Cato's admin documentation."
+          "qualification": "Native - Network Rules let admins assign a bandwidth-priority QoS tier to business-critical traffic, alongside acceleration/optimisation and transport-path settings, confirmed directly in Cato's admin documentation. [46]"
         },
         "f14_packet_loss_remediation": {
           "source_url": "https://support.catonetworks.com/hc/en-us/articles/360001868837",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native - packet duplication for packet loss mitigation, confirmed directly in Cato's own documentation: TCP packets duplicated across active links, UDP packets duplicated across active or standby links. [44] [45] [46] Native - packet duplication for packet loss mitigation, confirmed directly in Cato's own documentation: TCP packets duplicated across active links, UDP packets duplicated across active or standby links."
+          "qualification": "Native - packet duplication for packet loss mitigation, confirmed directly in Cato's own documentation: TCP packets duplicated across active links, UDP packets duplicated across active or standby links. [44] [45] [46]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://support.catonetworks.com/hc/en-us/articles/16308182518173-X1600-Cellular-Connectivity-Troubleshooting",
@@ -1288,6 +1373,26 @@
             "education": "partial"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "evidenced",
+          "name": "Cato Networks (UK) Limited",
+          "source_urls": [
+            "https://www.catonetworks.com/msa/"
+          ],
+          "checked_at": "2026-10-01T00:00:00Z",
+          "review_due": "2026-12-30T00:00:00Z",
+          "qualification": "The Cato Master Service Agreement, section 1.4, lists this UK contracting party. The entity identified in the buyer’s order determines the actual counterparty; this does not establish site coverage or managed-service scope."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -1433,7 +1538,7 @@
         "Buyers prioritising security maturity over network-platform maturity."
       ],
       "watch_outs": [
-        "Native SD-WAN capabilities (path selection, QoS, packet loss remediation) have limited public evidence relative to SD-WAN-led vendors.",
+        "Dynamic path selection: not confirmed; QoS and traffic shaping: not confirmed; Packet loss remediation: not confirmed. Confirm the exact SD-WAN product and required branch behaviour.",
         "Smaller SD-WAN deployment footprint than category leaders; validate scale references.",
         "Managed delivery is partner-led."
       ],
@@ -1499,7 +1604,7 @@
           "source_url": "https://checkpoint.com/harmony/sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, via the confirmed FWaaS capability [24] [28] None identified"
+          "qualification": "Native, via the confirmed FWaaS capability [24] [28]"
         },
         "f33_data_loss_prevention": {
           "source_url": "https://www.checkpoint.com/harmony/sase/",
@@ -1551,6 +1656,24 @@
           }
         ],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -1713,7 +1836,7 @@
           "source_url": "https://investor.cisco.com/news/news-details/2026/Cisco-Redefines-Security-for-the-Agentic-Era-with-AI-Defence-Expansion-and-AI-Aware-SASE/default.aspx",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, specifically confirmed in the AI-traffic context - the February 2026 AI-aware SASE announcement explicitly names 'packet duplication' as an AI traffic optimization technique [25] Native, specifically confirmed in the AI-traffic context - the February 2026 AI-aware SASE announcement explicitly names 'packet duplication' as an AI traffic optimization technique"
+          "qualification": "Native, specifically confirmed in the AI-traffic context - the February 2026 AI-aware SASE announcement explicitly names 'packet duplication' as an AI traffic optimization technique [25]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://documentation.meraki.com/CiscoPlusSecureConnect/Cisco___Secure_Connect_Pre-configuration_Checklist/Data_Centers",
@@ -1833,6 +1956,24 @@
           "regions": {
             "uk_ireland": "partial"
           }
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "partial",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -1966,7 +2107,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/cloudflare-one/",
-      "shortlist_summary": "Rather than building a security platform and adding network reach, or building a network and adding security, Cloudflare started as one of the internet’s largest content-delivery and DDoS-mitigation networks (founded 2009, public since 2019 on NYSE: NET) and extended that same global infrastructure - every product running in every data centre, not routed to a handful of regional security hubs - into a full SASE platform. That architecture is the platform’s clearest, most defensible claim: Cloudflare states it delivers full SASE from more than 300 cities, which it describes as more than three times the footprint of other SASE vendors, with sub-50-millisecond reach to 95% of the world’s int...",
+      "shortlist_summary": "Rather than building a security platform and adding network reach, or building a network and adding security, Cloudflare started as one of the internet’s largest content-delivery and DDoS-mitigation networks (founded 2009, public since 2019 on NYSE: NET) and extended that same global infrastructure - every product running in every data centre, not routed to a handful of regional security hubs - into a full SASE platform.",
       "key_differentiators": [
         "Cloudflare global edge network provides one of the largest PoP footprints in the category for SASE traffic.",
         "Strong Zero Trust and SWG capability inheritance from the wider Cloudflare security platform.",
@@ -1978,7 +2119,7 @@
         "Mid-market buyers attracted to Cloudflare One pricing transparency for Zero Trust user tiers."
       ],
       "watch_outs": [
-        "SD-WAN capabilities (path selection, QoS, packet loss remediation) have limited public evidence compared to SD-WAN-first vendors.",
+        "Dynamic path selection: supported; QoS and traffic shaping: not confirmed; Packet loss remediation: not confirmed. Confirm branch requirements and any delivery partner dependency.",
         "Less mature for very large branch estates with complex underlay requirements.",
         "Managed and co-managed service models are partner-led; this is primarily a self-service platform."
       ],
@@ -1996,7 +2137,7 @@
           "source_url": "https://cloudflare.com/enterprise/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, via the confirmed Argo Smart Routing capability, which dynamically routes traffic across Cloudflare's own network for optimal performance [33] Native, via the confirmed Argo Smart Routing capability, which dynamically routes traffic across Cloudflare's own network for optimal performance"
+          "qualification": "Native, via the confirmed Argo Smart Routing capability, which dynamically routes traffic across Cloudflare's own network for optimal performance [33]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://developers.cloudflare.com/magic-wan/",
@@ -2085,6 +2226,24 @@
           }
         ],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -2230,7 +2389,7 @@
       ],
       "watch_outs": [
         "Global delivery depth outside Europe is less prominent than the largest global carriers.",
-        "CASB and DLP have partial public evidence; SSE platform partner choice should be confirmed.",
+        "CASB capability: not confirmed; Data loss prevention: not confirmed. Ask Colt to identify the SSE platform, licences and operational responsibilities.",
         "Underlying SD-WAN platform should be explicitly confirmed in RFP."
       ],
       "evidence_coverage_pct": 0.425,
@@ -2259,7 +2418,7 @@
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'secure local internet breakout' named explicitly as a core integrated-firewall capability [4] Native, confirmed directly by name - 'secure local internet breakout' named explicitly as a core integrated-firewall capability"
+          "qualification": "Native, confirmed directly by name - 'secure local internet breakout' named explicitly as a core integrated-firewall capability [4]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
@@ -2271,13 +2430,13 @@
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly via the confirmed uCPE architecture, described as 'bringing cloud computing benefits from data centres to edge computing at customer' sites [4] Native, confirmed directly via the confirmed uCPE architecture, described as 'bringing cloud computing benefits from data centres to edge computing at customer' sites"
+          "qualification": "Native, confirmed directly via the confirmed uCPE architecture, described as 'bringing cloud computing benefits from data centres to edge computing at customer' sites [4]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly via the confirmed uCPE architecture, described as 'bringing cloud computing benefits from data centres to edge computing at customer' sites [4] Native, confirmed directly via the confirmed uCPE architecture, described as 'bringing cloud computing benefits from data centres to edge computing at customer' sites"
+          "qualification": "Native, confirmed directly via the confirmed uCPE architecture, described as 'bringing cloud computing benefits from data centres to edge computing at customer' sites [4]"
         },
         "f20_private_pops_dedicated_pops": {
           "source_url": "https://www.colt.net/products/networking/sd-wan",
@@ -2289,13 +2448,13 @@
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'uCPE allows customers to licence, manage, and monitor functions with flexible network options', with a specifically-named 'blue wireless CPE' attachable to 'any of the current standard Versa CPEs' [4] Native, confirmed directly by name - 'uCPE allows customers to licence, manage, and monitor functions with flexible network options', with a specifically-named 'blue wireless CPE' attachable to 'any of the current standard Versa CPEs'"
+          "qualification": "Native, confirmed directly by name - 'uCPE allows customers to licence, manage, and monitor functions with flexible network options', with a specifically-named 'blue wireless CPE' attachable to 'any of the current standard Versa CPEs' [4]"
         },
         "f25_high_availability_design": {
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'Active/Active operation' and the confirmed dual resilient SIM architecture for the named Blue Wireless partnership specifically [4] [6] Native, confirmed directly by name - 'Active/Active operation' and the confirmed dual resilient SIM architecture for the named Blue Wireless partnership specifically"
+          "qualification": "Native, confirmed directly by name - 'Active/Active operation' and the confirmed dual resilient SIM architecture for the named Blue Wireless partnership specifically [4] [6]"
         },
         "f26_sla_backed_service_fabric": {
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
@@ -2307,25 +2466,25 @@
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'Colt SD WAN provides an integrated firewall with SD WAN which provides secure local internet breakout, provides DDoS protection and ability to create firewall policies and rules through customer portal' [4] None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'Colt SD WAN provides an integrated firewall with SD WAN which provides secure local internet breakout, provides DDoS protection and ability to create firewall policies and rules through customer portal' [4]"
         },
         "f28_full_sase_platform": {
           "source_url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, and genuinely well-evidenced via Colt's own confirmed, substantial network scale combined with a confirmed, long-standing platform partnership [4] None identified"
+          "qualification": "Native, and genuinely well-evidenced via Colt's own confirmed, substantial network scale combined with a confirmed, long-standing platform partnership [4]"
         },
         "f30_zero_trust_network_access": {
           "source_url": "https://colt.net/resources/insights/colt-technology-services-brings-together-sd-wan-and-sse-features-in-new-integrated-full-sase-solution",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine specificity via a named product - Colt SD WAN Remote Access, 'based on Versa Secure Access (VSA)' [2] None identified"
+          "qualification": "Native, confirmed with genuine specificity via a named product - Colt SD WAN Remote Access, 'based on Versa Secure Access (VSA)' [2]"
         },
         "f31_secure_web_gateway": {
           "source_url": "https://colt.net/resources/insights/colt-technology-services-brings-together-sd-wan-and-sse-features-in-new-integrated-full-sase-solution",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'Versa Secure Web Gateway, a secure web access solution that offers organisations protection from malware and threats' [2] None identified"
+          "qualification": "Native, confirmed directly by name - 'Versa Secure Web Gateway, a secure web access solution that offers organisations protection from malware and threats' [2]"
         }
       },
       "projection_provenance": {
@@ -2386,6 +2545,30 @@
           "regions": {
             "uk_ireland": "yes"
           }
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "evidenced",
+          "name": null,
+          "source_urls": [
+            "https://www.colt.net/customer-stories/byblos-bank-europe",
+            "https://www.colt.net/customer-stories/leading-global-investment-bank",
+            "https://docs.colt.net/legal/terms-and-conditions",
+            "https://docs.colt.net/legal/colt-group-of-companies",
+            "https://find-and-update.company-information.service.gov.uk/company/03232904"
+          ],
+          "checked_at": "2026-09-30T19:56:00Z",
+          "review_due": "2026-10-30T00:00:00Z",
+          "qualification": "Colt Technology Services Group Limited, company 03232904, is registered at Colt House, 20 Great Eastern Street, London. Colt publishes a London SD-WAN deployment."
+        },
+        "regional_delivery": {
+          "status": "yes",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -2519,7 +2702,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/comcastbusiness/",
-      "shortlist_summary": "Comcast Business’s managed SD-WAN and SASE proposition traces its specialist technical foundation to Masergy, a managed SD-WAN and SASE vendor founded in 2000 in Plano, Texas, which Comcast Business acquired in 2021 to, in the words of Comcast Business’s then-President Bill Stemper, ‘instantly and dramatically amplify our growth in the global enterprise market’. At acquisition, Masergy served more than 1,400 customers across 100 countries and delivered its managed SD-WAN and SASE capability on named technology partnerships with Fortinet and Silver Peak (subsequently acquired by HPE), plus Bitglass for cloud access security broker capability specifically, per independent analyst commentary...",
+      "shortlist_summary": "Comcast Business’s managed SD-WAN and SASE proposition traces its specialist technical foundation to Masergy, a managed SD-WAN and SASE vendor founded in 2000 in Plano, Texas, which Comcast Business acquired in 2021 to, in the words of Comcast Business’s then-President Bill Stemper, ‘instantly and dramatically amplify our growth in the global enterprise market’.",
       "key_differentiators": [
         "SASE combining SD-WAN and security available fully managed or co-managed, drawing on Masergy AIOps heritage.",
         "Recognised as a leading managed SD-WAN provider by industry analysts.",
@@ -2561,25 +2744,25 @@
           "source_url": "https://business.comcast.com/resources/enterprise/articles/uniting-managed-sase-and-connectivity-for-scalable-networking-and-security",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'Firewall as a Service: Next-generation Firewall for network traffic inspection and security' None identified"
+          "qualification": "Native, confirmed directly by name - 'Firewall as a Service: Next-generation Firewall for network traffic inspection and security'"
         },
         "f28_full_sase_platform": {
           "source_url": "https://business.comcast.com/enterprise/products-services/secure-networking/sase",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'Zero-trust network access (ZTNA): Verifies the identity of every user and device before allowing them to access internal resources by setting up one-to-one encrypted connections' None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'Zero-trust network access (ZTNA): Verifies the identity of every user and device before allowing them to access internal resources by setting up one-to-one encrypted connections'"
         },
         "f30_zero_trust_network_access": {
           "source_url": "https://business.comcast.com/enterprise/products-services/secure-networking/sase",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'Zero-trust network access (ZTNA): Verifies the identity of every user and device before allowing them to access internal resources by setting up one-to-one encrypted connections' None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'Zero-trust network access (ZTNA): Verifies the identity of every user and device before allowing them to access internal resources by setting up one-to-one encrypted connections'"
         },
         "f31_secure_web_gateway": {
           "source_url": "https://business.comcast.com/resources/enterprise/articles/uniting-managed-sase-and-connectivity-for-scalable-networking-and-security",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name as a core SASE component - 'Secure Web Gateway (SWG): On-premise or cloud-based Internet traffic filtering' None identified"
+          "qualification": "Native, confirmed directly by name as a core SASE component - 'Secure Web Gateway (SWG): On-premise or cloud-based Internet traffic filtering'"
         },
         "f32_casb_capability": {
           "source_url": "https://business.comcast.com/resources/enterprise/articles/uniting-managed-sase-and-connectivity-for-scalable-networking-and-security",
@@ -2614,6 +2797,24 @@
         "curated_uk_basis": "No UK HQ (US). UK delivery via the Masergy global platform and partners.",
         "sector_review_queue": [],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -2745,7 +2946,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/ericsson-cradlepoint/",
-      "shortlist_summary": "Cradlepoint began in 2006 as an independent Boise, Idaho-based pioneer in cellular-first wireless WAN networking, raised more than $162 million before being acquired outright by Ericsson (NASDAQ: ERIC) in a deal announced September 2020 and closed later that year at an enterprise value of approximately $1.1 billion. That makes this platform’s identity distinctive within this product category: it sits inside one of the world’s largest telecommunications equipment manufacturers rather than a standalone security company or a private-equity-backed challenger, and its architecture reflects that heritage directly - NetCloud SASE is built cellular-first, with confirmed, specific capabilities lik...",
+      "shortlist_summary": "1 billion. That makes this platform’s identity distinctive within this product category: it sits inside one of the world’s largest telecommunications equipment manufacturers rather than a standalone security company or a private-equity-backed challenger, and its architecture reflects that heritage directly - NetCloud SASE is built cellular-first, with confirmed, specific capabilities like traffic steering based on cellular attributes and 5G standalone network slicing for guaranteed bandwidth that have no real equivalent among fixed-line-oriented competitors.",
       "key_differentiators": [
         "Wireless-first branch architecture from Ericsson with deep 5G expertise; NetCloud provides cellular-centric SD-WAN management.",
         "Strong story for organisations adopting 5G as a primary access medium rather than as a backup.",
@@ -2758,7 +2959,7 @@
       ],
       "watch_outs": [
         "SASE story is partner-integrated rather than native; SSE capabilities require validation in RFP.",
-        "Cloud on-ramp and multi-cloud transit fabric have limited public evidence relative to dedicated SASE platforms.",
+        "Cloud on-ramp: supported; Multi-cloud transit fabric: not confirmed. Confirm the cloud locations, connectivity pattern and transit design.",
         "Best for cellular-led architectures; less strong as a primary fit for fixed-circuit-heavy estates."
       ],
       "evidence_coverage_pct": 0.375,
@@ -2787,13 +2988,13 @@
           "source_url": "https://cradlepoint.com/products/netcloud-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly via the named cellular-attribute-based traffic steering capability [15] Native, confirmed directly via the named cellular-attribute-based traffic steering capability"
+          "qualification": "Native, confirmed directly via the named cellular-attribute-based traffic steering capability [15]"
         },
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://cradlepoint.com/products/netcloud-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 5G standalone network slicing 'for guaranteed bandwidth' is a specific, named, technically distinctive QoS mechanism [15] Native, confirmed directly and with genuine specificity - 5G standalone network slicing 'for guaranteed bandwidth' is a specific, named, technically distinctive QoS mechanism"
+          "qualification": "Native, confirmed directly and with genuine specificity - 5G standalone network slicing 'for guaranteed bandwidth' is a specific, named, technically distinctive QoS mechanism [15]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://cradlepoint.com/products/netcloud-sase/",
@@ -2805,19 +3006,19 @@
           "source_url": "https://cradlepoint.com/products/netcloud-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed via the platform's fully cloud-managed architecture [15] Native, confirmed via the platform's fully cloud-managed architecture"
+          "qualification": "Native, confirmed via the platform's fully cloud-managed architecture [15]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://cradlepoint.com/products/netcloud-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed via the platform's fully cloud-managed architecture [15] Native, confirmed via the platform's fully cloud-managed architecture"
+          "qualification": "Native, confirmed via the platform's fully cloud-managed architecture [15]"
         },
         "f34_remote_user_access": {
           "source_url": "https://cradlepoint.com/products/netcloud-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, and genuinely a core, confirmed architectural principle - 'While other solutions require agents or special browsers, NetCloud SASE uses agent-less isolation-based security' [15] None identified"
+          "qualification": "Native, and genuinely a core, confirmed architectural principle - 'While other solutions require agents or special browsers, NetCloud SASE uses agent-less isolation-based security' [15]"
         },
         "f40_managed_service_assurance": {
           "source_url": "https://cradlepoint.com/support/",
@@ -2910,6 +3111,24 @@
           }
         ],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -3040,7 +3259,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/expereo/",
-      "shortlist_summary": "Rather than owning last-mile or backbone infrastructure directly, Expereo positions itself explicitly as an internet-connectivity aggregation and optimisation specialist, describing itself as a ‘world-leading Managed Network as a Service provider’ built around a ‘Global Internet’ underlay philosophy - the consistent, repeated framing across its own materials is that a strong internet underlay, not owned physical infrastructure, is the essential foundation for effective SD-WAN and SASE. Founded in Amsterdam in 2004, Expereo has passed through a complex, multi-owner private-equity history: acquired by The Carlyle Group in July 2014, sold to Apax Partners in May 2018, and majority-acquired b...",
+      "shortlist_summary": "Rather than owning last-mile or backbone infrastructure directly, Expereo positions itself explicitly as an internet-connectivity aggregation and optimisation specialist, describing itself as a ‘world-leading Managed Network as a Service provider’ built around a ‘Global Internet’ underlay philosophy - the consistent, repeated framing across its own materials is that a strong internet underlay, not owned physical infrastructure, is the essential foundation for effective SD-WAN and SASE.",
       "key_differentiators": [],
       "best_fit_for": [],
       "watch_outs": [],
@@ -3052,19 +3271,19 @@
           "source_url": "https://expereo.com/resources/brochures/sd-wan",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'AI-enabled dynamic routing for reliable and predictable networks' Native, confirmed directly by name - 'AI-enabled dynamic routing for reliable and predictable networks'"
+          "qualification": "Native, confirmed directly by name - 'AI-enabled dynamic routing for reliable and predictable networks'"
         },
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://expereo.com/services/sd-wan",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'Easier management with the ability to set routing, traffic thresholds and access policies to suit your business' Native, confirmed directly - 'Easier management with the ability to set routing, traffic thresholds and access policies to suit your business'"
+          "qualification": "Native, confirmed directly - 'Easier management with the ability to set routing, traffic thresholds and access policies to suit your business'"
         },
         "f27_integrated_next_generation_firewall": {
           "source_url": "https://expereo.com/sd-wan",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'Includes integrated security features such as encryption and firewall capabilities' None identified"
+          "qualification": "Native, confirmed directly - 'Includes integrated security features such as encryption and firewall capabilities'"
         }
       },
       "projection_provenance": {
@@ -3117,6 +3336,24 @@
             "manufacturing": "yes"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -3262,7 +3499,7 @@
       ],
       "watch_outs": [
         "Smaller SD-WAN market presence than the leading platforms.",
-        "Full SASE platform completeness has partial public evidence; SSE module depth should be confirmed.",
+        "Full SASE platform: supported. Confirm the included networking and security products, licences and service scope.",
         "Managed delivery is partner-led; co-managed and white-label support require partner validation."
       ],
       "evidence_coverage_pct": 0.45,
@@ -3303,19 +3540,19 @@
           "source_url": "https://forcepoint.com/sites/default/files/resources/brochures/whitepaper_forcepoint_one_differentiation_en_0_0_0_0_0.pdf",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed explicitly alongside inline modes [10] None identified"
+          "qualification": "Native, confirmed explicitly alongside inline modes [10]"
         },
         "f33_data_loss_prevention": {
           "source_url": "https://forcepoint.com/use-case/incident-and-breach-response",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed - Forcepoint DLP provides 'continuous monitoring' across data at rest, in use, and in transit, per Forcepoint's own materials and independent analyst recognition [36] None identified"
+          "qualification": "Native, confirmed - Forcepoint DLP provides 'continuous monitoring' across data at rest, in use, and in transit, per Forcepoint's own materials and independent analyst recognition [36]"
         },
         "f34_remote_user_access": {
           "source_url": "https://forcepoint.com/sites/default/files/resources/brochures/whitepaper_forcepoint_one_differentiation_en_0_0_0_0_0.pdf",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed via the CASB/SWG gateway architecture supporting unmanaged devices without requiring an agent [10] None identified"
+          "qualification": "Native, confirmed via the CASB/SWG gateway architecture supporting unmanaged devices without requiring an agent [10]"
         },
         "f36_centralised_orchestration": {
           "source_url": "https://cyberdefensemagazine.com/innovator-spotlight-forcepoints-data-security-cloud-redefining-data-protection-in-the-ai-era/",
@@ -3344,6 +3581,24 @@
         "curated_uk_basis": "No UK HQ (US). UK delivery via security partners; government and defence heritage suits UK public sector.",
         "sector_review_queue": [],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -3653,6 +3908,24 @@
             "uk_ireland": "partner_integrated"
           }
         }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "partner_integrated",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -3827,19 +4100,19 @@
           "source_url": "https://gtt.net/resources/glossary/what-is-sd-wan-meaning-benefits-how-it-works/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'SD-WAN dynamically routes traffic across any connection based on real-time performance and policy' [10] Native, confirmed directly - 'SD-WAN dynamically routes traffic across any connection based on real-time performance and policy'"
+          "qualification": "Native, confirmed directly - 'SD-WAN dynamically routes traffic across any connection based on real-time performance and policy' [10]"
         },
         "f12_application_aware_routing": {
           "source_url": "https://gtt.net/resources/glossary/what-is-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'SD-WAN intelligently manages traffic across multiple network paths using centralized policies and real-time performance data' [7] None identified"
+          "qualification": "Native, confirmed directly - 'SD-WAN intelligently manages traffic across multiple network paths using centralized policies and real-time performance data' [7]"
         },
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://gtt.net/resources/glossary/what-is-sd-wan-meaning-benefits-how-it-works/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'centralized control, visibility and built-in security, making it more scalable and cloud-friendly' [10] Native, confirmed directly - 'centralized control, visibility and built-in security, making it more scalable and cloud-friendly'"
+          "qualification": "Native, confirmed directly - 'centralized control, visibility and built-in security, making it more scalable and cloud-friendly' [10]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://www.gtt.net/services/managed-networking/internet/5g-services/",
@@ -3857,19 +4130,19 @@
           "source_url": "https://businesswire.com/news/home/20250318895249/en/Radisson-Hotel-Group-Selects-GTT-for-Global-SASE-Deployment",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, and genuinely well-evidenced via a real, named customer example - 'wireless access for enhanced business continuity and resiliency', reinforced by confirmed '24/7 monitoring' [16] Native, and genuinely well-evidenced via a real, named customer example - 'wireless access for enhanced business continuity and resiliency', reinforced by confirmed '24/7 monitoring'"
+          "qualification": "Native, and genuinely well-evidenced via a real, named customer example - 'wireless access for enhanced business continuity and resiliency', reinforced by confirmed '24/7 monitoring' [16]"
         },
         "f27_integrated_next_generation_firewall": {
           "source_url": "https://gtt.net/services/secure-networking/sase-secure-connect/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'Firewall-as-a-Service (FWaaS)' named explicitly, reinforced by a confirmed 'Managed Firewall at branch locations' specifically for the Radisson deployment [9] [16] None identified"
+          "qualification": "Native, confirmed directly by name - 'Firewall-as-a-Service (FWaaS)' named explicitly, reinforced by a confirmed 'Managed Firewall at branch locations' specifically for the Radisson deployment [9] [16]"
         },
         "f30_zero_trust_network_access": {
           "source_url": "https://businesswire.com/news/home/20250318895249/en/Radisson-Hotel-Group-Selects-GTT-for-Global-SASE-Deployment",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and repeatedly by name - 'Zero Trust Network Access' named explicitly across multiple sources, including the confirmed Radisson deployment specifically [3] [16] None identified"
+          "qualification": "Native, confirmed directly and repeatedly by name - 'Zero Trust Network Access' named explicitly across multiple sources, including the confirmed Radisson deployment specifically [3] [16]"
         },
         "f32_casb_capability": {
           "source_url": "https://businesswire.com/news/home/20250318895249/en/Radisson-Hotel-Group-Selects-GTT-for-Global-SASE-Deployment",
@@ -3887,7 +4160,7 @@
           "source_url": "https://businesswire.com/news/home/20250318895249/en/Radisson-Hotel-Group-Selects-GTT-for-Global-SASE-Deployment",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name via the specifically-named EnvisionDX platform component - 'DX' framing itself directly implies digital-experience-monitoring focus, reinforced by confirmed '24/7 monitoring and access to ticketing support' for the named Radisson deployment [16] None identified"
+          "qualification": "Native, confirmed directly by name via the specifically-named EnvisionDX platform component - 'DX' framing itself directly implies digital-experience-monitoring focus, reinforced by confirmed '24/7 monitoring and access to ticketing support' for the named Radisson deployment [16]"
         }
       },
       "projection_provenance": {
@@ -3944,6 +4217,24 @@
             "hospitality_leisure": "yes"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -4106,7 +4397,7 @@
           "source_url": "https://hpe.com/us/en/aruba-edgeconnect-sd-wan.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed for specific named hyperscalers [15] [19] None identified"
+          "qualification": "Native, confirmed for specific named hyperscalers [15] [19]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://docs.axissecurity.com/docs/pops",
@@ -4118,19 +4409,19 @@
           "source_url": "https://hpe.com/us/en/aruba-edgeconnect-sd-wan.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed for specific named hyperscalers [15] [19] None identified"
+          "qualification": "Native, confirmed for specific named hyperscalers [15] [19]"
         },
         "f24_flexible_edge_form_factors": {
           "source_url": "https://buy.hpe.com/in/en/cloud/private-hybrid-cloud/hpe-aruba-networking-connectivity-saas/hpe-aruba-networking-connectivity/hpe-aruba-networking-edgeconnect-10106-1g-2x-sfp-2x-combo-1g-2x-rj45-poe-sd%E2%80%91wan-gateway/p/s0e22a",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native - physical appliances confirmed at a specific model level (e.g. the EC-10106 gateway, described as 'ideally suited for small branch and remote office environments'), plus virtual appliance deployment [21] Native - physical appliances confirmed at a specific model level (e.g. the EC-10106 gateway, described as 'ideally suited for small branch and remote office environments'), plus virtual appliance deployment"
+          "qualification": "Native - physical appliances confirmed at a specific model level (e.g. the EC-10106 gateway, described as 'ideally suited for small branch and remote office environments'), plus virtual appliance deployment [21]"
         },
         "f27_integrated_next_generation_firewall": {
           "source_url": "https://hpe.com/us/en/networking/sase.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, via the SSE platform's confirmed capability set alongside the EdgeConnect-embedded NGFW described above [14] None identified"
+          "qualification": "Native, via the SSE platform's confirmed capability set alongside the EdgeConnect-embedded NGFW described above [14]"
         }
       },
       "projection_provenance": {
@@ -4257,6 +4548,24 @@
           "regions": {
             "uk_ireland": "partial"
           }
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "partial",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -4401,7 +4710,7 @@
         "Organisations with strong network engineering capability who can take advantage of WAN Assurance telemetry."
       ],
       "watch_outs": [
-        "SASE story is less mature than the SASE-led vendors; SSE capabilities have limited public evidence relative to category leaders.",
+        "Full SASE platform: partial evidence; CASB capability: not confirmed; Data loss prevention: not confirmed. Confirm the networking and SSE products and whether separate contracts or operators are required.",
         "Managed delivery is via partners; first-party managed service is not the primary model.",
         "Cloud on-ramp and private backbone capabilities are less prominent than dedicated SASE platforms."
       ],
@@ -4431,13 +4740,13 @@
           "source_url": "https://juniper.net/content/dam/www/assets/white-papers/us/en/routers/ai-driven-sd-wan-secures-todays-cloud-era-networks.pdf",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed via the platform's core, service-based routing architecture - 'sessions are delivered based on identity and context to relevant parties based on real-time policies' [10] Native, confirmed via the platform's core, service-based routing architecture - 'sessions are delivered based on identity and context to relevant parties based on real-time policies'"
+          "qualification": "Native, confirmed via the platform's core, service-based routing architecture - 'sessions are delivered based on identity and context to relevant parties based on real-time policies' [10]"
         },
         "f18_cloud_on_ramp": {
           "source_url": "https://juniper.net/us/en/customers/ambifox-case-study.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine specificity via a real, named customer deployment spanning two distinct named hyperscalers [25] None identified"
+          "qualification": "Native, confirmed with genuine specificity via a real, named customer deployment spanning two distinct named hyperscalers [25]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://www.juniper.net/us/en/solutions/sase.html",
@@ -4449,19 +4758,19 @@
           "source_url": "https://juniper.net/us/en/customers/ambifox-case-study.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine specificity via a real, named customer deployment spanning two distinct named hyperscalers [25] None identified"
+          "qualification": "Native, confirmed with genuine specificity via a real, named customer deployment spanning two distinct named hyperscalers [25]"
         },
         "f24_flexible_edge_form_factors": {
           "source_url": "https://juniper.net/us/en/products/routers/session-smart-router.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed as genuinely flexible - the Session Smart Router runs as a software-based solution on dedicated Juniper SSR-series hardware, white-box customer-premises equipment, data-centre network servers, or the public cloud [14] Native, confirmed as genuinely flexible - the Session Smart Router runs as a software-based solution on dedicated Juniper SSR-series hardware, white-box customer-premises equipment, data-centre network servers, or the public cloud"
+          "qualification": "Native, confirmed as genuinely flexible - the Session Smart Router runs as a software-based solution on dedicated Juniper SSR-series hardware, white-box customer-premises equipment, data-centre network servers, or the public cloud [14]"
         },
         "f27_integrated_next_generation_firewall": {
           "source_url": "https://juniper.net/us/en/solutions/sd-wan/managed-sd-wan.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, and confirmed with specific technical detail [15] None identified"
+          "qualification": "Native, and confirmed with specific technical detail [15]"
         },
         "f28_full_sase_platform": {
           "source_url": "https://juniper.net/us/en/solutions/secure-ai-native-edge.html",
@@ -4479,7 +4788,7 @@
           "source_url": "https://juniper.net/us/en/customers/ambifox-case-study.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - the platform 'supports zero-touch installation and provisioning for fast setup and administration-with no site visits', evidenced via a real, named customer deployment [25] Native, confirmed directly and with genuine specificity - the platform 'supports zero-touch installation and provisioning for fast setup and administration-with no site visits', evidenced via a real, named customer deployment"
+          "qualification": "Native, confirmed directly and with genuine specificity - the platform 'supports zero-touch installation and provisioning for fast setup and administration-with no site visits', evidenced via a real, named customer deployment [25]"
         },
         "f38_observability_and_digital_experience_monitoring": {
           "source_url": "https://juniper.net/content/dam/www/assets/white-papers/us/en/routers/session-smart-routing-how-it-works.pdf",
@@ -4508,6 +4817,24 @@
         "curated_uk_basis": "No UK HQ (US, now HPE). UK channel and delivery via partners and MSPs.",
         "sector_review_queue": [],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -4670,31 +4997,31 @@
           "source_url": "https://lumen.com/en-us/services/sd-wan.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'Route traffic over the most efficient connection for high performance' [3] Native, confirmed directly - 'Route traffic over the most efficient connection for high performance'"
+          "qualification": "Native, confirmed directly - 'Route traffic over the most efficient connection for high performance' [3]"
         },
         "f12_application_aware_routing": {
           "source_url": "https://lumen.com/en-us/services/sd-wan.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'Route traffic over the most efficient connection for high performance, and update routing and security rules in real time as network needs change' [3] None identified"
+          "qualification": "Native, confirmed directly - 'Route traffic over the most efficient connection for high performance, and update routing and security rules in real time as network needs change' [3]"
         },
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://docs.lumen.com/readiness/products/sd-wan-versa/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'the ability to intelligently use lower cost Internet connections to achieve MPLS-like QoS' [2] Native, confirmed directly and with genuine specificity - 'the ability to intelligently use lower cost Internet connections to achieve MPLS-like QoS'"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'the ability to intelligently use lower cost Internet connections to achieve MPLS-like QoS' [2]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://lumen.com/en-us/services/sdwan-versa-networks.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name as a supported WAN underlay ('4G/LTE') [5] Native, confirmed directly by name as a supported WAN underlay ('4G/LTE')"
+          "qualification": "Native, confirmed directly by name as a supported WAN underlay ('4G/LTE') [5]"
         },
         "f18_cloud_on_ramp": {
           "source_url": "https://docs.lumen.com/readiness/products/sd-wan-versa/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly via the confirmed 'physical and virtual customer-premises equipment (CPE)' architecture description [2] Native, confirmed directly via the confirmed 'physical and virtual customer-premises equipment (CPE)' architecture description"
+          "qualification": "Native, confirmed directly via the confirmed 'physical and virtual customer-premises equipment (CPE)' architecture description [2]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://ir.lumen.com/news/news-details/2024/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution/default.aspx",
@@ -4718,13 +5045,13 @@
           "source_url": "https://lumen.com/en-us/services/sase-versa.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - a named, sized CPE device tier ('Extra Small CPE Device') is confirmed directly as part of Lumen's disclosed pricing structure [4] Native, confirmed directly and with genuine specificity - a named, sized CPE device tier ('Extra Small CPE Device') is confirmed directly as part of Lumen's disclosed pricing structure"
+          "qualification": "Native, confirmed directly and with genuine specificity - a named, sized CPE device tier ('Extra Small CPE Device') is confirmed directly as part of Lumen's disclosed pricing structure [4]"
         },
         "f25_high_availability_design": {
           "source_url": "https://lumen.com/en-us/services/sdwan-versa-networks.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - the confirmed service wrapper includes 'appliance/circuit monitoring' and '24/7 support for the entire WAN solution' [5] Native, confirmed directly and with genuine specificity - the confirmed service wrapper includes 'appliance/circuit monitoring' and '24/7 support for the entire WAN solution'"
+          "qualification": "Native, confirmed directly and with genuine specificity - the confirmed service wrapper includes 'appliance/circuit monitoring' and '24/7 support for the entire WAN solution' [5]"
         },
         "f26_sla_backed_service_fabric": {
           "source_url": "https://assets.lumen.com/is/content/Lumen/lumen-service-level-agreementpdf?Creativeid=dc0beb0f-83c4-46d5-8684-85af0333edbe",
@@ -4742,19 +5069,19 @@
           "source_url": "https://lumen.com/en-us/services/sase-versa.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine specificity via a named product - Versa Secure Private Access (VSPA) 'secure remote workforces at the edge with user-centric' access [4] None identified"
+          "qualification": "Native, confirmed with genuine specificity via a named product - Versa Secure Private Access (VSPA) 'secure remote workforces at the edge with user-centric' access [4]"
         },
         "f30_zero_trust_network_access": {
           "source_url": "https://lumen.com/en-us/services/sase-versa.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed with genuine specificity via a named product - Versa Secure Private Access (VSPA) 'secure remote workforces at the edge with user-centric' access [4] None identified"
+          "qualification": "Native, confirmed with genuine specificity via a named product - Versa Secure Private Access (VSPA) 'secure remote workforces at the edge with user-centric' access [4]"
         },
         "f31_secure_web_gateway": {
           "source_url": "https://lumen.com/en-us/services/sase.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly as part of the SSE capability list - 'Secure Web Gateway (SWG)' named explicitly [6] None identified"
+          "qualification": "Native, confirmed directly as part of the SSE capability list - 'Secure Web Gateway (SWG)' named explicitly [6]"
         },
         "f32_casb_capability": {
           "source_url": "https://lumen.com/en-us/services/sase.html",
@@ -4850,6 +5177,24 @@
             "manufacturing": "unknown"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -4982,7 +5327,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/netskope/",
-      "shortlist_summary": "Netskope sits in an interesting middle ground between a pure security-first platform and a fully networked one: unlike the likes of Zscaler, it has invested in its own converged mesh network (NewEdge) and a purpose-built SD-WAN (Borderless SD-WAN, built on the 2022 Infiot acquisition), so the ‘security company bolting on networking’ story is a few years further along than Zscaler’s; unlike Cato, that network is built on peering and interconnects across 67 regions rather than an owned private backbone. Where Netskope stands out is data-centric SSE - its Cloud Confidence Index covers 85,000+ SaaS and GenAI apps, its DLP heritage runs deep (it was arguably the original CASB/DLP-first vendor...",
+      "shortlist_summary": "Netskope sits in an interesting middle ground between a pure security-first platform and a fully networked one: unlike the likes of Zscaler, it has invested in its own converged mesh network (NewEdge) and a purpose-built SD-WAN (Borderless SD-WAN, built on the 2022 Infiot acquisition), so the ‘security company bolting on networking’ story is a few years further along than Zscaler’s; unlike Cato, that network is built on peering and interconnects across 67 regions rather than an owned private backbone.",
       "key_differentiators": [
         "Strong CASB heritage; widely recognised as a leading SSE vendor for SaaS-heavy environments.",
         "Borderless WAN (from the Infiot acquisition) extends Netskope into single-vendor SASE for buyers wanting both layers from one platform.",
@@ -4995,7 +5340,7 @@
       ],
       "watch_outs": [
         "Native SD-WAN (Borderless WAN) is newer than dedicated SD-WAN platforms; validate path selection and QoS depth in RFP.",
-        "Managed delivery is partner-led; first-party managed service is limited.",
+        "Fully managed service: not confirmed. Confirm who will operate the service and whether management is supplied directly or through a partner.",
         "Premium pricing with modular structure; full SASE bundle costs can scale meaningfully with users and traffic."
       ],
       "evidence_coverage_pct": 0.6,
@@ -5104,6 +5449,24 @@
           "regions": {
             "uk_ireland": "partial"
           }
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "partial",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -5237,7 +5600,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/ntt-data/",
-      "shortlist_summary": "NTT DATA is a massive, globally-established IT services and network provider, founded in Japan in 1988 as a spinoff of Nippon Telegraph and Telephone (NTT), and now operating in more than 70 countries with approximately 190,000 employees. A significant, current corporate event is worth understanding first: on 8 May 2025, NTT, Inc. (renamed that same year from Nippon Telegraph and Telephone Corporation) launched a tender offer to acquire full ownership of NTT DATA Group Corporation, its previously partially-owned, publicly-listed subsidiary; the offer, at JPY 4,000 per share (a confirmed 41.5% premium), achieved 81.75% acceptance, and following shareholder approval on 29 August 2025, NTT D...",
+      "shortlist_summary": "NTT DATA is a massive, globally-established IT services and network provider, founded in Japan in 1988 as a spinoff of Nippon Telegraph and Telephone (NTT), and now operating in more than 70 countries with approximately 190,000 employees. A significant, current corporate event is worth understanding first: on 8 May 2025, NTT, Inc. 75% acceptance, and following shareholder approval on 29 August 2025, NTT DATA Group was formally delisted from the Tokyo Stock Exchange on 26 September 2025, becoming a wholly-owned subsidiary of NTT, Inc.",
       "key_differentiators": [
         "24x7 managed SD-WAN delivery via global operations centres with strong portal visibility.",
         "Managed SASE partnership with Palo Alto Networks (Prisma SASE) for buyers wanting that platform under managed service.",
@@ -5267,7 +5630,7 @@
           "source_url": "https://dam.nttdata.com/api/public/content/GLOBAL-MNS-brochure",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'Move from outdated, end-of-life infrastructure to a modern, scalable network - with a tailored roadmap built around your current environment and future needs' Native, confirmed directly and with genuine specificity - 'Move from outdated, end-of-life infrastructure to a modern, scalable network - with a tailored roadmap built around your current environment and future needs'"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'Move from outdated, end-of-life infrastructure to a modern, scalable network - with a tailored roadmap built around your current environment and future needs'"
         },
         "f07_lifecycle_management": {
           "source_url": "https://www.nttglobal.net/services/sd-wan",
@@ -5285,7 +5648,7 @@
           "source_url": "https://services.global.ntt/en-us",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - SD-WAN networks 'can use additional resources to adapt to changes in demand and prioritize business-critical traffic' Native, confirmed directly by name - SD-WAN networks 'can use additional resources to adapt to changes in demand and prioritize business-critical traffic'"
+          "qualification": "Native, confirmed directly by name - SD-WAN networks 'can use additional resources to adapt to changes in demand and prioritize business-critical traffic'"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://www.nttglobal.net/services/sd-wan",
@@ -5315,13 +5678,13 @@
           "source_url": "https://nttdata.com/global/en/services/enterprise-networking/managed-network-services",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, via the confirmed Managed Network Security product line and the confirmed underlying platform partnerships None identified"
+          "qualification": "Native, via the confirmed Managed Network Security product line and the confirmed underlying platform partnerships"
         },
         "f30_zero_trust_network_access": {
           "source_url": "https://services.global.ntt/en-us/campaigns/managed-campus-networks-with-prisma-sase",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'zero trust, identity-level security to strengthen the protection of enterprise digital resources and IT applications, no matter where employees access them' None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'zero trust, identity-level security to strengthen the protection of enterprise digital resources and IT applications, no matter where employees access them'"
         },
         "f38_observability_and_digital_experience_monitoring": {
           "source_url": "https://nttdata.com/global/en/insights/reports/ntt-data-is-a-leader-in-managed-network-services",
@@ -5402,6 +5765,24 @@
             "retail_ecommerce": "yes"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -5545,7 +5926,7 @@
           "source_url": "https://open-systems.com/company/customers/mammut/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly via real, named customer-deployment detail - 'low-cost and secure internet breakouts' specifically described in the Mammut case study [16] Native, confirmed directly via real, named customer-deployment detail - 'low-cost and secure internet breakouts' specifically described in the Mammut case study"
+          "qualification": "Native, confirmed directly via real, named customer-deployment detail - 'low-cost and secure internet breakouts' specifically described in the Mammut case study [16]"
         },
         "f32_casb_capability": {
           "source_url": "https://eqtgroup.com/about/current-portfolio/open-systems",
@@ -5631,6 +6012,24 @@
             "retail_ecommerce": "yes"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -5794,25 +6193,25 @@
           "source_url": "https://documentation.evolutionplatform.orange-business.com/docs/services/networking/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'adaptive routing mechanisms' and 'centralized controllers to direct network traffic in an intelligent and efficient manner' Native, confirmed directly by name - 'adaptive routing mechanisms' and 'centralized controllers to direct network traffic in an intelligent and efficient manner'"
+          "qualification": "Native, confirmed directly by name - 'adaptive routing mechanisms' and 'centralized controllers to direct network traffic in an intelligent and efficient manner'"
         },
         "f12_application_aware_routing": {
           "source_url": "https://documentation.evolutionplatform.orange-business.com/docs/services/networking/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'centralized controllers to direct network traffic in an intelligent and efficient manner... to make the most of your network resources' None identified"
+          "qualification": "Native, confirmed directly - 'centralized controllers to direct network traffic in an intelligent and efficient manner... to make the most of your network resources'"
         },
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://documentation.evolutionplatform.orange-business.com/docs/services/networking/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'dynamic bandwidth management' named explicitly Native, confirmed directly - 'dynamic bandwidth management' named explicitly"
+          "qualification": "Native, confirmed directly - 'dynamic bandwidth management' named explicitly"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://orange-business.com/en/products/categories/internet-and-networks",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'wireless options' named explicitly as a supported underlay type Native, confirmed directly by name - 'wireless options' named explicitly as a supported underlay type"
+          "qualification": "Native, confirmed directly by name - 'wireless options' named explicitly as a supported underlay type"
         },
         "f18_cloud_on_ramp": {
           "source_url": "https://documentation.evolutionplatform.orange-business.com/docs/services/networking/sd-wan/",
@@ -5913,6 +6312,24 @@
             "manufacturing": "yes"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -6173,6 +6590,24 @@
           },
           "regions": {}
         }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -6304,7 +6739,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/sonicwall-cse/",
-      "shortlist_summary": "SonicWall is one of the oldest names in network security still operating under its own brand - founded 1991 as Sonic Systems, later renamed SonicWall, and shaped by an eventful corporate history: an IPO in 1999, a return to private ownership, acquisition by Dell in 2012, and a $2 billion-plus divestiture from Dell in November 2016 that spun the company out as an independent business jointly owned by private equity firms Francisco Partners and Elliott Management, who remain its owners today. Cloud Secure Edge (CSE), the product this profile covers, has its own separate origin: it began as Banyan Security, an independent SSE vendor, before SonicWall acquired it in January 2023 specifically...",
+      "shortlist_summary": "SonicWall is one of the oldest names in network security still operating under its own brand - founded 1991 as Sonic Systems, later renamed SonicWall, and shaped by an eventful corporate history: an IPO in 1999, a return to private ownership, acquisition by Dell in 2012, and a $2 billion-plus divestiture from Dell in November 2016 that spun the company out as an independent business jointly owned by private equity firms Francisco Partners and Elliott Management, who remain its owners today.",
       "key_differentiators": [
         "SD-WAN delivered via existing TZ, NSa and SM firewall appliances; familiar deployment for organisations standardised on SonicWall.",
         "Strong SMB and mid-market positioning with reseller channel and public hardware pricing.",
@@ -6316,7 +6751,7 @@
         "Buyers prioritising public pricing visibility and reseller channel options."
       ],
       "watch_outs": [
-        "SASE and SSE capabilities have partial public evidence; depth should be confirmed in RFP.",
+        "Full SASE platform: not confirmed; CASB capability: not confirmed; Data loss prevention: not confirmed. Confirm the exact networking and security modules included in the proposal.",
         "Less suited to large enterprise multinational deployments requiring private backbone or PoP architectures.",
         "Public cloud gateway and multi-cloud transit fabric capabilities are less prominent than cloud-native SASE vendors."
       ],
@@ -6328,7 +6763,7 @@
           "source_url": "https://prnewswire.com/news-releases/sonicwall-partner-ximpleit-deploys-cloud-secure-edge-to-deliver-zero-trust-security-to-legal-industry-clients-302790435.html",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, and genuinely one of the platform's clearest, most specifically-evidenced capabilities - explicit 'no rip-and-replace' positioning, confirmed 'guided migration, coexistence mode, and partner playbooks', and a real, named, dated 2026 case study describing exactly this scenario at an MSP [22] Native, and genuinely one of the platform's clearest, most specifically-evidenced capabilities - explicit 'no rip-and-replace' positioning, confirmed 'guided migration, coexistence mode, and partner playbooks', and a real, named, dated 2026 case study describing exactly this scenario at an MSP"
+          "qualification": "Native, and genuinely one of the platform's clearest, most specifically-evidenced capabilities - explicit 'no rip-and-replace' positioning, confirmed 'guided migration, coexistence mode, and partner playbooks', and a real, named, dated 2026 case study describing exactly this scenario at an MSP [22]"
         }
       },
       "projection_provenance": {
@@ -6387,6 +6822,24 @@
             "financial_services": "yes"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -6590,6 +7043,24 @@
         "curated_uk_basis": "No UK HQ (US). VeloCloud delivered in the UK through carriers including BT and Vodafone.",
         "sector_review_queue": [],
         "resolution": "source_review_required"
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
+        }
       }
     },
     {
@@ -6722,7 +7193,7 @@
         "log_retention_days": null
       },
       "marketplace_url": "https://netify.co.uk/marketplace/verizon/",
-      "shortlist_summary": "Verizon Communications is one of the largest telecommunications companies in the world - generating $133.6 billion in revenue in 2023 (2025 consensus estimates are approximately $134-135 billion) and serving nearly all of the Fortune 500 - and its managed SD-WAN and SASE proposition sits within Verizon Business, itself organised into three named customer groups (Enterprise and Public Sector, Business Markets and Other, and Wholesale). Verizon’s SASE architecture is an extensively multi-platform proposition: its own materials confirm direct integration with Versa, Cisco (cEdge and vEdge), Zscaler (both Zscaler Internet Access and Zscaler Private Access), and Palo Alto Networks Prisma Acces...",
+      "shortlist_summary": "6 billion in revenue in 2023 (2025 consensus estimates are approximately $134-135 billion) and serving nearly all of the Fortune 500 - and its managed SD-WAN and SASE proposition sits within Verizon Business, itself organised into three named customer groups (Enterprise and Public Sector, Business Markets and Other, and Wholesale).",
       "key_differentiators": [
         "Global carrier-led managed SASE and SD-WAN with strong North American presence and international delivery.",
         "Versa Networks partnership provides multi-tenant SD-WAN platform with security, routing and analytics under managed service.",
@@ -6746,7 +7217,7 @@
           "source_url": "https://verizon.com/business/resources/lp/secure-access-service-edge/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'increase your overall performance through a combination of caching, application organization' and prioritisation mechanisms [18] Native, confirmed directly - 'increase your overall performance through a combination of caching, application organization' and prioritisation mechanisms"
+          "qualification": "Native, confirmed directly - 'increase your overall performance through a combination of caching, application organization' and prioritisation mechanisms [18]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-branch/",
@@ -6758,7 +7229,7 @@
           "source_url": "https://verizon.com/business/answers/what-is-cloud-sase/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly via the specifically-named Virtual Network Services (VNS) platform and its VNS Application Edge capability [6] Native, confirmed directly via the specifically-named Virtual Network Services (VNS) platform and its VNS Application Edge capability"
+          "qualification": "Native, confirmed directly via the specifically-named Virtual Network Services (VNS) platform and its VNS Application Edge capability [6]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://www.verizon.com/business/en-gb/products/security/network-cloud-security/advanced-secure-access-service-edge/",
@@ -6788,7 +7259,7 @@
           "source_url": "https://verizon.com/business/products/security/network-cloud-security/sase-management/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - Zscaler Private Access (ZPA) named directly [2] None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - Zscaler Private Access (ZPA) named directly [2]"
         },
         "f31_secure_web_gateway": {
           "source_url": "https://verizon.com/business/products/security/network-cloud-security/sase-management/",
@@ -6889,6 +7360,24 @@
             "healthcare": "partial"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -7063,7 +7552,7 @@
           "source_url": "https://versa-networks.com/news/2018/versa-networks-present-adobe-sd-wan-use-case-onug-fall-2018.php",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, per-application SLA-based routing confirmed specifically via the Adobe deployment [19] Native, per-application SLA-based routing confirmed specifically via the Adobe deployment"
+          "qualification": "Native, per-application SLA-based routing confirmed specifically via the Adobe deployment [19]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://docs.versa-networks.com/Secure_SD-WAN/01_Configuration_from_Director/Common_Configuration/Configure_WWAN",
@@ -7075,7 +7564,7 @@
           "source_url": "https://docs.versa-networks.com/Integrations_and_Solutions/Integrations/Endpoint_Detection_and_Response/Integrate_Versa_SASE_with_CrowdStrike_Falcon",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native - confirmed explicitly for AWS-hosted VOS deployment, described as 'cloud edge deployment such as AWS running VOS' [24] Native - confirmed explicitly for AWS-hosted VOS deployment, described as 'cloud edge deployment such as AWS running VOS'"
+          "qualification": "Native - confirmed explicitly for AWS-hosted VOS deployment, described as 'cloud edge deployment such as AWS running VOS' [24]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Director/Ecosystem/Versa_SASE_Ecosystem",
@@ -7099,13 +7588,13 @@
           "source_url": "https://docs.versa-networks.com/Integrations_and_Solutions/Integrations/Endpoint_Detection_and_Response/Integrate_Versa_SASE_with_CrowdStrike_Falcon",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native - Versa-certified white-box routers (third-party hardware running VOS) confirmed specifically via the Adobe deployment account; branch edge devices, cloud edge deployment, and on-premises appliances all confirmed as supported form factors [24] Native - Versa-certified white-box routers (third-party hardware running VOS) confirmed specifically via the Adobe deployment account; branch edge devices, cloud edge deployment, and on-premises appliances all confirmed as supported form factors"
+          "qualification": "Native - Versa-certified white-box routers (third-party hardware running VOS) confirmed specifically via the Adobe deployment account; branch edge devices, cloud edge deployment, and on-premises appliances all confirmed as supported form factors [24]"
         },
         "f25_high_availability_design": {
           "source_url": "https://versa-networks.com/customers/case-studies/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed at a specific, quantified level via the Adobe case study - 'four-nines of availability for critical services' was an explicit deployment requirement Versa was chosen to meet [18] Native, confirmed at a specific, quantified level via the Adobe case study - 'four-nines of availability for critical services' was an explicit deployment requirement Versa was chosen to meet"
+          "qualification": "Native, confirmed at a specific, quantified level via the Adobe case study - 'four-nines of availability for critical services' was an explicit deployment requirement Versa was chosen to meet [18]"
         },
         "f26_sla_backed_service_fabric": {
           "source_url": "https://versa-networks.com/documents/Versa-Hosted-SASE-SLA.pdf",
@@ -7129,7 +7618,7 @@
           "source_url": "https://versa-networks.com/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed via a named practitioner review describing the console's 'ZTP (zero touch provisioning)' capability speeding up implementation [7] Native, confirmed via a named practitioner review describing the console's 'ZTP (zero touch provisioning)' capability speeding up implementation"
+          "qualification": "Native, confirmed via a named practitioner review describing the console's 'ZTP (zero touch provisioning)' capability speeding up implementation [7]"
         },
         "f40_managed_service_assurance": {
           "source_url": "https://versa-networks.com/documents/datasheets/versa-premier-service.pdf",
@@ -7220,6 +7709,24 @@
             "retail_ecommerce": "partial"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -7363,37 +7870,37 @@
           "source_url": "https://virginmediao2business.co.uk/connectivity/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13] Native, confirmed directly by name - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing'"
+          "qualification": "Native, confirmed directly by name - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13]"
         },
         "f12_application_aware_routing": {
           "source_url": "https://virginmediao2business.co.uk/connectivity/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13] None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'automatically path adjustment based on real-time conditions with dynamic application-aware routing' [10] [13]"
         },
         "f13_qos_and_traffic_shaping": {
           "source_url": "https://virginmediao2business.co.uk/connectivity/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'prioritising applications, focussing on critical services' and 'boost peak time performance and cut the need for MPLS circuits' [10] [13] Native, confirmed directly - 'prioritising applications, focussing on critical services' and 'boost peak time performance and cut the need for MPLS circuits'"
+          "qualification": "Native, confirmed directly - 'prioritising applications, focussing on critical services' and 'boost peak time performance and cut the need for MPLS circuits' [10] [13]"
         },
         "f17_cellular_and_5g_support": {
           "source_url": "https://virginmediao2business.co.uk/connectivity/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly by name as a supported WAN underlay [10] [13] Native, confirmed directly by name as a supported WAN underlay"
+          "qualification": "Native, confirmed directly by name as a supported WAN underlay [10] [13]"
         },
         "f18_cloud_on_ramp": {
           "source_url": "https://virginmediao2business.co.uk/connectivity/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'connecting directly to cloud apps including AWS, Azure and Google Cloud' [10] [13] None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'connecting directly to cloud apps including AWS, Azure and Google Cloud' [10] [13]"
         },
         "f23_multi_cloud_transit_fabric": {
           "source_url": "https://virginmediao2business.co.uk/connectivity/sd-wan/",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly and with genuine specificity - 'connecting directly to cloud apps including AWS, Azure and Google Cloud' [10] [13] None identified"
+          "qualification": "Native, confirmed directly and with genuine specificity - 'connecting directly to cloud apps including AWS, Azure and Google Cloud' [10] [13]"
         }
       },
       "projection_provenance": {
@@ -7430,6 +7937,27 @@
           "regions": {
             "uk_ireland": "yes"
           }
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "evidenced",
+          "name": null,
+          "source_urls": [
+            "https://www.virginmediabusiness.co.uk/legal/terms-and-conditions/",
+            "https://www.virginmediabusiness.co.uk/legal/privacy-policy/"
+          ],
+          "checked_at": "2026-09-30T19:56:00Z",
+          "review_due": "2026-10-30T00:00:00Z",
+          "qualification": "Virgin Media Business Limited, company 01785381, publishes its registered office in Reading and UK business network service terms."
+        },
+        "regional_delivery": {
+          "status": "yes",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -7599,7 +8127,7 @@
           "source_url": "https://vodafone.co.uk/business/sdn/secure-access-service-edge",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'secure overlay connectivity between customer sites and extending to cloud service provider environments e.g. Microsoft Azure, Amazon Web Services' [2] None identified"
+          "qualification": "Native, confirmed directly - 'secure overlay connectivity between customer sites and extending to cloud service provider environments e.g. Microsoft Azure, Amazon Web Services' [2]"
         },
         "f19_public_cloud_gateways": {
           "source_url": "https://www.vodafone.co.uk/newscentre/press-release/zscaler-smes-cloud/",
@@ -7617,7 +8145,7 @@
           "source_url": "https://vodafone.co.uk/business/sdn/secure-access-service-edge",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - 'secure overlay connectivity between customer sites and extending to cloud service provider environments e.g. Microsoft Azure, Amazon Web Services' [2] None identified"
+          "qualification": "Native, confirmed directly - 'secure overlay connectivity between customer sites and extending to cloud service provider environments e.g. Microsoft Azure, Amazon Web Services' [2]"
         },
         "f26_sla_backed_service_fabric": {
           "source_url": "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf",
@@ -7635,7 +8163,7 @@
           "source_url": "https://vodafone.co.uk/business/sdn/secure-access-service-edge",
           "reviewed_at": "2026-07-22T00:00:00.000Z",
           "review_due": "2026-12-30T00:00:00Z",
-          "qualification": "Native, confirmed directly - Zscaler is described specifically as delivering 'private application connectivity through a zero-trust architecture' [2] None identified"
+          "qualification": "Native, confirmed directly - Zscaler is described specifically as delivering 'private application connectivity through a zero-trust architecture' [2]"
         },
         "f31_secure_web_gateway": {
           "source_url": "https://vodafone.co.uk/business/sdn/secure-access-service-edge",
@@ -7690,6 +8218,27 @@
           "regions": {
             "uk_ireland": "yes"
           }
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "evidenced",
+          "name": null,
+          "source_urls": [
+            "https://www.vodafone.co.uk/privacy",
+            "https://www.vodafone.co.uk/business/case-studies/sd-wan-keeps-optos-connected-worldwide"
+          ],
+          "checked_at": "2026-09-30T19:56:00Z",
+          "review_due": "2026-10-30T00:00:00Z",
+          "qualification": "Vodafone Limited, company 01471587, identifies its registered office in Newbury; the Optos SD-WAN case includes UK operations."
+        },
+        "regional_delivery": {
+          "status": "yes",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     },
@@ -7978,6 +8527,24 @@
             "retail_ecommerce": "yes"
           },
           "regions": {}
+        }
+      },
+      "uk_evidence": {
+        "entity": {
+          "status": "not_researched",
+          "name": null,
+          "source_urls": [],
+          "checked_at": null,
+          "review_due": null,
+          "qualification": "UK contracting entity is not confirmed by the published Neon provider record."
+        },
+        "regional_delivery": {
+          "status": "unknown",
+          "scope": "Published UK and Ireland regional evidence. Confirm delivery to each UK site separately; this is not contracting-entity evidence."
+        },
+        "buyer_contract": {
+          "status": "requires_supplier_confirmation",
+          "qualification": "Confirm the legal counterparty, delivery partner, operator and support responsibilities in the proposal and order."
         }
       }
     }

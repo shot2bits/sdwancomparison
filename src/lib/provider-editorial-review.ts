@@ -9,7 +9,7 @@ export type ProviderEditorialReview = {
 /** Approval applies to this evidence state, not to future revisions of a provider. */
 export function providerEvidenceFingerprint(v:ShortlistVendor) {
   const ordered=(value:Record<string,unknown>)=>Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)));
-  return createHash('sha256').update(JSON.stringify({date:v.last_verified,capabilities:ordered(v.capabilities),capability_evidence:ordered(v.capability_evidence ?? {}),sectors:ordered(v.sectors),regions:ordered(v.regions),uk:v.uk_delivery,provenance:v.projection_provenance ?? null})).digest('hex');
+  return createHash('sha256').update(JSON.stringify({date:v.last_verified,capabilities:ordered(v.capabilities),capability_evidence:ordered(v.capability_evidence ?? {}),sectors:ordered(v.sectors),regions:ordered(v.regions),uk:v.uk_delivery,uk_evidence:v.uk_evidence??null,provenance:v.projection_provenance ?? null})).digest('hex');
 }
 function validatedEditorialReview(v:ShortlistVendor, record:ProviderEditorialReview|undefined=(reviews as Record<string,ProviderEditorialReview>)[v.slug], now=Date.now()):ProviderEditorialReview|null {
   if(!record || !['buyer_fit','reviewer','role','approved_at','review_due','evidence_fingerprint'].every(key=>typeof record[key as keyof ProviderEditorialReview] === 'string') || ![record.strengths,record.trade_offs,record.source_urls].every(value=>Array.isArray(value) && value.every(item=>typeof item === 'string')))return null;

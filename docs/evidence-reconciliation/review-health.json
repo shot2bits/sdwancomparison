@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T20:24:54.925Z",
+  "generated_at": "2026-10-01T22:10:19.435Z",
   "source": "snapshot_fallback",
   "evidence_issues": [],
   "dataset_versions": [],
@@ -153,6 +153,299 @@
       "slug": "zscaler",
       "status": "missing",
       "reason": "No approved assessment has been supplied."
+    }
+  ],
+  "uk_entity_reviews": [
+    {
+      "slug": "aryaka",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "att-business",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "barracuda-secureedge",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "bt-business",
+      "status": "evidenced",
+      "name": null,
+      "source_urls": [
+        "https://business.bt.com/insights/case-studies/financial-services-sd-wan/",
+        "https://business.bt.com/networks-digital-services/sd-wan-sase/sase/",
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+        "https://www.bt.com/about/contact-bt",
+        "https://find-and-update.company-information.service.gov.uk/company/04190816",
+        "https://business.bt.com/networks-digital-services/sd-wan/"
+      ],
+      "checked_at": "2026-09-30T19:56:00Z",
+      "review_due": "2026-10-30T00:00:00Z",
+      "qualification": "BT Group plc is headquartered at 1 Braham Street, London; UK managed SD-WAN is published by BT Business."
+    },
+    {
+      "slug": "cato-networks",
+      "status": "evidenced",
+      "name": "Cato Networks (UK) Limited",
+      "source_urls": [
+        "https://www.catonetworks.com/msa/"
+      ],
+      "checked_at": "2026-10-01T00:00:00Z",
+      "review_due": "2026-12-30T00:00:00Z",
+      "qualification": "The Cato Master Service Agreement, section 1.4, lists this UK contracting party. The entity identified in the buyer’s order determines the actual counterparty; this does not establish site coverage or managed-service scope."
+    },
+    {
+      "slug": "check-point",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "cisco",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "cloudflare-one",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "colt-technology-services",
+      "status": "evidenced",
+      "name": null,
+      "source_urls": [
+        "https://www.colt.net/customer-stories/byblos-bank-europe",
+        "https://www.colt.net/customer-stories/leading-global-investment-bank",
+        "https://docs.colt.net/legal/terms-and-conditions",
+        "https://docs.colt.net/legal/colt-group-of-companies",
+        "https://find-and-update.company-information.service.gov.uk/company/03232904"
+      ],
+      "checked_at": "2026-09-30T19:56:00Z",
+      "review_due": "2026-10-30T00:00:00Z",
+      "qualification": "Colt Technology Services Group Limited, company 03232904, is registered at Colt House, 20 Great Eastern Street, London. Colt publishes a London SD-WAN deployment."
+    },
+    {
+      "slug": "comcast-business",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "expereo",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "forcepoint",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "fortinet",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "gtt",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "hpe-aruba",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "juniper-networks",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "lumen",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "netskope",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "ntt",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "opensystems",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "orange-business",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "palo-alto-networks",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "sonicwall",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "arista-velocloud",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "verizon-business",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "versa-networks",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
+    },
+    {
+      "slug": "virgin-media-o2",
+      "status": "evidenced",
+      "name": null,
+      "source_urls": [
+        "https://www.virginmediabusiness.co.uk/legal/terms-and-conditions/",
+        "https://www.virginmediabusiness.co.uk/legal/privacy-policy/"
+      ],
+      "checked_at": "2026-09-30T19:56:00Z",
+      "review_due": "2026-10-30T00:00:00Z",
+      "qualification": "Virgin Media Business Limited, company 01785381, publishes its registered office in Reading and UK business network service terms."
+    },
+    {
+      "slug": "vodafone-business",
+      "status": "evidenced",
+      "name": null,
+      "source_urls": [
+        "https://www.vodafone.co.uk/privacy",
+        "https://www.vodafone.co.uk/business/case-studies/sd-wan-keeps-optos-connected-worldwide"
+      ],
+      "checked_at": "2026-09-30T19:56:00Z",
+      "review_due": "2026-10-30T00:00:00Z",
+      "qualification": "Vodafone Limited, company 01471587, identifies its registered office in Newbury; the Optos SD-WAN case includes UK operations."
+    },
+    {
+      "slug": "zscaler",
+      "status": "not_researched",
+      "name": null,
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
     }
   ],
   "evidence": {
