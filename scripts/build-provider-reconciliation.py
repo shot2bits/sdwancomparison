@@ -15,7 +15,7 @@ raw={n.provider_slug(d['source_document_id']):a.source_rows(ROOT/'.private/provi
 grade={'yes':'supported','partial':'partially_supported','partner_integrated':'partner_delivered'}
 result={};decisions=[]
 for p in records:
- slug=p['provider']['slug'];comparison=mapping.get(slug,slug);sources={s['id']:s for s in p['evidence_sources']};caps={c['capability_code']:c for c in p['capabilities']};fixes={}
+ slug=p['provider']['slug'];comparison=mapping.get(slug,slug);sources={s['id']:s for s in p['evidence_sources']};caps={c['capability_code']:c for c in sorted(p['capabilities'],key=lambda c:({'unresolved':0,'low':1,'low_medium':2,'medium':3,'medium_high':4,'high':5}.get(c['confidence'],0),c['id']))};fixes={}
  for code,c in caps.items():
   row=raw.get(slug,{}).get(code)
   if not row:continue

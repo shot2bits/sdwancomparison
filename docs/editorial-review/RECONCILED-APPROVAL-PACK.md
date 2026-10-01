@@ -27,7 +27,7 @@ Consider Aryaka where its documented capabilities match the deployment. The sele
 - https://aryaka.com/case-study/electronics-company/
 - https://www.aryaka.com/datasheet/global-connectivity-solution/
 
-Evidence fingerprint: c99ce4a88f7812c1bd79aa68fb2e3e717a61fdabc72d1b0ce70b98e82e65c56e
+Evidence fingerprint: 3bb7c37babf79d0ea67d1cd7e3935dc0e084f74760030a93d9452b47475028e1
 
 ## AT&T Business
 
@@ -110,7 +110,7 @@ Consider Cato Networks where its documented capabilities match the deployment. T
 - https://catonetworks.com/platform/digital-experience-monitoring-dem/
 - https://knowledge.catonetworks.com/docs/hardware
 
-Evidence fingerprint: 60aecbb03ba300fc6cfa4615dce9654087339d07a94c6deb5c179a3ae04c66ba
+Evidence fingerprint: d1a9900c09e405c7a6ce9f6d0e03419fe0e90311431553a0d857706e5246508c
 
 ## Check Point
 
@@ -154,7 +154,7 @@ Consider Cisco where its documented capabilities match the deployment. The selec
 - https://investor.cisco.com/news/news-details/2026/Cisco-Redefines-Security-for-the-Agentic-Era-with-AI-Defence-Expansion-and-AI-Aware-SASE/default.aspx
 - https://documentation.meraki.com/CiscoPlusSecureConnect/Cisco___Secure_Connect_Pre-configuration_Checklist/Data_Centers
 
-Evidence fingerprint: e741e9e0c2349bb858d0d16d91d690977e86e1b603dad6362b28292396c5024b
+Evidence fingerprint: 2174612f140dd8d81860626459394f1dcdd50e56c8189fe4187edb09459616bc
 
 ## Cloudflare One
 
@@ -177,7 +177,7 @@ Consider Cloudflare One where its documented capabilities match the deployment. 
 - https://www.cloudflare.com/plans/enterprise/
 - https://www.cloudflare.com/sase/
 
-Evidence fingerprint: f19f57e5cdb3761b180e05767fac1db631f2c2c2e086518419f1a3f8b391021a
+Evidence fingerprint: b846234864b11485f47a7233a0a78d0f2a118d023fa9a6eac8b9ebec0ea4e494
 
 ## Colt Technology Services
 
@@ -236,7 +236,7 @@ Consider Ericsson Cradlepoint where its documented capabilities match the deploy
 - https://cradlepoint.com/products/netcloud-sase/
 - https://cradlepoint.com/support/
 
-Evidence fingerprint: 64cf77ea63056764679998ab339c73980eb647ec8b38b71c6cb950f66fb5698f
+Evidence fingerprint: 34ef470034468df995ad605af61712de28d05935c20debbeabcc105fd1144487
 
 ## Expereo
 
@@ -254,7 +254,7 @@ Consider Expereo where its documented capabilities match the deployment. The sel
 - https://expereo.com/services/sd-wan
 - https://expereo.com/sd-wan
 
-Evidence fingerprint: 0621b1da349bb1e7ba694f9830c2f95e11c04141c75ecc84c3431e722118f275
+Evidence fingerprint: 30a171af44d2d2e2f309c00ed48a4030d094ce7030b0415dc2ba728df2f17c69
 
 ## Forcepoint
 
@@ -299,7 +299,7 @@ Consider Fortinet FortiSASE where its documented capabilities match the deployme
 - https://www.fortinet.com/products/sd-wan
 - https://www.fortinet.com/products/sase
 
-Evidence fingerprint: 2943d741154a064c2d470603c0200d785e878dec0731a43407d38defbf45c6c4
+Evidence fingerprint: ee4690a4e8df37f48d5995fee624947ecc52525f87710791784ea49a270ab1cf
 
 ## GTT
 
@@ -345,7 +345,7 @@ Consider HPE Aruba EdgeConnect where its documented capabilities match the deplo
 - https://buy.hpe.com/in/en/cloud/private-hybrid-cloud/hpe-aruba-networking-connectivity-saas/hpe-aruba-networking-connectivity/hpe-aruba-networking-edgeconnect-10106-1g-2x-sfp-2x-combo-1g-2x-rj45-poe-sd%E2%80%91wan-gateway/p/s0e22a
 - https://hpe.com/us/en/networking/sase.html
 
-Evidence fingerprint: ffd7a4a5431e9b9f3cef815ccbf33af9da06cd85dbbf7ae1d965657e98e5cbec
+Evidence fingerprint: 5deac460478e78a80b4e3dafa5c2cc90bfad22273e2cdf6c024852ce97d969b7
 
 ## Juniper Networks
 
@@ -396,7 +396,7 @@ Consider Lumen where its documented capabilities match the deployment. The selec
 - https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615
 - https://lumen.com/en-us/services/sase.html
 
-Evidence fingerprint: d3b9775eaab8be036202273e0ecd1d6106af2f79f3623f2843880aa355d33a5a
+Evidence fingerprint: 22e71c3e3a0abf631fbe2a10ac8721a11e4f1b06be4f29d9c717fd2d3cf7d526
 
 ## Netskope
 
@@ -417,7 +417,7 @@ Consider Netskope where its documented capabilities match the deployment. The se
 - https://www.netskope.com/press-releases/netskope-sets-new-industry-benchmarks-for-cloud-security-performance
 - https://www.netskope.com/netskope-technical-support
 
-Evidence fingerprint: 756b05d42ae15454625764bab1657f9e6ee4a28779f2e5aa60e8d103ae818758
+Evidence fingerprint: f00a0cd49feda79348179319ec2c2a77c616401d37cd3a7c57cb97e5c5074713
 
 ## NTT DATA
 
@@ -442,7 +442,7 @@ Consider NTT DATA where its documented capabilities match the deployment. The se
 - https://services.global.ntt/en-us/campaigns/managed-campus-networks-with-prisma-sase
 - https://nttdata.com/global/en/insights/reports/ntt-data-is-a-leader-in-managed-network-services
 
-Evidence fingerprint: e94b676b4a9a8bde0fbb00371ce2f3064ce33ce3f270d732b3fd82906c9c1632
+Evidence fingerprint: ffc7352c4063ae7b902538e52d1aa3845cd0c5961876db07b8f7d12c972cb38b
 
 ## Open Systems
 
@@ -458,7 +458,7 @@ Consider Open Systems where its documented capabilities match the deployment. Th
 - https://open-systems.com/company/customers/mammut/
 - https://eqtgroup.com/about/current-portfolio/open-systems
 
-Evidence fingerprint: 03dae191d51a53f3bd7de82ce497d3b02a7a35eade724eefcf63ceb243045aab
+Evidence fingerprint: ed9bc7b5d20fdba47f27852c7bb85400141af9f9d64edb028110bbe9ca5be892
 
 ## Orange Business
 
@@ -502,7 +502,7 @@ Consider Palo Alto Networks Prisma SASE where its documented capabilities match 
 - https://www.paloaltonetworks.com/blog/sase/the-architecture-behind-prisma-sase-99999-uptime/
 - https://www.paloaltonetworks.com/content/dam/pan/en_US/assets/pdf/datasheets/support/prisma-access-service-sla.pdf
 
-Evidence fingerprint: 779adb73d189a55afb22f3a9d790150da0eb44b31f579759bbe071d849077d89
+Evidence fingerprint: e89db5cd07e842d63429d33236f6fd4f26871703401bd24ec126c800c96b7cb3
 
 ## SonicWall Cloud Secure Edge
 
@@ -560,7 +560,7 @@ Consider Verizon Business where its documented capabilities match the deployment
 - https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/
 - https://verizon.com/business/products/security/network-cloud-security/sase-management/
 
-Evidence fingerprint: f651e9f5a855475eaf00d4809780b4f64bf232fe52f8022a1dc12450b33d5c25
+Evidence fingerprint: f20a4d459d5d431f43cae449c4135b1d1b346afed9533281edf26843a6320e52
 
 ## Versa Networks
 
@@ -589,7 +589,7 @@ Consider Versa Networks where its documented capabilities match the deployment. 
 - https://versa-networks.com/
 - https://versa-networks.com/documents/datasheets/versa-premier-service.pdf
 
-Evidence fingerprint: 01e20b37af373e89f1cbe49e9317e29640eb8a1af02e7e85bc6ed4dcd8cb5e34
+Evidence fingerprint: c89584e425884c4056188a6be62f04bb241a0021957b635d941a66e68d2e286e
 
 ## Virgin Media O2 Business
 
@@ -649,4 +649,4 @@ Consider Zscaler where its documented capabilities match the deployment. The sel
 - https://www.zscaler.com/press/zscaler-significantly-expands-global-sovereignty-zero-trust-exchange-platform
 - https://www.zscaler.com/resources/reference-architectures/traffic-forwarding-in-zscaler-internet-access.pdf
 
-Evidence fingerprint: 6abdc1a93f4bd6184d62bd8ba4d4e424636ac4b35d5924cc47b30e82e07c7e86
+Evidence fingerprint: 1660291be8d077a8e1b740347871390039c99f80c66c982688821c36a7fe41a6
