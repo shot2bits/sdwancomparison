@@ -94,6 +94,18 @@ async function main() {
     for (const v of [...yes, ...partial]) assert.ok(f.a.includes(v.name));
   }
   const graph = shortlistSchema(vendors)["@graph"] as Record<string, any>[];
+  // Required Dataset fields must survive the actual page graph, not just a legacy helper.
+  for (const subset of [vendors, vendors.slice(0, 2)]) {
+    const dataset = (shortlistSchema(subset)["@graph"] as Record<string, any>[])
+      .find((item) => item["@type"] === "Dataset")!;
+    assert.ok(dataset.description.length >= 50);
+    assert.ok(dataset.description.includes(`${subset.length} SD-WAN and SASE providers`));
+    assert.ok(dataset.description.includes("40 graded fields"));
+    assert.ok(dataset.description.includes("not provider quality"));
+    assert.equal(dataset.creator["@type"], "Organization");
+    assert.equal(dataset.creator.name, "Netify");
+    assert.equal(dataset.creator.url, "https://netify.co.uk/");
+  }
   const list = graph.find((g) => g["@type"] === "ItemList")!;
   assert.equal(list.numberOfItems, vendors.length);
   assert.deepEqual(

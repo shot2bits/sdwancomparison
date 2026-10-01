@@ -1,4 +1,5 @@
 import type { ShortlistVendor } from "./shortlist-core";
+import featureDefinitions from "../../data/feature-definitions.json";
 import { shortlistEntity, providerTypes } from "./shortlist-entity";
 import { shortlistFaqs } from "./shortlist-faq";
 import { sourcingServiceSchema } from "./sourcing-contract";
@@ -48,6 +49,13 @@ export function shortlistSchema(
         "@type": "Dataset",
         license: "https://creativecommons.org/licenses/by/4.0/",
         name: entity.h1,
+        description: `Public-source capability evidence for ${vendors.length} SD-WAN and SASE providers across ${featureDefinitions.features.length} graded fields. Includes operating models, sector and regional evidence, source references and review qualifications. Research completeness is not provider quality or confirmed suitability for a buyer.`,
+        creator: {
+          "@type": "Organization",
+          "@id": `${SITE_URL}/#organization`,
+          name: "Netify",
+          url: "https://netify.co.uk/",
+        },
         url: `${SITE_URL}/shortlist/data.json`,
         dateModified: entity.reviewed_at,
         isBasedOn: `${SITE_URL}/shortlist/research-methodology/`,
