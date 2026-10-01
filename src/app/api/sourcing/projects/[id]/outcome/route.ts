@@ -1,3 +1,4 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import {z} from 'zod';
 import {sessionFromRequest} from '@/lib/auth';
 import {sourcingAccess} from '@/lib/sourcing-access';
@@ -21,7 +22,7 @@ function failure(e:unknown){return Response.json({error:e instanceof CircuitErro
 export async function GET(req:Request,ctx:Ctx){try{const {id}=await ctx.params;const a=await access(req,id);return Response.json(view(await readOutcome(id),a.staff),{headers});}catch(e){return failure(e);}}
 const Input=z.object({action:z.enum(['draft','review','approve','decline','publish','withdraw']),revision:z.number().int().nonnegative(),content:OutcomeText.optional(),redaction_reviewed:z.boolean().optional(),consent:z.string().max(500).optional()}).strict();
 export async function POST(req:Request,ctx:Ctx){try{
- const origin=req.headers.get('origin');if(origin&&origin!==new URL(req.url).origin)throw new CircuitError('Origin not allowed.',403);
+ if(!requestOriginAllowed(req))throw new CircuitError('Origin not allowed.',403);
  const {id}=await ctx.params;const a=await access(req,id);const raw=await req.text();if(raw.length>10000)throw new CircuitError('Record too large.',413);
  const b=Input.parse(JSON.parse(raw));return Response.json(view(await outcomeAction(id,a.email,a.staff,b),a.staff),{headers});
 }catch(e){return failure(e);}}

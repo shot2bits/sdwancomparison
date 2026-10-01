@@ -1,10 +1,10 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import { sourcingPlanAllowed } from "@/lib/sourcing-plan-limit";
 import { SOURCING_ACQUISITIONS } from "@/lib/sourcing-acquisition";
 import { callSourcingTool } from "@/lib/mcp-sourcing-tools";
 export async function POST(req: Request) {
   if (
-    req.headers.get("origin") &&
-    req.headers.get("origin") !== new URL(req.url).origin
+    !requestOriginAllowed(req)
   )
     return Response.json({ error: "Origin not allowed" }, { status: 403 });
   try {

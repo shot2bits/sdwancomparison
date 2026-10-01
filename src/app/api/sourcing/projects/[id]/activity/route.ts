@@ -1,3 +1,4 @@
+import { requestOriginAllowed } from "@/lib/request-origin";
 import {recordSourcingMetric} from "@/lib/sourcing-metrics";
 import {currentSourcingProposals} from '@/lib/sourcing-proposal-scope';
 import {z} from 'zod';
@@ -21,7 +22,7 @@ export async function POST(req:Request,ctx:Ctx){
  try{
   const session=await sessionFromRequest(req);
   if(session?.role!=='netify')return Response.json({error:'Netify desk access required.'},{status:403,headers});
-  if(req.headers.get('origin')&&req.headers.get('origin')!==new URL(req.url).origin)return Response.json({error:'Origin not allowed.'},{status:403,headers});
+  if(!requestOriginAllowed(req))return Response.json({error:'Origin not allowed.'},{status:403,headers});
   const raw=await req.text();if(raw.length>20000)return Response.json({error:'Record too large.'},{status:413,headers});
   const b=Entry.parse(JSON.parse(raw));if(Date.parse(b.occurred_at)>Date.now())throw Error('Future event');
   const {id}=await ctx.params;
