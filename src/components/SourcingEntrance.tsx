@@ -6,6 +6,7 @@ import SourcingActions, { type SourcingAction as Action } from "./SourcingAction
 import { sourcingAcquisition } from "@/lib/sourcing-acquisition";
 import type { PublicPanelMember } from "@/lib/response-panel-contract";
 import React, { useEffect, useRef, useState } from "react";
+import type { InvestigationProvider } from "@/lib/sourcing-evidence";
 import type { ProviderEditorialReview } from "@/lib/provider-editorial-review";
 import type { ShortlistVendor } from "@/lib/shortlist-core";
 import {
@@ -51,6 +52,45 @@ export default function SourcingEntrance({
     [consent, setConsent] = useState(false),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState("");
+  const [investigation, setInvestigation] = useState<InvestigationProvider[]>([]);
+  const [checks, setChecks] = useState<string[]>([]);
+  const [directoryView, setDirectoryView] = useState("all");
+  const selectedRequests = Object.entries(selected).filter(([, actions]) => actions.length);
+  function scrollTo(id: string) {
+    requestAnimationFrame(() => {
+      const target = document.getElementById(id);
+      target?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      target?.focus({ preventScroll: true });
+    });
+  }
+  function editRequirements() { setEditing(true); scrollTo("sourcing-requirement"); }
+  useEffect(() => {
+    const open = (hash = window.location.hash) => {
+      if (["#sourcing-brief", "#sourcing-requirement"].includes(hash)) {
+        setEditing(true);
+        scrollTo("sourcing-requirement");
+      } else if (hash.startsWith("#provider-")) {
+        setDirectoryView("all");
+        scrollTo(hash.slice(1));
+      }
+    };
+    const onHash = () => open();
+    const onClick = (event: MouseEvent) => {
+      const anchor = event.target instanceof Element ? event.target.closest("a") : null;
+      const hash = anchor?.getAttribute("href");
+      if (hash && (["#sourcing-brief", "#sourcing-requirement"].includes(hash) || hash.startsWith("#provider-"))) {
+        event.preventDefault();
+        window.history.replaceState(window.history.state, "", hash);
+        open(hash);
+      }
+    };
+    const frame = requestAnimationFrame(onHash);
+    document.addEventListener("click", onClick);
+    window.addEventListener("hashchange", onHash);
+    return () => { cancelAnimationFrame(frame); document.removeEventListener("click", onClick); window.removeEventListener("hashchange", onHash); };
+  }, []);
   const briefVersion = useRef(0);
   const generatedBrief = useRef("");
   const [planStale, setPlanStale] = useState(false);
@@ -88,6 +128,9 @@ export default function SourcingEntrance({
       briefVersion.current++;
       setPlanStale(true);
       setMatches(null);
+      setInvestigation([]);
+      setChecks([]);
+      setDirectoryView("all");
       setMatchMessage(
         "Your requirements changed. Prepare the plan again to refresh evidence matching.",
       );
@@ -106,6 +149,7 @@ export default function SourcingEntrance({
     });
     setConsent(false);
     setMessage("");
+    setReviewMessage("");
   }
   async function prepare() {
     if (!SourcingBriefSchema.safeParse(brief).success) {
@@ -115,10 +159,16 @@ export default function SourcingEntrance({
       setMessage(
         "Check your sites, users and requirement before preparing the plan.",
       );
-      return;
+      setEditing(true);
+      scrollTo("sourcing-requirement");
+      return false;
     }
     const version = briefVersion.current;
     setPlan(true);
+    setEditing(false);
+    setInvestigation([]);
+    setChecks([]);
+    setReviewMessage("");
     setConsent(false);
     setMessage("");
     setMatching(true);
@@ -133,11 +183,7 @@ export default function SourcingEntrance({
       generatedBrief.current = summary;
     }
     setPlanStale(false);
-    requestAnimationFrame(() =>
-      document
-        .getElementById("sourcing-plan")
-        ?.scrollIntoView({ behavior: "smooth" }),
-    );
+    scrollTo("sourcing-plan-title");
     try {
       const r = await fetch("/sase/api/sourcing/plan/", {
         method: "POST",
@@ -147,9 +193,13 @@ export default function SourcingEntrance({
       const d = await r.json();
       if (!r.ok) throw new Error();
       if (version !== briefVersion.current) return;
-      setMatches((d.matches ?? []).map((v: { slug: string }) => v.slug));
+      const matched = (d.matches ?? []).map((v: { slug: string }) => v.slug);
+      setMatches(matched);
+      setInvestigation(d.investigation ?? []);
+      setChecks(d.outstanding_checks ?? []);
+      setDirectoryView(matched.length ? "matches" : "all");
       setMatchMessage(
-        "Evidence matching uses the selected sector, region, service and optional UK-provider filter. Site counts, timing and pasted notes still need desk and supplier assessment. No suppliers are automatically approved.",
+        "These results reflect the research available for your sector, region and service needs. The Netify team will confirm delivery and suitability for your project, including your sites, timing and notes.",
       );
     } catch {
       if (version !== briefVersion.current) return;
@@ -159,6 +209,18 @@ export default function SourcingEntrance({
     } finally {
       setMatching(false);
     }
+    return true;
+  }
+  async function reviewRequests() {
+    if (matching) { scrollTo("sourcing-plan-title"); return; }
+    if (!selectedRequests.length) {
+      setReviewMessage("Select a provider and at least one request, such as a demo or proposal, before reviewing.");
+      scrollTo("request-review-message");
+      return;
+    }
+    if (!plan || planStale) { if (!(await prepare())) return; }
+    setEditing(false);
+    scrollTo("selected-requests-title");
   }
 
   function acquisition() {
@@ -228,21 +290,23 @@ export default function SourcingEntrance({
       <form
         id="sourcing-brief"
         className="sourcing-form"
+        hidden={plan && !editing}
         onSubmit={(e) => {
           e.preventDefault();
           void prepare();
         }}
       >
         <h2>What do you need?</h2>
-        <p>Start with the essentials. We resolve the detail with you.</p>
+        <p>Enter what you know about your sites, users and service needs.</p>
         <label className="sourcing-check">
           <input
             type="checkbox"
             checked={brief.uk_provider_only ?? false}
             onChange={(e) => change("uk_provider_only", e.target.checked)}
           />
-          UK providers only: UK headquarters or contracting entity evidenced
+          UK-based providers only
         </label>
+        <p className="sourcing-small">Checks an evidenced UK headquarters or contracting entity. This is separate from availability at UK sites.</p>
         {brief.uk_provider_only && <p>This filter excludes providers whose UK entity we have not yet evidenced. It does not mean they cannot serve UK sites. Leave it off if UK service availability is your requirement.</p>}
         <div className="sourcing-fields">
           <label>
@@ -345,7 +409,7 @@ export default function SourcingEntrance({
           />
         </label>
         <button className="sourcing-primary" type="submit" disabled={matching}>
-          {matching ? "Checking evidence…" : "Prepare my sourcing plan →"}
+          {matching ? "Checking evidence…" : "Prepare my sourcing plan"}
         </button>
         <div className="sourcing-secondary">
           <button
@@ -360,12 +424,18 @@ export default function SourcingEntrance({
           >
             Bring a proposal
           </button>
-          <a href="#provider-research">Just show me the research</a>
+          <a href="#provider-research">Browse all providers</a>
         </div>
+        <p role="status">{!plan || editing ? message : ""}</p>
       </form>
+      {plan && !editing && <div id="sourcing-summary" className="sourcing-summary">
+        <strong>Your requirements</strong>
+        <p>{brief.sites} sites · {brief.remote_users} remote users · {REGION_LABELS[brief.region]} · {brief.sector ? SECTOR_LABELS[brief.sector] : "Sector not specified"} · {SOURCING_NEED_LABELS[brief.need]} · {brief.when}{brief.uk_provider_only ? " · UK-based providers only" : ""}</p>
+        <button type="button" className="sourcing-text-button" onClick={editRequirements}>Edit requirements</button>
+      </div>}
       <section id="sourcing-plan" className="sourcing-plan" hidden={!plan}>
         <p className="sourcing-eyebrow">Your draft sourcing plan</p>
-        <h2>Review the brief. Choose the requests.</h2>
+        <h2 id="sourcing-plan-title" tabIndex={-1}>Review your plan and choose requests</h2>
         <p>
           {brief.sites} sites · {brief.remote_users} remote users ·{" "}
           {REGION_LABELS[brief.region]} · {brief.when}
@@ -379,20 +449,18 @@ export default function SourcingEntrance({
         <p role="status">
           {matching ? "Checking the evidence dataset…" : matchMessage}
         </p>
-        {matches !== null && (
-          <p>
-            <strong>{matches.length} evidence matches</strong> for the supported
-            filters.{" "}
-            {matches.length === 0
-              ? "This does not establish that no providers can deliver; the desk must resolve missing or conflicting evidence."
-              : "See labelled cards in the full directory below."}
-          </p>
-        )}
-        <p>
-          The desk will check delivery, technical requirements and supplier
-          availability before outreach. Your original notes stay with Netify.
-          Only the anonymous brief below is approved for suppliers.
-        </p>
+        {matches !== null && (matches.length ? <p><strong>{matches.length} providers match the research filters.</strong> Review their evidence and choose requests below.</p> : <div className="sourcing-notice">
+          <h3>We need to check some options for you</h3>
+          <p>No provider has reviewed evidence for all of your selected criteria together. This does not mean providers cannot deliver.</p>
+          {checks.length > 0 && <p>The Netify team needs to check: {checks.join(", ")}.</p>}
+          <p><a href="#provider-research" onClick={() => setDirectoryView("all")}>Browse all providers</a> or <button type="button" className="sourcing-text-button" onClick={editRequirements}>Edit requirements</button>.</p>
+          <p>You can leave recipients unselected and confirm your brief below to ask the Netify team to review the options.</p>
+        </div>)}
+        {!!investigation.length && <details><summary>Providers to investigate ({investigation.length})</summary>
+          <p>These providers have relevant research, but do not meet every evidence filter. Confirm the outstanding points before deciding.</p>
+          <ul>{investigation.map(v => <li key={v.slug}><a href={`#provider-${v.slug}`} onClick={() => setDirectoryView("all")}>{v.name}</a><ul>{v.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul></li>)}</ul>
+        </details>}
+        <p>The Netify team will check your brief before approaching suppliers. Your original notes stay with Netify. Only the anonymous brief below is approved for sharing.</p>
         <label>
           Anonymous supplier brief
           <textarea
@@ -408,9 +476,9 @@ export default function SourcingEntrance({
           are preserved when you refresh the plan. Netify checks it again before
           sending.
         </p>
-        <h3>Approved recipients and actions</h3>
+        <h3 id="selected-requests-title" tabIndex={-1}>Selected providers and requests ({selectedRequests.length})</h3>
         {Object.entries(selected).filter(([, a]) => a.length).length ? (
-          <ul>
+          <ul className="sourcing-request-list">
             {Object.entries(selected)
               .filter(([, a]) => a.length)
               .map(([slug, a]) => (
@@ -431,12 +499,9 @@ export default function SourcingEntrance({
               ))}
           </ul>
         ) : (
-          <p>
-            No recipients selected. You can ask Netify to prepare a named plan
-            first, or choose from the full research directory below.
-          </p>
+          <p>No providers selected. Choose a provider and a request below, or confirm your brief to ask Netify to review the options first.</p>
         )}
-        <a href="#provider-research">Choose providers and actions ↓</a>
+        <a href="#provider-research">Choose providers and requests</a>
         <p>
           <strong>Response target:</strong> agreed by Netify with the
           participating suppliers before outreach. If a supplier declines or
@@ -476,7 +541,7 @@ export default function SourcingEntrance({
             className="sourcing-primary"
             disabled={busy || !consent || planStale || matching}
           >
-            {busy ? "Preparing confirmation…" : "Email my confirmation link →"}
+            {busy ? "Preparing confirmation…" : "Email my confirmation link"}
           </button>
           <p className="sourcing-small">
             No account or public listing. Confirmation is specific to this
@@ -494,20 +559,29 @@ export default function SourcingEntrance({
           Commission never affects the order.
         </p>
         <p>
-          Research-only suppliers are approached manually by the Netify desk. A
+          Research-only suppliers are approached by the Netify team. A
           response-panel badge requires a named contact, an agreed response time
           and acknowledged introduction terms.
         </p>
+        {matches !== null && <label>Show providers
+          <select value={directoryView} onChange={e => setDirectoryView(e.target.value)}>
+            <option value="all">All {vendors.length} providers</option>
+            <option value="matches">Research matches ({matches.length})</option>
+            <option value="selected">Selected providers ({selectedRequests.length})</option>
+          </select>
+        </label>}
+        {directoryView === "matches" && matches?.length === 0 && <p>No providers match every research filter. Choose All providers to explore the directory.</p>}
+        {directoryView === "selected" && !selectedRequests.length && <p>No providers selected. Choose All providers to select requests.</p>}
         <div className="sourcing-cards">
-          {vendors.map((v) => (
-            <article key={v.slug} id={`provider-${v.slug}`}>
+          {vendors.filter(v => directoryView === "all" || (directoryView === "matches" ? matches?.includes(v.slug) : selected[v.slug]?.length)).map((v) => (
+            <article key={v.slug} id={`provider-${v.slug}`} tabIndex={-1}>
               <div className="sourcing-card-top">
                 <h3><a href={`/sase/vendors/${v.slug}/`}>{v.name}</a></h3>
                 <span>
                   {v.response_panel ? "Response panel" : "Research only"}
                 </span>
               </div>
-              <p>{v.category}</p>
+              <p>{v.category.charAt(0).toUpperCase() + v.category.slice(1)}</p>
               {v.editorial && <div>
                 <p><strong>Netify assessment:</strong> {v.editorial.buyer_fit}</p>
                 <h4>Strengths for this buyer</h4><ul>{v.editorial.strengths.map(text=><li key={text}>{text}</li>)}</ul>
@@ -522,6 +596,7 @@ export default function SourcingEntrance({
                   pending
                 </p>
               )}
+              {investigation.some(option => option.slug === v.slug) && <div className="sourcing-notice"><strong>Provider to investigate</strong><ul>{investigation.find(option => option.slug === v.slug)?.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul></div>}
               <p>
                 <strong>
                   {researchMetrics(v).completeness_percent}% research completeness
@@ -571,8 +646,8 @@ export default function SourcingEntrance({
                   .
                 </p>
               )}
-              <a href={v.marketplace_url || `/sase/vendors/${v.slug}/`}>
-                Datasheet and evidence ↗
+              <a href={`/sase/vendors/${v.slug}/`}>
+                Provider profile and evidence
               </a>
               {v.response_panel && (
                 <p className="sourcing-small">
@@ -590,16 +665,11 @@ export default function SourcingEntrance({
         <button
           className="sourcing-primary"
           type="button"
-          onClick={() =>
-            plan
-              ? document
-                  .getElementById("sourcing-plan")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              : prepare()
-          }
+          onClick={() => void reviewRequests()}
         >
-          Review my bundled requests →
+          Review selected providers and requests ({selectedRequests.length})
         </button>
+        <p id="request-review-message" tabIndex={-1} role="status">{reviewMessage}</p>
         <details>
           <summary>Complete capability evidence table</summary>
           <div className="sourcing-table">
@@ -623,7 +693,7 @@ export default function SourcingEntrance({
                 {vendors.map((v) => (
                   <tr key={v.slug}>
                     <th>
-                      <a href={v.marketplace_url || `/sase/vendors/${v.slug}/`}>
+                      <a href={`/sase/vendors/${v.slug}/`}>
                         {v.name}
                       </a>
                     </th>

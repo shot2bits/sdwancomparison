@@ -12,7 +12,7 @@ export function orderPublicEvidence(vendors: ShortlistVendor[]) {
 /** Public status vocabulary preserves uncertainty without publishing the legacy unknown token.
  * Strip scoring outputs defensively, including unexpected imported fields. Source grades stay intact. */
 export function publicEvidenceOutput<T>(value: T): T {
-  if (value === "unknown") return "not_confirmed" as T;
+  if (typeof value === "string") return (value === "unknown" ? "not_confirmed" : value.replace(/\u2014/g, ", ")) as T;
   if (Array.isArray(value)) return value.map(publicEvidenceOutput) as T;
   if (!value || typeof value !== "object") return value;
   return Object.fromEntries(Object.entries(value).filter(([key]) => !/^(rank|score|ranking|fit_score|match_percentage|match_pct|balanced_setting_score|default_shortlist|top_providers_at_balanced_setting)$/.test(key)).map(([key,child]) => [key,publicEvidenceOutput(child)])) as T;

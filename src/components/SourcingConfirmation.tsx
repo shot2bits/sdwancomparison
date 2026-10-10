@@ -69,7 +69,7 @@ export default function SourcingConfirmation() {
       ) : result?.status === "desk_review" ? (
         <div>
           <p>
-            Your request is confirmed and queued for Netify desk review. No
+            Your request is confirmed and queued for the Netify team to review. No
             supplier has been contacted automatically.
           </p>
           {result.already_confirmed && !result.access && (
@@ -81,7 +81,7 @@ export default function SourcingConfirmation() {
           )}
           {result.project_url && (!result.already_confirmed || result.access) && (
             <a className="sourcing-primary" href={result.project_url}>
-              Open your private project →
+              Open your private project
             </a>
           )}
           <p>
@@ -95,7 +95,9 @@ export default function SourcingConfirmation() {
             Approve this exact anonymous brief and the listed recipient actions.
             No account is created.
           </p>
-          <pre style={{ whiteSpace: "pre-wrap" }}>{result.brief}</pre>
+          <div className="sourcing-notice"><h2>Your supplier brief</h2><p style={{ whiteSpace: "pre-wrap" }}>{result.brief}</p></div>
+          <h2>Selected providers and requests</h2>
+          {!result.recipients?.length && <p>You are asking Netify to review the options before choosing providers.</p>}
           <ul>
             {result.recipients?.map((r) => (
               <li key={r.slug}>

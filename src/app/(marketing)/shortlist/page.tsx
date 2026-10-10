@@ -1,3 +1,4 @@
+import { publicEvidenceOutput } from "@/lib/public-provider-evidence";
 import { approvedEditorialReview } from "@/lib/provider-editorial-review";
 import BuyerDecisionGuide from "@/components/BuyerDecisionGuide";
 import { buildShortlistMarketView, parseShortlistMarketView, SHORTLIST_VIEWS } from "@/lib/shortlist-market-views";
@@ -11,7 +12,6 @@ import MarketOutcomeView from "@/components/MarketOutcomeView";
 import type { Metadata } from "next";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import {
-  SOURCING_TITLE,
   sourcingUndertaking,
   SOURCING_DESCRIPTION,
   COMMISSION_DESCRIPTION,
@@ -52,52 +52,18 @@ export default async function ShortlistPage({
       ))}
       <header data-entity-block>
         <h1>{entity.h1}</h1>
-        <ShortlistEntityBlock entity={entity}/>
+        <p className="sourcing-lead">Explore {vendors.length} SD-WAN and SASE providers using Netify’s research into their network, security and service capabilities. Tell us what your business needs to narrow the options, or browse the providers yourself.</p>
+        <nav className="sourcing-entry-links" aria-label="Choose how to start">
+          <a className="sourcing-primary" href="#sourcing-brief">Find providers for my business</a>
+          <a className="sourcing-outline" href="#provider-research">Browse all {vendors.length} providers</a>
+        </nav>
         {view!=="all" && <p>{SHORTLIST_VIEWS[view].answer}</p>}
       </header>
-      <BuyerDecisionGuide vendors={vendors}/>
-      <h2>{SOURCING_TITLE}</h2>
-      <p className="sourcing-lead">{SOURCING_DESCRIPTION}</p>
-      <div className="sourcing-steps">
-        <div>
-          <strong>1. Tell us your requirement</strong>
-          <p>
-            Start with six essentials or paste your existing shortlist. We
-            clarify the detail with you.
-          </p>
-        </div>
-        <div>
-          <strong>2. Approve who we approach</strong>
-          <p>
-            Named suppliers, the anonymous information shared and one agreed
-            scope.
-          </p>
-        </div>
-        <div>
-          <strong>3. Compare the written responses</strong>
-          <p>
-            {sourcingUndertaking()}
-          </p>
-        </div>
+      <div className="sourcing-steps" aria-label="How it works">
+        <div><strong>1. Tell us what you need</strong><p>Enter your sites, users, locations and service needs.</p></div>
+        <div><strong>2. Choose the providers we approach</strong><p>Review your brief and select the providers and requests you approve.</p></div>
+        <div><strong>3. Compare their responses</strong><p>Netify reviews your request and coordinates supplier responses on an agreed timetable.</p></div>
       </div>
-      <div className="sourcing-trust">
-        <span>BT Authorised Partner</span>
-        <span>{vendors.length} providers researched</span>
-        <span>Research open to everyone</span>
-      </div>
-      <p className="sourcing-small">{COMMISSION_DESCRIPTION}</p>
-      <nav className="sourcing-sectors" aria-label="Sector entrance">
-        {[
-          ["healthcare", "Healthcare"],
-          ["retail_ecommerce", "Retail"],
-          ["manufacturing", "Manufacturing"],
-          ["financial_services", "Financial services"],
-        ].map(([key, label]) => (
-          <a key={key} href={`/sase/shortlist/?sector=${key}#sourcing-brief`}>
-            {label}
-          </a>
-        ))}
-      </nav>
       {live.source === "snapshot_fallback" && (
         <p className="sourcing-small">
           Saved research snapshot. A live source connection
@@ -107,14 +73,25 @@ export default async function ShortlistPage({
       )}
       <SourcingEntrance
         features={FEATURES.map(({ id, name }) => ({ id, name }))}
-        vendors={vendors.map(v=>({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))}
+        vendors={vendors.map(v=>publicEvidenceOutput({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))}
         initialSelection={typeof query.provider === "string" && vendors.some(v=>v.slug===query.provider) && typeof query.action === "string" && ["contacts","demo","proposals"].includes(query.action) ? {slug:query.provider,action:query.action as "contacts"|"demo"|"proposals"} : undefined}
         initialSector={
           typeof query.sector === "string" ? query.sector : undefined
         }
       />
+      <BuyerDecisionGuide vendors={vendors}/>
+      <section aria-labelledby="research-title">
+        <h2 id="research-title">About this research</h2>
+        <details><summary>Research coverage and method</summary>
+          <ShortlistEntityBlock entity={entity}/>
+          <p><a href="/sase/shortlist/research-methodology/">How the research works</a></p>
+          <p><a href="https://creativecommons.org/licenses/by/4.0/">Research licence CC BY 4.0 with attribution to Netify</a></p>
+        </details>
+        <p className="sourcing-small"><strong>How Netify is paid:</strong> {COMMISSION_DESCRIPTION}</p>
+      </section>
       <section>
         <h2>What comes back</h2>
+        <details><summary>Response timetable and follow-up</summary><p>{sourcingUndertaking()}</p></details>
         <p>
           Written proposals on one scope, connectivity pricing attached to the
           same requirement, missing costs identified and a decision pack with
@@ -141,7 +118,7 @@ export default async function ShortlistPage({
           to approach and request comparable proposals. You approve who receives
           your brief.
         </p>
-        <a className="sourcing-primary" href="#sourcing-requirement">Bring my shortlist →</a>
+        <a className="sourcing-primary" href="#sourcing-requirement">Bring my shortlist</a>
         <p className="sourcing-small">
           <a href="/sase/connector/">Connect your AI assistant</a>
         </p>
@@ -158,7 +135,6 @@ export default async function ShortlistPage({
         </a>
       </section>
       <section>
-        <p><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 with attribution to Netify</a></p>
         <h2>Provider questions</h2>
         {faqs.map((f) => (
           <details key={f.q}>

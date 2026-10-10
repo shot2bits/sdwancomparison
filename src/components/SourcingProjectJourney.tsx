@@ -1,4 +1,5 @@
 "use client";
+import { SOURCING_ACTION_LABELS } from "@/lib/sourcing-contract";
 import { useEffect, useState, useCallback } from "react";
 import SignIn from "./SignIn";
 import MarketOutcomeWorkflow from "./MarketOutcomeWorkflow";
@@ -12,6 +13,7 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
   const [connectivityOpened, setConnectivityOpened] = useState(false);
   const [view, setView] = useState("rfp"),
     [data, setData] = useState<{
+      sourcing_request?: { status: string; brief: string; recipients: { slug: string; name?: string; actions: (keyof typeof SOURCING_ACTION_LABELS)[] }[] } | null;
       feed: FeedItem[];
       previous_feed: FeedItem[];
       reviews: BidReview[];
@@ -61,15 +63,16 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
     );
   return (
     <div>
-      <p>
-        One private project: {id}. No public listing is required for desk
-        review.
-      </p>
-      <nav aria-label="Sourcing project">
+      <p>Your requirements, supplier requests and responses stay together here. This project is private. Netify reviews the requests you approved before contacting suppliers.</p>
+      {data.sourcing_request && <details><summary>Your confirmed brief and supplier requests</summary>
+        <p style={{whiteSpace: "pre-wrap"}}>{data.sourcing_request.brief}</p>
+        {data.sourcing_request.recipients.length ? <ul>{data.sourcing_request.recipients.map(r => <li key={r.slug}>{r.name ?? r.slug}: {r.actions.map(a => SOURCING_ACTION_LABELS[a]).join(", ")}</li>)}</ul> : <p>You asked Netify to review the options before choosing providers.</p>}
+        <p>The Netify team reviews any changes before sharing a revised brief with suppliers.</p>
+      </details>}
+      <nav className="sourcing-project-nav" aria-label="Sourcing project">
         <button onClick={() => setView("rfp")} aria-pressed={view === "rfp"}>
           Requirements and RFP
         </button>
-        {" · "}
         <button
           onClick={() => {
             setConnectivityOpened(true);
@@ -79,7 +82,6 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
         >
           Connectivity pricing
         </button>
-        {" · "}
         <button
           onClick={() => {
             setView("proposals");
@@ -89,16 +91,15 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
         >
           Written proposals
         </button>
-        {" · "}<button onClick={() => setView("outcome")} aria-pressed={view === "outcome"}>Anonymous outcome (optional)</button>
+        <button onClick={() => setView("outcome")} aria-pressed={view === "outcome"}>Anonymous outcome (optional)</button>
       </nav>
       {view === "outcome" && <MarketOutcomeWorkflow key={id} id={id}/>}
       {error && <p role="alert">{error}</p>}
       <div hidden={view !== "rfp"}>
-        <p>
+        <p className="sourcing-entry-links">
           <a href={`/sase/api/sourcing/projects/${id}/document/?format=doc`}>
             Download private RFP draft (Word)
           </a>
-          {" · "}
           <a href={`/sase/api/sourcing/projects/${id}/document/`}>
             Download Markdown
           </a>
@@ -107,7 +108,7 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
           Use this editor for your requirements. Your brief, connectivity pricing
           and written proposals stay together in this private project.
         </p>
-        <RfpBuilder initialId={id} privateSourcing />
+        <div className="sourcing-editor"><RfpBuilder initialId={id} privateSourcing /></div>
       </div>
       {connectivityOpened && (
         <div hidden={view !== "connectivity"}>
@@ -119,7 +120,7 @@ export default function SourcingProjectJourney({ id }: { id: string }) {
           <h2>Written proposals on this project</h2>
           <button onClick={() => void refresh()}>Refresh responses</button>
           <BidComparison feed={data.feed} />
-          {!!data.previous_feed?.length&&<details><summary>{data.previous_feed.length} earlier or unbound proposals — excluded from the current comparison</summary><p>Requirements changed or the original scope was not recorded. Ask the supplier to reconfirm before relying on these prices.</p><BidComparison feed={data.previous_feed}/></details>}
+          {!!data.previous_feed?.length&&<details><summary>{data.previous_feed.length} earlier proposals excluded from the current comparison</summary><p>Requirements changed or the original scope was not recorded. Ask the supplier to reconfirm before relying on these prices.</p><BidComparison feed={data.previous_feed}/></details>}
           {data.reviews.map((r) => (
             <article key={r.id}>
               <h3>{r.vendor}: evidence review</h3>

@@ -11,8 +11,8 @@ try {
  console.warn=(v)=>warnings.push(String(v));
  assert.equal(validateSourcingOperations(Date.parse("2026-10-15T23:59:59Z"),"support@netify.com").expiring,0);
  assert.equal(validateSourcingOperations(Date.parse("2026-10-16T00:00:01Z"),"support@netify.com").expiring,23);
- assert.equal(validateSourcingOperations(Date.parse("2026-10-31T00:00:01Z"),"support@netify.com").expired,23);
- assert.equal(warnings.length,2);
+ assert.throws(()=>validateSourcingOperations(Date.parse("2026-10-31T00:00:01Z"),"support@netify.com"), /Expired evidence must be reviewed before release/);
+ assert.equal(warnings.length,1);
  assert.throws(()=>validateSourcingOperations(Date.now(),""),/valid sourcing desk/);
 } finally { console.warn=warn; }
-console.log("PASS recovery paths reject external/ambiguous destinations; October review deadlines warn without blocking repairs; desk configuration remains mandatory");
+console.log("PASS recovery paths reject external/ambiguous destinations; October review deadlines warn and expired evidence blocks release; desk configuration remains mandatory");
