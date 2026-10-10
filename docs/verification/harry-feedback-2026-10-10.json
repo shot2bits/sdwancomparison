@@ -1,0 +1,183 @@
+{
+  "date": "2026-10-10",
+  "feedback_source": "Testing 2.docx, Harry Yelland",
+  "steps": [
+    {
+      "step": 1,
+      "change": "Plain shortlist introduction",
+      "result": "Replaced the statistics-led introduction with a short explanation of browsing or narrowing providers.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 2,
+      "change": "Two clear starting links",
+      "result": "Find providers and Browse all providers use shared controls.",
+      "verification": "Code and automated tests; rendered appearance not verified"
+    },
+    {
+      "step": 3,
+      "change": "Research details below tool",
+      "result": "Coverage, methodology and licensing moved into supporting details.",
+      "verification": "Code and automated tests; rendered appearance not verified"
+    },
+    {
+      "step": 4,
+      "change": "Operating model guidance",
+      "result": "Explains management responsibility separately from SASE service scope.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 5,
+      "change": "Guidance below the task",
+      "result": "Management guidance follows the form and provider directory.",
+      "verification": "Code and automated tests; rendered appearance not verified"
+    },
+    {
+      "step": 6,
+      "change": "Concise process",
+      "result": "Three steps cover requirements, approved requests and supplier responses.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 7,
+      "change": "Disclosure",
+      "result": "Payment and ordering disclosure remains visible; licence stays in research details.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 8,
+      "change": "Redundant navigation",
+      "result": "Removed duplicated sector and trust links around the entry tool.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 9,
+      "change": "Prepared requirements summary",
+      "result": "Form collapses after preparation into an editable summary.",
+      "verification": "Code and automated tests; rendered appearance not verified"
+    },
+    {
+      "step": 10,
+      "change": "Editing",
+      "result": "Edit requirements restores the populated form; changes revoke consent and invalidate matches.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 11,
+      "change": "Strict evidence matching",
+      "result": "Preserves the existing sector, region, service and UK entity filters.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 12,
+      "change": "Zero results",
+      "result": "Explains unresolved evidence and allows a Netify review with no recipients selected.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 13,
+      "change": "Investigation options",
+      "result": "Adds separately labelled candidates with the exact outstanding evidence checks.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 14,
+      "change": "Directory views",
+      "result": "Allows all providers, research matches or selected providers.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 15,
+      "change": "UK filter wording",
+      "result": "Distinguishes an evidenced UK entity from availability at UK sites.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 16,
+      "change": "Selected request review",
+      "result": "Review selected requests focuses the named providers and request summary.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 17,
+      "change": "Empty request review",
+      "result": "An empty selection gives an instruction without preparing a plan or sending.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 18,
+      "change": "Navigation focus",
+      "result": "Provider anchors reveal hidden cards; requirement anchors reopen the form.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 19,
+      "change": "Failure handling",
+      "result": "Brief and selections survive matching and request failures; duplicate preparation guarded.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 20,
+      "change": "Confirmation continuity",
+      "result": "Existing confirmation reopens the same private project and displays the approved brief.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 21,
+      "change": "Private project presentation",
+      "result": "Shared controls and styling wrap the existing RFP editor; pricing and proposals remain attached.",
+      "verification": "Code and automated tests; rendered appearance not verified"
+    },
+    {
+      "step": 22,
+      "change": "Public wording",
+      "result": "Replaced buyer-facing desk wording, removed CTA arrows and normalised em dash display.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 23,
+      "change": "Provider categories",
+      "result": "Category labels begin with a capital letter.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 24,
+      "change": "Provider evidence links",
+      "result": "Cards and matrix open internal provider profiles; full source record remains on the profile.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 25,
+      "change": "Partner evidence audit",
+      "result": "Added qualified BT and VMO2 evidence with expiry and newer-review guards, plus remaining checks.",
+      "verification": "Automated regression and code review"
+    },
+    {
+      "step": 26,
+      "change": "Spacing and disclosures",
+      "result": "Shared focus, button, detail, form and mobile spacing rules.",
+      "verification": "Code and automated tests; rendered appearance not verified"
+    },
+    {
+      "step": 27,
+      "change": "Regression validation",
+      "result": "Component interaction, provider evidence and sourcing route suites passed; visual and live-source checks are outstanding.",
+      "verification": "Automated regression and code review"
+    }
+  ],
+  "passed": [
+    "test:harry-feedback (offline component interactions and evidence cases)",
+    "test:action-first (local fake storage and captured mail)",
+    "test:provider-evidence",
+    "ESLint on modified TypeScript files",
+    "build:nonmutating (production compilation, TypeScript and route generation)",
+    "git diff --check"
+  ],
+  "limitations": [
+    "Browser access denied by an unavailable admin-enforced security check for the platform and local preview. Desktop/mobile appearance and live browser journeys are not verified.",
+    "Provider source credentials are absent locally. Runtime tests use the saved snapshot; feed tests use fixtures.",
+    "No supplier emails were sent by the tests.",
+    "Changes are proposed for review; production publication has not occurred."
+  ],
+  "publication_status": "Production publication authorised by the user on 2026-10-10. Browser and live-feed limitations remain as recorded."
+}

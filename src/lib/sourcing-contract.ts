@@ -4,9 +4,8 @@ import { REGION_KEYS, SECTOR_KEYS } from "./shortlist-core";
 export const SOURCING_VERSION = "netify-sourcing/1.0.0";
 export const SOURCING_TITLE =
   "Get comparable SD-WAN and SASE proposals from UK providers";
-// Working copy for Harry's editorial approval before production.
 export const SOURCING_DESCRIPTION =
-  "Use Netify to request comparable proposals, demos and pre-sales contacts from named SD-WAN and SASE providers. Research is open, and you approve each request before a supplier receives it. SD-WAN provides the connectivity component of SASE.";
+  "Use Netify to request comparable proposals, demos and pre-sales contacts from SD-WAN and SASE providers. You choose which providers we approach and approve the brief they receive.";
 export const SOURCING_ACTION_LABELS = {
   contacts: "Pre-sales contacts",
   demo: "Demo",
@@ -44,7 +43,7 @@ export function sourcingServiceSchema(
   };
 }
 export const COMMISSION_DESCRIPTION =
-  "Netify is paid by suppliers when an introduction leads to business. Commission never affects the evidence order.";
+  "Suppliers pay Netify when an introduction leads to business. This does not affect how providers are ordered.";
 export const SourcingBriefSchema = z.object({
   sites: z.number().int().min(1).max(100000),
   remote_users: z.number().int().min(0).max(1000000),

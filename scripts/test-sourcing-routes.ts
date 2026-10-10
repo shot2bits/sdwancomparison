@@ -455,6 +455,25 @@ await withFakeKv(async (store) => {
   delete process.env.ANTHROPIC_API_KEY;
   const privateProject =
     await import("../src/app/api/sourcing/projects/[id]/route");
+  const recoveredSummary = await privateProject.GET(scopedRequest, ctx);
+  assert.equal(recoveredSummary.status, 200);
+  assert.match(recoveredSummary.headers.get("cache-control") ?? "", /private.*no-store/);
+  const recoveredData = await recoveredSummary.json();
+  assert.equal(recoveredData.sourcing_request.brief, body.brief.supplier_brief);
+  assert.deepEqual(recoveredData.sourcing_request.recipients.map((r: {slug:string;actions:string[]})=>({slug:r.slug,actions:r.actions})), body.recipients);
+  assert.equal(recoveredData.sourcing_request.recipients[0].name, "Cisco");
+  assert(!JSON.stringify(recoveredData.sourcing_request).includes(body.email));
+  assert(!JSON.stringify(recoveredData.sourcing_request).includes("PRIVATE ORIGINAL"));
+  const foreignRead = await privateProject.GET(makeRequest("GET", "https://preview.example/sase/api/sourcing/projects/" + before.project_id), ctx);
+  assert.equal(foreignRead.status, 401);
+  const foreignData = await foreignRead.json();
+  assert.equal(foreignData.sourcing_request, undefined);
+  const confirmedRecord = store.peekJson<Record<string,unknown>>(`sourcing:request:${receipt.request_id}`)!;
+  store.command(["SET", `sourcing:request:${receipt.request_id}`, JSON.stringify({...confirmedRecord, project_id: "rfp_otherproject"})]);
+  const mismatched = await privateProject.GET(scopedRequest, ctx);
+  assert.equal(mismatched.status, 401, "A mismatched request binding must fail private access");
+  assert.equal((await mismatched.json()).sourcing_request, undefined, "A mismatched stored request must not be disclosed");
+  store.command(["SET", `sourcing:request:${receipt.request_id}`, JSON.stringify(confirmedRecord)]);
   const proposalScope = (
     await import("../src/lib/sourcing-proposal-scope")
   ).sourcingScopeHash((await rfpStore.getProject(before.project_id))!);

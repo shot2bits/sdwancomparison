@@ -254,6 +254,7 @@ export async function getLiveShortlistDataset(): Promise<LiveShortlistDataset> {
     const snapshot = normalize(publicSnapshot.vendors) as ShortlistVendor[];
     const regionReviews=new Map(Object.entries(geographyReview.providers).map(([slug,value])=>[comparisonSlugForGovernedProvider(slug),value]));
     for(const vendor of snapshot){const regional=regionReviews.get(vendor.slug);if(regional){vendor.regions=Object.fromEntries(REGION_KEYS.map(key=>{const row=(regional.regions as Record<string,{support_state:string}>)[key];return [key,row?.support_state==='supported'?'yes':'unknown'];})) as ShortlistVendor['regions'];}vendor.uk_delivery='not_confirmed';vendor.uk_basis='UK contracting entity requires source confirmation.';delete vendor.independent_evidence_source_count;applyProjectionReview(vendor,{revision_id:`public-snapshot-${publicSnapshot.captured_at}`,reviewed_at:vendor.last_verified,sectors:{}},base.find(v=>v.slug===vendor.slug)??vendor);}
+    for (const vendor of snapshot) applyReviewedComparisonEvidence(vendor, vendor.last_verified);
     for(const vendor of snapshot) for(const [feature,evidence] of Object.entries(vendor.capability_evidence ?? {})) {
       if(Date.parse(evidence.review_due)<=Date.now()){vendor.capabilities[feature]='unknown';delete vendor.capability_evidence![feature];}
     }

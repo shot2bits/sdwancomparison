@@ -59,7 +59,8 @@
     "test:sourcing-real-redis": "node scripts/test-sourcing-real-redis.mjs",
     "test:answer-first": "tsx scripts/test-research-metrics.ts && tsx scripts/test-answer-first.ts",
     "test:research-evidence": "tsx scripts/test-research-metrics.ts",
-    "test:provider-evidence": "python3 scripts/test-provider-support-parser.py && tsx scripts/test-evidence-health.ts && tsx scripts/test-reconciled-shortlist.ts && tsx scripts/test-live-shortlist.ts && tsx scripts/test-shortlist-market-views.ts && tsx scripts/test-citation-consistency.ts && tsx scripts/test-citation-protocol.ts"
+    "test:provider-evidence": "python3 scripts/test-provider-support-parser.py && tsx scripts/test-evidence-health.ts && tsx scripts/test-reconciled-shortlist.ts && tsx scripts/test-live-shortlist.ts && tsx scripts/test-shortlist-market-views.ts && tsx scripts/test-citation-consistency.ts && tsx scripts/test-citation-protocol.ts",
+    "test:harry-feedback": "node --import tsx scripts/test-harry-feedback.ts && node --import tsx scripts/test-harry-feedback-ui.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
@@ -75,11 +76,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "jsdom": "^30.1.2",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.56.0",
     "tailwindcss": "^4",

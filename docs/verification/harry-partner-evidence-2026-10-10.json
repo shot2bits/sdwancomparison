@@ -1,0 +1,299 @@
+{
+  "reviewed_at": "2026-10-10",
+  "runtime_source": "snapshot_fallback",
+  "method": "Published official documents support dated, qualified evidence. Unknown fields remain unknown. No provider has been assigned 100 percent completeness.",
+  "providers": [
+    {
+      "slug": "bt-business",
+      "name": "BT",
+      "metrics": {
+        "supported": 11,
+        "partial": 4,
+        "partner_delivered": 3,
+        "managed_service_dependent": 0,
+        "not_primary": 0,
+        "unconfirmed": 22,
+        "total": 40,
+        "reviewed": 18,
+        "completeness_percent": 45,
+        "completeness": 0.45
+      },
+      "reviewed_additions": {
+        "f12_application_aware_routing": {
+          "source_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "Fortinet annex clause 2.5 documents application-aware routing. BT implements agreed categories; two enabling links optimise operation."
+        },
+        "f24_flexible_edge_form_factors": {
+          "source_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "Physical and virtual SD-WAN devices are documented. Cloud deployment and customer-provided devices depend on the order and compatibility."
+        },
+        "f11_active_active_link_utilisation": {
+          "grade": "partial",
+          "source_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "Active-active mobile access is an optional 5G service. This does not establish active-active operation across all access types."
+        },
+        "f37_customer_portal_and_rbac": {
+          "grade": "partial",
+          "source_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "Customer monitoring and reporting portals are documented in clauses 2.3 and 2.8. Granular role-based permissions remain unconfirmed."
+        },
+        "f38_observability_and_digital_experience_monitoring": {
+          "grade": "partial",
+          "source_url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "The portal exposes application performance, flows and troubleshooting. These findings do not establish a full digital experience monitoring service."
+        }
+      },
+      "remaining_checks": [
+        {
+          "id": "f02_diy_self_managed_model",
+          "name": "DIY / self-managed model"
+        },
+        {
+          "id": "f04_multi_tenant_msp_white_label_support",
+          "name": "Multi-tenant MSP / white-label support"
+        },
+        {
+          "id": "f06_last_mile_circuit_management",
+          "name": "Last-mile circuit management"
+        },
+        {
+          "id": "f07_lifecycle_management",
+          "name": "Lifecycle management"
+        },
+        {
+          "id": "f08_flexible_commercial_model",
+          "name": "Flexible commercial model"
+        },
+        {
+          "id": "f13_qos_and_traffic_shaping",
+          "name": "QoS and traffic shaping"
+        },
+        {
+          "id": "f14_packet_loss_remediation",
+          "name": "Packet loss remediation"
+        },
+        {
+          "id": "f15_local_internet_breakout",
+          "name": "Local internet breakout"
+        },
+        {
+          "id": "f16_mpls_coexistence_and_migration",
+          "name": "MPLS coexistence and migration"
+        },
+        {
+          "id": "f18_cloud_on_ramp",
+          "name": "Cloud on-ramp"
+        },
+        {
+          "id": "f20_private_pops_dedicated_pops",
+          "name": "Private PoPs / dedicated PoPs"
+        },
+        {
+          "id": "f22_regional_breakout_and_data_residency",
+          "name": "Regional breakout and data residency"
+        },
+        {
+          "id": "f23_multi_cloud_transit_fabric",
+          "name": "Multi-cloud transit fabric"
+        },
+        {
+          "id": "f25_high_availability_design",
+          "name": "High availability design"
+        },
+        {
+          "id": "f26_sla_backed_service_fabric",
+          "name": "SLA-backed service fabric"
+        },
+        {
+          "id": "f29_sse_ecosystem_integration",
+          "name": "SSE ecosystem integration"
+        },
+        {
+          "id": "f33_data_loss_prevention",
+          "name": "Data loss prevention"
+        },
+        {
+          "id": "f34_remote_user_access",
+          "name": "Remote user access"
+        },
+        {
+          "id": "f35_soc_siem_soar_integration",
+          "name": "SOC/SIEM/SOAR integration"
+        },
+        {
+          "id": "f36_centralised_orchestration",
+          "name": "Centralised orchestration"
+        },
+        {
+          "id": "f39_apis_and_automation",
+          "name": "APIs and automation"
+        },
+        {
+          "id": "f40_managed_service_assurance",
+          "name": "Managed service assurance"
+        }
+      ]
+    },
+    {
+      "slug": "virgin-media-o2",
+      "name": "Virgin Media O2 Business",
+      "metrics": {
+        "supported": 10,
+        "partial": 4,
+        "partner_delivered": 0,
+        "managed_service_dependent": 0,
+        "not_primary": 0,
+        "unconfirmed": 26,
+        "total": 40,
+        "reviewed": 14,
+        "completeness_percent": 35,
+        "completeness": 0.35
+      },
+      "reviewed_additions": {
+        "f05_professional_services_and_migration_support": {
+          "grade": "partial",
+          "source_url": "https://www.virginmediabusiness.co.uk/connectivity/sdwan/sdwan-end-to-end-service/",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "VMO2 describes experts supporting network and cloud migration with customer teams. A site trial is offered; rollback and training scope require confirmation."
+        },
+        "f16_mpls_coexistence_and_migration": {
+          "source_url": "https://www.virginmediabusiness.co.uk/connectivity/sdwan/sdwan-how-it-works/",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "Service gateways connect existing MPLS IP VPN and new SD-WAN networks during transition. Confirm the design for each site."
+        },
+        "f37_customer_portal_and_rbac": {
+          "grade": "partial",
+          "source_url": "https://www.virginmediabusiness.co.uk/pdf/legal-documents/vmbusiness-service-schedule-sdwan-v5.0.pdf",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "Clause 14 and Appendix 1 document customer portals and individual user access. Granular role-based permissions remain unconfirmed."
+        },
+        "f26_sla_backed_service_fabric": {
+          "grade": "partial",
+          "source_url": "https://www.virginmediabusiness.co.uk/pdf/legal-documents/vmbusiness-service-schedule-sdwan-v5.0.pdf",
+          "reviewed_at": "2026-10-10T00:00:00Z",
+          "review_due": "2027-01-08T00:00:00Z",
+          "qualification": "Appendix 2 provides conditional service gateway targets and credits. This is not a blanket end-to-end performance guarantee."
+        }
+      },
+      "remaining_checks": [
+        {
+          "id": "f02_diy_self_managed_model",
+          "name": "DIY / self-managed model"
+        },
+        {
+          "id": "f04_multi_tenant_msp_white_label_support",
+          "name": "Multi-tenant MSP / white-label support"
+        },
+        {
+          "id": "f06_last_mile_circuit_management",
+          "name": "Last-mile circuit management"
+        },
+        {
+          "id": "f07_lifecycle_management",
+          "name": "Lifecycle management"
+        },
+        {
+          "id": "f08_flexible_commercial_model",
+          "name": "Flexible commercial model"
+        },
+        {
+          "id": "f11_active_active_link_utilisation",
+          "name": "Active-active link utilisation"
+        },
+        {
+          "id": "f14_packet_loss_remediation",
+          "name": "Packet loss remediation"
+        },
+        {
+          "id": "f15_local_internet_breakout",
+          "name": "Local internet breakout"
+        },
+        {
+          "id": "f19_public_cloud_gateways",
+          "name": "Public cloud gateways"
+        },
+        {
+          "id": "f20_private_pops_dedicated_pops",
+          "name": "Private PoPs / dedicated PoPs"
+        },
+        {
+          "id": "f21_private_global_backbone",
+          "name": "Private global backbone"
+        },
+        {
+          "id": "f22_regional_breakout_and_data_residency",
+          "name": "Regional breakout and data residency"
+        },
+        {
+          "id": "f24_flexible_edge_form_factors",
+          "name": "Flexible edge form factors"
+        },
+        {
+          "id": "f25_high_availability_design",
+          "name": "High availability design"
+        },
+        {
+          "id": "f27_integrated_next_generation_firewall",
+          "name": "Integrated next-generation firewall"
+        },
+        {
+          "id": "f29_sse_ecosystem_integration",
+          "name": "SSE ecosystem integration"
+        },
+        {
+          "id": "f30_zero_trust_network_access",
+          "name": "Zero Trust Network Access"
+        },
+        {
+          "id": "f31_secure_web_gateway",
+          "name": "Secure web gateway"
+        },
+        {
+          "id": "f32_casb_capability",
+          "name": "CASB capability"
+        },
+        {
+          "id": "f33_data_loss_prevention",
+          "name": "Data loss prevention"
+        },
+        {
+          "id": "f34_remote_user_access",
+          "name": "Remote user access"
+        },
+        {
+          "id": "f35_soc_siem_soar_integration",
+          "name": "SOC/SIEM/SOAR integration"
+        },
+        {
+          "id": "f36_centralised_orchestration",
+          "name": "Centralised orchestration"
+        },
+        {
+          "id": "f38_observability_and_digital_experience_monitoring",
+          "name": "Observability and digital experience monitoring"
+        },
+        {
+          "id": "f39_apis_and_automation",
+          "name": "APIs and automation"
+        },
+        {
+          "id": "f40_managed_service_assurance",
+          "name": "Managed service assurance"
+        }
+      ]
+    }
+  ]
+}
