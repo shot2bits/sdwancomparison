@@ -2038,3 +2038,30 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
 .nf-buying-start .nf-publication-benefits-compact {margin:14px 0}
 .nf-publication-benefits-compact li {padding:3px 10px}
 @media(max-width:700px){.nf-publication-benefits-compact {gap:5px}}
+
+/* Private document preparation precedes optional outreach. */
+.nf-draft-primary-actions,.nf-draft-research,.nf-optional-publication{grid-column:1/-1;margin:12px 0}
+.nf-draft-primary-actions{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid #dce4e9;padding:8px 0}
+.nf-draft-primary-actions .nf-private-draft{margin:0!important}
+.nf-draft-primary-actions button{min-height:44px}
+.nf-draft-primary-actions .nf-private-draft-content>p,.nf-draft-primary-actions .nf-private-draft-content>strong{display:none}
+.nf-draft-research{border:1px solid #dce4e9;border-radius:8px;padding:16px}
+.nf-draft-research ul{padding-left:20px}.nf-draft-research button{min-height:44px;padding:10px 16px}
+.nf-optional-publication>summary{cursor:pointer;padding:12px 0;font-weight:600}
+.nf-draft-research p{margin:8px 0}.nf-draft-research a{text-decoration:underline}
+@media(max-width:760px){
+ .nf-buying-page{padding:14px 18px}
+ .nf-buying-start{margin-bottom:12px;padding-bottom:12px}
+ .nf-buying-start>h1{font-size:25px;margin-bottom:8px}
+ .nf-buying-start nav{display:flex;gap:6px}.nf-buying-start nav button{font-size:13px;padding:8px;flex:1}
+ .nf-buying-start .nf-buying-subtle{font-size:12px;margin:6px 0}
+ .nf-buying-shell .nf-workspace-intro{display:none}
+ .nf-buying-shell .nf-calm-heading h2{font-size:20px}
+ .nf-buying-shell .nf-calm-tabs{margin:12px 0;gap:12px}
+ .nf-buying-shell .lpos-builder{gap:0 12px}
+ .nf-draft-primary-actions{padding:4px 0;margin:4px 0}
+ .nf-draft-primary-actions .nf-private-draft>summary{padding:4px 0;min-height:30px}
+ .nf-draft-primary-actions .nf-private-draft-content{padding:0 0 6px}
+ .nf-draft-primary-actions>button{font-size:13px;padding:6px 10px}
+ .nf-buying-shell .nf-guided-question{gap:12px}.nf-buying-shell .nf-guided-builder-label{margin-bottom:8px}
+}

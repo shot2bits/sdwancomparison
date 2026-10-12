@@ -14,7 +14,8 @@ import { fireNetifyEvent } from '@/components/NetifyEvents';
 import { coverageExplanation, type CoveragePreview } from '@/lib/coverage-preview';
 import PrivateDraftDownload from './PrivateDraftDownload';
 import PublicationPreview from './PublicationPreview';
-import { PreparedRequirements, MatchingExample, PublicationBenefits } from './PublicationBenefits';
+import { PreparedRequirements, PublicationBenefits } from './PublicationBenefits';
+import DraftResearchPreview from './DraftResearchPreview';
 import { briefDraftMarkdown } from '@/lib/private-draft';
 
 type Fields = BriefFields;
@@ -32,6 +33,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   const detailsRef = useRef<HTMLSelectElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [selected, setSelected] = useState<ProjectJourneyMode>('quick_list');
+  const [originalRequirement, setOriginalRequirement] = useState('');
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [project, setProject] = useState<Project | null>(null);
   const [entrance, setEntrance] = useState<ProjectEntranceContext | null>(null);
@@ -139,6 +141,8 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
 
   function choose(next: ProjectJourneyMode) {
     const workspace=readWorkspaceProject();
+    const source = (workspace?.payload.source_turns as {text?:string}[] | undefined)?.[0]?.text;
+    setOriginalRequirement(typeof source === 'string' ? source : '');
     if(workspace?.legacyProject){setPanelOpen(false);window.dispatchEvent(new Event("netify:legacy-project-review"));return;}
     mode.current = next; setSelected(next); setEngineRequested(false);
     if(workspace?.busy){setError('');setWorkspaceWaiting(true);setPanelOpen(true);return;}
@@ -232,7 +236,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   async function action(work: () => Promise<void>) {
     if (inFlight.current) return;
     inFlight.current = true; setBusy(true); setError('');
-    try { await work(); } catch (reason) { setError(reason instanceof Error ? reason.message : 'The request did not complete.'); }
+    try { await work(); } catch (reason) { setError(reason instanceof Error ? reason.message : 'The request did not complete.'); fireNetifyEvent('rfp_operation_failed',{reason:'request'}); }
     finally { inFlight.current = false; setBusy(false); }
   }
   async function saveForReview() {
@@ -257,6 +261,7 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
         saved = { project_reference: data.project_reference, revision: data.revision, envelope_revision:data.envelope_revision };
       }
       if(saved.envelope_revision!==undefined)syncWorkspaceRevision(saved.envelope_revision,saved.project_reference);
+      fireNetifyEvent("rfp_private_review", {status:"ready"});
       setProject(saved); setReview(true); setPrepared(false); setConsent(false); setCoverage(null);
       fireNetifyEvent("marketplace_review_reached", { intent: "project" });
       const url = new URL(location.href); url.searchParams.set('project', saved.project_reference); url.searchParams.delete('from');
@@ -288,17 +293,18 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   const briefContent = (
       <div className="nf-brief-panel-body">
           <ol className="nf-brief-progress" aria-label="Project progress">
-            {['Describe your project', 'Review requirements & notice', 'Verify email and publish'].map((label, index) => <li key={label} aria-current={index === (prepared || published ? 2 : review ? 1 : 0) ? 'step' : undefined}><span>{index + 1}</span>{label}</li>)}
+            {['Describe your project', 'Review and download', 'Optional: publish or request responses'].map((label, index) => <li key={label} aria-current={index === (prepared || published ? 2 : review ? 1 : 0) ? 'step' : undefined}><span>{index + 1}</span>{label}</li>)}
           </ol>
-          <h2 ref={headingRef} tabIndex={-1} id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review your requirements and publish anonymously' : 'Describe your project'}</h2>
+          <h2 ref={headingRef} tabIndex={-1} id="brief-panel-title" className="text-xl font-semibold">{published ? 'Your project is published' : review ? 'Review and download your private brief' : 'Describe your project'}</h2>
           <p className="mt-2 text-sm text-[#66635e]">A short brief is enough to start. You can add supplier questions later.</p>
           {workspaceWaiting && <p role="status" className="mt-4">Finishing your requirements. This review will update automatically.</p>}
           {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+          {originalRequirement && <details className="nf-private-source"><summary>Original requirements (private reference)</summary><p>Your original wording is retained in your RFP. The editable summary below uses confirmed details; check it before sharing.</p><p className="whitespace-pre-wrap">{originalRequirement}</p></details>}
           {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your anonymous notice is live. Your project workspace brings together your requirements, personalised provider and vendor matching, and any supplier responses. Publication does not guarantee a response or quote.</p><PublicationBenefits afterPublication /><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
-            <PreparedRequirements fields={fields} hasRfp={rfpFormat !== 'brief'} /><button type="button" className="nf-brief-editor-link" disabled={busy || workspaceWaiting} onClick={() => void openRequirementEditor()}>{rfpFormat === 'brief' ? 'Add supplier questions to build a Short RFP (optional)' : 'Open my RFP and supplier questions'}</button><h3 className="mt-6 font-semibold">Your anonymous public notice</h3><dl className="mt-3 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope === 'sdwan' ? 'SD-WAN' : fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
+            <PreparedRequirements fields={fields} hasRfp={rfpFormat !== 'brief'} /><button type="button" className="nf-brief-editor-link" disabled={busy || workspaceWaiting} onClick={() => void openRequirementEditor()}>{rfpFormat === 'brief' ? 'Add supplier questions to build a Short RFP (optional)' : 'Open my RFP and supplier questions'}</button><PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled={!!fields.outcome.trim()} /><DraftResearchPreview fields={fields}/><details className="nf-optional-publication"><summary>Optional: publish an anonymous notice</summary><h3 className="mt-6 font-semibold">Your anonymous public notice</h3><dl className="mt-3 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope === 'sdwan' ? 'SD-WAN' : fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
             <section className="nf-publication-outcomes" aria-label="What publication means">
               <h3>What you get when you publish</h3><PublicationBenefits afterPublication />
-              <MatchingExample />
+
               <h4>Privacy and publication</h4>
               <ul><li><strong>Public:</strong> the anonymous notice above. Remove identifying names, addresses and contact details from your requirement.</li><li><strong>Private:</strong> your company name, work email and pricing. Access to your private project is controlled separately.</li><li>Publishing is free and is not an order. You do not have to speak to a supplier or accept a response.</li><li>{SOURCING_DESCRIPTION}</li><li>To request closure or discuss access, <a href="mailto:support@netify.com">contact Netify</a>. Closing moves the notice to the closed archive; it does not erase the published notice.</li></ul>
             </section>
@@ -309,10 +315,10 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
             {prepared && !signedIn && <section className="nf-publication-verification" aria-label="Verify your work email"><h3>Verify your work email</h3><p>Your requirements are saved. Use the email link or code, then return to this project and select Publish my anonymous opportunity. Verifying your email does not publish anything.</p><SignIn role="buyer" publicationVerification prompt="Enter your work email to receive a verification link and a 6-digit code." onAuthed={() => setSignedIn(true)} /></section>}
             {prepared && signedIn && <p role="status" className="mt-4">Your work email is verified. Check your notice and confirm publication below.</p>}
             {(!prepared || signedIn) && <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my anonymous opportunity' : 'Verify work email to publish'}</button>}
-            <PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled={!!fields.outcome.trim()} />
+            </details>
             <p className="mt-3 text-sm">Not ready to publish? Keep your draft private, or <a className="underline" href="tel:+443332021011">call Netify on 0333 202 1011</a> to discuss your requirement. No supplier is contacted by saving or downloading.</p>
-          </> : <form className="mt-5" onSubmit={(e) => { e.preventDefault(); if (!detailsOpen) { setDetailsOpen(true); fireNetifyEvent('marketplace_brief_details_reached', { intent: 'project' }); return; } void saveForReview(); }}>
-            <p className="mb-4 text-sm">{detailsOpen ? 'Final details before review: add your sector and private company name. Choose an operating model or leave it as Not sure yet.' : 'Start with what you know. You can refine your brief while the notice is a draft.'}</p>
+          </> : <form className="mt-5" onInvalid={() => fireNetifyEvent("rfp_validation_failed",{reason:"validation"})} onSubmit={(e) => { e.preventDefault(); if (!detailsOpen) { setDetailsOpen(true); fireNetifyEvent('marketplace_brief_details_reached', { intent: 'project' }); return; } void saveForReview(); }}>
+            <p className="mb-4 text-sm">{detailsOpen ? 'Final details before review: add your sector and private company name. Choose an operating model or leave it as Not sure yet.' : 'Start with what you know. Save or download a private draft before deciding whether to publish.'}</p>
             <fieldset disabled={busy || workspaceWaiting} className="grid gap-4 sm:grid-cols-2">
                 <label className="text-sm font-semibold">Solution<select aria-label="Solution" required className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="">Choose SASE, SD-WAN or SSE</option><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
               <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea aria-label="What do you need to achieve?" required minLength={20} aria-describedby="brief-requirement-example" maxLength={4000} rows={4} placeholder="Tell us what needs to change, roughly how many sites or users you have, and where they are. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/><span id="brief-requirement-example" className="mt-2 block text-sm font-normal">Example: Replace our ageing network across five UK sites with managed SD-WAN, resilient internet and secure access to Microsoft 365. We need help choosing providers and planning migration.</span></label>
@@ -328,9 +334,9 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
                 ['f30_zero_trust_network_access', 'Zero Trust Network Access'], ['f31_secure_web_gateway', 'Secure web gateway'], ['f32_casb_capability', 'CASB'], ['f33_data_loss_prevention', 'Data loss prevention'], ['f16_mpls_coexistence_and_migration', 'MPLS migration'], ['f17_cellular_and_5g_support', 'Cellular and 5G'], ['f25_high_availability_design', 'High availability'], ['f28_full_sase_platform', 'Full SASE platform'],
               ].map(([id, label]) => <label key={id} className="flex gap-2 text-sm"><input type="checkbox" checked={fields.requiredFeatures.includes(id)} onChange={(e) => setField('requiredFeatures', e.target.checked ? [...fields.requiredFeatures, id] : fields.requiredFeatures.filter((v) => v !== id))}/>{label}</label>)}</div></details>
             </fieldset>
-            <button disabled={busy || workspaceWaiting} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : detailsOpen ? 'Review my opportunity' : 'Continue to project details'}</button>
+            <button disabled={busy || workspaceWaiting} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : detailsOpen ? 'Review and save my brief' : 'Continue to project details'}</button>
             <p className="mt-3 text-xs text-[#66635e]">Nothing is published until you verify your work email and approve the notice.</p>
-            <div className="mt-6"><PublicationPreview fields={fields} /></div>
+            <DraftResearchPreview fields={fields}/><details className="nf-optional-publication"><summary>Optional: preview a public notice</summary><PublicationPreview fields={fields} /></details>
             {!!fields.outcome.trim() && <PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled /> }
           </form>}
       </div>
