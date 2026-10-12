@@ -54,3 +54,8 @@
  .nf-buying-shell .nf-draft-primary-actions .nf-private-draft button{font-size:12px;padding:8px}
  .nf-entry-disclosure{padding:8px 18px;font-size:12px;line-height:1.45}
 }
+@media(max-width:760px){
+ /* Format remains available in Document settings and the entry route chooser. */
+ .nf-buying-shell .lpos-builder>.nf-format-options{display:none}
+ .nf-buying-shell .nf-calm-tabs button{white-space:nowrap;flex:0 0 auto;min-height:44px;padding:8px 0}
+}
