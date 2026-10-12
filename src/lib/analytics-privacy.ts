@@ -11,7 +11,7 @@ export function analyticsProps(data:Record<string,unknown>):Record<string,string
  const out:Record<string,string>={};
  const numeric=["step","provider_count","matched","invited","gapCount","count"];
  const flags=["has_title","opt_in","aiUsed"];
- const enums:Record<string,readonly string[]>={source:["rfp_builder","shortlist","marketplace","sector","mcp","standing_action","route_diagnosis"],from:["link","hero"],flow:["submit","review"],method:["email","phone"],family:["cost","best","compare","sector","vendor"],intent:["pricing","research","project"],channel:["web","mcp"],field:["search","scope","sector","region","responseMode"]};
+ const enums:Record<string,readonly string[]>={source:["rfp_builder","shortlist","marketplace","sector","mcp","standing_action","route_diagnosis"],from:["link","hero"],flow:["submit","review"],method:["email","phone"],family:["cost","best","compare","sector","vendor"],intent:["pricing","research","project"],channel:["web","mcp"],format:["brief","import","short-rfp","detailed-rfp","docx","print"],status:["ready","empty","failed"],reason:["validation","storage","request"],field:["search","scope","sector","region","responseMode"]};
  for(const [key,value] of Object.entries(data)){
   if(numeric.includes(key)&&/^\d{1,6}$/.test(String(value)))out[key]=String(value);
   else if(flags.includes(key)&&["yes","no","true","false","1","0"].includes(String(value)))out[key]=String(value);

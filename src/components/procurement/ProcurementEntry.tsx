@@ -109,7 +109,7 @@ export default function ProcurementEntry({ guidance }: { guidance?: ReactNode } 
           (landmark-no-duplicate-main, landmark-main-is-top-level). A
           plain `<div>` keeps every class/layout unchanged; the page's one
           true main landmark stays exactly where it already was. */}
-      <div className="mx-auto max-w-none px-0 pb-0 pt-0"><aside className="mx-auto max-w-5xl px-6 py-6"><p>{COMMISSION_DESCRIPTION}</p><a className="underline" href="/sase/shortlist/">Prepare a sourcing plan: brief → approve suppliers → compare written responses</a></aside>
+      <div className="mx-auto max-w-none px-0 pb-0 pt-0"><aside className="nf-entry-disclosure mx-auto max-w-5xl px-6 py-6"><p>{COMMISSION_DESCRIPTION}</p><a className="underline" href="/sase/shortlist/">Prepare a sourcing plan: brief → approve suppliers → compare written responses</a></aside>
         {/* One visual hierarchy (Robert, 29 Jul, exact-copy prompt): H1,
             supporting paragraph, trust paragraph, input: nothing else.
             All three blocks inline-styled inside CollapsibleHero so global
