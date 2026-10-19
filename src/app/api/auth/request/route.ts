@@ -232,14 +232,25 @@ export async function POST(req: Request) {
   // Same-screen 6-digit code (18 July 2026): corporate link scanners and
   // cross-device email opening break magic links for real buyers (observed in
   // the stuck-at-email cohort). The code maps to the SAME magic token, so
-  // consuming it inherits everything the link does — draft claim, pending
-  // submit, session. 15 minute expiry, 5 attempts, one code per email.
+  // consuming it inherits everything the link does: draft claim, pending
+  // submit, session. 5 attempts, one code per email.
+  //
+  // 18 Oct 2026: the code now lives as long as the link (MAGIC_TTL_MS, 60
+  // minutes) because sign-in email was observed taking well over 15 minutes
+  // to land, so codes were expiring before they were read. And if a live
+  // code already exists for this address (the person pressed Send link again
+  // while waiting), the SAME six digits are kept and re-pointed at the new
+  // token, so every email that eventually arrives carries a working code
+  // rather than only the last one sent.
+  const CODE_TTL_MS = 60 * 60 * 1000;
   let code: string | undefined;
   try {
-    code = String(Math.floor(100000 + Math.random() * 900000));
     const codeKey = `auth:code:${email}`;
-    await kvSetJson(codeKey, { token, code, attempts: 0, expires: Date.now() + 15 * 60 * 1000 });
-    await kvRaw(["PEXPIRE", codeKey, 15 * 60 * 1000]);
+    const existing = await kvGetJson<{ code?: string; expires?: number }>(codeKey).catch(() => null);
+    const reusable = existing?.code && typeof existing.expires === "number" && existing.expires > Date.now() ? existing.code : undefined;
+    code = reusable ?? String(Math.floor(100000 + Math.random() * 900000));
+    await kvSetJson(codeKey, { token, code, attempts: 0, expires: Date.now() + CODE_TTL_MS });
+    await kvRaw(["PEXPIRE", codeKey, CODE_TTL_MS]);
   } catch { code = undefined; /* code is an enhancement; the link still works */ }
 
   const sent = await sendMagicLink(email, token, resolvedRole, returnTo, code);

@@ -82,7 +82,7 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
       if (data.emailed === false && !data.dev_link) {
         setError(data.message ?? "We could not confirm delivery to that address. Double-check it, try a different work email, or email support@netify.com and we will get you in.");
       } else {
-        setSent(data.message ?? `Sent. Click the link in the email, or type the 6-digit code from it below. Not there within a minute? Check spam.`);
+        setSent(data.message ?? `Sent. Click the link in the email, or type the 6-digit code from it below. Both stay valid for 60 minutes. Not there within a few minutes? Check spam, then press Send link again; the code stays the same.`);
         if (data.dev_link) setDevLink(data.dev_link);
       }
     } catch (e) { setError(e instanceof Error ? e.message : "Could not send a link."); }

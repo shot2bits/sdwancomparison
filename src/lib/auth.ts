@@ -105,16 +105,26 @@ export async function sendMagicLink(email: string, token: string, role: string, 
   // already on has the same effect as clicking the link (same token), which
   // rescues corporate link-scanner and cross-device breakage.
   const codeBlock = code
-    ? `<p>On a different device, or the button not working? Enter this code on the Netify page you were on instead:</p><p style="font-size:26px;letter-spacing:6px;font-weight:bold">${code}</p><p style="font-size:12px;color:#555">The code is valid for 15 minutes and does exactly what the button does.</p>`
+    ? `<p>On a different device, or the button not working? Enter this code on the Netify page you were on instead:</p><p style="font-size:26px;letter-spacing:6px;font-weight:bold">${code}</p><p style="font-size:12px;color:#555">The code is valid for 60 minutes and does exactly what the button does. If more than one of these emails arrives, the code is the same in each.</p>`
     : "";
   const html = isSubmission
     ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched vendors, who review your requirements and make contact through the Netify app. Your contact details are never shown to them, and you can edit the RFP afterwards; they always see the latest version.</p>${codeBlock}<p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
     : `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p>${codeBlock}<p>If you did not request this, ignore this email.</p>`;
+  // Plain-text part (18 Oct 2026): HTML-only transactional mail from a
+  // sending subdomain is a common greylisting and spam-folder trigger, which
+  // showed up as sign-in email arriving late or not at all. Resend sends
+  // multipart/alternative when both parts are present.
+  const codeText = code
+    ? `\n\nOn a different device, or the button not working? Enter this code on the Netify page you were on instead:\n\n${code}\n\nThe code is valid for 60 minutes and does exactly what the link does. If more than one of these emails arrives, the code is the same in each.`
+    : "";
+  const text = isSubmission
+    ? `You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.\n\nConfirm and submit (valid for 60 minutes): ${link}\n\nOpening the link confirms your agreement: your RFP goes to your matched vendors, who review your requirements and make contact through the Netify app. Your contact details are never shown to them, and you can edit the RFP afterwards; they always see the latest version.${codeText}\n\nIf you did not request this, ignore this email and nothing is sent to anyone.`
+    : `Sign in to the Netify marketplace as a ${role}.\n\nSign in (valid for 60 minutes): ${link}\n\nThen click "Confirm sign-in" on the page that opens.${codeText}\n\nIf you did not request this, ignore this email.`;
   try {
     const res = await activityMailFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({ from, to: email, subject, html }),
+      body: JSON.stringify({ from, to: email, subject, html, text }),
     });
     if (!res.ok) return { ok: false };
     const data = (await res.json().catch(() => null)) as { id?: string } | null;
