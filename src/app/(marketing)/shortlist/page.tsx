@@ -3,7 +3,7 @@ import BuyerDecisionGuide from "@/components/BuyerDecisionGuide";
 import { buildShortlistMarketView, parseShortlistMarketView, SHORTLIST_VIEWS } from "@/lib/shortlist-market-views";
 import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
 import { shortlistSchema } from "@/lib/shortlist-schema";
-import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
+import { shortlistEntity, bestFor, ukStatus } from "@/lib/shortlist-entity";
 import {publicResponsePanel} from '@/lib/response-panel';
 import {annotateResponsePanel} from '@/lib/response-panel-contract';
 import {listPublicOutcomes} from "@/lib/market-outcomes";
@@ -107,7 +107,7 @@ export default async function ShortlistPage({
       )}
       <SourcingEntrance
         features={FEATURES.map(({ id, name }) => ({ id, name }))}
-        vendors={vendors.map(v=>({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))}
+        vendors={vendors.map(v=>({...v,...bestFor(v),editorial:approvedEditorialReview(v),uk_status:ukStatus(v)}))}
         initialSelection={typeof query.provider === "string" && vendors.some(v=>v.slug===query.provider) && typeof query.action === "string" && ["contacts","demo","proposals"].includes(query.action) ? {slug:query.provider,action:query.action as "contacts"|"demo"|"proposals"} : undefined}
         initialSector={
           typeof query.sector === "string" ? query.sector : undefined

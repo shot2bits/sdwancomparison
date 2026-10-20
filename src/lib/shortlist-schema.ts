@@ -32,6 +32,21 @@ export function shortlistSchema(
             name: v.name,
             url: `${SITE_URL}/vendors/${v.slug}/`,
             sameAs: v.website,
+            ...(v.shortlist_summary
+              ? {
+                  description: v.shortlist_summary
+                    .replace(/\s*\u2014\s*/g, " - ")
+                    .replace(/\bunknown\b/gi, "not yet reviewed"),
+                }
+              : {}),
+            ...(v.product_focus
+              ? {
+                  knowsAbout: v.product_focus
+                    .split(", ")
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                }
+              : {}),
             additionalType: Object.entries(providerTypes(v))
               .filter(([, yes]) => yes)
               .map(

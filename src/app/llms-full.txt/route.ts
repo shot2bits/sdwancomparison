@@ -36,10 +36,14 @@ export async function GET() {
     sections.push("");
   }
 
+  const cleanText = (text: string) =>
+    text.replace(/\s*\u2014\s*/g, " - ").replace(/\bunknown\b/gi, "not yet reviewed");
   sections.push("## All 30 vendor profiles");
   for (const v of vendors) {
     sections.push(`Evidence profile: ${bestFor(v).best_for}`);
-    sections.push(`- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${v.category}; research completeness ${researchMetrics(v).completeness_percent}%; source references ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})`);
+    sections.push(
+      `- ${v.name}: ${SITE_URL}/vendors/${v.slug} (category: ${cleanText(v.category)}; products: ${cleanText(v.product_focus || "Confirm in proposal")}; research completeness ${researchMetrics(v).completeness_percent}%; source references ${v.evidence_source_count ?? 0}; reviewed ${v.last_verified})${v.shortlist_summary ? ` ${cleanText(v.shortlist_summary)}` : ""}`,
+    );
   }
   sections.push("");
   sections.push(`Netify Demand Index (live, anonymised marketplace demand by sector and technology): ${SITE_URL}/demand?utm_source=ai_assistant&utm_medium=llms · twin: ${SITE_URL}/demand/data.json`);

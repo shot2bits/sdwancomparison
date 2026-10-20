@@ -22,17 +22,42 @@ import {
   type SourcingBrief,
 } from "@/lib/sourcing-contract";
 const actionLabels = SOURCING_ACTION_LABELS;
+const evidenceText = (text: string) =>
+  text.replace(/\s*\u2014\s*/g, " - ").replace(/\bunknown\b/gi, "not yet reviewed");
+const gradeLabel = (status?: string) =>
+  !status || ["unknown", "not_confirmed"].includes(status)
+    ? "Not yet reviewed"
+    : STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status;
 export default function SourcingEntrance({
   vendors,
   initialSector,
   initialSelection,
   features,
 }: {
-  vendors: (ShortlistVendor & { best_for?: string; editorial?: ProviderEditorialReview | null; response_panel?: PublicPanelMember | null })[];
+  vendors: (ShortlistVendor & {
+    best_for?: string;
+    editorial?: ProviderEditorialReview | null;
+    response_panel?: PublicPanelMember | null;
+    uk_status?: {
+      status: string;
+      label: string;
+      source_urls: string[];
+      reviewed_at: string | null;
+      qualification: string | null;
+    };
+  })[];
   initialSector?: string;
   initialSelection?: {slug:string; action:Action};
   features: { id: string; name: string }[];
 }) {
+  const featureNames = Object.fromEntries(features.map((f) => [f.id, f.name]));
+  const ukLabel = (v: (typeof vendors)[number]) =>
+    v.uk_status?.label ??
+    (v.uk_delivery === "uk_hq"
+      ? "UK headquartered"
+      : v.uk_delivery === "uk_entity"
+        ? "UK contracting entity"
+        : "UK entity not yet reviewed");
   const [brief, setBrief] = useState<SourcingBrief>({
     sites: 10,
     remote_users: 50,
@@ -498,6 +523,63 @@ export default function SourcingEntrance({
           response-panel badge requires a named contact, an agreed response time
           and acknowledged introduction terms.
         </p>
+        <div className="sourcing-table" id="evidence-summary-table">
+          <table>
+            <caption>
+              Summary comparison of {vendors.length} SD-WAN and SASE providers:
+              operating models, architecture, UK entity status and evidence coverage
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Provider</th>
+                <th scope="col">Category</th>
+                <th scope="col">Core products / platform</th>
+                <th scope="col">Fully managed</th>
+                <th scope="col">Self-managed</th>
+                <th scope="col">Full SASE</th>
+                <th scope="col">Private backbone</th>
+                <th scope="col">UK entity status</th>
+                <th scope="col">Published PoPs / SLA</th>
+                <th scope="col">Graded evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vendors.map((v) => {
+                const metrics = researchMetrics(v);
+                const popsSla = [
+                  v.pop_count ? `${v.pop_count} PoPs` : null,
+                  v.sla_availability_pct ? `${v.sla_availability_pct}% SLA` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ");
+                return (
+                  <tr key={v.slug}>
+                    <th scope="row">
+                      <a href={`/sase/vendors/${v.slug}/`}>{v.name}</a>
+                    </th>
+                    <td>{evidenceText(v.category)}</td>
+                    <td>
+                      {v.product_focus
+                        ? evidenceText(v.product_focus)
+                        : "Confirm in proposal"}
+                    </td>
+                    <td>{gradeLabel(v.capabilities.f01_fully_managed_service)}</td>
+                    <td>{gradeLabel(v.capabilities.f02_diy_self_managed_model)}</td>
+                    <td>{gradeLabel(v.capabilities.f28_full_sase_platform)}</td>
+                    <td>{gradeLabel(v.capabilities.f21_private_global_backbone)}</td>
+                    <td>{ukLabel(v)}</td>
+                    <td>{popsSla || "Not published"}</td>
+                    <td>
+                      {metrics.supported} supported / {metrics.reviewed} graded (
+                      {metrics.completeness_percent}%) ·{" "}
+                      {v.evidence_source_count ?? 0} refs
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         <div className="sourcing-cards">
           {vendors.map((v) => (
             <article key={v.slug} id={`provider-${v.slug}`}>
@@ -507,15 +589,114 @@ export default function SourcingEntrance({
                   {v.response_panel ? "Response panel" : "Research only"}
                 </span>
               </div>
-              <p>{v.category}</p>
-              {v.editorial && <div>
-                <p><strong>Netify assessment:</strong> {v.editorial.buyer_fit}</p>
-                <h4>Strengths for this buyer</h4><ul>{v.editorial.strengths.map(text=><li key={text}>{text}</li>)}</ul>
-                <h4>Trade-offs to check</h4><ul>{v.editorial.trade_offs.map(text=><li key={text}>{text}</li>)}</ul>
-                <p className="sourcing-small">Editorial review: {v.editorial.reviewer}, {v.editorial.role}, {v.editorial.approved_at.slice(0,10)}.</p>
-                <details><summary>Assessment sources</summary><ul>{v.editorial.source_urls.map(url=><li key={url}><a href={url}>{url}</a></li>)}</ul></details>
-              </div>}
-              <p data-best-for={v.slug}><strong>Evidence profile:</strong> {v.best_for}</p>
+              <p>
+                <strong>Category:</strong> {evidenceText(v.category)}
+                {v.product_focus
+                  ? ` · Core products: ${evidenceText(v.product_focus)}`
+                  : ""}
+              </p>
+              {v.shortlist_summary && <p>{evidenceText(v.shortlist_summary)}</p>}
+              {v.editorial ? (
+                <div>
+                  <p>
+                    <strong>Netify assessment:</strong>{" "}
+                    {evidenceText(v.editorial.buyer_fit)}
+                  </p>
+                  <h4>Strengths for this buyer</h4>
+                  <ul>
+                    {v.editorial.strengths.map((text) => (
+                      <li key={text}>{evidenceText(text)}</li>
+                    ))}
+                  </ul>
+                  <h4>Trade-offs to check</h4>
+                  <ul>
+                    {v.editorial.trade_offs.map((text) => (
+                      <li key={text}>{evidenceText(text)}</li>
+                    ))}
+                  </ul>
+                  <p className="sourcing-small">
+                    Editorial review: {v.editorial.reviewer}, {v.editorial.role},{" "}
+                    {v.editorial.approved_at.slice(0, 10)}.
+                  </p>
+                  <details>
+                    <summary>Assessment sources</summary>
+                    <ul>
+                      {v.editorial.source_urls.map((url) => (
+                        <li key={url}>
+                          <a href={url}>{url}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </div>
+              ) : (
+                <div>
+                  {v.best_fit_for && v.best_fit_for.length > 0 && (
+                    <>
+                      <h4>Typical buyer fit</h4>
+                      <ul>
+                        {v.best_fit_for.slice(0, 3).map((text) => (
+                          <li key={text}>{evidenceText(text)}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {v.key_differentiators && v.key_differentiators.length > 0 && (
+                    <>
+                      <h4>Documented strengths and differentiators</h4>
+                      <ul>
+                        {v.key_differentiators.slice(0, 3).map((text) => (
+                          <li key={text}>{evidenceText(text)}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {v.capability_evidence &&
+                    Object.keys(v.capability_evidence).length > 0 && (
+                      <>
+                        <h4>Sourced capability findings</h4>
+                        <ul>
+                          {Object.entries(v.capability_evidence)
+                            .slice(0, 3)
+                            .map(([featureId, ev]) => (
+                              <li key={featureId}>
+                                <strong>
+                                  {featureNames[featureId] ?? featureId}:
+                                </strong>{" "}
+                                {evidenceText(ev.qualification)} (
+                                <a href={ev.source_url}>source</a>, verified{" "}
+                                {ev.reviewed_at.slice(0, 10)})
+                              </li>
+                            ))}
+                        </ul>
+                      </>
+                    )}
+                  {v.watch_outs && v.watch_outs.length > 0 && (
+                    <>
+                      <h4>Trade-offs and scope to confirm in RFP</h4>
+                      <ul>
+                        {v.watch_outs.slice(0, 3).map((text) => (
+                          <li key={text}>{evidenceText(text)}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+              <p data-best-for={v.slug}><strong>Best for:</strong> {v.best_for}</p>
+              <p className="sourcing-small">
+                <strong>Commercial model:</strong> {evidenceText(v.cost_model)}
+                {v.pop_count ? ` · Published PoPs: ${v.pop_count}` : ""}
+                {v.sla_availability_pct
+                  ? ` · Published SLA: ${v.sla_availability_pct}%`
+                  : ""}{" "}
+                · <strong>UK status:</strong> {ukLabel(v)}
+              </p>
+              {["uk_hq", "uk_entity"].includes(v.uk_delivery) && v.uk_basis && (
+                <p className="sourcing-small">
+                  <strong>UK entity basis:</strong> {evidenceText(v.uk_basis)}
+                </p>
+              )}
               {matches?.includes(v.slug) && (
                 <p>
                   <strong>Evidence match</strong> · supplier confirmation
@@ -538,7 +719,7 @@ export default function SourcingEntrance({
               </details>
               {v.projection_provenance?.active_review?.sector_signoff && (
                 <p className="sourcing-small">
-                  {v.projection_provenance.active_review.sector_signoff.label}
+                  {evidenceText(v.projection_provenance.active_review.sector_signoff.label)}
                 </p>
               )}
               {brief.sector && (
@@ -556,8 +737,8 @@ export default function SourcingEntrance({
               )}
               {v.projection_provenance?.active_review?.qualification && (
                 <div className="sourcing-small">
-                  <p>{v.projection_provenance.active_review.qualification.split(/(?<=[.!?])\s/)[0]}</p>
-                  <details><summary>Read evidence qualifications</summary><p>{v.projection_provenance.active_review.qualification}</p></details>
+                  <p>{evidenceText(v.projection_provenance.active_review.qualification.split(/(?<=[.!?])\s/)[0])}</p>
+                  <details><summary>Read evidence qualifications</summary><p>{evidenceText(v.projection_provenance.active_review.qualification)}</p></details>
                 </div>
               )}
               {["review_expired", "source_newer_than_review"].includes(
