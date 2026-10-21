@@ -62,7 +62,7 @@ export default function ShortlistProviderDirectory({ vendors, selected, onChoose
       <label>Provider type<select value={type} onChange={e => setType(e.target.value)}><option value="all">All provider types</option><option value="technology vendor">Technology vendors</option><option value="managed service provider">Managed service providers</option><option value="carrier">Carriers</option></select></label>
     </div>
     <p className="sourcing-small" role="status">Showing {shown.length} of {filtered.length} providers.</p>
-    <div className="buyer-table-wrap"><table className="buyer-table"><caption className="sr-only">Provider products, management options and proposal selections</caption><thead><tr><th>Proposals</th><th>Provider</th><th>Products and platform</th><th>Management and services</th><th>Details</th></tr></thead><tbody>
+    <div className="buyer-table-wrap"><table className="buyer-table"><caption className="sr-only">Provider products, management options and proposal selections</caption><thead><tr><th>Proposals</th><th>Provider</th><th>Products and platform</th><th>Delivery and management</th><th>Details</th></tr></thead><tbody>
       {shown.map(p => <tr key={p.slug} className={active === p.slug ? "buyer-active-row" : undefined}>
         <td><input type="checkbox" aria-label={`Include ${p.name} in proposals`} checked={(selected[p.slug] ?? []).includes("proposals")} onChange={() => onChoose(p.slug, "proposals")} /></td>
         <th scope="row"><button type="button" className="buyer-provider-name" aria-pressed={active === p.slug} onClick={() => inspect(p.slug)}>{p.name}</button><p>{p.role}</p></th>
@@ -76,7 +76,7 @@ export default function ShortlistProviderDirectory({ vendors, selected, onChoose
     {/* All profiles are server rendered. Native details retain the full comparison for readers and crawlers. */}
     {profiles.map(p => <article key={p.slug} id={`provider-${p.slug}`} className="buyer-profile" tabIndex={-1} hidden={active !== p.slug}>
       <div className="buyer-profile-heading"><div><p className="buyer-label">Provider profile</p><h3>{p.name}</h3><p className="sourcing-small">{p.role}</p></div><a href={p.profile}>Full technical profile ↗</a></div>
-      <div className="buyer-profile-summary"><div><h4>Products and platform</h4><p>{p.products.join(" · ")}</p></div><div><h4>Management options</h4><p>{p.management}</p></div></div>
+      <div className="buyer-profile-summary"><div><h4>Products and platform</h4><p>{p.products.join(" · ")}</p></div><div><h4>Delivery and management</h4><p>{p.management}</p></div></div>
       <h4 className="buyer-subheading">Services and deployment</h4>
       <dl className="buyer-facts">{p.facts.map((fact, i) => <div key={`${fact.label}-${i}`}><dt>{fact.label}</dt><dd><p>{fact.value}</p>{fact.qualification && <p className="sourcing-small">{fact.qualification}</p>}<a href={fact.url} target="_blank" rel="noopener noreferrer">{fact.locator || "Service details"} ↗</a></dd></div>)}</dl>
       <div className="buyer-customers"><h4>Customer deployments</h4>{p.cases.length ? p.cases.map(c => <div key={c.name}><h5>{c.name}</h5>{c.outcome && <p>{c.outcome}</p>}<p className="sourcing-small">{c.qualification}</p>{c.source && <a href={c.source} target="_blank" rel="noopener noreferrer">Customer story ↗</a>}</div>) : <p>Explore the deployment references in the <a href={p.profile}>full provider research</a>.</p>}</div>

@@ -605,7 +605,7 @@
       "slug": "att-business",
       "name": "AT&T Business",
       "role": "Managed service provider / Carrier network provider",
-      "management": "Cisco, Palo Alto Networks",
+      "management": "Fully managed; Cisco or Palo Alto Networks platform options",
       "products": [
         "AT&T Managed SASE with Cisco",
         "AT&T Managed SD-WAN",
@@ -847,7 +847,7 @@
       "slug": "bt-business",
       "name": "BT",
       "role": "Managed service provider / Carrier network provider",
-      "management": "Fortinet, Meraki, Cisco",
+      "management": "Managed service platforms: Fortinet, Meraki and Cisco",
       "products": [
         "Agile Connect",
         "BT Managed SASE (Fortinet-based)",
