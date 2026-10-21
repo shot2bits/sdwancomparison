@@ -21,6 +21,7 @@ import { SITE_URL } from "@/lib/structured-data";
 import { FEATURES } from "@/lib/vendors";
 import SourcingEntrance from "@/components/SourcingEntrance";
 import "./sourcing.css";
+import "./buyer-profiles.css";
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const entity = shortlistEntity((await getLiveShortlistDataset()).vendors);
@@ -36,11 +37,12 @@ export default async function ShortlistPage({
   const live = await getLiveShortlistDataset();
   const view = parseShortlistMarketView(typeof query.view === "string" ? query.view : "all");
   const vendors = annotateResponsePanel(buildShortlistMarketView(live.vendors,view),await publicResponsePanel());
+  const buyerProfiles = view === "all";
   const entity = shortlistEntity(vendors,view === "all" ? undefined : SHORTLIST_VIEWS[view].title);
   const faqs = shortlistFaqs(vendors);
   const schemas = [shortlistSchema(vendors,entity.h1,view === "all" ? "/shortlist/" : `/shortlist/${view}/`)];
   return (
-    <main className="sourcing">
+    <main className={`sourcing${buyerProfiles ? " buyer-hub" : ""}`}>
       {schemas.map((schema, i) => (
         <script
           key={i}
@@ -50,21 +52,24 @@ export default async function ShortlistPage({
           }}
         />
       ))}
-      <header data-entity-block>
-        <h1>{entity.h1}</h1>
-        <p className="sourcing-lead">Explore {vendors.length} SD-WAN and SASE providers using Netify’s research into their network, security and service capabilities. Tell us what your business needs to narrow the options, or browse the providers yourself.</p>
+      <div className={buyerProfiles ? "buyer-layout" : undefined}>
+      {buyerProfiles && <nav className="buyer-contents" aria-label="Page contents"><p>Contents</p><a href="#shortlist-overview"><span>01</span>Overview</a><a href="#provider-research"><span>02</span>Compare providers</a><a href="#provider-profiles"><span>03</span>Provider profiles</a><a href="#sourcing-brief"><span>04</span>Your shortlist</a><a href="#research-title"><span>05</span>How we research</a><div className="buyer-side-note">Free to research.<br />No account required.<br /><br />You choose which providers receive your brief.</div></nav>}
+      <div className={buyerProfiles ? "buyer-main" : undefined}>
+      <header data-entity-block id="shortlist-overview">
+        {buyerProfiles ? <><p className="sourcing-eyebrow">SD-WAN and SASE procurement</p><h1>Compare providers.<br />Build your shortlist.</h1></> : <h1>{entity.h1}</h1>}
+        <p className="sourcing-lead">{buyerProfiles ? "Compare SD-WAN and SASE providers, understand their services and choose who you want to hear from." : <>Explore {vendors.length} SD-WAN and SASE providers using Netify’s research into their network, security and service capabilities. Tell us what your business needs to narrow the options, or browse the providers yourself.</>}</p>
         <nav className="sourcing-entry-links" aria-label="Choose how to start">
-          <a className="sourcing-primary" href="#sourcing-brief">Find providers for my business</a>
-          <a className="sourcing-outline" href="#provider-research">Browse all {vendors.length} providers</a>
+          <a className="sourcing-primary" href={buyerProfiles ? "#provider-research" : "#sourcing-brief"}>{buyerProfiles ? "Compare providers ↓" : "Find providers for my business"}</a>
+          <a className="sourcing-outline" href={buyerProfiles ? "#sourcing-brief" : "#provider-research"}>{buyerProfiles ? "Get help with my shortlist" : <>Browse all {vendors.length} providers</>}</a>
         </nav>
         {view!=="all" && <p>{SHORTLIST_VIEWS[view].answer}</p>}
-        {view==="all" && <p>{SHORTLIST_VIEWS["sd-wan-vendors"].answer}</p>}
+
       </header>
-      <div className="sourcing-steps" aria-label="How it works">
+      {buyerProfiles ? <div className="sourcing-steps" aria-label="How it works"><div><strong>01 · Compare the options</strong><p>Technology vendors, managed services and carriers.</p></div><div><strong>02 · Understand the service</strong><p>Management responsibilities, deployment and customer examples.</p></div><div><strong>03 · Choose who to approach</strong><p>Request proposals, demos or a pre-sales conversation.</p></div></div> : (<div className="sourcing-steps" aria-label="How it works">
         <div><strong>1. Tell us what you need</strong><p>Enter your sites, users, locations and service needs.</p></div>
         <div><strong>2. Choose the providers we approach</strong><p>Review your brief and select the providers and requests you approve.</p></div>
         <div><strong>3. Compare their responses</strong><p>Netify reviews your request and coordinates supplier responses on an agreed timetable.</p></div>
-      </div>
+      </div>)}
       {live.source === "snapshot_fallback" && (
         <p className="sourcing-small">
           Saved research snapshot. A live source connection
@@ -74,6 +79,7 @@ export default async function ShortlistPage({
       )}
       <SourcingEntrance
         showProductFocus={view === "all"}
+        buyerProfiles={buyerProfiles}
         features={FEATURES.map(({ id, name }) => ({ id, name }))}
         vendors={vendors.map(v=>publicEvidenceOutput({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))}
         initialSelection={typeof query.provider === "string" && vendors.some(v=>v.slug===query.provider) && typeof query.action === "string" && ["contacts","demo","proposals"].includes(query.action) ? {slug:query.provider,action:query.action as "contacts"|"demo"|"proposals"} : undefined}
@@ -81,7 +87,7 @@ export default async function ShortlistPage({
           typeof query.sector === "string" ? query.sector : undefined
         }
       />
-      <BuyerDecisionGuide vendors={vendors}/>
+      {!buyerProfiles && <BuyerDecisionGuide vendors={vendors}/>}
       <section aria-labelledby="research-title">
         <h2 id="research-title">About this research</h2>
         <details><summary>Research coverage and method</summary>
@@ -145,6 +151,7 @@ export default async function ShortlistPage({
           </details>
         ))}
       </section>
+      </div></div>
     </main>
   );
 }

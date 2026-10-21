@@ -1,0 +1,2081 @@
+{
+  "version": "shortlist-buyer-profiles/2026-10-21",
+  "checked_at": "2026-10-21",
+  "publication_basis": "User approved revised service profiles and authorised production publication on 21 October 2026. No Harry editorial sign-off implied.",
+  "profiles": [
+    {
+      "slug": "lumen",
+      "name": "Lumen",
+      "role": "Technology vendor / Managed service provider / Carrier network provider",
+      "management": "Self-Managed, Pro-Managed",
+      "products": [
+        "Lumen SASE with Versa",
+        "Lumen SD-WAN with Versa Networks"
+      ],
+      "offers": [
+        {
+          "name": "Lumen Managed SASE Solutions",
+          "delivery": "Managed"
+        },
+        {
+          "name": "Lumen SASE with Versa",
+          "delivery": "Managed or Pro-managed, self-service option for smaller configurations"
+        },
+        {
+          "name": "Lumen SD-WAN with Versa Networks",
+          "delivery": "Managed, over MPLS/broadband/wireless/Ethernet"
+        },
+        {
+          "name": "Managed Routing",
+          "delivery": "Managed"
+        },
+        {
+          "name": "Versa Secure Private Access (VSPA)",
+          "delivery": "Cloud-delivered, part of the Lumen SASE with Versa offering"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Management options",
+          "value": "Self-Managed, Pro-Managed",
+          "qualification": "Dated contractual description. Confirm applicable order and current platform. Pro-Managed excludes SOC services; customer monitors security events.",
+          "url": "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615",
+          "locator": "23 April 2024 guide, sections 1 and 4.1"
+        },
+        {
+          "label": "Technology platforms",
+          "value": "Fortinet, VMware, Versa",
+          "qualification": "Named in the dated guide; not confirmation that every variant remains orderable in every location.",
+          "url": "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615",
+          "locator": "Section 1"
+        },
+        {
+          "label": "UK service geography",
+          "value": "UK listed in Zone 1 for specified services",
+          "qualification": "Affiliate or third-party delivery permitted. Does not identify the UK contracting entity or prove availability at a buyer address.",
+          "url": "https://assets.lumen.com/is/content/Lumen/lumen-zone-list-0422?Creativeid=f5055731-6fad-4786-9b0b-43557d6c2008",
+          "locator": "Zone 1, version 3 February 2025"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Horizon Bank",
+          "qualification": "Compensated supplier-published endorsement of service responsiveness. No independently measured SASE outcome established by this quote.",
+          "source": "https://lumen.com/en-us/resources/customer-success-stories.html",
+          "outcome": "Confirmed directly via named individual testimonial praising service responsiveness - a real, though qualitative, outcome"
+        },
+        {
+          "name": "Berridge Manufacturing Co.",
+          "qualification": "Compensated supplier-published testimonial. The statement anticipates SASE and EWAS working together after implementation; it is not a completed outcome.",
+          "source": "https://lumen.com/en-us/resources/customer-success-stories.html",
+          "outcome": "Compensated supplier-published testimonial. The statement anticipates SASE and EWAS working together after implementation; it is not a completed outcome."
+        },
+        {
+          "name": "Valley Cities Behavioral Health Care",
+          "qualification": "Matching telehealth/performance testimonial identifies the previously anonymous healthcare customer. Compensated supplier-published endorsement; not independent proof of a buyer’s UK requirements.",
+          "source": "https://lumen.com/en-us/resources/customer-success-stories.html",
+          "outcome": "Confirmed directly: improved performance, redundancy, security, and specifically-named 'telehealth capabilities' - a real, specific, though not further quantified, outcome"
+        },
+        {
+          "name": "Savista",
+          "qualification": "Compensated supplier-published endorsement covering voice, network and security. Do not infer every SASE component or a numerical outcome.",
+          "source": "https://lumen.com/en-us/resources/customer-success-stories.html",
+          "outcome": "Confirmed directly: quote emphasises 'quality, data security and privacy' as reasons for trusting Lumen - a real, though qualitative, outcome"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/lumen/"
+    },
+    {
+      "slug": "versa-networks",
+      "name": "Versa Networks",
+      "role": "Technology vendor",
+      "management": "Platform enables MSP-delivered managed services",
+      "products": [
+        "Versa Private SASE",
+        "Versa Titan",
+        "VersaONE"
+      ],
+      "offers": [
+        {
+          "name": "Inbound SSE",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Secure Enterprise Browser",
+          "delivery": "Browser-based"
+        },
+        {
+          "name": "VOS",
+          "delivery": "Runs on branch edge devices, cloud edge deployments, or on-premises appliances"
+        },
+        {
+          "name": "Versa Analytics",
+          "delivery": "Cloud-delivered, streams to third-party SIEM"
+        },
+        {
+          "name": "Versa Concerto",
+          "delivery": "Cloud or on-premises management console"
+        },
+        {
+          "name": "Versa Private SASE",
+          "delivery": "Provider-hosted, multi-tenant"
+        },
+        {
+          "name": "Versa SASE Client (VSAC)",
+          "delivery": "Client-based, available on iOS, Android, Windows, macOS, Linux"
+        },
+        {
+          "name": "Versa Titan",
+          "delivery": "Cloud-delivered, mobile apps available"
+        },
+        {
+          "name": "Versa Verbo",
+          "delivery": "Integrated with VersaONE, cloud-delivered"
+        },
+        {
+          "name": "VersaONE",
+          "delivery": "Cloud, on-premises, or hybrid"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Platform scope",
+          "value": "SD-WAN, SSE, NGFW, ZTNA, SD-LAN",
+          "qualification": "Platform components listed by Versa; licence and deployed configuration still required.",
+          "url": "https://versa-networks.com/documents/solution-briefs/Versa-SB-managed-svcs.pdf",
+          "locator": "Page 1, Versa's Value to Service Providers"
+        },
+        {
+          "label": "Service delivery",
+          "value": "Platform enables MSP-delivered managed services",
+          "qualification": "Multi-tenant platform capability does not make Versa the contracted operator of every deployment.",
+          "url": "https://versa-networks.com/documents/solution-briefs/Versa-SB-managed-svcs.pdf",
+          "locator": "Page 1"
+        },
+        {
+          "label": "Deployment choices",
+          "value": "cloud, on-premises, hybrid, air-gapped",
+          "qualification": "Confirm which security components are available in the selected deployment.",
+          "url": "https://versa-networks.com/documents/solution-briefs/Versa-SB-managed-svcs.pdf",
+          "locator": "Page 1, Flexible deployment"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/versa-networks/"
+    },
+    {
+      "slug": "netskope",
+      "name": "Netskope",
+      "role": "Technology vendor",
+      "management": "SASE Gateways, cloud-managed via NewEdge; Cloud-delivered",
+      "products": [
+        "Borderless SD-WAN",
+        "Netskope One"
+      ],
+      "offers": [
+        {
+          "name": "Borderless SD-WAN",
+          "delivery": "SASE Gateways, cloud-managed via NewEdge"
+        },
+        {
+          "name": "Cloud Confidence Index (CCI)",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Netskope Cloud Exchange (CE)",
+          "delivery": "Self-hosted (AWS EC2) or Cloud Exchange as a Service"
+        },
+        {
+          "name": "Netskope One",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Netskope One AI Security / AI Guardrails",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Netskope One Client",
+          "delivery": "Client-based"
+        },
+        {
+          "name": "Netskope One SSE",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Netskope Private Access (NPA)",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "NewEdge Network",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "SkopeAI",
+          "delivery": "Cloud-delivered"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Platform components",
+          "value": "Netskope One SSE, Netskope One SD-WAN",
+          "qualification": "An SSE subscription alone is not evidence of an installed SD-WAN service.",
+          "url": "https://www.netskope.com/products/secure-access-service-edge",
+          "locator": "Key Secure Access Service Edge components"
+        },
+        {
+          "label": "Networking functions",
+          "value": "dynamic path selection, link remediation, TCP/UDP optimisation, VRF segmentation",
+          "qualification": "Converged Gateway scope. Exact packet-loss mechanism, software version and entitlement need technical documentation before a blanket grade change.",
+          "url": "https://www.netskope.com/products/converged-gateway",
+          "locator": "High-performance networking services, Secure SD-WAN"
+        },
+        {
+          "label": "Performance monitoring",
+          "value": "Gateway DEM includes hop-by-hop and application performance monitoring",
+          "qualification": "Confirm package and licence; not proof of a managed NOC or security response service.",
+          "url": "https://www.netskope.com/products/converged-gateway",
+          "locator": "DEM"
+        }
+      ],
+      "cases": [
+        {
+          "name": "MinterEllisonRuddWatts",
+          "qualification": "SSE deployment case; do not extend to every Netskope product.",
+          "source": "https://netskope.com/customers/merw-case-study",
+          "outcome": "Full rollout completed in six weeks, described by the customer as 'one of the smoothest deployments... as a company'; named executives (Stevenson, Mulder) both quoted positively"
+        },
+        {
+          "name": "CARE Ratings",
+          "qualification": "Security Cloud/SSE and remote-access case; not evidence of branch SD-WAN deployment.",
+          "source": "https://netskope.com/customers/care-ratings-case-study",
+          "outcome": "System went live within the expected timeframe; CARE Ratings became aware of multiple previously-unmanaged risky apps"
+        },
+        {
+          "name": "JLL",
+          "qualification": "SSE, CASB, SWG and private-access case; not evidence of branch SD-WAN deployment.",
+          "source": "https://netskope.com/customers/jll-case-study",
+          "outcome": "Specific, named remediation outcome: identified affected endpoints and restored corporate OneDrive accounts as 'an unexpected benefit'; named executives (Shepherd, Sarnowski) confirm improved technology-standard enforcement"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/netskope/"
+    },
+    {
+      "slug": "palo-alto-networks",
+      "name": "Palo Alto Networks Prisma SASE",
+      "role": "Technology vendor",
+      "management": "Cloud-delivered (Google Cloud backbone); Cloud-delivered; ION devices, cloud-managed",
+      "products": [
+        "Prisma Access",
+        "Prisma SASE",
+        "Prisma SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "ADEM",
+          "delivery": "Cloud-delivered, no additional agents required"
+        },
+        {
+          "name": "AI Access Security",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Enterprise DLP",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Precision AI / Strata Copilot",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Prisma Access",
+          "delivery": "Cloud-delivered (Google Cloud backbone)"
+        },
+        {
+          "name": "Prisma Access Browser",
+          "delivery": "Browser-based, clientless"
+        },
+        {
+          "name": "Prisma SASE",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Prisma SASE for MSPs / Prisma SASE 5G",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Prisma SD-WAN",
+          "delivery": "ION devices, cloud-managed"
+        },
+        {
+          "name": "Strata Cloud Manager",
+          "delivery": "Cloud-delivered"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Platform scope",
+          "value": "Prisma SD-WAN is the branch networking component of Prisma SASE",
+          "qualification": "Keep Prisma ION and PAN-OS SD-WAN product records separate.",
+          "url": "https://www.paloaltonetworks.com/sase/sd-wan",
+          "locator": "Power Your Zero Trust Branch with Prisma SASE"
+        },
+        {
+          "label": "Sase integration",
+          "value": "Native onboarding supports Cloud Managed and Panorama Managed Prisma Access",
+          "qualification": "A branch site, assigned ION and WAN circuit are required. Existing CloudBlade deployments need deactivation and support involvement before this workflow.",
+          "url": "https://docs.paloaltonetworks.com/prisma-sd-wan/administration/prisma-sd-wan-native-integrations",
+          "locator": "Prisma SD-WAN SASE Easy Onboarding"
+        },
+        {
+          "label": "Integration requirements",
+          "value": "Panorama Cloud Services plugin minimum 5.2.0-h24",
+          "qualification": "Applies to the documented Panorama workflow, not every Prisma deployment.",
+          "url": "https://docs.paloaltonetworks.com/prisma-sd-wan/administration/prisma-sd-wan-native-integrations",
+          "locator": "Prerequisites for Panorama Managed Prisma Access"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Cordis",
+          "qualification": "Named primary-source Prisma SASE customer. Keep other Palo Alto products and their reported outcomes separate; no blanket current licence or UK-delivery inference.",
+          "source": "https://paloaltonetworks.com/customers/cordis-deploys-cyber-transformation",
+          "outcome": "Not quantified beyond the confirmed 2,500-employee, multi-location-type deployment scope"
+        },
+        {
+          "name": "Autodesk",
+          "qualification": "Named primary-source Prisma SASE customer. Keep other Palo Alto products and their reported outcomes separate; no blanket current licence or UK-delivery inference.",
+          "source": "https://paloaltonetworks.com/customers/autodesk-modernizes-network-and-security-architecture-with-sase",
+          "outcome": "Discussed at length in a named-executive podcast (Prakash Kota, SVP/CIO, Autodesk, in conversation with Anand Oswal, SVP/GM Network Security, Palo Alto Networks) but without a single crisp headline statistic extracted in this pass"
+        },
+        {
+          "name": "Grupo Bimbo",
+          "qualification": "Named primary-source Prisma SASE customer. Keep other Palo Alto products and their reported outcomes separate; no blanket current licence or UK-delivery inference.",
+          "source": "https://paloaltonetworks.com/customers/grupo-bimbo-protects-its-global-connected-supply-chain-with-palo-alto-networks",
+          "outcome": "Insurance coverage doubled (2x) without insurers raising the premium; mean time to resolution reduced from days to one hour (with the case study's own intro separately describing a reduction from 'weeks to minutes'); $100,000 in monthly connectivity cost savings in Colombia alone from direct-to-app connectivity; 139K employees, 40,000 endpoints protected"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/palo-alto-prisma-sase/"
+    },
+    {
+      "slug": "cato-networks",
+      "name": "Cato Networks",
+      "role": "Technology vendor",
+      "management": "Self-managed, co-managed or fully managed",
+      "products": [
+        "Cato SASE Cloud Platform",
+        "Cato Socket",
+        "Cato SSE 360"
+      ],
+      "offers": [
+        {
+          "name": "Cato Browser Extension",
+          "delivery": "Clientless"
+        },
+        {
+          "name": "Cato Client",
+          "delivery": "Client-based"
+        },
+        {
+          "name": "Cato DEM",
+          "delivery": "Cloud-delivered, add-on licence"
+        },
+        {
+          "name": "Cato EPP/EDR",
+          "delivery": "Client-based"
+        },
+        {
+          "name": "Cato SASE Cloud Platform",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Cato SSE 360",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Cato Socket",
+          "delivery": "On-prem appliance + cloud-managed"
+        },
+        {
+          "name": "Cato XDR / Managed XDR",
+          "delivery": "Cloud + optional managed service"
+        },
+        {
+          "name": "Cato vSocket",
+          "delivery": "Virtual edge"
+        },
+        {
+          "name": "Managed SASE / Managed Services",
+          "delivery": "Co-managed / fully managed"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Hands-Free Management",
+          "value": "Cato or a qualified partner performs networking and security policy changes.",
+          "qualification": "",
+          "url": "https://www.catonetworks.com/services/",
+          "locator": "Hands-Free Management"
+        },
+        {
+          "label": "Intelligent Last-Mile Monitoring",
+          "value": "Cato monitors last-mile ISPs 24/7 and works with the ISP on outages or degradation.",
+          "qualification": "",
+          "url": "https://www.catonetworks.com/services/",
+          "locator": "Last-mile service"
+        },
+        {
+          "label": "Managed Detection and Response",
+          "value": "Analysts investigate threats and guide remediation.",
+          "qualification": "",
+          "url": "https://www.catonetworks.com/services/",
+          "locator": "Managed Detection and Response"
+        },
+        {
+          "label": "Site deployment",
+          "value": "Remote or on-site support for site activation and configuration.",
+          "qualification": "",
+          "url": "https://www.catonetworks.com/services/",
+          "locator": "Site Deployment"
+        },
+        {
+          "label": "Hands-Free service scope",
+          "value": "Customer-requested configuration changes; third-party devices excluded.",
+          "qualification": "Select the management service and scope in the order.",
+          "url": "https://knowledge.catonetworks.com/docs/product-specific-terms",
+          "locator": "Hands Free Services, clauses 2.5–2.6"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Ulta Beauty",
+          "qualification": "Named US retail case. Do not infer UK delivery or an independent benchmark.",
+          "source": "https://catonetworks.com/customers/ulta-beauty-reinvents-network-deliver-seamless-retail-experience/",
+          "outcome": "Cutover success rate improved from 70-90% (early manual pilot) to 99.99% (scripted, automated); rollout pace reached 10 stores/night"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/cato-networks/"
+    },
+    {
+      "slug": "cisco",
+      "name": "Cisco",
+      "role": "Technology vendor",
+      "management": "Cloud-managed, on-premises appliances; Cloud-delivered; Cloud-delivered, managed via Meraki dashboard",
+      "products": [
+        "Cisco Catalyst SD-WAN",
+        "Cisco Secure Access",
+        "Cisco Secure Connect"
+      ],
+      "offers": [
+        {
+          "name": "Cisco AI Defence",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Cisco Catalyst SD-WAN",
+          "delivery": "Cloud-managed, on-premises appliances"
+        },
+        {
+          "name": "Cisco Duo",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Cisco ISE",
+          "delivery": "On-premises or cloud, integrates via pxGrid Cloud"
+        },
+        {
+          "name": "Cisco Secure Access",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Cisco Secure Connect",
+          "delivery": "Cloud-delivered, managed via Meraki dashboard"
+        },
+        {
+          "name": "Cisco XDR",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Meraki SD-WAN",
+          "delivery": "Cloud-managed via Meraki dashboard"
+        },
+        {
+          "name": "Splunk (via Cisco acquisition)",
+          "delivery": "Cloud or on-premises Splunk deployment"
+        },
+        {
+          "name": "ThousandEyes",
+          "delivery": "Cloud-delivered, agent-based"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Sse integration",
+          "value": "Catalyst SD-WAN, Meraki, Firepower Threat Defense",
+          "qualification": "Product families have different networking and security architectures; do not pool their features into a single unqualified Cisco row.",
+          "url": "https://www.cisco.com/c/en/us/products/collateral/security/secure-access/secure-access-ds.html",
+          "locator": "Integration with Cisco SD-WAN, updated 2 July 2026"
+        },
+        {
+          "label": "Management console",
+          "value": "Cisco Cloud Control integrates Catalyst SD-WAN and Secure Access management",
+          "qualification": "The documented management integration does not prove identical feature parity or licence coverage across Meraki and Catalyst.",
+          "url": "https://www.cisco.com/c/en/us/products/collateral/security/secure-access/secure-access-ds.html",
+          "locator": "Unified Management for Cisco SASE"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Peco Foods",
+          "qualification": "Named food-manufacturing Cisco SASE customer story. Keep the declared solution and US estate scope; do not treat supplier-reported outcomes as independent benchmarks.",
+          "source": "https://video.cisco.com/detail/video/6382776429112",
+          "outcome": "'The user experience has improved twofold, by 200%. All they need is an internet connection, and they're connected to the same resources every time' (named executive quote, Mario Manzano, IT Infrastructure, Security and Collaboration Manager)"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/cisco/"
+    },
+    {
+      "slug": "check-point",
+      "name": "Check Point",
+      "role": "Technology vendor",
+      "management": "Cloud-delivered, hybrid on-device/cloud inspection",
+      "products": [
+        "Check Point SASE Platform"
+      ],
+      "offers": [
+        {
+          "name": "AI Network Firewall / AI Defence Plane",
+          "delivery": "Cloud-delivered, integrated across network/endpoints/cloud/apps/APIs"
+        },
+        {
+          "name": "CASB",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Check Point Infinity Architecture",
+          "delivery": "Cloud or hybrid, spanning Harmony, CloudGuard and Quantum"
+        },
+        {
+          "name": "Check Point SASE Platform",
+          "delivery": "Cloud-delivered, hybrid on-device/cloud inspection"
+        },
+        {
+          "name": "Firewall as a Service",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Mobile Threat Defence",
+          "delivery": "Client-based, integrated into the broader SASE framework"
+        },
+        {
+          "name": "Secure Web Gateway",
+          "delivery": "Cloud-delivered, on-device or cloud inspection"
+        },
+        {
+          "name": "ZTNA",
+          "delivery": "Cloud-delivered"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Platform scope",
+          "value": "Current SASE page describes networking, ZTNA and threat prevention",
+          "qualification": "Do not use older Perimeter 81 remote-access material alone as evidence of current SD-WAN scope.",
+          "url": "https://www.checkpoint.com/harmony/sase/",
+          "locator": "Check Point SASE platform and FAQ"
+        },
+        {
+          "label": "Platform components",
+          "value": "Check Point SD-WAN software blade integrates with Check Point SASE",
+          "qualification": "SD-WAN is a subscription licensed per firewall. The retrieved document has changed from the older Harmony/Quantum wording in the search index. Validate the selected firewall model and subscription.",
+          "url": "https://www.checkpoint.com/downloads/products/quantum-sd-wan-datasheet.pdf",
+          "locator": "2026 datasheet, A Complete SASE Solution; Licensing"
+        },
+        {
+          "label": "Sse integration options",
+          "value": "Zscaler, Microsoft Entra SSE",
+          "qualification": "Certified external SSE integrations are distinct from the single-vendor Check Point SASE configuration.",
+          "url": "https://www.checkpoint.com/downloads/products/quantum-sd-wan-datasheet.pdf",
+          "locator": "2026 datasheet, Third-party SSE Integrations"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/checkpoint/"
+    },
+    {
+      "slug": "att-business",
+      "name": "AT&T Business",
+      "role": "Managed service provider / Carrier network provider",
+      "management": "Cisco, Palo Alto Networks",
+      "products": [
+        "AT&T Managed SASE with Cisco",
+        "AT&T Managed SD-WAN",
+        "AT&T SASE with Palo Alto Networks"
+      ],
+      "offers": [
+        {
+          "name": "AT&T Dynamic Defence with Palo Alto Networks",
+          "delivery": "Fully managed, available with AT&T Switched Ethernet on Demand"
+        },
+        {
+          "name": "AT&T Managed SASE with Cisco",
+          "delivery": "Fully managed, cloud-based"
+        },
+        {
+          "name": "AT&T Managed SD-WAN",
+          "delivery": "Managed, or SD-WAN as a service"
+        },
+        {
+          "name": "AT&T Network as a Service (NaaS)",
+          "delivery": "Self-service via online portals and APIs, with zero-touch provisioning"
+        },
+        {
+          "name": "AT&T SASE with Palo Alto Networks",
+          "delivery": "Fully managed: AT&T manages deployment, policy, and ongoing operations"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Managed platform options",
+          "value": "Cisco, Palo Alto Networks",
+          "qualification": "These are explicit current page options, not a complete historical AT&T partner list.",
+          "url": "https://www.business.att.com/products/sase.html",
+          "locator": "Managed services product sections"
+        },
+        {
+          "label": "Management options",
+          "value": "fully managed",
+          "qualification": "Feature entitlement and underlay responsibility depend on the selected bundle and order.",
+          "url": "https://www.business.att.com/products/sase.html",
+          "locator": "AT&T Managed SASE with Cisco; AT&T Managed SASE with Palo Alto Networks"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/att/"
+    },
+    {
+      "slug": "fortinet",
+      "name": "Fortinet FortiSASE",
+      "role": "Technology vendor",
+      "management": "Cloud-delivered, FortiOS running as VM instances in cloud PoPs; Customer-operated private cloud, turnkey; FortiGate appliances, cloud-managed via FortiManager",
+      "products": [
+        "FortiSASE",
+        "FortiSASE Sovereign",
+        "Fortinet Secure SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "Fabric Connectors",
+          "delivery": "One-click activation against partner platforms via the Security Fabric architecture"
+        },
+        {
+          "name": "FortiClient",
+          "delivery": "Client-based; delivers protection, compliance and secure access in one modular client"
+        },
+        {
+          "name": "FortiGuard AI-Powered Security Services",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "FortiManager / FortiAnalyzer",
+          "delivery": "On-premises or cloud"
+        },
+        {
+          "name": "FortiSASE",
+          "delivery": "Cloud-delivered, FortiOS running as VM instances in cloud PoPs"
+        },
+        {
+          "name": "FortiSASE Sovereign",
+          "delivery": "Customer-operated private cloud, turnkey"
+        },
+        {
+          "name": "FortiSOC / FortiSIEM / FortiSOAR",
+          "delivery": "Cloud or on-premises"
+        },
+        {
+          "name": "Fortinet Secure SD-WAN",
+          "delivery": "FortiGate appliances, cloud-managed via FortiManager"
+        },
+        {
+          "name": "Universal ZTNA",
+          "delivery": "Automatic, encrypted per-session tunnels via FortiClient"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Platform components",
+          "value": "FortiSASE SSE, FortiGate Secure SD-WAN",
+          "qualification": "FortiSASE, FortiSASE Sovereign and FortiGate are distinct deployable components, not interchangeable subscriptions.",
+          "url": "https://www.fortinet.com/solutions/unified-sase",
+          "locator": "Architecture and Related Products"
+        },
+        {
+          "label": "Sdwan location",
+          "value": "Secure SD-WAN is integrated in FortiGate NGFWs",
+          "qualification": "Do not infer a carrier-managed circuit or operational service from Fortinet platform support.",
+          "url": "https://www.fortinet.com/solutions/unified-sase",
+          "locator": "Fortinet Secure SD-WAN"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/fortinet-fortisase/"
+    },
+    {
+      "slug": "juniper-networks",
+      "name": "Juniper Networks",
+      "role": "Technology vendor",
+      "management": "Software-based; dedicated hardware, white-box CPE, data-centre servers, or public cloud; Cloud-delivered, single-policy framework across SRX (on-premises) and Secure Edge (cloud); On-premises",
+      "products": [
+        "Juniper AI-Native SD-WAN",
+        "Security Director Cloud",
+        "Session Smart Conductor"
+      ],
+      "offers": [
+        {
+          "name": "Juniper AI-Native SD-WAN",
+          "delivery": "Software-based; dedicated hardware, white-box CPE, data-centre servers, or public cloud"
+        },
+        {
+          "name": "Juniper Mist AI / Marvis AI",
+          "delivery": "Cloud-delivered management platform"
+        },
+        {
+          "name": "Juniper Secure Edge",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Managed SD-WAN",
+          "delivery": "Cloud-managed, includes Marvis AI Assistant"
+        },
+        {
+          "name": "SRX Series Firewalls",
+          "delivery": "On-premises hardware, unified into SASE policy via Security Director Cloud"
+        },
+        {
+          "name": "Security Director Cloud",
+          "delivery": "Cloud-delivered, single-policy framework across SRX (on-premises) and Secure Edge (cloud)"
+        },
+        {
+          "name": "Session Smart Conductor",
+          "delivery": "On-premises"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Sse connector options",
+          "value": "Juniper Secure Edge, Palo Alto Prisma Access, Zscaler, Custom",
+          "qualification": "Provisioning mode differs. Do not present every connector as an equivalent native security platform.",
+          "url": "https://www.juniper.net/documentation/us/en/software/mist/mist-wan/topics/concept/wan-assurance-secure-edge-connector.html",
+          "locator": "Juniper Mist supports the following SEC providers"
+        },
+        {
+          "label": "Routing constraints",
+          "value": "BGP over IPsec is supported for Prisma Access automatic provisioning and Custom, not JSE or Zscaler",
+          "qualification": "Limitation applies to the documented Secure Edge Connector workflow.",
+          "url": "https://www.juniper.net/documentation/us/en/software/mist/mist-wan/topics/concept/wan-assurance-secure-edge-connector.html",
+          "locator": "Dynamic Routing for SEC"
+        },
+        {
+          "label": "Platform distinction",
+          "value": "SSR and SRX are distinct supported WAN platforms",
+          "qualification": "Do not copy SSR-specific forwarding or SRX-specific firewall capabilities between products.",
+          "url": "https://www.juniper.net/documentation/us/en/software/mist/mist-wan/topics/concept/wan-assurance-secure-edge-connector.html",
+          "locator": "Connector overview"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/juniper/"
+    },
+    {
+      "slug": "orange-business",
+      "name": "Orange Business",
+      "role": "Carrier network provider / Integrator",
+      "management": "self-managed to fully managed",
+      "products": [
+        "Orange Business SASE with Palo Alto Networks Prisma SASE",
+        "Orange Business and Fortinet SASE",
+        "Orange Cyberdefense Managed SASE"
+      ],
+      "offers": [
+        {
+          "name": "Orange Business Evolution Platform",
+          "delivery": "Self-managed, co-managed, or fully managed"
+        },
+        {
+          "name": "Orange Business SASE with Palo Alto Networks Prisma SASE",
+          "delivery": "Fully managed"
+        },
+        {
+          "name": "Orange Business and Fortinet SASE",
+          "delivery": "Managed"
+        },
+        {
+          "name": "Orange Cyberdefense Managed SASE",
+          "delivery": "Managed, end-to-end design/operate/monitor"
+        },
+        {
+          "name": "SD-WAN",
+          "delivery": "Self-managed, co-managed, or fully managed"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Management options",
+          "value": "self-managed to fully managed",
+          "qualification": "The catalogue permits selection of provider, service and operating model; confirm the specific SASE service and change rights.",
+          "url": "https://www.orange-business.com/en/expertise/evolution-platform-the-network-as-a-service",
+          "locator": "Build your solution your way"
+        },
+        {
+          "label": "Architecture relationship",
+          "value": "Composable services using selected technology providers",
+          "qualification": "A platform catalogue does not establish native ownership or equal feature support across all partner services.",
+          "url": "https://www.orange-business.com/en/expertise/evolution-platform-the-network-as-a-service",
+          "locator": "Evolution Platform solutions catalogue"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Siemens AG",
+          "qualification": "27 April 2022 completed SD-WAN rollout announcement using Cisco. Historical SD-WAN deployment, not proof of a current full Evolution Platform SASE bundle.",
+          "source": "https://www.orange-business.com/en/press/orange-business-services-delivers-flexible-sd-wan-siemens-worldwide-majority-corporate",
+          "outcome": "Confirmed directly at a qualitative level: 'a best-case scenario when we work with our customers... combining the customer's business strategy with their infrastructure strategy' - a real, though largely qualitative rather than numerically quantified, characterisation of the partnership's success"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/orangebusiness/"
+    },
+    {
+      "slug": "bt-business",
+      "name": "BT",
+      "role": "Managed service provider / Carrier network provider",
+      "management": "Fortinet, Meraki, Cisco",
+      "products": [
+        "Agile Connect",
+        "BT Managed SASE (Fortinet-based)",
+        "BT Managed SASE (Meraki-based)"
+      ],
+      "offers": [
+        {
+          "name": "Agile Connect",
+          "delivery": "Fully managed, with mixed connectivity options per site"
+        },
+        {
+          "name": "BT Managed Fortinet Firewall",
+          "delivery": "Managed, edge-deployed with SSL decryption"
+        },
+        {
+          "name": "BT Managed SASE (Fortinet-based)",
+          "delivery": "Cloud-delivered SSE layered on managed SD-WAN"
+        },
+        {
+          "name": "BT Managed SASE (Meraki-based)",
+          "delivery": "Cloud-delivered SSE layered on managed SD-WAN"
+        },
+        {
+          "name": "BT Security Managed Detection and Response",
+          "delivery": "Managed, 24x7"
+        },
+        {
+          "name": "BT-managed VMware SASE (legacy/historical)",
+          "delivery": "Cloud-delivered, via a global network of over 150 VMware/partner PoPs at launch"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Managed service platforms",
+          "value": "Fortinet, Meraki, Cisco",
+          "qualification": "Keep each service annex, and any cloud-security appendix, attached to the corresponding offer.",
+          "url": "https://business.bt.com/terms-and-conditions/",
+          "locator": "Associated Services Annexes for Managed Service"
+        },
+        {
+          "label": "Fortinet service levels",
+          "value": "Service Levels and Service Credits do not apply to the Fortinet Service",
+          "qualification": "Enabling services have separate terms. This finding must not be copied to Meraki or to every BT service.",
+          "url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+          "locator": "Published 3 July 2025, section 10"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/bt/"
+    },
+    {
+      "slug": "forcepoint",
+      "name": "Forcepoint",
+      "role": "Technology vendor",
+      "management": "Managed services can be delivered by MSSP partners",
+      "products": [
+        "FlexEdge Secure SD-WAN",
+        "Forcepoint Data Security Cloud"
+      ],
+      "offers": [
+        {
+          "name": "AI Mesh / Getvisibility",
+          "delivery": "Cloud-delivered, embedded in Data Security Cloud"
+        },
+        {
+          "name": "ARIA",
+          "delivery": "Cloud-delivered, embedded in Data Security Cloud"
+        },
+        {
+          "name": "Field Programmable SASE Logic (FPSL)",
+          "delivery": "Embedded in the SSE gateway policy engine"
+        },
+        {
+          "name": "FlexEdge Secure SD-WAN",
+          "delivery": "Physical or virtual appliance, FlexEdge Secure SD-WAN Manager console"
+        },
+        {
+          "name": "Forcepoint DLP",
+          "delivery": "Cloud, on-premises, or endpoint-based"
+        },
+        {
+          "name": "Forcepoint Data Security Cloud",
+          "delivery": "Cloud-delivered (SaaS)"
+        },
+        {
+          "name": "Forcepoint ONE SSE gateways",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Symphony",
+          "delivery": "Cloud-delivered dashboard"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Platform components",
+          "value": "Forcepoint ONE SSE, FlexEdge Secure SD-WAN",
+          "qualification": "Specific product and security licence must be identified; Data Security Cloud alone does not prove branch SD-WAN.",
+          "url": "https://www.forcepoint.com/sites/default/files/resources/brochures/guide-flexedge-secure-sdwan-buyers-guide-en_0_0.pdf",
+          "locator": "Forcepoint solution section"
+        },
+        {
+          "label": "Service delivery",
+          "value": "Managed services can be delivered by MSSP partners",
+          "qualification": "Historical programme evidence. Does not establish a named current UK MSSP or a direct Forcepoint operational service.",
+          "url": "https://www.forcepoint.com/newsroom/2023/forcepoint-launches-global-managed-security-service-provider-program-forcepoint-one-0",
+          "locator": "18 April 2023 MSSP programme announcement"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/forcepoint/"
+    },
+    {
+      "slug": "gtt",
+      "name": "GTT",
+      "role": "Hybrid provider",
+      "management": "Managed, over GTT's Tier 1 IP backbone; Managed, Enterprise/Premium/Standard tiers; Managed, across GTT's Tier 1 network",
+      "products": [
+        "GTT Managed SD-WAN",
+        "GTT Secure Connect",
+        "Secure Connect with HPE (Aruba/EdgeConnect/SSE)"
+      ],
+      "offers": [
+        {
+          "name": "GTT Envision",
+          "delivery": "Managed, provides connect/orchestrate/virtualize/automate capability"
+        },
+        {
+          "name": "GTT Managed SD-WAN",
+          "delivery": "Managed, over GTT's Tier 1 IP backbone"
+        },
+        {
+          "name": "GTT Secure Connect",
+          "delivery": "Managed, Enterprise/Premium/Standard tiers"
+        },
+        {
+          "name": "Secure Connect with HPE (Aruba/EdgeConnect/SSE)",
+          "delivery": "Managed, across GTT's Tier 1 network"
+        },
+        {
+          "name": "Secure Connect with Palo Alto Networks (Prisma SASE)",
+          "delivery": "Managed, cloud-native"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Product scope · envisionedge",
+          "value": "Managed edge device combines SD-WAN, SASE and local compute",
+          "qualification": "Choose the actual configuration; the device does not prove every security function is enabled.",
+          "url": "https://www.gtt.net/envision/envisionedge/",
+          "locator": "GTT EnvisionEDGE, What you get"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Radisson Hotel Group",
+          "qualification": "18 March 2025 selection announcement for GTT Secure Connect. Selection and intended scope do not prove every site subsequently completed rollout.",
+          "source": "https://www.gtt.net/about-us/press-releases/radisson-hotel-group-selects-gtt-for-global-sase-deployment/35/",
+          "outcome": "18 March 2025 selection announcement for GTT Secure Connect. Selection and intended scope do not prove every site subsequently completed rollout."
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/gtt/"
+    },
+    {
+      "slug": "zscaler",
+      "name": "Zscaler",
+      "role": "Technology vendor",
+      "management": "Hardware appliance or VM, cloud-managed; Cloud-delivered",
+      "products": [
+        "Zero Trust Branch",
+        "Zero Trust Exchange"
+      ],
+      "offers": [
+        {
+          "name": "AI Security / GenAI Security",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Data Fabric for Security",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Risk360",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Zero Trust Branch",
+          "delivery": "Hardware appliance or VM, cloud-managed"
+        },
+        {
+          "name": "Zero Trust Exchange",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Zscaler Client Connector",
+          "delivery": "Client-based"
+        },
+        {
+          "name": "Zscaler Deception",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Zscaler Digital Experience",
+          "delivery": "Cloud-delivered, add-on"
+        },
+        {
+          "name": "Zscaler Internet Access",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Zscaler Private Access",
+          "delivery": "Cloud-delivered"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Branch product scope",
+          "value": "Zero Trust Branch includes Zero Trust SD-WAN, OT/IoT segmentation and privileged remote access offerings",
+          "qualification": "Separate capabilities and packages; do not reduce Zscaler to an SSE-only record or assume all branch functions come with ZIA.",
+          "url": "https://www.zscaler.com/products-and-solutions/zero-trust-branch",
+          "locator": "Zero Trust Branch Solutions"
+        },
+        {
+          "label": "Architecture boundary",
+          "value": "Branch connectivity uses Zero Trust Exchange application access rather than a traditional unrestricted routed overlay",
+          "qualification": "Avoid assigning classic encrypted overlay semantics purely from the SD-WAN product name.",
+          "url": "https://www.zscaler.com/products-and-solutions/zero-trust-branch",
+          "locator": "Zero Trust Branch overview and FAQ"
+        }
+      ],
+      "cases": [
+        {
+          "name": "AutoNation",
+          "qualification": "Named Zero Trust Exchange / security customer. Do not relabel as a Zero Trust SD-WAN branch-appliance deployment without product-specific evidence.",
+          "source": "https://zscaler.com/customers/autonation",
+          "outcome": "Eliminated ~500 GB/month of unwanted P2P traffic (named-executive quote); improved Microsoft 365 performance enterprise-wide"
+        },
+        {
+          "name": "NOV",
+          "qualification": "Named Zero Trust Exchange / security customer. Do not relabel as a Zero Trust SD-WAN branch-appliance deployment without product-specific evidence.",
+          "source": "https://zscaler.com/customers/nov",
+          "outcome": "Leadership able to commit that all 27,500 users could work remotely on short notice - a specific, dated (2020 pandemic-era), verifiable capability claim"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/zscaler/"
+    },
+    {
+      "slug": "aryaka",
+      "name": "Aryaka",
+      "role": "Technology vendor",
+      "management": "fully managed, co-managed, self-managed",
+      "products": [
+        "Aryaka Unified SASE as a Service",
+        "Zero Trust WAN"
+      ],
+      "offers": [
+        {
+          "name": "AI>Observe",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "AI>Secure",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Aryaka Network Access Point (ANAP)",
+          "delivery": "Included as part of service delivery, not sold separately"
+        },
+        {
+          "name": "Aryaka Unified SASE as a Service",
+          "delivery": "Fully managed, cloud-delivered"
+        },
+        {
+          "name": "MyAryaka portal",
+          "delivery": "Cloud-delivered, co-managed"
+        },
+        {
+          "name": "Private Access",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Universal ZTNA",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Zero Trust WAN",
+          "delivery": "Delivered over Aryaka's private global network"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Management options",
+          "value": "fully managed, co-managed, self-managed",
+          "qualification": "Vendor page explicitly lists the choices; obtain the responsibility split and commercial package.",
+          "url": "https://www.aryaka.com/solutions/managed-unified-sase/",
+          "locator": "Aryaka Delivers a Better Way, item 1"
+        },
+        {
+          "label": "Connectivity operations",
+          "value": "ISP procurement, contract management, link monitoring",
+          "qualification": "Listed service capabilities, not proof they are included at every site or in every contract.",
+          "url": "https://www.aryaka.com/solutions/managed-unified-sase/",
+          "locator": "Item 6"
+        },
+        {
+          "label": "Security services",
+          "value": "NGFW, SWG, CASB, ZTNA",
+          "qualification": "Page also lists managed third-party firewall services; keep native and third-party functions separate.",
+          "url": "https://www.aryaka.com/solutions/managed-unified-sase/",
+          "locator": "Item 4"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Albemarle Corporation",
+          "qualification": "Historical connectivity and last-mile case; not proof every current security component was deployed.",
+          "source": "https://aryaka.com/case-study/albemarle/",
+          "outcome": "Major improvement in performance for Office 365 and other core applications following the initial 2018 deployment"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/aryaka/"
+    },
+    {
+      "slug": "colt-technology-services",
+      "name": "Colt Technology Services",
+      "role": "Carrier network provider",
+      "management": "self-service, co-managed, fully managed",
+      "products": [
+        "Colt SASE Gateway solution",
+        "Colt SD WAN",
+        "Zscaler SSE option"
+      ],
+      "offers": [
+        {
+          "name": "Colt SASE Gateway solution",
+          "delivery": "Managed"
+        },
+        {
+          "name": "Colt SD WAN",
+          "delivery": "Managed, over MPLS/broadband/DIA/wireless"
+        },
+        {
+          "name": "Colt SD WAN Remote Access",
+          "delivery": "Cloud-delivered, integrated with Colt SD WAN's core features"
+        },
+        {
+          "name": "Partner IP Access (Blue Wireless)",
+          "delivery": "Managed, Primary or Backup mode"
+        },
+        {
+          "name": "Zscaler SSE option",
+          "delivery": "Cloud-delivered; validation status confirmed to vary by specific connectivity option"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Management options",
+          "value": "self-service, co-managed, fully managed",
+          "qualification": "Self-service portal access alone is not the full DIY operating model in the comparison definition.",
+          "url": "https://www.colt.net/about/partners/versa",
+          "locator": "Colt / Versa partnership description"
+        },
+        {
+          "label": "Sase variants",
+          "value": "Versa SD-WAN plus Versa SASE, Versa SD-WAN plus Zscaler SSE",
+          "qualification": "Store two service variants. Zscaler functions are partner-delivered, not native Versa functions.",
+          "url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
+          "locator": "Section 12, Colt SASE Solution"
+        },
+        {
+          "label": "Gateway options",
+          "value": "shared, dedicated",
+          "qualification": "Capacity, platform and redundancy differ. Do not apply shared-gateway parameters to all deployments.",
+          "url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
+          "locator": "Section 7, SD WAN Gateway"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/colt/"
+    },
+    {
+      "slug": "hpe-aruba",
+      "name": "HPE Aruba EdgeConnect",
+      "role": "Technology vendor",
+      "management": "Centralised orchestration, integrates with ClearPass API; Physical/virtual appliance, cloud edge (AWS, Azure, Google Cloud, Megaport Virtual Edge)",
+      "products": [
+        "EdgeConnect Orchestrator",
+        "HPE Aruba Networking EdgeConnect SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "Cloud Intelligence",
+          "delivery": "Embedded, cloud-delivered path database"
+        },
+        {
+          "name": "EdgeConnect Orchestrator",
+          "delivery": "Centralised orchestration, integrates with ClearPass API"
+        },
+        {
+          "name": "First-Packet iQ",
+          "delivery": "Embedded in EdgeConnect appliances"
+        },
+        {
+          "name": "HPE Aruba Networking Central",
+          "delivery": "Cloud-delivered, AWS/Azure-hosted clusters"
+        },
+        {
+          "name": "HPE Aruba Networking ClearPass",
+          "delivery": "On-premises or cloud-managed"
+        },
+        {
+          "name": "HPE Aruba Networking EdgeConnect SD-WAN",
+          "delivery": "Physical/virtual appliance, cloud edge (AWS, Azure, Google Cloud, Megaport Virtual Edge)"
+        },
+        {
+          "name": "HPE Aruba Networking SSE",
+          "delivery": "Cloud-delivered, 500+ global edge locations"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Sse connector scope",
+          "value": "SWG and private-application access integration through HPE SSE",
+          "qualification": "SSE not supported in air-gapped environments. EdgeConnect SD-WAN and SD-Branch are distinct product families.",
+          "url": "https://arubanetworking.hpe.com/techdocs/sdwan/docs/orch/configuration/cloud/hpe-sse/",
+          "locator": "HPE SSE introduction"
+        },
+        {
+          "label": "Appliance constraints",
+          "value": "Installing SSE Connector disables WAN Optimization on EdgeConnect appliances with fewer than 16 cores",
+          "qualification": "Connector is not supported on EC-US or older EC-XS models. Check exact appliance and certified software version.",
+          "url": "https://arubanetworking.hpe.com/techdocs/sdwan/docs/orch/configuration/cloud/hpe-sse/",
+          "locator": "SSE Connector notes"
+        },
+        {
+          "label": "Tunnel limit",
+          "value": "Default 100 tunnels per HPE SSE tenant; increases require support",
+          "qualification": "A documented default, not an immutable maximum across all contracts.",
+          "url": "https://arubanetworking.hpe.com/techdocs/sdwan/docs/orch/configuration/cloud/hpe-sse/",
+          "locator": "Secure Web Gateway"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Henkel",
+          "qualification": "Named unified SASE customer reference. Supplier-reported results need their original context; no independent benchmark inferred.",
+          "source": "https://www.hpe.com/us/en/products/networking/sase.html",
+          "outcome": "Established a consistent network experience across 450 locations; reduced the time to diagnose and resolve network issues by 90%"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/hpe-aruba-edgeconnect/"
+    },
+    {
+      "slug": "vodafone-business",
+      "name": "Vodafone Business",
+      "role": "Managed service provider / Carrier network provider",
+      "management": "Managed, connecting users, devices and machinery; Managed or Co-Managed, licence-package-based; Managed, global access-network reach",
+      "products": [
+        "Fortinet-based Secure Networking",
+        "Vodafone Business SASE",
+        "Vodafone Business SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "Fortinet-based Secure Networking",
+          "delivery": "Managed, connecting users, devices and machinery"
+        },
+        {
+          "name": "Vodafone Business Managed Network Services",
+          "delivery": "Managed, with confirmed multi-site WAN management and primary/backup link support"
+        },
+        {
+          "name": "Vodafone Business Network as a Service (NaaS)",
+          "delivery": "Buy, configure and manage directly, or via Vodafone Business managed services teams"
+        },
+        {
+          "name": "Vodafone Business SASE",
+          "delivery": "Managed or Co-Managed, licence-package-based"
+        },
+        {
+          "name": "Vodafone Business SD-WAN",
+          "delivery": "Managed, global access-network reach"
+        },
+        {
+          "name": "Vodafone Global WAN Services",
+          "delivery": "Managed, single-provider model"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Service portfolio",
+          "value": "Vodafone Business publishes SD-WAN and SASE services",
+          "qualification": "Page body is only partially exposed to the text fetch. No detailed capability changes based on that fetch.",
+          "url": "https://www.vodafone.com/business/products/fixed-connectivity/sd-wan",
+          "locator": "SD-WAN and secure connected enterprise sections"
+        },
+        {
+          "label": "Partner status",
+          "value": "Fortinet global specialisations in SASE and SD-WAN; EMEA Secure Networking specialisation",
+          "qualification": "Partner certification is not proof of product orderability, a particular customer deployment or service SLA.",
+          "url": "https://www.vodafone.com/business/news-and-insights/company-news/vodafone-business-retains-fortinet-global-partner-status",
+          "locator": "12 May 2026 announcement heading"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Places for People",
+          "qualification": "UK named SD-WAN case using Cisco Meraki and Vodafone. Does not validate every Vodafone SASE security option.",
+          "source": "https://vodafone.co.uk/business/case-studies/places-for-people-and-sd-wan",
+          "outcome": "Confirmed directly: the organisation was able to 'respond faster to changes in ways of working' - a real, though qualitative rather than specifically quantified, outcome"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/vodafone/"
+    },
+    {
+      "slug": "ntt",
+      "name": "NTT DATA",
+      "role": "Carrier network provider",
+      "management": "Fully managed, Network as a Service (NaaS); Managed, 24x7 monitoring confirmed directly; Managed",
+      "products": [
+        "Managed Campus Networks with Prisma SASE",
+        "Managed Network Security",
+        "NTT DATA Managed SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "Managed Campus Networks with Prisma SASE",
+          "delivery": "Fully managed, Network as a Service (NaaS)"
+        },
+        {
+          "name": "Managed Internet Connectivity",
+          "delivery": "Managed - 'we procure, deliver and manage robust internet connectivity infrastructure'"
+        },
+        {
+          "name": "Managed IoT and Network as a Service (NaaS)",
+          "delivery": "Managed"
+        },
+        {
+          "name": "Managed Network Security",
+          "delivery": "Managed, 24x7 monitoring confirmed directly"
+        },
+        {
+          "name": "NTT DATA Managed SD-WAN",
+          "delivery": "Managed"
+        },
+        {
+          "name": "SD-WAN with Fortinet Secure SD-WAN",
+          "delivery": "Managed, with dashboard-based reporting"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Managed sase partner",
+          "value": "Palo Alto Networks Prisma SASE",
+          "qualification": "An evidenced service option; not an exhaustive list of NTT technology partners.",
+          "url": "https://www.nttdata.com/global/en/insights/focus/2025/053",
+          "locator": "Managed SASE: Let the experts handle it"
+        },
+        {
+          "label": "Customer evidence · pick n pay",
+          "value": "Named NTT DATA customer reference for managed SD-WAN store connectivity",
+          "qualification": "South African retail example, not evidence of UK delivery or of all Prisma security capabilities.",
+          "url": "https://www.nttdata.com/global/en/services/infrastructure-solutions/secure-networking-solutions",
+          "locator": "Pick n Pay customer section"
+        },
+        {
+          "label": "Customer evidence · frucor suntory",
+          "value": "Named reference for software-defined infrastructure",
+          "qualification": "Do not relabel as a completed full SASE deployment without the detailed case evidence.",
+          "url": "https://www.nttdata.com/global/en/services/infrastructure-solutions/secure-networking-solutions",
+          "locator": "Frucor Suntory customer section"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Pick n Pay",
+          "qualification": "Named South African managed SD-WAN reference; do not infer UK service delivery.",
+          "source": "https://nttdata.com/global/en/services/infrastructure-solutions/secure-networking-solutions",
+          "outcome": "Confirmed directly and specifically: improved network stability, connectivity and security; ability to trade and process payments during rolling blackouts; and a specific, quantified business outcome - a 1% increase in turnover within the first six months the solution was active"
+        },
+        {
+          "name": "Frucor Suntory",
+          "qualification": "Named software-defined infrastructure reference; specific SASE component deployment not established by this page.",
+          "source": "https://nttdata.com/global/en/services/infrastructure-solutions/secure-networking-solutions",
+          "outcome": "Confirmed directly at a general level: enabling teams to 'access data, collaborate seamlessly and work securely from anywhere' - a real, though largely qualitative, outcome"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/ntt-data/"
+    },
+    {
+      "slug": "verizon-business",
+      "name": "Verizon Business",
+      "role": "Managed service provider / Carrier network provider",
+      "management": "Verizon and Versa offer a fully managed SD-WAN/security platform",
+      "products": [
+        "Verizon Managed SD Branch",
+        "Verizon Managed SD WAN",
+        "Verizon SASE Management"
+      ],
+      "offers": [
+        {
+          "name": "RingCentral (voice/UC integration)",
+          "delivery": "Managed, cloud-based"
+        },
+        {
+          "name": "Verizon Managed SD Branch",
+          "delivery": "Flexible: fully managed through monitor/notify-only options"
+        },
+        {
+          "name": "Verizon Managed SD WAN",
+          "delivery": "Managed, hassle-free positioning"
+        },
+        {
+          "name": "Verizon SASE Management",
+          "delivery": "Cloud-delivered, integrating NOC/SOC across the chosen platform"
+        },
+        {
+          "name": "Virtual Network Services (VNS)",
+          "delivery": "Cloud-delivered"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Managed platform option",
+          "value": "Verizon and Versa offer a fully managed SD-WAN/security platform",
+          "qualification": "Versa-specific service evidence; do not transfer all capabilities to every Verizon partner variant.",
+          "url": "https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/",
+          "locator": "Enable digital transformation with SASE"
+        },
+        {
+          "label": "Management service scope",
+          "value": "SASE Management connects SD-WAN and cloud-security management",
+          "qualification": "Dated contractual guide; confirm current applicable service terms and selected cloud-security instance.",
+          "url": "https://www.verizon.com/business/service_guide/reg-20240201/verizon-sase-management-2024FEB01-mk.pdf",
+          "locator": "1 February 2024 service guide"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/verizon/"
+    },
+    {
+      "slug": "cradlepoint-ericsson",
+      "name": "Ericsson Cradlepoint",
+      "role": "Technology vendor / Carrier network provider",
+      "management": "Cloud-delivered, cellular-first architecture; Cloud-managed, builds on base NetCloud licence",
+      "products": [
+        "NetCloud SASE",
+        "NetCloud SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "NetCloud Federal",
+          "delivery": "Cloud-managed, FIPS 140-3 compliant routers"
+        },
+        {
+          "name": "NetCloud Manager",
+          "delivery": "Cloud-hosted, zero-touch deployment"
+        },
+        {
+          "name": "NetCloud Perimeter",
+          "delivery": "Cloud-delivered, identity-based"
+        },
+        {
+          "name": "NetCloud Private Networks",
+          "delivery": "Cloud-managed"
+        },
+        {
+          "name": "NetCloud SASE",
+          "delivery": "Cloud-delivered, cellular-first architecture"
+        },
+        {
+          "name": "NetCloud SASE Secure Connect",
+          "delivery": "Software-defined tunnel, cloud-managed"
+        },
+        {
+          "name": "NetCloud SD-WAN",
+          "delivery": "Cloud-managed, builds on base NetCloud licence"
+        },
+        {
+          "name": "Pop-Up Network Kit (PNK)",
+          "delivery": "Physical hardware kit with cloud management"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Clientless access",
+          "value": "Clientless ZTNA for third parties and BYOD users was announced 22 April 2025",
+          "qualification": "Browser-based access does not establish native clients for every OS.",
+          "url": "https://www.ericsson.com/en/news/2025/4/ericsson-boosts-netcloud-sase-with-industrys-first-fully-integrated-clientless-ztna-solution-for-wireless-wan",
+          "locator": "Announcement and product description"
+        },
+        {
+          "label": "Management integration",
+          "value": "Clientless ZTNA integrates with NetCloud Manager alongside WWAN, SD-WAN and other SASE features",
+          "qualification": "Confirm router, service plan and entitled application protocols.",
+          "url": "https://www.ericsson.com/en/news/2025/4/ericsson-boosts-netcloud-sase-with-industrys-first-fully-integrated-clientless-ztna-solution-for-wireless-wan",
+          "locator": "Single-platform Management"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/ericsson-cradlepoint/"
+    },
+    {
+      "slug": "virgin-media-o2",
+      "name": "Virgin Media O2 Business",
+      "role": "Managed service provider / Carrier network provider",
+      "management": "Cloud-delivered SSE layered on managed SD-WAN; Managed, over MPLS/broadband/4G-LTE",
+      "products": [
+        "Virgin Media Business SASE (Zscaler-based)",
+        "Virgin Media O2 Business SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "8x8 Voice for Teams",
+          "delivery": "Managed"
+        },
+        {
+          "name": "Cloud Infrastructure as a Service / Platform as a Service",
+          "delivery": "Managed, UK-based Telefónica Tech team"
+        },
+        {
+          "name": "Managed Detection and Response",
+          "delivery": "Managed, 24x7 (implied)"
+        },
+        {
+          "name": "Success Agreement",
+          "delivery": "Bespoke, outcome-based rather than deliverable-based"
+        },
+        {
+          "name": "Virgin Media Business SASE (Zscaler-based)",
+          "delivery": "Cloud-delivered SSE layered on managed SD-WAN"
+        },
+        {
+          "name": "Virgin Media O2 Business SD-WAN",
+          "delivery": "Managed, over MPLS/broadband/4G-LTE"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Historical managed sdwan partner",
+          "value": "Versa Cloud IP platform for fully managed SD-WAN",
+          "qualification": "Archived launch evidence, not confirmation that every present offer uses that platform.",
+          "url": "https://news.virginmediao2.co.uk/vm-archive/virgin-media-business-to-partner-with-versa-networks/",
+          "locator": "Virgin Media archive partnership announcement"
+        },
+        {
+          "label": "Legal entity reference",
+          "value": "name: Virgin Media Business Limited; company number: 01785381; registered office: 500 Brook Drive, Reading, RG2 6UU",
+          "qualification": "Corporate identity is confirmed. Match to the specific service order before assigning it as the buyer's contractual counterparty.",
+          "url": "https://www.virginmediabusiness.co.uk/legal/terms-and-conditions/",
+          "locator": "Company information"
+        },
+        {
+          "label": "Service schedule reference",
+          "value": "Published SDWAN Special Terms Service Schedule v5.0",
+          "qualification": "Read the schedule and applicable order before changing service SLA or technical claims.",
+          "url": "https://www.virginmediabusiness.co.uk/legal/terms-and-conditions/",
+          "locator": "SMB, LE & PS"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/virgin-media-o2/"
+    },
+    {
+      "slug": "cloudflare-one",
+      "name": "Cloudflare One",
+      "role": "Technology vendor",
+      "management": "Cloud-delivered",
+      "products": [
+        "Cloudflare One"
+      ],
+      "offers": [
+        {
+          "name": "AI Gateway / Agents SDK / MCP security",
+          "delivery": "Cloud-delivered, developer-platform integrated"
+        },
+        {
+          "name": "CASB",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Cloudflare Access",
+          "delivery": "Cloud-delivered, identity-based per-application access"
+        },
+        {
+          "name": "Cloudflare One",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Cloudflare One Appliance",
+          "delivery": "Physical hardware or virtual machine image"
+        },
+        {
+          "name": "Cloudflare Tunnel",
+          "delivery": "Outbound-only connector, no public IP exposure required"
+        },
+        {
+          "name": "Data Loss Prevention",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Email Security",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Remote Browser Isolation",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "Secure Web Gateway",
+          "delivery": "Cloud-delivered"
+        },
+        {
+          "name": "WARP client",
+          "delivery": "Client-based, Windows/macOS/Linux/iOS/Android"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Product naming",
+          "value": "Cloudflare WAN, formerly Magic WAN",
+          "qualification": "Keep the former name as an alias; do not change existing Netify URLs.",
+          "url": "https://developers.cloudflare.com/cloudflare-wan/",
+          "locator": "Overview, updated 12 October 2026"
+        },
+        {
+          "label": "Licensing scope",
+          "value": "Cloudflare WAN is Enterprise-only",
+          "qualification": "Cloudflare One Appliance requires purchase of Cloudflare WAN; free Zero Trust access does not include this WAN service.",
+          "url": "https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-wan/get-started/",
+          "locator": "Before you begin"
+        },
+        {
+          "label": "Onramp options",
+          "value": "Cloudflare One Appliance hardware, Cloudflare One Appliance virtual, manual tunnels",
+          "qualification": "Customer/MSSP operation and connectivity procurement remain separate responsibilities.",
+          "url": "https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-wan/get-started/",
+          "locator": "Set up method"
+        }
+      ],
+      "cases": [
+        {
+          "name": "Delivery Hero",
+          "qualification": "Cloudflare One / zero-trust remote access case with other application services. Do not transfer CDN or bandwidth outcomes to WAN or all SASE components.",
+          "source": "https://www.cloudflare.com/en-ca/case-studies/delivery-hero/",
+          "outcome": "Successfully replaced VPN access for 40,000 employees using Cloudflare One"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/cloudflare-one/"
+    },
+    {
+      "slug": "comcast-business",
+      "name": "Comcast Business",
+      "role": "Managed service provider / Carrier network provider",
+      "management": "fully managed, co-managed",
+      "products": [
+        "Comcast Business Managed SD-WAN",
+        "Comcast Business SASE"
+      ],
+      "offers": [
+        {
+          "name": "Comcast Business CASB",
+          "delivery": "Cloud-delivered, part of SASE"
+        },
+        {
+          "name": "Comcast Business FWaaS",
+          "delivery": "Cloud-delivered, part of SASE"
+        },
+        {
+          "name": "Comcast Business Managed SD-WAN",
+          "delivery": "Fully managed or co-managed"
+        },
+        {
+          "name": "Comcast Business SASE",
+          "delivery": "Fully managed or co-managed"
+        },
+        {
+          "name": "Comcast Business SWG",
+          "delivery": "On-premise or cloud-delivered, part of SASE"
+        },
+        {
+          "name": "Comcast Business ZTNA",
+          "delivery": "Cloud-delivered, part of SASE"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Management options",
+          "value": "fully managed, co-managed",
+          "qualification": "Responsibility split and entitlement depend on the order.",
+          "url": "https://business.comcast.com/~/media/business_comcast_com/PDFs/SDN---SD-WAN/Masergy/Product%20Brief%20%20Secure%20Access%20Service%20Edge.pdf",
+          "locator": "Page 1, A Pragmatic Approach to Secure Networking"
+        },
+        {
+          "label": "Technology partner",
+          "value": "Fortinet",
+          "qualification": "Applies to this documented SASE offer, not every historical Masergy/Comcast platform.",
+          "url": "https://business.comcast.com/~/media/business_comcast_com/PDFs/SDN---SD-WAN/Masergy/Product%20Brief%20%20Secure%20Access%20Service%20Edge.pdf",
+          "locator": "Page 1, Enabled by Fortinet"
+        },
+        {
+          "label": "Underlay options",
+          "value": "Comcast-provided or customer-provided underlay",
+          "qualification": "Network service reach is distinct from Comcast's owned US access footprint and UK orderability.",
+          "url": "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan",
+          "locator": "OTT service and uCPE description"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/comcastbusiness/"
+    },
+    {
+      "slug": "arista-velocloud",
+      "name": "VeloCloud",
+      "role": "Technology vendor",
+      "management": "VeloCloud SD-WAN integrates with third-party SSE providers",
+      "products": [
+        "VeloCloud Orchestrator",
+        "VeloCloud SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "Arista AVA",
+          "delivery": "Embedded in the ETM/VeloCloud management experience"
+        },
+        {
+          "name": "Edge Threat Management (ETM)",
+          "delivery": "Software update to existing VeloCloud physical/virtual edge devices"
+        },
+        {
+          "name": "SSE partner integrations",
+          "delivery": "Cloud-delivered, via confirmed integration architecture"
+        },
+        {
+          "name": "VeloCloud Orchestrator",
+          "delivery": "Multi-tenant SaaS"
+        },
+        {
+          "name": "VeloCloud SD-WAN",
+          "delivery": "Physical/virtual edge appliance, cloud-managed orchestration"
+        },
+        {
+          "name": "VeloRAIN architecture",
+          "delivery": "Embedded in VeloCloud Edge appliances"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Legacy product lifecycle",
+          "value": "end of sale: 2025-07-01; end of support: 2026-06-30; current for new sales: False",
+          "qualification": "Dates apply to the named Symantec-secured SKUs, not to all VeloCloud SD-WAN products.",
+          "url": "https://www.arista.com/en/support/advisories-notices/end-of-sale/22072-end-of-sale-life-velocloud-sase-secured-symantec",
+          "locator": "Arista notice dated 20 August 2025"
+        },
+        {
+          "label": "Security integration",
+          "value": "VeloCloud SD-WAN integrates with third-party SSE providers",
+          "qualification": "A partner integration is not an always-included native SSE stack.",
+          "url": "https://www.arista.com/en/solutions/sd-wan",
+          "locator": "Application flexibility and SASE architecture"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/velocloud/"
+    },
+    {
+      "slug": "expereo",
+      "name": "Expereo",
+      "role": "Managed service provider / Carrier network provider",
+      "management": "Managed SD-WAN with end-to-end services",
+      "products": [
+        "Expereo Managed SD-WAN",
+        "Expereo SD-WAN/SASE with Cato Networks"
+      ],
+      "offers": [
+        {
+          "name": "Expereo Enhanced Internet",
+          "delivery": "Managed"
+        },
+        {
+          "name": "Expereo Managed SD-WAN",
+          "delivery": "Managed, over Global Internet or Enhanced Internet underlay"
+        },
+        {
+          "name": "Expereo SD-WAN/SASE with Cato Networks",
+          "delivery": "Managed, via the confirmed Cato platform since 2022"
+        },
+        {
+          "name": "Starlink (via Expereo, authorised reseller)",
+          "delivery": "Managed, confirmed directly via a real customer case study as 'under consideration for future rapid deployments'"
+        },
+        {
+          "name": "expereoOne",
+          "delivery": "Web-based, providing performance reporting, monitoring, visualization, and case management"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Partner catalogue",
+          "value": "Cisco, Cato Networks, Arista Networks, Ericsson Enterprise Wireless Solutions",
+          "qualification": "Different partner roles. Arista campus networking and Ericsson WWAN listings do not establish a specific VeloCloud or SASE service SKU.",
+          "url": "https://www.expereo.com/partners",
+          "locator": "Technology Partners"
+        },
+        {
+          "label": "Management options",
+          "value": "Managed SD-WAN with end-to-end services",
+          "qualification": "Confirm selected platform, last-mile scope and customer policy rights. No blanket DIY claim.",
+          "url": "https://www.expereo.com/services/sd-wan",
+          "locator": "Managed SD-WAN from Expereo"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/expereo/"
+    },
+    {
+      "slug": "opensystems",
+      "name": "Open Systems",
+      "role": "Technology vendor / Managed service provider",
+      "management": "Fully managed; Fully managed or co-managed, cloud-native",
+      "products": [
+        "Managed SD-WAN / Secure SD-WAN",
+        "Open Systems SASE Experience"
+      ],
+      "offers": [
+        {
+          "name": "MDR+ (Managed Detection and Response)",
+          "delivery": "Fully managed"
+        },
+        {
+          "name": "Managed SD-WAN / Secure SD-WAN",
+          "delivery": "Fully managed"
+        },
+        {
+          "name": "Managed, Universal SSE",
+          "delivery": "Cloud-native, fully managed"
+        },
+        {
+          "name": "Mission Control",
+          "delivery": "24x7x365 follow-the-sun, Level-3 engineers only"
+        },
+        {
+          "name": "OT Firewall",
+          "delivery": "Not fully detailed"
+        },
+        {
+          "name": "Open Systems SASE Experience",
+          "delivery": "Fully managed or co-managed, cloud-native"
+        },
+        {
+          "name": "Zero Trust Service",
+          "delivery": "Cloud-native, fully managed"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Networking functions",
+          "value": "encryption and routing, bandwidth control, path selection, application optimisation",
+          "qualification": "Page-level function evidence, not proof of every packet-loss remediation mechanism or licence.",
+          "url": "https://open-systems.com/sase/sdwan-as-a-service/",
+          "locator": "Four building blocks"
+        },
+        {
+          "label": "Operational scope",
+          "value": "Network/security operation described as automation with Level-3 engineers",
+          "qualification": "Do not infer a customer DIY tier or exact contractual response SLA.",
+          "url": "https://open-systems.com/sase/sdwan-as-a-service/",
+          "locator": "One network, run for you"
+        },
+        {
+          "label": "Transport scope",
+          "value": "Internet or MPLS across providers",
+          "qualification": "Transport compatibility is not proof Open Systems owns the underlying circuits or a private global backbone.",
+          "url": "https://open-systems.com/sase/sdwan-as-a-service/",
+          "locator": "Encryption and routing"
+        }
+      ],
+      "cases": [
+        {
+          "name": "SOS Children’s Villages",
+          "qualification": "Named primary-source SASE/Mission Control customer reference. No new numerical outcome or UK delivery claim is inferred.",
+          "source": "https://open-systems.com/company/customers/",
+          "outcome": "Confirmed directly: 'Mission Control and cloud security improved performance, connectivity, and IT efficiency worldwide' - though without a specific, quantified percentage or figure attached"
+        },
+        {
+          "name": "Mammut",
+          "qualification": "Named primary-source SASE/Mission Control customer reference. No new numerical outcome or UK delivery claim is inferred.",
+          "source": "https://open-systems.com/company/customers/",
+          "outcome": "'In less than two months, we took over bandwidth management and added low-cost and secure internet breakouts and VPNs to connect sites and users'; built-in cybersecurity protected assets 'on-premises, at data centres, or in the cloud'; 360° security and network visibility confirmed via Mission Control; Mammut's IT team was freed to focus on other priorities"
+        },
+        {
+          "name": "KEMET",
+          "qualification": "Named primary-source SASE/Mission Control customer reference. No new numerical outcome or UK delivery claim is inferred.",
+          "source": "https://open-systems.com/company/customers/",
+          "outcome": "Confirmed directly: 'simplified operations, improved security, and cut costs by 50%' - a specific, quantified cost-reduction outcome"
+        }
+      ],
+      "profile": "https://netify.co.uk/marketplace/opensystems/"
+    },
+    {
+      "slug": "barracuda-secureedge",
+      "name": "Barracuda SecureEdge",
+      "role": "Technology vendor",
+      "management": "Cloud-delivered, via Azure Marketplace; Cloud-native, centrally managed; Cloud-delivered, over the Microsoft Global Network",
+      "products": [
+        "Barracuda SecureEdge",
+        "Barracuda SecureEdge Access",
+        "Secure SD-WAN"
+      ],
+      "offers": [
+        {
+          "name": "Barracuda SecureEdge",
+          "delivery": "Cloud-delivered, via Azure Marketplace"
+        },
+        {
+          "name": "Barracuda SecureEdge Access",
+          "delivery": "Cloud-native, centrally managed"
+        },
+        {
+          "name": "BarracudaONE",
+          "delivery": "Cloud-delivered, integrates email/data/network/application protection and managed XDR"
+        },
+        {
+          "name": "Secure Edge Manager",
+          "delivery": "Cloud-hosted"
+        },
+        {
+          "name": "Secure SD-WAN",
+          "delivery": "Cloud-delivered, over the Microsoft Global Network"
+        },
+        {
+          "name": "SecureEdge Access Agent",
+          "delivery": "Client-based, Windows/macOS/iOS/Android/Linux, up to 5 devices"
+        },
+        {
+          "name": "SecureEdge Secure Connector",
+          "delivery": "Connector-based"
+        },
+        {
+          "name": "SecureEdge: MSP Option",
+          "delivery": "Multi-tenant cloud portal, zero-touch remote deployment"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Packet loss remediation",
+          "value": "Last Mile Optimization uses Forward Error Correction",
+          "qualification": "FEC is enabled on Override Categories when Last Mile Optimization is enabled. Do not confuse it with circuit management.",
+          "url": "https://documentation.campus.barracuda.com/wiki/spaces/SEP/pages/54133806/SD-WAN",
+          "locator": "SD-WAN, Last Mile Optimization"
+        },
+        {
+          "label": "Networking functions",
+          "value": "performance-based transport selection, adaptive/static session balancing, failover, multi-provider load balancing",
+          "qualification": "Policy and fallback-link configuration determine actual traffic handling.",
+          "url": "https://documentation.campus.barracuda.com/wiki/spaces/SEP/pages/54133806/SD-WAN",
+          "locator": "Multi-transport VPN features"
+        },
+        {
+          "label": "Deployment relationship",
+          "value": "SaaS, Azure Virtual WAN, or customer/partner-hosted virtual/hardware deployment",
+          "qualification": "Hosting/management of infrastructure is distinct from a fully managed end-to-end customer network service.",
+          "url": "https://www.barracuda.com/products/network-protection/secureedge/features",
+          "locator": "Deployment options"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/barracuda-secureedge/"
+    },
+    {
+      "slug": "sonicwall",
+      "name": "SonicWall Cloud Secure Edge",
+      "role": "Technology vendor",
+      "management": "Cloud-native SDP architecture",
+      "products": [
+        "SonicWall Cloud Secure Edge"
+      ],
+      "offers": [
+        {
+          "name": "Managed Protection Security Suite (MPSS)",
+          "delivery": "Bundled managed service"
+        },
+        {
+          "name": "SAMI",
+          "delivery": "Embedded within SonicWall Unified Management"
+        },
+        {
+          "name": "Secure Internet Access",
+          "delivery": "DNS-layer security (Basic); adds CASB and SWG (Advanced)"
+        },
+        {
+          "name": "Secure Private Access",
+          "delivery": "Tunnel-based ZTNA (Basic); adds proxy-based ZTNA (Advanced)"
+        },
+        {
+          "name": "SonicWall Cloud Secure Edge",
+          "delivery": "Cloud-native SDP architecture"
+        },
+        {
+          "name": "SonicWall Unified Management",
+          "delivery": "Cloud-native hub, includes embedded AI (SAMI)"
+        }
+      ],
+      "facts": [
+        {
+          "label": "Product classification",
+          "value": "Security Service Edge (SSE)",
+          "qualification": "CSE alone does not establish a branch SD-WAN service or full network-and-security managed service.",
+          "url": "https://cse-docs.sonicwall.com/docs/intro/",
+          "locator": "What is SonicWall Cloud Secure Edge, validated 15 July 2026"
+        },
+        {
+          "label": "Security components",
+          "value": "ZTNA, VPNaaS, CASB, SWG",
+          "qualification": "Check current SPA/SIA editions and licence before assigning capability grades.",
+          "url": "https://cse-docs.sonicwall.com/docs/intro/",
+          "locator": "Device-centric SSE product description"
+        },
+        {
+          "label": "Private access dependency",
+          "value": "Access Tier or Connector required for private resources",
+          "qualification": "Deployment must be located in an appropriate customer data-centre or cloud environment.",
+          "url": "https://www.sonicwall.com/support/knowledge-base/sonicwall-cloud-secure-edge-cse-components/kA1VN0000000TMz0AM",
+          "locator": "Cloud Secure Edge Components"
+        }
+      ],
+      "cases": [],
+      "profile": "https://netify.co.uk/marketplace/sonicwall-cse/"
+    }
+  ]
+}

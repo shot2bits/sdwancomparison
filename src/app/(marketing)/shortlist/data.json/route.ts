@@ -1,3 +1,4 @@
+import buyerProfiles from "@data/shortlist-buyer-profiles.json";
 import { approvedEditorialReview } from "@/lib/provider-editorial-review";
 import { buyerDecisionGuide } from "@/lib/buyer-decision-guide";
 import { RESEARCH_METRIC_METHOD } from "@/lib/research-metrics";
@@ -32,6 +33,9 @@ export async function GET(request: Request) {
       title: entity.h1,
       description: entity.count_sentence,
       publisher: "Netify Group Limited",
+      buyer_profile_version: buyerProfiles.version,
+      buyer_profiles_checked_at: buyerProfiles.checked_at,
+      buyer_profiles: buyerProfiles.profiles,
       license: "https://creativecommons.org/licenses/by/4.0/",
       contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
       market_view_contract_version: SHORTLIST_VIEW_CONTRACT_VERSION,

@@ -1,4 +1,5 @@
 "use client";
+import ShortlistProviderDirectory from "./ShortlistProviderDirectory";
 import { parseResearchHandoff } from "@/lib/research-handoff";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import { researchMetrics } from "@/lib/research-metrics";
@@ -29,12 +30,14 @@ export default function SourcingEntrance({
   initialSelection,
   features,
   showProductFocus = false,
+  buyerProfiles = false,
 }: {
   vendors: (ShortlistVendor & { best_for?: string; editorial?: ProviderEditorialReview | null; response_panel?: PublicPanelMember | null })[];
   initialSector?: string;
   initialSelection?: {slug:string; action:Action};
   features: { id: string; name: string }[];
   showProductFocus?: boolean;
+  buyerProfiles?: boolean;
 }) {
   const [brief, setBrief] = useState<SourcingBrief>({
     sites: 10,
@@ -285,6 +288,7 @@ export default function SourcingEntrance({
   }
   return (
     <fieldset
+      className={buyerProfiles ? "buyer-journey" : undefined}
       disabled={busy}
       style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
     >
@@ -298,7 +302,7 @@ export default function SourcingEntrance({
           void prepare();
         }}
       >
-        <h2>What do you need?</h2>
+        <h2>{buyerProfiles ? "Your shortlist and requirements" : "What do you need?"}</h2>
         <p>Enter what you know about your sites, users and service needs.</p>
         <label className="sourcing-check">
           <input
@@ -552,6 +556,7 @@ export default function SourcingEntrance({
         </form>
         <p role="status">{message}</p>
       </section>
+      {buyerProfiles ? <ShortlistProviderDirectory vendors={vendors} selected={selected} onChoose={choose} onReview={() => void reviewRequests()} reviewMessage={reviewMessage} /> : (
       <section id="provider-research" className="sourcing-directory">
         <p className="sourcing-eyebrow">Open research</p>
         <h2>All {vendors.length} researched providers</h2>
@@ -717,7 +722,7 @@ export default function SourcingEntrance({
             </table>
           </div>
         </details>
-      </section>
+      </section>)}
     </fieldset>
   );
 }
