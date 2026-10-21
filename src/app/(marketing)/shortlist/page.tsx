@@ -58,6 +58,7 @@ export default async function ShortlistPage({
           <a className="sourcing-outline" href="#provider-research">Browse all {vendors.length} providers</a>
         </nav>
         {view!=="all" && <p>{SHORTLIST_VIEWS[view].answer}</p>}
+        {view==="all" && <p>{SHORTLIST_VIEWS["sd-wan-vendors"].answer}</p>}
       </header>
       <div className="sourcing-steps" aria-label="How it works">
         <div><strong>1. Tell us what you need</strong><p>Enter your sites, users, locations and service needs.</p></div>
@@ -72,6 +73,7 @@ export default async function ShortlistPage({
         </p>
       )}
       <SourcingEntrance
+        showProductFocus={view === "all"}
         features={FEATURES.map(({ id, name }) => ({ id, name }))}
         vendors={vendors.map(v=>publicEvidenceOutput({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))}
         initialSelection={typeof query.provider === "string" && vendors.some(v=>v.slug===query.provider) && typeof query.action === "string" && ["contacts","demo","proposals"].includes(query.action) ? {slug:query.provider,action:query.action as "contacts"|"demo"|"proposals"} : undefined}
