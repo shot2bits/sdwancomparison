@@ -28,11 +28,13 @@ export default function SourcingEntrance({
   initialSector,
   initialSelection,
   features,
+  showProductFocus = false,
 }: {
   vendors: (ShortlistVendor & { best_for?: string; editorial?: ProviderEditorialReview | null; response_panel?: PublicPanelMember | null })[];
   initialSector?: string;
   initialSelection?: {slug:string; action:Action};
   features: { id: string; name: string }[];
+  showProductFocus?: boolean;
 }) {
   const [brief, setBrief] = useState<SourcingBrief>({
     sites: 10,
@@ -582,6 +584,9 @@ export default function SourcingEntrance({
                 </span>
               </div>
               <p>{v.category.charAt(0).toUpperCase() + v.category.slice(1)}</p>
+              {showProductFocus && v.product_focus?.trim() && (
+                <p data-product-focus={v.slug}><strong>Product focus:</strong> {v.product_focus}</p>
+              )}
               {v.editorial && <div>
                 <p><strong>Netify assessment:</strong> {v.editorial.buyer_fit}</p>
                 <h4>Strengths for this buyer</h4><ul>{v.editorial.strengths.map(text=><li key={text}>{text}</li>)}</ul>
