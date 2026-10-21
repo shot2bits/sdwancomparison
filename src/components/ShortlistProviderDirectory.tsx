@@ -24,15 +24,25 @@ export default function ShortlistProviderDirectory({ vendors, selected, onChoose
     return profile ? [{ ...profile, category: v.category }] : [];
   });
   useEffect(() => {
-    const openLinkedProfile = () => {
-      const slug = window.location.hash.startsWith("#provider-") ? window.location.hash.slice(10) : "";
+    const openLinkedProfile = (hash = window.location.hash) => {
+      const slug = hash.startsWith("#provider-") ? hash.slice(10) : "";
       if (!vendors.some(v => v.slug === slug)) return;
       setActive(slug);
       requestAnimationFrame(() => document.getElementById(`provider-${slug}`)?.scrollIntoView({ behavior: "auto", block: "start" }));
     };
     openLinkedProfile();
-    window.addEventListener("hashchange", openLinkedProfile);
-    return () => window.removeEventListener("hashchange", openLinkedProfile);
+    const onHashChange = () => openLinkedProfile();
+    const onLinkedProfile = (event: MouseEvent) => {
+      const anchor = event.target instanceof Element ? event.target.closest("a") : null;
+      const hash = anchor?.getAttribute("href");
+      if (hash?.startsWith("#provider-")) openLinkedProfile(hash);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    document.addEventListener("click", onLinkedProfile, true);
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      document.removeEventListener("click", onLinkedProfile, true);
+    };
   }, [vendors]);
   const filtered = profiles.filter(p => p.name.toLowerCase().includes(search.trim().toLowerCase()) && (type === "all" || p.category.includes(type)));
   const shown = expanded || search.trim() || type !== "all" ? filtered : filtered.slice(0, 8);
