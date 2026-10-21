@@ -292,6 +292,7 @@ export default function SourcingEntrance({
       disabled={busy}
       style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
     >
+      {buyerProfiles && <ShortlistProviderDirectory vendors={vendors} selected={selected} onChoose={choose} onReview={() => void reviewRequests()} reviewMessage={reviewMessage} />}
       {articleSource && <p className="sourcing-small">Requirements carried from <a href={articleSource}>your research article</a>. Review and edit them before preparing the plan. No supplier has been selected or contacted.</p>}
       <form
         id="sourcing-brief"
@@ -556,7 +557,7 @@ export default function SourcingEntrance({
         </form>
         <p role="status">{message}</p>
       </section>
-      {buyerProfiles ? <ShortlistProviderDirectory vendors={vendors} selected={selected} onChoose={choose} onReview={() => void reviewRequests()} reviewMessage={reviewMessage} /> : (
+      {!buyerProfiles && (
       <section id="provider-research" className="sourcing-directory">
         <p className="sourcing-eyebrow">Open research</p>
         <h2>All {vendors.length} researched providers</h2>
