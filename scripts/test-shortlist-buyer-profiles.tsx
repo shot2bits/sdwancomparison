@@ -6,6 +6,13 @@ import content from '../data/shortlist-buyer-profiles.json';
 const vendors = content.profiles.map(p => ({slug:p.slug,name:p.name,category:p.role.toLowerCase()}));
 const html = renderToStaticMarkup(<Directory vendors={vendors} selected={{'cato-networks':['demo']}} onChoose={()=>{}} onReview={()=>{}} reviewMessage=""/>);
 assert.equal(content.profiles.length,30);
+assert(html.includes('Showing 30 of 30 providers.'));
+assert.equal((html.match(/class="buyer-profile"/g) ?? []).length,30);
+assert.equal((html.match(/class="buyer-profile-toggle"/g) ?? []).length,30);
+assert(!html.includes('hidden=""'));
+assert(!html.includes('Show all 30 providers'));
+assert(html.includes('Expand all profiles'));
+assert(html.includes('Collapse all profiles'));
 assert.equal(new Set(content.profiles.map(p=>p.slug)).size,30);
 assert(html.includes('Self-managed, co-managed or fully managed'));
 assert(html.includes('Hands-Free Management'));
@@ -19,6 +26,9 @@ assert(html.includes('1 provider selected'));
 for(const p of content.profiles){
   assert(p.facts.length>0,p.slug);
   assert(html.includes(`id="provider-${p.slug}"`),p.slug);
+  const section = html.split(`id="provider-${p.slug}"`)[1].split('</details>')[0];
+  assert(section.includes(`<h3>${p.name.replaceAll('&', '&amp;')}</h3>`),p.slug);
+  assert(section.includes(p.facts[0].label),p.slug);
   for(const f of p.facts){assert.equal(new URL(f.url).protocol,'https:');assert(f.qualification!==undefined);}
   assert(p.offers.every(o=>!o.name.includes('Black Lotus Labs')));
 }
