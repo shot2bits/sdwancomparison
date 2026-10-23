@@ -177,3 +177,11 @@ Released via fast-forward Git push at `5e4388fdd01ddc52cf43613b20173a329094431b`
 Owner confirmed Monday–Friday 09:00–17:00 Europe/London and a red overdue warning after eight working hours. Configured `data/sourcing-operations.json`; desk address remains support@netify.com. Weekends are excluded and GMT/BST changes are handled. Bank holidays are not separately excluded. This is an internal queue warning, not a supplier proposal SLA. The proposal-count and delivery-day undertaking remains unset pending supplier commitments.
 
 Validation: action-first suite passed including explicit unconfigured-hours fallback, weekend/DST checks, and exact-eight-hours versus eight-hours-plus-one-minute warning boundary. Nonmutating production build passed. No real buyer request or email was created for this verification.
+
+## 23 October 2026: BT original profile and shortlist completion
+
+Owner authorised completing BT only before moving to the next provider. Full original source is preserved verbatim; no Neon record or original source document changed. New dated research is separate from Harry Yelland's writing. 37 sourced notes cover 77 of 103 original rows containing uncertainty wording; this is scoped coverage, not a count of confirmed BT-included capabilities. 26 entries need direct service-specific BT evidence and each has an explicit question. Important corrections: Fortinet managed SASE launch 25 November 2024; International Global Fabric SSE choices expanded 14 October 2026; BT SOC 2 report available under NDA, exact service scope to check; RBI underlying-platform select availability, not automatic BT inclusion.
+
+Shortlist BT overview is exactly 200 original words selected as complete source sentences. Other 29 profiles, sourcing actions, provider evidence, ordering, URLs and canonical rules unchanged. Original BT overview provenance is tied to the source document hash. Full profile retains all 2,138 original paragraphs and 22 tables, plus separately identified sourced research in HTML, JSON and Markdown.
+
+Validation/release identities and actual browser results are appended after completion. No claim that all BT evidence gaps have been resolved.

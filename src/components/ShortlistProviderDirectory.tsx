@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import buyerProfiles from "@data/shortlist-buyer-profiles.json";
+import btOverview from "@data/bt-harry-overview.json";
 import SourcingActions, { type SourcingAction } from "./SourcingActions";
 
 type Vendor = { slug: string; name: string; category: string };
@@ -80,12 +81,12 @@ export default function ShortlistProviderDirectory({ vendors, selected, onChoose
       <summary className="buyer-profile-toggle"><h3>{p.name}</h3><span>{p.management}</span><span className="buyer-profile-toggle-label"><span className="buyer-expand-label">Expand profile</span><span className="buyer-collapse-label">Collapse profile</span></span></summary>
       <div className="buyer-profile-body">
       <div className="buyer-profile-heading"><div><p className="buyer-label">Provider profile</p><p className="sourcing-small">{p.role}</p></div><a href={p.profile}>Full technical profile ↗</a></div>
-      <div className="buyer-profile-summary"><div><h4>Products and platform</h4><p>{p.products.join(" · ")}</p></div><div><h4>Delivery and management</h4><p>{p.management}</p></div></div>
+      {p.slug === btOverview.provider_slug ? <div className="buyer-original-overview" data-original-author="Harry Yelland"><h4>Overview by Harry Yelland</h4>{btOverview.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}<p className="sourcing-small">200 words selected verbatim from Harry’s full profile.</p><a className="buyer-full-profile" href={btOverview.profile_url}>Read the full BT profile and research updates ↗</a></div> : <><div className="buyer-profile-summary"><div><h4>Products and platform</h4><p>{p.products.join(" · ")}</p></div><div><h4>Delivery and management</h4><p>{p.management}</p></div></div>
       <h4 className="buyer-subheading">Services and deployment</h4>
       <dl className="buyer-facts">{p.facts.map((fact, i) => <div key={`${fact.label}-${i}`}><dt>{fact.label}</dt><dd><p>{fact.value}</p>{fact.qualification && <p className="sourcing-small">{fact.qualification}</p>}<a href={fact.url} target="_blank" rel="noopener noreferrer">{fact.locator || "Service details"} ↗</a></dd></div>)}</dl>
       <div className="buyer-customers"><h4>Customer deployments</h4>{p.cases.length ? p.cases.map(c => <div key={c.name}><h5>{c.name}</h5>{c.outcome && <p>{c.outcome}</p>}<p className="sourcing-small">{c.qualification}</p>{c.source && <a href={c.source} target="_blank" rel="noopener noreferrer">Customer story ↗</a>}</div>) : <p>Explore the deployment references in the <a href={p.profile}>full provider research</a>.</p>}</div>
       <details><summary>Products and delivery models</summary><div className="buyer-table-wrap"><table><thead><tr><th>Product or service</th><th>Delivery model</th></tr></thead><tbody>{p.offers.map(o => <tr key={o.name}><td>{o.name}</td><td>{o.delivery}</td></tr>)}</tbody></table></div></details>
-      <div className="buyer-proposal-scope"><h4>What to include in your proposal request</h4><ul><li>Name the product, security subscriptions and management services being quoted.</li><li>Assign responsibility for policy changes, monitoring, incidents and ISP escalation.</li><li>Include site coverage, contracting entity, response times and all recurring charges.</li></ul></div>
+      <div className="buyer-proposal-scope"><h4>What to include in your proposal request</h4><ul><li>Name the product, security subscriptions and management services being quoted.</li><li>Assign responsibility for policy changes, monitoring, incidents and ISP escalation.</li><li>Include site coverage, contracting entity, response times and all recurring charges.</li></ul></div></>}
       <SourcingActions slug={p.slug} selected={selected[p.slug] ?? []} onChoose={onChoose} />
     </div></details>)}
     <div className="buyer-review"><p role="status">{selectedCount} provider{selectedCount === 1 ? "" : "s"} selected. Choose proposals, demos or pre-sales contacts in each profile.</p><button className="sourcing-primary" type="button" onClick={onReview}>Review selected providers and requests ({selectedCount})</button><p id="request-review-message" tabIndex={-1} role="status">{reviewMessage}</p></div>

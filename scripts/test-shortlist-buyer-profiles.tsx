@@ -28,8 +28,10 @@ for(const p of content.profiles){
   assert(html.includes(`id="provider-${p.slug}"`),p.slug);
   const section = html.split(`id="provider-${p.slug}"`)[1].split('</details>')[0];
   assert(section.includes(`<h3>${p.name.replaceAll('&', '&amp;')}</h3>`),p.slug);
-  assert(section.includes(p.facts[0].label),p.slug);
+  if(p.slug!=='bt-business') assert(section.includes(p.facts[0].label),p.slug);
   for(const f of p.facts){assert.equal(new URL(f.url).protocol,'https:');assert(f.qualification!==undefined);}
   assert(p.offers.every(o=>!o.name.includes('Black Lotus Labs')));
 }
+assert(html.includes('data-original-author="Harry Yelland"'));
+assert(html.includes('Read the full BT profile and research updates'));
 console.log('PASS: all 30 profiles are server-rendered; Cato management, source links, case scope and selection state retained; grading labels absent.');

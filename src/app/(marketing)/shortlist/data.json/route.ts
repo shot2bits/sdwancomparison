@@ -1,3 +1,4 @@
+import btOverview from "@data/bt-harry-overview.json";
 import buyerProfiles from "@data/shortlist-buyer-profiles.json";
 import { approvedEditorialReview } from "@/lib/provider-editorial-review";
 import { buyerDecisionGuide } from "@/lib/buyer-decision-guide";
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
       publisher: "Netify Group Limited",
       buyer_profile_version: buyerProfiles.version,
       buyer_profiles_checked_at: buyerProfiles.checked_at,
-      buyer_profiles: buyerProfiles.profiles,
+      buyer_profiles: buyerProfiles.profiles.map(profile => profile.slug === btOverview.provider_slug ? { ...profile, original_overview: btOverview } : profile),
       license: "https://creativecommons.org/licenses/by/4.0/",
       contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
       market_view_contract_version: SHORTLIST_VIEW_CONTRACT_VERSION,

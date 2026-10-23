@@ -1,0 +1,15 @@
+{
+  "provider_slug": "bt-business",
+  "author": "Harry Yelland",
+  "source_document": "BT_ManagedSASE_Profile.docx",
+  "source_document_sha256": "0489ff6960aec560d4da636b2874baf57e6e168b61e1f8d04ec0179bdb615f2d",
+  "word_count": 200,
+  "paragraphs": [
+    "BT is not a single-platform SASE company, but the UK’s largest telecommunications operator and managed service provider, delivering SASE as one service line within a vastly larger, publicly-listed (LSE: BT.A) group.",
+    "BT’s SASE proposition is delivered under its own named managed-connectivity brand, Agile Connect, and is explicitly multi-platform rather than built on a single, proprietary technology stack: BT’s own materials and Netify’s own published research confirm managed SD-WAN delivered on Cisco Meraki and Versa, with managed SASE delivered on Fortinet and Meraki, reinforced by BT’s own Managed Detection and Response service.",
+    "Commercially, BT’s SASE offering is confirmed as quote-based with no published enterprise pricing, and buyers should confirm directly which specific underlying vendor platform (Fortinet, Meraki, or otherwise) is being proposed for their specific deployment, since BT’s own positioning is explicit that platform choice and packaging vary by customer.",
+    "BT's SASE architecture reflects its identity as a large, diversified telecommunications operator and systems integrator rather than a single-platform technology company: the differentiators are infrastructural and operational, not proprietary software.",
+    "On compliance: beyond the confirmed HSCN accreditation, does the specific SASE service itself carry any independently-verified certifications (ISO 27001, SOC 2, or equivalent), distinct from BT Group's broader corporate compliance posture?"
+  ],
+  "profile_url": "https://netify.co.uk/marketplace/bt/"
+}
