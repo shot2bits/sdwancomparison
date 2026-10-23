@@ -185,3 +185,17 @@ Owner authorised completing BT only before moving to the next provider. Full ori
 Shortlist BT overview is exactly 200 original words selected as complete source sentences. Other 29 profiles, sourcing actions, provider evidence, ordering, URLs and canonical rules unchanged. Original BT overview provenance is tied to the source document hash. Full profile retains all 2,138 original paragraphs and 22 tables, plus separately identified sourced research in HTML, JSON and Markdown.
 
 Validation/release identities and actual browser results are appended after completion. No claim that all BT evidence gaps have been resolved.
+
+### BT production acceptance, 23 October 2026
+
+Released by fast-forward Git updates only. Apex source 938170b3c5962cdd77babf91d2d2aec251e6dbda, production dpl_6bDP13Vm67Q8xCAf3R4w2vwhV6aj; release started 10:42:17 UTC. Shortlist source 5ee74e5b8d89dc0d814e676adc57990cb2ab6a70, production dpl_2jmsesFnRheTo8YgAe45N3zoyg7Q; release started 10:44:42 UTC. PRs apex #70 and SASE #25. Both reached READY with the intended public aliases. No CLI upload, promotion, alias reassignment, database import or billing changes.
+
+Public netify.co.uk BT HTTP comparison passed: all 2,138 original paragraphs exactly and in order, 22 tables, all 565 citation links resolve, complete JSON original blocks and matching research data, Markdown includes every research note and the full original source. Research remains separate from Harry's text: 37 notes covering 77 scoped uncertainty rows, plus 26 explicit questions; underlying-platform support does not imply BT service inclusion.
+
+Public shortlist HTML contains the exact 200 original words and all 30 provider cards. JSON comparison against the saved production baseline proves all 30 provider records, all 30 governed profiles, the other 29 buyer profiles and all 15 FAQs unchanged. BT's existing JSON fields are unchanged with its original overview added. Self-canonical remains https://netify.co.uk/sase/shortlist/. Public browser verifies the expanded BT overview and profile link; no console errors. Preview proposal selection and deselection passed without submission. Phone checks: profile and shortlist body clientWidth/scrollWidth 375/375; no internal profile scroll boxes; one sidebar. Research expansion, hash targeting and source-linked copying work.
+
+Full local and hosted builds, TypeScript, changed-file ESLint, exact paragraph/link-span tests, 103-row source-matched research checks, excerpt provenance tests and existing CI checks passed. Vercel Agent Review was skipped for insufficient credit and is not counted as an independent review.
+
+The first wider live smoke run returned 41 passes and one stale Cloud Voice placement assertion. That assertion predated the already approved move of the calculator to a collapsed panel at the bottom. Updated the read-only checker to require rate card, FAQ, then closed calculator panel; rerun returned 42 passed, zero failed at 10:47 UTC. This test-only correction and acceptance notes remain on the work branch; no additional production UI change. Current Cloud Voice releases remain intact.
+
+Evidence in parent workspace: research/bt-completion-2026-10-23/verification.json, live-data-comparison.json, production-before/, production-after/, smoke-42-passed.txt, live-bt-profile.png and live-bt-shortlist.png. Scope ends at BT; next provider awaits owner instruction.
