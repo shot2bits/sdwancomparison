@@ -1,3 +1,7 @@
+## 29 October 2026: Resell menu LIVE
+
+Source3dbf338359b83d470b0b75270bf2492b44247fca. PR26 https://github.com/shot2bits/sdwancomparison/pull/26. Exact-source sourcing Redis workflow40968655118 succeeded. Work branch fetched/rebased unchanged, fast-forwarded release/2026-09-30 and pushed through Git over existing SSH access. Production dpl_4F26B8MFXwjAnckfNJw4wcG3wYaQ READY. Registered origin project-8q2xb.vercel.app remains unchanged. Public netify.co.uk/sase/shortlist/ confirms source3dbf338, full page heading and Resell group. Desktop menu opening/Escape and Voice navigation to canonical apex route verified. Public mobile drawer389pxclient/scroll, all nine links available. Main-site companion503a4eb production dpl_4WxspsvHD7eogzdMec1F6j6NfwRq READY. Apex mandatory public smoke42passed0failed at22:54UTC. No customer data, forms or mail touched. Local3015server stopped; viewport reset. Acceptance entry local only, no additional deployment.
+
 ## 29 October 2026: Resell product navigation, release preparation
 
 Owner requested a dedicated top-level Resell menu. Added the same eight programme/product/application links and order portal as the main-site companion, through the existing desktop and mobile renderers. Four BT reseller links move from By Provider; other existing groups and application-specific differences remain. Uses canonical Voice route and the existing BT partnership anchor in the SASE reseller guide. Closed desktop panels use aria-hidden and inert. No content, authentication, sourcing or record changes.
