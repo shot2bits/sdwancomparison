@@ -185,6 +185,8 @@ export default function MegaNav() {
                   <Chevron open={open} />
                 </button>
                 <div
+                  aria-hidden={!open}
+                  inert={!open}
                   style={{ backgroundColor: "rgba(255,255,255,0.97)" }}
                   className={`absolute top-full mt-1 rounded-2xl border border-zinc-200/90 bg-white/95 p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-200 ease-out ${
                     gi >= 2 ? "right-0" : "left-0"

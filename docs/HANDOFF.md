@@ -1,3 +1,9 @@
+## 29 October 2026: Resell product navigation, release preparation
+
+Owner requested a dedicated top-level Resell menu. Added the same eight programme/product/application links and order portal as the main-site companion, through the existing desktop and mobile renderers. Four BT reseller links move from By Provider; other existing groups and application-specific differences remain. Uses canonical Voice route and the existing BT partnership anchor in the SASE reseller guide. Closed desktop panels use aria-hidden and inert. No content, authentication, sourcing or record changes.
+
+Based on verified production Git source release/2026-09-30 at 5ee74e5b8d89dc0d814e676adc57990cb2ab6a70, deployment dpl_2jmsesFnRheTo8YgAe45N3zoyg7Q. New isolated work branch codex/resell-navigation. Full npm run build:nonmutating passed, including sourcing and provider evidence preflight checks; scoped ESLint and whitespace passed. Identical reseller JSON and all eight public destination HTTP checks passed, including SASE anchor. Generated evidence report restored after build; no evidence/data source change included. Browser and CI verification follow before production fast-forward. No forms, production records or notifications.
+
 ## 1 October 2026 — evidence-led shortlist and article sourcing
 
 User approved the citation-review recommendations. Implementation and verification: [release scope](editorial-review/IMPLEMENTATION.md). Named editorial assessments remain unpublished until real writer/reviewer approval; no owner commitments or historical outcomes are invented. Production release identity will be recorded after Git deployment and public checks.

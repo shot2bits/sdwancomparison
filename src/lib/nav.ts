@@ -1,3 +1,5 @@
+import resellerNavigation from "./reseller-navigation.json";
+
 /**
  * Navigation config — app-style accordion sidebar + minimal top bar (v3).
  *
@@ -198,16 +200,12 @@ export const MEGA_GROUPS: MegaGroup[] = [
     items: [
       { label: "BT Fortinet and Cisco Meraki", href: "/bt-fortinet-meraki/", desc: "Buy BT Managed SD-WAN and SASE through Netify." },
       { label: "Buy BT Business", href: "/buy-bt/", desc: "Source connectivity, voice, security and managed networks through Netify." },
-      { label: "BT reseller programme", href: "/resell/bt-business-services/", desc: "The active BT portfolio for UK channel partners." },
-      { label: "Resell BT Business Broadband", href: "/resell/bt-business-broadband/", desc: "BT products, eligibility, commission and the application route." },
-      { label: "BT Business Internet", href: "/resell/bt-business-internet/", desc: "BTnet leased lines and associated managed services." },
-      { label: "BT Cloud Voice", href: "/resell/bt-hosted-voip/", desc: "Hosted voice for organisations and the BT reseller route." },
       { label: "BT SD-WAN and SASE databank", href: "/bt-sase-sd-wan/", desc: "Query sourced BT evidence and turn requirements into a buying brief." },
       { label: "Virgin Media Business profile", href: "/marketplace/virgin-media/", desc: "Connectivity, SD-WAN capabilities and buying fit." },
       { label: "Virgin reseller route", href: "/resell/virgin-media-business/", desc: "Current status and reseller interest registration." },
     ],
-    footerLink: { label: "Reseller order portal", href: "https://reseller.netify.co.uk/" },
   },
+  resellerNavigation as MegaGroup,
 ];
 
 /** The board stands alone in the bar: one tap, no dropdown. */

@@ -1,0 +1,15 @@
+{
+  "label": "Resell",
+  "columns": 2,
+  "items": [
+    { "label": "BT reseller programme", "href": "/resell/bt-business-services/", "desc": "Explore the BT portfolio and how to become a Netify partner." },
+    { "label": "Broadband", "href": "/resell/bt-business-broadband/", "desc": "BT Business Broadband, eligibility and the partner programme." },
+    { "label": "Voice & VoIP", "href": "/resell/voip-reseller/", "desc": "BT Hosted Cloud Voice, reseller support and upfront commissions." },
+    { "label": "Leased lines", "href": "/resell/bt-business-internet/", "desc": "Resell BTnet dedicated internet for business customers." },
+    { "label": "SD-WAN", "href": "/resell/sd-wan-reseller/", "desc": "Explore SD-WAN reseller programmes and Netify’s BT route." },
+    { "label": "SASE", "href": "/insights/reselling-sase-market-guide/#bt-partnership", "desc": "Compare SASE partner models and read about Netify’s BT route." },
+    { "label": "Cloud security", "href": "/resell/bt-cloud-security/", "desc": "Resell BT Connect and Protect through Netify." },
+    { "label": "Apply to resell BT", "href": "/go/bt-reseller-application/", "desc": "Tell Netify about your business and the services you want to sell." }
+  ],
+  "footerLink": { "label": "Reseller order portal", "href": "https://reseller.netify.co.uk/" }
+}
