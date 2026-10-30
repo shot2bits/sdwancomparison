@@ -1,15 +1,85 @@
 {
-  "label": "Resell",
+  "label": "Resell with Netify",
   "columns": 2,
   "items": [
-    { "label": "Netify reseller programme", "href": "/resell/bt-business-services/", "desc": "Explore the BT portfolio and how to become a Netify partner." },
-    { "label": "Broadband", "href": "/resell/bt-business-broadband/", "desc": "BT Business Broadband, eligibility and the partner programme." },
-    { "label": "Voice & VoIP", "href": "/resell/voip-reseller/", "desc": "BT Hosted Cloud Voice, reseller support and upfront commissions." },
-    { "label": "Leased lines", "href": "/resell/bt-business-internet/", "desc": "Resell BTnet dedicated internet for business customers." },
-    { "label": "SD-WAN", "href": "/resell/sd-wan-reseller/", "desc": "Explore SD-WAN reseller programmes and Netify’s BT route." },
-    { "label": "SASE", "href": "/insights/reselling-sase-market-guide/#bt-partnership", "desc": "Compare SASE partner models and read about Netify’s BT route." },
-    { "label": "Cloud security", "href": "/resell/bt-cloud-security/", "desc": "Resell BT Connect and Protect through Netify." },
-    { "label": "Apply to resell BT", "href": "/go/bt-reseller-application/", "desc": "Tell Netify about your business and the services you want to sell." }
+    {
+      "label": "Netify reseller programme",
+      "href": "/resell/bt-business-services/",
+      "desc": "Explore the BT portfolio and how to become a Netify partner."
+    },
+    {
+      "label": "Broadband",
+      "href": "/resell/bt-business-broadband/",
+      "desc": "BT Business Broadband, eligibility and the partner programme."
+    },
+    {
+      "label": "Voice & VoIP",
+      "href": "/resell/voip-reseller/",
+      "desc": "BT Hosted Cloud Voice, reseller support and upfront commissions."
+    },
+    {
+      "label": "Leased lines",
+      "href": "/resell/bt-business-internet/",
+      "desc": "Resell BTnet dedicated internet for business customers."
+    },
+    {
+      "label": "SD-WAN",
+      "href": "/resell/sd-wan-reseller/",
+      "desc": "Explore SD-WAN reseller programmes and Netify\u2019s BT route."
+    },
+    {
+      "label": "SASE",
+      "href": "/insights/reselling-sase-market-guide/#bt-partnership",
+      "desc": "Compare SASE partner models and read about Netify\u2019s BT route."
+    },
+    {
+      "label": "Cloud security",
+      "href": "/resell/bt-cloud-security/",
+      "desc": "Resell BT Connect and Protect through Netify."
+    },
+    {
+      "label": "Apply to resell BT",
+      "href": "/go/bt-reseller-application/",
+      "desc": "Tell Netify about your business and the services you want to sell."
+    }
   ],
-  "footerLink": { "label": "Reseller order portal", "href": "https://reseller.netify.co.uk/" }
+  "footerLink": {
+    "label": "Reseller order portal",
+    "href": "https://reseller.netify.co.uk/"
+  },
+  "comparisonGroup": {
+    "label": "Reseller Comparison",
+    "items": [
+      {
+        "label": "Broadband programmes",
+        "href": "/insights/broadband-reseller-companies/",
+        "desc": "Compare UK broadband reseller routes and commercial models."
+      },
+      {
+        "label": "VoIP programmes",
+        "href": "/comparison/voip-reseller-programmes/",
+        "desc": "Compare voice programmes, billing, branding and support."
+      },
+      {
+        "label": "SD-WAN programmes",
+        "href": "/resell/sd-wan-reseller/",
+        "desc": "Compare SD-WAN reseller programmes and partner routes."
+      },
+      {
+        "label": "SASE programmes",
+        "href": "/insights/reselling-sase-market-guide/",
+        "desc": "Compare SASE vendor, carrier and managed-service partner models."
+      },
+      {
+        "label": "SD-WAN wholesale providers",
+        "href": "/insights/sd-wan-resellers-guide/",
+        "desc": "Read the wider SD-WAN wholesale provider guide and decision matrix."
+      },
+      {
+        "label": "Microsoft Teams reseller list",
+        "href": "/insights/how-to-become-a-microsoft-teams-reseller/",
+        "desc": "Explore Teams reseller routes and the provider list."
+      }
+    ]
+  }
 }

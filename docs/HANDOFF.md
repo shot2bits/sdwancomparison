@@ -1,3 +1,9 @@
+## 30 October2026: Resell with Netify comparison menu companion prepared
+
+Owner requested Resell with Netify > Reseller Comparison. Synced comparisonGroup JSON, MegaGroup type and PanelItems renderer with apex implementation; retains all prior product/application/portal links and adds six live canonical comparison/list destinations. Desktop panel height bounded/scrollable. Source-only pending release. Scoped ESLint/whitespace passed; broad TypeScript run stopped without a result because release is already blocked by sourcing preflight.
+
+Fresh correct-cwd run of scripts/validate-sourcing-operations.ts rejects23expired sector/UK-carrier evidence reviews. No data, dates or guards changed. Main site can release separately; do not claim this header is published. Source is on existing codex/resell-navigation work branch, not integration.
+
 ## 30 October 2026: Resell menu companion release blocked by evidence expiry
 
 Source369059c33c8525f6e240d00a52ca4bca55858e8f, PR27, exact-source CI40977881424 passed. Work branch fetched/rebased unchanged and fast-forwarded into release/2026-09-30 through Git. Production build dpl_68yhewBfAjVRm1v2XFsoYGU1hwyi failed in validate-sourcing-operations.ts:23 sector/UK-carrier evidence reviews expired on30October. No review dates, evidence qualifications, guard or deployment settings changed. Previous successful production remains live; the SASE copy of the Resell overview label is not published. Review/owner extension of those underlying evidence records is a separate outstanding prerequisite. No CLI production upload, promotion or alias reassignment attempted. Local nonmutating build and provider-evidence tests passed; deterministic fixture clocks do not alter production expiry behaviour.

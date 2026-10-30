@@ -82,6 +82,19 @@ function PanelItems({ group, onNavigate }: { group: MegaGroup; onNavigate?: () =
           </a>
         ))}
       </div>
+      {group.comparisonGroup && (
+        <section aria-label={group.comparisonGroup.label} className="mt-3 border-t border-zinc-200/80 pt-3">
+          <h2 className="px-2.5 pb-2 text-[12px] font-semibold tracking-wide text-zinc-600">{group.comparisonGroup.label}</h2>
+          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+            {group.comparisonGroup.items.map(item => (
+              <a key={item.href} href={item.href} onClick={onNavigate} className="block rounded-xl p-2.5 no-underline transition-colors hover:bg-zinc-50/80">
+                <span className="block text-[12.5px] font-semibold leading-snug text-zinc-900">{item.label}</span>
+                <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">{item.desc}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
       {group.footerLink && (
         <a
           href={group.footerLink.href}
@@ -188,7 +201,7 @@ export default function MegaNav() {
                   aria-hidden={!open}
                   inert={!open}
                   style={{ backgroundColor: "rgba(255,255,255,0.97)" }}
-                  className={`absolute top-full mt-1 rounded-2xl border border-zinc-200/90 bg-white/95 p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-200 ease-out ${
+                  className={`absolute top-full mt-1 max-h-[calc(100dvh-80px)] overflow-y-auto rounded-2xl border border-zinc-200/90 bg-white/95 p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-200 ease-out ${
                     gi >= 2 ? "right-0" : "left-0"
                   } ${group.columns === 2 ? "w-[540px]" : "w-[360px]"} ${
                     open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-1 opacity-0"

@@ -164,6 +164,7 @@ export type MegaGroup = {
   label: string;
   columns: 1 | 2;
   items: MegaItem[];
+  comparisonGroup?: { label: string; items: MegaItem[] };
   footerLink?: { label: string; href: string };
 };
 
