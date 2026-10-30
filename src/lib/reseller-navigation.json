@@ -2,7 +2,7 @@
   "label": "Resell",
   "columns": 2,
   "items": [
-    { "label": "BT reseller programme", "href": "/resell/bt-business-services/", "desc": "Explore the BT portfolio and how to become a Netify partner." },
+    { "label": "Netify reseller programme", "href": "/resell/bt-business-services/", "desc": "Explore the BT portfolio and how to become a Netify partner." },
     { "label": "Broadband", "href": "/resell/bt-business-broadband/", "desc": "BT Business Broadband, eligibility and the partner programme." },
     { "label": "Voice & VoIP", "href": "/resell/voip-reseller/", "desc": "BT Hosted Cloud Voice, reseller support and upfront commissions." },
     { "label": "Leased lines", "href": "/resell/bt-business-internet/", "desc": "Resell BTnet dedicated internet for business customers." },
