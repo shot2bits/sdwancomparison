@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { mergeNeonProviderRecords, LIVE_SHORTLIST_CONTRACT_VERSION } from "../src/lib/live-shortlist";
+import { mergeNeonProviderRecords as mergeWithCurrentClock, LIVE_SHORTLIST_CONTRACT_VERSION } from "../src/lib/live-shortlist";
 import type { ProviderMatchRecord } from "../src/lib/provider-matching";
 import { buildShortlist } from "../src/lib/shortlist-core";
 import { FEATURES, FEATURE_NAMES, getShortlistDataset } from "../src/lib/vendors";
@@ -37,6 +37,16 @@ const record: ProviderMatchRecord = {
   sectors: { "Financial services": { ...supported(), evidence_strength: "strong" } },
 };
 
+// This fixture tests a dated UK qualification while it is valid. Keep its
+// clock explicit so the assertion does not change when the review expires.
+function atReviewTime<T>(iso: string, action: () => T): T {
+  const originalNow = Date.now;
+  try { Date.now = () => Date.parse(iso); return action(); }
+  finally { Date.now = originalNow; }
+}
+function mergeNeonProviderRecords(...args: Parameters<typeof mergeWithCurrentClock>) {
+  return atReviewTime('2026-10-29T12:00:00Z', () => mergeWithCurrentClock(...args));
+}
 const [provider] = mergeNeonProviderRecords(base, [record]);
 assert.equal(LIVE_SHORTLIST_CONTRACT_VERSION, "neon-shortlist/2.0.0");
 assert.equal(provider.slug, "hpe-aruba");
@@ -51,6 +61,8 @@ assert.equal(provider.capabilities.f10_dynamic_path_selection, "yes");
 assert.equal(provider.capabilities.f28_full_sase_platform, "yes");
 assert.equal(provider.capabilities.f08_flexible_commercial_model, "unknown", "a legacy grade must not survive without current Neon evidence");
 assert.equal(provider.regions.uk_ireland, "partial", "dated UK review qualifies the broad regional feed");
+const [expiredRegionReview] = atReviewTime('2027-02-01T12:00:00Z', () => mergeWithCurrentClock(base, [record]));
+assert.notEqual(expiredRegionReview.projection_provenance?.resolution, 'reviewed_override', 'expired dated qualifications must not be applied');
 assert.equal(provider.sectors.financial_services, "yes");
 assert.equal(provider.supported_clouds.azure, "yes");
 assert.equal(provider.ai_capability.ai_assistant, "yes");

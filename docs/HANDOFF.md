@@ -1,3 +1,7 @@
+## 30 October 2026: Deterministic dated-evidence regression fixture
+
+The menu-label companion CI failed after the date rollover: test-live-shortlist expected a dated UK projection qualification to remain active after its review window. Production data and evidence dates are unchanged. Scoped the synchronous shortlist fixture projections and the citation-consistency fixture to an explicit valid review date, restoring the clock afterwards. Added an explicit post-expiry check that an expired reviewed override is not applied; the citation fixture also retains its explicit expired-Cato check. Existing explicit editorial-expiry/newer-review tests remain. Full evidence suite and CI must pass before release.
+
 ## 29 October 2026: Resell menu naming correction
 
 Owner requested removing “BT Reseller Programme” as a programme label. Renamed the overview entry to “Netify reseller programme”, retaining its existing /resell/bt-business-services/ destination and all other entries. Companion to the main-site VoIP editorial restructure. No product, data, auth or application changes. Build/CI/public verification precede Git release.

@@ -5,6 +5,11 @@ import {mergeNeonProviderRecords} from '../src/lib/live-shortlist';
 import {ProviderMatchRecordSchema} from '../src/lib/provider-matching';
 import {applyUKEvidence} from '../src/lib/uk-evidence';
 import {publicShortlistPreview} from '../src/lib/public-shortlist';
+// The reconciled fixture contains dated UK reviews. Test their valid window
+// explicitly; the expired-Cato assertion below still exercises expiry.
+const originalClock = Date.now;
+Date.now = () => Date.parse('2026-10-29T12:00:00Z');
+try {
 const fixture=JSON.parse(readFileSync('docs/evidence-reconciliation/reconciled-match-fixture.json','utf8'));
 const vendors=mergeNeonProviderRecords(getShortlistDataset(),fixture.providers.map((p:unknown)=>ProviderMatchRecordSchema.parse(p)));
 const cato=vendors.find(v=>v.slug==='cato-networks')!;
@@ -42,3 +47,5 @@ try {
  assert(mcp.matches.every((v:any)=>!v.summary.includes('weighted')));
 }finally{globalThis.fetch=originalFetch;}
 console.log('PASS older connector uses private sourcing fallback without a publication gate; null evidence accepted');
+
+} finally { Date.now = originalClock; }
