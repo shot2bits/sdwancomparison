@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-31",
+  "sase_source": "97e0d973530a4b829476d3dd5257b8d529457e1d",
+  "sase_deployment": "dpl_8jQaxdFMY6GJA3QUX65WR3wx2qwV",
+  "sase_ci": 41246090678,
+  "apex_source": "65765a8dcd04555af815f426fcde7f3d4fbb7201",
+  "apex_deployment": "dpl_AteY3BvaSRF5XJ7x8ED613HfjDCa",
+  "apex_ci": 41246221177,
+  "public_smoke": {
+    "passed": 42,
+    "failed": 0,
+    "at": "2026-10-31 22:07 UTC"
+  },
+  "http_checks": [
+    {
+      "path": "/sase/account/",
+      "status": 200,
+      "passed": true,
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/sase/opportunities/board/",
+      "status": 200,
+      "passed": true,
+      "cache_control": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/sase/opportunities/opp_mue6v5sin89lsb/",
+      "status": 200,
+      "passed": true,
+      "cache_control": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/sase/api/admin/access-report/",
+      "status": 403,
+      "passed": true,
+      "cache_control": "private, no-store"
+    },
+    {
+      "path": "/sase/api/sourcing/desk/",
+      "status": 403,
+      "passed": true,
+      "cache_control": "private, no-store"
+    }
+  ],
+  "browser": {
+    "live_source_matches": true,
+    "signed_in_support_account": true,
+    "internal_workspace_label": true,
+    "staff_count_explanation": true,
+    "existing_admin_desk_loaded": true,
+    "unworked_external_requests_visible": 2,
+    "access_report_loaded": true,
+    "historical_zero_not_claimed": true,
+    "main_site_menu_handoff": "https://netify.co.uk/sase/account/",
+    "new_requirement_preview_handoff": "/sase/shortlist/",
+    "browser_errors_observed": 0
+  },
+  "initial_runtime_error_scan": "No error/fatal groups returned for this SASE deployment in the selected ten-minute window",
+  "production_test_records_or_messages_created": false,
+  "evidence": "23 exact expired overrides remain excluded with unchanged dates, grades and pending human sign-offs"
+}
