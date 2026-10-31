@@ -26,6 +26,20 @@ export default function AccountPage() {
         <p className="text-sm text-[var(--ink-600)]">Your procurements and what the agent remembers, all tied to your signed-in email and recoverable from any device.</p>
       </div>
 
+      <section aria-labelledby="access-heading" className="mb-8 rounded-2xl bg-zinc-50 p-6 sm:p-8">
+        <p className="eyebrow mb-2">Choose your next step</p>
+        <h2 id="access-heading" className="text-2xl font-semibold tracking-tight">What would you like to do?</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {[
+            ['New requirement', 'Describe your SD-WAN or SASE requirement. Review the brief and approve which suppliers Netify may approach.', '/sase/shortlist/', 'project'],
+            ['Return to my workspace', 'Sign in below to reopen a confirmed request or published project.', '#workspace-sign-in', 'returning'],
+            ['Supplier access', 'Register your company or return to the supplier area.', '/sase/for-suppliers/', 'supplier'],
+            ['Reseller order portal', 'Place and track orders through the Netify reseller portal.', 'https://reseller.netify.co.uk/', 'reseller'],
+          ].map(([title, description, href, destination]) => <a key={destination} href={href} data-access-route={destination} className="rounded-xl border border-zinc-200 bg-white p-5 no-underline transition-colors hover:border-zinc-500 focus-visible:outline-2 focus-visible:outline-offset-4"><strong className="block text-base">{title} →</strong><span className="mt-2 block text-sm leading-6 text-zinc-600">{description}</span></a>)}
+        </div>
+        <p className="mt-5 text-sm leading-6">Start with your requirements. No account is needed to research providers or prepare a brief. Nothing is shared with suppliers without your approval.</p>
+      </section>
+
       {/* ONE ROUTE TO PUBLISH, AND THEREFORE ONE ROUTE TO AN ACCOUNT
           (Robert's ruling, 30 Jul 2026, after a buyer in Mauritius arrived
           from Google, clicked Sign in and verified an email address without
@@ -43,11 +57,11 @@ export default function AccountPage() {
       <div className="mb-8 rounded-md border border-[var(--ink-200,#e5e5e5)] p-5">
         <p className="m-0 text-sm text-[var(--ink-600,#555)]">
           You can return to a confirmed sourcing request, approved circuit-pricing request or published project with the same work email. To start a new requirement,{" "}
-          <Link href="/#describe" className="underline">describe your project on the front page</Link>.
+          <a href="/sase/shortlist/" data-access-route="project" className="underline">describe your project and prepare a sourcing request</a>.
         </p>
       </div>
 
-      <div className="mb-8">
+      <div id="workspace-sign-in" className="mb-8 scroll-mt-24">
         <p className="eyebrow mb-2">Already have a confirmed request or project?</p>
         <SignIn role="buyer" prompt="Sign in with the same work email used for your confirmed request or project." />
         <p className="mt-3 text-xs text-[var(--ink-500)]">

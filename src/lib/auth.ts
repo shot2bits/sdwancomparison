@@ -31,7 +31,9 @@ export function clearCookieHeader(): string {
 }
 
 export async function sessionFromRequest(req: Request): Promise<AuthSession | null> {
-  return getSession(parseCookie(req, SESSION_COOKIE));
+  const session = await getSession(parseCookie(req, SESSION_COOKIE));
+  // Existing administrator identity remains authoritative for the desk too.
+  return session && isAdminEmail(session.email) ? { ...session, role: "netify", vendor_slug: null } : session;
 }
 
 /**

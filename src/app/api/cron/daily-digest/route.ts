@@ -1,3 +1,4 @@
+import {isAdminEmail} from "@/lib/access-control";
 import { pendingSourcingNotifications } from "@/lib/sourcing-notifications";
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import {
@@ -129,7 +130,9 @@ export async function GET(req: Request) {
   // Sessions created in the window, split by role; netify/admin excluded
   // from the headline count but reported.
   const sessionsNew = sessions.filter((s) => (s.created ?? 0) >= since);
-  const buyerSessionsNew = sessionsNew.filter((s) => s.role === "buyer");
+  const internalSession = (s: {email:string;role:string}) => s.role === "netify" || isAdminEmail(s.email) || /@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(s.email);
+  const buyerSessionsNew = sessionsNew.filter((s) => s.role === "buyer" && !internalSession(s));
+  const internalSessionsNew = sessionsNew.filter(internalSession);
   const supplierSessionsNew = sessionsNew.filter((s) => s.role === "supplier");
   const buyerDomains = Array.from(new Set(buyerSessionsNew.map((s) => (s.email.split("@")[1] ?? "").toLowerCase()))).filter(Boolean);
 
@@ -164,12 +167,13 @@ export async function GET(req: Request) {
     `- Of those, consent recorded: ${consentedNew.length}`,
     `- Buyer sign-ins: ${buyerSessionsNew.length}${buyerDomains.length ? ` (${buyerDomains.join(", ")})` : ""}`,
     `- Vendor sign-ins: ${supplierSessionsNew.length}`,
+    `- Internal/admin sign-ins (not buyers): ${internalSessionsNew.length}`,
     "",
     "Watch items:",
-    `- Buyers stuck at the email step (pending submit, link never clicked): ${stuckSubmits.length}${stuckBouncedCount ? ` (${stuckBouncedCount} confirmed bounced, see admin console)` : ""}`,
-    `- Vendor access requests waiting in the queue: ${pending.length}`,
+    `- Prepared submissions awaiting completion: ${stuckSubmits.length} (${stuckSubmits.filter((p,i)=>Boolean(p.owner_email || stuckContacts[i])).length} with a recorded contact; ${stuckBouncedCount} with a confirmed bounce). This does not establish that a verification email was sent.`,
+    `- Access-review queue: ${pending.length} domain entries (${pending.filter(p=>p.role === "buyer").length} buyer, ${pending.filter(p=>p.role === "supplier").length} supplier, ${pending.filter(p=>!p.role).length} historical role unspecified). These are not verified leads.`,
     "",
-    "Running totals:",
+    "Running totals (legacy stored counts; includes internal, test and unverified history):",
     `- Published (all paths): ${combinedPublishedTotal}${delta(combinedPublishedTotal, prevCombinedPublished)}`,
     `    - Project/RFP engine: ${publishedTotal}${delta(publishedTotal, snapshot?.published)}`,
     `    - Opportunity wizard: ${opportunitiesTotal}${delta(opportunitiesTotal, snapshot?.opportunities)}`,

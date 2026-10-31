@@ -1,3 +1,4 @@
+import {recordAccess, accessEntry, type AccessStage} from "@/lib/auth-access-report";
 import { confirmedSourcingOwner } from "@/lib/sourcing-access";
 import { recordPublicationVerification } from "@/lib/publication-verification-events";
 import {CircuitSignupIntentSchema} from "@/lib/circuit-schema";
@@ -50,6 +51,10 @@ export async function POST(req: Request) {
   const returnTo = authReturnPath(rawReturn);
 
   const admin = isAdminEmail(email);
+  const accessRole = admin ? "admin" : isNetifyDomainLive(domain) ? "internal" : role;
+  const entry = accessEntry(rawReturn);
+  const record = (stage: AccessStage) => recordAccess(stage, accessRole, entry);
+  await record("attempted");
   const circuitIntent = body.circuit_intent === undefined ? null : CircuitSignupIntentSchema.safeParse(body.circuit_intent);
   if (circuitIntent && (!circuitIntent.success || role !== "buyer")) return Response.json({error:"Complete your connection requirements and approve the pricing request before verifying your work email."},{status:422,headers:cors});
 
@@ -61,7 +66,7 @@ export async function POST(req: Request) {
   if (role === "buyer" && !admin) {
     const website = typeof body.bot_proof?.website === "string" ? body.bot_proof.website.trim() : "";
     const proof = verifyAuthChallenge(typeof body.bot_proof?.challenge === "string" ? body.bot_proof.challenge : "");
-    if (website || !proof.ok) return Response.json({ error: "We could not verify this sign-in request. Refresh the page and try again." }, { status: 403, headers: cors });
+    if (website || !proof.ok) { await record("challenge_rejected"); return Response.json({ error: "We could not verify this sign-in request. Refresh the page and try again." }, { status: 403, headers: cors }); }
     proofNonce = proof.nonce;
   }
 
@@ -81,7 +86,7 @@ export async function POST(req: Request) {
     withinLimit(`auth:rate:email:${digest(email)}`, 5, 3600),
     withinLimit(`auth:rate:domain:${digest(domain)}`, 12, 3600),
   ]).then((checks) => checks.every(Boolean)).catch(() => true);
-  if (!allowedByRate) return Response.json({ error: "Too many sign-in requests. Please wait before trying again." }, { status: 429, headers: { ...cors, "retry-after": "900" } });
+  if (!allowedByRate) { await record("rate_limited"); return Response.json({ error: "Too many sign-in requests. Please wait before trying again." }, { status: 429, headers: { ...cors, "retry-after": "900" } }); }
 
   // Business-only identity policy, enforced for every role. Admins are exempt.
   //
@@ -90,13 +95,15 @@ export async function POST(req: Request) {
   // is a legitimate SASE buyer, while student sign-ups get filtered by the
   // review. Approved domains land on the buyer allowlist and sign in freely.
   if (!admin && isAcademicDomain(domain) && !(await isBuyerAllowedDomain(domain))) {
+    await record("academic_review");
     try { await recordPendingRequest(email, domain, role); } catch { /* best effort */ }
     return Response.json(
-      { ok: true, message: "Thanks. Academic and research addresses are reviewed before access, because the marketplace supports commercial procurement. The Netify team will check your request (usually within one working day) and email your sign-in link once approved. The question bank, methodology and sample RFP pages are open to read meanwhile." },
+      { ok: true, access_pending: true, message: "Thanks. Academic and research addresses are reviewed before access, because the marketplace supports commercial procurement. The Netify team will check your request (usually within one working day) and email your sign-in link once approved. The question bank, methodology and sample RFP pages are open to read meanwhile." },
       { headers: cors },
     );
   }
   if (!admin && (await isBlockedDomainLive(domain))) {
+    await record("personal_email_rejected");
     try { await recordRejectedAttempt(domain, "webmail"); } catch { /* best effort */ }
     // Business email only, no other door (Robert's ruling, 29 Jul 2026,
     // with the mockup review: the LinkedIn lane is removed). The mailbox
@@ -135,6 +142,7 @@ export async function POST(req: Request) {
     }
     if (!publicationBound) publicationBound = await circuitBuyerCanSignIn(email);
     if (!publicationBound) {
+      await record("project_required");
       return Response.json(
         { error: "Prepare an RFP, short project brief or circuit-pricing request and approve its review before verifying your work email.", publish_required: true },
         { status: 403, headers: cors },
@@ -147,7 +155,7 @@ export async function POST(req: Request) {
     if (consumed !== "OK") return Response.json({ error: "That sign-in request has expired. Refresh the page and try again." }, { status: 403, headers: cors });
   }
 
-  let resolvedRole: "supplier" | "buyer" | "netify" = role;
+  let resolvedRole: "supplier" | "buyer" | "netify" = admin ? "netify" : role;
   let vendor_slug: string | null = null;
 
   if (role === "supplier") {
@@ -161,9 +169,10 @@ export async function POST(req: Request) {
         // review rather than silently blocking. Respond success-shaped so we
         // never confirm which domains map to vendors.
         if (!admin) {
+          await record("supplier_review");
           try { await recordPendingRequest(email, domain); } catch { /* best effort */ }
           return Response.json(
-            { ok: true, message: "Thanks. Your registration request is queued. Your email domain isn't yet linked to a vendor profile, so the Netify team will review it (usually within one working day) and email your sign-in link once approved. No need to do anything else." },
+            { ok: true, access_pending: true, message: "Thanks. Your registration request is queued. Your email domain isn't yet linked to a vendor profile, so the Netify team will review it (usually within one working day) and email your sign-in link once approved. No need to do anything else." },
             { headers: cors },
           );
         }
@@ -195,6 +204,7 @@ export async function POST(req: Request) {
   // already failed.
   const priorBounce = await getBounce(email).catch(() => null);
   if (priorBounce) {
+    await record("known_bounce");
     return Response.json(
       {
         ok: true,
@@ -251,6 +261,7 @@ export async function POST(req: Request) {
   await recordResendSend(sent.emailId, { to: email, kind: "magic_link", ts: Date.now(), rfp_id: rfpId });
   // Authentication tokens are only available through delivery or the private
   // preview capture store. Missing delivery must never become an auth bypass.
-  if (!sent.ok) return Response.json({error:"Sign-in delivery is unavailable. Please try again later."}, {status:503,headers:cors});
+  if (!sent.ok) { await record("delivery_failed"); return Response.json({error:"Sign-in delivery is unavailable. Please try again later."}, {status:503,headers:cors}); }
+  await record("email_sent");
   return Response.json({ ok: true, emailed: true, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
 }

@@ -189,7 +189,11 @@ export default function NetifyEvents() {
       const safePage={page_location:analyticsLocation(window.location.href),page_referrer:analyticsReferrer(document.referrer),page_title:'Netify buying platform'};
       if(googleAllowed()){window.gtag?.('set',safePage);window.gtag?.('event','page_view',safePage);}
       const params=new URLSearchParams(window.location.search);
-      fire('buying_entry',{intent:params.get('intent')==='pricing'?'pricing':'project',channel:params.get('source')==='mcp'?'mcp':'web'});
+      const route = analyticsPath(window.location.href);
+      if (route === '/sase/account/') fire('account_view');
+      else if (['/sase/home/','/sase/workspace/','/sase/rfp-builder/','/sase/circuit-pricing/','/sase-sd-wan-rfp-builder/'].includes(route)) {
+        fire('buying_entry',{intent:params.get('intent')==='pricing'?'pricing':'project',channel:params.get('source')==='mcp'?'mcp':'web'});
+      }
     }
     const startedForms = new WeakSet<Element>();
 
@@ -199,6 +203,10 @@ export default function NetifyEvents() {
       if (!el) return;
       const href = el.getAttribute('href') ?? '';
       const text = (el.textContent ?? '').trim().toLowerCase();
+
+      if (/^\/sase\/account\/?(?:#|$)/.test(href)) fire('account_entry', {source: el.closest('header') ? 'header' : 'workspace'});
+      const accessRoute = el.getAttribute('data-access-route');
+      if (accessRoute) fire('account_route_selected', {destination:accessRoute});
 
       if (href.startsWith('mailto:')) {
         fire('contact_click', { method: 'email' });

@@ -1,3 +1,9 @@
+## 31 October 2026: Account access, access reporting and commercial validation prepared
+
+Owner authorised the proposed fixes, record review, offer, manual service workflow, reporting and draft follow-ups. Work is in the actual checkout on codex/account-access-and-demand-20261031, not a verification-only copy. Adds named owner administrator, consistent existing admin desk role, access-route chooser/current shortlist handoff, explicit queued-review response, private bounded access counters/report, and corrected digest/event classifications. Project-first, personal-email, bot, rate and delivery protections retained. No provider/source evidence, rates or protected commercial copy changed. Private shortlist and six drafts stored outside Git; no customer contact, approvals or notifications. Full file/before/after and actual validation: docs/account-access/change-report.md.
+
+Focused access-handler test, protected-report test, buying-funnel test, scoped ESLint and source TypeScript pass. Standard tsc sees pre-existing generated iCloud conflict copies; source check excludes generated files without altering project config. npm run build fails before compilation on the existing 23 expired evidence reviews. No review dates or guards bypassed. NOT LIVE; no new deployment. Actual evidence review remains the release prerequisite. Apex label companion prepared separately on codex/workspace-access-menu-20261031.
+
 ## 30 October2026: Resell with Netify comparison menu companion prepared
 
 Owner requested Resell with Netify > Reseller Comparison. Synced comparisonGroup JSON, MegaGroup type and PanelItems renderer with apex implementation; retains all prior product/application/portal links and adds six live canonical comparison/list destinations. Desktop panel height bounded/scrollable. Source-only pending release. Scoped ESLint/whitespace passed; broad TypeScript run stopped without a result because release is already blocked by sourcing preflight.

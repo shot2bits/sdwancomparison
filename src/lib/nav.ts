@@ -131,7 +131,7 @@ export const APP_GROUPS: NavGroup[] = [];
  * ACCOUNT is the signed-in destination and is unchanged: anyone who has
  * published still reaches their record, and the magic links in their
  * confirmation emails still land there. */
-export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
+export const SIGN_IN: NavLink = { label: "Workspace Sign In", href: "/sase/account/" };
 export const ACCOUNT: NavLink = { label: "My account", href: "/sase/account/" };
 // One universal CTA everywhere (navigation architecture, 14 July 2026):
 // the top bar, drawer and sidebar all say Start a project. Since 21 July

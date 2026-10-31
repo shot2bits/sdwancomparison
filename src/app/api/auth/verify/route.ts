@@ -1,3 +1,5 @@
+import {recordAccess, accessEntry} from "@/lib/auth-access-report";
+import {isAdminEmail} from "@/lib/access-control";
 import { recordPublicationVerification } from "@/lib/publication-verification-events";
 import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
 import { executePublish, SavedUnpublishedError } from "@/lib/rfp-publish";
@@ -34,11 +36,12 @@ export async function POST(req: Request) {
   let token = body.token ?? null;
   if (!token && body.code && body.email) {
     token = await tokenFromCode(body.email, body.code.trim());
-    if (!token) return Response.json({ error: "That code is not right or has expired. Check the 6 digits in the email, or click the email link instead." }, { status: 401 });
+    if (!token) { await recordAccess("verification_failed", "unknown", accessEntry(req.headers.get("referer") ?? "")); return Response.json({ error: "That code is not right or has expired. Check the 6 digits in the email, or click the email link instead." }, { status: 401 }); }
   }
   const payload = token ? await consumeMagicToken(token) : null;
-  if (!payload) return Response.json({ error: "This sign-in link is invalid or has expired." }, { status: 401 });
+  if (!payload) { await recordAccess("verification_failed", "unknown", accessEntry(req.headers.get("referer") ?? "")); return Response.json({ error: "This sign-in link is invalid or has expired." }, { status: 401 }); }
   const session = await createSession(payload);
+  await recordAccess("verified", isAdminEmail(payload.email) ? "admin" : payload.role === "netify" ? "internal" : payload.role === "supplier" ? "supplier" : "buyer", accessEntry(payload.attr?.page ?? ""));
   // Server-side draft claim and submit: if this sign-in link was requested
   // from a specific draft, attach it to the verified email now, and when the
   // draft carries a wizard-submit intent (pending_submit), complete the
