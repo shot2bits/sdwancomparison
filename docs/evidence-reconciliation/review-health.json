@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T22:10:19.435Z",
+  "generated_at": "2026-10-31T21:54:14.573Z",
   "source": "snapshot_fallback",
   "evidence_issues": [],
   "dataset_versions": [],
@@ -185,19 +185,12 @@
     },
     {
       "slug": "bt-business",
-      "status": "evidenced",
+      "status": "not_researched",
       "name": null,
-      "source_urls": [
-        "https://business.bt.com/insights/case-studies/financial-services-sd-wan/",
-        "https://business.bt.com/networks-digital-services/sd-wan-sase/sase/",
-        "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
-        "https://www.bt.com/about/contact-bt",
-        "https://find-and-update.company-information.service.gov.uk/company/04190816",
-        "https://business.bt.com/networks-digital-services/sd-wan/"
-      ],
-      "checked_at": "2026-09-30T19:56:00Z",
-      "review_due": "2026-10-30T00:00:00Z",
-      "qualification": "BT Group plc is headquartered at 1 Braham Street, London; UK managed SD-WAN is published by BT Business."
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
     },
     {
       "slug": "cato-networks",
@@ -239,18 +232,12 @@
     },
     {
       "slug": "colt-technology-services",
-      "status": "evidenced",
+      "status": "not_researched",
       "name": null,
-      "source_urls": [
-        "https://www.colt.net/customer-stories/byblos-bank-europe",
-        "https://www.colt.net/customer-stories/leading-global-investment-bank",
-        "https://docs.colt.net/legal/terms-and-conditions",
-        "https://docs.colt.net/legal/colt-group-of-companies",
-        "https://find-and-update.company-information.service.gov.uk/company/03232904"
-      ],
-      "checked_at": "2026-09-30T19:56:00Z",
-      "review_due": "2026-10-30T00:00:00Z",
-      "qualification": "Colt Technology Services Group Limited, company 03232904, is registered at Colt House, 20 Great Eastern Street, London. Colt publishes a London SD-WAN deployment."
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
     },
     {
       "slug": "comcast-business",
@@ -416,27 +403,21 @@
     },
     {
       "slug": "virgin-media-o2",
-      "status": "evidenced",
+      "status": "not_researched",
       "name": null,
-      "source_urls": [
-        "https://www.virginmediabusiness.co.uk/legal/terms-and-conditions/",
-        "https://www.virginmediabusiness.co.uk/legal/privacy-policy/"
-      ],
-      "checked_at": "2026-09-30T19:56:00Z",
-      "review_due": "2026-10-30T00:00:00Z",
-      "qualification": "Virgin Media Business Limited, company 01785381, publishes its registered office in Reading and UK business network service terms."
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
     },
     {
       "slug": "vodafone-business",
-      "status": "evidenced",
+      "status": "not_researched",
       "name": null,
-      "source_urls": [
-        "https://www.vodafone.co.uk/privacy",
-        "https://www.vodafone.co.uk/business/case-studies/sd-wan-keeps-optos-connected-worldwide"
-      ],
-      "checked_at": "2026-09-30T19:56:00Z",
-      "review_due": "2026-10-30T00:00:00Z",
-      "qualification": "Vodafone Limited, company 01471587, identifies its registered office in Newbury; the Optos SD-WAN case includes UK operations."
+      "source_urls": [],
+      "checked_at": null,
+      "review_due": null,
+      "qualification": "UK contracting entity requires source confirmation."
     },
     {
       "slug": "zscaler",
@@ -450,145 +431,171 @@
   ],
   "evidence": {
     "pending": 23,
+    "held_expired": 23,
+    "unresolved_expired": 0,
+    "invalid": 0,
     "expiring": 0,
-    "expired": 0,
+    "expired": 23,
     "owner_deadline": "2026-10-16",
     "rows": [
       {
         "slug": "cisco",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "ntt",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "hpe-aruba",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "versa-networks",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "sonicwall",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "expereo",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "verizon-business",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "netskope",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "opensystems",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "lumen",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "zscaler",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "cato-networks",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "orange-business",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "gtt",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "palo-alto-networks",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "fortinet",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "bt-business",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "colt",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "aryaka",
         "kind": "sector",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "bt-business",
         "kind": "uk_carrier",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "virgin-media-o2",
         "kind": "uk_carrier",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "vodafone-business",
         "kind": "uk_carrier",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       },
       {
         "slug": "colt-technology-services",
         "kind": "uk_carrier",
+        "held": true,
         "due": "2026-10-30T00:00:00Z",
         "signed": false
       }
@@ -597,6 +604,6 @@
   "reconciliation": {
     "version": "provider-reconciliation/2026-10-01",
     "review_due": "2026-12-30T00:00:00Z",
-    "days_remaining": 90
+    "days_remaining": 60
   }
 }

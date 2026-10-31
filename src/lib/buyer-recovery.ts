@@ -48,3 +48,8 @@ export function recoveryReminder(title: string, link: string, unsubscribe: strin
   return { subject, text: [...paragraphs, `Review saved project: ${link}`, `Unsubscribe: ${unsubscribe}`].join("\n\n"),
     html: paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join("") + `<p><a href="${escapeHtml(link)}">Review saved project</a></p><p><a href="${escapeHtml(unsubscribe)}">Unsubscribe</a></p>` };
 }
+
+/** No age limit on an unworked request. Age is not evidence of resolution. */
+export function retainSupplierFollowUp(updated: number, connections: number, now = Date.now()) {
+  return connections === 0 || now - updated < 30 * 86400000;
+}

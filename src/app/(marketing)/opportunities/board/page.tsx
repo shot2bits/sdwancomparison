@@ -13,6 +13,7 @@ export default async function Page() {
     <div className="mx-auto max-w-5xl px-6 py-16">
       <h1>Netify Market Record</h1>
       <p className="mt-4">Buyer-approved anonymous sourcing outcomes, including declines and incomplete outcomes.</p>
+      <p className="mt-4">This page records approved outcomes, not every submitted project. Existing project notices and private response rooms remain accessible through their saved links. A submitted requirement does not appear here until an outcome has been reviewed and the buyer has approved publication.</p>
       {records === null ? <p>The Market Record is temporarily unavailable.</p> : records.length === 0 ? <p>No approved outcome records have been published yet.</p> : records.map(record => <div key={record.id}><MarketOutcomeView record={record}/><Link href={`/shortlist/outcomes/${record.id}/`}>Read this outcome</Link></div>)}
       <p className="mt-8">
         <Link href="/shortlist/">Ask Netify to prepare a sourcing plan →</Link>

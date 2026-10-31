@@ -6,6 +6,7 @@
  */
 
 import Link from "next/link";
+import {noticeResponseWindow} from "@/lib/notice-presentation";
 import { RESPONSE_MODE_LABELS, type PublicOpportunity } from "@/lib/opportunity-types";
 import {
   SECTORS,
@@ -59,7 +60,8 @@ export default function NoticeView({
   isPreview?: boolean;
 }) {
   const o = notice;
-  const statusLabel = o.status === "open" ? "Open for responses" : o.status === "awarded" ? "Awarded" : "Closed";
+  const window = noticeResponseWindow(o);
+  const statusLabel = window === "deadline_passed" ? "Response deadline passed" : window === "open" ? "Open for responses" : window === "awarded" ? "Awarded" : "Closed";
   const sector = o.buyer_sector ? labelFor(SECTORS, o.buyer_sector) : "";
   const responseDeadline = formatDate(o.response_deadline ?? o.deadline);
 
@@ -91,7 +93,7 @@ export default function NoticeView({
       {/* 1. Header */}
       <header className="mb-6">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Chip tone={o.status === "open" ? "green" : "neutral"}>{statusLabel}</Chip>
+          <Chip tone={window === "open" ? "green" : "neutral"}>{statusLabel}</Chip>
           {/* One fact, one chip (Harry's Section 1 finding, 28 Jul 2026):
               response mode and attachment merge when both say full RFP. */}
           {o.response_mode === "full_rfp" && o.has_full_rfp ? (

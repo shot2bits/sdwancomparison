@@ -1,3 +1,4 @@
+import {retainSupplierFollowUp} from "@/lib/buyer-recovery";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
 import {
@@ -137,16 +138,21 @@ export async function GET(req: Request) {
   // Brokering queue (deal room slice 1): until suppliers register, the Netify
   // team delivers the private response links. Recent published RFPs with per
   // supplier link, viewed and forwarded state, newest first.
-  const brokerSource = publishedProjects
-    .filter((p) => {
-      const owner = (p.owner_email ?? "").toLowerCase();
-      // Accountable, recent publishes only: the new submit flow always has
-      // an owner, so ownerless test-era publishes stay out of the queue.
-      return owner !== "" && !owner.endsWith("@netify.com") && Date.now() - p.updated < 30 * 86400000;
-    })
-    .sort((a, b) => b.updated - a.updated)
+  // Unworked requests must not disappear when they turn 30 days old.
+  // This queue is read-only and does not authorise supplier outreach.
+  const brokerCandidates = publishedProjects.filter(p => {
+    const owner = (p.owner_email ?? "").toLowerCase();
+    const notice = opportunities.find(o => o.source_rfp_id === p.id);
+    return owner && !isAdminEmail(owner) && !/@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(owner) &&
+      activityClassification(p) !== "test" && (!notice || notice.status === "open");
+  });
+  const candidateConnections = await Promise.all(brokerCandidates.map(p => listConnections(p.id)));
+  const retained = brokerCandidates.map((p, i) => ({p, connections: candidateConnections[i] ?? []}))
+    .filter(({p, connections}) => retainSupplierFollowUp(p.updated, connections.length))
+    .sort((a, b) => Number(a.connections.length > 0) - Number(b.connections.length > 0) || a.p.updated - b.p.updated)
     .slice(0, 25);
-  const brokerConns = await Promise.all(brokerSource.map((p) => listConnections(p.id)));
+  const brokerSource = retained.map(row => row.p);
+  const brokerConns = retained.map(row => row.connections);
   const broker_queue = brokerSource.map((p, i) => ({
     rfp_id: p.id,
     title: p.title,

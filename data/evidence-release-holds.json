@@ -1,0 +1,119 @@
+{
+  "records": {
+    "cisco/sector": {
+      "fingerprint": "57c71999a0f24171cc35ca34ef1bddee350621d89fda5b6f2368088506345274",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "ntt/sector": {
+      "fingerprint": "06e492f6f62128a572bb90a073e1cdc608c3609602cee51869b5891a090d5e32",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "hpe-aruba/sector": {
+      "fingerprint": "9fb7821c05fee7f782673df8869e0ab39782d702666373a7f10d7c74c3b6d91a",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "versa-networks/sector": {
+      "fingerprint": "3743a1300e1ad8f8db02416cdb80a2f5885ba4608cac3d38ff42b5369689cf27",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "sonicwall/sector": {
+      "fingerprint": "eda87189af1502c2749793dc2096822a0e7842b78b0918bb278119adb031218e",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "expereo/sector": {
+      "fingerprint": "c1e2f3654b28e3b7223e8dd15090571f65bfbadf80d66e3f90dd7a3bb8fc3929",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "verizon-business/sector": {
+      "fingerprint": "112a8a25d3715df4b4b77c53d767f3cd19c20fca72fde1221e26aac1d91ea024",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "netskope/sector": {
+      "fingerprint": "48cd6a6a03a69cc63ab69d9dcf547deea05592bfd04fbeb4036345ef9ac11f07",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "opensystems/sector": {
+      "fingerprint": "6fed4ee2916fd115940f2059de98c6715ab9fb9bcac39447a7c4690a667d3762",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "lumen/sector": {
+      "fingerprint": "f1f9073749773cece767e168cd6f40dd1d20bf882b879220131f895e69268d6f",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "zscaler/sector": {
+      "fingerprint": "b9584e6633bffafadd817c0d3cd34b9ba728ce73eae1a1d829afd697068fd947",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "cato-networks/sector": {
+      "fingerprint": "4fd2f841f234a16f92872a6f7b859505869a3bd09c334714a544b3268635d2d3",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "orange-business/sector": {
+      "fingerprint": "624281bedc46a63f4a0eded52cf32817e0ca486d00ac9bc4d9504030c70f55ac",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "gtt/sector": {
+      "fingerprint": "3a91aeb2624affac7e6b1ac465f58c980bb7b4a2aed3ffc2b2e9e4609da2f9be",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "palo-alto-networks/sector": {
+      "fingerprint": "6de53b3680137285d9c55316ea70e73fc56c16a5453187c943bfa69ac8f9de45",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "fortinet/sector": {
+      "fingerprint": "e49b11b6bc72ed29876531081c7b8fa17bddebf1425e1e84ff74f18a46608342",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "bt-business/sector": {
+      "fingerprint": "8e7f4fdc1706c7117cbe0f81e78645bf200ec9079fbc66358ed01e02dcd9265d",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "colt/sector": {
+      "fingerprint": "7496c2a165dd1a5230094e65b3d362e6b2fa5586b7ed327611633bb49d1ab698",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "aryaka/sector": {
+      "fingerprint": "4cd063f2a02d318cdc105a056736bf1920c64958177532fb2c3baf39ee14e939",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "bt-business/uk_carrier": {
+      "fingerprint": "0c90e4333f536ce6a6a39be9826a204580adbcceccae4e1b4982a8351df34bc0",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "virgin-media-o2/uk_carrier": {
+      "fingerprint": "187c6c197b25fc9c6dfeca18984b3972c391e3eda9d3f52c061ce84bc909a02e",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "vodafone-business/uk_carrier": {
+      "fingerprint": "1b2f44862db8f8cdfaa4cfb86b6b4ad8fa5b622398bf930c7c761f5562a042b0",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    },
+    "colt-technology-services/uk_carrier": {
+      "fingerprint": "5fb38e03713b6c539d4c620621ebb52aa3afeabb621aa737a429d1b93f61cb10",
+      "held_at": "2026-10-31T00:00:00Z",
+      "reason": "Expired override retired pending source review. Existing runtime expiry continues to exclude it. No review or human sign-off is asserted."
+    }
+  }
+}

@@ -173,13 +173,14 @@ export default function AdminClient() {
       {(data.broker_queue ?? []).length > 0 && (
         <section className={card}>
           <h2 className={h2}>Brokering queue</h2>
-          <p className={sub}>Every published RFP with its response links. Copy the link, send it to the vendor contact, then mark it forwarded so the team can see delivery state at a glance.</p>
+          <p className={sub}>External published requests needing supplier follow-up, with unworked requests retained beyond 30 days. Confirm current buyer intent, the deadline, prior correspondence and permission before approaching suppliers. Copy only the approved response link for each agreed recipient, then record forwarding.</p>
           <div className="space-y-4">
             {(data.broker_queue ?? []).map((b) => (
               <div key={b.rfp_id} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3">
                 <p className="text-sm font-medium">
-                  {b.title} <span className="text-[var(--ink-500)] font-normal">· {b.owner_email ?? "anonymous"}{b.sector ? ` · ${b.sector}` : ""}{b.response_deadline ? ` · closes ${when(b.response_deadline)}` : ""}</span>
+                  {b.title} <span className="text-[var(--ink-500)] font-normal">· {b.owner_email ?? "anonymous"}{b.sector ? ` · ${b.sector}` : ""}{b.response_deadline ? ` · stated response deadline ${when(b.response_deadline)}` : ""}</span>
                 </p>
+                {b.suppliers.length === 0 && <p className="mt-2 text-sm">No supplier handoff recorded. Check the buyer’s next step and existing correspondence before arranging introductions.</p>}
                 <ul className="mt-2 space-y-1 text-sm">
                   {b.suppliers.map((s) => (
                     <li key={s.vendor_slug} className="flex flex-wrap items-center gap-2">

@@ -90,6 +90,7 @@ type Row = {
 
 export default function MyProcurements() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [admin, setAdmin] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [rfps, setRfps] = useState<Rfp[] | null>(null);
   const [opps, setOpps] = useState<MineOpp[] | null>(null);
@@ -122,14 +123,15 @@ export default function MyProcurements() {
 
     const loadPrivateRecords = async () => {
       const session = await fetch("/sase/api/auth/session", { cache: "no-store" })
-        .then((response) => response.ok ? response.json() as Promise<{ authenticated?: boolean }> : { authenticated: false })
-        .catch(() => ({ authenticated: false }));
+        .then((response) => response.ok ? response.json() as Promise<{ authenticated?: boolean; admin?: boolean }> : { authenticated: false, admin: false })
+        .catch(() => ({ authenticated: false, admin: false }));
       if (!active) return;
       if (!session.authenticated) {
         return;
       }
 
       setAuthenticated(true);
+      setAdmin(Boolean(session.admin));
       const drafts = localDrafts();
       if (drafts.length > 0) {
         await fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) }).catch(() => {});
@@ -235,9 +237,9 @@ export default function MyProcurements() {
     <div className="mb-10">
       <h2 className="text-xl mb-1">Your procurements</h2>
       <p className="text-sm text-[var(--ink-600)] mb-4">
-        One row per procurement, grouped by stage, carrying every door it has: the project record, the public
-        notice and the manage room. Manage responses, invite vendors or close a notice from its room.
+        These are projects saved to your signed-in account, not all enquiries received by Netify. A user count in a project title describes the staff covered by that requirement, not website visitors or customers. Open a project to review its details and next step.
       </p>
+      {admin && <p className="mb-4 text-sm">This is an internal administrator workspace and can include saved tests. It is not a customer pipeline. <a className="underline" href="/sase/admin/">Review external requests and follow-up in the administration console →</a></p>}
       <div className="space-y-6">
         {grouped.map((g) => (
           <section key={g.key}>
