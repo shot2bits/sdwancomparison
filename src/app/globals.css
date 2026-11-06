@@ -2065,3 +2065,11 @@ body:has(.nf-buying-shell) header:has(nav[aria-label="Primary"]) { display:none;
  .nf-draft-primary-actions>button{font-size:13px;padding:6px 10px}
  .nf-buying-shell .nf-guided-question{gap:12px}.nf-buying-shell .nf-guided-builder-label{margin-bottom:8px}
 }
+
+/* Buyer completion: readable proposal comparison and deliberate next-step choices. */
+.nf-matching-example table {width:100%;border-collapse:collapse;font-size:14px;text-align:left}
+.nf-matching-example caption {text-align:left;font-weight:650;padding:12px 0}
+.nf-matching-example th,.nf-matching-example td {padding:12px;border:1px solid #cbd5df;vertical-align:top;min-width:140px}
+.nf-matching-example thead {background:#f1f5f7}
+.nf-buying-start nav[aria-label="Choose your next step"] {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:600px){.nf-buying-start nav[aria-label="Choose your next step"] {grid-template-columns:minmax(0,1fr)}}

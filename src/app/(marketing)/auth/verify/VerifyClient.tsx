@@ -54,6 +54,7 @@ export default function VerifyClient() {
   ));
   const [state, setState] = useState<"loading" | "ready" | "working" | "done" | "signed_in" | "already" | "error">("loading");
   const [info, setInfo] = useState<{ role?: string; vendor_slug?: string | null; email?: string }>({});
+  const [publicationMessage, setPublicationMessage] = useState("");
   const [claimedCount, setClaimedCount] = useState(0);
   const [dest, setDest] = useState<string>("/sase/account/");
 
@@ -91,6 +92,9 @@ export default function VerifyClient() {
       const d = await r.json();
       if (!r.ok) { setState("error"); return; }
 
+      if (d.publish_outcome?.state === 'saved_unpublished') {
+        setPublicationMessage(d.publish_outcome.message || 'Your project has not been published. Open your saved project to review it and retry.');
+      }
       // Buyer (or Netify) sessions: attach this browser's anonymous drafts to
       // the account, so the sign-up and the drafting are finally the same person.
       let claimed: { id: string }[] = [];
@@ -125,7 +129,7 @@ export default function VerifyClient() {
       setDest(to);
       setInfo(d);
       setState("done");
-      window.setTimeout(() => { window.location.assign(to); }, 2500);
+      if (d.publish_outcome?.state !== 'saved_unpublished') window.setTimeout(() => { window.location.assign(to); }, 2500);
     } catch { setState("error"); }
   }
 
@@ -185,11 +189,12 @@ export default function VerifyClient() {
     return (
       <div>
         <h1 className="text-xl mb-2">You are signed in.</h1>
+        {publicationMessage && <p role="alert" className="mb-4">{publicationMessage}</p>}
         {claimedCount > 0 && (
           <p className="text-emerald-700 mb-1">{claimedCount === 1 ? "Your draft RFP is now saved to your account." : `${claimedCount} draft RFPs are now saved to your account.`}</p>
         )}
         <p className="text-[var(--ink-700)] mb-4">
-          {supplier
+          {publicationMessage ? 'Open your saved project to review what is missing. Nothing has been published.' : supplier
             ? `Signed in as a vendor${info.vendor_slug ? ` (${info.vendor_slug})` : ""}. Taking you to the opportunity board...`
             : claimedCount > 0
               ? "Taking you back to your RFP..."

@@ -178,13 +178,16 @@ export async function GET(req: Request) {
   const titleById = new Map(projects.map((p) => [p.id, p.title]));
   const publishLeadsRaw = (await kvGetJson<Array<Record<string, unknown>>>("publish:leads")) ?? [];
   const latestOutcomes = latestPublicationOutcomes(publishLeadsRaw as PublicationOutcome[]);
+  const contactById = new Map(projects.map((p,i) => [p.id, contacts[i] ?? '']));
   const reviewProjects = projects.filter(p => {
-    const email = p.owner_email || latestOutcomes.get(p.id)?.email || '';
+    const email = p.owner_email || contactById.get(p.id) || latestOutcomes.get(p.id)?.email || '';
     return email && !isAdminEmail(email) && !/@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(email) && activityClassification(p) !== 'test';
   });
-  const attention = (await Promise.all(reviewProjects.map(async p => {
+  const completionIssues = await kvMgetJson<import('@/lib/publication-issues').PublicationIssue>(reviewProjects.map(p => `rfp:${p.id}:completion_issue`));
+  const attention = (await Promise.all(reviewProjects.map(async (p, i) => {
     const connections = p.status === 'published' ? await listConnections(p.id) : [];
-    return attentionItem(p, latestOutcomes.get(p.id), connections.length);
+    const issue = completionIssues[i];
+    return attentionItem({...p,contact_email:contactById.get(p.id)}, latestOutcomes.get(p.id), connections.length, issue);
   }))).filter(item => item !== null).sort((a,b) => a.at - b.at);
   const publish_leads = publishLeadsRaw
     .slice(-100)

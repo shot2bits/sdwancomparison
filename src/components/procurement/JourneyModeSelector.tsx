@@ -1,6 +1,5 @@
 "use client";
 
-import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode } from '@/lib/rfp-types';
 import { PROJECT_ENTRANCE_CONTRACT_VERSION, type ProjectEntranceContext } from '@/lib/project-entrance-contract';
@@ -46,6 +45,23 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
   const [consent, setConsent] = useState(false);
   const [prepared, setPrepared] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [supplierIntent, setSupplierIntent] = useState(false);
+  const [recoveryId, setRecoveryId] = useState('');
+  const [receipt, setReceipt] = useState<{reference:string;published_at:number|null;notice_url:string|null;invitations_prepared:number;supplier_handoffs:number;responses:number}|null>(null);
+  useEffect(() => {
+    const intent = (event: Event) => setSupplierIntent((event as CustomEvent<string>).detail === 'responses');
+    window.addEventListener('netify:buying-intent', intent);
+    return () => window.removeEventListener('netify:buying-intent', intent);
+  }, []);
+  async function recoverProject(id: string) {
+    const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}/recover`, {method:'POST'});
+    if (response.status === 401) { setRecoveryId(id); throw new Error('Verify your work email below to reopen your saved project on this device.'); }
+    if (!response.ok) { setRecoveryId(id); throw new Error('This project could not be reopened. Sign in with the work email that owns it, or contact Netify. Your saved work has not been deleted.'); }
+    const data = await response.json();
+    localStorage.setItem(projectTokenKey(id), data.project_session_token);
+    setRecoveryId('');
+    return data.project_session_token as string;
+  }
   const [published, setPublished] = useState(false);
   const [workspaceWaiting, setWorkspaceWaiting] = useState(false);
   const [rfpFormat, setRfpFormat] = useState('brief');
@@ -72,15 +88,20 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
           history.replaceState(history.state, '', location.pathname + location.search);
         }
         if (id) {
-          const token = localStorage.getItem(projectTokenKey(id));
-          if (!token) throw new Error('Open this project on the browser where you started it, or use your assistant’s private resume link.');
-          const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
+          let token = localStorage.getItem(projectTokenKey(id));
+          if (!token) token = await recoverProject(id);
+          let response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
+          if (response.status === 404) {
+            token = await recoverProject(id);
+            response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(id)}`, {headers:{authorization:`Bearer ${token}`},cache:'no-store'});
+          }
           const data = await response.json();
           if (!response.ok) throw new Error('This private project session has expired or is unavailable. Your saved project has not been deleted.');
           if (!active) return;
           const raw = data.entrance_context?.raw_input ?? {}, buyer = data.buyer;
           setFields({ scope: raw.solution_scope ?? (buyer.product_scope === 'sdwan_only' ? 'sdwan' : buyer.product_scope === 'sse_only' ? 'sse' : 'sase'), sector: buyer.sector ?? '', sites: buyer.site_count == null ? '' : String(buyer.site_count), regions: buyer.regions, operatingModel: buyer.operating_model, outcome: buyer.notes, timescale: raw.timescale ?? '', company: buyer.organisation, requiredFeatures: raw.shortlist?.required_features ?? data.entrance_context?.shortlist_input?.required_features ?? [] });
           setEntrance(data.entrance_context ?? null); setProject({ project_reference: id, revision: data.revision, envelope_revision:data.envelope_revision });
+          setReceipt(data.publication_receipt ?? null);
           setPrepared(data.prepared); setReview(true); setDetailsOpen(true);
           setPublished(data.marketplace_state?.publication_status === 'published' && data.marketplace_state?.market_unlock_status === 'unlocked');
           mode.current = data.mode === 'find_providers' ? 'find_providers' : 'quick_list'; setSelected(mode.current);
@@ -226,11 +247,19 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
     window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('netify:workspace-action', { detail: actionName })));
   }
   async function request(path: string, body: unknown, method = 'POST', current = project) {
-    const token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
+    let token = current ? localStorage.getItem(projectTokenKey(current.project_reference)) : null;
+    if (current && !token) token = await recoverProject(current.project_reference);
     if (current && !token) throw new Error('Your private session is unavailable. Reload to recover your project.');
-    const response = await fetch(path, { method, headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
+    const send = () => fetch(path, { method, headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
+    let response = await send();
+    if (current && response.status === 404) { token = await recoverProject(current.project_reference); response = await send(); }
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || data.error || 'The request did not complete. Your project is still saved.');
+    if (!response.ok) {
+      if (response.status === 401) setSignedIn(false);
+      const stage = path.endsWith('/publish') ? 'publication' : path.endsWith('/prepare-publication') ? 'preparation' : 'save';
+      fireNetifyEvent('rfp_request_failed', {stage,http_status:String(response.status)});
+      throw new Error(data.message || data.error || 'The request did not complete. Your project is still saved.');
+    }
     return data;
   }
   async function action(work: () => Promise<void>) {
@@ -281,6 +310,9 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
       const data = await request(`/sase/api/marketplace/projects/${encodeURIComponent(current.project_reference)}/publish`, { base_revision: current.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT }, 'POST', current);
       if (!data.ok || !data.market_unlocked || !data.opportunity_id) throw new Error('The board listing is not complete. Please retry.');
       setPublished(true);
+      const latest = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(current.project_reference)}`, {headers:{authorization:`Bearer ${localStorage.getItem(projectTokenKey(current.project_reference))}`},cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+      setReceipt(latest?.publication_receipt ?? null);
+      fireNetifyEvent('marketplace_publication_receipt', {status:'ready'});
     });
   }
   async function previewCoverage() {
@@ -299,29 +331,31 @@ export default function JourneyModeSelector({ children }: { children?: ReactNode
           <p className="mt-2 text-sm text-[#66635e]">A short brief is enough to start. You can add supplier questions later.</p>
           {workspaceWaiting && <p role="status" className="mt-4">Finishing your requirements. This review will update automatically.</p>}
           {error && <p role="alert" className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+          {recoveryId && <SignIn role="buyer" publishRfpId={recoveryId} prompt="Use the work email that owns this saved project. Your work stays private." onAuthed={() => window.location.reload()} />}
           {originalRequirement && <details className="nf-private-source"><summary>Original requirements (private reference)</summary><p>Your original wording is retained in your RFP. The editable summary below uses confirmed details; check it before sharing.</p><p className="whitespace-pre-wrap">{originalRequirement}</p></details>}
-          {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your anonymous notice is live. Your project workspace brings together your requirements, personalised provider and vendor matching, and any supplier responses. Publication does not guarantee a response or quote.</p><PublicationBenefits afterPublication /><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
-            <PreparedRequirements fields={fields} hasRfp={rfpFormat !== 'brief'} /><button type="button" className="nf-brief-editor-link" disabled={busy || workspaceWaiting} onClick={() => void openRequirementEditor()}>{rfpFormat === 'brief' ? 'Add supplier questions to build a Short RFP (optional)' : 'Open my RFP and supplier questions'}</button><PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled={!!fields.outcome.trim()} /><DraftResearchPreview fields={fields}/><details className="nf-optional-publication"><summary>Optional: publish an anonymous notice</summary><h3 className="mt-6 font-semibold">Your anonymous public notice</h3><dl className="mt-3 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope === 'sdwan' ? 'SD-WAN' : fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
+          {!ready ? <p className="mt-4" role="status">Loading your project…</p> : published && project ? <div className="mt-5"><p>Your anonymous notice is published. Your company, email and pricing stay private.</p><p><strong>Project reference:</strong> {project.project_reference}</p><p><a className="underline" href={buyingPlatformPath(`project=${encodeURIComponent(project.project_reference)}`)}>Return to this project on any device</a> using the same verified work email.</p>{receipt && <dl className="mt-4"><div><dt>Notice published</dt><dd>{receipt.published_at ? new Date(receipt.published_at).toLocaleString('en-GB') : 'Confirmed'}</dd></div><div><dt>Supplier invitations prepared</dt><dd>{receipt.invitations_prepared}</dd></div><div><dt>Supplier handoffs recorded</dt><dd>{receipt.supplier_handoffs}</dd></div><div><dt>Responses received</dt><dd>{receipt.responses}</dd></div></dl>}<p className="mt-4"><strong>What happens next:</strong> Netify checks your requirement and the appropriate supplier route. Response timing and recipients need confirmation. No response or price is guaranteed. <a className="underline" href="mailto:support@netify.com">Contact Netify about this project</a>.</p><PublicationBenefits afterPublication /><a className="mt-4 inline-block rounded bg-[#b64b16] px-5 py-3 font-semibold text-white" href={buyingPlatformPath(`id=${encodeURIComponent(project.project_reference)}`)}>Open my matches and responses</a></div> : review ? <>
+            <PreparedRequirements fields={fields} hasRfp={rfpFormat !== 'brief'} /><button type="button" className="nf-brief-editor-link" disabled={busy || workspaceWaiting} onClick={() => void openRequirementEditor()}>{rfpFormat === 'brief' ? 'Add supplier questions to build a Short RFP (optional)' : 'Open my RFP and supplier questions'}</button><details className="nf-optional-publication" open={supplierIntent || prepared || undefined}><summary>{supplierIntent ? 'Request supplier responses: review and approve' : 'Ready for supplier responses? Review and publish your brief'}</summary><h3 className="mt-6 font-semibold">Your anonymous public notice</h3><dl className="mt-3 grid gap-3 sm:grid-cols-2"><div><dt className="font-semibold">Scope</dt><dd>{fields.scope === 'sdwan' ? 'SD-WAN' : fields.scope.toUpperCase()} · {fields.sites} sites</dd></div><div><dt className="font-semibold">Sector</dt><dd>{SECTOR_LABELS[fields.sector as keyof typeof SECTOR_LABELS] ?? fields.sector}</dd></div><div><dt className="font-semibold">Regions</dt><dd>{fields.regions.map((r) => REGION_LABELS[r as keyof typeof REGION_LABELS] ?? r).join(', ')}</dd></div><div><dt className="font-semibold">Timescale</dt><dd>{fields.timescale}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">Requirement</dt><dd className="whitespace-pre-wrap">{fields.outcome}</dd></div></dl>
             <section className="nf-publication-outcomes" aria-label="What publication means">
-              <h3>What you get when you publish</h3><PublicationBenefits afterPublication />
-
-              <h4>Privacy and publication</h4>
-              <ul><li><strong>Public:</strong> the anonymous notice above. Remove identifying names, addresses and contact details from your requirement.</li><li><strong>Private:</strong> your company name, work email and pricing. Access to your private project is controlled separately.</li><li>Publishing is free and is not an order. You do not have to speak to a supplier or accept a response.</li><li>{SOURCING_DESCRIPTION}</li><li>To request closure or discuss access, <a href="mailto:support@netify.com">contact Netify</a>. Closing moves the notice to the closed archive; it does not erase the published notice.</li></ul>
+              <h3>Before you publish</h3>
+              <p>Netify reviews your requirement and helps coordinate responses from appropriate suppliers. Supplier recipients and response timing need confirmation.</p>
+              <ul><li><strong>Public:</strong> only the anonymous notice above. Remove identifying details from the requirement.</li><li><strong>Private:</strong> your company, work email and pricing.</li><li>Publication is free and non-binding. You decide whether to speak to a supplier or accept a proposal.</li></ul>
+              <p><a href="mailto:support@netify.com">Contact Netify</a> for help or to close a notice. Closure retains its published record.</p>
             </section>
             <button type="button" disabled={busy || workspaceWaiting} onClick={() => { setReview(false); setConsent(false); }} className="mt-3 text-sm underline">Edit project details</button>
             {selected === 'find_providers' && coverage === null && <button type="button" disabled={busy || workspaceWaiting} onClick={previewCoverage} className="ml-4 text-sm underline">Check market coverage</button>}
             {coverage !== null && <p className="mt-3 text-sm">{coverageExplanation(coverage)}</p>}
             <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} disabled={busy || workspaceWaiting} onChange={(e) => setConsent(e.target.checked)} className="mt-1"/><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label>
-            {prepared && !signedIn && <section className="nf-publication-verification" aria-label="Verify your work email"><h3>Verify your work email</h3><p>Your requirements are saved. Use the email link or code, then return to this project and select Publish my anonymous opportunity. Verifying your email does not publish anything.</p><SignIn role="buyer" publicationVerification prompt="Enter your work email to receive a verification link and a 6-digit code." onAuthed={() => setSignedIn(true)} /></section>}
+            {prepared && !signedIn && <section className="nf-publication-verification" aria-label="Verify your work email"><h3>Verify your work email</h3><p>Your requirements are saved. Use the email link or code, then return to this project and select Publish my brief and request supplier responses. Verifying your email does not publish anything.</p><SignIn role="buyer" publicationVerification prompt="Enter your work email to receive a verification link and a 6-digit code." onAuthed={() => setSignedIn(true)} /></section>}
             {prepared && signedIn && <p role="status" className="mt-4">Your work email is verified. Check your notice and confirm publication below.</p>}
-            {(!prepared || signedIn) && <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my anonymous opportunity' : 'Verify work email to publish'}</button>}
+            {(!prepared || signedIn) && <button type="button" disabled={busy || workspaceWaiting || !consent} onClick={publish} className="mt-5 rounded-full bg-[#b64b16] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : signedIn ? 'Publish my brief and request supplier responses' : 'Verify work email to publish'}</button>}
             </details>
+            <PrivateDraftDownload title="Private project brief" markdown={briefDraftMarkdown(fields)} enabled={!!fields.outcome.trim()} /><DraftResearchPreview fields={fields}/>
             <p className="mt-3 text-sm">Not ready to publish? Keep your draft private, or <a className="underline" href="tel:+443332021011">call Netify on 0333 202 1011</a> to discuss your requirement. No supplier is contacted by saving or downloading.</p>
-          </> : <form className="mt-5" onInvalid={() => fireNetifyEvent("rfp_validation_failed",{reason:"validation"})} onSubmit={(e) => { e.preventDefault(); if (!detailsOpen) { setDetailsOpen(true); fireNetifyEvent('marketplace_brief_details_reached', { intent: 'project' }); return; } void saveForReview(); }}>
+          </> : <form className="mt-5" onInvalid={() => fireNetifyEvent("rfp_field_validation",{reason:"validation"})} onSubmit={(e) => { e.preventDefault(); if (!detailsOpen) { setDetailsOpen(true); fireNetifyEvent('marketplace_brief_details_reached', { intent: 'project' }); return; } void saveForReview(); }}>
             <p className="mb-4 text-sm">{detailsOpen ? 'Final details before review: add your sector and private company name. Choose an operating model or leave it as Not sure yet.' : 'Start with what you know. Save or download a private draft before deciding whether to publish.'}</p>
             <fieldset disabled={busy || workspaceWaiting} className="grid gap-4 sm:grid-cols-2">
                 <label className="text-sm font-semibold">Solution<select aria-label="Solution" required className={inputClass} value={fields.scope} onChange={(e) => setField('scope', e.target.value)}><option value="">Choose SASE, SD-WAN or SSE</option><option value="sase">SASE (networking and security)</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
-              <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea aria-label="What do you need to achieve?" required minLength={20} aria-describedby="brief-requirement-example" maxLength={4000} rows={4} placeholder="Tell us what needs to change, roughly how many sites or users you have, and where they are. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/><span id="brief-requirement-example" className="mt-2 block text-sm font-normal">Example: Replace our ageing network across five UK sites with managed SD-WAN, resilient internet and secure access to Microsoft 365. We need help choosing providers and planning migration.</span></label>
+              <label className="text-sm font-semibold sm:col-span-2">What do you need to achieve?<textarea aria-label="What do you need to achieve?" required minLength={20} aria-describedby="brief-requirement-example" maxLength={4000} rows={4} placeholder="Tell us what needs to change, or paste your existing brief from ChatGPT or another assistant. Leave out your company name and contact details." className={inputClass} value={fields.outcome} onChange={(e) => setField('outcome', e.target.value)}/><span id="brief-requirement-example" className="mt-2 block text-sm font-normal">Example: Replace our ageing network across five UK sites with managed SD-WAN, resilient internet and secure access to Microsoft 365. We need help choosing providers and planning migration.</span></label>
               <label className="text-sm font-semibold">Approximate number of sites<input required={detailsOpen} type="number" min="1" step="1" className={inputClass} value={fields.sites} onChange={(e) => setField('sites', e.target.value)}/><span className="mt-1 block text-xs font-normal">An estimate is fine. A site count is needed before review.</span></label>
               <label className="text-sm font-semibold">Buying timescale<input required={detailsOpen} maxLength={200} placeholder="e.g. within six months, or not decided" className={inputClass} value={fields.timescale} onChange={(e) => setField('timescale', e.target.value)}/><button type="button" className="mt-1 text-xs font-normal underline" onClick={() => setField('timescale', 'Not decided')}>Not decided yet</button></label>
               {detailsOpen && <>

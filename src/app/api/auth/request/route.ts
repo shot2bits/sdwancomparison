@@ -1,3 +1,4 @@
+import { recordPublicationIssue } from '@/lib/publication-issues';
 import {recordAccess, accessEntry, type AccessStage} from "@/lib/auth-access-report";
 import { confirmedSourcingOwner } from "@/lib/sourcing-access";
 import { recordPublicationVerification } from "@/lib/publication-verification-events";
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
 
   // A buyer account is not a standalone product. First access must be tied
   // to a real RFP carrying explicit board-publication intent; returning
-  // buyers may sign in only when they already own a market-unlocked RFP.
+  // buyers may sign in to their existing owned drafts as well as published RFPs.
   // Merely requesting a link can therefore never create an empty account.
   if (role === "buyer" && !admin) {
     const rfpId = publicationProjectFromReturn(returnTo);
@@ -132,12 +133,12 @@ export async function POST(req: Request) {
       const belongsToEmail = Boolean(project && (!project.owner_email || project.owner_email.toLowerCase() === email));
       publicationBound = publicationBound || Boolean(
         project && belongsToEmail &&
-        ((project.pending_submit?.list_on_board === true) || (await isMarketUnlocked(project.id)) || (await confirmedSourcingOwner(project, email)))
+        ((Boolean(project.owner_email && project.owner_email.toLowerCase() === email)) || (project.pending_submit?.list_on_board === true) || (await isMarketUnlocked(project.id)) || (await confirmedSourcingOwner(project, email)))
       );
     } else {
       const projects = await getProjectsBulk(await listAllRfpIds());
       for (const project of projects.filter((item) => (item.owner_email ?? "").toLowerCase() === email)) {
-        if ((await isMarketUnlocked(project.id)) || (await confirmedSourcingOwner(project, email))) { publicationBound = true; break; }
+        if (project.owner_email.toLowerCase() === email || (await isMarketUnlocked(project.id)) || (await confirmedSourcingOwner(project, email))) { publicationBound = true; break; }
       }
     }
     if (!publicationBound) publicationBound = await circuitBuyerCanSignIn(email);
@@ -252,6 +253,10 @@ export async function POST(req: Request) {
     await kvRaw(["PEXPIRE", codeKey, 15 * 60 * 1000]);
   } catch { code = undefined; /* code is an enhancement; the link still works */ }
 
+  // A requested verification is a contact attempt, not a verified buyer or sent email.
+  if (rfpId && role === 'buyer') {
+    try { await kvSetJson(`rfp:${rfpId}:contact_email`, email); } catch { /* Best effort private support context. */ }
+  }
   const sent = await sendMagicLink(email, token, resolvedRole, returnTo, code);
   if (sent.ok && rfpId && role === "buyer") await recordPublicationVerification(rfpId, email, "verification_requested");
   // Correlate this send against Resend's own email id so the bounce webhook
@@ -261,7 +266,7 @@ export async function POST(req: Request) {
   await recordResendSend(sent.emailId, { to: email, kind: "magic_link", ts: Date.now(), rfp_id: rfpId });
   // Authentication tokens are only available through delivery or the private
   // preview capture store. Missing delivery must never become an auth bypass.
-  if (!sent.ok) { await record("delivery_failed"); return Response.json({error:"Sign-in delivery is unavailable. Please try again later."}, {status:503,headers:cors}); }
+  if (!sent.ok) { if (rfpId) await recordPublicationIssue(rfpId, 'verification', 'delivery_failed'); await record("delivery_failed"); return Response.json({error:"Sign-in delivery is unavailable. Please try again later."}, {status:503,headers:cors}); }
   await record("email_sent");
   return Response.json({ ok: true, emailed: true, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
 }
