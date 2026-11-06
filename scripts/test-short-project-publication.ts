@@ -15,7 +15,7 @@ const live = { vendors, source: 'neon', providerContractVersion: 'provider-match
 const mocks: Record<string, string> = {
  'server-only': 'export {};',
  '@/lib/verify-business': 'export async function verifyBusinessEmail() { return { passed: true, domain: "buyer.example", checked_at: Date.now(), derived_company: "Private Buyer Ltd", failed_check: null }; }',
- '@/lib/live-shortlist': `export const LIVE_SHORTLIST_CONTRACT_VERSION="fixture"; export async function getStrictLiveShortlistDataset(){return ${JSON.stringify(live)}}`,
+ '@/lib/live-shortlist': `export function shortlistInputFromProviderMatchInput(){throw Error('Not used by this receipt fixture');} export const LIVE_SHORTLIST_CONTRACT_VERSION="fixture"; export async function getStrictLiveShortlistDataset(){return ${JSON.stringify(live)}}`,
 };
 registerHooks({ resolve(specifier: string, context: object, next: (s: string,c: object) => { url: string }) {
  return mocks[specifier] ? { url: `data:text/javascript,${encodeURIComponent(mocks[specifier])}`, shortCircuit: true } : next(specifier,context);
@@ -51,6 +51,13 @@ await withFakeKv(async () => {
   assert.ok(notice.summary.includes(project.buyer.notes));
   const replay = await executePublish((await getProject(project.id))!, 'owner@buyer.example', { list_on_board: true, shortlist_size: 3 });
   assert.equal(replay.board.opportunity_id, result.board.opportunity_id, 'retry must not duplicate the board listing');
+  const {recoverMarketplaceSession,readMarketplaceProject} = await import('../src/lib/marketplace-project-session');
+  const recovered=await recoverMarketplaceSession((await getProject(project.id))!);
+  const projection=await readMarketplaceProject(project.id,recovered.project_session_token);
+  assert.equal(projection.publication_receipt?.reference,project.id);
+  assert.equal(projection.publication_receipt?.invitations_prepared,noMatches ? 0 : 3);
+  assert.equal(projection.publication_receipt?.supplier_handoffs,0,'prepared invitations must not be reported as actual supplier handoffs');
+  assert.equal(projection.publication_receipt?.responses,0);
   console.log(`PASS ${mode}: real publish pipeline, anonymous notice, timescale, unlock, invitations and idempotent replay`);
  }
 });

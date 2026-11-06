@@ -1,3 +1,4 @@
+import { recordPublicationIssue } from '@/lib/publication-issues';
 import {recordAccess, accessEntry} from "@/lib/auth-access-report";
 import {isAdminEmail} from "@/lib/access-control";
 import { recordPublicationVerification } from "@/lib/publication-verification-events";
@@ -88,9 +89,10 @@ export async function POST(req: Request) {
     // failure: the requirement is saved, the lead is captured, and the
     // buyer must be told why nothing published (Ruling One). Every other
     // publish failure stays non-fatal to sign-in exactly as before.
-    if (e instanceof SavedUnpublishedError) {
-      publishOutcome = { state: "saved_unpublished", message: e.message, return_url: e.return_url };
-    }
+    if (payload.rfp_id) await recordPublicationIssue(payload.rfp_id, 'publication', 'publication_failed');
+    publishOutcome = e instanceof SavedUnpublishedError
+      ? { state: "saved_unpublished", message: e.message, return_url: e.return_url }
+      : { state: "saved_unpublished", message: "Your email is verified, but your project has not been published. Open your saved project to review the requirements and retry, or ask Netify for help.", return_url: payload.rfp_id ? `/sase/rfp-builder/${payload.rfp_id}/` : '/sase/account/' };
   }
   // Alert the Netify team the first time a buyer or supplier signs in. Best
   // effort and never blocks sign-in: a notification failure must not stop a

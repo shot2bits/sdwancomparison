@@ -33,3 +33,9 @@ assert.equal(noticeResponseWindow({status:'open'},today),'open');
 assert.equal(noticeResponseWindow({status:'closed',response_deadline:old},today),'closed');
 assert.equal(noticeResponseWindow({status:'awarded'},today),'awarded');
 console.log('PASS unworked older requests retained and stated response-window status is truthful without rewriting stored notices');
+
+const contactedDraft={id:'rfp_contacted',title:'Private draft',status:'draft',updated:100,contact_email:'requester@business.example',pending_submit:{list_on_board:true}};
+assert.match(attentionItem(contactedDraft,undefined,0)!.status,/unfinished/);
+assert.match(attentionItem(contactedDraft,undefined,0,{at:101,stage:'verification',code:'delivery_failed'})!.reason,/not accepted for sending/);
+assert.equal(attentionItem({...contactedDraft,contact_email:'',pending_submit:undefined},undefined,0),null,'anonymous drafts are not contactable leads');
+console.log('PASS unfinished contacted requests and failed delivery are visible; anonymous drafts are not promoted to leads');

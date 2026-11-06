@@ -1,5 +1,6 @@
 import { publicEvidenceOutput } from "@/lib/public-provider-evidence";
 import { approvedEditorialReview } from "@/lib/provider-editorial-review";
+import ProposalExample from "@/components/procurement/ProposalExample";
 import BuyerDecisionGuide from "@/components/BuyerDecisionGuide";
 import { buildShortlistMarketView, parseShortlistMarketView, SHORTLIST_VIEWS } from "@/lib/shortlist-market-views";
 import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
@@ -56,12 +57,13 @@ export default async function ShortlistPage({
       {buyerProfiles && <nav className="buyer-contents" aria-label="Page contents"><p>Contents</p><a href="#shortlist-overview"><span>01</span>Overview</a><a href="#provider-research"><span>02</span>Compare providers</a><a href="#provider-profiles"><span>03</span>Provider profiles</a><a href="#sourcing-brief"><span>04</span>Your shortlist</a><a href="#research-title"><span>05</span>How we research</a><div className="buyer-side-note">Free to research.<br />No account required.<br /><br />You choose which providers receive your brief.</div></nav>}
       <div className={buyerProfiles ? "buyer-main" : undefined}>
       <header data-entity-block id="shortlist-overview">
-        {buyerProfiles ? <><p className="sourcing-eyebrow">SD-WAN and SASE procurement</p><h1>Compare providers.<br />Build your shortlist.</h1></> : <h1>{entity.h1}</h1>}
-        <p className="sourcing-lead">{buyerProfiles ? "Compare SD-WAN and SASE providers, understand their services and choose who you want to hear from." : <>Explore {vendors.length} SD-WAN and SASE providers using Netify’s research into their network, security and service capabilities. Tell us what your business needs to narrow the options, or browse the providers yourself.</>}</p>
+        {buyerProfiles ? <><p className="sourcing-eyebrow">SD-WAN and SASE procurement</p><h1>Get comparable proposals.<br />Choose the right provider.</h1></> : <h1>{entity.h1}</h1>}
+        <p className="sourcing-lead">{buyerProfiles ? "Tell Netify what your business needs. We help prepare one scope, agree which providers to approach and coordinate comparable written responses. You can also research providers freely." : <>Explore {vendors.length} SD-WAN and SASE providers using Netify’s research into their network, security and service capabilities. Tell us what your business needs to narrow the options, or browse the providers yourself.</>}</p>
         <nav className="sourcing-entry-links" aria-label="Choose how to start">
-          <a className="sourcing-primary" href={buyerProfiles ? "#provider-research" : "#sourcing-brief"}>{buyerProfiles ? "Compare providers ↓" : "Find providers for my business"}</a>
-          <a className="sourcing-outline" href={buyerProfiles ? "#sourcing-brief" : "#provider-research"}>{buyerProfiles ? "Get help with my shortlist" : <>Browse all {vendors.length} providers</>}</a>
+          <a className="sourcing-primary" href="#sourcing-brief">{buyerProfiles ? "Help me get supplier proposals" : "Find providers for my business"}</a>
+          <a className="sourcing-outline" href="#provider-research">{buyerProfiles ? "Research providers first" : <>Browse all {vendors.length} providers</>}</a>
         </nav>
+        {buyerProfiles && <><p className="sourcing-small">A short brief is enough to start. No supplier receives your request until you approve it. Timing and participation need confirmation. Suppliers pay Netify when an introduction leads to business.</p><ProposalExample /></>}
         {view!=="all" && <p>{SHORTLIST_VIEWS[view].answer}</p>}
 
       </header>

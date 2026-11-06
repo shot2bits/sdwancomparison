@@ -30,6 +30,14 @@ export { MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "./ma
 async function persistSession(token: string, session: MarketplaceSession) {
   await kvRaw(["SET", sessionKey(token), JSON.stringify(session), "EX", SESSION_TTL_SECONDS]);
 }
+/** Called only after the route has matched a verified session to the saved owner. */
+export async function recoverMarketplaceSession(project: import('./rfp-types').ProjectDetails) {
+  const token = randomBytes(32).toString('base64url');
+  const now = Date.now();
+  await persistSession(token, SessionSchema.parse({project_id:project.id,token_hash:hash(token),revision:project.marketplace_revision,created_at:now,expires_at:now+SESSION_TTL_SECONDS*1000}));
+  return {project_reference:project.id,project_session_token:token,revision:project.marketplace_revision};
+}
+
 export async function authenticateMarketplaceProject(projectId: string, token: string) {
   const raw = await kvGetJson<MarketplaceSession>(sessionKey(token));
   const parsed = SessionSchema.safeParse(raw);
@@ -173,6 +181,7 @@ export async function readMarketplaceProject(projectId: string, token: string) {
     notice: isShortProject(project) ? shortProjectNotice(project) : null,
     mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION,
     marketplace_state: project.marketplace_state,
+    publication_receipt: await marketplaceReceipt(project),
   };
 }
 
@@ -186,4 +195,14 @@ export async function previewMarketplaceProject(projectId: string, token: string
 
 export async function prepareMarketplacePublication(projectId: string, token: string, input: unknown) {
   return withMarketplaceMutation(projectId, token, () => prepareMarketplacePublicationUnlocked(projectId, token, input));
+}
+
+async function marketplaceReceipt(project: import('./rfp-types').ProjectDetails) {
+  if (!(await isMarketUnlocked(project.id))) return null;
+  const {getLatestPublishedSnapshot} = await import('./published-snapshot');
+  const {listConnections,listResponses} = await import('./rfp-store');
+  const snapshot = await getLatestPublishedSnapshot(project.id);
+  const [connections,responses] = await Promise.all([listConnections(project.id),listResponses(project.id)]);
+  return {reference:project.id,published_at:snapshot?.published_at ?? null,notice_url:snapshot?.public_projection.url ?? null,
+    invitations_prepared:connections.length,supplier_handoffs:connections.filter(c=>Boolean(c.forwarded_at)).length,responses:responses.length};
 }

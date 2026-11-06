@@ -1,3 +1,4 @@
+import { resolvePublicationIssue } from '@/lib/publication-issues';
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { randomUUID } from "node:crypto";
 import { kvRaw } from "@/lib/rfp-store";
@@ -441,7 +442,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
     subject: "Your requirement is live. Here is what happens next",
     html:
       `<p>Hello,</p>` +
-      `<p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
+      `<p><strong>Project reference:</strong> ${p.id}</p><p><a href="${SITE_URL}/home/?project=${encodeURIComponent(p.id)}">Return to your saved project</a>. Sign in with the same work email on any device.</p><p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
       `<p><strong>What happens to your information:</strong> ${PROMISES_PARAGRAPH} The vetting standard is published at <a href="${SITE_URL}/supplier-vetting-standard/">${SITE_URL}/supplier-vetting-standard/</a>.</p>` +
       (invited.length === 0 ? "<p><strong>What happens next:</strong> No suppliers have been invited. Publication is complete, but supplier responses are not guaranteed. Review your requirements and the available provider evidence in your workspace.</p>" : `<p><strong>What happens next:</strong> ${invited.length} evaluated vendor${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>`) +
       bandBlock +
@@ -1276,6 +1277,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
   }
   // A resumed event repairs a missing snapshot without adding a governed revision.
 
+  await resolvePublicationIssue(project.id);
   // Notify only after the durable snapshot exists. A snapshot-write retry cannot resend these emails.
   try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
 
