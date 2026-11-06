@@ -24,3 +24,14 @@ Full build, final test results, Git/PR/deployment identity and public-domain acc
 ## Pre-release result
 
 Full npm run build passed on the final application source, including its validation gates, Next.js compilation, TypeScript and static generation. Buyer completion handler/UI tests, RFP completion/research UI, marketplace journey, account access, buyer/notice recovery and isolated short-project publication/receipt tests passed. Focused ESLint and git diff --check passed; an unused fixture binding reported during lint was removed. The local build disclosed snapshot fallback because production provider credentials are not present. Production evidence settings were not modified.
+
+## Released and verified
+
+- PR [29](https://github.com/shot2bits/sdwancomparison/pull/29), application source `7ca07366d2a91a24a96b39347ed316441ce477bc`, merged through Git into `release/2026-09-30` as `048802a56eabad70e9a6299f9461ca77ff59c070`.
+- Exact-source GitHub sourcing/real Redis workflow `42253532220` succeeded. Preview `dpl_5zqXcqx3Viq95XZ5Fv4ZiXLuofcE` READY. The first preview caught production-mode React test-helper configuration; the isolated UI test now explicitly uses test mode and passes with NODE_ENV=production. No application guards were bypassed.
+- Production `dpl_FzWwvHRrhhECMApo3zYn7n5NvCMG` READY through the normal Git integration. No direct production upload, promotion or alias reassignment.
+- 6 November 2026, 16:38 UTC: both public builder and shortlist return HTTP 200, source marker `048802a`, and new proposal-oriented headings. Browser confirms the buyer choices and comparison example on preview; public pages show the released copy. Public shortlist browser console has no captured errors. Initial deployment-scoped error/fatal log counts returned no groups.
+- Public recovery POST without a session returns 401 with verification required. Successful owner recovery, wrong-owner denial, verification and publication remain covered by isolated real-handler/UI tests; no synthetic production publication or email was sent.
+- Wider apex smoke: **40 passed, 2 failed**. Its homepage check expects the old marketplace headline, whereas the separate apex homepage currently leads with the Netify Telecoms Reseller Programme. Its Cloud Voice check reports the calculator/rate-card/FAQ order differs from the September contract; all other Cloud Voice checks pass. These are outside the SASE application deployed here, were not changed, and are not represented as passing. The changed marketplace routes and their source/version/access checks pass.
+
+Screenshot of the live shortlist is retained outside Git in the task workspace outputs. This acceptance-only documentation commit is not another production release.
