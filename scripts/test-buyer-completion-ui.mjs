@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
+// This isolated process needs React's test helpers even during a production build.
+process.env.NODE_ENV='test';
 const dom=new JSDOM('<!doctype html><html><body></body></html>',{url:'https://fixture.test/sase/home/?project=rfp_fixtureowner&review=1'});
 for(const key of ['window','document','HTMLElement','Element','MutationObserver','Event','CustomEvent','location','history','localStorage','sessionStorage'])globalThis[key]=dom.window[key];
 Object.defineProperty(globalThis,'navigator',{value:dom.window.navigator,configurable:true});
