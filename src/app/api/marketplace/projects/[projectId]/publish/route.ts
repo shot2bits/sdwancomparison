@@ -1,3 +1,4 @@
+import {ProviderMatchSourceUnavailable} from '@/lib/provider-match-source';
 import { recordPublicationIssue } from '@/lib/publication-issues';
 import { z } from "zod";
 import { sessionFromRequest } from "@/lib/auth";
@@ -60,6 +61,10 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
     });
   } catch (error) {
     if (!(error instanceof MarketplaceProjectUnauthorised)) await recordPublicationIssue(projectId, 'publication', 'publication_failed');
+    if(error instanceof ProviderMatchSourceUnavailable){
+      console.error('publication_dependency_unavailable',{code:'provider_feed_unavailable',project_id:projectId});
+      return Response.json({error:'Your project is saved, but publication is temporarily unavailable. Please retry shortly. Nothing has been published.'},{status:503});
+    }
     if (error instanceof MarketplaceProjectConflict) return Response.json({ error: error.message }, { status: 409 });
     if (error instanceof MarketplaceProjectUnauthorised) return Response.json({ error: "Project not found." }, { status: 404 });
     return Response.json({ error: error instanceof Error ? error.message : "Publication failed." }, { status: 400 });

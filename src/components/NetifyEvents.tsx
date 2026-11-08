@@ -35,7 +35,7 @@ let googleGuardInstalled=false;
 function googleAllowed(target=window.location.href):boolean {
   try {
     const url=new URL(target,window.location.href);
-    googlePrivateSeen ||= Boolean(url.search||url.hash) || /^\/sase-sd-wan-rfp-builder(?:\/|$)/.test(url.pathname) || /^\/sase\/(home|workspace|circuit-pricing|account|admin|rfp-builder|opportunities)(?:\/|$)/.test(url.pathname);
+    googlePrivateSeen ||= Boolean(url.search||url.hash) || /^\/sase-sd-wan-rfp-builder(?:\/|$)/.test(url.pathname) || /^\/sase\/(home|workspace|studio-preview|studio|circuit-pricing|account|admin|rfp-builder|opportunities)(?:\/|$)/.test(url.pathname);
   } catch {googlePrivateSeen=true;}
   window['ga-disable-G-XNL6HY3BQX']=googlePrivateSeen||!readConsent().analytics;
   return !window['ga-disable-G-XNL6HY3BQX'];

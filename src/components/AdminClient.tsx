@@ -133,7 +133,7 @@ export default function AdminClient() {
         {session.authenticated && !session.admin && (
           <p className="text-sm text-red-700">Signed in as {session.email}, which is not an admin account.</p>
         )}
-        <SignIn role="buyer" prompt="Sign in with your Netify admin email to manage the marketplace." />
+        <SignIn simple role="buyer" prompt="Use your Netify work email. Enter the code here to open the marketplace controls." />
       </div>
     );
   }

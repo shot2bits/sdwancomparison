@@ -1,3 +1,5 @@
+import { isStudioProject, studioDraftFromProject, studioPublicationReadiness, studioReviewHash } from './studio-project';
+import { studioPublicNotice } from './opportunity-studio';
 import { resolvePublicationIssue } from '@/lib/publication-issues';
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { randomUUID } from "node:crypto";
@@ -223,6 +225,7 @@ export async function listRfpOnBoard(
   );
 
   const base: Opportunity = OpportunitySchema.parse({
+    privacy_contract: isStudioProject(p) ? "opportunity-studio/1" : existing?.privacy_contract,
     id: existing?.id ?? newId("opp"),
     created: existing?.created ?? Date.now(),
     updated: Date.now(),
@@ -271,6 +274,14 @@ export async function listRfpOnBoard(
     // revision id, e.g. a cosmetic re-list) rather than clearing it.
     source_published_revision_id: opts.publishedRevisionId ?? existing?.source_published_revision_id ?? "",
   });
+
+  if(isStudioProject(p)) {
+    const n=studioPublicNotice(studioDraftFromProject(p));
+    base.title=n.title; base.summary=n.summary; base.ai_summary=n.summary; base.timeline_note=n.timing;
+    const draft=studioDraftFromProject(p);
+    base.studio_users=Number(draft.users)||0; base.studio_service=draft.service; base.studio_format=draft.format;
+    base.users_band=n.size; base.budget_note='';
+  }
 
   // The public quality gate (Robert's ruling, 28 Jul 2026): no test data,
   // coherent figures, sector stated or explicitly not stated. A gate failure
@@ -404,6 +415,14 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify(payload),
     });
+
+  if(isStudioProject(p)) {
+    const workspaceUrl=`${SITE_URL}/studio-preview/?project=${encodeURIComponent(p.id)}`;
+    const format=studioDraftFromProject(p).format.toUpperCase();
+    await send({from,to,reply_to:ownerEmail,subject:`${format} opportunity published | ${p.id}`,html:`<p>A verified buyer published an anonymous ${format} opportunity.</p><p>Reference: ${p.id}</p><p>No automatic supplier invitations were sent. Approved suppliers can request to bid.</p><p><a href="${workspaceUrl}">Open project (owner sign-in required)</a></p>`});
+    await send({from,to:ownerEmail,subject:`Your Netify ${format} opportunity is published`,html:`<p>Your anonymous opportunity is published.</p><p>Approved suppliers can review your requirement and request to bid. You choose which requests to approve; approval opens a private conversation and does not automatically share your account details.</p><p>No response or purchase is guaranteed or required.</p><p><a href="${workspaceUrl}">Open your project</a> using the same work email.</p>`});
+    return;
+  }
 
   // Internal lead alert
   await send({
@@ -697,6 +716,8 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
     // rather than returning nothing; the snapshot below will be created.
   }
 
+  if(isStudioProject(project) && (project.entrance_context?.raw_input.studio_review_revision!==project.marketplace_revision || project.entrance_context?.raw_input.studio_review_hash!==studioReviewHash(project))) throw new Error("Review this current requirement and approve supplier sharing before publication.");
+
   const essentialBaseline = persistedEssentialBaselineChecklist({
     facts: project.facts,
     decisionLedger: project.decision_ledger,
@@ -710,7 +731,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
   // (below) so the fixture suite can exercise the REAL gate logic directly,
   // never a hand-duplicated copy that could silently drift from it.
   const activeQuestionCount = minimumContentQuestionCount(project);
-  const readiness = isShortProject(project)
+  const readiness = isStudioProject(project) ? studioPublicationReadiness(project) : isShortProject(project)
     ? shortProjectReadiness(project)
     : publicationReadiness({ baselineReady: essentialBaseline.ready, baselineRemaining: essentialBaseline.remaining, activeQuestionCount });
   if (!currentDocumentIsConsistent(project)) throw new Error("The saved document does not match your current confirmed facts. Save and review the current revision before publishing. Nothing has been sent.");
@@ -832,7 +853,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
       // hard failure, when this project's most recent save predates the
       // field or came from a client build that had not yet started
       // sending it (published-snapshot.ts's own frozen_content comment).
-      frozen_content: { title: working.title, buyer: projectWithCurrentBuyerFacts(working).buyer, rfp_sections: working.rfp_sections, living_document: working.procurement_document ?? null, facts: working.facts },
+      frozen_content: { ...(isStudioProject(working)?{studio_requirement:studioDraftFromProject(working)}:{}), title: working.title, buyer: projectWithCurrentBuyerFacts(working).buyer, rfp_sections: working.rfp_sections, living_document: working.procurement_document ?? null, facts: working.facts },
       created_at: Date.now(),
     });
     attempt = await savePublicationAttempt({
@@ -1111,7 +1132,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
   // already-invited slug. Already-invited slugs (from a resumed attempt)
   // still get their supplier_url reconstructed for THIS response, even
   // though inviteSupplier() itself is not called again for them.
-  const invitationPlan = attempt.invitation_plan ?? [];
+  const invitationPlan = isStudioProject(published) ? [] : attempt.invitation_plan ?? [];
   const alreadyInvited = new Set(attempt.invited_slugs);
   const invited: { slug: string; name: string; supplier_url: string }[] = [];
   for (const entry of invitationPlan) {
@@ -1257,7 +1278,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
       consent: latestPublishConsent(published),
       content_hash: contentHash(contentSnapshotForEvent),
       // Same treatment as the earlier FrozenRevision (step B) above.
-      frozen_content: { title: published.title, buyer: projectWithCurrentBuyerFacts(published).buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null, facts: published.facts },
+      frozen_content: { ...(isStudioProject(published)?{studio_requirement:studioDraftFromProject(published)}:{}), title: published.title, buyer: projectWithCurrentBuyerFacts(published).buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null, facts: published.facts },
       public_projection: { opportunity_id: board.opportunity_id ?? null, url: board.url ?? null, notice: publishedNotice ? toPublicOpportunity(publishedNotice) : null },
       private_requirement: { rfp_id: published.id },
       match_criteria: attempt.match_criteria ?? "",

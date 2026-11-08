@@ -12,7 +12,7 @@ assert.match(session, /authenticateMarketplaceProject\(projectId, token\)/);
 assert.match(session, /session\.revision !== request\.base_revision/);
 assert.match(session, /getStrictLiveShortlistDataset/);
 assert.match(session, /shortlistInputFromProviderMatchInput/);
-assert.match(session, /buildShortlist\(scoped, translated\.input, FEATURE_NAMES\)/);
+assert.match(session, /buildShortlist\(scoped, \{ \.\.\.translated\.input, \.\.\.projectMatchingInput\(project\) \}, FEATURE_NAMES\)/);
 assert.match(session, /calculated_at: Date\.now\(\)/);
 assert.match(session, /project_revision: nextRevision/);
 assert.doesNotMatch(route, /manage_token/);

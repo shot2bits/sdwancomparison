@@ -51,7 +51,7 @@ const record = (pass: boolean, label: string, detail = "") => {
 function main() {
   const CANON = "https://netify.co.uk/sase-sd-wan-rfp-builder/";
   const config = src("next.config.ts");
-  const home = src("src/app/(workspace)/home/page.tsx");
+  const home = src("src/app/(studio)/home/page.tsx");
   const entry = src("src/components/procurement/ProcurementEntry.tsx");
   const hero = src("src/components/CollapsibleHero.tsx");
   const content = src("src/components/procurement/RfpPublicContent.tsx");
@@ -91,7 +91,7 @@ function main() {
   record(!/^"use client"/.test(content.trim()), "3: RfpPublicContent is a Server Component");
   record(RFP_DEFINITIONS.length === 2 && RFP_DEFINITIONS[0].term === "SD-WAN RFP" && RFP_DEFINITIONS[1].term === "SASE RFP", "3: two definitions, SD-WAN RFP then SASE RFP");
   record(RFP_DEFINITIONS.every((d) => /^An? (SD-WAN|SASE) RFP is a request for proposal/.test(d.text)), "3: each definition opens as a quotable sentence");
-  record(/definitions=\{RFP_DEFINITIONS\}/.test(entry) && /<dl/.test(hero) && /<dt/.test(hero), "3: definitions render above the application as a description list");
+  record(/RFP_DEFINITIONS.map/.test(home) && /<dl/.test(home) && /<dt/.test(home), "3: definitions remain server-rendered in the native buying guide");
   record(!/^\s*<div className="sr-only">/m.test(hero.split("return (")[1] ?? ""), "3: the pre-start hero is no longer wrapped in sr-only");
   const areas = ["Organisation and scale", "Network architecture", "SASE security", "Resilience", "Managed service", "Implementation", "Pricing and contract terms", "Supplier evidence"];
   record(RFP_AREAS.map((r) => r.area).join("|") === areas.join("|"), "3: the table carries the eight ruled areas in order");

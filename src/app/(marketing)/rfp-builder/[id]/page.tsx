@@ -1,3 +1,4 @@
+import {redirect} from 'next/navigation';
 import type { Metadata } from "next";
 import Link from "next/link";
 import SourcingProjectJourney from "@/components/SourcingProjectJourney";
@@ -47,6 +48,7 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
     // of the hand-off. The header reads the project's engine flag only; no
     // private matter is rendered server-side.
     const proj = await getProject(id).catch(() => null);
+    if(proj?.entrance_context?.raw_input.studio_contract==="opportunity-studio/1")redirect(`/studio-preview/?project=${encodeURIComponent(id)}`);
     const isEngine = proj?.engine === "security_sourcing";
     const isSourcing = Boolean(proj?.entrance_context?.raw_input.sourcing_request_id);
     return (

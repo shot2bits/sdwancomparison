@@ -24,6 +24,7 @@ export async function GET(req: Request, ctx: Ctx) {
   const since = Number(url.searchParams.get("since") ?? 0);
   const providedToken = url.searchParams.get("buyer_token") ?? req.headers.get("x-buyer-token");
   const isOwner = Boolean(providedToken && providedToken === opp.buyer_token);
+  if(opp.privacy_contract==="opportunity-studio/1"&&!isOwner)return Response.json({items:[],now:Date.now(),status:opp.status,invited:[]},{headers:cors});
   const feed = isOwner ? opp.feed : maskedFeed(opp);
   const items = feed.filter((f) => f.created > since);
   return Response.json({ items, now: Date.now(), status: opp.status, invited: opp.invited }, { headers: cors });

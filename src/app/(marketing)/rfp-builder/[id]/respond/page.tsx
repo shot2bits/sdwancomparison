@@ -1,3 +1,4 @@
+import {getProject} from '@/lib/rfp-store';
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import RfpResponder from "@/components/RfpResponder";
@@ -10,6 +11,8 @@ type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ token?: 
 export default async function RespondPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { token, vt } = await searchParams;
+  const p=await getProject(id).catch(()=>null);
+  if(p?.entrance_context?.raw_input.studio_contract==="opportunity-studio/1")redirect(`/studio/supplier/${id}/`);
   // Piece 3B-2 credential exchange (Robert's ruling, 9 Aug 2026): the
   // per-supplier bearer credential is no longer accepted here as a URL
   // parameter at all — every current invitation link points at

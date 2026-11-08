@@ -3,6 +3,8 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer } from "node:net";
+const testScript=process.argv[2]??"scripts/test-sourcing-routes.ts";
+if(!["scripts/test-sourcing-routes.ts","scripts/test-studio-integration.ts"].includes(testScript))throw Error("Unknown integration suite");
 const reserve = createServer();
 await new Promise((r) => reserve.listen(0, "127.0.0.1", r));
 const port = reserve.address().port;
@@ -45,7 +47,7 @@ try {
   if (!ready) throw Error("Isolated Redis failed to start");
   const child = spawn(
     process.execPath,
-    ["node_modules/tsx/dist/cli.mjs", "scripts/test-sourcing-routes.ts"],
+    ["node_modules/tsx/dist/cli.mjs", testScript],
     {
       stdio: "inherit",
       env: {
