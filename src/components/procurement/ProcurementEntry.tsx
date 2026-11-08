@@ -70,7 +70,7 @@ export const ENGINE_ROLE =
  * evaluation and anonymous publication. The former description was the
  * whole ENGINE_DESCRIPTION paragraph stack (984 characters). */
 export const RFP_META_DESCRIPTION =
-  "Build an SD-WAN RFP or SASE RFP with governed supplier questions, validate it, publish anonymously and run a like-for-like vendor evaluation. Free for buyers.";
+  "Bring or build an SD-WAN RFP or SASE RFP. Publish anonymously and choose which supplier requests to approve for private proposal discussions. Free to publish.";
 export const ENGINE_PROMISE = SOURCING_DESCRIPTION;
 export const ENGINE_VALUE =
   "Use Netify's question bank and sourced provider comparisons to structure your requirements. Choose your sector, including retail, manufacturing, healthcare, financial services or government, then review the relevant questions against your business needs.";

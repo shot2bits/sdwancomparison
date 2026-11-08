@@ -1,0 +1,7 @@
+# RFP proposal service wording — 8 November 2026
+
+User authorised live copy/metadata changes: bring an existing or AI-generated RFP, review and publish anonymously, choose supplier requests to approve, and open private proposal discussions. Do not guarantee supplier participation. Fictional examples must be explicit.
+
+Canonical URL unchanged. Search title/description and WebPage/WebApplication names/descriptions align with procurement service. New server-rendered service explanation is passed as a ReactNode slot and appears before closed MCP connection details. Hero explicitly accepts existing AI drafts; More tools links to the local service explanation. New fictional supplier-request/buyer-approval/reply illustration carries an explicit demonstration-only label and no real vendor, price or result claims. Fees/privacy/approval FAQs match the implemented request-to-bid model, independently of the shortlist desk service. Removed unsupported side-by-side response claim; evaluated records are explicitly not a participation count. Editorial copy date updated, underlying methodology evidence dates unchanged.
+
+No API, ownership, publication, supplier permission or email changes. Existing draft/publish/supplier/MCP hooks retained. Local canonical validator and TypeScript pass; scoped lint and Studio UI regression, hosted visual/readable-HTML checks and exact-source CI precede release. Final source/deployment evidence follows acceptance.
