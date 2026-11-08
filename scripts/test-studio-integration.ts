@@ -19,6 +19,7 @@ await withFakeKv(async (store) => {
   process.env.PROVIDER_MATCH_DATA_URL = "https://provider.fixture/records";
   process.env.PROVIDER_MATCH_SERVICE_TOKEN = "fixture-only";
   let failBoard = false;
+  let failFeed = false;
   const before = global.fetch;
   const { getShortlistDataset } = await import("../src/lib/vendors");
   const { ProviderMatchRecordSchema } =
@@ -39,6 +40,8 @@ await withFakeKv(async (store) => {
   );
   global.fetch = async (input, init) => {
     const url = String(input instanceof Request ? input.url : input);
+    if (url === "https://provider.fixture/records" && failFeed)
+      return Response.json({ error: "Not found." }, { status: 404 });
     if (url === "https://provider.fixture/records")
       return Response.json({
         contract_version: "provider-match-records/2.0.0",
@@ -257,6 +260,12 @@ await withFakeKv(async (store) => {
         ctx,
       );
     if (format === "rfi") {
+      failFeed = true;
+      const feedFailure = await pub();
+      failFeed = false;
+      assert.equal(feedFailure.status, 503);
+      assert.match((await feedFailure.json()).error, /project is saved/);
+      assert.equal((await kv.getProject(c.project_reference))!.status, "draft");
       failBoard = true;
       const failed = await pub();
       failBoard = false;
@@ -289,13 +298,41 @@ await withFakeKv(async (store) => {
       (await repeat.json()).opportunity_id,
       resultBody.opportunity_id,
     );
-    const snapshot=await (await import('../src/lib/published-snapshot')).getLatestPublishedSnapshot(c.project_reference);
-    assert.equal(snapshot!.frozen_content.studio_requirement!.users,'500');
-    const storedBefore=await kv.getProject(c.project_reference);assert(storedBefore);
-    await kv.saveProject({...storedBefore,entrance_context:{...storedBefore.entrance_context!,raw_input:{...storedBefore.entrance_context!.raw_input,studio_users:'900'}}});
-    const frozenRead=await engage.GET(makeRequest('GET','https://studio-test.vercel.app/engagement?role=supplier',{cookie:cookie(supplier)}),ctx);
-    assert.equal((await frozenRead.json()).requirement.users,'500','A later record edit cannot silently alter the published supplier requirement');
-    const tampered=await pub();assert.equal(tampered.status,400,'Changed unreviewed content cannot be republished');
+    const snapshot = await (
+      await import("../src/lib/published-snapshot")
+    ).getLatestPublishedSnapshot(c.project_reference);
+    assert.equal(snapshot!.frozen_content.studio_requirement!.users, "500");
+    const storedBefore = await kv.getProject(c.project_reference);
+    assert(storedBefore);
+    await kv.saveProject({
+      ...storedBefore,
+      entrance_context: {
+        ...storedBefore.entrance_context!,
+        raw_input: {
+          ...storedBefore.entrance_context!.raw_input,
+          studio_users: "900",
+        },
+      },
+    });
+    const frozenRead = await engage.GET(
+      makeRequest(
+        "GET",
+        "https://studio-test.vercel.app/engagement?role=supplier",
+        { cookie: cookie(supplier) },
+      ),
+      ctx,
+    );
+    assert.equal(
+      (await frozenRead.json()).requirement.users,
+      "500",
+      "A later record edit cannot silently alter the published supplier requirement",
+    );
+    const tampered = await pub();
+    assert.equal(
+      tampered.status,
+      400,
+      "Changed unreviewed content cannot be republished",
+    );
     await kv.saveProject(storedBefore);
     const read = await publicRead.GET(
       makeRequest("GET", "https://studio-test.vercel.app/public"),

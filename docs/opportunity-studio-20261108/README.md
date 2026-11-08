@@ -1,4 +1,8 @@
-# Opportunity Studio: working design preview
+# Opportunity Studio
+
+The initial design-preview record below is historical. The connected implementation and current test/release status are recorded in [INTEGRATION.md](INTEGRATION.md). The candidate now uses real project, publication, supplier engagement and MCP services; testing uses isolated preview storage and captured email. Production release is pending hosted acceptance.
+
+## Original design-preview record
 
 8 November 2026. Branch `codex/opportunity-studio-20261108`, based on verified live source `048802a56eabad70e9a6299f9461ca77ff59c070` from `release/2026-09-30`. Actual checkout `/Users/robertsturt/sdwancomparison`.
 

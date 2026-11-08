@@ -179,7 +179,13 @@ export default function OpportunityStudio({
   const project = useStudioProject((d, published) => {
     setDraft(d);
     setPreviewPublished(published);
-    setStep(published ? "engage" : "review");
+    setStep(
+      published
+        ? "engage"
+        : studioReadiness(d, questions).length
+          ? "requirements"
+          : "review",
+    );
     setPublicConsent(false);
     setSupplierConsent(false);
   });

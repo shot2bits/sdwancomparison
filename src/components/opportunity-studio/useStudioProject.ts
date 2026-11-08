@@ -18,6 +18,7 @@ type ProjectRead = {
   buyer: { organisation: string };
   market_unlocked: boolean;
   publication_complete: boolean;
+  prepared: boolean;
   publication_receipt: { notice_url: string | null } | null;
   revision: number;
 };
@@ -40,6 +41,7 @@ export async function studioJson<T>(
 export function useStudioProject(
   onLoad: (d: StudioDraft, published: boolean) => void,
 ) {
+  const [recoveryCopy, setRecoveryCopy] = useState<StudioDraft | null>(null);
   const [recoveryProject, setRecoveryProject] = useState("");
   const [legacyUrl, setLegacyUrl] = useState("");
   const [returnPath, setReturnPath] = useState("/sase/studio-preview/");
@@ -92,6 +94,15 @@ export function useStudioProject(
       }
       remember({ ...c, revision: p.revision });
       setCompany(p.buyer.organisation);
+      setPrepared(p.prepared === true);
+      try {
+        localStorage.setItem(
+          `netify_studio_backup_${c.project_reference}`,
+          JSON.stringify(p.studio_draft),
+        );
+      } catch {
+        /* Server remains authoritative. */
+      }
       setNoticeUrl(
         p.publication_receipt?.notice_url
           ? new URL(p.publication_receipt.notice_url).pathname
@@ -111,16 +122,26 @@ export function useStudioProject(
       c = { project_reference: id, project_session_token: token, revision: 0 };
     else if (id) {
       try {
-        c = await studioJson<Credential>(
-          `/sase/api/marketplace/projects/${encodeURIComponent(id)}/recover/`,
-          { method: "POST" },
+        const local = JSON.parse(
+          localStorage.getItem("netify_studio_project_v1") ?? "null",
         );
+        if (local?.project_reference === id && local.project_session_token)
+          c = local;
       } catch {
-        setRecoveryProject(id);
-        throw new Error(
-          "Verify the work email that owns this project to reopen it.",
-        );
+        /* Try verified owner recovery. */
       }
+      if (!c)
+        try {
+          c = await studioJson<Credential>(
+            `/sase/api/marketplace/projects/${encodeURIComponent(id)}/recover/`,
+            { method: "POST" },
+          );
+        } catch {
+          setRecoveryProject(id);
+          throw new Error(
+            "Verify the work email that owns this project to reopen it.",
+          );
+        }
     } else {
       try {
         c = JSON.parse(
@@ -147,6 +168,22 @@ export function useStudioProject(
         return result;
       } catch {
         setRecoveryProject(c.project_reference);
+        try {
+          const cached = JSON.parse(
+            localStorage.getItem(
+              `netify_studio_backup_${c.project_reference}`,
+            ) ?? "null",
+          );
+          if (
+            cached &&
+            typeof cached.requirement === "string" &&
+            Array.isArray(cached.regions) &&
+            Array.isArray(cached.questionIds)
+          )
+            setRecoveryCopy(cached);
+        } catch {
+          /* No usable browser copy. */
+        }
         throw error;
       }
     }
@@ -209,6 +246,14 @@ export function useStudioProject(
       c = { ...c, revision: saved.revision };
       remember(c);
     }
+    try {
+      localStorage.setItem(
+        `netify_studio_backup_${c.project_reference}`,
+        JSON.stringify(draft),
+      );
+    } catch {
+      /* Server save already succeeded. */
+    }
     return c;
   }
   async function prepare(draft: StudioDraft) {
@@ -267,6 +312,22 @@ export function useStudioProject(
     }
   }
   return {
+    recoveryCopy,
+    restartFromCopy: () => {
+      if (!recoveryCopy) return;
+      ref.current = null;
+      setCredential(null);
+      setPrepared(false);
+      setCompany("");
+      setRecoveryProject("");
+      setError("");
+      try {
+        localStorage.removeItem("netify_studio_project_v1");
+      } catch {}
+      window.history.replaceState(null, "", window.location.pathname);
+      loadCallback.current(recoveryCopy, false);
+      setRecoveryCopy(null);
+    },
     recoveryProject,
     legacyUrl,
     returnPath,

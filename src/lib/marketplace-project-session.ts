@@ -192,7 +192,7 @@ export async function readMarketplaceProject(projectId: string, token: string) {
     workspace_payload: marketplaceWorkspacePayload(project),
     expires_at: session.expires_at, buyer: projectWithCurrentBuyerFacts(project).buyer, entrance_context: project.entrance_context,
     notice: isShortProject(project) ? shortProjectNotice(project) : null,
-    mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION,
+    mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION && (!isStudioProject(project) || (project.entrance_context?.raw_input.studio_review_revision===project.marketplace_revision && project.entrance_context?.raw_input.studio_review_hash===studioReviewHash(project))),
     marketplace_state: project.marketplace_state,
     publication_receipt: receipt,
   };
