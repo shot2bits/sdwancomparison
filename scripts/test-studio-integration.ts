@@ -292,12 +292,22 @@ await withFakeKv(async (store) => {
     const resultBody = await result.json();
     assert.equal(result.status, 200, JSON.stringify(resultBody));
     assert.equal(resultBody.ok, true);
+    const alertModule = await import("../src/lib/admin-alerts");
+    const publishedSnapshot = await (await import("../src/lib/published-snapshot")).getLatestPublishedSnapshot(c.project_reference);
+    const alertId = alertModule.adminAlertId({kind:"project", reference:c.project_reference, revision:publishedSnapshot!.id, format:format === "rfi" ? "RFI" : "RFP"});
+    const alertReceipt = store.peekJson<import("../src/lib/admin-alerts").AdminAlert>(`admin-alerts:record:${alertId}`)!;
+    assert.equal(alertReceipt.status,"accepted");
+    assert.equal(alertReceipt.payload!.to,"support@netify.com");
+    assert.match(alertReceipt.payload!.text,new RegExp(`/admin/projects/${c.project_reference}/`));
+    assert(!alertReceipt.payload!.text.includes("PRIVATE_SENTINEL"));
+    assert(!alertReceipt.payload!.text.includes(c.project_session_token));
     const repeat = await pub();
     assert.equal(repeat.status, 200);
     assert.equal(
       (await repeat.json()).opportunity_id,
       resultBody.opportunity_id,
     );
+    assert.equal(store.peekJson<import("../src/lib/admin-alerts").AdminAlert>(`admin-alerts:record:${alertId}`)!.attempts, 1, "Publish replay must not resend support alert");
     const snapshot = await (
       await import("../src/lib/published-snapshot")
     ).getLatestPublishedSnapshot(c.project_reference);
@@ -539,6 +549,15 @@ await withFakeKv(async (store) => {
   );
   assert.equal(claimRequest.status, 200);
   assert.equal((await claimRequest.json()).status, "pending");
+  const pendingClaim = (await kv.getVendorClaim("aryaka"))!;
+  const alerts = await import("../src/lib/admin-alerts");
+  const supplierAlertId = alerts.adminAlertId({kind:"supplier",reference:"aryaka",requested:pendingClaim.requested});
+  const supplierAlert = store.peekJson<import("../src/lib/admin-alerts").AdminAlert>(`admin-alerts:record:${supplierAlertId}`)!;
+  assert.equal(supplierAlert.status,"accepted");
+  assert.equal(supplierAlert.payload!.to,"support@netify.com");
+  assert.match(supplierAlert.payload!.text,/#supplier-approvals/);
+  assert.equal((await kv.requestVendorClaim("aryaka", "studio@aryaka.com", "aryaka.com")).requested,pendingClaim.requested);
+  assert.equal(store.peekJson<import("../src/lib/admin-alerts").AdminAlert>(`admin-alerts:record:${supplierAlertId}`)!.attempts,1);
   const authRequest = await import("../src/app/api/auth/request/route");
   const authVerify = await import("../src/app/api/auth/verify/route");
   const adminRequest = await authRequest.POST(
@@ -569,6 +588,10 @@ await withFakeKv(async (store) => {
   assert.equal(adminVerified.status, 200);
   const adminCookie = adminVerified.headers.get("set-cookie")!.split(";")[0];
   const adminRoute = await import("../src/app/api/admin/route");
+  const testMail = await adminRoute.POST(makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {cookie:adminCookie,body:{action:"send_test_alert"}}));
+  assert.equal(testMail.status,200);assert.equal((await testMail.json()).status,"accepted");
+  const forbiddenTest = await adminRoute.POST(makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {cookie:cookie(buyer),body:{action:"send_test_alert"}}));
+  assert.equal(forbiddenTest.status,403);
   const ordinary = await adminRoute.POST(
     makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {
       cookie: cookie(buyer),

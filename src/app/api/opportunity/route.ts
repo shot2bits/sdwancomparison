@@ -2,7 +2,7 @@ import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveOpportunity, kvConfigured, newId, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem } from "@/lib/opportunity";
-import { notifyOpportunityPublishedLead } from "@/lib/notify";
+import { queueAdminAlert, tryAdminAlert } from "@/lib/admin-alerts";
 import { sessionFromRequest } from "@/lib/auth";
 import {
   OpportunitySchema,
@@ -111,12 +111,13 @@ export async function POST(req: Request) {
     owner_email: session.email ?? "",
   });
   if (!parsed.success) return Response.json({ error: "Invalid opportunity." }, { status: 422, headers: cors });
+  const alertId = await queueAdminAlert({ kind: "opportunity", reference: parsed.data.id });
   let opp = await saveOpportunity(parsed.data);
   opp = await addFeedItem(opp, "buyer", null, (buyer_visibility === "anonymous" ? "" : opp.buyer_org) || "Buyer", "post", opp.summary || opp.title);
   // This POST is the only moment an Opportunity exists at all (no draft
   // state precedes it), so it is also the only correct moment to alert the
   // team — see notify.ts's notifyOpportunityPublishedLead for the reasoning.
-  try { await notifyOpportunityPublishedLead(opp); } catch { /* best effort */ }
+  await tryAdminAlert(alertId);
   if(opp.visibility==="public") await recordMarketplaceFunnelEvent({event:"publication_completed",project_id:opp.id,source:"notice_builder",mode:"notice",channel:"web",detail:{board_created:true}});
   return Response.json(opp, { headers: cors });
 }

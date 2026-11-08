@@ -26,3 +26,4 @@ jobs:
       - run: node scripts/test-sourcing-real-redis.mjs scripts/test-studio-integration.ts
       - run: node --import tsx scripts/test-studio-ui.mjs
       - run: node --import tsx scripts/test-admin-ui.mjs
+      - run: node scripts/test-sourcing-real-redis.mjs scripts/test-admin-alerts.ts

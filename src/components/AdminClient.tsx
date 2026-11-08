@@ -101,6 +101,7 @@ type PublishLead = {
   } | null;
 };
 type Overview = {
+  email_alerts?: { recipient: string; pending: number; needs_review: number; last_delivery_failure_at?: number | null };
   generated_at?: number;
   attention?: AttentionItem[];
   admin_email: string;
@@ -258,6 +259,9 @@ export default function AdminClient() {
           `Shape backfill: ${Number(d.processed_now ?? 0)} processed, ${Number(d.remaining ?? 0)} still to process of ${Number(d.missing_total ?? 0)} missing a shape.`,
         );
       }
+      if (payload.action === "send_test_alert") setNotice(d.status === "accepted"
+        ? "Resend accepted the test email to support@netify.com. Check the inbox."
+        : "Test email queued for retry. Check the email alert status below.");
       if (payload.action === "approve_claim") setNotice("Supplier approved.");
       if (payload.action === "reject_claim")
         setNotice("Supplier access rejected.");
@@ -353,6 +357,17 @@ export default function AdminClient() {
           {notice}
         </p>
       )}
+
+      {data.email_alerts && (
+        <p className="text-sm mb-6" role="status">
+          Project and supplier approval alerts go to {data.email_alerts.recipient} via Resend.{" "}
+          <button className={btn} disabled={busy} onClick={() => act({action:"send_test_alert"})}>Send test email</button>
+          {data.email_alerts.pending > 0 && ` ${data.email_alerts.pending} email(s) waiting for delivery acceptance; retried every five minutes.`}
+          {data.email_alerts.last_delivery_failure_at && ` A delivery failure for this inbox was recorded on ${when(data.email_alerts.last_delivery_failure_at)}. Check Resend delivery logs.`}
+          {data.email_alerts.needs_review > 0 && ` ${data.email_alerts.needs_review} email(s) need delivery review in Resend before resending.`}
+        </p>
+      )}
+
 
       {/* Buyer funnel: the four stages that matter */}
       {data.funnel && (
@@ -475,6 +490,7 @@ export default function AdminClient() {
           )}
         </section>
       )}
+
 
       {/* Profile claims */}
       <section id="supplier-approvals" className={card}>
@@ -822,7 +838,7 @@ export default function AdminClient() {
       </section>
 
       {/* Opportunity board moderation */}
-      <section className={card}>
+      <section id="opportunity-board" className={card}>
         <h2 className={h2}>
           Opportunity board ({(data.opportunities ?? []).length})
         </h2>
