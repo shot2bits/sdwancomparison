@@ -1,3 +1,4 @@
+import { queueAdminAlert, tryAdminAlert } from "./admin-alerts";
 import { isStudioProject, studioDraftFromProject, studioPublicationReadiness, studioReviewHash } from './studio-project';
 import { studioPublicNotice } from './opportunity-studio';
 import { resolvePublicationIssue } from '@/lib/publication-issues';
@@ -17,14 +18,12 @@ import { buildShortlist, MATCHING_RULES_VERSION } from "@/lib/shortlist-core";
 import { FEATURE_NAMES } from "@/lib/vendors";
 import { getStrictLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 import { SITE_URL } from "@/lib/structured-data";
-import { emailDomain } from "@/lib/access-control";
 import { toPublicOpportunity, OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
 import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validate";
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
 import { FOLLOW_UP_NOTE, PROMISES_PARAGRAPH } from "@/lib/publish-promises";
 import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION } from "@/lib/rfp-document";
-import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
 import {
   rfpContentSnapshot,
@@ -370,44 +369,20 @@ export async function recoverUnlistedPublish(
 }
 
 /**
- * Publish notifications, best effort: an internal lead alert to the Netify
- * team and a confirmation to the buyer. Sent with the auth transport (Resend,
- * no-reply sender); failures never fail the publish, matching /api/lead.
+ * Buyer confirmations remain best effort through Resend. Internal team alerts
+ * use the durable admin-alert outbox independently of the buyer email.
  */
 function pinnedNoteFor(p: ProjectDetails): string {
   const pins = (p.buyer.pinned_vendors ?? []).filter(Boolean);
   return pins.length ? `<p><em>Includes the vendor${pins.length === 1 ? "" : "s"} you named for evaluation: ${pins.join(", ")}.</em></p>` : "";
 }
 
-/** Friendly label for the internal alert: which engine, and which door the
- *  buyer came through. Both fields pre-date Milestone 3 as schema (engine
- *  Piece B, source Piece 2) but neither was ever surfaced to a human until
- *  now — Robert's 10 Aug ask to make the emails reflect the current
- *  deployment. */
-function engineChannelLabel(p: ProjectDetails): string {
-  const engine = p.engine === "security_sourcing" ? "Security Sourcing" : "Network/SD-WAN";
-  const channel = p.source === "mcp" ? "AI agent (MCP)" : p.source === "wizard" ? "web wizard" : "unknown/pre-stamp";
-  return `${engine} &middot; via ${channel}`;
-}
-
 async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[], report?: MarketReport) {
   const key = activityMailKey();
   if (!key) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
-  const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
-  // The canonical Project view (Robert's copy, 21 Jul: the RFP Builder is
-  // "a deliberate escape hatch, never the main road"). Both the internal
-  // alert and the buyer confirmation used to point at that escape hatch
-  // (/rfp-builder/{id}/, still a real, live page) rather than the front
-  // door — fixed 10 Aug 2026.
+  // Buyer confirmations keep their existing owner workspace link.
   const rfpUrl = `${SITE_URL}/project/${p.id}/`;
-  const supplierNames = invited.map((v) => v.name).join("\n");
-  const org = [
-    p.buyer.sector && `Sector: ${sectorLabel(p.buyer.sector)}`,
-    p.buyer.organisation_size && p.buyer.organisation_size !== "any" && `Size: ${labelFor(RFP_ORG_SIZES, p.buyer.organisation_size)}`,
-    p.buyer.site_count && `Sites: ${p.buyer.site_count}`,
-    p.buyer.regions.length > 0 && `Regions: ${p.buyer.regions.join(", ")}`,
-  ].filter(Boolean).join("<br/>");
 
   const send = (payload: Record<string, unknown>) =>
     activityMailFetch("https://api.resend.com/emails", {
@@ -419,19 +394,9 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
   if(isStudioProject(p)) {
     const workspaceUrl=`${SITE_URL}/studio-preview/?project=${encodeURIComponent(p.id)}`;
     const format=studioDraftFromProject(p).format.toUpperCase();
-    await send({from,to,reply_to:ownerEmail,subject:`${format} opportunity published | ${p.id}`,html:`<p>A verified buyer published an anonymous ${format} opportunity.</p><p>Reference: ${p.id}</p><p>No automatic supplier invitations were sent. Approved suppliers can request to bid.</p><p><a href="${workspaceUrl}">Open project (owner sign-in required)</a></p>`});
     await send({from,to:ownerEmail,subject:`Your Netify ${format} opportunity is published`,html:`<p>Your anonymous opportunity is published.</p><p>Approved suppliers can review your requirement and request to bid. You choose which requests to approve; approval opens a private conversation and does not automatically share your account details.</p><p>No response or purchase is guaranteed or required.</p><p><a href="${workspaceUrl}">Open your project</a> using the same work email.</p>`});
     return;
   }
-
-  // Internal lead alert
-  await send({
-    from,
-    to,
-    reply_to: ownerEmail,
-    subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} vendors`,
-    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p><p>${engineChannelLabel(p)}</p>${org ? `<p>${org}</p>` : ""}<p><strong>Vendors auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}${pinnedNoteFor(p)}<p><a href="${rfpUrl}">Open the Project</a></p>`,
-  });
 
   // Confirmation to the buyer, carrying the Market Report (18 July 2026):
   // the publish reward stated in the email itself — price band, matched
@@ -1294,7 +1259,12 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
       open_decisions: market_report.gaps,
       market_report,
     };
+    // Persist the alert intent first; cron checks for this exact committed snapshot.
+    const adminAlert = !published.test && board.listed
+      ? await queueAdminAlert({ kind: "project", reference: published.id, revision: snapshot.id, format: isStudioProject(published) && studioDraftFromProject(published).format === "rfi" ? "RFI" : "RFP" })
+      : null;
     await savePublishedSnapshot(project.id, snapshot);
+    if (adminAlert) await tryAdminAlert(adminAlert);
   }
   // A resumed event repairs a missing snapshot without adding a governed revision.
 

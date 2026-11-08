@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer } from "node:net";
 const testScript=process.argv[2]??"scripts/test-sourcing-routes.ts";
-if(!["scripts/test-sourcing-routes.ts","scripts/test-studio-integration.ts"].includes(testScript))throw Error("Unknown integration suite");
+if(!["scripts/test-sourcing-routes.ts","scripts/test-studio-integration.ts","scripts/test-admin-alerts.ts"].includes(testScript))throw Error("Unknown integration suite");
 const reserve = createServer();
 await new Promise((r) => reserve.listen(0, "127.0.0.1", r));
 const port = reserve.address().port;

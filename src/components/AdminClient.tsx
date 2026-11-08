@@ -101,6 +101,7 @@ type PublishLead = {
   } | null;
 };
 type Overview = {
+  email_alerts?: { recipient: string; pending: number; needs_review: number; last_delivery_failure_at?: number | null };
   generated_at?: number;
   attention?: AttentionItem[];
   admin_email: string;
@@ -476,6 +477,15 @@ export default function AdminClient() {
         </section>
       )}
 
+      {data.email_alerts && (
+        <p className="text-sm mb-6" role="status">
+          Project and supplier approval alerts go to {data.email_alerts.recipient} via Resend.
+          {data.email_alerts.pending > 0 && ` ${data.email_alerts.pending} email(s) waiting for delivery acceptance; retried every five minutes.`}
+          {data.email_alerts.last_delivery_failure_at && ` A delivery failure for this inbox was recorded on ${when(data.email_alerts.last_delivery_failure_at)}. Check Resend delivery logs.`}
+          {data.email_alerts.needs_review > 0 && ` ${data.email_alerts.needs_review} email(s) need delivery review in Resend before resending.`}
+        </p>
+      )}
+
       {/* Profile claims */}
       <section id="supplier-approvals" className={card}>
         <h2 className={h2}>Supplier approvals</h2>
@@ -822,7 +832,7 @@ export default function AdminClient() {
       </section>
 
       {/* Opportunity board moderation */}
-      <section className={card}>
+      <section id="opportunity-board" className={card}>
         <h2 className={h2}>
           Opportunity board ({(data.opportunities ?? []).length})
         </h2>

@@ -1,3 +1,4 @@
+import { adminAlertSummary } from "@/lib/admin-alerts";
 import {isAdminEmail} from "@/lib/access-control";
 import { pendingSourcingNotifications } from "@/lib/sourcing-notifications";
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
@@ -149,13 +150,15 @@ export async function GET(req: Request) {
   const prevCombinedPublished =
     snapshot?.published !== undefined && snapshot?.opportunities !== undefined ? snapshot.published + snapshot.opportunities : undefined;
 
+  const adminAlerts = await adminAlertSummary();
   const sourcingNotifications = await pendingSourcingNotifications();
   const quiet = draftsNew.length === 0 && buyerSessionsNew.length === 0 && combinedPublishedNew === 0;
-  const subject = sourcingNotifications.desk_pending > 0 ? `Netify: ${sourcingNotifications.desk_pending} sourcing desk notifications need attention` : quiet
+  const subject = adminAlerts.pending + adminAlerts.needs_review > 0 ? `Netify: ${adminAlerts.pending + adminAlerts.needs_review} admin email alerts need attention` : sourcingNotifications.desk_pending > 0 ? `Netify: ${sourcingNotifications.desk_pending} sourcing desk notifications need attention` : quiet
     ? "Netify 07:30 digest: quiet 24h (0 published, 0 drafts)"
     : `Netify 07:30 digest: ${combinedPublishedNew} published, ${draftsNew.length} draft${draftsNew.length === 1 ? "" : "s"}, ${buyerSessionsNew.length} buyer sign-in${buyerSessionsNew.length === 1 ? "" : "s"}`;
 
   const lines = [
+    `Admin alerts: ${adminAlerts.pending} queued for retry; ${adminAlerts.needs_review} require delivery review. https://netify.co.uk/sase/admin/`,
     `Sourcing: ${sourcingNotifications.requests} confirmed requests; ${sourcingNotifications.desk_pending} desk notifications pending; ${sourcingNotifications.buyer_pending} buyer notifications pending. Review /sase/admin/sourcing/.`,
     "Published in the last 24 hours (the number that matters):",
     `- Total: ${combinedPublishedNew}`,
@@ -180,7 +183,7 @@ export async function GET(req: Request) {
     `- Buyer accounts: ${accountsTotal}${delta(accountsTotal, snapshot?.accounts)}`,
     `- Vendor responses: ${responsesTotal}${delta(responsesTotal, snapshot?.responses)}`,
     "",
-    `Admin console: https://netify.co.uk/sase/account/`,
+    `Admin console: https://netify.co.uk/sase/admin/`,
     "Netify daily digest. Reply to this address to reach the workspace.",
   ];
   const text = lines.join("\n");

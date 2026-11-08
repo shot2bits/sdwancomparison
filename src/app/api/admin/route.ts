@@ -1,3 +1,4 @@
+import { adminAlertSummary } from "@/lib/admin-alerts";
 import { adminStudioActivity } from "@/lib/admin-project";
 import { isStudioProject, studioDraftFromProject } from "@/lib/studio-project";
 import { retainSupplierFollowUp } from "@/lib/buyer-recovery";
@@ -330,6 +331,7 @@ export async function GET(req: Request) {
       ok: true,
       generated_at: Date.now(),
       admin_email: auth.email,
+      email_alerts: await adminAlertSummary(),
       sessions: sessions.map((s) => ({
         token: s.token,
         role: s.role,

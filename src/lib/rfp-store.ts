@@ -1,3 +1,4 @@
+import { queueAdminAlert, tryAdminAlert } from "./admin-alerts";
 import {recordPersistedActivity} from "./activity-events";
 import { activityKvBinding } from "@/lib/activity-storage";
 import { createActivity, activityEnvironment } from "./activity-provenance";
@@ -921,7 +922,7 @@ export async function listVendorClaims(): Promise<VendorClaim[]> {
  *  fresh pending claim is recorded for an admin to approve. */
 export async function requestVendorClaim(slug: string, email: string, domain: string): Promise<VendorClaim> {
   const existing = await getVendorClaim(slug);
-  if (existing && existing.status === "approved") return existing;
+  if (existing && (existing.status === "approved" || (existing.status === "pending" && existing.email === email.toLowerCase() && existing.domain === domain.toLowerCase()))) return existing;
   const claim: VendorClaim = {
     slug,
     status: "pending",
@@ -929,8 +930,10 @@ export async function requestVendorClaim(slug: string, email: string, domain: st
     domain: domain.toLowerCase(),
     requested: Date.now(),
   };
+  const alertId = await queueAdminAlert({ kind: "supplier", reference: slug, requested: claim.requested });
   await setJson(`vendor:claim:${slug}`, claim);
   await kv(["SADD", "vendor:claims:index", slug]);
+  await tryAdminAlert(alertId);
   return claim;
 }
 
