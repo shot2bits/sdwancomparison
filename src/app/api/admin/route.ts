@@ -1,4 +1,4 @@
-import { adminAlertSummary } from "@/lib/admin-alerts";
+import { adminAlertSummary, sendAdminTestAlert } from "@/lib/admin-alerts";
 import { adminStudioActivity } from "@/lib/admin-project";
 import { isStudioProject, studioDraftFromProject } from "@/lib/studio-project";
 import { retainSupplierFollowUp } from "@/lib/buyer-recovery";
@@ -405,6 +405,10 @@ export async function POST(req: Request) {
 
   try {
     switch (action) {
+      case "send_test_alert": {
+        const status = await sendAdminTestAlert();
+        return Response.json({ok:true,status}, {headers:{...cors,"Cache-Control":"private, no-store"}});
+      }
       case "revoke_session": {
         const token = String(body.token ?? "");
         if (!token)

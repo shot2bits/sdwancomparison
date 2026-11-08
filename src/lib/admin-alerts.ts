@@ -14,7 +14,8 @@ const SAFE_RETRY_MS = 23 * 60 * 60 * 1000;
 export type AdminAlertEvent =
   | { kind: "project"; reference: string; revision: string; format: "RFI" | "RFP" }
   | { kind: "supplier"; reference: string; requested: number }
-  | { kind: "opportunity"; reference: string };
+  | { kind: "opportunity"; reference: string }
+  | { kind: "test"; reference: string };
 export type AdminAlert = {
   id: string; event: AdminAlertEvent; created: number;
   status: "pending" | "accepted" | "needs_review" | "cancelled";
@@ -52,6 +53,9 @@ async function alertPayload(record: AdminAlert): Promise<AdminAlert["payload"] |
     if (claim.requested !== e.requested || claim.status !== "pending") return "cancelled";
     subject = `Supplier approval needed — Netify | ${e.reference}`;
     text = `A verified supplier has requested access to the ${e.reference} profile.\nRequested by: ${claim.email}\n\nReview and approve or reject the request (admin sign-in required):\n${SITE_URL}/admin/#supplier-approvals\n\nThe supplier is still pending. Receiving this email does not approve access.`;
+  } else if (e.kind === "test") {
+    subject = "Netify admin email test — no action needed";
+    text = `This is a test of Netify's Resend alerts to support@netify.com.\n\nNew project publications and supplier approval requests send an email with an admin link. This test has not published a project, invited a supplier or approved access.\n\nOpen admin:\n${SITE_URL}/admin/`;
   } else {
     const opportunity = await getOpportunity(e.reference);
     if (!opportunity) return null;
@@ -130,4 +134,11 @@ export async function adminAlertSummary() {
   const records = await Promise.all(ids.map(id => kvGetJson<AdminAlert>(recordKey(id))));
   const bounce = await getBounce(ADMIN_ALERT_TO);
   return { recipient: ADMIN_ALERT_TO, last_delivery_failure_at: bounce?.ts ?? null, pending: records.filter(r => r?.status === "pending").length, needs_review: records.filter(r => r?.status === "needs_review").length };
+}
+
+/** Admin-only caller. One test per five-minute bucket, always to the fixed inbox. */
+export async function sendAdminTestAlert() {
+  const id = await queueAdminAlert({kind:"test",reference:String(Math.floor(Date.now() / RETRY_MS))});
+  await tryAdminAlert(id);
+  return (await kvGetJson<AdminAlert>(recordKey(id)))?.status ?? "pending";
 }

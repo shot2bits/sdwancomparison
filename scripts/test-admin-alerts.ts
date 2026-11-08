@@ -65,6 +65,12 @@ await withFakeKv(async store => {
   await kv.kvSetJson(`admin-alerts:record:${thirdId}`,{...record(thirdId),first_attempt:Date.now()-24*3600000,next_attempt:0});
   const beforeExpired=sent;await alerts.deliverAdminAlert(thirdId);assert.equal(sent,beforeExpired);assert.equal(record(thirdId).status,"needs_review");
   assert.equal((await alerts.adminAlertSummary()).needs_review,1);
+  mode="accept";
+  assert.equal(await alerts.sendAdminTestAlert(),"accepted");
+  const beforeTestRepeat=sent;
+  assert.equal(await alerts.sendAdminTestAlert(),"accepted");assert.equal(sent,beforeTestRepeat);
+  assert.equal(JSON.parse(bodies.at(-1)!).to,"support@netify.com");
+  assert.match(JSON.parse(bodies.at(-1)!).subject,/test/);
   delete process.env.RESEND_API_KEY;
   const noKey=await kv.requestVendorClaim("cato","qa@catonetworks.com","catonetworks.com");
   const noKeyId=alerts.adminAlertId({kind:"supplier",reference:"cato",requested:noKey.requested});

@@ -588,6 +588,10 @@ await withFakeKv(async (store) => {
   assert.equal(adminVerified.status, 200);
   const adminCookie = adminVerified.headers.get("set-cookie")!.split(";")[0];
   const adminRoute = await import("../src/app/api/admin/route");
+  const testMail = await adminRoute.POST(makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {cookie:adminCookie,body:{action:"send_test_alert"}}));
+  assert.equal(testMail.status,200);assert.equal((await testMail.json()).status,"accepted");
+  const forbiddenTest = await adminRoute.POST(makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {cookie:cookie(buyer),body:{action:"send_test_alert"}}));
+  assert.equal(forbiddenTest.status,403);
   const ordinary = await adminRoute.POST(
     makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {
       cookie: cookie(buyer),
