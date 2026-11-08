@@ -492,13 +492,11 @@ export default function OpportunityStudio({
                 Get proposals for your SD-WAN or SASE project.
               </h1>
               <p id="page-subhead" className="ns-lead">
-                Bring an existing RFP or build your requirement here. Publish an
-                anonymous opportunity and choose which supplier requests to approve.
+                Bring an existing or AI-generated RFP, or build your requirement here.
+                Publish anonymously and choose which supplier requests to approve.
               </p>
               <p className="ns-existing-rfp">
-                Already drafted your RFP with an AI assistant? Paste it below or import its text.
-                Approved suppliers can request to bid; you choose who can continue in a private conversation.
-                Supplier participation and proposals are not guaranteed.
+                Paste or import your brief below. Supplier participation and proposals are not guaranteed.
               </p>
               <div className="ns-format-choice" aria-label="Document type">
                 {(["rfi", "rfp"] as const).map((f) => (
