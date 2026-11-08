@@ -154,9 +154,11 @@ const SAMPLE =
 export default function OpportunityStudio({
   questions,
   testEnvironment = false,
+  serviceContent,
 }: {
   questions: StudioQuestion[];
   testEnvironment?: boolean;
+  serviceContent?: ReactNode;
 }) {
   const [draft, setDraft] = useState<StudioDraft>({ ...EMPTY_STUDIO_DRAFT });
   const [step, setStep] = useState<StudioStep>("describe");
@@ -367,7 +369,7 @@ export default function OpportunityStudio({
               >
                 Connect your assistant
               </button>
-              <a href="https://netify.co.uk/sase/how-it-works/">
+              <a href={serviceContent ? "#supplier-proposals" : "https://netify.co.uk/sase/how-it-works/"}>
                 How the service works
               </a>
             </div>
@@ -490,8 +492,11 @@ export default function OpportunityStudio({
                 Get proposals for your SD-WAN or SASE project.
               </h1>
               <p id="page-subhead" className="ns-lead">
-                Write one requirement. Publish an anonymous opportunity. Choose
-                which suppliers you want to speak to.
+                Bring an existing or AI-generated RFP, or build your requirement here.
+                Publish anonymously and choose which supplier requests to approve.
+              </p>
+              <p className="ns-existing-rfp">
+                Paste or import your brief below. Supplier participation and proposals are not guaranteed.
               </p>
               <div className="ns-format-choice" aria-label="Document type">
                 {(["rfi", "rfp"] as const).map((f) => (
@@ -1085,6 +1090,7 @@ export default function OpportunityStudio({
           </aside>
         )}
       </div>
+      {serviceContent}
       <dialog
         ref={connectorDialog}
         className="ns-connector"

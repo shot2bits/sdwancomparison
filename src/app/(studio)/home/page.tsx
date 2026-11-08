@@ -1,3 +1,4 @@
+import RfpProposalService from "@/components/procurement/RfpProposalService";
 import type { Metadata } from "next";
 import OpportunityStudio from "@/components/opportunity-studio/OpportunityStudio";
 import { canonicalQuestions } from "@/lib/rfp-question-bank";
@@ -14,12 +15,12 @@ import "@/components/opportunity-studio/studio.css";
 const APEX = "https://netify.co.uk";
 const BUILDER_URL = `${APEX}/sase-sd-wan-rfp-builder/`;
 export const metadata: Metadata = {
-  title: "Free SD-WAN and SASE RFP Builder and Template",
+  title: "SD-WAN & SASE RFPs: Get Supplier Proposals",
   description: RFP_META_DESCRIPTION,
   alternates: { canonical: BUILDER_URL },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Free SD-WAN and SASE RFP Builder and Template | Netify",
+    title: "SD-WAN & SASE RFPs: Get Supplier Proposals | Netify",
     description: RFP_META_DESCRIPTION,
     url: BUILDER_URL,
     type: "website",
@@ -33,12 +34,12 @@ export default function Page() {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "@id": BUILDER_URL + "#webapplication",
-      name: "Netify SASE and SD-WAN Opportunity Studio",
+      name: "Netify SD-WAN and SASE procurement service",
       url: BUILDER_URL,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       description:
-        "Build a short RFI or detailed RFP, verify your work email, publish an anonymous opportunity and choose which approved suppliers may engage. Private project access is available through MCP.",
+        "Bring an existing or AI-generated RFP, or build an RFI or RFP. Publish anonymously and approve supplier requests to open private proposal discussions. Supplier participation and proposals are not guaranteed.",
       offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
       softwareVersion: "opportunity-studio/1",
     },
@@ -54,6 +55,7 @@ export default function Page() {
           />
         ))}
         <OpportunityStudio
+          serviceContent={<RfpProposalService />}
           questions={canonicalQuestions()}
           testEnvironment={process.env.VERCEL_ENV !== "production"}
         />

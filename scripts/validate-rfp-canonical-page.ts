@@ -52,7 +52,6 @@ function main() {
   const CANON = "https://netify.co.uk/sase-sd-wan-rfp-builder/";
   const config = src("next.config.ts");
   const home = src("src/app/(studio)/home/page.tsx");
-  const entry = src("src/components/procurement/ProcurementEntry.tsx");
   const hero = src("src/components/CollapsibleHero.tsx");
   const content = src("src/components/procurement/RfpPublicContent.tsx");
   const sample = src("src/app/(marketing)/rfp-builder/sample-rfp/page.tsx");
@@ -74,12 +73,12 @@ function main() {
   record(!/https:\/\/netify\.co\.uk\/\?q=/.test(config), "1: ?sector= prefill redirects open the builder page, not the apex root");
 
   /* 2. Title, H1, description */
-  record(/title:\s*"Free SD-WAN and SASE RFP Builder and Template"/.test(home), "2: page title is the ruled wording (layout template appends ' | Netify')");
-  record("Free SD-WAN and SASE RFP Builder and Template | Netify".length <= 60, "2: full title with suffix is 60 characters or fewer");
+  record(/title:\s*"SD-WAN & SASE RFPs: Get Supplier Proposals"/.test(home), "2: page title is the ruled wording (layout template appends ' | Netify')");
+  record("SD-WAN & SASE RFPs: Get Supplier Proposals | Netify".length <= 60, "2: full title with suffix is 60 characters or fewer");
   record(["SASE RFP", "SD-WAN RFP", "short brief"].every((term) => ENGINE_H1.includes(term)), "2: H1 states both RFP subjects and the short-brief route", ENGINE_H1);
   record(/description:\s*RFP_META_DESCRIPTION/.test(home), "2: metadata description uses the concise RFP_META_DESCRIPTION");
   record(RFP_META_DESCRIPTION.length <= 160, "2: meta description is 160 characters or fewer", String(RFP_META_DESCRIPTION.length));
-  for (const term of ["SD-WAN RFP", "SASE RFP", "supplier questions", "evaluation", "anonymously"]) {
+  for (const term of ["SD-WAN RFP", "SASE RFP", "supplier requests", "proposal", "anonymously"]) {
     record(RFP_META_DESCRIPTION.includes(term), `2: meta description carries "${term}"`);
   }
   record(/alternates:\s*\{\s*canonical:\s*BUILDER_URL\s*\}/.test(home) && home.includes('const BUILDER_URL = `${APEX}/sase-sd-wan-rfp-builder/`'), "2: canonical is the apex builder URL");
@@ -104,13 +103,15 @@ function main() {
   record(RFP_AREAS.every((r) => !/\bthree-year total cost\b|\bTwo references\b/.test(r.evidence)), "3: table evidence states recommendations, not universal rules");
   record(content.includes("https://netify.co.uk/sase/rfp-builder/questions/") && content.includes("https://netify.co.uk/sase/rfp-builder/sample-rfp/") && content.includes("https://netify.co.uk/sd-wan/sample-rfp/"), "3: links to the question bank and both sample RFPs");
   const faqQs = [
+    "Can I use an AI-generated or existing RFP to get supplier proposals?",
+    "Who can see my requirement and respond?",
     "What should an SD-WAN RFP include?",
     "What should a SASE RFP include?",
     "What is the difference between an RFI and an RFP?",
     "How should SD-WAN and SASE vendors be evaluated?",
     "Is the Netify RFP Builder free?",
   ];
-  record(FAQS.map((f) => f.q).join("|") === faqQs.join("|"), "3: the five ruled FAQs, in order");
+  record(FAQS.map((f) => f.q).join("|") === faqQs.join("|"), "3: buyer service and RFP FAQs, in order");
   record(FAQS.every((f) => f.a.length >= 80 && f.a.length <= 900), "3: FAQ answers are short and direct (80 to 900 characters)");
   record(/<details/.test(content) && /<summary/.test(content), "3: FAQs use native <details>/<summary> (present in served HTML, no client state)");
 

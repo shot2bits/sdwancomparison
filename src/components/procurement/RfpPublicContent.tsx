@@ -1,4 +1,3 @@
-import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 /**
  * The citable, server-rendered public content of the canonical builder
  * page, https://netify.co.uk/sase-sd-wan-rfp-builder/ (Robert, 3 Sep
@@ -31,7 +30,7 @@ export const SDWAN_SAMPLE_RFP_URL = "https://netify.co.uk/sd-wan/sample-rfp/";
  *  FAQs), distinct from the validator's own reviewed date in
  *  rfp-validator.ts, which dates the scoring method and is shown by
  *  RfpCitationEvidence. Update this when the content below changes. */
-export const RFP_CONTENT_REVIEWED = "2026-09-06";
+export const RFP_CONTENT_REVIEWED = "2026-11-08";
 
 /** What an SD-WAN or SASE RFP covers. Eight areas (Robert's list), each
  *  with the SD-WAN emphasis, the SASE emphasis and the evidence a buyer
@@ -90,6 +89,14 @@ export const RFP_AREAS: { area: string; sdwan: string; sase: string; evidence: s
 /** Short, direct answers. Each question is a query buyers search. */
 export const FAQS: { q: string; a: string }[] = [
   {
+    q: "Can I use an AI-generated or existing RFP to get supplier proposals?",
+    a: "Yes. Bring an RFP drafted with an AI assistant or elsewhere, paste or import its text, and review the requirement before publishing an anonymous opportunity. Approved, signed-in suppliers can review the requirement you authorise for them and request to bid. You choose which requests to approve, opening private conversations for supplier discussions and proposals. Supplier participation, proposals and response times are not guaranteed.",
+  },
+  {
+    q: "Who can see my requirement and respond?",
+    a: "Your public listing excludes your name, contact details, documents and exact estate counts. Approved, signed-in suppliers can review the fuller requirement you approve for sharing, so remove identifying details from it. They can request to bid; approving a request opens a private conversation with that supplier. Publication does not automatically send your RFP to every provider in Netify's research directory.",
+  },
+  {
     q: "What should an SD-WAN RFP include?",
     a: "An SD-WAN RFP should state the site list and regions, the underlay circuits and WAN topology, application performance and QoS targets, failover and availability requirements, security integration, the managed or co-managed operating model, the implementation and migration plan, the pricing model and contract terms, and the evidence suppliers must attach. Netify's question bank covers each of these areas with supplier questions you can select.",
   },
@@ -103,11 +110,11 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How should SD-WAN and SASE vendors be evaluated?",
-    a: "Score each supplier against the same weighted criteria: capability fit against the stated requirements, security efficacy, performance and PoP coverage in your regions, resilience and SLA, operating model fit, implementation approach, total cost over the contract term and the quality of evidence provided. Netify compares providers against a common evidence-based capability methodology, and supplier responses to a published RFP land side by side against the questions you asked.",
+    a: "Score each supplier against the same weighted criteria: capability fit against the stated requirements, security efficacy, performance and PoP coverage in your regions, resilience and SLA, operating model fit, implementation approach, total cost over the contract term and the quality of evidence provided. Netify's provider research helps you assess capabilities. In this service, you approve supplier requests to open private conversations and review the proposals received against your own requirements.",
   },
   {
     q: "Is the Netify RFP Builder free?",
-    a: SHORTLIST_FAQS[0].a,
+    a: "Yes. Drafting and anonymous publication are free for buyers, with no commitment to buy. Suppliers pay Netify when an introduction leads to business. Suppliers request to bid and you choose which requests to approve; publication does not guarantee supplier participation, proposals or response times.",
   },
 ];
 
@@ -144,7 +151,7 @@ export function getRfpWebPageSchema() {
     "@type": "WebPage",
     "@id": `${CANONICAL_BUILDER_URL}#webpage`,
     url: CANONICAL_BUILDER_URL,
-    name: "Free SD-WAN and SASE RFP Builder and Template",
+    name: "SD-WAN & SASE RFPs: Get Supplier Proposals",
     dateModified: RFP_CONTENT_REVIEWED,
     inLanguage: "en-GB",
     isPartOf: { "@id": "https://netify.co.uk/#website" },

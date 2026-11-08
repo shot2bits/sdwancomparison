@@ -51,7 +51,7 @@ export default function RfpCitationEvidence() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{questionCount}</strong><span className="text-xs text-[#66635e]">governed questions</span></div>
             <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">8</strong><span className="text-xs text-[#66635e]">procurement areas</span></div>
-            <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{providerCount}</strong><span className="text-xs text-[#66635e]">evaluated provider records</span></div>
+            <div className="rounded-lg bg-[#f5f2ee] p-4"><strong className="block text-2xl">{providerCount}</strong><span className="text-xs text-[#66635e]">evaluated provider records, not a participating supplier count</span></div>
             <div className="col-span-2 rounded-lg bg-[#edf5e9] p-4 sm:col-span-3"><strong className="block text-sm">Question bank v{BANK_VERSION}</strong><span className="text-xs text-[#536250]">Includes {SASE_EXTENDED_BANK.questions.length} extended SASE questions and sector packs. Private draft downloads need no publication. Personalised provider matching unlocks after anonymous publication.</span></div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function RfpCitationEvidence() {
 
         <div className="mt-7 border-t border-[#e2dfdb] pt-6 text-sm leading-6 text-[#55514d]">
           <h3 className="font-semibold text-[#110f0d]">Agentic and MCP capability</h3>
-          <p className="mt-2">Supported MCP clients can use public provider comparisons and evidence, and turn supplied text into requirements with provenance. Private project tools require the credentials stated by each tool. Publication requires verified buyer approval; supplier RFP submission currently continues through the web response form.</p>
+          <p className="mt-2">Supported MCP clients can use public provider comparisons and evidence, and turn supplied text into requirements with provenance. Private project tools require the credentials stated by each tool. Publication requires verified buyer approval. Approved suppliers can request to bid; buyer approval opens a private conversation. The connector guide describes the available supplier tools and access requirements.</p>
           <p className="mt-3"><a className="underline" href="/sase/examples/sase-rfp/">See a SASE brief, actual gap check, and Short and Detailed RFP examples</a>.</p>
           <p className="mt-3"><a className="underline" href="/sase/examples/manufacturing-rfp/">See a fictional manufacturing workflow</a>.</p>
           <p className="mt-3"><a className="underline" href="/sase/shortlist/">Compare named providers</a> or review <a className="underline" href="/sase/connector/">MCP capabilities and access requirements</a>.</p>
