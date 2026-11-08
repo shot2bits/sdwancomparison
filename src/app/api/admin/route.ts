@@ -1,4 +1,6 @@
-import {retainSupplierFollowUp} from "@/lib/buyer-recovery";
+import { adminStudioActivity } from "@/lib/admin-project";
+import { isStudioProject, studioDraftFromProject } from "@/lib/studio-project";
+import { retainSupplierFollowUp } from "@/lib/buyer-recovery";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
 import {
@@ -43,29 +45,63 @@ import {
   emailDomain,
 } from "@/lib/access-control";
 import type { AuthSession } from "@/lib/rfp-store";
-import { attentionItem, latestPublicationOutcomes, type PublicationOutcome } from "@/lib/buyer-recovery";
+import {
+  attentionItem,
+  latestPublicationOutcomes,
+  type PublicationOutcome,
+} from "@/lib/buyer-recovery";
 import { activityClassification } from "@/lib/activity-provenance";
 import { publishedDeadline } from "@/lib/notice-presentation";
 
 export const runtime = "nodejs";
-export async function OPTIONS(req: Request) { return preflight(req); }
+export async function OPTIONS(req: Request) {
+  return preflight(req);
+}
 
 /** Resolve an admin session or return a 401/403 Response. */
-async function requireAdmin(req: Request, cors: Record<string, string>): Promise<AuthSession | Response> {
+async function requireAdmin(
+  req: Request,
+  cors: Record<string, string>,
+): Promise<AuthSession | Response> {
   const session = await sessionFromRequest(req);
-  if (!session) return Response.json({ error: "Sign in required.", auth_required: true }, { status: 401, headers: cors });
-  if (!isAdminEmail(session.email)) return Response.json({ error: "Admin access only." }, { status: 403, headers: cors });
+  if (!session)
+    return Response.json(
+      { error: "Sign in required.", auth_required: true },
+      { status: 401, headers: cors },
+    );
+  if (!isAdminEmail(session.email))
+    return Response.json(
+      { error: "Admin access only." },
+      { status: 403, headers: cors },
+    );
   return session;
 }
 
 /** Admin overview: live sessions, vendor domains, blocklist, pending requests. */
 export async function GET(req: Request) {
   const cors = corsHeaders(req);
-  if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
+  if (!kvConfigured())
+    return Response.json(
+      { error: "Storage not configured." },
+      { status: 503, headers: cors },
+    );
   const auth = await requireAdmin(req, cors);
   if (auth instanceof Response) return auth;
 
-  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities, signups, rfpIds, leads, buyerAllowlist, rejectStats] = await Promise.all([
+  const [
+    sessions,
+    effective,
+    overrides,
+    blocklistExtra,
+    pending,
+    claims,
+    opportunities,
+    signups,
+    rfpIds,
+    leads,
+    buyerAllowlist,
+    rejectStats,
+  ] = await Promise.all([
     listSessions(),
     effectiveVendorDomains(),
     getVendorDomainOverrides(),
@@ -82,29 +118,58 @@ export async function GET(req: Request) {
 
   const vendors = Object.keys(effective)
     .sort()
-    .map((slug) => ({ slug, domains: effective[slug], customised: Object.prototype.hasOwnProperty.call(overrides, slug) }));
+    .map((slug) => ({
+      slug,
+      domains: effective[slug],
+      customised: Object.prototype.hasOwnProperty.call(overrides, slug),
+    }));
 
   // Buyer funnel: every RFP (anonymous drafts included), with the draft-link
   // email captures and supplier response counts, so the console answers
   // "signup, create, publish, responses" at a glance.
   const projects = await getProjectsBulk(rfpIds);
-  const contacts = await kvMgetJson<string>(projects.map((p) => `rfp:${p.id}:contact_email`));
+  const contacts = await kvMgetJson<string>(
+    projects.map((p) => `rfp:${p.id}:contact_email`),
+  );
   const publishedProjects = projects.filter((p) => p.status === "published");
-  const responseLists = await kvMgetJson<unknown[]>(publishedProjects.map((p) => `rfp:${p.id}:responses`));
+  const responseLists = await kvMgetJson<unknown[]>(
+    publishedProjects.map((p) => `rfp:${p.id}:responses`),
+  );
   const responsesByRfp = new Map<string, number>();
-  publishedProjects.forEach((p, i) => responsesByRfp.set(p.id, Array.isArray(responseLists[i]) ? responseLists[i]!.length : 0));
+  publishedProjects.forEach((p, i) =>
+    responsesByRfp.set(
+      p.id,
+      Array.isArray(responseLists[i]) ? responseLists[i]!.length : 0,
+    ),
+  );
+  const studioProjects = projects.filter(isStudioProject);
+  const studioRows = await kvMgetJson<unknown[]>(
+    studioProjects.map((p) => `studio:${p.id}:bid_requests`),
+  );
+  const studioActivity = new Map(
+    studioProjects.map((p, i) => [p.id, adminStudioActivity(studioRows[i])]),
+  );
+  for (const [id, a] of studioActivity)
+    responsesByRfp.set(id, a.supplier_responses);
 
   // Confirmed delivery bounces (11 Aug 2026, fed by /api/webhooks/resend):
   // one bulk lookup against every owner/contact address on the page, so
   // "stuck at the email step" stops being one undifferentiated number and
   // becomes "actually undeliverable" vs "just hasn't clicked yet".
-  const bounceAddrs = projects.flatMap((p, i) => [p.owner_email || "", contacts[i] ?? ""]).filter(Boolean);
+  const bounceAddrs = projects
+    .flatMap((p, i) => [p.owner_email || "", contacts[i] ?? ""])
+    .filter(Boolean);
   const bouncesByAddr = await getBounces(bounceAddrs);
 
   const rfps = projects
     .map((p, i) => ({
       id: p.id,
       title: p.title,
+      format: isStudioProject(p)
+        ? studioDraftFromProject(p).format.toUpperCase()
+        : "RFP",
+      admin_url: `/sase/admin/projects/${p.id}/`,
+      bid_requests: studioActivity.get(p.id)?.bid_requests ?? null,
       status: p.status,
       owner_email: p.owner_email || null,
       contact_email: contacts[i] ?? null,
@@ -112,7 +177,9 @@ export async function GET(req: Request) {
       sector: p.buyer.sector,
       scope: p.buyer.product_scope,
       sections: p.rfp_sections.filter((s) => s.included).length,
-      questions: p.rfp_sections.filter((s) => s.included).reduce((n, s) => n + s.questions.length, 0),
+      questions: p.rfp_sections
+        .filter((s) => s.included)
+        .reduce((n, s) => n + s.questions.length, 0),
       invited_vendors: p.invited_vendors.length,
       responses: responsesByRfp.get(p.id) ?? 0,
       // Funnel diagnostics: consented = the wizard agreement was signed;
@@ -126,7 +193,8 @@ export async function GET(req: Request) {
       // with bounced false just hasn't clicked yet; with bounced true, the
       // link never had a chance to arrive.
       bounced: Boolean(
-        (p.owner_email && bouncesByAddr.has(p.owner_email.toLowerCase().trim())) ||
+        (p.owner_email &&
+          bouncesByAddr.has(p.owner_email.toLowerCase().trim())) ||
         (contacts[i] && bouncesByAddr.has(contacts[i]!.toLowerCase().trim())),
       ),
       created: p.created,
@@ -140,26 +208,42 @@ export async function GET(req: Request) {
   // supplier link, viewed and forwarded state, newest first.
   // Unworked requests must not disappear when they turn 30 days old.
   // This queue is read-only and does not authorise supplier outreach.
-  const brokerCandidates = publishedProjects.filter(p => {
+  const brokerCandidates = publishedProjects.filter((p) => {
     const owner = (p.owner_email ?? "").toLowerCase();
-    const notice = opportunities.find(o => o.source_rfp_id === p.id);
-    return owner && !isAdminEmail(owner) && !/@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(owner) &&
-      activityClassification(p) !== "test" && (!notice || notice.status === "open");
+    const notice = opportunities.find((o) => o.source_rfp_id === p.id);
+    return (
+      owner &&
+      !isAdminEmail(owner) &&
+      !/@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(owner) &&
+      activityClassification(p) !== "test" &&
+      (!notice || notice.status === "open")
+    );
   });
-  const candidateConnections = await Promise.all(brokerCandidates.map(p => listConnections(p.id)));
-  const retained = brokerCandidates.map((p, i) => ({p, connections: candidateConnections[i] ?? []}))
-    .filter(({p, connections}) => retainSupplierFollowUp(p.updated, connections.length))
-    .sort((a, b) => Number(a.connections.length > 0) - Number(b.connections.length > 0) || a.p.updated - b.p.updated)
+  const candidateConnections = await Promise.all(
+    brokerCandidates.map((p) => listConnections(p.id)),
+  );
+  const retained = brokerCandidates
+    .map((p, i) => ({ p, connections: candidateConnections[i] ?? [] }))
+    .filter(({ p, connections }) =>
+      retainSupplierFollowUp(p.updated, connections.length),
+    )
+    .sort(
+      (a, b) =>
+        Number(a.connections.length > 0) - Number(b.connections.length > 0) ||
+        a.p.updated - b.p.updated,
+    )
     .slice(0, 25);
-  const brokerSource = retained.map(row => row.p);
-  const brokerConns = retained.map(row => row.connections);
+  const brokerSource = retained.map((row) => row.p);
+  const brokerConns = retained.map((row) => row.connections);
   const broker_queue = brokerSource.map((p, i) => ({
     rfp_id: p.id,
     title: p.title,
     owner_email: p.owner_email || null,
     sector: p.buyer.sector,
     // Show the same published deadline as the notice; do not expose a private/default window as a published commitment.
-    response_deadline: publishedDeadline(opportunities.find(o => o.source_rfp_id === p.id) ?? {}),
+    response_deadline: publishedDeadline(
+      opportunities.find((o) => o.source_rfp_id === p.id) ?? {},
+    ),
     updated: p.updated,
     suppliers: (brokerConns[i] ?? []).map((c) => ({
       vendor_slug: c.vendor_slug,
@@ -176,33 +260,68 @@ export async function GET(req: Request) {
   // verification evidence, requirement depth and working state. Private to
   // this console; nothing here reaches any public surface.
   const titleById = new Map(projects.map((p) => [p.id, p.title]));
-  const publishLeadsRaw = (await kvGetJson<Array<Record<string, unknown>>>("publish:leads")) ?? [];
-  const latestOutcomes = latestPublicationOutcomes(publishLeadsRaw as PublicationOutcome[]);
-  const contactById = new Map(projects.map((p,i) => [p.id, contacts[i] ?? '']));
-  const reviewProjects = projects.filter(p => {
-    const email = p.owner_email || contactById.get(p.id) || latestOutcomes.get(p.id)?.email || '';
-    return email && !isAdminEmail(email) && !/@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(email) && activityClassification(p) !== 'test';
+  const publishLeadsRaw =
+    (await kvGetJson<Array<Record<string, unknown>>>("publish:leads")) ?? [];
+  const latestOutcomes = latestPublicationOutcomes(
+    publishLeadsRaw as PublicationOutcome[],
+  );
+  const contactById = new Map(
+    projects.map((p, i) => [p.id, contacts[i] ?? ""]),
+  );
+  const reviewProjects = projects.filter((p) => {
+    const email =
+      p.owner_email ||
+      contactById.get(p.id) ||
+      latestOutcomes.get(p.id)?.email ||
+      "";
+    return (
+      email &&
+      !isAdminEmail(email) &&
+      !/@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(email) &&
+      activityClassification(p) !== "test"
+    );
   });
-  const completionIssues = await kvMgetJson<import('@/lib/publication-issues').PublicationIssue>(reviewProjects.map(p => `rfp:${p.id}:completion_issue`));
-  const attention = (await Promise.all(reviewProjects.map(async (p, i) => {
-    const connections = p.status === 'published' ? await listConnections(p.id) : [];
-    const issue = completionIssues[i];
-    return attentionItem({...p,contact_email:contactById.get(p.id)}, latestOutcomes.get(p.id), connections.length, issue);
-  }))).filter(item => item !== null).sort((a,b) => a.at - b.at);
+  const completionIssues = await kvMgetJson<
+    import("@/lib/publication-issues").PublicationIssue
+  >(reviewProjects.map((p) => `rfp:${p.id}:completion_issue`));
+  const attention = (
+    await Promise.all(
+      reviewProjects.map(async (p, i) => {
+        const connections =
+          p.status === "published" ? await listConnections(p.id) : [];
+        const issue = completionIssues[i];
+        return attentionItem(
+          { ...p, contact_email: contactById.get(p.id) },
+          latestOutcomes.get(p.id),
+          connections.length,
+          issue,
+        );
+      }),
+    )
+  )
+    .filter((item) => item !== null)
+    .sort((a, b) => a.at - b.at);
   const publish_leads = publishLeadsRaw
     .slice(-100)
     .reverse()
-    .map((e) => ({ ...e, title: titleById.get(String(e.rfp_id ?? "")) ?? null }));
+    .map((e) => ({
+      ...e,
+      title: titleById.get(String(e.rfp_id ?? "")) ?? null,
+    }));
 
   const owned = projects.filter((p) => p.owner_email);
   const funnel = {
     buyer_accounts: signups.filter((u) => u.roles.includes("buyer")).length,
-    accounts_with_rfp: new Set(owned.map((p) => p.owner_email.toLowerCase())).size,
+    accounts_with_rfp: new Set(owned.map((p) => p.owner_email.toLowerCase()))
+      .size,
     rfps_total: projects.length,
     rfps_account_owned: owned.length,
     rfps_anonymous: projects.length - owned.length,
     rfps_published: publishedProjects.length,
-    supplier_responses: Array.from(responsesByRfp.values()).reduce((n, c) => n + c, 0),
+    supplier_responses: Array.from(responsesByRfp.values()).reduce(
+      (n, c) => n + c,
+      0,
+    ),
     draft_link_captures: leads.length,
   };
 
@@ -211,14 +330,25 @@ export async function GET(req: Request) {
       ok: true,
       generated_at: Date.now(),
       admin_email: auth.email,
-      sessions: sessions.map((s) => ({ token: s.token, role: s.role, email: s.email, vendor_slug: s.vendor_slug, created: s.created, expires: s.expires })),
+      sessions: sessions.map((s) => ({
+        token: s.token,
+        role: s.role,
+        email: s.email,
+        vendor_slug: s.vendor_slug,
+        created: s.created,
+        expires: s.expires,
+      })),
       users: signups.map((u) => ({
         email: u.email,
         roles: u.roles,
-        sessions: sessions.filter((s) => s.email.toLowerCase() === u.email).length,
+        sessions: sessions.filter((s) => s.email.toLowerCase() === u.email)
+          .length,
       })),
       vendors,
-      blocklist: { builtin_count: FREE_EMAIL_DOMAINS.size, custom: blocklistExtra },
+      blocklist: {
+        builtin_count: FREE_EMAIL_DOMAINS.size,
+        custom: blocklistExtra,
+      },
       pending,
       claims,
       funnel,
@@ -252,32 +382,61 @@ export async function GET(req: Request) {
 /** Admin actions. Body: { action, ... }. */
 export async function POST(req: Request) {
   const cors = corsHeaders(req);
-  if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
+  if (!kvConfigured())
+    return Response.json(
+      { error: "Storage not configured." },
+      { status: 503, headers: cors },
+    );
   const auth = await requireAdmin(req, cors);
   if (auth instanceof Response) return auth;
 
   let body: Record<string, unknown>;
-  try { body = (await req.json()) as Record<string, unknown>; } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
+  try {
+    body = (await req.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json(
+      { error: "Invalid JSON." },
+      { status: 400, headers: cors },
+    );
+  }
   const action = String(body.action ?? "");
 
   try {
     switch (action) {
       case "revoke_session": {
         const token = String(body.token ?? "");
-        if (!token) return Response.json({ error: "token required." }, { status: 422, headers: cors });
+        if (!token)
+          return Response.json(
+            { error: "token required." },
+            { status: 422, headers: cors },
+          );
         await deleteSession(token);
         return Response.json({ ok: true }, { headers: cors });
       }
       case "set_vendor_domains": {
         const slug = String(body.slug ?? "");
-        const domains = Array.isArray(body.domains) ? (body.domains as unknown[]).map((d) => String(d)) : [];
-        if (!slug) return Response.json({ error: "slug required." }, { status: 422, headers: cors });
+        const domains = Array.isArray(body.domains)
+          ? (body.domains as unknown[]).map((d) => String(d))
+          : [];
+        if (!slug)
+          return Response.json(
+            { error: "slug required." },
+            { status: 422, headers: cors },
+          );
         await setVendorDomainOverride(slug, domains);
         return Response.json({ ok: true }, { headers: cors });
       }
       case "add_blocklist": {
-        const d = emailDomain(`x@${String(body.domain ?? "")}`) ?? String(body.domain ?? "").trim().toLowerCase();
-        if (!d) return Response.json({ error: "domain required." }, { status: 422, headers: cors });
+        const d =
+          emailDomain(`x@${String(body.domain ?? "")}`) ??
+          String(body.domain ?? "")
+            .trim()
+            .toLowerCase();
+        if (!d)
+          return Response.json(
+            { error: "domain required." },
+            { status: 422, headers: cors },
+          );
         const list = await addBlocklistDomain(d);
         return Response.json({ ok: true, custom: list }, { headers: cors });
       }
@@ -286,11 +445,19 @@ export async function POST(req: Request) {
         return Response.json({ ok: true, custom: list }, { headers: cors });
       }
       case "approve_pending": {
-        const domain = String(body.domain ?? "").trim().toLowerCase();
+        const domain = String(body.domain ?? "")
+          .trim()
+          .toLowerCase();
         const slug = String(body.slug ?? "");
-        if (!domain || !slug) return Response.json({ error: "domain and slug required." }, { status: 422, headers: cors });
+        if (!domain || !slug)
+          return Response.json(
+            { error: "domain and slug required." },
+            { status: 422, headers: cors },
+          );
         const effective = await effectiveVendorDomains();
-        const merged = Array.from(new Set([...(effective[slug] ?? []), domain]));
+        const merged = Array.from(
+          new Set([...(effective[slug] ?? []), domain]),
+        );
         await setVendorDomainOverride(slug, merged);
         await clearPendingRequest(domain);
         return Response.json({ ok: true }, { headers: cors });
@@ -299,24 +466,44 @@ export async function POST(req: Request) {
         // Academic (or other reviewed) domain approved for BUYER sign-in:
         // allowlist it and clear the queue entry. The requester signs in
         // normally from then on.
-        const domain = String(body.domain ?? "").trim().toLowerCase();
-        if (!domain) return Response.json({ error: "domain required." }, { status: 422, headers: cors });
+        const domain = String(body.domain ?? "")
+          .trim()
+          .toLowerCase();
+        if (!domain)
+          return Response.json(
+            { error: "domain required." },
+            { status: 422, headers: cors },
+          );
         await addBuyerAllowDomain(domain);
         await clearPendingRequest(domain);
         return Response.json({ ok: true }, { headers: cors });
       }
       case "reject_pending": {
-        const domain = String(body.domain ?? "").trim().toLowerCase();
-        if (!domain) return Response.json({ error: "domain required." }, { status: 422, headers: cors });
+        const domain = String(body.domain ?? "")
+          .trim()
+          .toLowerCase();
+        if (!domain)
+          return Response.json(
+            { error: "domain required." },
+            { status: 422, headers: cors },
+          );
         await clearPendingRequest(domain);
         if (body.block === true) await addBlocklistDomain(domain);
         return Response.json({ ok: true }, { headers: cors });
       }
       case "delete_opportunity": {
         const id = String(body.id ?? "");
-        if (!id) return Response.json({ error: "id required." }, { status: 422, headers: cors });
+        if (!id)
+          return Response.json(
+            { error: "id required." },
+            { status: 422, headers: cors },
+          );
         const removed = await deleteOpportunity(id);
-        if (!removed) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
+        if (!removed)
+          return Response.json(
+            { error: "Opportunity not found." },
+            { status: 404, headers: cors },
+          );
         return Response.json({ ok: true }, { headers: cors });
       }
       case "close_opportunity": {
@@ -326,12 +513,32 @@ export async function POST(req: Request) {
         // stays the tool for content that should never have existed.
         // closed_at stamps the close moment (closed-forever, 29 Jul 2026).
         const id = String(body.id ?? "");
-        if (!id) return Response.json({ error: "id required." }, { status: 422, headers: cors });
+        if (!id)
+          return Response.json(
+            { error: "id required." },
+            { status: 422, headers: cors },
+          );
         const opp = await getOpportunity(id);
-        if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
-        if (opp.status !== "open") return Response.json({ ok: true, status: opp.status }, { headers: cors });
-        const saved = await saveOpportunity({ ...opp, status: "closed", closed_at: opp.closed_at ?? Date.now(), updated: Date.now() });
-        return Response.json({ ok: true, status: saved.status }, { headers: cors });
+        if (!opp)
+          return Response.json(
+            { error: "Opportunity not found." },
+            { status: 404, headers: cors },
+          );
+        if (opp.status !== "open")
+          return Response.json(
+            { ok: true, status: opp.status },
+            { headers: cors },
+          );
+        const saved = await saveOpportunity({
+          ...opp,
+          status: "closed",
+          closed_at: opp.closed_at ?? Date.now(),
+          updated: Date.now(),
+        });
+        return Response.json(
+          { ok: true, status: saved.status },
+          { headers: cors },
+        );
       }
       case "backfill_notice_shapes": {
         // Harry's N2 retest (29 Jul 2026): the What-suppliers-answer section
@@ -342,29 +549,65 @@ export async function POST(req: Request) {
         // same counting rule the publish path uses: sections that carry
         // active questions, titles and counts only, never the questions.
         const all = await listOpportunities();
-        const missing = all.filter((o) => o.source_rfp_id && (!o.rfp_shape || o.rfp_shape.sections.length === 0));
-        const batch = missing.slice(0, Math.min(Math.max(Number(body.limit ?? 10), 1), 20));
+        const missing = all.filter(
+          (o) =>
+            o.source_rfp_id &&
+            (!o.rfp_shape || o.rfp_shape.sections.length === 0),
+        );
+        const batch = missing.slice(
+          0,
+          Math.min(Math.max(Number(body.limit ?? 10), 1), 20),
+        );
         const rfps = await getProjectsBulk(batch.map((o) => o.source_rfp_id));
         const results: Array<{ opp_id: string; outcome: string }> = [];
         for (let i = 0; i < batch.length; i++) {
           const o = batch[i];
           const p = rfps[i];
-          if (!p) { results.push({ opp_id: o.id, outcome: "source RFP not found" }); continue; }
-          const active = p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
-          const total = active.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
-          if (active.length === 0 || total === 0) { results.push({ opp_id: o.id, outcome: "source RFP has no active questions" }); continue; }
+          if (!p) {
+            results.push({ opp_id: o.id, outcome: "source RFP not found" });
+            continue;
+          }
+          const active = p.rfp_sections.filter(
+            (s) =>
+              s.included && s.questions.some((q) => q.priority !== "optional"),
+          );
+          const total = active.reduce(
+            (n, s) =>
+              n + s.questions.filter((q) => q.priority !== "optional").length,
+            0,
+          );
+          if (active.length === 0 || total === 0) {
+            results.push({
+              opp_id: o.id,
+              outcome: "source RFP has no active questions",
+            });
+            continue;
+          }
           await saveOpportunity({
             ...o,
             rfp_shape: {
               version: p.methodology_version,
               total,
-              sections: active.map((s) => ({ title: s.category, questions: s.questions.filter((q) => q.priority !== "optional").length })),
+              sections: active.map((s) => ({
+                title: s.category,
+                questions: s.questions.filter((q) => q.priority !== "optional")
+                  .length,
+              })),
             },
           });
-          results.push({ opp_id: o.id, outcome: `stamped ${total} questions across ${active.length} sections` });
+          results.push({
+            opp_id: o.id,
+            outcome: `stamped ${total} questions across ${active.length} sections`,
+          });
         }
         return Response.json(
-          { ok: true, missing_total: missing.length, processed_now: batch.length, remaining: missing.length - batch.length, results },
+          {
+            ok: true,
+            missing_total: missing.length,
+            processed_now: batch.length,
+            remaining: missing.length - batch.length,
+            results,
+          },
           { headers: cors },
         );
       }
@@ -379,13 +622,24 @@ export async function POST(req: Request) {
         const ids = await listAllRfpIds();
         const projects = await getProjectsBulk(ids);
         const PUBLISHED = new Set(["published", "qa", "evaluation"]);
-        const published = projects.filter((p) => PUBLISHED.has(p.status) && p.test !== true);
-        const mappings = await kvMgetJson<string>(published.map((p) => `rfp:${p.id}:board_opp`));
+        const published = projects.filter(
+          (p) => PUBLISHED.has(p.status) && p.test !== true,
+        );
+        const mappings = await kvMgetJson<string>(
+          published.map((p) => `rfp:${p.id}:board_opp`),
+        );
         const unlisted = published.filter((_, i) => !mappings[i]);
-        const leads = (await kvGetJson<Array<{ rfp_id?: string }>>("publish:leads").catch(() => null)) ?? [];
+        const leads =
+          (await kvGetJson<Array<{ rfp_id?: string }>>("publish:leads").catch(
+            () => null,
+          )) ?? [];
         const processed = new Set(leads.map((l) => String(l.rfp_id ?? "")));
-        const queue = unlisted.filter((p) => body.retry === true || !processed.has(p.id));
-        const contacts = await kvMgetJson<string>(queue.map((p) => `rfp:${p.id}:contact_email`));
+        const queue = unlisted.filter(
+          (p) => body.retry === true || !processed.has(p.id),
+        );
+        const contacts = await kvMgetJson<string>(
+          queue.map((p) => `rfp:${p.id}:contact_email`),
+        );
         const batch = queue.slice(0, limit);
         const results = [];
         for (let i = 0; i < batch.length; i++) {
@@ -393,7 +647,13 @@ export async function POST(req: Request) {
           results.push({ rfp_id: batch[i].id, title: batch[i].title, ...r });
         }
         return Response.json(
-          { ok: true, unlisted_total: unlisted.length, processed_now: batch.length, remaining: queue.length - batch.length, results },
+          {
+            ok: true,
+            unlisted_total: unlisted.length,
+            processed_now: batch.length,
+            remaining: queue.length - batch.length,
+            results,
+          },
           { headers: cors },
         );
       }
@@ -406,37 +666,96 @@ export async function POST(req: Request) {
         // one label can never render twice. Nothing else is editable here:
         // feeds, bids and provenance stay exactly as posted.
         const id = String(body.id ?? "");
-        if (!id) return Response.json({ error: "id required." }, { status: 422, headers: cors });
+        if (!id)
+          return Response.json(
+            { error: "id required." },
+            { status: 422, headers: cors },
+          );
         const opp = await getOpportunity(id);
-        if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
-        const patch: { title?: string; buyer_sector?: string; regions?: string[] } = {};
+        if (!opp)
+          return Response.json(
+            { error: "Opportunity not found." },
+            { status: 404, headers: cors },
+          );
+        const patch: {
+          title?: string;
+          buyer_sector?: string;
+          regions?: string[];
+        } = {};
         if (typeof body.title === "string" && body.title.trim()) {
           const t = body.title.replace(/\s+/g, " ").trim();
-          if (t.length < 8 || t.length > 140) return Response.json({ error: "Title must be 8 to 140 characters." }, { status: 422, headers: cors });
+          if (t.length < 8 || t.length > 140)
+            return Response.json(
+              { error: "Title must be 8 to 140 characters." },
+              { status: 422, headers: cors },
+            );
           patch.title = t;
         }
         if (typeof body.buyer_sector === "string" && body.buyer_sector.trim()) {
           const raw = body.buyer_sector.trim();
-          const match = SECTORS.find((s) => s.key === raw) ?? SECTORS.find((s) => s.label.toLowerCase() === raw.toLowerCase());
-          if (!match) return Response.json({ error: `Unknown sector "${raw}". Use a key or label from the sector catalogue.` }, { status: 422, headers: cors });
+          const match =
+            SECTORS.find((s) => s.key === raw) ??
+            SECTORS.find((s) => s.label.toLowerCase() === raw.toLowerCase());
+          if (!match)
+            return Response.json(
+              {
+                error: `Unknown sector "${raw}". Use a key or label from the sector catalogue.`,
+              },
+              { status: 422, headers: cors },
+            );
           patch.buyer_sector = match.key;
         }
         if (Array.isArray(body.regions) && body.regions.length) {
           const keys = body.regions.map(String);
           const bad = keys.filter((k) => !REGIONS.some((r) => r.key === k));
-          if (bad.length) return Response.json({ error: `Unknown regions: ${bad.join(", ")}.` }, { status: 422, headers: cors });
+          if (bad.length)
+            return Response.json(
+              { error: `Unknown regions: ${bad.join(", ")}.` },
+              { status: 422, headers: cors },
+            );
           patch.regions = keys;
         }
-        if (!Object.keys(patch).length) return Response.json({ error: "Nothing to change: send title, buyer_sector or regions." }, { status: 422, headers: cors });
-        const saved = await saveOpportunity({ ...opp, ...patch, updated: Date.now() });
-        return Response.json({ ok: true, id: saved.id, title: saved.title, buyer_sector: saved.buyer_sector, regions: saved.regions }, { headers: cors });
+        if (!Object.keys(patch).length)
+          return Response.json(
+            {
+              error: "Nothing to change: send title, buyer_sector or regions.",
+            },
+            { status: 422, headers: cors },
+          );
+        const saved = await saveOpportunity({
+          ...opp,
+          ...patch,
+          updated: Date.now(),
+        });
+        return Response.json(
+          {
+            ok: true,
+            id: saved.id,
+            title: saved.title,
+            buyer_sector: saved.buyer_sector,
+            regions: saved.regions,
+          },
+          { headers: cors },
+        );
       }
       case "approve_claim":
       case "reject_claim": {
         const slug = String(body.slug ?? "");
-        if (!slug) return Response.json({ error: "slug required." }, { status: 422, headers: cors });
-        const c = await decideVendorClaim(slug, action === "approve_claim", auth.email);
-        if (!c) return Response.json({ error: "No claim found for that vendor." }, { status: 404, headers: cors });
+        if (!slug)
+          return Response.json(
+            { error: "slug required." },
+            { status: 422, headers: cors },
+          );
+        const c = await decideVendorClaim(
+          slug,
+          action === "approve_claim",
+          auth.email,
+        );
+        if (!c)
+          return Response.json(
+            { error: "No claim found for that vendor." },
+            { status: 404, headers: cors },
+          );
         return Response.json({ ok: true, claim: c }, { headers: cors });
       }
       case "mark_forwarded": {
@@ -444,26 +763,59 @@ export async function POST(req: Request) {
         // private link during the pre-registration phase.
         const rfpId = String(body.rfp_id ?? "");
         const vendorSlug = String(body.vendor_slug ?? "");
-        if (!rfpId || !vendorSlug) return Response.json({ error: "rfp_id and vendor_slug required." }, { status: 422, headers: cors });
+        if (!rfpId || !vendorSlug)
+          return Response.json(
+            { error: "rfp_id and vendor_slug required." },
+            { status: 422, headers: cors },
+          );
         const conn = await getConnection(rfpId, vendorSlug);
-        if (!conn) return Response.json({ error: "Connection not found." }, { status: 404, headers: cors });
-        const saved = await saveConnection({ ...conn, forwarded_at: Date.now() });
-        return Response.json({ ok: true, forwarded_at: saved.forwarded_at }, { headers: cors });
+        if (!conn)
+          return Response.json(
+            { error: "Connection not found." },
+            { status: 404, headers: cors },
+          );
+        const saved = await saveConnection({
+          ...conn,
+          forwarded_at: Date.now(),
+        });
+        return Response.json(
+          { ok: true, forwarded_at: saved.forwarded_at },
+          { headers: cors },
+        );
       }
       case "delete_user": {
-        const email = String(body.email ?? "").trim().toLowerCase();
-        const confirm = String(body.confirm ?? "").trim().toLowerCase();
-        if (!email) return Response.json({ error: "email required." }, { status: 422, headers: cors });
+        const email = String(body.email ?? "")
+          .trim()
+          .toLowerCase();
+        const confirm = String(body.confirm ?? "")
+          .trim()
+          .toLowerCase();
+        if (!email)
+          return Response.json(
+            { error: "email required." },
+            { status: 422, headers: cors },
+          );
         if (!confirm || confirm !== email) {
-          return Response.json({ error: "confirm must match the account email exactly." }, { status: 422, headers: cors });
+          return Response.json(
+            { error: "confirm must match the account email exactly." },
+            { status: 422, headers: cors },
+          );
         }
-        const summary = await deleteUser(email, { deleteRfps: body.delete_rfps === true });
+        const summary = await deleteUser(email, {
+          deleteRfps: body.delete_rfps === true,
+        });
         return Response.json({ ok: true, ...summary }, { headers: cors });
       }
       default:
-        return Response.json({ error: "Unknown action." }, { status: 422, headers: cors });
+        return Response.json(
+          { error: "Unknown action." },
+          { status: 422, headers: cors },
+        );
     }
   } catch (e) {
-    return Response.json({ error: e instanceof Error ? e.message : "Action failed." }, { status: 500, headers: cors });
+    return Response.json(
+      { error: e instanceof Error ? e.message : "Action failed." },
+      { status: 500, headers: cors },
+    );
   }
 }
