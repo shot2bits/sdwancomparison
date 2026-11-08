@@ -1,4 +1,3 @@
-import { queueAdminAlert, tryAdminAlert } from "./admin-alerts";
 import {recordPersistedActivity} from "./activity-events";
 import { activityKvBinding } from "@/lib/activity-storage";
 import { createActivity, activityEnvironment } from "./activity-provenance";
@@ -920,7 +919,7 @@ export async function listVendorClaims(): Promise<VendorClaim[]> {
 /** A domain-verified supplier requests to claim their vendor profile. An
  *  already-approved claim is returned unchanged (idempotent); otherwise a
  *  fresh pending claim is recorded for an admin to approve. */
-export async function requestVendorClaim(slug: string, email: string, domain: string): Promise<VendorClaim> {
+export async function requestVendorClaim(slug: string, email: string, domain: string, beforeSave?: (claim: VendorClaim) => Promise<void>): Promise<VendorClaim> {
   const existing = await getVendorClaim(slug);
   if (existing && (existing.status === "approved" || (existing.status === "pending" && existing.email === email.toLowerCase() && existing.domain === domain.toLowerCase()))) return existing;
   const claim: VendorClaim = {
@@ -930,10 +929,9 @@ export async function requestVendorClaim(slug: string, email: string, domain: st
     domain: domain.toLowerCase(),
     requested: Date.now(),
   };
-  const alertId = await queueAdminAlert({ kind: "supplier", reference: slug, requested: claim.requested });
+  if (beforeSave) await beforeSave(claim);
   await setJson(`vendor:claim:${slug}`, claim);
   await kv(["SADD", "vendor:claims:index", slug]);
-  await tryAdminAlert(alertId);
   return claim;
 }
 

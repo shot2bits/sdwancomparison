@@ -27,14 +27,14 @@ await withFakeKv(async store => {
   };
   const record = (id:string) => store.peekJson<import("../src/lib/admin-alerts").AdminAlert>(`admin-alerts:record:${id}`)!;
   const due = async(id:string) => {await kv.kvSetJson(`admin-alerts:record:${id}`, {...record(id),next_attempt:0});};
-  const claim = await kv.requestVendorClaim("cisco","qa@cisco.com","cisco.com");
+  const claim = await alerts.requestSupplierApproval("cisco","qa@cisco.com","cisco.com");
   const event = {kind:"supplier" as const,reference:"cisco",requested:claim.requested};
   const id = alerts.adminAlertId(event);
   assert.equal(record(id).status,"pending"); assert.equal(sent,1);
   assert.equal(record(id).payload!.to,"support@netify.com");
   assert.match(record(id).payload!.text,/#supplier-approvals/);
   await alerts.deliverAdminAlert(id); assert.equal(sent,1,"Backoff prevents request bursts");
-  const repeat = await kv.requestVendorClaim("cisco","qa@cisco.com","cisco.com");
+  const repeat = await alerts.requestSupplierApproval("cisco","qa@cisco.com","cisco.com");
   assert.equal(repeat.requested,claim.requested);assert.equal(sent,1,"Repeated pending claim does not spam");
   assert.equal((await cron.GET(makeRequest("GET","https://fixture/cron"))).status,401);
   await due(id); mode="accept";
@@ -46,7 +46,7 @@ await withFakeKv(async store => {
   assert.equal((await alerts.adminAlertSummary()).pending,0);
   // A send accepted by Resend but not saved locally uses the SAME immutable payload/key on retry.
   failReceipt=true;
-  const second = await kv.requestVendorClaim("fortinet","qa@fortinet.com","fortinet.com");
+  const second = await alerts.requestSupplierApproval("fortinet","qa@fortinet.com","fortinet.com");
   const secondId=alerts.adminAlertId({kind:"supplier",reference:"fortinet",requested:second.requested});
   assert.equal(record(secondId).status,"pending");
   await due(secondId);await alerts.deliverAdminAlert(secondId);
@@ -60,7 +60,7 @@ await withFakeKv(async store => {
   await kv.kvSetJson("vendor:claim:absent",{slug:"absent",requested:1,status:"approved"});
   await alerts.deliverAdminAlert(absent);assert.equal(record(absent).status,"cancelled");
   mode="timeout";
-  const third=await kv.requestVendorClaim("aryaka","qa@aryaka.com","aryaka.com");
+  const third=await alerts.requestSupplierApproval("aryaka","qa@aryaka.com","aryaka.com");
   const thirdId=alerts.adminAlertId({kind:"supplier",reference:"aryaka",requested:third.requested});
   await kv.kvSetJson(`admin-alerts:record:${thirdId}`,{...record(thirdId),first_attempt:Date.now()-24*3600000,next_attempt:0});
   const beforeExpired=sent;await alerts.deliverAdminAlert(thirdId);assert.equal(sent,beforeExpired);assert.equal(record(thirdId).status,"needs_review");
@@ -72,7 +72,7 @@ await withFakeKv(async store => {
   assert.equal(JSON.parse(bodies.at(-1)!).to,"support@netify.com");
   assert.match(JSON.parse(bodies.at(-1)!).subject,/test/);
   delete process.env.RESEND_API_KEY;
-  const noKey=await kv.requestVendorClaim("cato","qa@catonetworks.com","catonetworks.com");
+  const noKey=await alerts.requestSupplierApproval("cato","qa@catonetworks.com","catonetworks.com");
   const noKeyId=alerts.adminAlertId({kind:"supplier",reference:"cato",requested:noKey.requested});
   assert.equal(record(noKeyId).status,"pending");assert.equal(record(noKeyId).attempts,0);
   global.fetch=originalFetch;

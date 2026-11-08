@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { activityMailFetch, activityMailKey } from "./activity-mail";
-import { kvGetJson, kvSetJson, kvRaw, getVendorClaim, getOpportunity } from "./rfp-store";
+import { kvGetJson, kvSetJson, kvRaw, getVendorClaim, getOpportunity, requestVendorClaim } from "./rfp-store";
 import { getLatestPublishedSnapshot } from "./published-snapshot";
 import { getBounce, recordResendSend } from "./email-bounces";
 import { SITE_URL } from "./structured-data";
@@ -141,4 +141,15 @@ export async function sendAdminTestAlert() {
   const id = await queueAdminAlert({kind:"test",reference:String(Math.floor(Date.now() / RETRY_MS))});
   await tryAdminAlert(id);
   return (await kvGetJson<AdminAlert>(recordKey(id)))?.status ?? "pending";
+}
+
+/** Keep Node-only email work at the supplier route boundary, not in the shared
+ * KV module, which is also used by Edge routes. Intent still precedes commit. */
+export async function requestSupplierApproval(slug: string, email: string, domain: string) {
+  let alertId: string | undefined;
+  const claim = await requestVendorClaim(slug, email, domain, async pending => {
+    alertId = await queueAdminAlert({kind:"supplier",reference:slug,requested:pending.requested});
+  });
+  if (alertId) await tryAdminAlert(alertId);
+  return claim;
 }
