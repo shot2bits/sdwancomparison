@@ -1,3 +1,5 @@
+import {authenticateMarketplaceProject} from '@/lib/marketplace-project-session';
+import {isStudioProject} from '@/lib/studio-project';
 import { recordPublicationIssue } from '@/lib/publication-issues';
 import {recordAccess, accessEntry, type AccessStage} from "@/lib/auth-access-report";
 import { confirmedSourcingOwner } from "@/lib/sourcing-access";
@@ -38,7 +40,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
 export async function POST(req: Request) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
-  let body: { circuit_intent?: unknown; email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean; attribution?: { ref?: unknown; landing?: unknown } | null; bot_proof?: { challenge?: unknown; website?: unknown } | null };
+  let body: { project_session_token?: string; circuit_intent?: unknown; email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean; attribution?: { ref?: unknown; landing?: unknown } | null; bot_proof?: { challenge?: unknown; website?: unknown } | null };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const email = (body.email ?? "").trim().toLowerCase();
   const role = body.role === "supplier" ? "supplier" : "buyer";
@@ -130,6 +132,10 @@ export async function POST(req: Request) {
     let publicationBound = Boolean(circuitIntent?.success);
     if (rfpId) {
       const project = await getProject(rfpId);
+      if(project && isStudioProject(project) && !project.owner_email) {
+        try {await authenticateMarketplaceProject(project.id,body.project_session_token??'');}
+        catch{return Response.json({error:'Reopen the private project link before verifying this draft.'},{status:403,headers:cors});}
+      }
       const belongsToEmail = Boolean(project && (!project.owner_email || project.owner_email.toLowerCase() === email));
       publicationBound = publicationBound || Boolean(
         project && belongsToEmail &&

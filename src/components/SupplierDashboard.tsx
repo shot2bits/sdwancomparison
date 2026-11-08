@@ -6,7 +6,7 @@ import SignIn from "@/components/SignIn";
 import { OPP_SCOPE_LABELS, type OppScope } from "@/lib/opportunity-types";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null; admin?: boolean };
-type Opp = { id: string; title: string; scope: string[]; regions: string[]; sites: number | null; engagement_type: string; auction_format: string; eligibility: string; bid_count: number; room_token: string };
+type Opp = { id: string; title: string; scope: string[]; regions: string[]; sites: number | null; engagement_type: string; auction_format: string; eligibility: string; bid_count: number; room_token?: string; workspace_url?:string };
 
 function vendorTitle(slug: string): string {
   return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
@@ -71,7 +71,7 @@ export default function SupplierDashboard() {
       </div>
       <div className="flex items-center justify-between">
         <span className="text-xs text-[var(--ink-500)]">{o.regions.join(", ").toUpperCase()}{o.sites != null ? ` · ${o.sites} sites` : ""} · {o.bid_count} bids</span>
-        <Link href={`/opportunities/supplier/${o.room_token}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">Open and bid</Link>
+        <Link href={o.workspace_url??`/opportunities/supplier/${o.room_token}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">Open and bid</Link>
       </div>
     </div>
   );

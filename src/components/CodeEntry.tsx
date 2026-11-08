@@ -10,7 +10,7 @@
 
 import { useState } from "react";
 
-export default function CodeEntry({ defaultEmail = "", onVerified }: { defaultEmail?: string; onVerified: () => void }) {
+export default function CodeEntry({ defaultEmail = "", onVerified, simple=false }: { defaultEmail?: string; onVerified: () => void; simple?:boolean }) {
   const [addr, setAddr] = useState(defaultEmail);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -40,7 +40,7 @@ export default function CodeEntry({ defaultEmail = "", onVerified }: { defaultEm
   }
   return (
     <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
-      <p className="text-sm mb-1.5"><strong>Or type the 6-digit code from the email.</strong> Quicker than finding the link, and it works even if your company scans links:</p>
+      <p className="text-sm mb-1.5">{simple?<strong>Enter your 6-digit code.</strong>:<><strong>Or type the 6-digit code from the email.</strong> Quicker than finding the link, and it works even if your company scans links:</>}</p>
       <div className="flex flex-wrap items-center gap-2">
         {!defaultEmail && (
           <input

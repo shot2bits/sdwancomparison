@@ -156,7 +156,7 @@ function main() {
       record(moved, `5: src/app/(marketing)/${rel} exists after the restructuring`, "");
       record(!stale, `5: src/app/${rel} (the pre-move path) no longer exists`, "");
     }
-    record(exists("src/app/(workspace)/home/page.tsx"), "5: src/app/(workspace)/home/page.tsx exists", "");
+    record(exists("src/app/(studio)/home/page.tsx"), "5: src/app/(studio)/home/page.tsx exists", "");
     record(exists("src/app/(workspace)/workspace/page.tsx"), "5: src/app/(workspace)/workspace/page.tsx exists", "");
     record(!exists("src/app/home/page.tsx"), "5: the pre-move src/app/home/page.tsx no longer exists", "");
     record(!exists("src/app/workspace/page.tsx"), "5: the pre-move src/app/workspace/page.tsx no longer exists", "");
@@ -195,7 +195,7 @@ function main() {
   {
     const entries = readdirSync(path.join(ROOT, "src/app"));
     const allowedTopLevel = new Set([
-      "(marketing)", "(workspace)", "api",
+      "(marketing)", "(workspace)", "(studio)", "api",
       "layout.tsx", "not-found.tsx", "globals.css",
       "robots.txt", "sitemap.xml", ".well-known", "llms.txt",
       "llms-full.txt", "capabilities.json", "question-bank.json",
@@ -217,13 +217,13 @@ function main() {
   {
     const entry = src("src/components/procurement/ProcurementEntry.tsx");
     record(/export const ENGINE_H1/.test(entry), "8: ProcurementEntry.tsx is the sole declaration site of ENGINE_H1", "");
-    const homePage = src("src/app/(workspace)/home/page.tsx");
+    const homePage = src("src/app/(studio)/home/page.tsx");
     const workspacePage = src("src/app/(workspace)/workspace/page.tsx");
     record(!/const ENGINE_H1\s*=/.test(homePage), "8: (workspace)/home/page.tsx does not re-declare ENGINE_H1", "");
     record(!/const ENGINE_H1\s*=/.test(workspacePage), "8: (workspace)/workspace/page.tsx does not re-declare ENGINE_H1", "");
     record(/from ["']@\/components\/procurement\/ProcurementEntry["']/.test(homePage), "8: (workspace)/home/page.tsx imports from ProcurementEntry.tsx", "");
     record(/from ["']@\/components\/procurement\/ProcurementEntry["']/.test(workspacePage), "8: (workspace)/workspace/page.tsx imports from ProcurementEntry.tsx", "");
-    record(/<ProcurementEntry(?:\s+guidance=|\s*\/>)/.test(homePage), "8: (workspace)/home/page.tsx renders the shared ProcurementEntry (optional server guidance)", "");
+    record(/<OpportunityStudio/.test(homePage), "8: the current public entry renders Opportunity Studio; the original workspace remains available", "");
     record(/<ProcurementEntry\s*\/>/.test(workspacePage), "8: (workspace)/workspace/page.tsx renders <ProcurementEntry />", "");
   }
 

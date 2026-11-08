@@ -23,3 +23,4 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y redis-server
       - run: npx tsx scripts/test-request-origin.ts && npx tsx scripts/test-sourcing-routes.ts
       - run: node scripts/test-sourcing-real-redis.mjs
+      - run: node scripts/test-sourcing-real-redis.mjs scripts/test-studio-integration.ts

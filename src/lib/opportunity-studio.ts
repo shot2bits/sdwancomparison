@@ -81,7 +81,7 @@ export function studioDocument(d: StudioDraft, questions: StudioQuestion[]): str
     `Timescale: ${d.timescale||'Not stated'}`,
     ...(d.format==='rfp'?['## Supplier response questions',...questions.filter(q=>d.questionIds.includes(q.id)).map(q=>`- [${q.id}] ${q.text}`)]:[]),
     '## Requested response',d.format==='rfp'?'Provide a proposal against the stated scope, itemised pricing, assumptions, exclusions and delivery approach.':'Explain your relevant capabilities, coverage, proposed approach and information needed for a formal proposal.',
-    '\nDesign preview document. Not published or issued to suppliers.',
+    '\nDraft export. The saved publication receipt confirms whether this requirement has been issued.',
   ].join('\n\n');
 }
 export function studioCanEngage(published: boolean, approvedSupplier: boolean) { return published && approvedSupplier; }

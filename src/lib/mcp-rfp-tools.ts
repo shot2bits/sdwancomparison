@@ -1,3 +1,5 @@
+import {readMarketplaceProject} from './marketplace-project-session';
+import {studioAgentSession, readSupplierEngagement, requestStudioBid, messageStudioBid} from './studio-engagement';
 import { publicationOutcomes } from "./publication-outcomes";
 import { mcpConsentError, withMcpConsentSchema } from "./mcp-consent";
 import { livingDocumentToRfpSections } from "./rfp-document";
@@ -31,10 +33,15 @@ import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 
 export const MCP_RFP_TOOL_DEFINITIONS = ([
+  {name:'read_studio_project',description:'Read the current anonymous requirement and revision using the private expiring buyer project credential. Never returns buyer identity. Use the website for verified final publication.',inputSchema:{type:'object',properties:{project_id:{type:'string'},project_session_token:{type:'string'}},required:['project_id','project_session_token']}},
+  {name:'save_studio_requirement',description:'Update the same saved RFI or RFP used in Opportunity Studio. Pass a complete studio_draft with format, requirement, scope, sites, users, regions, timescale, service and questionIds; a current revision and unique idempotency key are required. Invalidates prior publication approval. Does not publish.',inputSchema:{type:'object',properties:{project_id:{type:'string'},project_session_token:{type:'string'},base_revision:{type:'integer'},idempotency_key:{type:'string'},studio_draft:{type:'object'}},required:['project_id','project_session_token','base_revision','idempotency_key','studio_draft']}},
+  {name:'read_supplier_project',description:'Read a published anonymous requirement and your own bid request/conversation. Requires a one-hour assistant_token issued by an approved supplier from this project workspace. No other supplier or buyer identity is returned.',inputSchema:{type:'object',properties:{project_id:{type:'string'},assistant_token:{type:'string'}},required:['project_id','assistant_token']}},
+  {name:'request_to_bid',description:'Request permission to bid on this published project as the approved supplier who issued the scoped assistant_token. One durable request per supplier; does not approve engagement.',inputSchema:{type:'object',properties:{project_id:{type:'string'},assistant_token:{type:'string'},reason:{type:'string',minLength:20,maxLength:4000}},required:['project_id','assistant_token','reason']}},
+  {name:'message_studio_buyer',description:'Send a private project message only after the buyer has approved your request. Requires the scoped supplier assistant_token and UUID idempotency_key. Does not release account contact details.',inputSchema:{type:'object',properties:{project_id:{type:'string'},assistant_token:{type:'string'},body:{type:'string'},idempotency_key:{type:'string'}},required:['project_id','assistant_token','body','idempotency_key']}},
   { name: "start_project", description: "Create the canonical private ProjectDetails envelope with MCP journey attribution. Anonymous and rate-limited by the MCP transport; returns an expiring opaque project session token.", inputSchema: { type: "object", properties: { entrance_context: { type: "object" }, mode: { type: "string", enum: ["quick_list","find_providers","build_rfp","validate_rfp"] }, sector_profile: { type: "object" } }, required: ["entrance_context","mode"] } },
   { name: "update_requirements", description: "Update a canonical private project using its opaque project session token, optimistic revision and idempotency key.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, idempotency_key: { type: "string" }, buyer_patch: { type: "object" }, raw_input: { type: "object" }, sector_profile: { type: "object" } }, required: ["project_id","project_session_token","base_revision","idempotency_key"] } },
   { name: "preview_provider_matches", description: "Return aggregate provider coverage only. Never returns provider names, slugs, IDs, scores or hidden rows while the notice is a draft.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, input: { type: "object" } }, required: ["project_id","project_session_token","base_revision","input"] } },
-  { name: "prepare_publication", description: "Record the current versioned anonymous-board consent intent against a private project. Does not publish; verified buyer identity is still required.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" }, marketing_opt_in: { type: "boolean" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
+  { name: "prepare_publication", description: "Record the current versioned anonymous-board consent intent against a private project. Does not publish; verified buyer identity is still required.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" }, marketing_opt_in: { type: "boolean" }, supplier_consent_text:{type:"string",description:"Required for Opportunity Studio: exact reviewed supplier-sharing consent text from the website."} }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
   { name: "publish_opportunity", description: "Publish a prepared project exactly once. Requires the opaque project token, current revision, exact consent and a verified buyer session on the MCP HTTP request; cannot bypass the website policy.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
   { name: "get_project_status", description: "Return private project, board and MarketUnlock status to the verified owner holding the opaque project session token.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" } }, required: ["project_id","project_session_token"] } },
   { name: "get_unlocked_matches", description: "Return the exact provider identities and evidence frozen at publication, only to the verified project owner after a live MarketUnlock binding passes.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, input: { type: "object", description: "Accepted for compatibility. Published matches are never recalculated from this value." } }, required: ["project_id","project_session_token"] } },
@@ -181,6 +188,7 @@ export const MCP_RFP_TOOL_DEFINITIONS = ([
 export const RFP_TOOL_NAMES: Set<string> = new Set(MCP_RFP_TOOL_DEFINITIONS.map((t) => t.name as string));
 
 async function projectForDocumentRead(project: NonNullable<Awaited<ReturnType<typeof getProjectByToken>>>) {
+  if(project.entrance_context?.raw_input.studio_contract==='opportunity-studio/1')throw new Error('Use read_supplier_project with an approved supplier project credential to read this requirement.');
   const snapshot = await getLatestPublishedSnapshot(project.id);
   if (!snapshot) return projectWithCurrentBuyerFacts(project);
   return {...project,buyer:snapshot.frozen_content.buyer,rfp_sections:snapshot.frozen_content.rfp_sections,procurement_document:snapshot.frozen_content.living_document ?? undefined,facts:snapshot.frozen_content.facts ?? []};
@@ -202,6 +210,17 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
   const denied = mcpConsentError(name, args);
   if (denied) return denied;
   // name validated against RFP_TOOL_NAMES by the caller
+  if(name==='read_studio_project') {
+    const p=await readMarketplaceProject(String(args.project_id??''),String(args.project_session_token??''));
+    return {project_id:p.project_reference,revision:p.revision,requirement:p.studio_draft,published:p.market_unlocked,receipt:p.publication_receipt,publication:'Final approval and verified buyer identity are required on the website.'};
+  }
+  if(name==='save_studio_requirement')return updateMarketplaceProject(String(args.project_id??''),String(args.project_session_token??''),{base_revision:args.base_revision,idempotency_key:args.idempotency_key,raw_input:{studio_draft:args.studio_draft}});
+  if(['read_supplier_project','request_to_bid','message_studio_buyer'].includes(name)) {
+    const id=String(args.project_id??''),session=await studioAgentSession(id,String(args.assistant_token??''));
+    if(name==='read_supplier_project')return readSupplierEngagement(id,session);
+    if(name==='request_to_bid')return requestStudioBid(id,session,args.reason,"mcp");
+    return messageStudioBid(id,session,session.vendor_slug!,args.body,args.idempotency_key,"mcp");
+  }
   // Public board read: open, no token. Safe before the storage guard.
   if (name === "list_opportunities") {
     if (!kvConfigured()) return { opportunities: [], count: 0 };
@@ -240,7 +259,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
   }
   if (name === "update_requirements") return updateMarketplaceProject(String(args.project_id ?? ""), String(args.project_session_token ?? ""), { base_revision: args.base_revision, idempotency_key: args.idempotency_key, buyer_patch: args.buyer_patch ?? {}, raw_input: args.raw_input ?? {}, ...(args.sector_profile ? { sector_profile: args.sector_profile } : {}) });
   if (name === "preview_provider_matches") return previewMarketplaceProject(String(args.project_id ?? ""), String(args.project_session_token ?? ""), { base_revision: args.base_revision, input: args.input });
-  if (name === "prepare_publication") return prepareMarketplacePublication(String(args.project_id ?? ""), String(args.project_session_token ?? ""), { base_revision: args.base_revision, consent_version: args.consent_version, consent_text: args.consent_text, marketing_opt_in: args.marketing_opt_in ?? false });
+  if (name === "prepare_publication") return prepareMarketplacePublication(String(args.project_id ?? ""), String(args.project_session_token ?? ""), { base_revision: args.base_revision, consent_version: args.consent_version, consent_text: args.consent_text, marketing_opt_in: args.marketing_opt_in ?? false, ...(args.supplier_consent_text?{supplier_consent_text:args.supplier_consent_text}:{}) });
   if (name === "get_project_status") {
     const projectId = String(args.project_id ?? "");
     await authenticateMarketplaceProject(projectId, String(args.project_session_token ?? ""));
@@ -397,6 +416,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     if (opp.source_rfp_id && !(await isMarketUnlocked(opp.source_rfp_id))) {
       return { error: "This supplier capability is locked until publication and MarketUnlock complete successfully." };
     }
+    if(opp.privacy_contract==="opportunity-studio/1")return {error:"approved_supplier_required",message:"Open the supplier project workspace and use its scoped assistant handoff."};
     if (name === "opportunity_inbox") {
       // Pricing amounts are private to the buyer: this supplier agent sees its
       // own figures; other suppliers' amounts are masked. Anonymous buyer names

@@ -26,6 +26,7 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!ref) return Response.json({ error: "Invalid token." }, { status: 404, headers: cors });
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
+  if(opp.privacy_contract==="opportunity-studio/1")return Response.json({error:"Use the approved supplier project workspace.",url:`/sase/studio/supplier/${opp.source_rfp_id}/`},{status:403,headers:cors});
   if (opp.source_rfp_id && !(await isMarketUnlocked(opp.source_rfp_id))) return Response.json({ error: "Market access is locked." }, { status: 403, headers: cors });
   // Fix (supplier-isolation leak, found 5 Aug 2026 during Base44 build
   // scoping): `introduced` and `invited` are both full arrays of vendor
@@ -74,6 +75,7 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!ref) return Response.json({ error: "Invalid token." }, { status: 404, headers: cors });
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
+  if(opp.privacy_contract==="opportunity-studio/1")return Response.json({error:"Use the approved supplier project workspace.",url:`/sase/studio/supplier/${opp.source_rfp_id}/`},{status:403,headers:cors});
   if (opp.source_rfp_id && !(await isMarketUnlocked(opp.source_rfp_id))) return Response.json({ error: "Market access is locked." }, { status: 403, headers: cors });
   if (opp.status !== "open") return Response.json({ error: "This opportunity is not open." }, { status: 409, headers: cors });
   const session = await sessionFromRequest(req);

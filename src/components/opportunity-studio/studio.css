@@ -13,3 +13,5 @@
 @media(prefers-reduced-motion:reduce){.ns-studio *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @media print{.ns-preview-ribbon,.ns-header,.ns-rail,.ns-context,.ns-actions,.ns-workspace-footer,.ns-review-tabs,.ns-role-switch,.ns-workspace-meta,.ns-connector{display:none!important}.ns-layout{display:block}.ns-main{padding:0}.ns-studio{background:white}}
 @media(max-width:650px){.ns-header nav>button:first-child{display:block;font-size:10px;margin-right:12px;white-space:nowrap}.ns-product{font-size:9px}}
+.ns-supplier-page{max-width:900px;margin:0 auto;padding:48px 24px;min-height:85vh}.ns-supplier-page h1{font-size:clamp(32px,5vw,56px);font-weight:650;letter-spacing:-.045em;margin:20px 0}.ns-studio button:disabled{cursor:not-allowed;opacity:.5}.ns-supplier-document li{margin:12px 0}.ns-supplier-document textarea{width:100%}
+.ns-buying-guide{max-width:1050px;margin:32px auto;padding:24px;color:#283735}.ns-buying-guide>summary{cursor:pointer;font-weight:600}.ns-buying-guide dl{margin:24px 0;display:grid;gap:20px}.ns-buying-guide dt{font-weight:600}.ns-buying-guide dd{margin-top:8px;line-height:1.7}

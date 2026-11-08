@@ -1,5 +1,6 @@
 /** Applies to agent/API writes; existing owner, version and publication checks still run. */
 export const MCP_EXPLICIT_CONSENT_TOOLS = new Set([
+  'save_studio_requirement', 'request_to_bid', 'message_studio_buyer',
   'start_project', 'update_requirements', 'preview_provider_matches',
   'generate_rfp_from_opportunity', 'opportunity_respond', 'supplier_reply',
   'respond_to_rfp', 'generate_security_rfp',

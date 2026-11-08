@@ -80,6 +80,8 @@ export async function GET(req: Request, ctx: Ctx) {
     return Response.json({ ...publicProject(projectWithCurrentBuyerFacts(project)), market_unlocked: unlock !== null, market_unlock: unlock }, { headers: cors });
   }
 
+  if(project.entrance_context?.raw_input.studio_contract==="opportunity-studio/1")return Response.json({error:"Sign in through the supplier project workspace.",url:`/sase/studio/supplier/${id}/`},{status:403,headers:cors});
+
   // Supplier read: requires the share token from the response link.
   const shareToken = (url.searchParams.get("token") ?? "").trim();
   if (shareToken && shareToken === project.share_token) {
@@ -126,6 +128,7 @@ export async function PUT(req: Request, ctx: Ctx) {
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
   const existing = await getProject(id);
+  if(existing?.entrance_context?.raw_input.studio_contract==="opportunity-studio/1")return Response.json({error:"Use Opportunity Studio to edit this project."},{status:409,headers:cors});
   if (!existing) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   let body: Record<string, unknown>;
   try {
