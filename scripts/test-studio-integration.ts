@@ -586,6 +586,29 @@ await withFakeKv(async (store) => {
   console.log(
     "PASS supplier profile request and owner email-code approval; ordinary buyers cannot approve supplier access",
   );
+  assert.equal((await adminRoute.GET(makeRequest("GET","https://studio-test.vercel.app/sase/api/admin/"))).status,401);
+  assert.equal((await adminRoute.GET(makeRequest("GET","https://studio-test.vercel.app/sase/api/admin/",{cookie:cookie(buyer)}))).status,403);
+  const overviewResponse=await adminRoute.GET(makeRequest("GET","https://studio-test.vercel.app/sase/api/admin/",{cookie:adminCookie}));
+  assert.equal(overviewResponse.status,200);
+  const overview=await overviewResponse.json();
+  const adminRow=overview.rfps.find((r:{id:string})=>r.id===lastId);
+  assert.equal(adminRow.responses,1,"Studio replies must appear in the admin project count");
+  assert.equal(adminRow.bid_requests,1);
+  assert.equal(adminRow.admin_url,`/sase/admin/projects/${lastId}/`);
+  const {readAdminProject}=await import("../src/lib/admin-project");
+  const {sessionFromRequest}=await import("../src/lib/auth");
+  const adminSession=await sessionFromRequest(makeRequest("GET","https://studio-test.vercel.app/sase/admin/",{cookie:adminCookie}));
+  const inspected=await readAdminProject(lastId,adminSession);
+  assert(inspected);assert.equal(inspected.format,"RFP");
+  assert.equal(inspected.requests.length,1);
+  assert(inspected.requests[0].messages.some(m=>m.body.includes("PRIVATE_PRICING")));
+  assert(!JSON.stringify(inspected).includes("manage_token"));
+  assert(!JSON.stringify(inspected).includes("project_session_token"));
+  await assert.rejects(()=>readAdminProject(lastId,null),/administrator/);
+  await assert.rejects(()=>readAdminProject(lastId,buyer),/administrator/);
+  assert.equal(await readAdminProject("rfp_missing",adminSession),null);
+  console.log("PASS admin overview and read-only project detail: support identity sees real supplier responses; anonymous and ordinary buyers denied");
+
   const p = await kv.getProject(lastId);
   assert(p);
   const c = await (
