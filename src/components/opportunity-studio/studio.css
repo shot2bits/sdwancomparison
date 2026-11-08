@@ -132,3 +132,6 @@
 .ns-waiting,.ns-locked{color:var(--muted)}.ns-waiting h2,.ns-locked h2{font-size:22px;letter-spacing:-.02em}.ns-waiting p,.ns-locked p{font-size:14px}
 .ns-project-status{background:#f3f7f5;border-color:var(--line);border-radius:4px}.ns-project-status strong{font-size:15px}.ns-project-status small{font-size:12px}
 .ns-bid h2{font-size:18px}.ns-bid p,.ns-supplier-room>p:not(.ns-caption){font-size:14px}
+
+.ns-layout.ns-layout-recovery{grid-template-columns:minmax(0,1fr);max-width:880px;min-height:70vh}
+.ns-recovery{max-width:640px;padding-bottom:40px}.ns-recovery-copy{border-top:1px solid var(--line);margin-top:30px;padding-top:20px;font-size:14px}.ns-recovery-copy summary{cursor:pointer}.ns-recovery-copy p{margin:16px 0;line-height:1.7}

@@ -21,6 +21,7 @@ globalThis.fetch=async(url,init={})=>{
  if(init.headers?.authorization!=='Bearer fresh')return Response.json({error:'Project not found.'},{status:404});
  return Response.json({studio_draft:draft,revision:5,buyer:{organisation:'Private company'},publication_complete:true,publication_receipt:{notice_url:'https://netify.co.uk/sase/opportunities/opp_saved/'}});
 };
+const recoveryFetch=globalThis.fetch;
 function Harness(){const [loaded,setLoaded]=React.useState('');const p=useStudioProject((d,published)=>setLoaded(d.requirement+' '+published));return React.createElement('div',null,React.createElement('p',null,loaded),React.createElement('p',null,p.error),React.createElement('p',null,p.recoveryProject),React.createElement('button',{onClick:()=>p.run(()=>p.restore())},'Reopen'));}
 render(React.createElement(Harness));
 await waitFor(()=>assert.ok(screen.getByText(draft.requirement+' true')));
@@ -36,4 +37,24 @@ function CopyHarness(){const [loaded,setLoaded]=React.useState('');const p=useSt
 render(React.createElement(CopyHarness));await waitFor(()=>assert.ok(screen.getByRole('button',{name:'Use saved copy'})));fireEvent.click(screen.getByRole('button',{name:'Use saved copy'}));await waitFor(()=>assert.ok(screen.getByText(draft.requirement)));assert.equal(location.search,'');cleanup();
 globalThis.fetch=async(url,init={})=>String(url).includes('/auth/session')?Response.json({authenticated:true,role:'supplier',email:'supplier@example.test',vendor_slug:'cisco'}):String(url).includes('/supplier/claim/')?Response.json({status:'pending'}):Response.json({error:'Your supplier profile must be approved before viewing details or requesting to bid.'},{status:403});
 render(React.createElement(Supplier,{projectId:'rfp_saved'}));await waitFor(()=>assert.ok(screen.getByRole('button',{name:'Request supplier approval'})));fireEvent.click(screen.getByRole('button',{name:'Request supplier approval'}));await waitFor(()=>assert.ok(screen.getByText('Your request is saved for Netify review. No buyer details are accessible until approval.')));assert.equal(screen.queryByText(draft.requirement),null);cleanup();
+// Exercise the actual page, not just the recovery hook: an email prompt must be actionable.
+const {default:Studio}=await import('../src/components/opportunity-studio/OpportunityStudio.tsx');
+signedIn=false;localStorage.clear();history.replaceState(null,'','/sase/studio-preview/?project=rfp_saved');
+globalThis.fetch=async(url,init={})=>{
+ if(String(url).includes('/auth/request'))return Response.json({emailed:true});
+ if(String(url).includes('/auth/verify')){signedIn=true;return Response.json({ok:true});}
+ return recoveryFetch(url,init);
+};
+render(React.createElement(Studio,{questions:[],testEnvironment:true}));
+await waitFor(()=>assert.ok(screen.getByRole('heading',{name:'Reopen your project'})));
+assert.equal(screen.queryByRole('button',{name:'Continue'}),null,'an unresolved saved project must not show a new blank brief');
+fireEvent.change(screen.getByLabelText('Work email'),{target:{value:'buyer@example.test'}});
+await waitFor(()=>assert.equal(screen.getByRole('button',{name:'Email me a code'}).disabled,false));
+fireEvent.click(screen.getByRole('button',{name:'Email me a code'}));
+await waitFor(()=>assert.ok(screen.getByLabelText('6-digit code from the email')));
+fireEvent.change(screen.getByLabelText('6-digit code from the email'),{target:{value:'123456'}});
+fireEvent.click(screen.getByRole('button',{name:'Confirm with code'}));
+await waitFor(()=>assert.ok(screen.getByRole('heading',{name:'Supplier requests and proposals'})));
+assert.match(location.search,/project=rfp_saved/,'verification must reopen the same published project');
+cleanup();
 console.log('PASS Studio UI: expired-owner recovery, same-project return after verification, and no invented zero counts on failed supplier-activity reads');

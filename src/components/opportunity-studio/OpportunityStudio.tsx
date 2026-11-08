@@ -374,46 +374,59 @@ export default function OpportunityStudio({
           </details>
         </nav>
       </header>
-      <nav className="ns-journey" aria-label="Project progress">
-        <ol>
-          {STUDIO_STEPS.filter(
-            (s) => s.id !== "engage" || previewPublished,
-          ).map((s) => {
-            const i = STUDIO_STEPS.findIndex((item) => item.id === s.id);
-            const label = {
-              describe: "Project brief",
-              requirements: "Requirements",
-              review: "Review & publish",
-              engage: "Supplier responses",
-            }[s.id];
-            return (
-              <li
-                key={s.id}
-                data-active={s.id === step}
-                data-done={i < stepIndex}
-              >
-                <button
-                  disabled={
-                    i > stepIndex || (previewPublished && s.id !== "engage")
-                  }
-                  onClick={() => go(s.id)}
-                  aria-current={s.id === step ? "step" : undefined}
+      {!project.recoveryProject && (
+        <nav className="ns-journey" aria-label="Project progress">
+          <ol>
+            {STUDIO_STEPS.filter(
+              (s) => s.id !== "engage" || previewPublished,
+            ).map((s) => {
+              const i = STUDIO_STEPS.findIndex((item) => item.id === s.id);
+              const label = {
+                describe: "Project brief",
+                requirements: "Requirements",
+                review: "Review & publish",
+                engage: "Supplier responses",
+              }[s.id];
+              return (
+                <li
+                  key={s.id}
+                  data-active={s.id === step}
+                  data-done={i < stepIndex}
                 >
-                  {label}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
-      <div className="ns-layout">
+                  <button
+                    disabled={
+                      i > stepIndex || (previewPublished && s.id !== "engage")
+                    }
+                    onClick={() => go(s.id)}
+                    aria-current={s.id === step ? "step" : undefined}
+                  >
+                    {label}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      )}
+      <div
+        className={
+          project.recoveryProject ? "ns-layout ns-layout-recovery" : "ns-layout"
+        }
+      >
         <section className="ns-main" aria-label="Project workspace">
           <div className="ns-workspace-meta">
             <span>
               <Icon name="lock" size={13} />
-              {previewPublished ? "Published project" : "Private draft"}
+              {project.recoveryProject
+                ? "Saved project"
+                : previewPublished
+                  ? "Published project"
+                  : "Private draft"}
             </span>
-            <button onClick={save} disabled={previewPublished}>
+            <button
+              onClick={save}
+              disabled={previewPublished || Boolean(project.recoveryProject)}
+            >
               Save draft
             </button>
           </div>
@@ -433,7 +446,44 @@ export default function OpportunityStudio({
               {storageMessage}
             </p>
           )}
-          {step === "describe" && (
+          {project.recoveryProject && (
+            <div className="ns-recovery">
+              <h1 id="page-h1" ref={heading} tabIndex={-1}>
+                Reopen your project
+              </h1>
+              <p className="ns-lead">
+                Use the work email that owns this project. Your saved
+                requirement and supplier conversations will reopen after
+                verification.
+              </p>
+              <SignIn
+                simple
+                role="buyer"
+                returnTo={`${project.returnPath}?project=${encodeURIComponent(project.recoveryProject)}`}
+                onAuthed={() => {
+                  void project.run(() => project.restore());
+                }}
+                prompt="Enter the work email you used for this project."
+              />
+              {project.recoveryCopy && (
+                <details className="ns-recovery-copy">
+                  <summary>Need your unverified draft?</summary>
+                  <p>
+                    This browser has a copy of your last saved brief. You can
+                    start a new private draft from it. The original project
+                    stays unchanged.
+                  </p>
+                  <button
+                    className="ns-download"
+                    onClick={project.restartFromCopy}
+                  >
+                    Start new private draft from saved copy
+                  </button>
+                </details>
+              )}
+            </div>
+          )}
+          {!project.recoveryProject && step === "describe" && (
             <div className="ns-entry">
               <p className="ns-eyebrow">SD-WAN & SASE procurement</p>
               <h1 id="page-h1" ref={heading} tabIndex={-1}>
@@ -540,7 +590,7 @@ export default function OpportunityStudio({
               </div>
             </div>
           )}
-          {step === "requirements" && (
+          {!project.recoveryProject && step === "requirements" && (
             <div className="ns-build">
               <p className="ns-eyebrow">Your requirements</p>
               <h1 id="page-h1" ref={heading} tabIndex={-1}>
@@ -760,7 +810,7 @@ export default function OpportunityStudio({
               </div>
             </div>
           )}
-          {step === "review" && (
+          {!project.recoveryProject && step === "review" && (
             <div className="ns-review">
               <p className="ns-eyebrow">
                 <Icon name="lock" size={16} /> YOU DECIDE WHAT IS SHARED
@@ -974,12 +1024,14 @@ export default function OpportunityStudio({
               </button>
             </div>
           )}
-          {step === "engage" && project.credential && (
-            <StudioEngagement
-              projectId={project.credential.project_reference}
-              noticeUrl={project.noticeUrl}
-            />
-          )}
+          {!project.recoveryProject &&
+            step === "engage" &&
+            project.credential && (
+              <StudioEngagement
+                projectId={project.credential.project_reference}
+                noticeUrl={project.noticeUrl}
+              />
+            )}
           <footer className="ns-workspace-footer">
             <span>Free to publish. No commitment to buy.</span>
             <span>
@@ -987,45 +1039,51 @@ export default function OpportunityStudio({
             </span>
           </footer>
         </section>
-        <aside className="ns-context" aria-label="Live requirement preview">
-          <div className="ns-context-heading">
-            <h2>
-              {step === "review" ? "Before you publish" : "Your public listing"}
-            </h2>
+        {!project.recoveryProject && (
+          <aside className="ns-context" aria-label="Live requirement preview">
+            <div className="ns-context-heading">
+              <h2>
+                {step === "review"
+                  ? "Before you publish"
+                  : "Your public listing"}
+              </h2>
+              {step !== "review" && (
+                <span>{previewPublished ? "Published" : "Draft preview"}</span>
+              )}
+            </div>
             {step !== "review" && (
-              <span>{previewPublished ? "Published" : "Draft preview"}</span>
+              <Notice
+                draft={draft}
+                label={
+                  previewPublished
+                    ? "Published opportunity"
+                    : "Public board preview"
+                }
+              />
             )}
-          </div>
-          {step !== "review" && (
-            <Notice
-              draft={draft}
-              label={
-                previewPublished
-                  ? "Published opportunity"
-                  : "Public board preview"
-              }
-            />
-          )}
-          <div className="ns-context-note">
-            <p>
-              {step === "review"
-                ? "Check both views before publishing. Your company name and work email stay private. Remove identifying details from the requirement you share with approved suppliers."
-                : draft.format === "rfi"
-                  ? "Start with a clear statement of requirements. Suppliers can ask questions and put their approach forward."
-                  : "A single scope and shared question set help you assess proposals on the same basis."}
-            </p>
-          </div>
-          <div className="ns-context-process">
-            <p className="ns-caption">WHAT HAPPENS NEXT</p>
-            <ol>
-              <li>You approve your listing.</li>
-              <li>Approved suppliers review it.</li>
-              <li>They request to bid.</li>
-              <li>You choose who to engage.</li>
-            </ol>
-            <p>Supplier participation and response times are not guaranteed.</p>
-          </div>
-        </aside>
+            <div className="ns-context-note">
+              <p>
+                {step === "review"
+                  ? "Check both views before publishing. Your company name and work email stay private. Remove identifying details from the requirement you share with approved suppliers."
+                  : draft.format === "rfi"
+                    ? "Start with a clear statement of requirements. Suppliers can ask questions and put their approach forward."
+                    : "A single scope and shared question set help you assess proposals on the same basis."}
+              </p>
+            </div>
+            <div className="ns-context-process">
+              <p className="ns-caption">WHAT HAPPENS NEXT</p>
+              <ol>
+                <li>You approve your listing.</li>
+                <li>Approved suppliers review it.</li>
+                <li>They request to bid.</li>
+                <li>You choose who to engage.</li>
+              </ol>
+              <p>
+                Supplier participation and response times are not guaranteed.
+              </p>
+            </div>
+          </aside>
+        )}
       </div>
       <dialog
         ref={connectorDialog}
