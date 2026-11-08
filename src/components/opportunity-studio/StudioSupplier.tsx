@@ -10,13 +10,20 @@ type Data = {
   request: StudioBidRequest | null;
   status: string;
 };
-export default function StudioSupplier({ projectId, testEnvironment=false }: { projectId: string; testEnvironment?:boolean }) {
+export default function StudioSupplier({
+  projectId,
+  testEnvironment = false,
+}: {
+  projectId: string;
+  testEnvironment?: boolean;
+}) {
   const [data, setData] = useState<Data | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [reason, setReason] = useState(""),
     [message, setMessage] = useState(""),
     [copied, setCopied] = useState(false);
+  const [approvalRequested, setApprovalRequested] = useState(false);
   const messageAttempts = useRef(
     new Map<string, { body: string; id: string }>(),
   );
@@ -135,7 +142,8 @@ export default function StudioSupplier({ projectId, testEnvironment=false }: { p
             {error}
           </p>
         )}
-        <SignIn simple
+        <SignIn
+          simple
           role="supplier"
           onAuthed={refresh}
           onSignedOut={() => {
@@ -144,6 +152,44 @@ export default function StudioSupplier({ projectId, testEnvironment=false }: { p
           }}
           prompt="Use your work email to view this requirement. Your supplier profile must already be approved by Netify."
         />
+        {!data && error.includes("profile must be approved") && (
+          <section className="ns-supplier-document">
+            <h2>Request company approval</h2>
+            <p>
+              Netify checks a supplier profile once before it can access private
+              buyer requirements.
+            </p>
+            <button
+              className="ns-primary"
+              disabled={busy || approvalRequested}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  const r = await studioJson<{ status: string }>(
+                    "/sase/api/supplier/claim/",
+                    { method: "POST" },
+                  );
+                  setApprovalRequested(r.status === "pending");
+                  if (r.status === "approved") await refresh();
+                } catch (e) {
+                  setError((e as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              {approvalRequested
+                ? "Approval requested"
+                : "Request supplier approval"}
+            </button>
+            {approvalRequested && (
+              <p role="status">
+                Your request is saved for Netify review. No buyer details are
+                accessible until approval.
+              </p>
+            )}
+          </section>
+        )}
         {data && (
           <>
             <p className="ns-small">

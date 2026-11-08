@@ -1,4 +1,4 @@
-import {recordMarketplaceFunnelEvent} from './marketplace-funnel-safe';
+import { recordMarketplaceFunnelEvent } from "./marketplace-funnel-safe";
 import { notifyBuyerOfSupplierActivity } from "./notify";
 /** Durable bid requests and conversations. No contact release or supplier mail. */
 import { createHash, randomBytes } from "node:crypto";
@@ -73,6 +73,11 @@ export async function requireStudioSupplier(session: AuthSession | null) {
   return session.vendor_slug;
 }
 async function owner(id: string, session: AuthSession | null) {
+  if (!session || !["buyer", "netify"].includes(session.role))
+    throw new StudioAccessError(
+      "Sign in with the work email that owns this project to view supplier activity.",
+      401,
+    );
   const result = await publishedProject(id);
   if (
     !session ||
@@ -136,7 +141,9 @@ export async function readSupplierEngagement(
   return {
     project_id: id,
     opportunity: toPublicOpportunity(opp),
-    requirement: snapshot.frozen_content.studio_requirement ?? studioDraftFromProject(frozen),
+    requirement:
+      snapshot.frozen_content.studio_requirement ??
+      studioDraftFromProject(frozen),
     request: (await rows(id)).find((r) => r.vendor_slug === slug) ?? null,
     status: opp.status,
   };
@@ -145,7 +152,7 @@ export async function requestStudioBid(
   id: string,
   session: AuthSession | null,
   reason: unknown,
-  channel:"web"|"mcp"="web",
+  channel: "web" | "mcp" = "web",
 ) {
   const parsed = z.string().trim().min(20).max(4000).parse(reason);
   const supplier = await readSupplierEngagement(id, session);
@@ -166,7 +173,11 @@ export async function requestStudioBid(
       messages: [],
     });
     await kvRaw(["SET", key(id), JSON.stringify([...requests, row])]);
-    await recordMarketplaceFunnelEvent({event:"supplier_interest",project_id:id,channel});
+    await recordMarketplaceFunnelEvent({
+      event: "supplier_interest",
+      project_id: id,
+      channel,
+    });
     try {
       const { opp } = await publishedProject(id);
       await notifyBuyerOfSupplierActivity(opp, row.vendor_name, "interest");
@@ -205,7 +216,7 @@ export async function messageStudioBid(
   slug: string,
   body: unknown,
   idempotencyKey: unknown,
-  channel:"web"|"mcp"="web",
+  channel: "web" | "mcp" = "web",
 ) {
   const text = z.string().trim().min(1).max(10000).parse(body);
   const messageId = z.string().uuid().parse(idempotencyKey);
@@ -250,7 +261,12 @@ export async function messageStudioBid(
       created: Date.now(),
     });
     await kvRaw(["SET", key(id), JSON.stringify(requests)]);
-    if(!isOwner)await recordMarketplaceFunnelEvent({event:"supplier_response",project_id:id,channel});
+    if (!isOwner)
+      await recordMarketplaceFunnelEvent({
+        event: "supplier_response",
+        project_id: id,
+        channel,
+      });
     return r;
   });
 }

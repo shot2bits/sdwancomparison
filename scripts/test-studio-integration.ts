@@ -523,6 +523,69 @@ await withFakeKv(async (store) => {
       "real route save → prepare → publish/replay → anonymous notice → approved supplier → request/approval → private response → scoped MCP",
     );
   }
+  const supplierClaimRoute =
+    await import("../src/app/api/supplier/claim/route");
+  const pendingSupplier = await kv.createSession({
+    role: "supplier",
+    email: "studio@aryaka.com",
+    vendor_slug: "aryaka",
+  });
+  const claimRequest = await supplierClaimRoute.POST(
+    makeRequest(
+      "POST",
+      "https://studio-test.vercel.app/sase/api/supplier/claim/",
+      { cookie: cookie(pendingSupplier) },
+    ),
+  );
+  assert.equal(claimRequest.status, 200);
+  assert.equal((await claimRequest.json()).status, "pending");
+  const authRequest = await import("../src/app/api/auth/request/route");
+  const authVerify = await import("../src/app/api/auth/verify/route");
+  const adminRequest = await authRequest.POST(
+    makeRequest(
+      "POST",
+      "https://studio-test.vercel.app/sase/api/auth/request/",
+      {
+        body: {
+          email: "support@netify.com",
+          role: "buyer",
+          return_to: "/sase/admin/",
+        },
+      },
+    ),
+  );
+  assert.equal(adminRequest.status, 200);
+  const adminCode = store.peekJson<{ code: string }>(
+    "auth:code:support@netify.com",
+  );
+  assert(adminCode);
+  const adminVerified = await authVerify.POST(
+    makeRequest(
+      "POST",
+      "https://studio-test.vercel.app/sase/api/auth/verify/",
+      { body: { email: "support@netify.com", code: adminCode.code } },
+    ),
+  );
+  assert.equal(adminVerified.status, 200);
+  const adminCookie = adminVerified.headers.get("set-cookie")!.split(";")[0];
+  const adminRoute = await import("../src/app/api/admin/route");
+  const ordinary = await adminRoute.POST(
+    makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {
+      cookie: cookie(buyer),
+      body: { action: "approve_claim", slug: "aryaka" },
+    }),
+  );
+  assert.equal(ordinary.status, 403);
+  const approved = await adminRoute.POST(
+    makeRequest("POST", "https://studio-test.vercel.app/sase/api/admin/", {
+      cookie: adminCookie,
+      body: { action: "approve_claim", slug: "aryaka" },
+    }),
+  );
+  assert.equal(approved.status, 200, JSON.stringify(await approved.json()));
+  console.log(
+    "PASS supplier profile request and owner email-code approval; ordinary buyers cannot approve supplier access",
+  );
   const p = await kv.getProject(lastId);
   assert(p);
   const c = await (
