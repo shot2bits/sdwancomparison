@@ -10,7 +10,7 @@ const {render,screen,waitFor,cleanup,fireEvent}=await import('@testing-library/r
 const {default:Admin}=await import('../src/components/AdminClient.tsx');
 let authenticated=false,failOverview=true,expired=false,approved=false;
 const writes=[];
-function overview(){return {admin_email:'support@netify.com',sessions:[],users:[],vendors:[],blocklist:{builtin_count:0,custom:[]},pending:[],claims:[{slug:'fortinet',status:approved?'approved':'pending',email:'fixture@fortinet.com',domain:'fortinet.com',requested:1}],opportunities:[],rfps:[{id:'rfp_fixture',title:'Read-only fixture project',admin_url:'/sase/admin/projects/rfp_fixture/',format:'RFI',status:'published',owner_email:'buyer@example.test',contact_email:null,organisation:'Fixture',sector:null,scope:'SD-WAN',sections:0,questions:0,invited_vendors:0,responses:1,created:1,updated:1}],funnel:{buyer_accounts:1,accounts_with_rfp:1,rfps_total:1,rfps_account_owned:1,rfps_anonymous:0,rfps_published:1,supplier_responses:1,draft_link_captures:0}};}
+function overview(){return {email_alerts:{recipient:'support@netify.com',pending:0,needs_review:0},admin_email:'support@netify.com',sessions:[],users:[],vendors:[],blocklist:{builtin_count:0,custom:[]},pending:[],claims:[{slug:'fortinet',status:approved?'approved':'pending',email:'fixture@fortinet.com',domain:'fortinet.com',requested:1}],opportunities:[],rfps:[{id:'rfp_fixture',title:'Read-only fixture project',admin_url:'/sase/admin/projects/rfp_fixture/',format:'RFI',status:'published',owner_email:'buyer@example.test',contact_email:null,organisation:'Fixture',sector:null,scope:'SD-WAN',sections:0,questions:0,invited_vendors:0,responses:1,created:1,updated:1}],funnel:{buyer_accounts:1,accounts_with_rfp:1,rfps_total:1,rfps_account_owned:1,rfps_anonymous:0,rfps_published:1,supplier_responses:1,draft_link_captures:0}};}
 globalThis.fetch=async(url,init={})=>{
  const u=String(url);
  if(u.includes('/auth/session'))return Response.json({authenticated,admin:authenticated,email:authenticated?'support@netify.com':undefined,role:authenticated?'netify':undefined});
@@ -19,7 +19,7 @@ globalThis.fetch=async(url,init={})=>{
  if(u.includes('/auth/verify')){authenticated=true;return Response.json({ok:true});}
  if(u.includes('/auth/logout')){authenticated=false;return Response.json({ok:true});}
  if(u.includes('/api/admin')){
-  if(init.method==='POST'){const body=JSON.parse(init.body);writes.push(body);approved=true;return Response.json({ok:true});}
+  if(init.method==='POST'){const body=JSON.parse(init.body);writes.push(body);if(body.action==='approve_claim')approved=true;return Response.json({ok:true,status:'accepted'});}
   if(expired)return Response.json({error:'Sign in required.'},{status:401});
   if(failOverview)return Response.json({error:'Unavailable'},{status:503});
   return Response.json(overview());
@@ -44,6 +44,9 @@ fireEvent.click(screen.getByRole('button',{name:'Approve',exact:true}));
 await waitFor(()=>assert.ok(screen.getByText('Supplier approved.')));
 assert.deepEqual(writes,[{action:'approve_claim',slug:'fortinet'}]);
 assert.equal(screen.queryByRole('button',{name:'Approve',exact:true}),null);
+fireEvent.click(screen.getByRole('button',{name:'Send test email',exact:true}));
+await waitFor(()=>assert.ok(screen.getByText('Resend accepted the test email to support@netify.com. Check the inbox.')));
+assert.deepEqual(writes.at(-1),{action:'send_test_alert'});
 fireEvent.click(screen.getByRole('button',{name:'Sign out',exact:true}));
 await waitFor(()=>assert.ok(screen.getByLabelText('Work email')));
 assert.equal(screen.queryByRole('heading',{name:'Projects'}),null);cleanup();
@@ -51,4 +54,4 @@ authenticated=true;expired=true;
 render(React.createElement(Admin));
 await waitFor(()=>assert.ok(screen.getByLabelText('Work email')));
 assert.ok(screen.getByRole('alert'));assert.equal(screen.queryByText('Loading admin console...'),null);cleanup();
-console.log('PASS actual admin page: email-code login without reload, retryable load failure, admin project links, supplier approval, sign-out and expired-session recovery');
+console.log('PASS actual admin page: email-code login without reload, retryable load failure, admin project links, supplier approval, support test email, sign-out and expired-session recovery');

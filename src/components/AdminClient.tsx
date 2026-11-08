@@ -358,6 +358,17 @@ export default function AdminClient() {
         </p>
       )}
 
+      {data.email_alerts && (
+        <p className="text-sm mb-6" role="status">
+          Project and supplier approval alerts go to {data.email_alerts.recipient} via Resend.{" "}
+          <button className={btn} disabled={busy} onClick={() => act({action:"send_test_alert"})}>Send test email</button>
+          {data.email_alerts.pending > 0 && ` ${data.email_alerts.pending} email(s) waiting for delivery acceptance; retried every five minutes.`}
+          {data.email_alerts.last_delivery_failure_at && ` A delivery failure for this inbox was recorded on ${when(data.email_alerts.last_delivery_failure_at)}. Check Resend delivery logs.`}
+          {data.email_alerts.needs_review > 0 && ` ${data.email_alerts.needs_review} email(s) need delivery review in Resend before resending.`}
+        </p>
+      )}
+
+
       {/* Buyer funnel: the four stages that matter */}
       {data.funnel && (
         <section id="projects" className={card}>
@@ -480,15 +491,6 @@ export default function AdminClient() {
         </section>
       )}
 
-      {data.email_alerts && (
-        <p className="text-sm mb-6" role="status">
-          Project and supplier approval alerts go to {data.email_alerts.recipient} via Resend.{" "}
-          <button className={btn} disabled={busy} onClick={() => act({action:"send_test_alert"})}>Send test email</button>
-          {data.email_alerts.pending > 0 && ` ${data.email_alerts.pending} email(s) waiting for delivery acceptance; retried every five minutes.`}
-          {data.email_alerts.last_delivery_failure_at && ` A delivery failure for this inbox was recorded on ${when(data.email_alerts.last_delivery_failure_at)}. Check Resend delivery logs.`}
-          {data.email_alerts.needs_review > 0 && ` ${data.email_alerts.needs_review} email(s) need delivery review in Resend before resending.`}
-        </p>
-      )}
 
       {/* Profile claims */}
       <section id="supplier-approvals" className={card}>
