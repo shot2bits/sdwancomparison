@@ -21,3 +21,7 @@ MCP: actual initialize handshake from the UI. A private expiring buyer handoff p
 - Original model tests, TypeScript, scoped lint, buyer-completion tests and acceptance-fixes tests passed at their recorded checkpoints. Final regression/build/cloud checks remain to be recorded.
 
 The existing provider-preview source assertion expected an older pre-production call signature. Updated it to require the existing merge where current saved buyer facts override translated matching input; no matching production code was changed for that assertion.
+
+Additional acceptance: full `npm run validate` passed after updating the route inventory for the deliberate Studio group and retaining the original detailed workspace. Provider evidence, RFP completion, acceptance fixes, buyer completion and marketplace foundation suites passed. Real Redis tests also prove that a later record edit cannot change the frozen supplier requirement or be republished without fresh review. A signed content hash binds Studio approval to the exact current requirement. The browser recovery test covers an expired project credential, verified-owner recovery, same-project return after email verification and failure displays that do not invent zero requests.
+
+Hosted acceptance uses the existing physically isolated preview database. Branch-only preview mail capture was enabled for `codex/opportunity-studio-20261108`; production settings are unchanged. PR30 targets the verified production release branch. No production merge has occurred.
