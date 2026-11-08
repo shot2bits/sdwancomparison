@@ -75,8 +75,9 @@ export default function StudioEngagement({
   return (
     <div className="ns-engage">
       <p className="ns-eyebrow">YOUR PUBLISHED PROJECT</p>
-      <h1>Open for possibilities.</h1>
-      <SignIn simple
+      <h1>Supplier requests and proposals</h1>
+      <SignIn
+        simple
         role="buyer"
         onAuthed={refresh}
         onSignedOut={() => {
@@ -100,8 +101,8 @@ export default function StudioEngagement({
         View public notice ↗
       </a>
       <p className="ns-small">
-        Reference: {projectId}. Supplier activity appears after it is saved by
-        the server. Refresh to check for new requests.
+        Reference: {projectId}. Refresh to check for new supplier requests and
+        proposals.
       </p>
       <button onClick={refresh} disabled={busy}>
         Refresh requests
@@ -129,7 +130,7 @@ export default function StudioEngagement({
           </div>
           {!rows.length && (
             <div className="ns-waiting">
-              <h2>Your next conversation starts here.</h2>
+              <h2>No supplier requests yet</h2>
               <p>
                 Approved suppliers can review the requirement and request to
                 bid. A listing does not guarantee responses.

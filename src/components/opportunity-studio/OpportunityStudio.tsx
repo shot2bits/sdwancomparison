@@ -114,9 +114,7 @@ function Notice({
         <Icon name="globe" size={18} />
       </div>
       <div className="ns-notice-paper">
-        <div className="ns-notice-mark">
-          N<span>OPPORTUNITY</span>
-        </div>
+        <p className="ns-listing-label">Netify opportunity board</p>
         <p className="ns-caption">{n.format}</p>
         <h3>{n.title}</h3>
         <p className="ns-notice-summary">{n.summary}</p>
@@ -341,9 +339,7 @@ export default function OpportunityStudio({
       <div className="ns-preview-ribbon">
         <span>
           <i />{" "}
-          {testEnvironment
-            ? "ISOLATED TEST WORKSPACE"
-            : "NETIFY OPPORTUNITY STUDIO"}
+          {testEnvironment ? "ISOLATED TEST WORKSPACE" : "NETIFY PROCUREMENT"}
         </span>
         <span>
           {testEnvironment
@@ -359,69 +355,58 @@ export default function OpportunityStudio({
         >
           netify<span>®</span>
         </a>
-        <span className="ns-product">
-          Opportunity Studio <span>01</span>
-        </span>
+        <span className="ns-product">Procurement service</span>
         <nav aria-label="Workspace utilities">
           <button onClick={restore}>Open draft</button>
-          <button className="ns-agent-button" onClick={showConnector}>
-            <Icon name="link" size={16} />
-            Connect your assistant
-          </button>
+          <details className="ns-tools">
+            <summary>More tools</summary>
+            <div>
+              <button
+                aria-label="Connect your assistant"
+                onClick={showConnector}
+              >
+                Connect your assistant
+              </button>
+              <a href="https://netify.co.uk/sase/how-it-works/">
+                How the service works
+              </a>
+            </div>
+          </details>
         </nav>
       </header>
-      <div className="ns-layout">
-        <aside className="ns-rail">
-          <div>
-            <p className="ns-caption">YOUR BUYING JOURNEY</p>
-            <ol>
-              {STUDIO_STEPS.map((s, i) => (
-                <li
-                  key={s.id}
-                  data-active={s.id === step}
-                  data-done={i < stepIndex}
+      <nav className="ns-journey" aria-label="Project progress">
+        <ol>
+          {STUDIO_STEPS.filter(
+            (s) => s.id !== "engage" || previewPublished,
+          ).map((s) => {
+            const i = STUDIO_STEPS.findIndex((item) => item.id === s.id);
+            const label = {
+              describe: "Project brief",
+              requirements: "Requirements",
+              review: "Review & publish",
+              engage: "Supplier responses",
+            }[s.id];
+            return (
+              <li
+                key={s.id}
+                data-active={s.id === step}
+                data-done={i < stepIndex}
+              >
+                <button
+                  disabled={
+                    i > stepIndex || (previewPublished && s.id !== "engage")
+                  }
+                  onClick={() => go(s.id)}
+                  aria-current={s.id === step ? "step" : undefined}
                 >
-                  <button
-                    disabled={
-                      i > stepIndex || (previewPublished && s.id !== "engage")
-                    }
-                    onClick={() => go(s.id)}
-                    aria-current={s.id === step ? "step" : undefined}
-                  >
-                    <span>
-                      {i < stepIndex ? (
-                        <Icon name="check" size={15} />
-                      ) : (
-                        String(i + 1).padStart(2, "0")
-                      )}
-                    </span>
-                    {s.label}
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="ns-rail-bottom">
-            <div className="ns-orbit" aria-hidden="true">
-              <i />
-              <i />
-              <span>N</span>
-            </div>
-            <h2>
-              Built around
-              <br />
-              your requirement.
-            </h2>
-            <p>
-              One project. A shared scope.
-              <br />
-              You control every introduction.
-            </p>
-            <a href="https://netify.co.uk/sase/how-it-works/">
-              How the marketplace works <span>↗</span>
-            </a>
-          </div>
-        </aside>
+                  {label}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+      <div className="ns-layout">
         <section className="ns-main" aria-label="Project workspace">
           <div className="ns-workspace-meta">
             <span>
@@ -450,18 +435,13 @@ export default function OpportunityStudio({
           )}
           {step === "describe" && (
             <div className="ns-entry">
-              <p className="ns-eyebrow">
-                <span /> FROM REQUIREMENT TO RESPONSE
-              </p>
+              <p className="ns-eyebrow">SD-WAN & SASE procurement</p>
               <h1 id="page-h1" ref={heading} tabIndex={-1}>
-                Your next network.
-                <br />
-                <span>Starts with you.</span>
+                Get proposals for your SD-WAN or SASE project.
               </h1>
               <p id="page-subhead" className="ns-lead">
-                Build your SASE or SD-WAN RFI or RFP.
-                <br className="ns-desktop-break" /> Let providers put their
-                proposals forward.
+                Write one requirement. Publish an anonymous opportunity. Choose
+                which suppliers you want to speak to.
               </p>
               <div className="ns-format-choice" aria-label="Document type">
                 {(["rfi", "rfp"] as const).map((f) => (
@@ -470,12 +450,11 @@ export default function OpportunityStudio({
                     aria-pressed={draft.format === f}
                     onClick={() => chooseFormat(f)}
                   >
-                    <span className="ns-radio-dot" />
                     <span>
                       <strong>
                         {f === "rfi"
-                          ? "Start with an RFI"
-                          : "Build a detailed RFP"}
+                          ? "Simple project brief (RFI)"
+                          : "Detailed tender (RFP)"}
                       </strong>
                       <small>
                         {f === "rfi"
@@ -483,14 +462,11 @@ export default function OpportunityStudio({
                           : "A structured request for proposals"}
                       </small>
                     </span>
-                    {f === "rfi" && <em>QUICKEST START</em>}
                   </button>
                 ))}
               </div>
               <div className="ns-composer">
-                <label htmlFor="studio-brief">
-                  What are you looking to change?
-                </label>
+                <label htmlFor="studio-brief">Describe your project</label>
                 <textarea
                   id="studio-brief"
                   onFocus={() => {
@@ -512,14 +488,10 @@ export default function OpportunityStudio({
                     aria-expanded={importing}
                   >
                     <Icon name="plus" size={17} />
-                    Bring an existing brief
+                    Import an existing brief
                   </button>
-                  <button
-                    className="ns-send"
-                    onClick={build}
-                    aria-label="Build my requirement"
-                  >
-                    <Icon name="arrow" />
+                  <button className="ns-primary" onClick={build}>
+                    Continue <Icon name="arrow" size={17} />
                   </button>
                 </div>
               </div>
@@ -564,17 +536,15 @@ export default function OpportunityStudio({
                 <button onClick={() => update("requirement", SAMPLE)}>
                   Try an example project <span>↗</span>
                 </button>
-                <span>Already have an AI-written RFP? Paste it above.</span>
+                <span>Already have a brief or RFP? Paste it above.</span>
               </div>
             </div>
           )}
           {step === "requirements" && (
             <div className="ns-build">
-              <p className="ns-eyebrow">
-                <Icon name="spark" size={16} /> YOUR REQUIREMENT, TAKING SHAPE
-              </p>
+              <p className="ns-eyebrow">Your requirements</p>
               <h1 id="page-h1" ref={heading} tabIndex={-1}>
-                Make it yours.
+                Check your project details
               </h1>
               <p className="ns-lead">
                 Check the details we recognised. Fill the gaps.
@@ -582,11 +552,9 @@ export default function OpportunityStudio({
                 Nothing is sent until you review and publish.
               </p>
               <div className="ns-understood">
-                <Icon name="spark" size={17} />
                 <p>
-                  Explicit details from your brief are prefilled for review.
-                  Unstated details stay blank. Only explicit details are
-                  recognised. Review every field before sharing.
+                  Details stated in your brief are filled in below. Check them
+                  and add anything missing before publishing.
                 </p>
               </div>
               <div className="ns-fields">
@@ -798,7 +766,7 @@ export default function OpportunityStudio({
                 <Icon name="lock" size={16} /> YOU DECIDE WHAT IS SHARED
               </p>
               <h1 id="page-h1" ref={heading} tabIndex={-1}>
-                Ready for the market.
+                Review and publish your requirement
               </h1>
               <p className="ns-lead">
                 One final check. Two different views.
@@ -1021,35 +989,39 @@ export default function OpportunityStudio({
         </section>
         <aside className="ns-context" aria-label="Live requirement preview">
           <div className="ns-context-heading">
-            <span>YOUR OPPORTUNITY</span>
-            <span>
-              LIVE PREVIEW <i />
-            </span>
+            <h2>
+              {step === "review" ? "Before you publish" : "Your public listing"}
+            </h2>
+            {step !== "review" && (
+              <span>{previewPublished ? "Published" : "Draft preview"}</span>
+            )}
           </div>
-          <Notice draft={draft} />
+          {step !== "review" && (
+            <Notice
+              draft={draft}
+              label={
+                previewPublished
+                  ? "Published opportunity"
+                  : "Public board preview"
+              }
+            />
+          )}
           <div className="ns-context-note">
-            <Icon name="spark" size={19} />
             <p>
-              {draft.format === "rfi"
-                ? "Start with a clear statement of requirements. Suppliers can ask questions and put their approach forward."
-                : "A single scope and shared question set help you assess proposals on the same basis."}
+              {step === "review"
+                ? "Check both views before publishing. Your company name and work email stay private. Remove identifying details from the requirement you share with approved suppliers."
+                : draft.format === "rfi"
+                  ? "Start with a clear statement of requirements. Suppliers can ask questions and put their approach forward."
+                  : "A single scope and shared question set help you assess proposals on the same basis."}
             </p>
           </div>
           <div className="ns-context-process">
             <p className="ns-caption">WHAT HAPPENS NEXT</p>
             <ol>
-              <li>
-                <span>01</span>You approve your listing.
-              </li>
-              <li>
-                <span>02</span>Approved suppliers review it.
-              </li>
-              <li>
-                <span>03</span>They request to bid.
-              </li>
-              <li>
-                <span>04</span>You choose who to engage.
-              </li>
+              <li>You approve your listing.</li>
+              <li>Approved suppliers review it.</li>
+              <li>They request to bid.</li>
+              <li>You choose who to engage.</li>
             </ol>
             <p>Supplier participation and response times are not guaranteed.</p>
           </div>
@@ -1071,11 +1043,7 @@ export default function OpportunityStudio({
           </button>
         </div>
         <Icon name="link" size={36} />
-        <h2 id="studio-connector-title">
-          Your assistant.
-          <br />
-          The same project.
-        </h2>
+        <h2 id="studio-connector-title">Connect your assistant</h2>
         <p>
           Use a supported MCP client to research providers, prepare requirements
           and continue a project. Private actions require the correct project

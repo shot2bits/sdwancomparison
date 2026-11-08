@@ -30,7 +30,7 @@ signedIn=false;history.replaceState(null,'','/sase/studio-preview/?project=rfp_s
 render(React.createElement(Harness));await waitFor(()=>assert.ok(screen.getByText('rfp_saved')));
 signedIn=true;fireEvent.click(screen.getByRole('button',{name:'Reopen'}));await waitFor(()=>assert.ok(screen.getByText(draft.requirement+' true')));cleanup();
 render(React.createElement(Engagement,{projectId:'rfp_saved',noticeUrl:'/sase/opportunities/opp_saved/'}));
-await waitFor(()=>assert.ok(screen.getByRole('alert')));assert.equal(screen.queryByText('Requests to bid'),null,'failed reads must not invent a zero-request count');assert.equal(screen.queryByText('Your next conversation starts here.'),null);cleanup();
+await waitFor(()=>assert.ok(screen.getByRole('alert')));assert.equal(screen.queryByText('Requests to bid'),null,'failed reads must not invent a zero-request count');assert.equal(screen.queryByText('No supplier requests yet'),null);cleanup();
 signedIn=false;history.replaceState(null,'','/sase/studio-preview/?project=rfp_saved#project_session=expired');localStorage.setItem('netify_studio_backup_rfp_saved',JSON.stringify(draft));
 function CopyHarness(){const [loaded,setLoaded]=React.useState('');const p=useStudioProject(d=>setLoaded(d.requirement));return React.createElement('div',null,React.createElement('p',null,loaded),p.recoveryCopy&&React.createElement('button',{onClick:p.restartFromCopy},'Use saved copy'));}
 render(React.createElement(CopyHarness));await waitFor(()=>assert.ok(screen.getByRole('button',{name:'Use saved copy'})));fireEvent.click(screen.getByRole('button',{name:'Use saved copy'}));await waitFor(()=>assert.ok(screen.getByText(draft.requirement)));assert.equal(location.search,'');cleanup();
