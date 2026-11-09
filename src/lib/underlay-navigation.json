@@ -1,0 +1,106 @@
+{
+  "label": "Underlay",
+  "primaryLabel": "BT & Virgin / O2 Business",
+  "columns": 2,
+  "items": [
+    {
+      "label": "BT Business reseller programme",
+      "href": "/resell/bt-business-services/",
+      "desc": "Explore the BT portfolio and Netify authorised-partner route."
+    },
+    {
+      "label": "Virgin / O2 Business reseller programme",
+      "href": "/resell/virgin-media-business/",
+      "desc": "Broadband, FibreLight, FibreBright, mobile connectivity and managed Wi-Fi."
+    },
+    {
+      "label": "Buy BT Business",
+      "href": "/buy-bt/",
+      "desc": "Source BT connectivity, voice, security and managed networks through Netify."
+    },
+    {
+      "label": "Apply to resell BT",
+      "href": "/go/bt-reseller-application/",
+      "desc": "Apply to Netify for the BT Business authorised-partner route."
+    }
+  ],
+  "comparisonGroup": {
+    "label": "Products, tools and partner information",
+    "items": [
+      {
+        "label": "BT Business Broadband",
+        "href": "/resell/bt-business-broadband/",
+        "desc": "Broadband products, reseller eligibility and commissions."
+      },
+      {
+        "label": "BTnet internet and leased lines",
+        "href": "/resell/internet-solutions-reseller/",
+        "desc": "Dedicated connectivity, partner terms and pricing references."
+      },
+      {
+        "label": "BT Cloud Voice and VoIP",
+        "href": "/resell/voip-reseller/",
+        "desc": "The BT hosted voice reseller route through Netify."
+      },
+      {
+        "label": "Microsoft Teams reseller information",
+        "href": "/resell/microsoft-teams/",
+        "desc": "Read the status of Netify’s planned Teams reseller offer."
+      },
+      {
+        "label": "BT managed SD-WAN and SASE",
+        "href": "/bt-fortinet-meraki/",
+        "desc": "BT managed networking with Fortinet and Cisco Meraki."
+      },
+      {
+        "label": "BT cybersecurity buying guide",
+        "href": "/bt-cybersecurity-buying-guide/",
+        "desc": "BT security products and service responsibilities."
+      },
+      {
+        "label": "BT SD-WAN and SASE databank",
+        "href": "/bt-sase-sd-wan/",
+        "desc": "Sourced BT product evidence and buying requirements."
+      },
+      {
+        "label": "BT Cloud Security",
+        "href": "/resell/bt-cloud-security/",
+        "desc": "BT Connect and Protect reseller information."
+      },
+      {
+        "label": "BT SASE partnership",
+        "href": "/insights/reselling-sase-market-guide/#bt-partnership",
+        "desc": "Read the BT partnership section of the SASE programme guide."
+      },
+      {
+        "label": "BT for Healthcare",
+        "href": "/sd-wan-for-healthcare/",
+        "desc": "BT networking and security for healthcare organisations."
+      },
+      {
+        "label": "BT Cloud Voice pricing",
+        "href": "/tools/bt-cloud-voice-pricing-calculator/",
+        "desc": "Model licences and calling requirements before a quote."
+      },
+      {
+        "label": "BTnet leased line costs",
+        "href": "/bt-leased-line-cost-calculator-tool/",
+        "desc": "Explore bandwidth, term and installation costs."
+      },
+      {
+        "label": "BT One Phone replacement",
+        "href": "/tools/bt-one-phone-replacement/",
+        "desc": "Review replacement options and usage requirements."
+      },
+      {
+        "label": "Virgin / O2 Business provider profile",
+        "href": "/marketplace/virgin-media/",
+        "desc": "Provider research, connectivity capabilities and buying fit."
+      }
+    ]
+  },
+  "footerLink": {
+    "label": "Reseller order portal",
+    "href": "https://reseller.netify.co.uk/"
+  }
+}

@@ -24,6 +24,7 @@
  * scripts/test-rfp-canonical-live.ts and run against a started server.
  */
 
+import {MEGA_GROUPS} from "../src/lib/nav";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -131,7 +132,7 @@ function main() {
   /* 5. Continuation and internal links */
   record(continuationUrl("We need SD-WAN for 20 sites.", []).startsWith(CANON + "?q="), "5: continuationUrl opens the builder page with ?q=");
   record(!/https:\/\/netify\.co\.uk\/\?q=/.test(nav), "5: nav sector RFP links open the builder page");
-  record(/label: "Build an SD-WAN or SASE RFP", href: "\/sase-sd-wan-rfp-builder\/"/.test(nav), "5: mega-nav links the canonical with descriptive wording");
+  record(MEGA_GROUPS.some(g => g.items.some(i => i.label === "Build an SD-WAN or SASE RFP" && i.href === "/sase-sd-wan-rfp-builder/")), "5: mega-nav links the canonical with descriptive wording");
   record(sample.includes('href="https://netify.co.uk/sase-sd-wan-rfp-builder/"') && sample.includes("https://netify.co.uk/sd-wan/sample-rfp/"), "5: SASE sample page links the canonical builder and the SD-WAN sample");
   record(questions.includes('href="https://netify.co.uk/sase-sd-wan-rfp-builder/"') && !questions.includes('href="/sase/rfp-builder/"'), "5: question bank page links the canonical, not the redirecting /sase/rfp-builder/");
   record(!/<Link href="\/rfp-builder\/(sase|sd-wan|sse)"/.test(questions) && !/<Link href="\/rfp-builder\/sd-wan"/.test(sample), "5: no links to the retired /rfp-builder/{sase,sd-wan,sse} paths");

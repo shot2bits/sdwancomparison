@@ -69,6 +69,7 @@ function Chevron({ open }: { open: boolean }) {
 function PanelItems({ group, onNavigate }: { group: MegaGroup; onNavigate?: () => void }) {
   return (
     <>
+      {group.primaryLabel && <h2 className="px-2.5 pb-2 text-xs font-semibold text-zinc-600">{group.primaryLabel}</h2>}
       <div className={group.columns === 2 ? "grid grid-cols-1 gap-1 sm:grid-cols-2" : "grid grid-cols-1 gap-1"}>
         {group.items.map((item) => (
           <a

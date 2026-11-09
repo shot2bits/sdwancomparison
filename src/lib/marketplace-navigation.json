@@ -1,0 +1,64 @@
+[
+  {
+    "label": "By Sector",
+    "columns": 2,
+    "items": [
+      {
+        "label": "Manufacturing",
+        "href": "/sd-wan-sase-for-manufacturing/",
+        "desc": "OT segmentation, plant uptime, failover and brownfield estates."
+      },
+      {
+        "label": "Retail",
+        "href": "/sd-wan-sase-for-retail/",
+        "desc": "Store rollout, POS, PCI, guest Wi-Fi and resilient connectivity."
+      },
+      {
+        "label": "Financial services",
+        "href": "/sd-wan-sase-for-financial-services/",
+        "desc": "DORA, auditability, resilience and supplier due diligence."
+      }
+    ]
+  },
+  {
+    "label": "Tools",
+    "columns": 2,
+    "items": [
+      {
+        "label": "Build an SD-WAN or SASE RFP",
+        "href": "/sase-sd-wan-rfp-builder/",
+        "desc": "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation."
+      },
+      {
+        "label": "Provider shortlist",
+        "href": "/sase/shortlist/",
+        "desc": "Research providers openly and approve a request for comparable proposals."
+      },
+      {
+        "label": "Cost and TCO estimator",
+        "href": "/sase/cost-estimator/",
+        "desc": "Model budget and total cost of ownership for SASE and SD-WAN."
+      },
+      {
+        "label": "Request circuit pricing",
+        "href": "/sase/circuit-pricing/",
+        "desc": "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations."
+      },
+      {
+        "label": "SD-WAN vendor filter",
+        "href": "/sd-wan/vendor-filter/",
+        "desc": "Narrow the market by service model, capability and requirement."
+      },
+      {
+        "label": "Question bank",
+        "href": "/sase/rfp-builder/questions/",
+        "desc": "Reusable questions for SASE and SD-WAN procurement."
+      },
+      {
+        "label": "Market Record",
+        "href": "/sase/opportunities/board/",
+        "desc": "Review current network and security opportunities."
+      }
+    ]
+  }
+]

@@ -1,3 +1,4 @@
+import {underlayFooter} from "@/lib/underlay-navigation";
 import { buildStamp } from "@/lib/build-info";
 
 /**
@@ -35,7 +36,7 @@ import { buildStamp } from "@/lib/build-info";
  * duplicating here. /vendor-comparison/ and /about-netify-marketplace/
  * keep their links until their deferred merges actually happen: internal
  * linking before redirects, and no page orphaned by the chrome. */
-const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
+const ORIGINAL_FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Marketplace and procurement",
     links: [
@@ -121,6 +122,8 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     ],
   },
 ];
+
+const FOOTER_COLUMNS=underlayFooter(ORIGINAL_FOOTER_COLUMNS);
 
 export default function CommercialFooter() {
   return (

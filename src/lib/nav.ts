@@ -1,4 +1,6 @@
 import resellerNavigation from "./reseller-navigation.json";
+import underlayNavigation from "./underlay-navigation.json";
+import marketplaceNavigation from "./marketplace-navigation.json";
 
 /**
  * Navigation config — app-style accordion sidebar + minimal top bar (v3).
@@ -54,6 +56,7 @@ export function toAppHref(href: string): string {
 // left the sidebar (vendor profiles, alternatives, BT tools, corporate) live
 // in the footer and research pages, keeping their internal-link equity.
 export const NAV_GROUPS: NavGroup[] = [
+  {label:"Underlay",items:[...underlayNavigation.items,...underlayNavigation.comparisonGroup.items,underlayNavigation.footerLink]},
   {
     label: "Get quotes",
     items: [
@@ -163,51 +166,13 @@ export type MegaItem = { label: string; href: string; desc: string };
 export type MegaGroup = {
   label: string;
   columns: 1 | 2;
+  primaryLabel?: string;
   items: MegaItem[];
   comparisonGroup?: { label: string; items: MegaItem[] };
   footerLink?: { label: string; href: string };
 };
 
-export const MEGA_GROUPS: MegaGroup[] = [
-  {
-    label: "By Sector",
-    columns: 2,
-    items: [
-      { label: "BT for healthcare", href: "/sd-wan-for-healthcare/", desc: "BT SD-WAN and SASE for NHS and healthcare organisations." },
-      { label: "Manufacturing", href: "/sd-wan-sase-for-manufacturing/", desc: "OT segmentation, plant uptime, failover and brownfield estates." },
-      { label: "Retail", href: "/sd-wan-sase-for-retail/", desc: "Store rollout, POS, PCI, guest Wi-Fi and resilient connectivity." },
-      { label: "Financial services", href: "/sd-wan-sase-for-financial-services/", desc: "DORA, auditability, resilience and supplier due diligence." },
-    ],
-  },
-  {
-    label: "Tools",
-    columns: 2,
-    items: [
-      { label: "Build an SD-WAN or SASE RFP", href: "/sase-sd-wan-rfp-builder/", desc: "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation." },
-      { label: "Provider shortlist", href: "/sase/shortlist/", desc: "Research providers openly and approve a request for comparable proposals." },
-      { label: "Cost and TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership for SASE and SD-WAN." },
-      { label: "Request circuit pricing", href: "/sase/circuit-pricing/", desc: "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations." },
-      { label: "SD-WAN vendor filter", href: "/sd-wan/vendor-filter/", desc: "Narrow the market by service model, capability and requirement." },
-      { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "Reusable questions for SASE and SD-WAN procurement." },
-      { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/", desc: "Model users, licences and calling requirements before a formal quote." },
-      { label: "BTnet leased line costs", href: "/bt-leased-line-cost-calculator-tool/", desc: "What a leased line actually costs, by bandwidth, term and install." },
-      { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/", desc: "One Phone is switched off: map your usage to the right replacement and price it." },
-      { label: "Market Record", href: "/sase/opportunities/board/", desc: "Review current network and security opportunities." },
-    ],
-  },
-  {
-    label: "By Provider",
-    columns: 2,
-    items: [
-      { label: "BT Fortinet and Cisco Meraki", href: "/bt-fortinet-meraki/", desc: "Buy BT Managed SD-WAN and SASE through Netify." },
-      { label: "Buy BT Business", href: "/buy-bt/", desc: "Source connectivity, voice, security and managed networks through Netify." },
-      { label: "BT SD-WAN and SASE databank", href: "/bt-sase-sd-wan/", desc: "Query sourced BT evidence and turn requirements into a buying brief." },
-      { label: "Virgin Media Business profile", href: "/marketplace/virgin-media/", desc: "Connectivity, SD-WAN capabilities and buying fit." },
-      { label: "Virgin reseller route", href: "/resell/virgin-media-business/", desc: "Current status and reseller interest registration." },
-    ],
-  },
-  resellerNavigation as MegaGroup,
-];
+export const MEGA_GROUPS = [...marketplaceNavigation, underlayNavigation, resellerNavigation] as MegaGroup[];
 
 /** The board stands alone in the bar: one tap, no dropdown. */
 export const BOARD_LINK: NavLink = { label: "Market Record", href: "/sase/opportunities/board/" };
