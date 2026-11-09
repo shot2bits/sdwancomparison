@@ -1,64 +1,69 @@
 [
   {
-    "label": "By Sector",
+    "label": "SD-WAN & SASE Marketplace",
     "columns": 2,
-    "items": [
-      {
-        "label": "Manufacturing",
-        "href": "/sd-wan-sase-for-manufacturing/",
-        "desc": "OT segmentation, plant uptime, failover and brownfield estates."
-      },
-      {
-        "label": "Retail",
-        "href": "/sd-wan-sase-for-retail/",
-        "desc": "Store rollout, POS, PCI, guest Wi-Fi and resilient connectivity."
-      },
-      {
-        "label": "Financial services",
-        "href": "/sd-wan-sase-for-financial-services/",
-        "desc": "DORA, auditability, resilience and supplier due diligence."
-      }
-    ]
-  },
-  {
-    "label": "Tools",
-    "columns": 2,
+    "primaryLabel": "Get supplier proposals",
     "items": [
       {
         "label": "Build an SD-WAN or SASE RFP",
         "href": "/sase-sd-wan-rfp-builder/",
-        "desc": "SD-WAN and SASE RFP builder: governed supplier questions, validation, anonymous publication and vendor evaluation."
+        "desc": "Create an RFI or detailed RFP, or bring your own. Publish anonymously and choose which suppliers can respond."
       },
       {
-        "label": "Provider shortlist",
+        "label": "Find SD-WAN and SASE providers",
         "href": "/sase/shortlist/",
-        "desc": "Research providers openly and approve a request for comparable proposals."
+        "desc": "Build a shortlist against your network and security requirements."
       },
       {
-        "label": "Cost and TCO estimator",
-        "href": "/sase/cost-estimator/",
-        "desc": "Model budget and total cost of ownership for SASE and SD-WAN."
-      },
-      {
-        "label": "Request circuit pricing",
-        "href": "/sase/circuit-pricing/",
-        "desc": "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations."
-      },
-      {
-        "label": "SD-WAN vendor filter",
-        "href": "/sd-wan/vendor-filter/",
-        "desc": "Narrow the market by service model, capability and requirement."
-      },
-      {
-        "label": "Question bank",
-        "href": "/sase/rfp-builder/questions/",
-        "desc": "Reusable questions for SASE and SD-WAN procurement."
-      },
-      {
-        "label": "Market Record",
+        "label": "View published opportunities",
         "href": "/sase/opportunities/board/",
-        "desc": "Review current network and security opportunities."
+        "desc": "See anonymous project summaries. Suppliers sign in to request to bid."
+      },
+      {
+        "label": "How the marketplace works",
+        "href": "/sase/how-it-works/",
+        "desc": "Understand publishing, supplier requests and buyer-controlled introductions. Responses are not guaranteed."
       }
-    ]
+    ],
+    "comparisonGroup": {
+      "label": "Research and sector guides",
+      "items": [
+        {
+          "label": "Cost and TCO estimator",
+          "href": "/sase/cost-estimator/",
+          "desc": "Model budget and total cost of ownership for SASE and SD-WAN."
+        },
+        {
+          "label": "Request circuit pricing",
+          "href": "/sase/circuit-pricing/",
+          "desc": "Request sourced Ethernet, broadband and remote SIM quotes for UK and international locations."
+        },
+        {
+          "label": "SD-WAN vendor filter",
+          "href": "/sd-wan/vendor-filter/",
+          "desc": "Narrow the market by service model, capability and requirement."
+        },
+        {
+          "label": "Question bank",
+          "href": "/sase/rfp-builder/questions/",
+          "desc": "Reusable questions for SASE and SD-WAN procurement."
+        },
+        {
+          "label": "Manufacturing",
+          "href": "/sd-wan-sase-for-manufacturing/",
+          "desc": "OT segmentation, plant uptime, failover and brownfield estates."
+        },
+        {
+          "label": "Retail",
+          "href": "/sd-wan-sase-for-retail/",
+          "desc": "Store rollout, POS, PCI, guest Wi-Fi and resilient connectivity."
+        },
+        {
+          "label": "Financial services",
+          "href": "/sd-wan-sase-for-financial-services/",
+          "desc": "DORA, auditability, resilience and supplier due diligence."
+        }
+      ]
+    }
   }
 ]

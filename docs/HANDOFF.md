@@ -1,3 +1,15 @@
+## 9 November 2026: marketplace navigation prepared
+
+Owner requests a clear SD-WAN & SASE Marketplace menu separate from Underlay. Replace Tools and By Sector with one explicit marketplace panel: RFI/RFP publication, provider shortlist, published opportunities and service explanation, followed by research and sector guides. Rename neutral Partner programmes to Reseller comparisons so it does not imply a Netify programme. Underlay data, page content, metadata/schema and service flows unchanged. Shared-navigation experiment exception; preserve indexed-copy clocks and all baseline evidence. Final checks and hosted acceptance pending.
+
+## 9 November 2026: Underlay navigation LIVE
+
+Owner requested BT and Virgin/O2 Business navigation grouped under Underlay. SASE PR36/source83c566648f974e169ec1596583711bcbfe96085a, production dpl_F1UgLd3Db9RNWE5wMpbZk2F89GaV; apex PR192/source02872e3fb5bff8235e73bfd325d99b6217bd6a1a, production dpl_FXZhDWR8HKnSKGVmh3NcksdTQ4Dc. Exact-source CI42631385582 and42631388581 passed. Both production releases followed reviewed Git fast-forwards after fetch/rebase; no preview promotion.
+
+Main/mobile menus show Underlay with both brand programme links first; branded services/tools and six-column footers regrouped, neutral SD-WAN/SASE research and programme comparisons separate. All19 destinations resolve, canonical BTnet pricing anchor exists, both footer datasets have one BTnet cost link. Desktop and390px mobile opening, brand links, mobile navigation/close and zero browser errors verified; public SASE-to-Virgin/O2 link reaches the correct page. Article content/product tables, URLs, metadata/schema and service flows unchanged. Public RFP main text matches before/after SHA2566064a0b33c496a1fffbb9ad096c70dfd645fdf79ebe898459eea5d8aba994b13.
+
+Public verification: 2026-11-09T14:14:52.830723+00:00; 2026-11-09 14:14 UTC  passed 42  failed 0. Evidence: research outputs/underlay-navigation-20261109/acceptance.json, live-underlay-menu.png, live-rfp-parity.json and live-smoke.log. Navigation exception recorded in RFP experiment status and active monitoring prompt, with clocks/baseline preserved. No form submission, account change, supplier contact or email. This completion note is local documentation after verification, without another production deploy.
+
 ## 9 November 2026: Underlay navigation prepared
 
 Owner requested all BT and Virgin/O2 Business menu content under Underlay. Main/mobile navigation and six-column footers now group branded partner services, applications and tools there. The Underlay panel starts with both brand programmes; general SD-WAN/SASE research and neutral partner comparisons remain separate. Both apps carry identical marketplace/Underlay/partner menu data. Existing page URLs, article text, metadata, schema, procurement and supplier flows unchanged. Old sample/QA release completion notes retained. This shared-navigation change is an owner-authorised experiment confounder; clocks and baseline preserved.
