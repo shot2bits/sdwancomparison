@@ -28,3 +28,8 @@ assert.equal(SectorComparisonInputSchema.safeParse({...input,challenges:[{id:'re
 const sase=compareSectorProviders({...input,scope:'sase'},[native]);
 assert.equal(sase.providers[0].findings.filter(f=>f.id.startsWith('scope:')).length,6);
 assert.ok(sase.providers[0].questions.every(q=>q.length>10));
+
+const matrix=pack.split('## Comparison matrix')[1].split('## ')[0].trim();
+assert.ok(matrix.split('\n').every(line=>line.startsWith('|')),'matrix must remain a valid contiguous Markdown table for Word export');
+const uncertainNegative=provider('uncertain-negative');uncertainNegative.capabilities[1]={...negative.capabilities[1],confidence:'low'};
+assert.equal(compareSectorProviders(input,[uncertainNegative]).providers[0].group,'confirmation','low confidence cannot establish a mandatory exclusion');
