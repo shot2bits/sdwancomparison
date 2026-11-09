@@ -3,7 +3,7 @@ import { recordPublicationIssue } from '@/lib/publication-issues';
 import { z } from "zod";
 import { sessionFromRequest } from "@/lib/auth";
 import { authenticateMarketplaceProject, withMarketplaceMutation, MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "@/lib/marketplace-project-session";
-import { getProject, saveProject } from "@/lib/rfp-store";
+import { getProject, saveProject, indexRfpForBuyer } from "@/lib/rfp-store";
 import { executePublish } from "@/lib/rfp-publish";
 import { isMarketUnlocked } from "@/lib/market-unlock";
 import { ProjectDetailsSchema } from "@/lib/rfp-types";
@@ -48,6 +48,7 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
       consent: project.consent?.version === input.consent_version ? project.consent : { version: input.consent_version, agreed_at: at, flow: "marketplace_project" },
       consents: priorConsent ? project.consents : [...(project.consents ?? []), { at, action: "marketplace.publish", granted_by: sessionEmail, via: "web", text: input.consent_text }],
     }));
+    await indexRfpForBuyer(sessionEmail, projectId);
     const result = await executePublish(consented, sessionEmail, { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in });
     const unlocked = await isMarketUnlocked(projectId);
     if (!publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })) {

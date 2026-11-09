@@ -2,7 +2,7 @@ import { recordPublicationIssue } from '@/lib/publication-issues';
 import {recordAccess, accessEntry} from "@/lib/auth-access-report";
 import {isAdminEmail} from "@/lib/access-control";
 import { recordPublicationVerification } from "@/lib/publication-verification-events";
-import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
+import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject, indexRfpForBuyer } from "@/lib/rfp-store";
 import { executePublish, SavedUnpublishedError } from "@/lib/rfp-publish";
 import { sessionCookieHeader, notifyNewSignup } from "@/lib/auth";
 import { isMarketUnlocked } from "@/lib/market-unlock";
@@ -64,7 +64,10 @@ export async function POST(req: Request) {
         project.owner_email = payload.email;
         project = await saveProject(project);
       }
-      if (project?.owner_email === payload.email) await recordPublicationVerification(project.id, payload.email, "verification_completed");
+      if (project?.owner_email.toLowerCase() === payload.email.toLowerCase()) {
+        await indexRfpForBuyer(payload.email, project.id);
+        await recordPublicationVerification(project.id, payload.email, "verification_completed");
+      }
       if (
         project &&
         // The workspace asks for a separate final publication click after verification.

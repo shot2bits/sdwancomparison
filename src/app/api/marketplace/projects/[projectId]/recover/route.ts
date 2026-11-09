@@ -1,5 +1,5 @@
 import { sessionFromRequest } from '@/lib/auth';
-import { getProject } from '@/lib/rfp-store';
+import { getProject, indexRfpForBuyer } from '@/lib/rfp-store';
 import { recoverMarketplaceSession } from '@/lib/marketplace-project-session';
 
 export const runtime = 'nodejs';
@@ -12,6 +12,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
   const { projectId } = await params;
   const project = await getProject(projectId);
   if (!project?.owner_email || project.owner_email.toLowerCase() !== session.email.toLowerCase()) return Response.json({ error: 'Project not found.' }, { status: 404, headers });
-  try { return Response.json(await recoverMarketplaceSession(project), { headers }); }
+  try { await indexRfpForBuyer(session.email, projectId); return Response.json(await recoverMarketplaceSession(project), { headers }); }
   catch { return Response.json({ error: 'Your project could not be reopened. Try again; your saved work has not been deleted.' }, { status: 503, headers }); }
 }

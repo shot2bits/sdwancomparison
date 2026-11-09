@@ -231,6 +231,7 @@ await withFakeKv(async (store) => {
       assert.equal(verified.status, 200);
       assert.equal((await verified.json()).role, "buyer");
       buyerCookie = verified.headers.get("set-cookie")!.split(";")[0];
+      assert((await kv.listBuyerRfpIds(buyer.email)).includes(c.project_reference), "Email verification links the anonymous draft to My projects");
       assert.equal(
         (await kv.getProject(c.project_reference))!.status,
         "draft",
@@ -433,7 +434,6 @@ await withFakeKv(async (store) => {
     const bData = await buyerRead.json();
     assert.equal(bData.requests.length, 1);
     assert.equal(bData.requests[0].messages.length, 1);
-    await kv.indexRfpForBuyer("buyer@netify.co.uk", c.project_reference);
     const mineRoute=await import("../src/app/api/rfp/mine/route");
     const mineResponse=await mineRoute.GET(makeRequest("GET","https://studio-test.vercel.app/sase/api/rfp/mine/",{cookie:cookie(buyer)}));
     const accountRows=(await mineResponse.json()).rfps;
