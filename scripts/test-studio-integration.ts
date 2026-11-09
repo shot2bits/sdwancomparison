@@ -433,6 +433,14 @@ await withFakeKv(async (store) => {
     const bData = await buyerRead.json();
     assert.equal(bData.requests.length, 1);
     assert.equal(bData.requests[0].messages.length, 1);
+    await kv.indexRfpForBuyer("buyer@netify.co.uk", c.project_reference);
+    const mineRoute=await import("../src/app/api/rfp/mine/route");
+    const mineResponse=await mineRoute.GET(makeRequest("GET","https://studio-test.vercel.app/sase/api/rfp/mine/",{cookie:cookie(buyer)}));
+    const accountRows=(await mineResponse.json()).rfps;
+    const accountProject=accountRows.find((r:{id:string})=>r.id===c.project_reference);
+    assert.equal(accountProject?.studio,true,"Account links identify the Studio workspace");
+    assert.equal(accountProject?.published,true);
+    assert.equal(accountProject?.responses,1,"Account counts use durable supplier conversations");
     const competitor = await engage.GET(
       makeRequest(
         "GET",
