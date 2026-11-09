@@ -7,7 +7,7 @@ export function isUnderlayLink(link:Link){return brandedPaths.has(link.href) || 
 export function underlayFooter(columns:readonly Column[]):Column[]{
  const moved:Link[]=[],otherPartners:Link[]=[];
  const result=columns.map(c=>{const links=c.links.filter(l=>{if(isUnderlayLink(l)){moved.push(l);return false}return true});if(c.title==='Providers and partners'){otherPartners.push(...links);return {title:'Underlay',links:[]}}return {...c,links}});
- const unique=(links:readonly Link[])=>[...new Map(links.map(l=>[l.href,l])).values()];
+ const unique=(links:readonly Link[])=>[...new Map(links.map(link=>{const l=link.href==="/bt-leased-line-cost-calculator-tool/"?{...link,href:"/resell/internet-solutions-reseller/#pricing-reference"}:link;return [l.href,l] as const})).values()];
  const target=result.find(c=>c.title==='Underlay')!;
  target.links=unique([underlay.items[0],underlay.items[1],...moved,...underlay.items,...underlay.comparisonGroup.items,underlay.footerLink]);
  const providers=result.find(c=>c.title==='Providers and comparisons');if(providers)providers.links=unique([...providers.links,...otherPartners]);
