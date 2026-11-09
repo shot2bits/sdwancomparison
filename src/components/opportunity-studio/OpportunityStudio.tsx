@@ -979,12 +979,12 @@ export default function OpportunityStudio({
                 noticeUrl={project.noticeUrl}
               />
             )}
-          <footer className="ns-workspace-footer">
+          <div className="ns-workspace-footer">
             <span>Free to publish. No commitment to buy.</span>
             <span>
               Suppliers pay Netify when an introduction leads to business.
             </span>
-          </footer>
+          </div>
         </main>
         {!project.recoveryProject && (
           <aside className="ns-context" aria-label="Live requirement preview">
