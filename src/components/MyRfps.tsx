@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type Health = { tone: string; label: string; detail: string };
-type Rfp = { id: string; title: string; status: string; updated: number; phase?: string; responses?: number; health?: Health };
+type Rfp = { studio?: boolean; id: string; title: string; status: string; updated: number; phase?: string; responses?: number; health?: Health };
 
 const STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
@@ -150,8 +150,8 @@ export default function MyRfps() {
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <Link prefetch={false} href={`/rfp-builder/${r.id}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
-                    <Link prefetch={false} href={`/project/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
+                    <Link prefetch={false} href={r.studio?`/studio-preview/?project=${r.id}`:`/rfp-builder/${r.id}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
+                    <Link prefetch={false} href={r.studio?`/studio-preview/?project=${r.id}`:`/project/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
                   </div>
                 </div>
               ))}

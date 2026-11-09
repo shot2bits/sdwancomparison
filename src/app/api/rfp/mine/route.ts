@@ -1,3 +1,5 @@
+import type {StudioBidRequest} from "@/lib/studio-engagement";
+import {kvGetJson} from "@/lib/rfp-store";
 import {isStudioProject} from "@/lib/studio-project";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
@@ -45,7 +47,7 @@ export async function GET(req: Request) {
     const phase = projectPhase(p);
     const [responseCount, approvals] = await Promise.all([
       ["published", "qa", "evaluation", "awarded", "transacting", "complete"].includes(phase)
-        ? listResponses(p.id).then((r) => r.length).catch(() => 0)
+        ? (isStudioProject(p)?kvGetJson<StudioBidRequest[]>(`studio:${p.id}:bid_requests`).then(r=>(r??[]).filter(b=>b.messages.some(m=>m.from==="supplier")).length):listResponses(p.id).then((r) => r.length)).catch(() => 0)
         : Promise.resolve(0),
       phase === "drafted"
         ? listSignoffs(p.id).then((s) => signoffHealthContext(s)).catch(() => [] as Array<{ decision?: "approved" | "declined" }>)

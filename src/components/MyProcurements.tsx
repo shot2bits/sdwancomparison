@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type Health = { tone: string; label: string; detail: string };
-type Rfp = { id: string; title: string; status: string; updated: number; phase?: string; responses?: number; health?: Health };
+type Rfp = { studio?: boolean; id: string; title: string; status: string; updated: number; phase?: string; responses?: number; health?: Health };
 type MineOpp = {
   id: string; title: string; status: string; visibility: string; response_mode: string;
   created: number; updated: number; bid_count: number; comment_count: number;
@@ -74,6 +74,7 @@ function localDrafts(): { id: string; manage_token: string }[] {
 }
 
 type Row = {
+  studio?: boolean;
   key: string;
   phase: string;
   title: string;
@@ -209,6 +210,7 @@ export default function MyProcurements() {
       health: r.health,
       statusLine: noticeEnded ? `${baseLine} · notice ${o.status}` : baseLine,
       projectId: r.id,
+      studio: r.studio,
       oppId: o?.id,
       noticeEnded: Boolean(noticeEnded),
       responses: r.responses,
@@ -265,10 +267,10 @@ export default function MyProcurements() {
                       <Link prefetch={false} href={`/opportunities/${r.oppId}/room`} className={`rounded-full px-3 py-1 text-xs no-underline ${r.projectId ? "border border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]" : "bg-amber-500 font-medium text-zinc-950 hover:bg-amber-400"}`}>Manage room</Link>
                     )}
                     {r.projectId && (
-                      <Link prefetch={false} href={`/rfp-builder/${r.projectId}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
+                      <Link prefetch={false} href={r.studio?`/studio-preview/?project=${r.projectId}`:`/rfp-builder/${r.projectId}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
                     )}
                     {r.projectId && (
-                      <Link prefetch={false} href={`/project/${r.projectId}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
+                      <Link prefetch={false} href={r.studio?`/studio-preview/?project=${r.projectId}`:`/project/${r.projectId}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
                     )}
                   </div>
                 </div>
