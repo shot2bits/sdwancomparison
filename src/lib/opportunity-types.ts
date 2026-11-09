@@ -229,6 +229,8 @@ export type Opportunity = z.infer<typeof OpportunitySchema>;
  * the figures.
  */
 export type PublicOpportunity = {
+  privacy_contract?: "opportunity-studio/1";
+  studio_format?: "rfi"|"rfp";
   id: string;
   created: number;
   updated: number;
@@ -353,7 +355,7 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     // Strict studio allowlist: no arbitrary prose or exact estate sizes, even on historical writes.
     const scope=o.scope.includes('sase')?'SASE':o.scope.includes('sd_wan')?'SD-WAN':'SSE';
     const notice=studioPublicNotice({format:o.studio_format??'rfi',scope,sites:o.sites?String(o.sites):'',users:o.studio_users?String(o.studio_users):'',regions:o.regions.map(r=>STUDIO_REGIONS[['uk','eu','us','apac','me','latam','china'].indexOf(r)]).filter(Boolean),service:o.studio_service??'',timescale:o.timeline_note,requirement:'',questionIds:[]});
-    return {...projection,buyer_org:'',title:notice.title,sites:null,site_band:notice.size,
+    return {...projection,privacy_contract:'opportunity-studio/1',studio_format:o.studio_format??'rfi',buyer_org:'',title:notice.title,sites:null,site_band:notice.size,
       summary:notice.summary,regions:o.regions.filter(r=>['uk','eu','us','apac','me','latam','china'].includes(r)),
       budget_note:'',timeline_note:notice.timing,
       buyer_sector:'not_stated',buyer_size_band:'',users_band:'',remote_users_band:'',cloud_platforms:[],

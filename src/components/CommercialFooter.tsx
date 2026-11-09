@@ -138,7 +138,7 @@ export default function CommercialFooter() {
                     <li key={`${col.title}-${l.href}-${l.label}`}>
                       <a
                         href={l.href}
-                        className="text-zinc-500 transition-colors hover:text-zinc-900"
+                        className="inline-flex min-h-6 items-center py-1 text-zinc-600 transition-colors hover:text-zinc-900"
                         {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                       >
                         {l.label}

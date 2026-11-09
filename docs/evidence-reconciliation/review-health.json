@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-31T21:54:14.573Z",
+  "generated_at": "2026-11-09T12:56:21.007Z",
   "source": "snapshot_fallback",
   "evidence_issues": [],
   "dataset_versions": [],
@@ -604,6 +604,6 @@
   "reconciliation": {
     "version": "provider-reconciliation/2026-10-01",
     "review_due": "2026-12-30T00:00:00Z",
-    "days_remaining": 60
+    "days_remaining": 51
   }
 }

@@ -100,11 +100,8 @@ export default function StudioEngagement({
       >
         View public notice ↗
       </a>
-      <p className="ns-small">
-        Reference: {projectId}. Refresh to check for new supplier requests and
-        proposals.
-      </p>
-      <button onClick={refresh} disabled={busy}>
+      <p className="ns-small">Your project is saved. Use My projects to return to it, or refresh to check for new supplier requests and proposals.</p>
+      <button className="ns-secondary" onClick={refresh} disabled={busy}>
         Refresh requests
       </button>
       {error && (

@@ -33,7 +33,8 @@ export function sectorLabel(o: PublicOpportunity): string {
 }
 
 export function regionLabels(o: PublicOpportunity): string[] {
-  return o.regions.map((r) => labelFor(REGIONS, r));
+  const labels:Record<string,string>={uk:"UK & Ireland",eu:"Europe",us:"North America",apac:"Asia Pacific",me:"Middle East & Africa",latam:"Latin America",china:"Mainland China"};
+  return o.regions.map((r) => labels[r] ?? labelFor(REGIONS, r));
 }
 
 export function buyerLabel(o: PublicOpportunity): string {

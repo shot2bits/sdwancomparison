@@ -118,7 +118,7 @@ export default function QuestionBankPage() {
       {/* Harry Yelland's revised public framework, in full. */}
       <div id="supplier-questions" className="mb-12 scroll-mt-24">
         <h2 className="mb-1 text-2xl font-semibold">The 20-pillar supplier question set</h2>
-        <p className="mb-6 max-w-3xl text-sm leading-6 text-[var(--ink-600)]">120 core questions across 20 procurement pillars. Each question carries a classification tag, the exact wording suppliers must answer, and the evidence, strong-response and red-flag markers evaluators should use.</p>
+        <p className="mb-6 max-w-3xl text-sm leading-6 text-[var(--ink-600)]">Harry Yelland’s public framework contains 120 core questions across 20 procurement pillars. Netify also maintains a separate governed reference bank of 386 questions across 8 procurement areas and 43 extended SASE questions. The builder currently offers the condensed 27-question core for selection. The two collections serve different purposes; they are not interchangeable totals. Each question carries a classification tag, the exact wording suppliers must answer, and the evidence, strong-response and red-flag markers evaluators should use.</p>
         <div className="space-y-5">
           {framework.pillars.map((pillar) => (
             <details key={pillar.id} id={pillar.id.toLowerCase()} className="scroll-mt-24 rounded-xl border border-[var(--ink-200,#e5e5e5)] bg-white" open={pillar.id === "P01"}>

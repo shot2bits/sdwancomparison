@@ -6,7 +6,7 @@ export type StudioDraft = {
   format: StudioFormat; requirement: string; scope: '' | 'SASE' | 'SD-WAN' | 'SSE';
   sites: string; users: string; regions: string[]; timescale: string;
   service: '' | 'Fully managed' | 'Co-managed' | 'Self-managed' | 'Open to advice';
-  questionIds: string[];
+  questionIds: string[]; responseDays?: number;
 };
 export const EMPTY_STUDIO_DRAFT: StudioDraft = {
   format: 'rfi', requirement: '', scope: '', sites: '', users: '', regions: [],
@@ -85,3 +85,5 @@ export function studioDocument(d: StudioDraft, questions: StudioQuestion[]): str
   ].join('\n\n');
 }
 export function studioCanEngage(published: boolean, approvedSupplier: boolean) { return published && approvedSupplier; }
+
+export function studioPreviewDraft(d:StudioDraft):StudioDraft {const inferred=studioSuggestions(d.requirement);return {...d,...Object.fromEntries(Object.entries(inferred).filter(([key])=>{const v=d[key as keyof StudioDraft];return !v || (Array.isArray(v)&&v.length===0)}))};}

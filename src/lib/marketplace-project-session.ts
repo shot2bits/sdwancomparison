@@ -84,7 +84,7 @@ async function preserveWorkspace(existing: Parameters<typeof preserveMarketplace
   }
 }
 
-async function updateMarketplaceProjectUnlocked(projectId: string, token: string, raw: unknown) {
+async function updateMarketplaceProjectUnlocked(projectId: string, token: string, raw: unknown, verifiedOwnerEmail = "") {
   const input = UpdateSchema.parse(raw);
   const session = await authenticateMarketplaceProject(projectId, token);
   const prior = await kvGetJson<{ project_reference: string; revision: number; envelope_revision?: number; saved_at: number; request_hash?:string }>(idempotencyKey(projectId, input.idempotency_key));
@@ -93,7 +93,10 @@ async function updateMarketplaceProjectUnlocked(projectId: string, token: string
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   if (project.marketplace_revision !== input.base_revision) throw new MarketplaceProjectConflict("This project has changed. Reload before editing.");
-  if (project.marketplace_state?.publication_status === "published" || ["published", "qa", "evaluation"].includes(project.status)) throw new MarketplaceProjectConflict("Open the published project to change requirements.");
+  if (project.marketplace_state?.publication_status === "published" || ["published", "qa", "evaluation"].includes(project.status)) {
+    if (!isStudioProject(project) || !verifiedOwnerEmail || verifiedOwnerEmail.toLowerCase() !== project.owner_email.toLowerCase()) throw new MarketplaceProjectConflict("Sign in as this project's owner before editing its published requirement.");
+    if (!input.raw_input.studio_draft || Object.keys(input.raw_input).some(k=>k!=="studio_draft") || Object.keys(input.buyer_patch).some(k=>k!=="organisation")) throw new Error("Edit the reviewed Studio requirement only.");
+  }
   const workspace = await preserveWorkspace(project, input.raw_input);
   const nextRevision = session.revision + 1;
   let next = ProjectDetailsSchema.parse({ ...project, ...workspace, consent: undefined, pending_submit: undefined, buyer: { ...project.buyer, ...input.buyer_patch }, entrance_context: project.entrance_context ? { ...project.entrance_context, buyer_input: { ...project.entrance_context.buyer_input, ...input.buyer_patch }, raw_input: { ...project.entrance_context.raw_input, ...input.raw_input } } : project.entrance_context, sector_profile: input.sector_profile ?? project.sector_profile, marketplace_revision: nextRevision });
@@ -184,8 +187,12 @@ export async function readMarketplaceProject(projectId: string, token: string) {
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   const receipt=await marketplaceReceipt(project);
+  const {getLatestPublishedSnapshot}=await import('./published-snapshot');
+  const publishedSnapshot=isStudioProject(project)?await getLatestPublishedSnapshot(project.id):null;
+  const unpublishedChanges=Boolean(publishedSnapshot && JSON.stringify(publishedSnapshot.frozen_content.studio_requirement)!==JSON.stringify(studioDraftFromProject(project)));
   return {
     studio_draft:isStudioProject(project)?studioDraftFromProject(project):null,
+    unpublished_changes:unpublishedChanges,
     publication_complete:project.marketplace_state?.publication_status==="published" && Boolean(receipt?.published_at&&receipt?.notice_url),
     project_reference: project.id, revision: project.marketplace_revision, envelope_revision: project.envelope_revision,
     buyer_facts: currentBuyerFacts(project), market_unlocked: await isMarketUnlocked(project.id),
@@ -198,8 +205,8 @@ export async function readMarketplaceProject(projectId: string, token: string) {
   };
 }
 
-export async function updateMarketplaceProject(projectId: string, token: string, input: unknown) {
-  return withMarketplaceMutation(projectId, token, () => updateMarketplaceProjectUnlocked(projectId, token, input));
+export async function updateMarketplaceProject(projectId: string, token: string, input: unknown, verifiedOwnerEmail = "") {
+  return withMarketplaceMutation(projectId, token, () => updateMarketplaceProjectUnlocked(projectId, token, input, verifiedOwnerEmail));
 }
 
 export async function previewMarketplaceProject(projectId: string, token: string, input: unknown) {

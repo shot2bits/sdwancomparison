@@ -1,0 +1,4 @@
+Contact: mailto:support@netify.com
+Expires: 2027-11-09T00:00:00Z
+Preferred-Languages: en
+Canonical: https://netify.co.uk/.well-known/security.txt

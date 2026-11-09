@@ -178,7 +178,7 @@ export function CookieBanner() {
               <button
                 type="button"
                 onClick={handleAcceptAll}
-                className="rounded-md border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-amber-600 hover:bg-amber-600"
+                className="rounded-md border border-[#203b33] bg-[#203b33] px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-[#34584b] hover:bg-[#34584b]"
               >
                 Accept all
               </button>
@@ -276,7 +276,7 @@ export function CookieBanner() {
           <button
             type="button"
             onClick={handleSavePreferences}
-            className="rounded-md border border-amber-500 bg-amber-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:border-amber-600 hover:bg-amber-600"
+            className="rounded-md border border-[#203b33] bg-[#203b33] px-5 py-2 text-sm font-semibold text-white transition-colors hover:border-[#34584b] hover:bg-[#34584b]"
           >
             Save preferences
           </button>

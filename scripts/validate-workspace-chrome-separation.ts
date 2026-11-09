@@ -69,13 +69,13 @@ function main() {
   /*    now lives under -- renders MegaNav and the commercial footer.   */
   /* ================================================================ */
   {
-    const marketingLayout = src("src/app/(marketing)/layout.tsx");
+    const marketingLayout = src("src/app/(marketing)/layout.tsx") + src("src/components/opportunity-studio/ProcurementMarketingShell.tsx");
     record(/<MegaNav\s*\/>/.test(marketingLayout), "2: (marketing)/layout.tsx renders <MegaNav />", "");
     record(/<CommercialFooter\s*\/>/.test(marketingLayout), "2: (marketing)/layout.tsx renders <CommercialFooter />", "");
     /* Parity, 19 Aug 2026: both groups now carry identical chrome, so a
        future change to one must be a deliberate divergence, not a
        silent one. */
-    record(/<MegaNav\s*\/>/.test(marketingLayout), "2: (marketing)/layout.tsx renders <MegaNav /> -- the SAME header the workspace group now uses", "");
+    record(/<MegaNav\s*\/>/.test(marketingLayout), "2: ordinary marketing routes retain MegaNav; procurement routes use the shared procurement header", "");
   }
 
   /* ================================================================ */

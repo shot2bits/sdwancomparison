@@ -1,4 +1,6 @@
 "use client";
+import {studioPreviewDraft} from "@/lib/opportunity-studio";
+import ProcurementHeader from "./ProcurementHeader";
 
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import SignIn from "@/components/SignIn";
@@ -190,6 +192,7 @@ export default function OpportunityStudio({
   const categories = [...new Set(questions.map((q) => q.category))];
   const selected = questions.filter((q) => draft.questionIds.includes(q.id));
   const stepIndex = STUDIO_STEPS.findIndex((s) => s.id === step);
+  function editPublished() { setPreviewPublished(false); project.setPrepared(false); setPublicConsent(false); setSupplierConsent(false); go("requirements"); }
   function update<K extends keyof StudioDraft>(key: K, value: StudioDraft[K]) {
     if (previewPublished || project.busy) return;
     project.setPrepared(false);
@@ -302,17 +305,8 @@ export default function OpportunityStudio({
             : "Private drafting. Anonymous publication. Buyer-controlled engagement."}
         </span>
       </div>
-      <header className="ns-header">
-        <a
-          className="ns-logo"
-          href="https://netify.co.uk/"
-          aria-label="Netify home"
-        >
-          netify<span>®</span>
-        </a>
-        <span className="ns-product">Procurement service</span>
-        <nav aria-label="Workspace utilities">
-          <button onClick={restore}>Open draft</button>
+      <ProcurementHeader>
+          <a href="/sase/studio/projects/">My projects</a><button onClick={restore}>Open last saved project</button>
           <details className="ns-tools">
             <summary>More tools</summary>
             <div>
@@ -324,13 +318,12 @@ export default function OpportunityStudio({
               </a>
             </div>
           </details>
-        </nav>
-      </header>
+      </ProcurementHeader>
       {!project.recoveryProject && (
         <nav className="ns-journey" aria-label="Project progress">
           <ol>
             {STUDIO_STEPS.filter(
-              (s) => s.id !== "engage" || previewPublished,
+              (s) => s.id !== "engage" || previewPublished || project.hasLiveVersion,
             ).map((s) => {
               const i = STUDIO_STEPS.findIndex((item) => item.id === s.id);
               const label = {
@@ -347,7 +340,7 @@ export default function OpportunityStudio({
                 >
                   <button
                     disabled={
-                      i > stepIndex || (previewPublished && s.id !== "engage")
+                      s.id==='engage' && project.hasLiveVersion ? false : i > stepIndex || (previewPublished && s.id !== "engage")
                     }
                     onClick={() => go(s.id)}
                     aria-current={s.id === step ? "step" : undefined}
@@ -365,7 +358,7 @@ export default function OpportunityStudio({
           project.recoveryProject ? "ns-layout ns-layout-recovery" : "ns-layout"
         }
       >
-        <section className="ns-main" aria-label="Project workspace">
+        <main className="ns-main" id="main-content" aria-label="Project workspace">
           <div className="ns-workspace-meta">
             <span>
               <Icon name="lock" size={13} />
@@ -373,15 +366,11 @@ export default function OpportunityStudio({
                 ? "Saved project"
                 : previewPublished
                   ? "Published project"
-                  : "Private draft"}
+                  : project.hasLiveVersion ? "Unpublished changes · current notice stays live" : "Private draft"}
             </span>
-            <button
-              onClick={save}
-              disabled={previewPublished || Boolean(project.recoveryProject)}
-            >
-              Save draft
-            </button>
+            {previewPublished ? <button className="ns-edit" onClick={editPublished}>Edit published project</button> : <button onClick={save} disabled={Boolean(project.recoveryProject)}>{project.hasLiveVersion?"Save changes privately":"Save draft"}</button>}
           </div>
+          {project.hasLiveVersion && !previewPublished && <p className="ns-understood">You are editing a published project. The current notice and supplier requirement stay unchanged until you review and publish this revision. Existing supplier conversations are retained; approved suppliers will see the newly published requirement.</p>}
           {project.error && (
             <p className="ns-error" role="alert">
               {project.error}
@@ -483,9 +472,11 @@ export default function OpportunityStudio({
                   rows={5}
                   maxLength={20000}
                   value={draft.requirement}
+                  aria-invalid={attempted && draft.requirement.trim().length<20}
+                  aria-describedby={attempted && draft.requirement.trim().length<20?"studio-brief-error studio-brief-help":"studio-brief-help"}
                   onChange={(e) => update("requirement", e.target.value)}
                   placeholder="We need managed SASE for our offices and remote users. We want to replace our VPN, improve security and hear from suitable providers…"
-                  aria-describedby="studio-brief-help"
+
                 />
                 <div className="ns-composer-tools">
                   <button
@@ -528,7 +519,7 @@ export default function OpportunityStudio({
                 </p>
               )}
               {attempted && draft.requirement.trim().length < 20 && (
-                <p className="ns-error" role="alert">
+                <p id="studio-brief-error" className="ns-error" role="alert">
                   Tell us a little more about your project: at least 20
                   characters.
                 </p>
@@ -778,6 +769,7 @@ export default function OpportunityStudio({
                 <br />
                 Your identity stays separate from your requirement.
               </p>
+              <label className="ns-field">Supplier response window<select value={draft.responseDays??14} onChange={e=>update("responseDays",Number(e.target.value))}>{[7,14,21,30,60].map(days=><option key={days} value={days}>{days} days from this revision</option>)}</select></label>
               <div
                 className="ns-review-tabs"
                 role="group"
@@ -993,7 +985,7 @@ export default function OpportunityStudio({
               Suppliers pay Netify when an introduction leads to business.
             </span>
           </footer>
-        </section>
+        </main>
         {!project.recoveryProject && (
           <aside className="ns-context" aria-label="Live requirement preview">
             <div className="ns-context-heading">
@@ -1008,7 +1000,7 @@ export default function OpportunityStudio({
             </div>
             {step !== "review" && (
               <Notice
-                draft={draft}
+                draft={step==="describe"?studioPreviewDraft(draft):draft}
                 label={
                   previewPublished
                     ? "Published opportunity"

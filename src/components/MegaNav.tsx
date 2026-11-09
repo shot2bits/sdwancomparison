@@ -35,9 +35,9 @@ function ProjectsBadge({ enabled }: { enabled: boolean }) {
     const load = () =>
       fetch("/sase/api/rfp/mine")
         .then((r) => (r.ok ? r.json() : null))
-        .then((d: { rfps?: { status: string }[] } | null) => {
+        .then((d: { rfps?: { status: string; published?:boolean }[] } | null) => {
           if (!d?.rfps) return;
-          const live = d.rfps.filter((r) => r.status === "published").length;
+          const live = d.rfps.filter((r) => r.published ?? ["published","qa","evaluation","awarded","transacting","complete"].includes(r.status)).length;
           setCounts({ drafts: d.rfps.length - live, live });
         })
         .catch(() => {});

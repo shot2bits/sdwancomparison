@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 };
 export default function StudioPreviewPage() {
   return (
-    <main id="main-content">
+    <div id="studio-service">
       <OpportunityStudio
         questions={canonicalQuestions()}
         testEnvironment={process.env.VERCEL_ENV !== "production"}
       />
-    </main>
+    </div>
   );
 }

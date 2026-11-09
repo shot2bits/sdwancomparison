@@ -1,3 +1,4 @@
+import {isStudioProject} from "@/lib/studio-project";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
 import { listBuyerRfpIds, getProjectsBulk, saveProject, listResponses, listSignoffs, kvConfigured } from "@/lib/rfp-store";
@@ -51,7 +52,7 @@ export async function GET(req: Request) {
         : Promise.resolve([] as Array<{ decision?: "approved" | "declined" }>),
     ]);
     const health = projectHealth(p, { responseCount, approvals });
-    return { id: p.id, title: p.title, status: p.status, updated: p.updated, phase, responses: responseCount, health };
+    return { studio:isStudioProject(p), published:p.marketplace_state?.publication_status==="published" || ["published","qa","evaluation","awarded","transacting","complete"].includes(phase), id: p.id, title: p.title, status: p.status, updated: p.updated, phase, responses: responseCount, health };
   }));
 
   return Response.json({ rfps: rfps.sort((a, b) => b.updated - a.updated) }, { headers: cors });

@@ -243,3 +243,7 @@ Owner authorised completing BT only before moving to the next provider. Full ori
 Shortlist BT overview is exactly 200 original words selected as complete source sentences. Other 29 profiles, sourcing actions, provider evidence, ordering, URLs and canonical rules unchanged. Original BT overview provenance is tied to the source document hash. Full profile retains all 2,138 original paragraphs and 22 tables, plus separately identified sourced research in HTML, JSON and Markdown.
 
 Validation/release identities and actual browser results are appended after completion. No claim that all BT evidence gaps have been resolved.
+
+## 9 November 2026 — Harry QA repairs authorised
+
+Owner lifts the freeze for F1–F15 in Harry's supplied QA report, with hosted full buyer/supplier acceptance including editing before live release. Candidate starts from actual production5833c7d on release/2026-09-30. Experiment exception saved without resetting either engine clock. See docs/harry-qa-20261109/REPAIR.md for scoped changes, evidence and gates. Production remains unchanged while testing. Existing untracked assets preserved.

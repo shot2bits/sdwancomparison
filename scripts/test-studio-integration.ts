@@ -527,6 +527,27 @@ await withFakeKv(async (store) => {
     });
     assert(!buyerMcp.result?.isError, JSON.stringify(buyerMcp));
     assert(!JSON.stringify(buyerMcp).includes("PRIVATE_COMPANY"));
+    // Actual owner edit API, frozen public/supplier reads, fresh review and same-notice republish.
+    const currentProject=await kv.getProject(c.project_reference); assert(currentProject);
+    const changedDraft={...draft,users:"750",responseDays:21,requirement:draft.requirement+" Revised migration scope."};
+    const editBody={base_revision:currentProject.marketplace_revision,idempotency_key:randomUUID(),buyer_patch:{},raw_input:{studio_draft:changedDraft}};
+    const changeReq=(who?:string)=>makeRequest("PATCH","https://studio-test.vercel.app/sase/api/marketplace/projects/"+c.project_reference+"/",{headers,cookie:who,body:editBody});
+    assert.equal((await projectRoute.PATCH(changeReq(),ctx)).status,409,"Bearer alone cannot edit a published project");
+    assert.equal((await projectRoute.PATCH(changeReq(cookie(stranger)),ctx)).status,409,"Another buyer cannot edit");
+    const changed=await projectRoute.PATCH(changeReq(cookie(buyer)),ctx); const changedReceipt=await changed.json(); assert.equal(changed.status,200,JSON.stringify(changedReceipt));
+    assert.equal((await projectRoute.PATCH(changeReq(cookie(buyer)),ctx)).status,200,"Save replay is safe");
+    const changedRead=await projectRoute.GET(makeRequest("GET","https://studio-test.vercel.app/project",{headers}),ctx);
+    assert.equal((await changedRead.json()).unpublished_changes,true,"Reload distinguishes an unpublished revision from the live project");
+    assert.equal((await (await engage.GET(makeRequest("GET","https://studio-test.vercel.app/engagement?role=supplier",{cookie:cookie(supplier)}),ctx)).json()).requirement.users,"500","Private edits do not leak to suppliers");
+    const approveRevision=await prepare.POST(makeRequest("POST","https://studio-test.vercel.app/prepare",{headers,cookie:cookie(buyer),body:{base_revision:changedReceipt.revision,...consent}}),ctx);
+    const revisionReady=await approveRevision.json(); assert.equal(approveRevision.status,200,JSON.stringify(revisionReady));
+    const republish=()=>publish.POST(makeRequest("POST","https://studio-test.vercel.app/publish",{headers,cookie:cookie(buyer),body:{base_revision:revisionReady.revision,consent_version:consent.consent_version,consent_text:consent.consent_text}}),ctx);
+    const revised=await republish();const revisedReceipt=await revised.json();assert.equal(revised.status,200,JSON.stringify(revisedReceipt));assert.equal(revisedReceipt.opportunity_id,resultBody.opportunity_id,"Editing does not create a second board listing");
+    const revisedSupplier=await (await engage.GET(makeRequest("GET","https://studio-test.vercel.app/engagement?role=supplier",{cookie:cookie(supplier)}),ctx)).json();
+    assert.equal(revisedSupplier.requirement.users,"750");assert.equal(revisedSupplier.requirement.responseDays,21);assert.equal(revisedSupplier.published_version,2);assert(Math.abs((await kv.getOpportunity(resultBody.opportunity_id))!.response_deadline!-Date.now()-21*86400000)<15000,"New deadline uses the reviewed 21-day choice");assert(revisedSupplier.request.messages.length>0,"Earlier buyer/supplier discussion survives revision");
+    assert.equal((await republish()).status,200,"Republish replay is safe");
+    const history=await (await import("../src/lib/published-snapshot")).getPublishedSnapshotHistory(c.project_reference);assert.equal(history.length,2);assert.equal(history[0].frozen_content.studio_requirement!.users,"500");
+    console.log("PASS",format,"owner-only published edit → private save/reload → immutable old supplier requirement → review → same-notice new revision → retained conversation → replay");
     console.log(
       "PASS",
       format,

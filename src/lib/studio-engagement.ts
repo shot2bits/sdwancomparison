@@ -140,6 +140,8 @@ export async function readSupplierEngagement(
   // Only anonymous requirement fields; never tokens, source ledgers, company or other suppliers.
   return {
     project_id: id,
+    published_version:snapshot.document_version,
+    published_at:snapshot.published_at,
     opportunity: toPublicOpportunity(opp),
     requirement:
       snapshot.frozen_content.studio_requirement ??

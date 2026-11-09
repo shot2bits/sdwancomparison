@@ -18,6 +18,7 @@ type ProjectRead = {
   buyer: { organisation: string };
   market_unlocked: boolean;
   publication_complete: boolean;
+  unpublished_changes?: boolean;
   prepared: boolean;
   publication_receipt: { notice_url: string | null } | null;
   revision: number;
@@ -39,7 +40,7 @@ export async function studioJson<T>(
   return d;
 }
 export function useStudioProject(
-  onLoad: (d: StudioDraft, published: boolean) => void,
+  onLoad: (d: StudioDraft, published: boolean, hasLiveVersion?: boolean) => void,
 ) {
   const [recoveryCopy, setRecoveryCopy] = useState<StudioDraft | null>(null);
   const [recoveryProject, setRecoveryProject] = useState("");
@@ -51,6 +52,7 @@ export function useStudioProject(
     [error, setError] = useState(""),
     [company, setCompany] = useState(""),
     [noticeUrl, setNoticeUrl] = useState("");
+  const [hasLiveVersion,setHasLiveVersion]=useState(false);
   const [authenticated, setAuthenticated] = useState(false),
     [prepared, setPrepared] = useState(false);
   const running = useRef(false),
@@ -108,7 +110,8 @@ export function useStudioProject(
           ? new URL(p.publication_receipt.notice_url).pathname
           : "",
       );
-      loadCallback.current(p.studio_draft, p.publication_complete);
+      loadCallback.current(p.studio_draft, p.publication_complete && !p.unpublished_changes, p.publication_complete);
+      setHasLiveVersion(p.publication_complete);
       return p;
     },
     [remember],
@@ -312,6 +315,7 @@ export function useStudioProject(
     }
   }
   return {
+    hasLiveVersion,
     recoveryCopy,
     restartFromCopy: () => {
       if (!recoveryCopy) return;

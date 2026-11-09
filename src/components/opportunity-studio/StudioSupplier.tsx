@@ -1,4 +1,5 @@
 "use client";
+import ProcurementHeader from "./ProcurementHeader";
 import { useEffect, useRef, useState } from "react";
 import SignIn from "@/components/SignIn";
 import { studioJson } from "./useStudioProject";
@@ -8,7 +9,7 @@ import { canonicalQuestions } from "@/lib/rfp-question-bank";
 type Data = {
   requirement: StudioDraft;
   request: StudioBidRequest | null;
-  status: string;
+  status: string; published_version?:number; published_at?:number;
 };
 export default function StudioSupplier({
   projectId,
@@ -123,15 +124,9 @@ export default function StudioSupplier({
           </span>
         </div>
       )}
-      <header className="ns-header">
-        <a className="ns-logo" href="/sase/opportunities/board/">
-          netify<span>®</span>
-        </a>
-        <span>Supplier workspace</span>
-        <button onClick={refresh}>Refresh project</button>
-      </header>
+      <ProcurementHeader><a href="/sase/opportunities/board/">Opportunity board</a><button onClick={refresh}>Refresh project</button></ProcurementHeader>
       <main className="ns-supplier-page" id="main-content">
-        <p className="ns-eyebrow">OPPORTUNITY · {projectId}</p>
+        <p className="ns-eyebrow">PUBLISHED REQUIREMENT</p>
         <h1>
           {data
             ? `${data.requirement.scope} ${data.requirement.format.toUpperCase()}`
@@ -197,7 +192,7 @@ export default function StudioSupplier({
               stay private.
             </p>
             <section className="ns-supplier-document">
-              <p className="ns-preserve">{data.requirement.requirement}</p>
+              <p className="ns-small">Published revision {data.published_version??1}{data.published_at?` · ${new Date(data.published_at).toLocaleDateString("en-GB")}`:""}. This is the current published requirement; earlier conversation messages are retained.</p><p className="ns-preserve">{data.requirement.requirement}</p>
               <dl>
                 <div>
                   <dt>Sites / users</dt>

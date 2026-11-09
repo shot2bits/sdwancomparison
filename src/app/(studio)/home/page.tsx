@@ -19,12 +19,14 @@ export const metadata: Metadata = {
   description: RFP_META_DESCRIPTION,
   alternates: { canonical: BUILDER_URL },
   robots: { index: true, follow: true },
+  twitter:{card:"summary_large_image",images:["https://netify.co.uk/sase/procurement-share.png"]},
   openGraph: {
     title: "SD-WAN & SASE RFPs: Get Supplier Proposals | Netify",
     description: RFP_META_DESCRIPTION,
     url: BUILDER_URL,
     type: "website",
     locale: "en_GB",
+    images:[{url:"https://netify.co.uk/sase/procurement-share.png",width:1200,height:630,alt:"Netify procurement service"}],
   },
 };
 export default function Page() {
@@ -46,7 +48,7 @@ export default function Page() {
   ];
   return (
     <>
-      <main id="main-content">
+      <div id="studio-service">
         {schemas.map((s, i) => (
           <script
             key={i}
@@ -74,7 +76,7 @@ export default function Page() {
           <RfpPublicContent />
           <RfpCitationEvidence />
         </details>
-      </main>
+      </div>
       <SiteFooter>
         <CommercialFooter />
       </SiteFooter>

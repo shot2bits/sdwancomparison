@@ -68,7 +68,7 @@ export default async function OpportunityNoticePage({ params }: Props) {
       ))}
 
       <nav className="mb-6 text-sm text-[var(--ink-500)]">
-        <Link href="/opportunities/board" className="underline">Opportunity board</Link>
+        <Link prefetch={false} href="/opportunities/board" className="underline">Opportunity board</Link>
         {" / "}
         {isSample ? "Sample notice" : "Notice"}
       </nav>
@@ -89,15 +89,15 @@ export default async function OpportunityNoticePage({ params }: Props) {
                 {isSample ? "This is an example notice." : responseWindow === "deadline_passed" ? "The stated response deadline has passed. Confirm with Netify whether the buyer still wants responses before preparing a proposal." : responseWindow !== "open" ? "This notice is no longer open for responses." : "This opportunity is open for responses."} Sign in as a verified vendor to view the response room. Pricing stays private to the buyer.
               </p>
               {isSample ? (
-                <Link href="/opportunities/board" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
+                <Link prefetch={false} href="/opportunities/board" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
                   See live opportunities
                 </Link>
               ) : (
-                <Link href={`/opportunities/${id}/room`} className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
+                <Link prefetch={false} href={`/opportunities/${id}/room`} className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
                   {responseWindow === "open" ? "Sign in to respond" : "View response room"}
                 </Link>
               )}
-              <Link href="/for-suppliers#register" className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] transition-colors hover:bg-[var(--ink-100,#f5f5f5)]">
+              <Link prefetch={false} href="/for-suppliers#register" className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] transition-colors hover:bg-[var(--ink-100,#f5f5f5)]">
                 Register as a verified vendor
               </Link>
             </div>
@@ -106,13 +106,13 @@ export default async function OpportunityNoticePage({ params }: Props) {
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
               <p className="text-sm font-medium mb-1">Buyers</p>
               <ul className="space-y-2 text-sm">
-                <li><Link href={`/opportunities/new?clone=${id}`} className="underline">Post a similar project</Link> (prefills this opportunity as your template)</li>
+                <li><Link prefetch={false} href={`/opportunities/new?clone=${id}`} className="underline">Post a similar project</Link> (prefills this opportunity as your template)</li>
                 <li><a href={`/sase/rfp-builder/?from_opportunity=${id}`} className="underline">Turn this into a full RFP</a> (carries this opportunity into the builder)</li>
-                <li><Link href="/shortlist" className="underline">Request a Netify shortlist</Link></li>
+                <li><Link prefetch={false} href="/shortlist" className="underline">Request a Netify shortlist</Link></li>
               </ul>
               {!isSample && (
                 <p className="mt-3 text-xs text-[var(--ink-500)]">
-                  Posted this opportunity? <Link href={`/opportunities/${id}/room`} className="underline">Open your response room</Link>.
+                  Posted this opportunity? <Link prefetch={false} href={`/opportunities/${id}/room`} className="underline">Open your response room</Link>.
                 </p>
               )}
             </div>

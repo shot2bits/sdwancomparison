@@ -117,7 +117,7 @@ export default function MyRfps() {
           <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
             Describe your first project
           </a>
-          <Link href="/shortlist" className="text-sm underline text-[var(--ink-700)]">
+          <Link prefetch={false} href="/shortlist" className="text-sm underline text-[var(--ink-700)]">
             Not ready? Compare the market first
           </Link>
         </div>
@@ -150,8 +150,8 @@ export default function MyRfps() {
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <Link href={`/rfp-builder/${r.id}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
-                    <Link href={`/project/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
+                    <Link prefetch={false} href={`/rfp-builder/${r.id}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
+                    <Link prefetch={false} href={`/project/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
                   </div>
                 </div>
               ))}

@@ -190,7 +190,7 @@ export default function RfpPublicContent() {
         The eight areas below are the sections Netify builds and validates. Each row shows the SD-WAN emphasis, the SASE emphasis and the evidence Netify recommends requesting from suppliers; adapt them to your own procurement rules. Reviewed <time dateTime={RFP_CONTENT_REVIEWED}>{RFP_CONTENT_REVIEWED}</time>.
       </p>
 
-      <div className="mt-5 overflow-x-auto rounded-xl border border-[#d6d4d0]">
+      <div tabIndex={0} role="region" aria-label="Scrollable procurement requirements table" className="mt-5 overflow-x-auto rounded-xl border border-[#d6d4d0]">
         <table className="w-full min-w-[720px] border-collapse text-left text-sm">
           <caption className="px-4 py-3 text-left text-xs text-[#66635e]">
             SD-WAN and SASE RFP sections compared: what each area covers and the supplier evidence Netify recommends requesting. Source: Netify governed question bank; content reviewed {RFP_CONTENT_REVIEWED}.

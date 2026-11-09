@@ -64,7 +64,13 @@ const nextConfig: NextConfig = {
       { source: "/alternatives/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       {
         source: "/:path*",
-        headers: [{ key: "X-Robots-Tag", value: process.env.VERCEL_ENV === "production" ? "index, follow" : "noindex, nofollow" }],
+        headers: [
+          {key:"X-Content-Type-Options",value:"nosniff"},
+          {key:"X-Frame-Options",value:"SAMEORIGIN"},
+          {key:"Referrer-Policy",value:"strict-origin-when-cross-origin"},
+          {key:"Permissions-Policy",value:"camera=(), microphone=(), geolocation=()"},
+          {key:"Content-Security-Policy",value:"frame-ancestors 'self'; object-src 'none'; base-uri 'self'"},
+          { key: "X-Robots-Tag", value: process.env.VERCEL_ENV === "production" ? "index, follow" : "noindex, nofollow" }],
       },
     ];
   },

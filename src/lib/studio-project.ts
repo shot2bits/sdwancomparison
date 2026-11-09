@@ -40,6 +40,7 @@ export const StudioDraftSchema = z
       "Self-managed",
       "Open to advice",
     ]),
+    responseDays:z.union([z.literal(7),z.literal(14),z.literal(21),z.literal(30),z.literal(60)]).optional(),
     questionIds: z.array(z.string()).max(100),
   })
   .strict()
@@ -85,6 +86,7 @@ export function studioDraftFromProject(p: ProjectDetails): StudioDraft {
       .map((r) => STUDIO_REGIONS[regionKeys.indexOf(r)])
       .filter(Boolean),
     timescale: typeof raw.timescale === "string" ? raw.timescale : "",
+    ...(typeof raw.studio_response_days==="number"?{responseDays:raw.studio_response_days}:{}),
     questionIds: p.rfp_sections.flatMap((s) => s.questions.map((q) => q.id)),
   };
 }
@@ -135,6 +137,7 @@ export function studioFields(
     studio_contract: STUDIO_CONTRACT,
     document_purpose: d.format,
     studio_users: d.users,
+    ...(d.responseDays!==undefined?{studio_response_days:d.responseDays}:{}),
     timescale: d.timescale,
     studio_review_revision: null,
     studio_review_hash:null,
@@ -159,6 +162,7 @@ export function applyStudioFields(
     buyer: f.buyer,
     rfp_sections: f.rfp_sections,
     title: f.title,
+    ...(typeof f.metadata.studio_response_days==="number"?{response_deadline:Date.now()+f.metadata.studio_response_days*86400000}:{}),
     entrance_context: {
       ...p.entrance_context,
       requirement_text: f.buyer.notes,
