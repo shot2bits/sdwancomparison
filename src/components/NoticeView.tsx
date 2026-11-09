@@ -206,10 +206,10 @@ export default function NoticeView({
 
       <Section title="How suppliers can reply">
         <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
-          <li>
+          {o.privacy_contract === "opportunity-studio/1" ? <li>Approved suppliers can review the requirement and request to bid. The buyer chooses which requests to approve before a private conversation begins.</li> : <li>
             Response mode: <strong>{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</strong>.
-          </li>
-          <li>Browsing this opportunity is open to everyone. Responding requires vendor sign-in with a verified work email.</li>
+          </li>}
+          <li>Browsing this opportunity is open to everyone. Responding requires an approved supplier profile and verified work email.</li>
           <li>Pricing submitted by vendors is private to the buyer and never shown publicly.</li>
           {o.eligibility === "invited" && <li>This opportunity is invite-only: the buyer selects which vendors may respond.</li>}
           {o.evidence_requested.length > 0 && (

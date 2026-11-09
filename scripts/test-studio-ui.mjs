@@ -5,6 +5,8 @@ const dom=new JSDOM('<!doctype html><html><body></body></html>',{url:'https://fi
 for(const k of ['window','document','HTMLElement','Element','MutationObserver','Event','CustomEvent','location','history','localStorage','sessionStorage'])globalThis[k]=dom.window[k];
 Object.defineProperty(globalThis,'navigator',{value:dom.window.navigator,configurable:true});
 globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+globalThis.requestAnimationFrame=callback=>{callback();return 1;};
+dom.window.HTMLElement.prototype.scrollIntoView=function(){};
 const React=await import('react');globalThis.React=React;
 const {render,screen,waitFor,cleanup,fireEvent}=await import('@testing-library/react');
 const {useStudioProject}=await import('../src/components/opportunity-studio/useStudioProject.ts');
@@ -56,5 +58,11 @@ fireEvent.change(screen.getByLabelText('6-digit code from the email'),{target:{v
 fireEvent.click(screen.getByRole('button',{name:'Confirm with code'}));
 await waitFor(()=>assert.ok(screen.getByRole('heading',{name:'Supplier requests and proposals'})));
 assert.match(location.search,/project=rfp_saved/,'verification must reopen the same published project');
+assert.ok(screen.getByRole('button',{name:'Edit published project'}));
+fireEvent.click(screen.getByRole('button',{name:'Edit published project'}));
+await waitFor(()=>assert.ok(screen.getByRole('heading',{name:'Check your project details'})));
+assert.ok(screen.getByRole('button',{name:'Save changes privately'}));
+assert.equal(screen.queryByRole('button',{name:'Edit published project'}),null);
+assert.ok(screen.getByLabelText('Your statement of requirements'));
 cleanup();
 console.log('PASS Studio UI: expired-owner recovery, same-project return after verification, and no invented zero counts on failed supplier-activity reads');
