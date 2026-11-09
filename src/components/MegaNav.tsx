@@ -8,7 +8,7 @@ import ReleaseVersion from "@/components/ReleaseVersion";
  *
  * - Five groups from MEGA_GROUPS (lib/nav.ts), each href verified against
  *   a real route before it entered the data. The board stands alone.
- * - Desktop: hover or click opens a light glass panel; state-driven (not
+ * - Desktop: click or tap opens a stable panel; state-driven (not
  *   CSS-only hover) so keyboard users get the same menu: Enter opens,
  *   Escape closes, aria-expanded and aria-haspopup carried.
  * - Mobile: a right slide-over drawer with accordion sections and generous
@@ -18,8 +18,9 @@ import ReleaseVersion from "@/components/ReleaseVersion";
  *   console link. Amber stays the one action colour.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { lockMenuScroll } from "@/lib/menu-scroll-lock";
 import { usePathname } from "next/navigation";
 import { MEGA_GROUPS, NAV_CTA, SIGN_IN, ACCOUNT, type MegaGroup } from "@/lib/nav";
 
@@ -123,8 +124,7 @@ export default function MegaNav() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hoverOpenedAt = useRef(0);
+  const headerRef = useRef<HTMLElement>(null);
 
   const [session, setSession] = useState<Session | null>(null);
   useEffect(() => {
@@ -140,10 +140,27 @@ export default function MegaNav() {
      sign-in box: an account is produced by publishing (30 Jul 2026). */
   const accountHref = session?.authenticated ? ACCOUNT.href : SIGN_IN.href;
 
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+  useLayoutEffect(() => {
+    if (!mobileOpen) return;
+    return lockMenuScroll();
   }, [mobileOpen]);
+  useEffect(() => {
+    if (!openGroup) return;
+    const outside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !headerRef.current?.contains(event.target)) setOpenGroup(null);
+    };
+    document.addEventListener("pointerdown", outside);
+    return () => document.removeEventListener("pointerdown", outside);
+  }, [openGroup]);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1280px)");
+    const close = () => { setMobileOpen(false); setOpenSection(null); setOpenGroup(null); };
+    media.addEventListener("change", close);
+    return () => media.removeEventListener("change", close);
+  }, []);
+  useEffect(() => {
+    queueMicrotask(() => { setMobileOpen(false); setOpenSection(null); setOpenGroup(null); });
+  }, [pathname]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") { setMobileOpen(false); setOpenGroup(null); }
@@ -153,18 +170,8 @@ export default function MegaNav() {
   }, []);
 
 
-  const hold = (label: string | null, eventTime = 0) => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    if (label === null) {
-      closeTimer.current = setTimeout(() => setOpenGroup(null), 140);
-    } else {
-      hoverOpenedAt.current = eventTime;
-      setOpenGroup(label);
-    }
-  };
-
   return (
-    <header style={{ backgroundColor: "rgba(255,255,255,0.94)" }} className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-all duration-200">
+    <header ref={headerRef} onBlur={event => { if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) setOpenGroup(null); }} className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
       <div className="mx-auto flex h-13 max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
         <a href="https://netify.co.uk/" className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
           <span className="grid h-7 w-7 place-items-center rounded-md bg-zinc-950 text-sm font-bold text-white">N</span>
@@ -173,27 +180,20 @@ export default function MegaNav() {
 
         <ReleaseVersion />
         {/* Desktop groups */}
-        <nav aria-label="Primary" className="hidden min-w-0 items-center gap-1 lg:flex">
+        <nav aria-label="Primary" className="hidden min-w-0 items-center gap-1 xl:flex">
           {MEGA_GROUPS.map((group, gi) => {
             const open = openGroup === group.label;
             return (
               <div
                 key={group.label}
                 className="group relative"
-                onMouseEnter={(event) => hold(group.label, event.timeStamp)}
-                onMouseLeave={() => hold(null)}
               >
                 <button
                   type="button"
                   aria-expanded={open}
                   aria-haspopup="true"
-                  onClick={(event) => {
-                    /* Touch fires mouseenter then click: if the hover just
-                     * opened this panel, the click must not snap it shut. */
-                    if (open && event.timeStamp - hoverOpenedAt.current < 600) return;
-                    setOpenGroup(open ? null : group.label);
-                  }}
-                  className="flex items-center gap-1 rounded-md px-2.5 py-2 text-[13px] font-medium text-zinc-600 transition-colors hover:text-zinc-950"
+                  onClick={() => setOpenGroup(current => current === group.label ? null : group.label)}
+                  className="flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-2 text-[13px] font-medium text-zinc-600 transition-colors hover:text-zinc-950"
                 >
                   {group.label}
                   <Chevron open={open} />
@@ -201,11 +201,11 @@ export default function MegaNav() {
                 <div
                   aria-hidden={!open}
                   inert={!open}
-                  style={{ backgroundColor: "rgba(255,255,255,0.97)" }}
-                  className={`absolute top-full mt-1 max-h-[calc(100dvh-80px)] overflow-y-auto rounded-2xl border border-zinc-200/90 bg-white/95 p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-200 ease-out ${
+                  style={{ backgroundColor: "#ffffff" }}
+                  className={`absolute top-full max-h-[calc(100dvh-80px)] overflow-y-auto rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] ${
                     gi >= 2 ? "right-0" : "left-0"
                   } ${group.columns === 2 ? "w-[540px]" : "w-[360px]"} ${
-                    open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-1 opacity-0"
+                    open ? "block" : "hidden"
                   }`}
                 >
                   <PanelItems group={group} onNavigate={() => setOpenGroup(null)} />
@@ -236,7 +236,7 @@ export default function MegaNav() {
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
-            className="rounded-md border border-zinc-300 bg-transparent px-3 py-1.5 text-sm lg:hidden"
+            className="rounded-md border border-zinc-300 bg-transparent px-3 py-1.5 text-sm xl:hidden"
           >
             Menu
           </button>
@@ -245,7 +245,7 @@ export default function MegaNav() {
 
       {/* Mobile: the right slide-over drawer */}
       {mobileOpen && createPortal(
-        <div className="fixed inset-0 z-[100] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+        <div className="fixed inset-0 z-[100] xl:hidden" role="dialog" aria-modal="true" aria-label="Menu">
           <button type="button" aria-label="Close menu" onClick={() => setMobileOpen(false)} className="absolute inset-0 border-0 bg-zinc-950/20" />
           <div className="absolute inset-y-0 right-0 w-full max-w-sm overflow-y-auto border-l border-zinc-200 bg-white p-6 shadow-2xl" style={{ backgroundColor: "#ffffff" }}>
             <div className="mb-4 flex items-center justify-between">

@@ -1,3 +1,15 @@
+## 9 November 2026: menu stability repair prepared
+
+Owner reports sideways menu glitches and jumps across browsers. Scoped repair: click/tap-only desktop opening, no hover timers or sliding/height animations, compensate actual scrollbar width changes when locking the background, preserve scroll position during focus, keep fixed backdrops within viewport, and use the SASE mobile menu until desktop content fits. Menu labels, links, homepage copy, RFP main text and procurement/supplier logic unchanged. Navigation experiment exception will preserve all clocks and baseline. Focused regression and hosted browser acceptance required before Git release.
+
+## 9 November 2026: explicit marketplace navigation LIVE
+
+Owner requested a clear SD-WAN & SASE Marketplace menu separate from Underlay. SASE PR37/source f92b65510f9374ff5e60480549eb74a7c9e6d215, production dpl_4Z947omN1rPxDaMoK84jPo61C9wm; apex PR193/source e36387d24dc1d87203fd8cb521f96e7606f989dc, production dpl_5y3mUnBS8N1j632Dk2cL6DVX28a4. Exact-source CI42638307256 and42638315385 succeeded. Both production releases were normal reviewed Git fast-forwards after fetch/rebase, with matching hosted previews accepted first.
+
+Main menus now show SD-WAN & SASE Marketplace, Underlay and Reseller comparisons. Buyer actions lead under Get supplier proposals; previous tools and sector guides remain accessible within marketplace. Underlay data and all page bodies, metadata/schema and service flows unchanged. Both desktop and390px preview menus verified; public mobile actual520px has no horizontal overflow. Mobile back/close, public apex-to-shortlist and public SASE-to-canonical-RFP navigation verified. Browser warning/error logs empty. All11marketplace destinations return200. Actual public smoke: 2026-11-09 14:57 UTC passed42 failed0. Public RFP main text retains SHA2566064a0b33c496a1fffbb9ad096c70dfd645fdf79ebe898459eea5d8aba994b13.
+
+Evidence: research outputs/marketplace-navigation-20261109/acceptance.json, live-marketplace-menu.png, live-mobile-menu.png and live-rfp-parity.json. Owner-authorised shared-navigation experiment exception recorded without changing baseline or either clock; automation stays active. No forms submitted, customer changes or notifications. This post-release record is local documentation and does not trigger another release.
+
 ## 9 November 2026: marketplace navigation prepared
 
 Owner requests a clear SD-WAN & SASE Marketplace menu separate from Underlay. Replace Tools and By Sector with one explicit marketplace panel: RFI/RFP publication, provider shortlist, published opportunities and service explanation, followed by research and sector guides. Rename neutral Partner programmes to Reseller comparisons so it does not imply a Netify programme. Underlay data, page content, metadata/schema and service flows unchanged. Shared-navigation experiment exception; preserve indexed-copy clocks and all baseline evidence. Final checks and hosted acceptance pending.
