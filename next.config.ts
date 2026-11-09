@@ -59,6 +59,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "private, no-store" }] },
+      ...["/home/:path*", "/studio-preview/:path*"].map(source=>({source,headers:[{key:"Access-Control-Allow-Origin",value:"https://netify.co.uk"}]})),
       { source: "/shortlist/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       { source: "/best/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       { source: "/alternatives/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
