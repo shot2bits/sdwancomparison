@@ -21,6 +21,7 @@ jobs:
       - name: Menu scroll-lock regression
         run: node --experimental-strip-types --test tests/menu-scroll-lock.test.mjs
       - run: npm run test:rfp-completion
+      - run: node --import tsx scripts/test-sector-comparison.ts
       - run: npm run test:provider-evidence
       - run: sudo apt-get update && sudo apt-get install -y redis-server
       - run: npx tsx scripts/test-request-origin.ts && npx tsx scripts/test-sourcing-routes.ts

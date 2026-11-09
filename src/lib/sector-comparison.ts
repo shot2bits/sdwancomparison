@@ -1,0 +1,73 @@
+import {z} from 'zod';
+import {canonicalSector,challengeFor,SECTOR_CHOICES,CHALLENGES,COMPARISON_REGIONS,SECTOR_COMPARISON_VERSION,sectorFor} from './sector-comparison-config';
+import {evidenceState,type EvidenceRow,normalizedProviderSections} from './provider-evidence-normalization';
+
+export const SectorComparisonInputSchema=z.object({
+ sector:z.enum(SECTOR_CHOICES.map(s=>s.id) as [typeof SECTOR_CHOICES[number]['id'],...typeof SECTOR_CHOICES[number]['id'][]]),
+ sites:z.number().int().min(0).max(100000),users:z.number().int().min(0).max(1000000),
+ regions:z.array(z.enum(COMPARISON_REGIONS.map(r=>r[0]) as [typeof COMPARISON_REGIONS[number][0],...typeof COMPARISON_REGIONS[number][0][]])).min(1).max(7).refine(values=>new Set(values).size===values.length,'Choose each region once.'),
+ service_model:z.enum(['fully_managed','co_managed','self_managed','any']),
+ scope:z.enum(['sdwan','sase','secure_access']),
+ challenges:z.array(z.object({id:z.enum(CHALLENGES.map(c=>c.id) as [typeof CHALLENGES[number]['id'],...typeof CHALLENGES[number]['id'][]]),mandatory:z.boolean()})).max(CHALLENGES.length).refine(values=>new Set(values.map(c=>c.id)).size===values.length,'Choose each challenge once.'),
+ notes:z.string().max(6000).default(''),
+}).strict().refine(value=>value.sites>0||value.users>0,'Enter at least one site or user.');
+export type SectorComparisonInput=z.infer<typeof SectorComparisonInputSchema>;
+export type PublishedProvider={provider:{slug:string;display_name:string;provider_types?:string[]};revision:{id:string;dataset_version:string;reviewed_at:string};products:EvidenceRow[];capabilities:EvidenceRow[];geographies:EvidenceRow[];service_models:EvidenceRow[];sector_evidence:EvidenceRow[];case_studies:EvidenceRow[];evidence_sources:EvidenceRow[]};
+export type RequirementFinding={id:string;label:string;mandatory:boolean;state:'evidenced'|'conditional'|'unconfirmed'|'not_supported';qualification:string;supplier_question:string;source_urls:string[];reviewed_at:string|null};
+export type ProviderCandidate={slug:string;name:string;roles:string[];group:'evidenced'|'confirmation'|'excluded';findings:RequirementFinding[];sector_reference:{label:string;qualification:string;source_urls:string[];reviewed_at:string|null}[];questions:string[];revision_id:string;dataset_version:string;profile_url:string};
+export type SectorComparisonResult={version:string;generated_at:string;input:SectorComparisonInput;providers:ProviderCandidate[];unavailable_providers:string[];source:'published_provider_api';limitations:string[]};
+const positive=new Set(['supported','partially_supported','partner_delivered']);
+function sources(record:PublishedProvider,row:EvidenceRow):string[]{const ids=new Set(row.evidence_source_ids??[]);return [...new Set(record.evidence_sources.filter(s=>ids.has(String(s.id))&&['current','review_due'].includes(String(s.source_status??'current'))&&s.reliability_tier!=='tier_4').map(s=>String(s.url)).filter(url=>/^https?:\/\//.test(url)))];}
+function finding(record:PublishedProvider,id:string,label:string,mandatory:boolean,rows:EvidenceRow[],question:string):RequirementFinding{
+ const reviewed=rows.filter(r=>r.freshness_state==='current'&&sources(record,r).length);
+ const candidates=reviewed.filter(r=>positive.has(evidenceState(r))&&r.confidence!=='low'&&r.confidence!=='unresolved');
+ const row=candidates.find(r=>evidenceState(r)==='supported')??candidates[0];
+ if(row)return {id,label,mandatory,supplier_question:question,state:evidenceState(row)==='supported'?'evidenced':'conditional',qualification:String(row.qualification??'Public-source evidence; confirm the proposed product and service scope.'),source_urls:sources(record,row),reviewed_at:typeof row.verified_date==='string'?row.verified_date:null};
+ const negative=reviewed.find(r=>evidenceState(r)==='not_supported');
+ if(negative)return {id,label,mandatory,supplier_question:question,state:'not_supported',qualification:String(negative.qualification??'A source-linked record states this requirement is unsupported.'),source_urls:sources(record,negative),reviewed_at:typeof negative.verified_date==='string'?negative.verified_date:null};
+ return {id,label,mandatory,supplier_question:question,state:'unconfirmed',qualification:rows.some(r=>r.freshness_state!=='current')?'Evidence review is due. '+question:question,source_urls:[...new Set(rows.flatMap(r=>sources(record,r)))],reviewed_at:null};
+}
+function regionMatch(text:string,key:string){const patterns:Record<string,RegExp>={uk_ireland:/\buk\b|united kingdom|ireland/,europe:/europe|emea/,north_america:/north america|united states|\busa\b|canada/,asia_pacific:/asia.?pacific|\bapac\b/,middle_east_africa:/middle east|africa/,latin_america:/latin america|south america/,china_mainland:/china/};return patterns[key]?.test(text.toLowerCase())??false;}
+export function compareSectorProviders(input:SectorComparisonInput,raw:PublishedProvider[],unavailable:string[]=[],now=new Date().toISOString()):SectorComparisonResult{
+ const parsed=SectorComparisonInputSchema.parse(input);
+ const providers=raw.map(normalizedProviderSections).map(record=>{
+  const findings:RequirementFinding[]=[];
+  const scopeSpecs: {id:string;label:string;codes:string[]}[] = parsed.scope==='sdwan'
+   ?[{id:'sd_wan',label:'SD-WAN',codes:['sd_wan','f09_encrypted_overlay_fabric']}]
+   :parsed.scope==='secure_access'?[{id:'ztna',label:'Zero-trust access (ZTNA)',codes:['ztna']}]
+   :[
+     {id:'sd_wan',label:'SD-WAN',codes:['sd_wan','f09_encrypted_overlay_fabric']},
+     {id:'ztna',label:'Zero-trust access (ZTNA)',codes:['ztna']},
+     {id:'secure_web_gateway',label:'Secure web gateway',codes:['secure_web_gateway']},
+     {id:'firewall_as_a_service',label:'Cloud firewall',codes:['firewall_as_a_service']},
+     {id:'casb',label:'Cloud application controls (CASB)',codes:['casb_api','casb_inline']},
+     {id:'data_loss_prevention',label:'Data loss prevention',codes:['data_loss_prevention']},
+   ];
+  for(const spec of scopeSpecs)findings.push(finding(record,'scope:'+spec.id,spec.label,true,record.capabilities.filter(r=>spec.codes.includes(String(r.capability_code))),'Confirm the proposed '+spec.label+' product, licence and delivery model.'));
+  if(parsed.service_model!=='any')findings.push(finding(record,'service_model','Service model: '+parsed.service_model.replaceAll('_',' '),true,record.service_models.filter(r=>r.model===parsed.service_model||(parsed.service_model==='fully_managed'&&r.model==='carrier_managed')),'Confirm who operates the service, the retained buyer tasks and the delivery partner.'));
+  for(const region of parsed.regions){const rows=record.geographies.filter(r=>regionMatch(String(r.geography??''),region));
+   // Narrative geography entries are surfaced as qualified evidence, never
+   // promoted to service availability from a heading or provider nationality.
+   const geography=finding(record,'region:'+region,COMPARISON_REGIONS.find(r=>r[0]===region)![1]+' delivery',true,rows,'Confirm every required country and site; regional presence does not confirm address-level availability.');
+   if(geography.state==='unconfirmed'){const reference=rows.find(r=>r.freshness_state==='current'&&sources(record,r).length&&/^(confirmed|native|supported|available|yes|strong fit)\b/i.test(String(r.delivery_type??''))&&!/^(?:native,? )?implied/i.test(String(r.delivery_type??'')));if(reference){geography.state='conditional';geography.source_urls=sources(record,reference);geography.reviewed_at=typeof reference.verified_date==='string'?reference.verified_date:null;geography.qualification=String(reference.qualification??reference.delivery_type)+' Required countries, sites and contract scope still need confirmation.';}}
+   findings.push(geography);
+  }
+  for(const selected of parsed.challenges){const c=challengeFor(selected.id)!;findings.push(finding(record,c.id,c.label,selected.mandatory,record.capabilities.filter(r=>(c.codes as readonly string[]).includes(String(r.capability_code))),c.question));}
+  const references=record.sector_evidence.filter(r=>canonicalSector(String(r.sector??''))===parsed.sector&&r.named_evidence&&!/^none|not found|n\/a/i.test(String(r.named_evidence))&&sources(record,r).length).map(r=>({label:String(r.named_evidence),qualification:String(r.qualification??''),source_urls:sources(record,r),reviewed_at:typeof r.verified_date==='string'?r.verified_date:null}));
+  const mandatory=findings.filter(f=>f.mandatory);
+  const group:ProviderCandidate['group']=mandatory.some(f=>f.state==='not_supported')?'excluded':mandatory.every(f=>f.state==='evidenced')?'evidenced':'confirmation';
+  const questions=[...findings.filter(f=>f.state!=='evidenced').map(f=>f.supplier_question),...(!references.length?['Provide relevant '+sectorFor(parsed.sector)!.name.toLowerCase()+' references, including geography, product, delivery partner and scope.']:[]),'Confirm sizing, commercial minimums, implementation capacity and site serviceability for '+parsed.sites+' sites and '+parsed.users+' users.'];
+  return {slug:record.provider.slug,name:record.provider.display_name.split(/, operating|,? Inc\.|,? Ltd\.|,? Corporation/)[0],roles:record.provider.provider_types??[],group,findings,sector_reference:references,questions:[...new Set(questions)],revision_id:record.revision.id,dataset_version:record.revision.dataset_version,profile_url:'https://netify.co.uk/marketplace/'+record.provider.slug+'/'};
+ }).sort((a,b)=>({evidenced:0,confirmation:1,excluded:2}[a.group]-{evidenced:0,confirmation:1,excluded:2}[b.group])||b.findings.filter(f=>f.state==='evidenced').length-a.findings.filter(f=>f.state==='evidenced').length||b.sector_reference.length-a.sector_reference.length||a.name.localeCompare(b.name,'en-GB'));
+ return {version:SECTOR_COMPARISON_VERSION,generated_at:now,input:parsed,providers,unavailable_providers:unavailable,source:'published_provider_api',limitations:['Public-source comparison, not a supplier-confirmed recommendation.','Sector references are evidence of experience, not certification of compliance or project suitability.','Sites, users and project notes are retained in the brief; scale, capacity and commercial fit need supplier confirmation.','Review dates are preserved. No expired review is reactivated.']};
+}
+export function decisionPackMarkdown(result:SectorComparisonResult,slugs:string[]):string{
+ const chosen=result.providers.filter(p=>slugs.includes(p.slug));
+ if(chosen.length<1||chosen.length>4)throw new Error('Choose between one and four providers.');
+ const input=result.input;
+ const cell=(text:string)=>text.replaceAll('|',' / ').replace(/\r?\n/g,' ');
+ const sections=['# SD-WAN and SASE provider decision pack','Sector: '+sectorFor(input.sector)!.name,'Generated: '+result.generated_at,'Method: '+result.version,'## Project brief',`${input.sites} sites; ${input.users} users. Service model: ${input.service_model.replaceAll('_',' ')}. Scope: ${input.scope}.`, 'Regions: '+input.regions.map(r=>COMPARISON_REGIONS.find(x=>x[0]===r)![1]).join(', '),'### Buyer-provided notes\n\n'+(input.notes||'Not supplied.').split(/\r?\n/).map(line=>'> '+line).join('\n'),'## Buyer priorities',...input.challenges.map(c=>`- ${challengeFor(c.id)!.label}: ${c.mandatory?'mandatory':'preferred'}`),'## Comparison matrix','| Requirement | '+chosen.map(p=>cell(p.name)).join(' | ')+' |','| --- | '+chosen.map(()=>'---').join(' | ')+' |',...chosen[0].findings.map(f=>'| '+cell(f.label)+' | '+chosen.map(p=>p.findings.find(x=>x.id===f.id)?.state.replaceAll('_',' ')??'unconfirmed').join(' | ')+' |')];
+ for(const p of chosen){sections.push('## '+p.name,'Evidence group: '+p.group,'Provider record: '+p.profile_url,'Revision: '+p.revision_id+'; dataset: '+p.dataset_version,'### Findings',...p.findings.flatMap(f=>['- '+f.label+' — '+f.state+': '+f.qualification,'  Reviewed: '+(f.reviewed_at??'Not confirmed'),...f.source_urls.map(url=>'  Source: '+url)]),'### Sector references',...(p.sector_reference.length?p.sector_reference.flatMap(r=>['- '+r.label,'  '+r.qualification,...r.source_urls.map(url=>'  Source: '+url)]):['No source-linked sector reference in this record.']),'### Questions for this supplier',...p.questions.map(q=>'- '+q));}
+ const excluded=result.providers.filter(p=>p.group==='excluded');sections.push('## Exclusions against mandatory requirements',...(excluded.length?excluded.map(p=>'- '+p.name+': '+p.findings.filter(f=>f.mandatory&&f.state==='not_supported').map(f=>f.label+' — '+f.qualification).join('; ')):['No source-confirmed mandatory exclusions. This does not establish that every provider can deliver.']),'## Evidence limitations',...result.limitations.map(s=>'- '+s),...(result.unavailable_providers.length?['Unavailable provider records: '+result.unavailable_providers.join(', ')]:[]),'## Next step','Review these questions and the anonymous supplier brief before approving any supplier contact. No supplier has been contacted by generating this pack.');
+ return sections.join('\n\n');
+}

@@ -21,12 +21,14 @@ import { shortlistFaqs } from "@/lib/shortlist-faq";
 import { SITE_URL } from "@/lib/structured-data";
 import { FEATURES } from "@/lib/vendors";
 import SourcingEntrance from "@/components/SourcingEntrance";
+import SectorComparison from "@/components/SectorComparison";
+import "./sector-comparison.css";
 import "./sourcing.css";
 import "./buyer-profiles.css";
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const entity = shortlistEntity((await getLiveShortlistDataset()).vendors);
-  return { title: {absolute: `${entity.h1} | Netify`}, description: `${entity.count_sentence} ${SOURCING_DESCRIPTION}`, alternates: {canonical: `${SITE_URL}/shortlist/`} };
+  return { title: {absolute: "Compare SD-WAN and SASE providers by sector | Netify"}, description: `Compare ${entity.counts.providers} researched SD-WAN and SASE providers against your sector challenges. Download a decision pack with evidence, qualifications and supplier questions.`, alternates: {canonical: `${SITE_URL}/shortlist/`} };
 }
 export default async function ShortlistPage({
   searchParams,
@@ -42,6 +44,12 @@ export default async function ShortlistPage({
   const entity = shortlistEntity(vendors,view === "all" ? undefined : SHORTLIST_VIEWS[view].title);
   const faqs = shortlistFaqs(vendors);
   const schemas = [shortlistSchema(vendors,entity.h1,view === "all" ? "/shortlist/" : `/shortlist/${view}/`)];
+  if(view === "all") return <div>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(shortlistSchema(vendors,"Compare SD-WAN and SASE providers by sector")).replace(/</g,"\\u003c")}}/>
+    <SectorComparison initialSector={typeof query.sector === "string" ? query.sector : typeof query.s === "string" ? query.s : undefined} providerCount={vendors.length}/>
+    <section className="sector-tool sc-section"><h2>Research method and supplier engagement</h2><p className="sc-small">Comparisons use the published provider evidence, preserving source qualifications and review dates. Mandatory requirements, conditional support and unanswered questions remain separate. Provider availability, pricing and your specific design must be confirmed.</p><p><a href="/sase/shortlist/research-methodology/">Read the research methodology</a> · <a href="/sase/shortlist/data.json">Published research dataset</a></p>
+    <details id="supplier-discussions"><summary>Discuss your project with Netify or request supplier proposals</summary><SourcingEntrance showProductFocus buyerProfiles features={FEATURES.map(({id,name})=>({id,name}))} vendors={vendors.map(v=>publicEvidenceOutput({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))} initialSector={typeof query.sector === "string" ? query.sector : undefined}/></details></section>
+  </div>;
   return (
     <main className={`sourcing${buyerProfiles ? " buyer-hub" : ""}`}>
       {schemas.map((schema, i) => (
@@ -64,7 +72,7 @@ export default async function ShortlistPage({
           <a className="sourcing-outline" href="#provider-research">{buyerProfiles ? "Research providers first" : <>Browse all {vendors.length} providers</>}</a>
         </nav>
         {buyerProfiles && <><p className="sourcing-small">A short brief is enough to start. No supplier receives your request until you approve it. Timing and participation need confirmation. Suppliers pay Netify when an introduction leads to business.</p><ProposalExample /></>}
-        {view!=="all" && <p>{SHORTLIST_VIEWS[view].answer}</p>}
+        <p>{SHORTLIST_VIEWS[view].answer}</p>
 
       </header>
       {buyerProfiles ? <div className="sourcing-steps" aria-label="How it works"><div><strong>01 · Compare the options</strong><p>Technology vendors, managed services and carriers.</p></div><div><strong>02 · Understand the service</strong><p>Management responsibilities, deployment and customer examples.</p></div><div><strong>03 · Choose who to approach</strong><p>Request proposals, demos or a pre-sales conversation.</p></div></div> : (<div className="sourcing-steps" aria-label="How it works">
@@ -80,7 +88,7 @@ export default async function ShortlistPage({
         </p>
       )}
       <SourcingEntrance
-        showProductFocus={view === "all"}
+        showProductFocus={buyerProfiles}
         buyerProfiles={buyerProfiles}
         features={FEATURES.map(({ id, name }) => ({ id, name }))}
         vendors={vendors.map(v=>publicEvidenceOutput({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))}
