@@ -166,14 +166,8 @@ export default function OpportunityStudio({
   const [publicConsent, setPublicConsent] = useState(false);
   const [supplierConsent, setSupplierConsent] = useState(false);
   const [previewPublished, setPreviewPublished] = useState(false);
-  const [connector, setConnector] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [mcpEndpoint, setMcpEndpoint] = useState(
-    "https://netify.co.uk/sase/api/mcp/",
-  );
-  const [mcpStatus, setMcpStatus] = useState("Not checked");
   const [storageMessage, setStorageMessage] = useState("");
   const [reviewTab, setReviewTab] = useState<"public" | "supplier">("public");
   const project = useStudioProject((d, published) => {
@@ -192,7 +186,6 @@ export default function OpportunityStudio({
   const started = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
-  const connectorDialog = useRef<HTMLDialogElement>(null);
   const missing = studioReadiness(draft, questions);
   const categories = [...new Set(questions.map((q) => q.category))];
   const selected = questions.filter((q) => draft.questionIds.includes(q.id));
@@ -296,46 +289,6 @@ export default function OpportunityStudio({
       e.target.value = "";
     }
   }
-  async function showConnector() {
-    setConnector(true);
-    connectorDialog.current?.showModal();
-    const endpoint = window.location.origin + "/sase/api/mcp/";
-    setMcpEndpoint(endpoint);
-    setMcpStatus("Checking Netify MCP server…");
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: 1,
-          method: "initialize",
-          params: {
-            protocolVersion: "2025-06-18",
-            capabilities: {},
-            clientInfo: { name: "netify-studio", version: "1" },
-          },
-        }),
-      });
-      const rpc = await res.json();
-      if (!res.ok || !rpc.result?.serverInfo) throw new Error();
-      setMcpStatus(
-        "Netify MCP server reachable. Connect your assistant using the endpoint below.",
-      );
-    } catch {
-      setMcpStatus(
-        "The MCP server could not be reached. Your project is still available in this browser.",
-      );
-    }
-  }
-  async function copyEndpoint() {
-    try {
-      await navigator.clipboard.writeText(mcpEndpoint);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  }
   return (
     <div className="ns-studio">
       <div className="ns-preview-ribbon">
@@ -363,12 +316,9 @@ export default function OpportunityStudio({
           <details className="ns-tools">
             <summary>More tools</summary>
             <div>
-              <button
-                aria-label="Connect your assistant"
-                onClick={showConnector}
-              >
+              <a href="https://netify.co.uk/sase/connector/">
                 Connect your assistant
-              </button>
+              </a>
               <a href={serviceContent ? "#supplier-proposals" : "https://netify.co.uk/sase/how-it-works/"}>
                 How the service works
               </a>
@@ -1091,107 +1041,6 @@ export default function OpportunityStudio({
         )}
       </div>
       {serviceContent}
-      <dialog
-        ref={connectorDialog}
-        className="ns-connector"
-        onClose={() => setConnector(false)}
-        aria-labelledby="studio-connector-title"
-      >
-        <div className="ns-dialog-top">
-          <span className="ns-caption">NETIFY × YOUR ASSISTANT</span>
-          <button
-            aria-label="Close assistant connection"
-            onClick={() => connectorDialog.current?.close()}
-          >
-            <Icon name="close" />
-          </button>
-        </div>
-        <Icon name="link" size={36} />
-        <h2 id="studio-connector-title">Connect your assistant</h2>
-        <p>
-          Use a supported MCP client to research providers, prepare requirements
-          and continue a project. Private actions require the correct project
-          credentials and buyer approval.
-        </p>
-        <div className="ns-connection-status">
-          <i />
-          {mcpStatus}
-        </div>
-        <label className="ns-field">
-          <span>Netify marketplace MCP endpoint</span>
-          <input readOnly value={mcpEndpoint} />
-        </label>
-        <button className="ns-primary" onClick={copyEndpoint}>
-          {copied ? "Endpoint copied" : "Copy endpoint"}
-          <Icon name={copied ? "check" : "link"} size={17} />
-        </button>
-        <p className="ns-small">
-          Copying this address does not connect an assistant or grant access.
-          You can explicitly share the current project with an assistant below;
-          keep its access details private.
-        </p>
-        {project.credential && (
-          <button
-            className="ns-download"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(
-                  JSON.stringify(
-                    {
-                      endpoint: window.location.origin + "/sase/api/mcp/",
-                      project_id: project.credential!.project_reference,
-                      project_session_token:
-                        project.credential!.project_session_token,
-                      revision: project.credential!.revision,
-                      instructions:
-                        "Use read_studio_project to read this project and save_studio_requirement to update it with my explicit consent. Publication requires my final verified approval on the Netify website. This private credential expires after eight hours.",
-                    },
-                    null,
-                    2,
-                  ),
-                );
-                setStorageMessage(
-                  "Private assistant handoff copied. Share only with an assistant you trust.",
-                );
-              } catch {
-                setStorageMessage(
-                  "Clipboard unavailable. Keep working in the browser.",
-                );
-              }
-            }}
-          >
-            Copy private project handoff
-          </button>
-        )}
-        <details>
-          <summary>Current tools and approval boundaries</summary>
-          <dl>
-            <dt>start_project / update_requirements</dt>
-            <dd>
-              Prepare or amend a private project using scoped credentials.
-            </dd>
-            <dt>prepare_publication</dt>
-            <dd>Prepare publication intent. Does not publish.</dd>
-            <dt>publish_opportunity</dt>
-            <dd>
-              Requires a verified buyer session, project ownership, current
-              revision and consent.
-            </dd>
-            <dt>get_project_status</dt>
-            <dd>Read the private project with the required owner access.</dd>
-          </dl>
-        </details>
-        <a
-          href="https://netify.co.uk/sase/connector/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Read the live connector guide ↗
-        </a>
-      </dialog>
-      <span className="ns-sr-only" role="status">
-        {connector ? "Assistant connection information open" : ""}
-      </span>
     </div>
   );
 }
