@@ -15,3 +15,5 @@
 .sc-room .sc-hero h1{font-size:clamp(42px,5.8vw,78px);line-height:1.01}@media(max-width:650px){.sc-room .sc-hero h1{font-size:48px}}
 
 .sc-room-sector-challenges{display:grid;gap:5px;margin-top:12px;padding-top:10px;border-top:1px solid currentColor}.sc-room-sector-challenges-label{font-size:10px;letter-spacing:.7px;text-transform:uppercase}.sc-room-sector-challenges>span:not(.sc-room-sector-challenges-label){font-size:12px;line-height:1.45}
+
+.sc-room-context.sc-section-title{align-items:start;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:45px}.sc-room-sector-explanation{min-width:0;max-width:650px;font-size:16px;line-height:1.75;color:var(--sc-sub)}.sc-room-sector-explanation p+p{margin-top:16px}@media(max-width:760px){.sc-room-context.sc-section-title{grid-template-columns:1fr;gap:22px}.sc-room-sector-explanation{max-width:none}}

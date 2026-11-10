@@ -73,3 +73,13 @@ export const EXTRA_REQUIREMENTS = [
  {id:'servicenow',kind:'integration',label:'ServiceNow integration',codes:['servicenow']},
 ] as const;
 export type ExtraRequirementId=typeof EXTRA_REQUIREMENTS[number]['id'];
+
+/** Visible sector guidance is shared with the public research feed. */
+export const SECTOR_COMPARISON_INTRO = {
+ heading: 'Choose an SD-WAN or SASE provider for your sector.',
+ paragraphs: [
+  'Netify helps organisations compare SD-WAN and SASE technology vendors and managed service providers against the work their network needs to support. A retailer may need payments to keep working during a circuit failure. A manufacturer may need to give a maintenance supplier access to one system without opening the rest of the plant.',
+  'Our provider research covers network and security features, deployment and management options, geographic coverage, integrations, assurance documents and customer case studies. Compare application-aware routing, cellular backup, traffic segmentation, zero trust access, web filtering and data loss prevention. Source links, review dates and qualifications show what the evidence supports and what still needs checking.',
+  'Choose your sector, set your priorities and compare providers against the same requirements. See who operates the service, which capabilities have supporting evidence and what each supplier still needs to confirm. Download a Word decision pack with your shortlist, research and supplier questions. Use the RFP Builder when you are ready to ask suppliers for network designs and bids.',
+ ],
+} as const;
