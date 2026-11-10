@@ -12,7 +12,7 @@ const calls=[];
 globalThis.fetch=async(url,options)=>{calls.push({url,body:JSON.parse(options.body)});return {ok:true,json:async()=>url.includes('/review/')?{engine:'deterministic_fallback',brief:'Full advisory interpretation',updates:[],questions:[],notes:[],read_summary:'Read complete brief.',notice:'Advisory only.'}:compareSectorProviders(JSON.parse(options.body).input,rows)};};
 render(React.createElement(Room,{initialSector:'manufacturing',providerCount:30}));
 assert.equal(screen.getByRole('button',{name:'Continue →'}).disabled,true);
-assert.ok(screen.getByRole('heading',{name:/Compare SD-WAN.*SASE.*For your sector/}));
+assert.ok(screen.getByRole('heading',{name:'The SASE & SD-WAN Vendors and Managed Providers Comparison engine.',exact:true}));
 assert.ok(screen.getByRole('heading',{name:/A comparison you.*can take to a meeting/}));
 assert.ok(screen.getByRole('heading',{name:/From your operating challenges.*supplier-ready brief/}));
 assert.ok(screen.getByRole('heading',{name:/One comparison.*A clearer supplier conversation/}));
