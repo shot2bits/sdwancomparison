@@ -20,7 +20,7 @@ export async function POST(req:Request){
   if(parsed.data.format==='json')return Response.json(result,{headers});
   const selected=[...new Set(parsed.data.providers)];
   if(!selected.length||selected.some(slug=>!result.providers.some(p=>p.slug===slug)))return Response.json({error:'Select one to four available providers before downloading.'},{status:400,headers});
-  if(selected.some(slug=>parsed.data.expected_revisions[slug]!==result.providers.find(p=>p.slug===slug)!.revision_id||parsed.data.expected_fingerprints[slug]!==result.providers.find(p=>p.slug===slug)!.evidence_fingerprint))return Response.json({error:'Provider research has changed. Rebuild your comparison before downloading.'},{status:409,headers});
+  if(selected.some(slug=>parsed.data.expected_revisions[slug]!==result.providers.find(p=>p.slug===slug)!.revision_id||parsed.data.expected_fingerprints[slug]!==result.providers.find(p=>p.slug===slug)!.evidence_fingerprint))return Response.json({error:'Provider research or this tool has changed. Refresh this page and rebuild your comparison before downloading.'},{status:409,headers});
   const markdown=decisionPackMarkdown(result,selected);
   if(parsed.data.format==='markdown')return new Response(markdown,{headers:{...headers,'Content-Type':'text/markdown; charset=utf-8','Content-Disposition':'attachment; filename="netify-sector-decision-pack.md"'}});
   const file=await renderRfpDocx(markdown,'SD-WAN and SASE provider decision pack');
