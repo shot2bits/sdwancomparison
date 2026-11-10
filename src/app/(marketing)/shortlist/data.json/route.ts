@@ -34,7 +34,7 @@ export async function GET(request: Request) {
       title: entity.h1,
       description: entity.count_sentence,
       publisher: "Netify Group Limited",
-      sector_comparison: {version:"sector-comparison/2026-11-09.1", schema_url:`${SITE_URL}/api/sector-comparison/`, method:"POST", description:"Sector requirements, source-linked provider findings and Word or Markdown decision packs. Research does not contact suppliers.", formats:["json","docx","markdown"], export_requires:"Selected provider slugs and expected_revisions from the comparison response"},
+      sector_comparison: {version:"sector-comparison/2026-11-10.2", schema_url:`${SITE_URL}/api/sector-comparison/`, method:"POST", description:"Sector requirements, source-linked provider findings and Word or Markdown decision packs. Research does not contact suppliers.", formats:["json","docx","markdown"], export_requires:"Selected provider slugs and expected_revisions and expected_fingerprints from the comparison response"},
       buyer_profile_version: buyerProfiles.version,
       buyer_profiles_checked_at: buyerProfiles.checked_at,
       buyer_profiles: buyerProfiles.profiles.map(profile => profile.slug === btOverview.provider_slug ? { ...profile, original_overview: btOverview } : profile),

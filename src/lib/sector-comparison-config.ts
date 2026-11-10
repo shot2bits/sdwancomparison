@@ -1,4 +1,4 @@
-export const SECTOR_COMPARISON_VERSION = 'sector-comparison/2026-11-09.1';
+export const SECTOR_COMPARISON_VERSION = 'sector-comparison/2026-11-10.2';
 export const SECTOR_CHOICES = [
   {id:'financial_services',name:'Financial services',description:'Operational resilience, audit evidence and supplier accountability.',challenges:['resilience','audit','exit']},
   {id:'government_public_sector',name:'Government & councils',description:'Data location, procurement routes and accountable delivery.',challenges:['residency','audit','ownership']},
@@ -39,3 +39,37 @@ export function canonicalSector(text:string): ComparisonSector | null {
   const patterns:[ComparisonSector,RegExp][]=[['healthcare',/health|hospital|clinical|pharma/],['financial_services',/financial|bank|insurance/],['retail_ecommerce',/retail|e.?commerce|consumer/],['manufacturing',/manufactur|industrial/],['energy_utilities',/energy|utilit|oil|gas/],['government_public_sector',/government|public sector|council|local authorit/],['education',/education|school|universit/],['transport_logistics',/transport|logistic|shipping|aviation/],['professional_services',/professional|consult|legal|accountan/],['hospitality_leisure',/hospitality|leisure|hotel/]];
   return patterns.find(([,pattern])=>pattern.test(value))?.[0]??null;
 }
+
+export const EXTRA_REQUIREMENTS = [
+ {id:'path_selection',kind:'capability',label:'Dynamic path selection',codes:['dynamic_path_selection']},
+ {id:'qos',kind:'capability',label:'QoS and traffic shaping',codes:['qos_and_traffic_engineering']},
+ {id:'loss_recovery',kind:'capability',label:'Packet-loss remediation',codes:['forward_error_correction_packet_duplication']},
+ {id:'internet_breakout',kind:'capability',label:'Local internet breakout',codes:['local_internet_breakout']},
+ {id:'private_backbone',kind:'capability',label:'Private global backbone',codes:['f21_private_global_backbone']},
+ {id:'satellite',kind:'capability',label:'LEO satellite support',codes:['leo_satellite_support']},
+ {id:'branch_lan',kind:'capability',label:'Branch LAN and Wi-Fi integration',codes:['branch_lan_wlan_integration']},
+ {id:'byod',kind:'capability',label:'Unmanaged and BYOD devices',codes:['unmanaged_byod_devices']},
+ {id:'clientless',kind:'capability',label:'Clientless access',codes:['clientless_access']},
+ {id:'privileged',kind:'capability',label:'Privileged access',codes:['privileged_access']},
+ {id:'dns',kind:'capability',label:'DNS security',codes:['dns_security']},
+ {id:'browser',kind:'capability',label:'Remote browser isolation',codes:['remote_browser_isolation']},
+ {id:'ai_controls',kind:'capability',label:'Controls for generative AI applications',codes:['generative_ai_application_controls','ai_data_protection_controls']},
+ {id:'api',kind:'capability',label:'APIs and automation',codes:['apis_and_automation']},
+ {id:'portal',kind:'capability',label:'Customer portal and access controls',codes:['customer_portal_and_rbac']},
+ {id:'sla_reporting',kind:'capability',label:'SLA reporting',codes:['sla_reporting']},
+ {id:'iso27001',kind:'assurance',label:'ISO 27001 assurance evidence',codes:['iso','27001']},
+ {id:'soc2',kind:'assurance',label:'SOC 2 assurance evidence',codes:['soc','2']},
+ {id:'pci',kind:'assurance',label:'PCI DSS support and scope',codes:['pci']},
+ {id:'gdpr',kind:'assurance',label:'GDPR-related controls and scope',codes:['gdpr']},
+ {id:'dora',kind:'assurance',label:'DORA-related support',codes:['dora']},
+ {id:'nis2',kind:'assurance',label:'NIS2-related support',codes:['nis','2']},
+ {id:'nhs',kind:'assurance',label:'NHS assurance and DSPT evidence',codes:['nhs']},
+ {id:'entra',kind:'integration',label:'Microsoft Entra ID integration',codes:['entra']},
+ {id:'okta',kind:'integration',label:'Okta integration',codes:['okta']},
+ {id:'aws',kind:'integration',label:'AWS integration',codes:['aws']},
+ {id:'azure',kind:'integration',label:'Azure integration',codes:['azure']},
+ {id:'gcp',kind:'integration',label:'Google Cloud integration',codes:['google']},
+ {id:'splunk',kind:'integration',label:'Splunk integration',codes:['splunk']},
+ {id:'servicenow',kind:'integration',label:'ServiceNow integration',codes:['servicenow']},
+] as const;
+export type ExtraRequirementId=typeof EXTRA_REQUIREMENTS[number]['id'];

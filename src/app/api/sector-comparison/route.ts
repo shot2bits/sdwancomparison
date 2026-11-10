@@ -5,9 +5,9 @@ import {requestOriginAllowed} from '@/lib/request-origin';
 import {sourcingPlanAllowed} from '@/lib/sourcing-plan-limit';
 import {renderRfpDocx} from '@/lib/rfp-export-docx';
 export const runtime='nodejs';
-const schema=z.object({input:SectorComparisonInputSchema,format:z.enum(['json','docx','markdown']).default('json'),expected_revisions:z.record(z.string(),z.string()).default({}),providers:z.array(z.string().regex(/^[a-z0-9-]+$/)).max(4).default([])}).strict();
+const schema=z.object({input:SectorComparisonInputSchema,format:z.enum(['json','docx','markdown']).default('json'),expected_fingerprints:z.record(z.string(),z.string()).default({}),expected_revisions:z.record(z.string(),z.string()).default({}),providers:z.array(z.string().regex(/^[a-z0-9-]+$/)).max(4).default([])}).strict();
 const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'};
-export function GET(){return Response.json({version:'sector-comparison/2026-11-09.1',description:'Source-linked sector comparison and downloadable provider decision pack. No supplier contact or publication.',method:'POST',input:SectorComparisonInputSchema.toJSONSchema(),formats:['json','docx','markdown'],max_selected_providers:4,export_requires:'providers and expected_revisions from the comparison response'}, {headers});}
+export function GET(){return Response.json({version:'sector-comparison/2026-11-10.2',description:'Source-linked sector comparison and downloadable provider decision pack. No supplier contact or publication.',method:'POST',input:SectorComparisonInputSchema.toJSONSchema(),formats:['json','docx','markdown'],max_selected_providers:4,provider_research_url:'/sase/api/sector-comparison/providers/{slug}/',primary_source_research:'shortlist-primary-research/2026-11-09.1',export_requires:'providers, expected_revisions and expected_fingerprints from the comparison response'}, {headers});}
 /** No brief persistence, project publication, mail or supplier access. Operational rate limits apply. */
 export async function POST(req:Request){
  if(!requestOriginAllowed(req))return Response.json({error:'Origin not allowed.'},{status:403,headers});
@@ -20,7 +20,7 @@ export async function POST(req:Request){
   if(parsed.data.format==='json')return Response.json(result,{headers});
   const selected=[...new Set(parsed.data.providers)];
   if(!selected.length||selected.some(slug=>!result.providers.some(p=>p.slug===slug)))return Response.json({error:'Select one to four available providers before downloading.'},{status:400,headers});
-  if(selected.some(slug=>parsed.data.expected_revisions[slug]!==result.providers.find(p=>p.slug===slug)!.revision_id))return Response.json({error:'Provider research has changed. Rebuild your comparison before downloading.'},{status:409,headers});
+  if(selected.some(slug=>parsed.data.expected_revisions[slug]!==result.providers.find(p=>p.slug===slug)!.revision_id||parsed.data.expected_fingerprints[slug]!==result.providers.find(p=>p.slug===slug)!.evidence_fingerprint))return Response.json({error:'Provider research has changed. Rebuild your comparison before downloading.'},{status:409,headers});
   const markdown=decisionPackMarkdown(result,selected);
   if(parsed.data.format==='markdown')return new Response(markdown,{headers:{...headers,'Content-Type':'text/markdown; charset=utf-8','Content-Disposition':'attachment; filename="netify-sector-decision-pack.md"'}});
   const file=await renderRfpDocx(markdown,'SD-WAN and SASE provider decision pack');

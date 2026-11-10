@@ -1,0 +1,207 @@
+{
+  "version": "shortlist-primary-research/2026-11-09.1",
+  "verified_at": "2026-11-09",
+  "method": "Primary-source checks by Codex. Offering-level evidence only; does not confirm a buyer design, site availability, SLA or contract. Original imported claims and dates remain unchanged.",
+  "providers": {
+    "bt": {
+      "models": [
+        "fully_managed"
+      ],
+      "summary": "BT describes an end-to-end managed SASE service. Contractual service boundaries, policy tasks, licences and service levels must be agreed for the proposed package.",
+      "source_urls": [
+        "https://business.bt.com/networks-digital-services/sd-wan-sase/sase/",
+        "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "gtt": {
+      "models": [
+        "fully_managed",
+        "co_managed"
+      ],
+      "summary": "GTT Secure Connect offers end-to-end management and retained co-management rights. Confirm the chosen service level and responsibility matrix.",
+      "source_urls": [
+        "https://www.gtt.net/services/secure-networking/sase-secure-connect/"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "opensystems": {
+      "models": [
+        "fully_managed"
+      ],
+      "summary": "Open Systems describes lifecycle management of underlay and overlay, with a 24/7 operations centre. Obtain the scope, exclusions and location-specific service levels.",
+      "source_urls": [
+        "https://open-systems.com/solutions/switch-managed/"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "expereo": {
+      "models": [
+        "fully_managed"
+      ],
+      "summary": "Expereo describes running day-to-day SASE operations. Confirm the platform, security tasks, change process and service boundary in the order.",
+      "source_urls": [
+        "https://www.expereo.com/solutions/use-case/connectivity/sase/"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "lumen": {
+      "models": [
+        "fully_managed",
+        "self_managed"
+      ],
+      "summary": "Lumen offers Pro-Managed and Self-Managed SASE. The service guide excludes SOC services from Pro-Managed: the buyer retains security-event monitoring and response unless separately purchased.",
+      "source_urls": [
+        "https://www.lumen.com/en-us/services/sase.html",
+        "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "att": {
+      "models": [
+        "fully_managed"
+      ],
+      "summary": "AT&T describes fully managed SASE offerings with Cisco and Palo Alto Networks. Select the actual platform and verify retained buyer responsibilities.",
+      "source_urls": [
+        "https://www.business.att.com/products/sase.html"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "comcastbusiness": {
+      "models": [
+        "fully_managed",
+        "co_managed"
+      ],
+      "summary": "Comcast Business explicitly offers fully managed and co-managed SASE. Features and availability vary; agree the exact security policy and operating responsibilities.",
+      "source_urls": [
+        "https://business.comcast.com/enterprise/products-services/secure-networking/sase"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "ntt-data": {
+      "models": [
+        "fully_managed"
+      ],
+      "summary": "NTT DATA describes fully managed Prisma SASE with lifecycle operation and 24/7 support. This is evidence for that named service, not every NTT offering.",
+      "source_urls": [
+        "https://www.nttdata.com/global/en/-/media/nttdataglobal/1_files/services/network-services/managed-network-services/asset-10-mcn--prisma-sase-brochure.pdf?rev=7a363e8db468486b8b9720c79c8e1c7c"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "colt": {
+      "models": [
+        "self_managed"
+      ],
+      "summary": "Colt\u2019s Versa SASE service guide specifies self-management, customer policy changes and separate SD-WAN/SASE portals. A managed SD-WAN contract must not be assumed to include managed SASE operations.",
+      "source_urls": [
+        "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "verizon": {
+      "models": [
+        "fully_managed"
+      ],
+      "summary": "Verizon SASE Management operates specified customer-licensed security-cloud instances. Package scope varies; the customer creates policy rules and must meet the service-guide prerequisites.",
+      "source_urls": [
+        "https://www.verizon.com/business/products/security/network-cloud-security/sase-management/",
+        "https://www.verizon.com/business/service_guide/reg/verizon-sase-management-2024FEB01-mk.pdf"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "aryaka": {
+      "models": [
+        "fully_managed",
+        "co_managed",
+        "self_managed"
+      ],
+      "summary": "Aryaka publishes managed, co-managed and self-managed delivery choices. Confirm the selected mode, security tasks, site/user licences and separately ordered last-mile services.",
+      "source_urls": [
+        "https://www.aryaka.com/why-unified-sase/",
+        "https://www.aryaka.com/services-terms/"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "virgin-media-o2": {
+      "models": [],
+      "summary": "Virgin Media O2 Business describes SASE design, deployment and managed services across named vendor platforms. The precise operating model and retained buyer tasks remain unconfirmed.",
+      "source_urls": [
+        "https://www.virginmediao2business.co.uk/insights/what-is-sase/"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "orangebusiness": {
+      "models": [],
+      "summary": "Orange publishes several SD-WAN platforms and customer portal controls. A specific platform and SASE service boundary must be selected before management responsibilities can be confirmed.",
+      "source_urls": [
+        "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international",
+        "https://www.orange-business.com/en/service-publication"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    },
+    "velocloud": {
+      "models": [],
+      "summary": "Broadcom\u2019s lifecycle notice states that VeloCloud SASE secured by Symantec SKUs stopped sale on 1 July 2025 and Arista support ended on 30 June 2026. This specific retired bundle is excluded from current products; it does not mean all VeloCloud SD-WAN is retired. Confirm the current SSE integration and support path.",
+      "source_urls": [
+        "https://knowledge.broadcom.com/external/article/452890/end-of-life-of-velocloud-sase-secured-by.html"
+      ],
+      "scopes": [
+        "sdwan",
+        "sase",
+        "secure_access"
+      ]
+    }
+  }
+}
