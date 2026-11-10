@@ -21,6 +21,12 @@ jobs:
       - name: Menu scroll-lock regression
         run: node --experimental-strip-types --test tests/menu-scroll-lock.test.mjs
       - run: npm run test:rfp-completion
+      - name: Shortlist React and evidence quality
+        run: >-
+          npx eslint src/components/SectorComparison.tsx src/components/ProviderResearchDetails.tsx
+          src/lib/sector-comparison.ts src/lib/sector-comparison-source.ts
+          src/lib/provider-evidence-normalization.ts src/lib/shortlist-primary-research.ts
+          src/app/api/sector-comparison/route.ts "src/app/api/sector-comparison/providers/[slug]/route.ts"
       - run: node --import tsx scripts/test-sector-comparison.ts
       - run: npm run test:provider-evidence
       - run: sudo apt-get update && sudo apt-get install -y redis-server

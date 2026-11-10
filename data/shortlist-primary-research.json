@@ -66,7 +66,7 @@
         "fully_managed",
         "self_managed"
       ],
-      "summary": "Lumen offers Pro-Managed and Self-Managed SASE. The service guide excludes SOC services from Pro-Managed: the buyer retains security-event monitoring and response unless separately purchased.",
+      "summary": "Lumen currently lists Fortinet and Versa SASE options, with Pro-Managed and Self-Managed delivery. The service guide excludes SOC services from Pro-Managed: the buyer retains security-event monitoring and response unless separately purchased. Confirm the platform and responsibility matrix; the original Versa-focused profile does not describe the full current portfolio.",
       "source_urls": [
         "https://www.lumen.com/en-us/services/sase.html",
         "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide"
