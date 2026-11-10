@@ -1,4 +1,4 @@
-export const SECTOR_COMPARISON_VERSION = 'sector-comparison/2026-11-10.4';
+export const SECTOR_COMPARISON_VERSION = 'sector-comparison/2026-11-10.5';
 export const SECTOR_CHOICES = [
   {id:'financial_services',name:'Financial services',description:'Operational resilience, audit evidence and supplier accountability.',challenges:['resilience','audit','exit']},
   {id:'government_public_sector',name:'Government & councils',description:'Data location, procurement routes and accountable delivery.',challenges:['residency','audit','ownership']},
@@ -13,7 +13,7 @@ export const SECTOR_CHOICES = [
 ] as const;
 export type ComparisonSector = typeof SECTOR_CHOICES[number]['id'];
 export const CHALLENGES = [
-  {id:'resilience',label:'Keep critical services available',codes:['high_availability'],question:'Describe appliance and circuit failure scenarios, recovery targets, test evidence and exclusions.'},
+  {id:'resilience',label:'Test appliance and circuit recovery',codes:['high_availability'],question:'Describe appliance and circuit failure scenarios, recovery targets, test evidence and exclusions.'},
   {id:'audit',label:'Retain usable audit and incident evidence',codes:['raw_log_access'],question:'Specify audit exports, retention, change records, access controls and responsibilities.'},
   {id:'exit',label:'Plan an orderly contract exit',codes:[],question:'Provide exit assistance, configuration and data portability, transition charges and service continuity terms.'},
   {id:'residency',label:'Control where traffic and data are handled',codes:[],question:'Identify inspection, logging, backup and support-access locations for each required country.'},
@@ -73,3 +73,15 @@ export const EXTRA_REQUIREMENTS = [
  {id:'servicenow',kind:'integration',label:'ServiceNow integration',codes:['servicenow']},
 ] as const;
 export type ExtraRequirementId=typeof EXTRA_REQUIREMENTS[number]['id'];
+
+/** Visible sector guidance is shared with the public research feed. */
+export const SECTOR_COMPARISON_INTRO = {
+ heading: 'Choose an SD-WAN or SASE provider for your sector.',
+ paragraphs: [
+  'Netify helps organisations compare SD-WAN and SASE technology vendors and managed service providers against the work their network needs to support. A retailer may need payments to keep working during a circuit failure. A manufacturer may need to give a maintenance supplier access to one system without opening the rest of the plant.',
+  'Our provider research covers network and security features, deployment and management options, geographic coverage, integrations, assurance documents and customer case studies. Compare application-aware routing, cellular backup, traffic segmentation, zero trust access, web filtering and data loss prevention. Source links, review dates and qualifications show what the evidence supports and what still needs checking. AI helps structure your project notes; evidence checks use the published provider records. A listed feature does not prove that your application or proposed design will work.',
+  'Choose your sector and a buying problem, such as payment failover, clinical migration or access for a machine supplier. Compare providers against the same requirements. See who operates the service, which capabilities have supporting evidence and what each supplier still needs to confirm. Download a Word decision pack with your shortlist, research and supplier questions. Use the RFP Builder when you are ready to ask suppliers for network designs and bids.',
+ ],
+} as const;
+
+export const SECTOR_COMPARISON_EXAMPLE = 'For example, a retailer can compare evidence for cellular backup and payment-network separation, then take a payment failover test into the decision pack. The supplier still has to prove transaction behaviour, site coverage, licences and responsibilities for the proposed service.';

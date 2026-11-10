@@ -1,3 +1,5 @@
+import {SECTOR_PRIORITIES,SCENARIO_CHECKS} from '@/lib/sector-decision-config';
+import {SECTOR_COMPARISON_INTRO,SECTOR_COMPARISON_VERSION,SECTOR_COMPARISON_EXAMPLE} from "@/lib/sector-comparison-config";
 import btOverview from "@data/bt-harry-overview.json";
 import buyerProfiles from "@data/shortlist-buyer-profiles.json";
 import { approvedEditorialReview } from "@/lib/provider-editorial-review";
@@ -34,7 +36,7 @@ export async function GET(request: Request) {
       title: entity.h1,
       description: entity.count_sentence,
       publisher: "Netify Group Limited",
-      sector_comparison: {version:"sector-comparison/2026-11-10.4", schema_url:`${SITE_URL}/api/sector-comparison/`, method:"POST", description:"Sector requirements, source-linked provider findings, Harry’s original buyer checklists with dated fact checks, and Word or Markdown decision packs. Research does not contact suppliers.", formats:["json","docx","markdown","research_json","research_archive"], full_research_appendix:"Set include_full_research to true for every published field and row of selected providers", brief_review_url:`${SITE_URL}/api/sector-comparison/review/`, export_requires:"Selected provider slugs and expected_revisions and expected_fingerprints from the comparison response"},
+      sector_comparison: {introduction:SECTOR_COMPARISON_INTRO,worked_example:SECTOR_COMPARISON_EXAMPLE,version:SECTOR_COMPARISON_VERSION,sector_scenarios:SECTOR_PRIORITIES,scenario_capability_checks:SCENARIO_CHECKS,scenario_method:"Buying scenarios add advisory evidence checks and a supplier acceptance test. Feature evidence does not prove buyer-specific design or application suitability.", schema_url:`${SITE_URL}/api/sector-comparison/`, method:"POST", description:"Sector requirements, source-linked provider findings, Harry’s original buyer checklists with dated fact checks, and Word or Markdown decision packs. Research does not contact suppliers.", formats:["json","docx","markdown","research_json","research_archive"], full_research_appendix:"Set include_full_research to true for every published field and row of selected providers", brief_review_url:`${SITE_URL}/api/sector-comparison/review/`, export_requires:"Selected provider slugs and expected_revisions and expected_fingerprints from the comparison response"},
       buyer_profile_version: buyerProfiles.version,
       buyer_profiles_checked_at: buyerProfiles.checked_at,
       buyer_profiles: buyerProfiles.profiles.map(profile => profile.slug === btOverview.provider_slug ? { ...profile, original_overview: btOverview } : profile),

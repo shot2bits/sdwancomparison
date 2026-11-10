@@ -29,6 +29,7 @@ jobs:
           src/app/api/sector-comparison/route.ts src/app/api/sector-comparison/review/route.ts "src/app/api/sector-comparison/providers/[slug]/route.ts"
       - run: node --import tsx scripts/test-sector-comparison.ts
       - run: node --import tsx scripts/test-sector-decision-room.ts
+      - run: node --import tsx scripts/test-sector-scenarios.ts
       - run: node --import tsx scripts/test-sector-decision-room-ui.mjs
       - run: node --import tsx scripts/test-sector-review-contract.ts
       - run: npm run test:provider-evidence
