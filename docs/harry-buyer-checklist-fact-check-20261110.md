@@ -302,11 +302,11 @@ Source: https://coltonlinehelp.colt.net/sd-wan-external-service-guide/
 
 ## orangebusiness
 
-### supplier_confirmation: Segment results and service investment
+### qualified: Segment results and service investment
 
-Orange’s H1 2026 results distinguish revenue from EBITDAaL. The original 3.1% decline must be tied to the exact reported metric and period, not used as a general claim of declining service quality. Ask for the proposed platform, current assurance scope and relevant customer references.
+Orange’s H1 2026 release confirms a 3.1% Orange Business revenue decline; EBITDAaL declined 6.4%, a different metric. The original number is supported when labelled as revenue, not a general decline in service quality. Ask for the proposed platform, current assurance scope and comparable customer references.
 
-Source: https://www.orange.com/en/press-release/orange-achieved-record-first-half-growth-both-in-revenue-35-and-ebitdaal-50-486307
+Source: https://newsroom.orange.com/orange-achieved-record-first-half-growth-both-in-revenue-35-and-ebitdaal-50/?lang=eng
 
 Source: https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international
 
