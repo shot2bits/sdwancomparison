@@ -1,4 +1,4 @@
-export const SECTOR_COMPARISON_VERSION = 'sector-comparison/2026-11-10.2';
+export const SECTOR_COMPARISON_VERSION = 'sector-comparison/2026-11-10.3';
 export const SECTOR_CHOICES = [
   {id:'financial_services',name:'Financial services',description:'Operational resilience, audit evidence and supplier accountability.',challenges:['resilience','audit','exit']},
   {id:'government_public_sector',name:'Government & councils',description:'Data location, procurement routes and accountable delivery.',challenges:['residency','audit','ownership']},

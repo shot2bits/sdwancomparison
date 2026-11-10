@@ -24,7 +24,7 @@ jobs:
       - name: Shortlist React and evidence quality
         run: >-
           npx eslint src/components/SectorComparison.tsx src/components/ProviderResearchDetails.tsx
-          src/lib/sector-comparison.ts src/lib/sector-comparison-source.ts
+          src/lib/sector-comparison.ts src/lib/original-buyer-checklist.ts src/lib/sector-comparison-source.ts
           src/lib/provider-evidence-normalization.ts src/lib/shortlist-primary-research.ts
           src/app/api/sector-comparison/route.ts "src/app/api/sector-comparison/providers/[slug]/route.ts"
       - run: node --import tsx scripts/test-sector-comparison.ts

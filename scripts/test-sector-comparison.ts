@@ -51,3 +51,26 @@ const expiredAssurance={...rich,compliance:[{...supported,framework:'ISO 27001',
 const oldEvidence=provider('old-evidence');oldEvidence.capabilities[1]={...oldEvidence.capabilities[1],freshness_state:'expired',qualification:longText};const oldFinding=compareSectorProviders(input,[oldEvidence]).providers[0].findings.find(f=>f.id==='resilience')!;assert.ok(oldFinding.qualification.includes(longText),'unconfirmed findings preserve the full original qualification');assert.equal(oldFinding.reviewed_at,'2026-07-22');
 const hardFirst=provider('hard-first');hardFirst.geographies=[];hardFirst.capabilities=[{...supported,capability_code:'sd_wan'}];const preferencesFirst=provider('preferences-first');preferencesFirst.geographies=[];preferencesFirst.service_models=[];preferencesFirst.capabilities=[{...supported,capability_code:'sd_wan'},{...supported,capability_code:'high_availability'},{...supported,capability_code:'ztna'},{...supported,capability_code:'zero_touch_provisioning'}];const ordered=compareSectorProviders({...input,challenges:[{id:'resilience',mandatory:false},{id:'remote',mandatory:false},{id:'rollout',mandatory:false}]},[preferencesFirst,hardFirst]);assert.equal(ordered.providers[0].slug,'hard-first','optional features must not outrank better evidence for mandatory requirements');
 assert.equal(SectorComparisonInputSchema.safeParse({...input,notes:'A'.repeat(6001)}).success,false,'oversized notes are rejected, not silently shortened');assert.equal(SectorComparisonInputSchema.parse({...input,notes:'A'.repeat(6000)}).notes.length,6000);
+// Publishing permission covers the original checklists; preserve every paragraph
+// and keep current corrections separate from imported evidence and rankings.
+const {default:originalChecklists}=await import('../data/original-buyer-checklists.json');
+const {originalBuyerChecklist}=await import('../src/lib/original-buyer-checklist');
+assert.equal(Object.keys(originalChecklists.providers).length,30);
+for(const [slug,originalChecklist] of Object.entries(originalChecklists.providers)){
+ const checklist=originalBuyerChecklist(slug,originalChecklists.source_dataset)!;
+ assert.ok(checklist);assert.deepEqual(checklist.paragraphs,originalChecklist.paragraphs);
+ assert.equal(checklist.source_document_sha256.length,64);
+ assert.ok(checklist.fact_check.notes.length>0);assert.equal(checklist.fact_check.checked_at,'2026-11-10');
+ assert.ok(checklist.fact_check.notes.every(n=>n.source_urls.length&&n.source_urls.every(u=>u.startsWith('https://'))));
+ const fixture=provider(slug);fixture.revision.dataset_version=originalChecklists.source_dataset;
+ const comparison=compareSectorProviders(input,[fixture]);const pack=decisionPackMarkdown(comparison,[slug]);
+ for(const paragraph of originalChecklist.paragraphs)assert.ok(pack.includes(paragraph),'Complete original wording in '+slug+' pack');
+ for(const note of checklist.fact_check.notes){assert.ok(pack.includes(note.finding));for(const url of note.source_urls)assert.ok(pack.includes(url));}
+ const withoutEdition=structuredClone(fixture);withoutEdition.revision.dataset_version='newer-edition';
+ assert.equal(compareSectorProviders(input,[withoutEdition]).providers[0].buyer_checklist,null,'Do not attach original wording to a different dataset');
+ assert.equal(comparison.providers[0].group,compareSectorProviders(input,[withoutEdition]).providers[0].group,'Checklists never upgrade evidence grades');
+ assert.notEqual(comparison.providers[0].evidence_fingerprint,compareSectorProviders(input,[withoutEdition]).providers[0].evidence_fingerprint);
+}
+assert.equal(originalBuyerChecklist('unknown',originalChecklists.source_dataset),null);
+assert.ok(originalBuyerChecklist('gtt',originalChecklists.source_dataset)!.fact_check.notes.some(n=>n.status==='corrected'&&n.finding.includes('privately held')));
+console.log('PASS all 30 original checklists, 38 source-linked checks, complete exports, correct source edition and unchanged evidence grades.');
