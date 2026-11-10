@@ -23,11 +23,13 @@ jobs:
       - run: npm run test:rfp-completion
       - name: Shortlist React and evidence quality
         run: >-
-          npx eslint src/components/SectorComparison.tsx src/components/ProviderResearchDetails.tsx
-          src/lib/sector-comparison.ts src/lib/original-buyer-checklist.ts src/lib/sector-comparison-source.ts
+          npx eslint src/components/SectorComparison.tsx src/components/ProviderResearchDetails.tsx src/components/SectorProviderEvidence.tsx
+          src/lib/sector-comparison.ts src/lib/sector-decision-config.ts src/lib/sector-decision-review.ts src/lib/sector-research-appendix.ts src/lib/original-buyer-checklist.ts src/lib/sector-comparison-source.ts
           src/lib/provider-evidence-normalization.ts src/lib/shortlist-primary-research.ts
-          src/app/api/sector-comparison/route.ts "src/app/api/sector-comparison/providers/[slug]/route.ts"
+          src/app/api/sector-comparison/route.ts src/app/api/sector-comparison/review/route.ts "src/app/api/sector-comparison/providers/[slug]/route.ts"
       - run: node --import tsx scripts/test-sector-comparison.ts
+      - run: node --import tsx scripts/test-sector-decision-room.ts
+      - run: node --import tsx scripts/test-sector-decision-room-ui.mjs
       - run: npm run test:provider-evidence
       - run: sudo apt-get update && sudo apt-get install -y redis-server
       - run: npx tsx scripts/test-request-origin.ts && npx tsx scripts/test-sourcing-routes.ts

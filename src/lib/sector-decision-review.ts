@@ -1,0 +1,5 @@
+import type {SectorComparisonInput} from './sector-comparison';
+import {sectorFor,challengeFor,EXTRA_REQUIREMENTS} from './sector-comparison-config';
+import {priorityFor,DESIGN_APPROACHES} from './sector-decision-config';
+/** Keep all buyer text. The existing workspace ingest service reads paragraph chunks. */
+export function decisionReviewText(input:SectorComparisonInput){return ['Sector: '+sectorFor(input.sector)!.name,'Sites: '+input.sites+'; users: '+input.users,'Regions: '+input.regions.join(', '),'Scope: '+input.scope,'Operating model: '+input.service_model,'Business outcome: '+(priorityFor(input.sector,input.decision?.priority_id)?.title??'Not decided'),'Approach to investigate: '+(DESIGN_APPROACHES.find(d=>d.id===input.decision?.approach)?.title??'Not decided'),'Existing estate: '+(input.decision?.estate??'Not decided'),'Priorities: '+input.challenges.map(c=>challengeFor(c.id)!.label+(c.mandatory?' (mandatory)':' (preferred)')).join('; '),'Additional requirements: '+input.requirements.map(r=>EXTRA_REQUIREMENTS.find(e=>e.id===r.id)!.label).join('; '),'Buyer-provided project notes:',input.notes].join('\n\n');}
