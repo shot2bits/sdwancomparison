@@ -20,7 +20,7 @@ const curlCall=`curl -s ${ENDPOINT} \\\n  -H 'content-type: application/json' \\
 function Code({children}:{children:string}){return <pre className="mt-2 overflow-x-auto rounded-md bg-slate-900 p-3 text-xs text-slate-100"><code>{children}</code></pre>;}
 
 export default function ConnectPage(){
- const open=MARKET_TOOLS.filter(t=>t.access==='open');
+ const open=MARKET_TOOLS.filter(t=>t.access==='open'&&!['request_access_code','verify_access_code'].includes(t.name));
  const buyer=MARKET_TOOLS.filter(t=>t.access==='buyer');
  const schemas=[getOrganizationSchema(),getBreadcrumbSchema('Connect your AI agent','/connect')];
  return (
@@ -65,9 +65,15 @@ export default function ConnectPage(){
    </section>
 
    {buyer.length>0&&<section className="mt-10" aria-labelledby="buyer-tools">
-    <h2 id="buyer-tools" className="mb-3 text-xl font-semibold">Tools that need a verified work email</h2>
+    <h2 id="buyer-tools" className="mb-3 text-xl font-semibold">Publishing and downloads need a verified work email</h2>
+    <ol className="mb-4 list-decimal space-y-1 pl-5 text-sm text-slate-700">
+     <li>Your assistant calls <code>request_access_code</code> with your work email. Free email such as Gmail, Outlook, Hotmail, Yahoo and iCloud is rejected.</li>
+     <li>You read the six digit code from your inbox and give it to your assistant, which calls <code>verify_access_code</code> and receives an <code>access_token</code>.</li>
+     <li>Your assistant passes the token to the tools below, either as the <code>access_token</code> argument or as an <code>Authorization: Bearer</code> header.</li>
+    </ol>
+    <p className="mb-3 text-sm text-slate-700">Publishing needs <code>consent_publish: true</code>. The public board is anonymised: names, emails, phone numbers, company and exact addresses are removed. Set <code>show_company</code> only if you want your company shown. The formatted RFP and the recommended-providers pack download together as one bundle after you publish. Humans can use the same rules at <a className="underline" href="/sase/rfp-bundle/">the RFP bundle page</a>.</p>
     <ul className="space-y-2 text-sm">
-     {buyer.map(t=><li key={t.name}><code className="font-semibold">{t.name}</code>: {t.description}</li>)}
+     {MARKET_TOOLS.filter(t=>t.access==='buyer'||['request_access_code','verify_access_code'].includes(t.name)).map(t=><li key={t.name}><code className="font-semibold">{t.name}</code>: {t.description}</li>)}
     </ul>
    </section>}
 

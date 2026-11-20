@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build:botid-client": "esbuild scripts/botid/marketplace-botid-entry.mjs --bundle --format=esm --minify --define:process.env.NODE_ENV='\"production\"' --legal-comments=none --outfile=preview/context-space/vendor/botid.js",
+    "test:agent-access": "tsx scripts/test-agent-anonymise.ts && tsx scripts/test-agent-access.ts",
     "test:market-tools": "tsx --import ./scripts/core-test-bootstrap.mjs scripts/test-market-tools.ts",
     "test:send-guard": "tsx --import ./scripts/core-test-bootstrap.mjs scripts/test-send-guard.ts",
     "test:buyer-recovery": "tsx scripts/test-buyer-recovery.ts && tsx scripts/test-notice-recovery.ts",

@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {anonymiseText} from '../src/lib/agent-anonymise';
+const ctx={company:'Acme Retail Holdings Limited',email:'jane.smith@acmeretail.co.uk'};
+const raw='Contact Jane Smith at jane.smith@acmeretail.co.uk or +44 7700 900123 / 020 7946 0958. Acme Retail Holdings Limited has HQ at 14 High Street, Leeds LS1 4AB and a depot at Unit 7 Kings Road. See https://acmeretail.co.uk/it and www.acmeretail.co.uk. Acme runs 40 shops.';
+const out=anonymiseText(raw,ctx);
+for(const bad of ['Jane','Smith','jane.smith','@','7700','7946','Acme','acmeretail','High Street','LS1','Kings Road','https','www.'])assert.ok(!out.toLowerCase().includes(bad.toLowerCase()),`leaked ${bad}: ${out}`);
+assert.ok(out.includes('40 shops'),out);
+const kept=anonymiseText('Acme Retail Holdings Limited needs SD-WAN. Email jane.smith@acmeretail.co.uk, 020 7946 0958, 14 High Street.',{...ctx,keepCompany:true});
+assert.ok(kept.includes('Acme Retail Holdings Limited'));for(const bad of ['@','7946','High Street','jane'])assert.ok(!kept.toLowerCase().includes(bad),kept);
+console.log('anonymise ok');console.log(out);
