@@ -17,6 +17,6 @@ const AI_CRAWLERS = [
 
 export async function GET() {
   const blocks = AI_CRAWLERS.map((ua) => `User-Agent: ${ua}\nAllow: /`).join("\n\n");
-  const body = `User-Agent: *\nAllow: /\n\n${blocks}\n\nHost: ${SITE_URL}\nSitemap: ${SITE_URL}/sitemap.xml\n`;
+  const body = `User-Agent: *\nAllow: /\n\n${blocks}\n\nHost: ${SITE_URL}\nSitemap: ${SITE_URL}/sitemap.xml\nSitemap: ${SITE_URL}/research/sitemap.xml\n`;
   return new Response(body, { headers: { "content-type": "text/plain" } });
 }
