@@ -6,6 +6,7 @@ import { MCP_COST_TOOL_DEFINITIONS } from "@/lib/mcp-cost-tools";
 import { SECURITY_TOOL_DEFINITIONS_ALL } from "@/lib/mcp-security-tools";
 import { WORKSPACE_TOOL_DEFINITIONS } from "@/lib/mcp-workspace-tools";
 import { SITE_URL } from "@/lib/structured-data";
+import { MARKET_TOOL_VIEWS } from "@/lib/marketplace-tools";
 
 const allTools = [
   ...SOURCING_TOOL_DEFINITIONS,
@@ -38,6 +39,18 @@ export async function GET() {
           responses: { "200": { description: "MCP JSON-RPC response." } },
         },
       },
+      ...Object.fromEntries(MARKET_TOOL_VIEWS.map((tool) => [
+        `/api/agent-tools/${tool.name}/`,
+        {
+          post: {
+            operationId: tool.name,
+            summary: tool.title,
+            description: tool.description,
+            requestBody: { required: true, content: { "application/json": { schema: tool.inputSchema } } },
+            responses: { "200": { description: "Tool result as JSON." }, "422": { description: "Invalid arguments." } },
+          },
+        },
+      ])),
       ...Object.fromEntries(MCP_TOOL_DEFINITIONS.map((tool) => [
         `/api/openapi/${tool.name}/`,
         {
@@ -56,7 +69,7 @@ export async function GET() {
     "x-mcp": {
       endpoint: `${SITE_URL}/api/mcp/`,
       protocol: "JSON-RPC 2.0 over Streamable HTTP",
-      tools: allTools.map((tool) => ({
+      tools: [...MARKET_TOOL_VIEWS, ...allTools].map((tool) => ({
         name: tool.name,
         description: tool.description,
         inputSchema: tool.inputSchema,
