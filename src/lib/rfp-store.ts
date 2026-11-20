@@ -604,11 +604,29 @@ export async function listOpportunities(): Promise<Opportunity[]> {
   return out.sort((a, b) => b.created - a.created);
 }
 
+/** Historic test notices to keep off the public board. Withdrawn as closed and unlisted, not deleted, so they can be restored. */
+export const HISTORIC_TEST_NOTICE_IDS=['opp_msndrw2vk9vzva','opp_msn15a6fl8ezdv'] as const;
+export async function unlistHistoricTestNotices(): Promise<{id:string;status:string}[]>{
+  if(!kvConfigured())return [];
+  const changed:{id:string;status:string}[]=[];
+  for(const id of HISTORIC_TEST_NOTICE_IDS){
+    const o=await getOpportunity(id);
+    if(!o)continue;
+    if(o.visibility==='unlisted'&&o.status==='closed')continue;
+    const now=Date.now();
+    await saveOpportunity({...o,status:'closed',visibility:'unlisted',closed_at:o.closed_at??now,updated:now});
+    changed.push({id,status:'closed'});
+  }
+  return changed;
+}
+
 /**
  * Public board: open, public opportunities as stripped projections (no pricing
  * amounts, no tokens), newest activity first. Safe for crawlers and agents.
+ * Also withdraws the historic test notices below, once, if they are still listed.
  */
 export async function listPublicOpportunities(): Promise<PublicOpportunity[]> {
+  await unlistHistoricTestNotices();
   const all = await listOpportunities();
   return all
     .filter((o) => o.status === "open" && o.visibility === "public")

@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {requestOriginAllowed} from '@/lib/request-origin';
-import {SEND_PROTECTION} from '@/lib/send-guard';
+import {SEND_PROTECTION,sendGuardRuntime} from '@/lib/send-guard';
 import {requestAccessCode,PublishArgs} from '@/lib/agent-access';
 import {MarketError} from '@/lib/marketplace-mcp';
 
@@ -21,6 +21,9 @@ export async function POST(req:Request){
  if(p.data.honeypot?.trim())return Response.json({error:'request_rejected'},{status:400,headers});
  if(!Number.isFinite(p.data.elapsed_ms)||(p.data.elapsed_ms as number)<SEND_PROTECTION.minFormMs)return Response.json({error:'review_before_sending',message:'Please read the details, then try again.'},{status:400,headers});
  if(p.data.show_company&&!(p.data.company_name??'').trim())return Response.json({error:'company_name_required',message:'Enter the company name to show, or untick the option.'},{status:422,headers});
+ const verdict=await sendGuardRuntime.bot();
+ if(verdict==='unavailable')return Response.json({error:'bot_check_unavailable',message:'We could not confirm this request came from a browser. Please reload the page and try again.'},{status:503,headers});
+ if(verdict==='bot')return Response.json({error:'bot_check_failed',message:'We could not confirm this request came from a browser. Please reload the page and try again.'},{status:403,headers});
  const ip=(req.headers.get('x-forwarded-for')??'not-provided').split(',')[0].trim();
  try{
   const {email,honeypot:_h,elapsed_ms:_e,...pending}=p.data;void _h;void _e;
