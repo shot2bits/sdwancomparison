@@ -2,7 +2,9 @@ import {listPublicOutcomes} from "@/lib/market-outcomes";
 import MarketOutcomeView from "@/components/MarketOutcomeView";
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/structured-data";
 export const metadata = {
+  alternates: { canonical: `${SITE_URL}/opportunities/board/` },
   title: "Netify Market Record",
   description:
     "Consented sourcing outcomes, supplier responses and recorded delivery times.",

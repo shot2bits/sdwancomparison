@@ -1,3 +1,4 @@
+import { vendorProfileHref, VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -99,7 +100,7 @@ export default async function ComparePage({ params }: Props) {
       <nav aria-label="Breadcrumb" className="text-sm mb-6 text-[var(--ink-500)]">
         <Link href="/" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">Netify</Link>
         <span className="mx-2 text-[var(--ink-300)]">/</span>
-        <Link href="/vendors/" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">Vendors</Link>
+        <Link href={VENDOR_INDEX_URL} className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">Vendors</Link>
         <span className="mx-2 text-[var(--ink-300)]">/</span>
         <span className="text-[var(--ink-700)]">{c.names[a]} vs {c.names[b]}</span>
       </nav>
@@ -128,7 +129,7 @@ export default async function ComparePage({ params }: Props) {
           <div key={s} className="border border-[var(--ink-300,#ccc)] rounded-sm p-5">
             <p className="eyebrow mb-1">Source evidence</p>
             <h2 className="text-lg mb-1">
-              <Link href={`/vendors/${s}/`} className="no-underline hover:text-[var(--accent)]">{c.names[s]}</Link>
+              <Link href={vendorProfileHref(s)} className="no-underline hover:text-[var(--accent)]">{c.names[s]}</Link>
             </h2>
             <p className="text-sm text-[var(--ink-500)] mb-2">
               {c.meta[s].category} · Typical deployment: {c.meta[s].deployment_speed}

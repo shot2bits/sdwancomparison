@@ -1,3 +1,4 @@
+import { VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { COMPARE_PAIRS } from "@/lib/compare-pages";
@@ -68,7 +69,7 @@ export default function CompareIndexPage() {
             Build your own shortlist →
           </Link>
           <Link
-            href="/vendors/"
+            href={VENDOR_INDEX_URL}
             className="inline-flex items-center gap-2 px-4 py-2.5 border border-[var(--ink-300,#d4d4d8)] text-[var(--ink-900)] font-medium no-underline hover:bg-[var(--ink-100,#f4f4f5)] transition-colors rounded-full text-sm"
           >
             Browse all vendors

@@ -1,4 +1,5 @@
 "use client";
+import { vendorProfileHref } from "@/lib/vendor-links";
 import ShortlistProviderDirectory from "./ShortlistProviderDirectory";
 import { parseResearchHandoff } from "@/lib/research-handoff";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
@@ -584,7 +585,7 @@ export default function SourcingEntrance({
           {vendors.filter(v => directoryView === "all" || (directoryView === "matches" ? matches?.includes(v.slug) : selected[v.slug]?.length)).map((v) => (
             <article key={v.slug} id={`provider-${v.slug}`} tabIndex={-1}>
               <div className="sourcing-card-top">
-                <h3><a href={`/sase/vendors/${v.slug}/`}>{v.name}</a></h3>
+                <h3><a href={vendorProfileHref(v.slug)}>{v.name}</a></h3>
                 <span>
                   {v.response_panel ? "Response panel" : "Research only"}
                 </span>
@@ -657,7 +658,7 @@ export default function SourcingEntrance({
                   .
                 </p>
               )}
-              <a href={`/sase/vendors/${v.slug}/`}>
+              <a href={vendorProfileHref(v.slug)}>
                 Provider profile and evidence
               </a>
               {v.response_panel && (
@@ -704,7 +705,7 @@ export default function SourcingEntrance({
                 {vendors.map((v) => (
                   <tr key={v.slug}>
                     <th>
-                      <a href={`/sase/vendors/${v.slug}/`}>
+                      <a href={vendorProfileHref(v.slug)}>
                         {v.name}
                       </a>
                     </th>

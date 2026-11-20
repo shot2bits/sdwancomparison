@@ -1,5 +1,6 @@
 "use client";
 
+import { vendorProfileHref } from "@/lib/vendor-links";
 import { useMemo, useState } from "react";
 import {
   BAND,
@@ -268,7 +269,7 @@ export default function ConstellationScene({
             const anchorEnd = b.x > SCENE.w - 120 ? true : b.x < 120 ? false : Math.cos((b.angle * Math.PI) / 180) < 0;
             const name = v.name.length > 22 ? `${v.name.slice(0, 21)}…` : v.name;
             return (
-              <a key={b.slug} href={`/sase/vendors/${b.slug}/`} aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}>
+              <a key={b.slug} href={vendorProfileHref(b.slug)} aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}>
                 <g
                   className="cs-move cs-emerge"
                   style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: faded ? 0.16 : dim ? 0.38 : 1 }}

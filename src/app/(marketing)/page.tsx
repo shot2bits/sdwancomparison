@@ -1,3 +1,4 @@
+import { VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import { SOURCING_DESCRIPTION, SOURCING_TITLE } from "@/lib/sourcing-contract";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -61,7 +62,7 @@ export default function Home() {
         </p>
         <div className="flex items-center gap-6 flex-wrap mt-5 text-sm">
           <Link href="/how-it-works/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">How it works</Link>
-          <Link href="/vendors/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">Browse {totalCount} vendors</Link>
+          <Link href={VENDOR_INDEX_URL} className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">Browse {totalCount} vendors</Link>
           <Link href="/for-suppliers/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">For vendors and providers</Link>
           <a href="https://netify.co.uk" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">About Netify ↗</a>
         </div>
@@ -154,7 +155,7 @@ export default function Home() {
       <section className="text-center py-12">
         <h2 className="mb-6">Start with the full vendor list.</h2>
         <Link
-          href="/vendors/"
+          href={VENDOR_INDEX_URL}
           className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full"
         >
           Browse all {totalCount} vendors
