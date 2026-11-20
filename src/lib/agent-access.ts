@@ -106,6 +106,7 @@ export const PublishArgs=z.object({
 }).strict();
 export type PublishInput=z.infer<typeof PublishArgs>;
 
+/** Free text cannot be anonymised reliably (names, short company names), so it is only published on the show-company opt-in and always stays in the private bundle. */
 export function publicFacts(r:RfpInput,identity:{email:string},opts:{show_company:boolean;company_name?:string}){
  const ctx={company:opts.company_name,email:identity.email,keepCompany:opts.show_company};
  const labels=r.products.map(label),sector=SECTOR_LABEL[r.organisation.sector]??'';
@@ -114,9 +115,9 @@ export function publicFacts(r:RfpInput,identity:{email:string},opts:{show_compan
  if(r.operating_model==='fully_managed'||r.operating_model==='co_managed')scope.push('managed_service');
  const regions=[...new Set((r.sites.regions??[]).map(x=>REGION_KEYS.find(([re])=>re.test(x.replace(/_/g,' ')))?.[1]).filter(Boolean) as string[])];
  const title=`${labels.slice(0,3).join(', ')} requirement${sector?': '+sector:''}`.slice(0,140);
- const summary=anonymiseText(`An organisation is seeking ${labels.join(', ')} across ${r.sites.count} site${r.sites.count===1?'':'s'} and ${r.users.count} users${r.users.remote?` (${r.users.remote} remote)`:''}. ${r.organisation.description??''}`,ctx,1500);
+ const summary=anonymiseText(`An organisation is seeking ${labels.join(', ')} across ${r.sites.count} site${r.sites.count===1?'':'s'} and ${r.users.count} users${r.users.remote?` (${r.users.remote} remote)`:''}.${opts.show_company?' '+(r.organisation.description??''):''}`,ctx,1500);
  return {title,scope:scope.length?scope:(['not_sure'] as OppScope[]),regions,summary,
-  current_environment:anonymiseText(r.current_environment??'',ctx,2000),desired_outcomes:anonymiseText(r.desired_outcomes??'',ctx,2000),
+  current_environment:opts.show_company?anonymiseText(r.current_environment??'',ctx,2000):'',desired_outcomes:opts.show_company?anonymiseText(r.desired_outcomes??'',ctx,2000):'',
   compliance_requirements:anonymiseList(r.compliance,ctx,80,12),evaluation_priorities:anonymiseList(r.priorities,ctx,120,10)};
 }
 

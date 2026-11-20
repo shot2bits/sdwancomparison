@@ -36,7 +36,7 @@ export default function RfpBundleForm(){
      </div>
      <fieldset><legend className="text-sm font-medium">Services you need</legend><div className="mt-2 grid gap-1 sm:grid-cols-2">{CONTEXT_PRODUCTS.map(p=><label key={p.id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={products.includes(p.id)} onChange={()=>toggle(products,setProducts,p.id)}/>{p.label}</label>)}</div></fieldset>
      <fieldset><legend className="text-sm font-medium">Where you need service</legend><div className="mt-2 flex flex-wrap gap-3">{COMPARISON_REGIONS.map(([id,label])=><label key={id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={regions.includes(id)} onChange={()=>toggle(regions,setRegions,id)}/>{label}</label>)}</div></fieldset>
-     <label className="block text-sm font-medium">What do you want to achieve? (optional)<textarea value={outcomes} maxLength={2000} rows={4} onChange={e=>setOutcomes(e.target.value)} className={input} placeholder="Describe the outcomes, not your company details. Names, emails, phone numbers and addresses are removed from the public board."/></label>
+     <label className="block text-sm font-medium">What do you want to achieve? (optional)<textarea value={outcomes} maxLength={2000} rows={4} onChange={e=>setOutcomes(e.target.value)} className={input} placeholder="This stays private unless you choose to show your company. The public board shows only the sector, products, sites, users and region."/></label>
      {error&&<p role="alert" className="text-sm text-red-700">{error}</p>}
      <button className="rounded bg-slate-900 px-5 py-2.5 text-sm font-medium text-white">Get my RFP and recommended providers</button>
     </form>

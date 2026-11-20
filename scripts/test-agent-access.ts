@@ -41,6 +41,7 @@ await withFakeKv(async()=>{
  const publicJson=JSON.stringify(listed).toLowerCase();
  for(const bad of ['acme','jane','smith','acmeretail','7946','7700','high street','ls1','@','https'])assert.ok(!publicJson.includes(bad),`public board leaked "${bad}": ${publicJson}`);
  assert.equal(listed.buyer_org,'');assert.equal(listed.buyer_visibility,'anonymous');
+ for(const free of ['runs 40 shops','depot','resilient branches'])assert.ok(!publicJson.includes(free),`free text published without opt-in: ${free}`);
  const stored=await kv.getOpportunity(id);assert.equal(stored!.owner_email,email);
 
  // opt-in shows the company, and only the company
