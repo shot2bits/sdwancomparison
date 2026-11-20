@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withBotId } from "botid/next/config";
 
 const nextConfig: NextConfig = {
   // This app is served under netify.co.uk/sase/* via a rewrite from the main
@@ -228,4 +229,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBotId(nextConfig);
