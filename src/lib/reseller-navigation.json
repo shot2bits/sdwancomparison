@@ -1,0 +1,31 @@
+{
+  "label": "Reseller comparisons",
+  "columns": 2,
+  "items": [
+    {
+      "label": "Broadband programmes",
+      "href": "/insights/broadband-reseller-companies/",
+      "desc": "Compare UK broadband reseller routes and commercial models."
+    },
+    {
+      "label": "VoIP programmes",
+      "href": "/comparison/voip-reseller-programmes/",
+      "desc": "Compare voice programmes, billing, branding and support."
+    },
+    {
+      "label": "SD-WAN programmes",
+      "href": "/resell/sd-wan-reseller/",
+      "desc": "Compare SD-WAN reseller programmes and partner routes."
+    },
+    {
+      "label": "SASE programmes",
+      "href": "/insights/reselling-sase-market-guide/",
+      "desc": "Compare SASE vendor, carrier and managed-service partner models."
+    },
+    {
+      "label": "Microsoft Teams reseller list",
+      "href": "/insights/how-to-become-a-microsoft-teams-reseller/",
+      "desc": "Explore Teams reseller routes and the provider list."
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { applyStudioFields, isStudioProject, studioDraftFromProject, studioPublicationReadiness, studioReviewHash, STUDIO_SUPPLIER_CONSENT } from './studio-project';
 import { isMarketUnlocked } from "./market-unlock";
 import { currentBuyerFacts, projectWithCurrentBuyerFacts } from "./current-buyer-facts";
 import { preserveMarketplaceWorkspace, marketplaceWorkspacePayload, MarketplaceEnvelopeError } from "./marketplace-workspace-envelope";
@@ -8,7 +9,7 @@ import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 import { entranceToProjectDetails } from "@/lib/project-entrance";
 import { ProjectDetailsSchema, SectorProfileStateSchema, PROJECT_JOURNEY_MODES } from "@/lib/rfp-types";
 import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION } from "@/lib/publication-policy";
-import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-store";
+import { getProject, kvGetJson, kvRaw, newId, newSecretToken, saveProject } from "@/lib/rfp-store";
 import { ProviderMatchInputSchema, PROVIDER_MATCH_METHODOLOGY_VERSION } from "@/lib/provider-matching";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 import { getStrictLiveShortlistDataset, shortlistInputFromProviderMatchInput } from "@/lib/live-shortlist";
@@ -30,6 +31,14 @@ export { MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "./ma
 async function persistSession(token: string, session: MarketplaceSession) {
   await kvRaw(["SET", sessionKey(token), JSON.stringify(session), "EX", SESSION_TTL_SECONDS]);
 }
+/** Called only after the route has matched a verified session to the saved owner. */
+export async function recoverMarketplaceSession(project: import('./rfp-types').ProjectDetails) {
+  const token = randomBytes(32).toString('base64url');
+  const now = Date.now();
+  await persistSession(token, SessionSchema.parse({project_id:project.id,token_hash:hash(token),revision:project.marketplace_revision,created_at:now,expires_at:now+SESSION_TTL_SECONDS*1000}));
+  return {project_reference:project.id,project_session_token:token,revision:project.marketplace_revision};
+}
+
 export async function authenticateMarketplaceProject(projectId: string, token: string) {
   const raw = await kvGetJson<MarketplaceSession>(sessionKey(token));
   const parsed = SessionSchema.safeParse(raw);
@@ -55,9 +64,11 @@ export async function startMarketplaceProject(input: { entrance_context: unknown
   const now = input.now ?? Date.now();
   const scope = typeof entrance.raw_input.solution_scope === "string" ? entrance.raw_input.solution_scope.toUpperCase() : "SASE / SD-WAN";
   const title = input.mode === "quick_list" || input.mode === "find_providers" ? `${scope} opportunity${entrance.sector ? ` for ${entrance.sector}` : ""}` : undefined;
-  const project = entranceToProjectDetails({ entrance, ids: { id: newId("rfp"), shareToken: newId("tok"), manageToken: newId("mtok") }, now, title });
+  const project = entranceToProjectDetails({ entrance, ids: { id: newId("rfp"), shareToken: newSecretToken("tok"), manageToken: newSecretToken("mtok") }, now, title });
   const workspace = await preserveWorkspace(null, entrance.raw_input);
-  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, ...workspace, journey: { contract_version: "project-journey/1.0.0", source: entrance.source, mode: input.mode, source_url: entrance.source_url, started_at: now }, sector_profile: sectorProfile, marketplace_revision: 0, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "draft", board_opportunity_id: null, market_unlock_status: "locked", server_updated_at: now } }));
+  let initial = ProjectDetailsSchema.parse({ ...project, ...workspace, journey: { contract_version: "project-journey/1.0.0", source: entrance.source, mode: input.mode, source_url: entrance.source_url, started_at: now }, sector_profile: sectorProfile, marketplace_revision: 0, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "draft", board_opportunity_id: null, market_unlock_status: "locked", server_updated_at: now } });
+  if (entrance.raw_input.studio_draft) initial = applyStudioFields(initial, entrance.raw_input.studio_draft);
+  const saved = await saveProject(initial);
   const token = randomBytes(32).toString("base64url");
   const session = SessionSchema.parse({ project_id: saved.id, token_hash: hash(token), revision: 0, created_at: now, expires_at: now + SESSION_TTL_SECONDS * 1000 });
   await persistSession(token, session);
@@ -73,20 +84,29 @@ async function preserveWorkspace(existing: Parameters<typeof preserveMarketplace
   }
 }
 
-async function updateMarketplaceProjectUnlocked(projectId: string, token: string, raw: unknown) {
+async function updateMarketplaceProjectUnlocked(projectId: string, token: string, raw: unknown, verifiedOwnerEmail = "") {
   const input = UpdateSchema.parse(raw);
   const session = await authenticateMarketplaceProject(projectId, token);
-  const prior = await kvGetJson<{ project_reference: string; revision: number; envelope_revision?: number; saved_at: number }>(idempotencyKey(projectId, input.idempotency_key));
-  if (prior) return prior;
+  const prior = await kvGetJson<{ project_reference: string; revision: number; envelope_revision?: number; saved_at: number; request_hash?:string }>(idempotencyKey(projectId, input.idempotency_key));
+  if (prior) {if(prior.request_hash && prior.request_hash!==hash(JSON.stringify(input)))throw new MarketplaceProjectConflict("This save reference was already used for different content.");return prior;}
   if (session.revision !== input.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   if (project.marketplace_revision !== input.base_revision) throw new MarketplaceProjectConflict("This project has changed. Reload before editing.");
-  if (project.marketplace_state?.publication_status === "published" || ["published", "qa", "evaluation"].includes(project.status)) throw new MarketplaceProjectConflict("Open the published project to change requirements.");
+  if (project.marketplace_state?.publication_status === "published" || ["published", "qa", "evaluation"].includes(project.status)) {
+    if (!isStudioProject(project) || !verifiedOwnerEmail || verifiedOwnerEmail.toLowerCase() !== project.owner_email.toLowerCase()) throw new MarketplaceProjectConflict("Sign in as this project's owner before editing its published requirement.");
+    if (!input.raw_input.studio_draft || Object.keys(input.raw_input).some(k=>k!=="studio_draft") || Object.keys(input.buyer_patch).some(k=>k!=="organisation")) throw new Error("Edit the reviewed Studio requirement only.");
+  }
   const workspace = await preserveWorkspace(project, input.raw_input);
   const nextRevision = session.revision + 1;
-  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, ...workspace, consent: undefined, pending_submit: undefined, buyer: { ...project.buyer, ...input.buyer_patch }, entrance_context: project.entrance_context ? { ...project.entrance_context, buyer_input: { ...project.entrance_context.buyer_input, ...input.buyer_patch }, raw_input: { ...project.entrance_context.raw_input, ...input.raw_input } } : project.entrance_context, sector_profile: input.sector_profile ?? project.sector_profile, marketplace_revision: nextRevision }));
-  const receipt = { project_reference: saved.id, revision: nextRevision, envelope_revision: saved.envelope_revision, saved_at: saved.updated };
+  let next = ProjectDetailsSchema.parse({ ...project, ...workspace, consent: undefined, pending_submit: undefined, buyer: { ...project.buyer, ...input.buyer_patch }, entrance_context: project.entrance_context ? { ...project.entrance_context, buyer_input: { ...project.entrance_context.buyer_input, ...input.buyer_patch }, raw_input: { ...project.entrance_context.raw_input, ...input.raw_input } } : project.entrance_context, sector_profile: input.sector_profile ?? project.sector_profile, marketplace_revision: nextRevision });
+  if (input.raw_input.studio_draft) next = applyStudioFields(next, input.raw_input.studio_draft);
+  else if (isStudioProject(project)) {
+    if (Object.keys(input.raw_input).length || Object.keys(input.buyer_patch).some(k=>k!=="organisation")) throw new Error("Update this project through raw_input.studio_draft to keep its reviewed requirement consistent.");
+    next = applyStudioFields(next,studioDraftFromProject(project));
+  }
+  const saved = await saveProject(next);
+  const receipt = { project_reference: saved.id, revision: nextRevision, envelope_revision: saved.envelope_revision, saved_at: saved.updated, request_hash:hash(JSON.stringify(input)) };
   await kvRaw(["SET", idempotencyKey(projectId, input.idempotency_key), JSON.stringify(receipt), "EX", SESSION_TTL_SECONDS]);
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
   await recordMarketplaceFunnelEvent({ event: "requirements_updated", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision } });
@@ -138,7 +158,7 @@ async function previewMarketplaceProjectUnlocked(projectId: string, token: strin
   return { project_reference: saved.id, revision: nextRevision, preview };
 }
 
-const PreparePublicationSchema = z.object({ base_revision: z.number().int().min(0), consent_version: z.literal(MARKETPLACE_PUBLICATION_CONSENT_VERSION), consent_text: z.literal(MARKETPLACE_PUBLICATION_CONSENT_TEXT), marketing_opt_in: z.boolean().default(false) }).strict();
+const PreparePublicationSchema = z.object({ base_revision: z.number().int().min(0), consent_version: z.literal(MARKETPLACE_PUBLICATION_CONSENT_VERSION), consent_text: z.literal(MARKETPLACE_PUBLICATION_CONSENT_TEXT), marketing_opt_in: z.boolean().default(false), supplier_consent_text: z.literal(STUDIO_SUPPLIER_CONSENT).optional() }).strict();
 
 async function prepareMarketplacePublicationUnlocked(projectId: string, token: string, rawInput: unknown) {
   const session = await authenticateMarketplaceProject(projectId, token);
@@ -148,13 +168,14 @@ async function prepareMarketplacePublicationUnlocked(projectId: string, token: s
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   if (project.marketplace_revision !== input.base_revision) throw new MarketplaceProjectConflict("This project has changed. Reload before publishing.");
   if (project.buyer.organisation.trim().length < 2) throw new Error("Confirm your company name before publishing.");
-  if (isShortProject(project)) {
-    const readiness = shortProjectReadiness(project);
+  if (isStudioProject(project) && input.supplier_consent_text !== STUDIO_SUPPLIER_CONSENT) throw new Error("Approve sharing the reviewed requirement with approved suppliers.");
+  if (isShortProject(project) || isStudioProject(project)) {
+    const readiness = isStudioProject(project) ? studioPublicationReadiness(project) : shortProjectReadiness(project);
     if (!readiness.allowed) throw new Error(readiness.reasons.join("; "));
   }
   const nextRevision = session.revision + 1;
   const at = Date.now();
-  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, consent: { version: input.consent_version, agreed_at: at, flow: "marketplace_project" }, pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in, requested_at: at }, marketplace_revision: nextRevision }));
+  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, ...(isStudioProject(project) ? {entrance_context:{...project.entrance_context,raw_input:{...project.entrance_context?.raw_input,studio_review_revision:nextRevision,studio_review_hash:studioReviewHash(project)}}} : {}), consent: { version: input.consent_version, agreed_at: at, flow: "marketplace_project" }, pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in, requested_at: at }, marketplace_revision: nextRevision }));
   await persistSession(token, { ...session, revision: nextRevision, expires_at: at + SESSION_TTL_SECONDS * 1000 });
   await recordMarketplaceFunnelEvent({ event: "publication_prepared", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision } });
   return { project_reference: saved.id, revision: nextRevision, prepared_at: at };
@@ -165,19 +186,27 @@ export async function readMarketplaceProject(projectId: string, token: string) {
   const session = await authenticateMarketplaceProject(projectId, token);
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
+  const receipt=await marketplaceReceipt(project);
+  const {getLatestPublishedSnapshot}=await import('./published-snapshot');
+  const publishedSnapshot=isStudioProject(project)?await getLatestPublishedSnapshot(project.id):null;
+  const unpublishedChanges=Boolean(publishedSnapshot && JSON.stringify(publishedSnapshot.frozen_content.studio_requirement)!==JSON.stringify(studioDraftFromProject(project)));
   return {
+    studio_draft:isStudioProject(project)?studioDraftFromProject(project):null,
+    unpublished_changes:unpublishedChanges,
+    publication_complete:project.marketplace_state?.publication_status==="published" && Boolean(receipt?.published_at&&receipt?.notice_url),
     project_reference: project.id, revision: project.marketplace_revision, envelope_revision: project.envelope_revision,
     buyer_facts: currentBuyerFacts(project), market_unlocked: await isMarketUnlocked(project.id),
     workspace_payload: marketplaceWorkspacePayload(project),
     expires_at: session.expires_at, buyer: projectWithCurrentBuyerFacts(project).buyer, entrance_context: project.entrance_context,
     notice: isShortProject(project) ? shortProjectNotice(project) : null,
-    mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION,
+    mode: project.journey?.mode, prepared: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION && (!isStudioProject(project) || (project.entrance_context?.raw_input.studio_review_revision===project.marketplace_revision && project.entrance_context?.raw_input.studio_review_hash===studioReviewHash(project))),
     marketplace_state: project.marketplace_state,
+    publication_receipt: receipt,
   };
 }
 
-export async function updateMarketplaceProject(projectId: string, token: string, input: unknown) {
-  return withMarketplaceMutation(projectId, token, () => updateMarketplaceProjectUnlocked(projectId, token, input));
+export async function updateMarketplaceProject(projectId: string, token: string, input: unknown, verifiedOwnerEmail = "") {
+  return withMarketplaceMutation(projectId, token, () => updateMarketplaceProjectUnlocked(projectId, token, input, verifiedOwnerEmail));
 }
 
 export async function previewMarketplaceProject(projectId: string, token: string, input: unknown) {
@@ -186,4 +215,14 @@ export async function previewMarketplaceProject(projectId: string, token: string
 
 export async function prepareMarketplacePublication(projectId: string, token: string, input: unknown) {
   return withMarketplaceMutation(projectId, token, () => prepareMarketplacePublicationUnlocked(projectId, token, input));
+}
+
+async function marketplaceReceipt(project: import('./rfp-types').ProjectDetails) {
+  if (!(await isMarketUnlocked(project.id))) return null;
+  const {getLatestPublishedSnapshot} = await import('./published-snapshot');
+  const {listConnections,listResponses} = await import('./rfp-store');
+  const snapshot = await getLatestPublishedSnapshot(project.id);
+  const [connections,responses] = await Promise.all([listConnections(project.id),listResponses(project.id)]);
+  return {reference:project.id,published_at:snapshot?.published_at ?? null,notice_url:snapshot?.public_projection.url ?? null,
+    invitations_prepared:connections.length,supplier_handoffs:connections.filter(c=>Boolean(c.forwarded_at)).length,responses:responses.length};
 }

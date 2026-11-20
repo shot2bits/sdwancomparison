@@ -1,3 +1,6 @@
+import type {StudioBidRequest} from "@/lib/studio-engagement";
+import {kvGetJson} from "@/lib/rfp-store";
+import {isStudioProject} from "@/lib/studio-project";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
 import { listBuyerRfpIds, getProjectsBulk, saveProject, listResponses, listSignoffs, kvConfigured } from "@/lib/rfp-store";
@@ -44,14 +47,14 @@ export async function GET(req: Request) {
     const phase = projectPhase(p);
     const [responseCount, approvals] = await Promise.all([
       ["published", "qa", "evaluation", "awarded", "transacting", "complete"].includes(phase)
-        ? listResponses(p.id).then((r) => r.length).catch(() => 0)
+        ? (isStudioProject(p)?kvGetJson<StudioBidRequest[]>(`studio:${p.id}:bid_requests`).then(r=>(r??[]).filter(b=>b.messages.some(m=>m.from==="supplier")).length):listResponses(p.id).then((r) => r.length)).catch(() => 0)
         : Promise.resolve(0),
       phase === "drafted"
         ? listSignoffs(p.id).then((s) => signoffHealthContext(s)).catch(() => [] as Array<{ decision?: "approved" | "declined" }>)
         : Promise.resolve([] as Array<{ decision?: "approved" | "declined" }>),
     ]);
     const health = projectHealth(p, { responseCount, approvals });
-    return { id: p.id, title: p.title, status: p.status, updated: p.updated, phase, responses: responseCount, health };
+    return { studio:isStudioProject(p), published:p.marketplace_state?.publication_status==="published" || ["published","qa","evaluation","awarded","transacting","complete"].includes(phase), id: p.id, title: p.title, status: p.status, updated: p.updated, phase, responses: responseCount, health };
   }));
 
   return Response.json({ rfps: rfps.sort((a, b) => b.updated - a.updated) }, { headers: cors });

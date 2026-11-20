@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "baseline": "fb8c61ea9c35544a99e12411878156a13025ed16",
+  "existing_runtime_files_checked": 700,
+  "existing_page_layout_component_changes": 0,
+  "changed_existing_files": [
+    "src/app/.well-known/ai-plugin.json/route.ts",
+    "src/app/.well-known/mcp-server-metadata.json/route.ts",
+    "src/app/api/mcp/route.ts",
+    "src/app/api/webhooks/resend/route.ts",
+    "src/app/llms-full.txt/route.ts",
+    "src/app/llms.txt/route.ts"
+  ],
+  "machine_and_approved_backend_changes_only": true,
+  "shortlist_page_exact_baseline": true,
+  "metadata_proposal_removed": true,
+  "principal_interface_files_unchanged": 11
+}

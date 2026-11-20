@@ -7,7 +7,7 @@ import {
   SourcingBriefSchema,
   SourcingRequestSchema,
 } from "./sourcing-contract";
-import { publicShortlistPreview } from "./public-shortlist";
+import { sourcingEvidence } from "./sourcing-evidence";
 import { getLiveShortlistDataset } from "./live-shortlist";
 import { requestSourcing, readSourcingRequest } from "./sourcing-store";
 import { z } from "zod";
@@ -92,19 +92,7 @@ export async function callSourcingTool(
     runtime_provider_source:live.source,
     provider_contract_version:live.providerContractVersion,
     provider_dataset_versions:live.datasetVersions,
-    ...publicShortlistPreview(live.vendors, {
-      sector: b.sector,
-      required_regions: [b.region],
-      uk_provider_only: b.uk_provider_only ?? false,
-      required_features:
-        b.need === "sdwan"
-          ? ["f09_encrypted_overlay_fabric"]
-          : b.need === "sase"
-            ? ["f28_full_sase_platform"]
-            : b.need === "secure_access"
-              ? ["f30_zero_trust_network_access"]
-              : [],
-    }),
+    ...sourcingEvidence(live.vendors, b),
     next_action:
       "Review the evidence, agree named recipients and an anonymous supplier brief. Ask Netify to resolve missing evidence; no provider is a confirmed recommendation.",
   };

@@ -1,0 +1,11 @@
+import {requirePlatformOwner,privateHeaders} from '@/lib/final-owner';
+import {ParticipatingSupplierSchema,supplierIsParticipating,type ParticipatingSupplier} from '@/lib/final-commercial';
+import {finalCommercial} from '@/lib/final-commercial-runtime';
+import {platformStore} from '@/lib/final-platform-store';
+import {loadSectorComparisonRecords} from '@/lib/sector-comparison-source';
+import {contextCatalogue} from '@/lib/context-comparison-preview';
+import {coreEnvironment} from '@/lib/core-host';
+import {sha} from '@/lib/core-phase1';
+export const runtime='nodejs';export const dynamic='force-dynamic';
+export async function GET(req:Request){try{await requirePlatformOwner(req,'supplier_settings_view');const [research,settings]=await Promise.all([loadSectorComparisonRecords(),platformStore.list('supplier')]);return Response.json({providers:research.providers.map(p=>({id:p.provider.slug,name:p.provider.display_name,label:supplierIsParticipating(settings.find(s=>s.id===p.provider.slug)?.value as ParticipatingSupplier|undefined)?'Participating supplier':'Researched provider',settings:settings.find(s=>s.id===p.provider.slug)?.value??null})),unavailable:research.unavailable,products:contextCatalogue().products},{headers:privateHeaders});}catch(e:any){return Response.json({error:e.code??'supplier_settings_unavailable'},{status:e.status??503,headers:privateHeaders});}}
+export async function POST(req:Request){try{const owner=await requirePlatformOwner(req,'supplier_settings_change'),raw=await req.text();if(Buffer.byteLength(raw)>100000)return Response.json({error:'request_too_large'},{status:413,headers:privateHeaders});const body=JSON.parse(raw),value=ParticipatingSupplierSchema.parse({...body,settings:{...body.settings,environment:coreEnvironment()==='production'?'live':'test'},updatedBy:sha(owner.email),updatedAt:new Date().toISOString()});const research=await loadSectorComparisonRecords();if(!research.providers.some(p=>p.provider.slug===value.settings.supplierId))return Response.json({error:'provider_not_in_research'},{status:422,headers:privateHeaders});return Response.json(await finalCommercial.setSupplier(value,sha(owner.email)),{headers:privateHeaders});}catch(e:any){return Response.json({error:e.code??'supplier_settings_not_saved'},{status:e.status??422,headers:privateHeaders});}}

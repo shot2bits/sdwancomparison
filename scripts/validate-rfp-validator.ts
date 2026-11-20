@@ -102,7 +102,7 @@ async function main() {
   expect(method.facts?.governed_questions === 386 && method.facts.evaluated_providers === 30, "public citation atoms are derived from the real datasets", method.facts);
   expect(method.example?.report?.validBaseline === false, "the public worked AI-draft example honestly fails the baseline");
 
-  const home = readFileSync("src/app/(workspace)/home/page.tsx", "utf8");
+  const home = readFileSync("src/app/(studio)/home/page.tsx", "utf8");
   const desk = readFileSync("src/components/ProjectDesk.tsx", "utf8");
   const citation = readFileSync("src/components/procurement/RfpCitationEvidence.tsx", "utf8");
   const llms = readFileSync("src/app/llms.txt/route.ts", "utf8");

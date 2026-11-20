@@ -1,0 +1,4 @@
+# Preserve accepted HTML and upstream Leaflet bytes.
+preview/context-space/index.html -whitespace
+preview/context-space/vendor/* -whitespace
+preview/context-space/location-workspace.js -whitespace

@@ -39,7 +39,7 @@ for (const patch of [
   assert(
     !CircuitInputSchema.safeParse({ ...input, lines: [{ ...input.lines[0], ...patch }] }).success,
   );
-await withFakeKv(async () => {
+await withFakeKv(async (store) => {
   const s = await import("../src/lib/circuit-store");
   const intent = {id:crypto.randomUUID(),input,consent:CIRCUIT_CONSENT};
   const firstEmail = "circuit-acceptance@netify.co.uk";
@@ -58,12 +58,32 @@ await withFakeKv(async () => {
   let challenge;
   try { Date.now = ()=>now()-1000; challenge=issueAuthChallenge(); } finally { Date.now=now; }
   const freshIntent={...intent,id:crypto.randomUUID()};
-  const signup = await authRequest.POST(new Request("https://netify.co.uk/sase/api/auth/request",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:"new-circuit-buyer@netify.co.uk",role:"buyer",return_to:"/sase/circuit-pricing/?request="+freshIntent.id,circuit_intent:freshIntent,bot_proof:{challenge,website:""}})}));
-  assert.equal(signup.status,200);
-  const signupBody = await signup.json(); assert(signupBody.dev_link);
-  const {consumeMagicToken} = await import("../src/lib/rfp-store");
-  const signedIdentity=await consumeMagicToken(new URL(signupBody.dev_link).searchParams.get("token")!);
-  assert.equal(signedIdentity?.email,"new-circuit-buyer@netify.co.uk");
+  // Production no longer exposes dev_link. Exercise its real private preview
+  // capture transport against the fake KV instead of restoring that bypass.
+  const captureEnv = {VERCEL_ENV:"preview", NETIFY_PREVIEW_MAIL_CAPTURE:"1", VERCEL_URL:"pricing-fixture.vercel.app"};
+  const beforeCapture = Object.fromEntries(Object.keys(captureEnv).map(key=>[key,process.env[key]]));
+  try {
+    Object.assign(process.env,captureEnv);
+    const signup = await authRequest.POST(new Request("https://netify.co.uk/sase/api/auth/request",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:"new-circuit-buyer@netify.co.uk",role:"buyer",return_to:"/sase/circuit-pricing/?request="+freshIntent.id,circuit_intent:freshIntent,bot_proof:{challenge,website:""}})}));
+    const signupBody = await signup.json();
+    assert.equal(signup.status,200,JSON.stringify(signupBody));
+    assert.equal(signupBody.dev_link,undefined);
+    assert.equal(signupBody.token,undefined);
+    const captures=store.fixtureCommands().filter(row=>row[0]==="SET"&&String(row[1]).startsWith("preview:mail:"));
+    assert.equal(captures.length,1);
+    const capture=JSON.parse(String(captures[0][2]));
+    assert.equal(capture.delivery,"captured_not_sent");
+    const html=String(capture.payload.html);
+    assert(!html.includes("https://netify.co.uk/sase"));
+    const link=html.match(/href="([^"]+)"/)?.[1]?.replaceAll("&amp;","&");
+    assert(link);
+    assert.equal(new URL(link).host,captureEnv.VERCEL_URL);
+    const {consumeMagicToken} = await import("../src/lib/rfp-store");
+    const signedIdentity=await consumeMagicToken(new URL(link).searchParams.get("token")!);
+    assert.equal(signedIdentity?.email,"new-circuit-buyer@netify.co.uk");
+  } finally {
+    for(const [key,value] of Object.entries(beforeCapture))if(value===undefined)delete process.env[key];else process.env[key]=value;
+  }
   console.log("PASS first-time circuit buyer verification; no RFP prerequisite; unverified draft remains private; ownership and retries preserved");
   const { getOpportunity } = await import("../src/lib/rfp-store");
   const { toPublicOpportunity } = await import("../src/lib/opportunity-types");

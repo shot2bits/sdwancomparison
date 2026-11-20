@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {mapParent,mapBreadcrumbs,knowledgePath,createMapHistory} from '../preview/context-space/map-navigation.js';
+const path=id=>mapBreadcrumbs(id,x=>x).map(x=>x.id);
+assert.deepEqual(path('feature:sdwan:failover'),['overview','project','scope','product:sdwan','feature:sdwan:failover']);
+assert.deepEqual(path('provider:cisco'),['overview','project-shortlist','provider:cisco']);
+assert.deepEqual(path('questions'),['overview','written-brief','questions']);
+assert.deepEqual(path('apps'),['overview','sector-challenges','optional-details','apps']);
+assert.deepEqual(mapBreadcrumbs('custom-1',x=>x,['custom-1']).map(x=>x.id),['overview','sector-challenges','custom-1']);
+const encode=p=>'knowledge:'+encodeURIComponent(JSON.stringify(p));
+const record=encode(['provider_records',2,'evidence',0]);
+assert.equal(mapParent(record),encode(['provider_records',2,'evidence']));
+assert.deepEqual(path(record),['overview','research-library',encode(['provider_records']),encode(['provider_records',2]),encode(['provider_records',2,'evidence']),record]);
+for(const id of ['knowledge:bad',encode(['__proto__']),encode([{}])])assert.equal(knowledgePath(id),null);
+assert.equal(mapParent('knowledge:bad'),'research-library');
+assert.equal(mapParent('overview'),null);
+const h=createMapHistory();h.visit('scope');h.visit('scope');h.visit('product:sdwan');assert.equal(h.back(),'scope');assert.equal(h.back(),'project');assert.equal(h.back(),null);assert.equal(h.forward(),'scope');h.visit('sector');assert.equal(h.canForward,false);assert.equal(h.back(),'scope');h.reset();assert.equal(h.current,'project');assert.equal(h.canBack,false);
+console.log('PASS: parent levels, full breadcrumbs, safe research paths, back/forward history and branch changes.');

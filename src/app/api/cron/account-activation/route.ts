@@ -1,3 +1,4 @@
+import { hasCronSecret } from "@/lib/cron-auth";
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { kvConfigured, kvGetJson, kvSetJson, listAllRfpIds, getProjectsBulk, listSessions } from "@/lib/rfp-store";
 import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
@@ -30,9 +31,7 @@ const WINDOW_END_MS = 1 * 60 * 60 * 1000;
 const MAX_SENDS_PER_RUN = 20;
 
 function cronAuthorised(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  return hasCronSecret(req);
 }
 
 function emailBodies(unsubUrl: string) {

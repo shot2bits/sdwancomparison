@@ -99,7 +99,7 @@ export default function OpportunitiesPage() {
         <p className="text-sm text-[var(--ink-600)] mb-4">Three worked examples — the same structure your RFI will have.</p>
         <div className="grid gap-4 sm:grid-cols-3">
           {SAMPLE_NOTICES.map((s) => (
-            <Link key={s.slug} href={`/opportunities/${s.slug}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
+            <Link key={s.slug} href={`/opportunities/${s.slug}/`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
               <span className="mb-2 inline-block rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-[var(--ink-600)]">Sample</span>
               <h3 className="text-sm font-semibold leading-snug mb-1">{s.title}</h3>
               <p className="text-xs text-[var(--ink-600)] line-clamp-2">{s.summary}</p>

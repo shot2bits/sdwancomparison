@@ -1,0 +1,2 @@
+# Local-only synthetic partner portfolio. Never publish customer records.
+.local/

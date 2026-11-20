@@ -72,7 +72,7 @@ export default async function VendorsPage() {
             <strong className="text-[var(--ink-800)]">Same vendors, two different pages.</strong> This index is the{" "}
             <strong className="text-[var(--ink-800)]">research view</strong>: published capability evidence against the
             40-feature framework, with evidence sources and watch-outs — it powers the{" "}
-            <Link href="/shortlist" className="underline">shortlist builder</Link> and RFP evaluation. The{" "}
+            <Link href="/shortlist/" className="underline">shortlist builder</Link> and RFP evaluation. The{" "}
             <a href="https://netify.co.uk/marketplace/" className="underline">Netify Marketplace</a> is the{" "}
             <strong className="text-[var(--ink-800)]">commercial directory</strong>: company profiles, accreditations
             and contact routes. Compare capabilities here; engage companies there.
@@ -120,7 +120,7 @@ export default async function VendorsPage() {
                 return (
                   <Link
                     key={v.slug}
-                    href={`/vendors/${v.slug}`}
+                    href={`/vendors/${v.slug}/`}
                     className="vendor-card no-underline text-[var(--ink-900)] block group"
                   >
                     <div className="flex items-baseline justify-between gap-4 mb-3">

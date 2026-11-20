@@ -19,3 +19,11 @@ cases={
 }
 for text,expected in cases.items():assert m.support(text)==expected,(text,m.support(text),expected)
 print(f'PASS: {len(cases)} support-parser regression cases')
+
+long='Research evidence. '*600
+assert long.strip() in m.full_qualification('architecture',{'finding':long,'evidence':'[1]'}), 'normalisation must retain qualifications beyond 4,000 characters'
+assert 'Evidence: [1]' in m.full_qualification('architecture',{'finding':long,'evidence':'[1]'})
+assert m.service_model('Fully managed deployment')=='fully_managed'
+assert m.service_model('Co-managed deployment')=='co_managed'
+assert m.service_model('Cloud-delivered')=='other'
+print('PASS lossless labelled qualifications and explicit service-model mapping; no publication state change')

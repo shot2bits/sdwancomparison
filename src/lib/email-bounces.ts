@@ -28,7 +28,7 @@ const BOUNCE_TTL_MS = 180 * 24 * 60 * 60 * 1000; // long enough that a genuinely
 const RECENT_BOUNCES_KEY = "email:bounce:recent";
 const RECENT_BOUNCES_CAP = 199;
 
-export type SendKind = "magic_link" | "draft_link" | "publish_nudge";
+export type SendKind = "magic_link" | "draft_link" | "publish_nudge" | "admin_alert";
 
 export type SendRecord = {
   to: string;

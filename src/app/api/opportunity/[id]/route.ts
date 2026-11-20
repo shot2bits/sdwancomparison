@@ -1,3 +1,4 @@
+import { toPublicOpportunity } from '@/lib/opportunity-types';
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getOpportunity, kvConfigured } from "@/lib/rfp-store";
 import { maskedFeed } from "@/lib/opportunity";
@@ -28,6 +29,10 @@ export async function GET(req: Request, ctx: Ctx) {
 
   if (isOwner) return Response.json(opp, { headers: cors });
 
+  if(opp.privacy_contract==='opportunity-studio/1') {
+    if(opp.visibility!=='public')return Response.json({error:'Opportunity not found.'},{status:404,headers:cors});
+    return Response.json({...toPublicOpportunity(opp),feed:[]},{headers:cors});
+  }
   // Viewer projection: full notice + feed for the room, minus secrets.
   // Pricing amounts are masked (private to the buyer) and the buyer name is
   // masked when the notice is anonymous.

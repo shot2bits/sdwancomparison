@@ -23,8 +23,8 @@ export default function HowItWorksPage() {
   <h2 className="mt-8">Using an AI assistant</h2>
   <p>A connected assistant can prepare a sourcing plan through the same MCP tools. Sending a request still requires your approval and work-email confirmation.</p>
   <p className="my-6">{COMMISSION_DESCRIPTION}</p>
-  <Link href="/shortlist" className="underline">Research providers and prepare your request</Link>
-  {" · "}<Link href="/connector" className="underline">Assistant connection</Link>
+  <Link href="/shortlist/" className="underline">Research providers and prepare your request</Link>
+  {" · "}<Link href="/connector/" className="underline">Assistant connection</Link>
   <section><h2>Questions about the service</h2>{SHORTLIST_FAQS.map(f=><details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>)}</section>
  </main>;
 }

@@ -1,3 +1,4 @@
+import { hasCronSecret } from "@/lib/cron-auth";
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, listAllRfpIds, listConnections } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
@@ -17,9 +18,7 @@ export const maxDuration = 60;
  */
 
 function authorised(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  return hasCronSecret(req);
 }
 
 async function sendBuyerEmail(to: string, subject: string, html: string): Promise<boolean> {

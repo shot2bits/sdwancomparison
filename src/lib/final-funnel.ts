@@ -1,0 +1,16 @@
+import 'server-only';
+import {randomUUID} from 'node:crypto';
+import {coreDatabase,sha} from './core-phase1';
+import {coreEnvironment} from './core-host';
+import {finalEnabled} from './final-platform-flags';
+export const FUNNEL_EVENTS=['scope_started','scope_saved','sector_or_products_set','first_site_added','site_review_recorded','user_review_recorded','provider_assessment_viewed','rfp_generated','rfp_exported','project_claimed','request_prepared','request_approved_and_sent','reseller_enquiry_started','reseller_enquiry_sent','reseller_project_started','customer_mandate_recorded','reseller_request_sent'] as const;
+export type FunnelEvent=typeof FUNNEL_EVENTS[number];
+export type TrustedMeasurement={actor:string;owner:boolean;fixture:boolean;environment:string;source:'web'|'mcp'|'reseller'|'system';crawler:boolean};
+/** Exclusion facts come from verified identity, persisted fixture state and server environment. */
+export async function recordFinalEvent(event:FunnelEvent,projectId:string|null,operation:string,actor:TrustedMeasurement){
+ if(!finalEnabled('funnel'))return;const excluded=actor.owner||actor.fixture||actor.environment!=='production'||actor.crawler;
+ const reason=actor.owner?'owner':actor.fixture?'fixture':actor.environment!=='production'?'non_production':actor.crawler?'crawler':null;
+ await coreDatabase().query('INSERT INTO netify_core_phase1.platform_events(id,project_id,event,actor_hash,source,environment,excluded,exclusion_reason,operation_key) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(operation_key) DO NOTHING',[randomUUID(),projectId,event,sha(actor.actor),actor.source,coreEnvironment(),excluded,reason,sha(event+':'+(projectId??'')+':'+operation)]);
+}
+export function scopeTransitions(before:any|null,after:any):FunnelEvent[]{const events:FunnelEvent[]=[];const a=after.packet.project.input,b=before?.packet?.project?.input;if(!before)events.push('scope_started');if((a.sector||a.products?.length)&&(a.sector!==b?.sector||JSON.stringify(a.products)!==JSON.stringify(b?.products)))events.push('sector_or_products_set');if(!before?.estate?.sites?.length&&after.estate.sites.length)events.push('first_site_added');const plan=after.estate.planning,prior=before?.estate?.planning;if(JSON.stringify(plan?.siteReviews??{})!==JSON.stringify(prior?.siteReviews??{})&&Object.keys(plan?.siteReviews??{}).length)events.push('site_review_recorded');if(plan?.userReview&&plan.userReview!==prior?.userReview)events.push('user_review_recorded');return events;}
+export async function weeklyFunnel(filters:{from?:string;to?:string;stage?:string;source?:string}={}){return coreDatabase().query("SELECT date_trunc('week',at AT TIME ZONE 'Europe/London')::date AS week,event,source,count(*)::integer AS events,count(DISTINCT coalesce(project_id::text,actor_hash))::integer AS projects_or_visitors FROM netify_core_phase1.platform_events WHERE NOT excluded AND environment='production' AND (project_id IS NULL OR NOT EXISTS(SELECT 1 FROM netify_core_phase1.projects p WHERE p.id=project_id AND p.disposable_fixture)) AND ($1::timestamptz IS NULL OR at>=$1) AND ($2::date IS NULL OR at<$2::date+interval '1 day') AND ($3::text IS NULL OR event=$3) AND ($4::text IS NULL OR source=$4) GROUP BY 1,2,3 ORDER BY 1 DESC,2,3",[filters.from??null,filters.to??null,filters.stage??null,filters.source??null]);}

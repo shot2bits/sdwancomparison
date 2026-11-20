@@ -1,7 +1,9 @@
+import {coreDiscoveryEnabled} from '@/lib/core-host';
 import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tools";
 import { SITE_URL } from "@/lib/structured-data";
 
 export async function GET() {
+  if(coreDiscoveryEnabled())return Response.json({schema_version:"v1",name_for_human:"Netify SASE and SD-WAN Marketplace",name_for_model:"netify_sase_marketplace",description_for_model:"Open source-linked provider comparisons and research. Private estates, requirements, Living RFPs and prepared pricing requests require project-scoped capabilities. Agents cannot approve sharing or send. Verified owner approval in the web view can reach the Netify desk only.",auth:{type:"none",private_access:"Project-scoped capability"},mcp:{endpoint:`${SITE_URL}/api/mcp/`,discovery:`${SITE_URL}/.well-known/mcp-server-metadata.json/`},contact_email:"support@netify.com",legal_info_url:"https://netify.co.uk/terms-conditions/"},{headers:{"cache-control":"no-store"}});
   return Response.json({
     schema_version: "v1",
     name_for_human: "Netify SASE Shortlist Builder",

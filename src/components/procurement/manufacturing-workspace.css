@@ -45,3 +45,17 @@
 .nf-buying-shell .nf-calm-heading[data-started=false]{align-items:center;margin-bottom:20px}
 @media(max-width:760px){.nf-buying-shell .nf-calm-heading[data-started=false]{flex-direction:row}.nf-buying-shell .nf-workspace-intro{margin-bottom:18px;padding-bottom:20px}.nf-buying-shell .nf-project-formats{padding:14px}.nf-buying-shell .nf-project-formats>p{font-size:11px}}
 @media(max-width:760px){.nf-buying-shell .nf-buying-topbar{flex-wrap:wrap}.nf-buying-topbar [data-release-version]{order:5;flex-basis:100%;padding-bottom:8px}}
+
+@media(max-width:760px){
+ .nf-buying-shell .lpos-builder .nf-workspace-intro{display:none}
+ .nf-buying-shell .lpos-builder .nf-calm-heading{margin:0 0 8px;gap:6px;flex-direction:row;flex-wrap:wrap}
+ .nf-buying-shell .nf-calm-heading .nf-workspace-title h2{font-size:18px}
+ .nf-buying-shell .nf-calm-heading .nf-calm-publish{padding:8px 10px;min-height:44px}
+ .nf-buying-shell .nf-draft-primary-actions .nf-private-draft button{font-size:12px;padding:8px}
+ .nf-entry-disclosure{padding:8px 18px;font-size:12px;line-height:1.45}
+}
+@media(max-width:760px){
+ /* Format remains available in Document settings and the entry route chooser. */
+ .nf-buying-shell .lpos-builder>.nf-format-options{display:none}
+ .nf-buying-shell .nf-calm-tabs button{white-space:nowrap;flex:0 0 auto;min-height:44px;padding:8px 0}
+}

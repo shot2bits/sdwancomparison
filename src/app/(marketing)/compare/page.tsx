@@ -1,3 +1,4 @@
+import { VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { COMPARE_PAIRS } from "@/lib/compare-pages";
@@ -62,13 +63,13 @@ export default function CompareIndexPage() {
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
-            href="/shortlist"
+            href="/shortlist/"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
           >
             Build your own shortlist →
           </Link>
           <Link
-            href="/vendors"
+            href={VENDOR_INDEX_URL}
             className="inline-flex items-center gap-2 px-4 py-2.5 border border-[var(--ink-300,#d4d4d8)] text-[var(--ink-900)] font-medium no-underline hover:bg-[var(--ink-100,#f4f4f5)] transition-colors rounded-full text-sm"
           >
             Browse all vendors
@@ -80,7 +81,7 @@ export default function CompareIndexPage() {
         {pairs.map((p) => (
           <li key={p.slug}>
             <Link
-              href={`/compare/${p.slug}`}
+              href={`/compare/${p.slug}/`}
               className="block h-full rounded-xl border border-[var(--ink-200)] bg-[var(--paper-card,#fff)] p-5 no-underline transition-colors hover:border-[var(--ink-300,#d4d4d8)]"
             >
               <p className="font-medium text-[var(--ink-900)] leading-snug">

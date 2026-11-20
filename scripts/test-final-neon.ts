@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {randomUUID,randomBytes} from 'node:crypto';
+import {neon} from '@neondatabase/serverless';
+import {emptyCoreProject} from '../src/lib/core-buyer-tools';
+import {createCoreProject,saveCoreProject,coreDatabase} from '../src/lib/core-phase1';
+import {NeonPlatformStore} from '../src/lib/final-platform-store';
+if(process.env.NETIFY_CORE_BRANCH_ID!=='br-aged-union-zar77mut'||process.env.VERCEL_ENV==='production')throw Error('isolated_development_only');
+process.env.NETIFY_PLATFORM_FUNNEL='1';const admin=neon(process.env.NETIFY_CORE_DATABASE_URL!),sql=coreDatabase(),id=randomUUID(),snapshot=emptyCoreProject(id),edit=randomBytes(32).toString('base64url'),view=randomBytes(32).toString('base64url');
+await createCoreProject(snapshot,id,'http://127.0.0.1:3023',{edit,view});await admin.query('UPDATE netify_core_phase1.projects SET disposable_fixture=true WHERE id=$1',[id]);
+snapshot.packet.project.input.sector='manufacturing';await saveCoreProject(id,edit,snapshot,1,randomUUID());
+const events=await sql.query('SELECT event,excluded,exclusion_reason FROM netify_core_phase1.platform_events WHERE project_id=$1',[id]);assert(events.some(e=>e.event==='scope_started'));assert(events.some(e=>e.event==='sector_or_products_set'));assert(events.every(e=>e.excluded));
+const store=new NeonPlatformStore();await store.change('commercial',id,()=>({value:{fixture:true},result:true}),id);assert.deepEqual((await store.read('commercial',id))!.value,{fixture:true});
+let release:()=>void=()=>{},reads=0;const barrier=new Promise<void>(resolve=>release=resolve);class ConcurrentStore extends NeonPlatformStore{override async read<T>(kind:any,key:string){const row=await super.read<T>(kind,key);reads++;if(reads===2)release();await barrier;return row;}}const concurrent=new ConcurrentStore();
+const values=await Promise.allSettled([concurrent.change<any,boolean>('commercial',id,p=>({value:{...p,value:1},result:true}),id),concurrent.change<any,boolean>('commercial',id,p=>({value:{...p,value:2},result:true}),id)]);assert.equal(values.filter(r=>r.status==='rejected').length,1);
+await admin.query("UPDATE netify_core_phase1.projects SET expires_at=clock_timestamp()-interval '31 days' WHERE id=$1",[id]);const purger=neon(process.env.NETIFY_CORE_PURGE_DATABASE_URL!);await purger.query('SELECT netify_core_phase1.purge_project($1,$2)',[id,randomUUID()]);assert.equal((await sql.query('SELECT count(*)::int n FROM netify_core_phase1.platform_events WHERE project_id=$1',[id]))[0].n,0);
+console.log('PASS: isolated Neon event persistence/exclusion, atomic record conflict, fixture purge cascades; no production records or mail');

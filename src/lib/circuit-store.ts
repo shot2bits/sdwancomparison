@@ -1,7 +1,7 @@
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { randomBytes, createHash } from "node:crypto";
-import { kvRaw, kvGetJson, kvSetJson, saveOpportunity, newId } from "./rfp-store";
+import { kvRaw, kvGetJson, kvSetJson, saveOpportunity, newSecretToken } from "./rfp-store";
 import { OpportunitySchema } from "./opportunity-types";
 import {
   CircuitInputSchema,
@@ -178,7 +178,7 @@ export async function circuitPublish(
         summary: circuitPublicSummary(r),
         timeline_note: "Timescale shared privately with Netify.",
         owner_email: r.owner_email,
-        buyer_token: newId("btok"),
+        buyer_token: newSecretToken("btok"),
         eligibility: "invited",
         visibility: "public",
         response_mode: "indicative_pricing",

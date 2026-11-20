@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type Health = { tone: string; label: string; detail: string };
-type Rfp = { id: string; title: string; status: string; updated: number; phase?: string; responses?: number; health?: Health };
+type Rfp = { studio?: boolean; id: string; title: string; status: string; updated: number; phase?: string; responses?: number; health?: Health };
 type MineOpp = {
   id: string; title: string; status: string; visibility: string; response_mode: string;
   created: number; updated: number; bid_count: number; comment_count: number;
@@ -74,6 +74,7 @@ function localDrafts(): { id: string; manage_token: string }[] {
 }
 
 type Row = {
+  studio?: boolean;
   key: string;
   phase: string;
   title: string;
@@ -90,6 +91,7 @@ type Row = {
 
 export default function MyProcurements() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [admin, setAdmin] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [rfps, setRfps] = useState<Rfp[] | null>(null);
   const [opps, setOpps] = useState<MineOpp[] | null>(null);
@@ -122,14 +124,15 @@ export default function MyProcurements() {
 
     const loadPrivateRecords = async () => {
       const session = await fetch("/sase/api/auth/session", { cache: "no-store" })
-        .then((response) => response.ok ? response.json() as Promise<{ authenticated?: boolean }> : { authenticated: false })
-        .catch(() => ({ authenticated: false }));
+        .then((response) => response.ok ? response.json() as Promise<{ authenticated?: boolean; admin?: boolean }> : { authenticated: false, admin: false })
+        .catch(() => ({ authenticated: false, admin: false }));
       if (!active) return;
       if (!session.authenticated) {
         return;
       }
 
       setAuthenticated(true);
+      setAdmin(Boolean(session.admin));
       const drafts = localDrafts();
       if (drafts.length > 0) {
         await fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) }).catch(() => {});
@@ -166,7 +169,7 @@ export default function MyProcurements() {
           <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
             Describe your first project
           </a>
-          <Link href="/shortlist" className="text-sm underline text-[var(--ink-700)]">
+          <Link prefetch={false} href="/shortlist/" className="text-sm underline text-[var(--ink-700)]">
             Not ready? Compare the market first
           </Link>
         </div>
@@ -207,6 +210,7 @@ export default function MyProcurements() {
       health: r.health,
       statusLine: noticeEnded ? `${baseLine} · notice ${o.status}` : baseLine,
       projectId: r.id,
+      studio: r.studio,
       oppId: o?.id,
       noticeEnded: Boolean(noticeEnded),
       responses: r.responses,
@@ -235,9 +239,9 @@ export default function MyProcurements() {
     <div className="mb-10">
       <h2 className="text-xl mb-1">Your procurements</h2>
       <p className="text-sm text-[var(--ink-600)] mb-4">
-        One row per procurement, grouped by stage, carrying every door it has: the project record, the public
-        notice and the manage room. Manage responses, invite vendors or close a notice from its room.
+        These are projects saved to your signed-in account, not all enquiries received by Netify. A user count in a project title describes the staff covered by that requirement, not website visitors or customers. Open a project to review its details and next step.
       </p>
+      {admin && <p className="mb-4 text-sm">This is an internal administrator workspace and can include saved tests. It is not a customer pipeline. <a className="underline" href="/sase/admin/">Review external requests and follow-up in the administration console →</a></p>}
       <div className="space-y-6">
         {grouped.map((g) => (
           <section key={g.key}>
@@ -257,16 +261,16 @@ export default function MyProcurements() {
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
                     {r.oppId && (
-                      <Link href={`/opportunities/${r.oppId}`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">{r.noticeEnded ? "View closed notice" : "Public notice"}</Link>
+                      <Link prefetch={false} href={`/opportunities/${r.oppId}/`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">{r.noticeEnded ? "View closed notice" : "Public notice"}</Link>
                     )}
                     {r.oppId && (
-                      <Link href={`/opportunities/${r.oppId}/room`} className={`rounded-full px-3 py-1 text-xs no-underline ${r.projectId ? "border border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]" : "bg-amber-500 font-medium text-zinc-950 hover:bg-amber-400"}`}>Manage room</Link>
+                      <Link prefetch={false} href={`/opportunities/${r.oppId}/room`} className={`rounded-full px-3 py-1 text-xs no-underline ${r.projectId ? "border border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]" : "bg-amber-500 font-medium text-zinc-950 hover:bg-amber-400"}`}>Manage room</Link>
                     )}
                     {r.projectId && (
-                      <Link href={`/rfp-builder/${r.projectId}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
+                      <Link prefetch={false} href={r.studio?`/studio-preview/?project=${r.projectId}`:`/rfp-builder/${r.projectId}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
                     )}
                     {r.projectId && (
-                      <Link href={`/project/${r.projectId}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
+                      <Link prefetch={false} href={r.studio?`/studio-preview/?project=${r.projectId}`:`/project/${r.projectId}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
                     )}
                   </div>
                 </div>

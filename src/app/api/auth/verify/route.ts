@@ -1,5 +1,8 @@
+import { recordPublicationIssue } from '@/lib/publication-issues';
+import {recordAccess, accessEntry} from "@/lib/auth-access-report";
+import {isAdminEmail} from "@/lib/access-control";
 import { recordPublicationVerification } from "@/lib/publication-verification-events";
-import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
+import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject, indexRfpForBuyer } from "@/lib/rfp-store";
 import { executePublish, SavedUnpublishedError } from "@/lib/rfp-publish";
 import { sessionCookieHeader, notifyNewSignup } from "@/lib/auth";
 import { isMarketUnlocked } from "@/lib/market-unlock";
@@ -34,11 +37,12 @@ export async function POST(req: Request) {
   let token = body.token ?? null;
   if (!token && body.code && body.email) {
     token = await tokenFromCode(body.email, body.code.trim());
-    if (!token) return Response.json({ error: "That code is not right or has expired. Check the 6 digits in the email, or click the email link instead." }, { status: 401 });
+    if (!token) { await recordAccess("verification_failed", "unknown", accessEntry(req.headers.get("referer") ?? "")); return Response.json({ error: "That code is not right or has expired. Check the 6 digits in the email, or click the email link instead." }, { status: 401 }); }
   }
   const payload = token ? await consumeMagicToken(token) : null;
-  if (!payload) return Response.json({ error: "This sign-in link is invalid or has expired." }, { status: 401 });
+  if (!payload) { await recordAccess("verification_failed", "unknown", accessEntry(req.headers.get("referer") ?? "")); return Response.json({ error: "This sign-in link is invalid or has expired." }, { status: 401 }); }
   const session = await createSession(payload);
+  await recordAccess("verified", isAdminEmail(payload.email) ? "admin" : payload.role === "netify" ? "internal" : payload.role === "supplier" ? "supplier" : "buyer", accessEntry(payload.attr?.page ?? ""));
   // Server-side draft claim and submit: if this sign-in link was requested
   // from a specific draft, attach it to the verified email now, and when the
   // draft carries a wizard-submit intent (pending_submit), complete the
@@ -60,7 +64,10 @@ export async function POST(req: Request) {
         project.owner_email = payload.email;
         project = await saveProject(project);
       }
-      if (project?.owner_email === payload.email) await recordPublicationVerification(project.id, payload.email, "verification_completed");
+      if (project?.owner_email.toLowerCase() === payload.email.toLowerCase()) {
+        await indexRfpForBuyer(payload.email, project.id);
+        await recordPublicationVerification(project.id, payload.email, "verification_completed");
+      }
       if (
         project &&
         // The workspace asks for a separate final publication click after verification.
@@ -85,9 +92,10 @@ export async function POST(req: Request) {
     // failure: the requirement is saved, the lead is captured, and the
     // buyer must be told why nothing published (Ruling One). Every other
     // publish failure stays non-fatal to sign-in exactly as before.
-    if (e instanceof SavedUnpublishedError) {
-      publishOutcome = { state: "saved_unpublished", message: e.message, return_url: e.return_url };
-    }
+    if (payload.rfp_id) await recordPublicationIssue(payload.rfp_id, 'publication', 'publication_failed');
+    publishOutcome = e instanceof SavedUnpublishedError
+      ? { state: "saved_unpublished", message: e.message, return_url: e.return_url }
+      : { state: "saved_unpublished", message: "Your email is verified, but your project has not been published. Open your saved project to review the requirements and retry, or ask Netify for help.", return_url: payload.rfp_id ? `/sase/rfp-builder/${payload.rfp_id}/` : '/sase/account/' };
   }
   // Alert the Netify team the first time a buyer or supplier signs in. Best
   // effort and never blocks sign-in: a notification failure must not stop a

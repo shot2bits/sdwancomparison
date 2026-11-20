@@ -1,3 +1,4 @@
+import { vendorProfileHref } from "@/lib/vendor-links";
 import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -26,7 +27,7 @@ export default function PeplinkAlternatives() {
     <p className="mb-6">{result.methodology_note}</p>
     <SourcedTable ranked={false} slugs={result.shortlist.map(v => v.slug)} caption="Peplink alternatives compared on sourced evidence" intro="Compare network ownership, service delivery and published capability evidence. These are research candidates, not confirmed substitutes. The table includes providers with detailed source-table records; the directory below includes the full current catalogue." id="evidence-table" />
     <ol className="list-none p-0 space-y-6">{result.shortlist.map(v => <li key={v.slug} className="border rounded p-5" id={`provider-${v.slug}`}>
-      <h2 className="text-xl mb-2"><span>{v.position}. </span><Link href={v.marketplace_url ?? `/vendors/${v.slug}`}>{v.name}</Link></h2>
+      <h2 className="text-xl mb-2"><span>{v.position}. </span><Link href={vendorProfileHref(v.slug)}>{v.name}</Link></h2>
       <p className="mb-2">{v.differentiator}</p>
       <p className="text-sm">Proven capability items: {v.proven_evidence_count} · Provider verification: {v.last_verified || "Not recorded"}</p>
     </li>)}</ol>

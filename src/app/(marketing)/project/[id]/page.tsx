@@ -179,7 +179,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
           <p className="m-0 mt-2 text-sm">
             {boardOppId && (
               <>
-                <Link href={`/opportunities/${boardOppId}`} className="font-medium underline">View your live board listing</Link>
+                <Link href={`/opportunities/${boardOppId}/`} className="font-medium underline">View your live board listing</Link>
                 <span className="mx-2 text-emerald-700/40">·</span>
               </>
             )}
@@ -347,7 +347,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
               <span className="text-[var(--ink-600,#555)]">Publishing happens from the builder&rsquo;s submit step, through Review and edit above.</span>
             ) : isPublished ? (
               boardOpp ? (
-                <Link href={`/opportunities/${boardOpp}`} className="underline">View the public notice</Link>
+                <Link href={`/opportunities/${boardOpp}/`} className="underline">View the public notice</Link>
               ) : (
                 <Link href={`/rfp-builder/${id}/preview${qsFrom}`} className="underline">View the published document</Link>
               )

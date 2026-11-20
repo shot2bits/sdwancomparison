@@ -1,0 +1,107 @@
+{
+ "dataset_version": "netify-research/2026-11-20+sha256-055195423508f092",
+ "roles": {
+  "aryaka": [
+   "technology_vendor"
+  ],
+  "att-business": [
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "barracuda-secureedge": [
+   "technology_vendor"
+  ],
+  "bt-business": [
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "cato-networks": [
+   "technology_vendor"
+  ],
+  "check-point": [
+   "technology_vendor"
+  ],
+  "cisco": [
+   "technology_vendor"
+  ],
+  "cloudflare-one": [
+   "technology_vendor"
+  ],
+  "colt-technology-services": [
+   "carrier_network_provider"
+  ],
+  "comcast-business": [
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "cradlepoint-ericsson": [
+   "technology_vendor",
+   "carrier_network_provider"
+  ],
+  "expereo": [
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "forcepoint": [
+   "technology_vendor"
+  ],
+  "fortinet": [
+   "technology_vendor"
+  ],
+  "gtt": [
+   "hybrid_provider"
+  ],
+  "hpe-aruba": [
+   "technology_vendor"
+  ],
+  "juniper-networks": [
+   "technology_vendor"
+  ],
+  "lumen": [
+   "technology_vendor",
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "netskope": [
+   "technology_vendor"
+  ],
+  "ntt": [
+   "carrier_network_provider"
+  ],
+  "opensystems": [
+   "technology_vendor",
+   "managed_service_provider"
+  ],
+  "orange-business": [
+   "carrier_network_provider",
+   "integrator"
+  ],
+  "palo-alto-networks": [
+   "technology_vendor"
+  ],
+  "sonicwall": [
+   "technology_vendor"
+  ],
+  "arista-velocloud": [
+   "technology_vendor"
+  ],
+  "verizon-business": [
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "versa-networks": [
+   "technology_vendor"
+  ],
+  "virgin-media-o2": [
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "vodafone-business": [
+   "managed_service_provider",
+   "carrier_network_provider"
+  ],
+  "zscaler": [
+   "technology_vendor"
+  ]
+ }
+}

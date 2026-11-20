@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {randomBytes,randomUUID,createHash} from 'node:crypto';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {performance} from 'node:perf_hooks';
+import {coreDatabase,createCoreProject,readCoreProject,saveCoreProject,validatedSnapshot,coreProjection} from '../src/lib/core-phase1';
+import {buildContextProject} from '../src/lib/context-project-preview';
+import {compilePreviewPricedScope} from '../src/lib/pricing-preview';
+import {siteReviewSignature,estateReadiness,sitePlanning} from '../preview/context-space/location-model.js';
+import {estateFixture} from './phase1b-fixtures';
+import {normaliseEstate,scopeDigest} from '../preview/context-space/estate-projection.js';
+import {renderRfpDocx} from '../src/lib/rfp-export-docx';
+const sql=coreDatabase(),origin='http://127.0.0.1:3022',templateRow=(await sql.query('SELECT snapshot FROM netify_core_phase1.scope_revisions WHERE project_id=$1 ORDER BY revision DESC LIMIT 1',['290472bb-415c-43db-9cb3-1dfd734b541b']))[0],template=typeof templateRow.snapshot==='string'?JSON.parse(templateRow.snapshot):templateRow.snapshot;
+const results:any[]=[];await mkdir('reports/phase1b-20261114',{recursive:true});
+for(const n of [200,1000]){
+ const snapshot=validatedSnapshot(estateFixture(template,n)),id=snapshot.packet.project.id,credentials={edit:randomBytes(32).toString('base64url'),view:randomBytes(32).toString('base64url')},body={snapshot,credentials,operation_id:randomUUID()};
+ const requestBytes=Buffer.byteLength(JSON.stringify(body));assert(requestBytes<4500000*.25,'Fixtures must have substantial single-request headroom');assert(estateReadiness(snapshot.estate,snapshot.packet.project.input).ready);
+ let t=performance.now();const created=await createCoreProject(snapshot,body.operation_id,origin,credentials);const createMs=performance.now()-t;
+ t=performance.now();const browserB=await readCoreProject(id,credentials.edit);const readMs=performance.now()-t;assert.equal(browserB.snapshot.estate.sites.length,n);assert.equal(estateReadiness(browserB.snapshot.estate,browserB.snapshot.packet.project.input).ready,true);
+ const changed=structuredClone(browserB.snapshot);changed.estate.sites[Math.floor(n/2)].notes+=' ONE SITE EDIT '+n;changed.estate.sites[Math.floor(n/2)].connectivity={...sitePlanning(changed.estate,changed.estate.sites[Math.floor(n/2)]).connectivity,secondary:{type:'five_g',bandwidthMbps:50}};
+ const beforeSize=Number((await sql.query("SELECT pg_total_relation_size('netify_core_phase1.scope_revisions') AS bytes",[]))[0].bytes);
+ t=performance.now();const saved=await saveCoreProject(id,credentials.edit,changed,1,randomUUID());const saveMs=performance.now()-t;
+ const afterSize=Number((await sql.query("SELECT pg_total_relation_size('netify_core_phase1.scope_revisions') AS bytes",[]))[0].bytes);
+ await assert.rejects(()=>saveCoreProject(id,credentials.edit,snapshot,1,randomUUID()),/revision_conflict/);
+ const reloaded=await coreProjection(id,credentials.edit);assert.equal(reloaded.sites.length,n);assert.equal(reloaded.project.revision,2);const reviews=reloaded.project.snapshot.estate.planning.siteReviews;assert(!reviews[changed.estate.sites[Math.floor(n/2)].id]);assert.equal(Object.keys(reviews).length,n-1);assert(!reloaded.project.snapshot.estate.planning.userReview);
+ assert(reloaded.living_rfp?.includes('Revision 2.'));assert(reloaded.living_rfp?.includes('ONE SITE EDIT '+n));for(let i=1;i<=n;i++)assert(reloaded.living_rfp?.includes('fixture-site-'+String(i).padStart(4,'0')));assert(reloaded.living_rfp?.includes('FINAL SOURCE MARKER'));
+ const priced=compilePreviewPricedScope({projectId:id,revision:2,createdAt:new Date().toISOString(),input:changed.packet.project.input,estate:reloaded.project.snapshot.estate,terms:{termMonths:36,bandwidthMbps:null,accessType:null,resilience:null,includeConnectivity:true}});assert.equal(priced.scope.sites.length,n);assert.equal(priced.scope.sites[Math.floor(n/2)].connectivity?.secondary.type,'five_g');
+ const built=buildContextProject({...reloaded.project.snapshot.packet.project,revision:reloaded.project.revision},reloaded.project.snapshot.estate);t=performance.now();const docx=await renderRfpDocx(built.markdown,'Phase 1b synthetic '+n+'-location RFP');const docxMs=performance.now()-t;await writeFile('reports/phase1b-20261114/'+n+'-complete.docx',docx);await writeFile('reports/phase1b-20261114/'+n+'-complete.md',built.markdown);
+ const sizes=await sql.query('SELECT revision,octet_length(scope::text) AS scope_json_bytes,octet_length(snapshot::text) AS snapshot_json_bytes,pg_column_size(scope) AS stored_scope_bytes,pg_column_size(snapshot) AS stored_snapshot_bytes,pg_column_size(actor) AS actor_bytes,pg_column_size(scope_hash) AS hash_bytes FROM netify_core_phase1.scope_revisions WHERE project_id=$1 ORDER BY revision',[id]);
+ const original=JSON.stringify(reloaded.project.snapshot);const over=structuredClone(reloaded.project.snapshot);over.estate.sites.push({...over.estate.sites[0],id:'over-limit'});if(n===1000)assert.throws(()=>validatedSnapshot(over));assert.equal(JSON.stringify(reloaded.project.snapshot),original);
+ results.push({locations:n,project_id:id,request_bytes:requestBytes,snapshot_bytes:Buffer.byteLength(JSON.stringify(snapshot)),create_ms:createMs,read_ms:readMs,save_ms:saveMs,docx_ms:docxMs,docx_bytes:docx.length,markdown_bytes:Buffer.byteLength(built.markdown),revisions:sizes,relation_allocation_delta_for_second_revision:afterSize-beforeSize,checks:'save/reload, exact IDs, one-site edit, missing review only on changed site, dependent user review invalidated, stale-save rejection, complete source/export markers, priced-scope alignment, explicit record limit',supplier_actions:0,production_writes:0});
+ console.log('PASS '+n+' locations: request '+requestBytes+' bytes; saved/reloaded, edited, full exports and price scope agree.');
+}
+const tables=await sql.query("SELECT table_name FROM information_schema.tables WHERE table_schema='netify_core_phase1' ORDER BY table_name",[]);assert.equal(tables.length,5);await writeFile('reports/phase1b-20261114/neon-acceptance.json',JSON.stringify({results,tables:tables.map(x=>x.table_name),multipart_staging:false},null,2));console.log(JSON.stringify({result:'PASS',fixtures:results.map(x=>({locations:x.locations,request_bytes:x.request_bytes,revision_bytes:x.revisions.map((r:any)=>({revision:r.revision,stored_scope_bytes:r.stored_scope_bytes,stored_snapshot_bytes:r.stored_snapshot_bytes})),allocated_revision_delta:x.relation_allocation_delta_for_second_revision})),tables:tables.length,staging:false}));

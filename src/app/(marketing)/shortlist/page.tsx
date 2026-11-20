@@ -1,9 +1,11 @@
+import { publicEvidenceOutput } from "@/lib/public-provider-evidence";
 import { approvedEditorialReview } from "@/lib/provider-editorial-review";
+import ProposalExample from "@/components/procurement/ProposalExample";
 import BuyerDecisionGuide from "@/components/BuyerDecisionGuide";
 import { buildShortlistMarketView, parseShortlistMarketView, SHORTLIST_VIEWS } from "@/lib/shortlist-market-views";
 import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
 import { shortlistSchema } from "@/lib/shortlist-schema";
-import { shortlistEntity, bestFor, ukStatus } from "@/lib/shortlist-entity";
+import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
 import {publicResponsePanel} from '@/lib/response-panel';
 import {annotateResponsePanel} from '@/lib/response-panel-contract';
 import {listPublicOutcomes} from "@/lib/market-outcomes";
@@ -11,7 +13,6 @@ import MarketOutcomeView from "@/components/MarketOutcomeView";
 import type { Metadata } from "next";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import {
-  SOURCING_TITLE,
   sourcingUndertaking,
   SOURCING_DESCRIPTION,
   COMMISSION_DESCRIPTION,
@@ -20,11 +21,14 @@ import { shortlistFaqs } from "@/lib/shortlist-faq";
 import { SITE_URL } from "@/lib/structured-data";
 import { FEATURES } from "@/lib/vendors";
 import SourcingEntrance from "@/components/SourcingEntrance";
+import SectorComparison from "@/components/SectorComparison";
+import "./sector-comparison.css";
 import "./sourcing.css";
+import "./buyer-profiles.css";
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const entity = shortlistEntity((await getLiveShortlistDataset()).vendors);
-  return { title: {absolute: `${entity.h1} | Netify`}, description: `${entity.count_sentence} ${SOURCING_DESCRIPTION}`, alternates: {canonical: `${SITE_URL}/shortlist/`} };
+  return { title: {absolute: "Compare SD-WAN and SASE providers by sector | Netify"}, description: `Compare ${entity.counts.providers} researched SD-WAN and SASE providers against your sector challenges. Download a decision pack with evidence, qualifications and supplier questions.`, alternates: {canonical: `${SITE_URL}/shortlist/`} };
 }
 export default async function ShortlistPage({
   searchParams,
@@ -36,11 +40,18 @@ export default async function ShortlistPage({
   const live = await getLiveShortlistDataset();
   const view = parseShortlistMarketView(typeof query.view === "string" ? query.view : "all");
   const vendors = annotateResponsePanel(buildShortlistMarketView(live.vendors,view),await publicResponsePanel());
+  const buyerProfiles = view === "all";
   const entity = shortlistEntity(vendors,view === "all" ? undefined : SHORTLIST_VIEWS[view].title);
   const faqs = shortlistFaqs(vendors);
   const schemas = [shortlistSchema(vendors,entity.h1,view === "all" ? "/shortlist/" : `/shortlist/${view}/`)];
+  if(view === "all") return <div>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(shortlistSchema(vendors,"Compare SD-WAN and SASE providers by sector")).replace(/</g,"\\u003c")}}/>
+    <SectorComparison initialSector={typeof query.sector === "string" ? query.sector : typeof query.s === "string" ? query.s : undefined} providerCount={vendors.length}/>
+    <section className="sector-tool sc-section"><h2>Research method and supplier engagement</h2><p className="sc-small">Comparisons use the published provider evidence, preserving source qualifications and review dates. Mandatory requirements, conditional support and unanswered questions remain separate. Provider availability, pricing and your specific design must be confirmed.</p><p><a href="/sase/shortlist/research-methodology/">Read the research methodology</a> · <a href="/sase/shortlist/data.json">Published research dataset</a></p>
+    <details id="supplier-discussions"><summary>Discuss your project with Netify or request supplier proposals</summary><SourcingEntrance showProductFocus buyerProfiles features={FEATURES.map(({id,name})=>({id,name}))} vendors={vendors.map(v=>publicEvidenceOutput({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))} initialSector={typeof query.sector === "string" ? query.sector : undefined}/></details></section>
+  </div>;
   return (
-    <main className="sourcing">
+    <main className={`sourcing${buyerProfiles ? " buyer-hub" : ""}`}>
       {schemas.map((schema, i) => (
         <script
           key={i}
@@ -50,54 +61,25 @@ export default async function ShortlistPage({
           }}
         />
       ))}
-      <header data-entity-block>
-        <h1>{entity.h1}</h1>
-        <ShortlistEntityBlock entity={entity}/>
-        {view!=="all" && <p>{SHORTLIST_VIEWS[view].answer}</p>}
+      <div className={buyerProfiles ? "buyer-layout" : undefined}>
+      {buyerProfiles && <nav className="buyer-contents" aria-label="Page contents"><p>Contents</p><a href="#shortlist-overview"><span>01</span>Overview</a><a href="#provider-research"><span>02</span>Compare providers</a><a href="#provider-profiles"><span>03</span>Provider profiles</a><a href="#sourcing-brief"><span>04</span>Your shortlist</a><a href="#research-title"><span>05</span>How we research</a><div className="buyer-side-note">Free to research.<br />No account required.<br /><br />You choose which providers receive your brief.</div></nav>}
+      <div className={buyerProfiles ? "buyer-main" : undefined}>
+      <header data-entity-block id="shortlist-overview">
+        {buyerProfiles ? <><p className="sourcing-eyebrow">SD-WAN and SASE procurement</p><h1>Get comparable proposals.<br />Choose the right provider.</h1></> : <h1>{entity.h1}</h1>}
+        <p className="sourcing-lead">{buyerProfiles ? "Tell Netify what your business needs. We help prepare one scope, agree which providers to approach and coordinate comparable written responses. You can also research providers freely." : <>Explore {vendors.length} SD-WAN and SASE providers using Netify’s research into their network, security and service capabilities. Tell us what your business needs to narrow the options, or browse the providers yourself.</>}</p>
+        <nav className="sourcing-entry-links" aria-label="Choose how to start">
+          <a className="sourcing-primary" href="#sourcing-brief">{buyerProfiles ? "Help me get supplier proposals" : "Find providers for my business"}</a>
+          <a className="sourcing-outline" href="#provider-research">{buyerProfiles ? "Research providers first" : <>Browse all {vendors.length} providers</>}</a>
+        </nav>
+        {buyerProfiles && <><p className="sourcing-small">A short brief is enough to start. No supplier receives your request until you approve it. Timing and participation need confirmation. Suppliers pay Netify when an introduction leads to business.</p><ProposalExample /></>}
+        <p>{SHORTLIST_VIEWS[view].answer}</p>
+
       </header>
-      <BuyerDecisionGuide vendors={vendors}/>
-      <h2>{SOURCING_TITLE}</h2>
-      <p className="sourcing-lead">{SOURCING_DESCRIPTION}</p>
-      <div className="sourcing-steps">
-        <div>
-          <strong>1. Tell us your requirement</strong>
-          <p>
-            Start with six essentials or paste your existing shortlist. We
-            clarify the detail with you.
-          </p>
-        </div>
-        <div>
-          <strong>2. Approve who we approach</strong>
-          <p>
-            Named suppliers, the anonymous information shared and one agreed
-            scope.
-          </p>
-        </div>
-        <div>
-          <strong>3. Compare the written responses</strong>
-          <p>
-            {sourcingUndertaking()}
-          </p>
-        </div>
-      </div>
-      <div className="sourcing-trust">
-        <span>BT Authorised Partner</span>
-        <span>{vendors.length} providers researched</span>
-        <span>Research open to everyone</span>
-      </div>
-      <p className="sourcing-small">{COMMISSION_DESCRIPTION}</p>
-      <nav className="sourcing-sectors" aria-label="Sector entrance">
-        {[
-          ["healthcare", "Healthcare"],
-          ["retail_ecommerce", "Retail"],
-          ["manufacturing", "Manufacturing"],
-          ["financial_services", "Financial services"],
-        ].map(([key, label]) => (
-          <a key={key} href={`/sase/shortlist/?sector=${key}#sourcing-brief`}>
-            {label}
-          </a>
-        ))}
-      </nav>
+      {buyerProfiles ? <div className="sourcing-steps" aria-label="How it works"><div><strong>01 · Compare the options</strong><p>Technology vendors, managed services and carriers.</p></div><div><strong>02 · Understand the service</strong><p>Management responsibilities, deployment and customer examples.</p></div><div><strong>03 · Choose who to approach</strong><p>Request proposals, demos or a pre-sales conversation.</p></div></div> : (<div className="sourcing-steps" aria-label="How it works">
+        <div><strong>1. Tell us what you need</strong><p>Enter your sites, users, locations and service needs.</p></div>
+        <div><strong>2. Choose the providers we approach</strong><p>Review your brief and select the providers and requests you approve.</p></div>
+        <div><strong>3. Compare their responses</strong><p>Netify reviews your request and coordinates supplier responses on an agreed timetable.</p></div>
+      </div>)}
       {live.source === "snapshot_fallback" && (
         <p className="sourcing-small">
           Saved research snapshot. A live source connection
@@ -106,15 +88,28 @@ export default async function ShortlistPage({
         </p>
       )}
       <SourcingEntrance
+        showProductFocus={buyerProfiles}
+        buyerProfiles={buyerProfiles}
         features={FEATURES.map(({ id, name }) => ({ id, name }))}
-        vendors={vendors.map(v=>({...v,...bestFor(v),editorial:approvedEditorialReview(v),uk_status:ukStatus(v)}))}
+        vendors={vendors.map(v=>publicEvidenceOutput({...v,...bestFor(v),editorial:approvedEditorialReview(v)}))}
         initialSelection={typeof query.provider === "string" && vendors.some(v=>v.slug===query.provider) && typeof query.action === "string" && ["contacts","demo","proposals"].includes(query.action) ? {slug:query.provider,action:query.action as "contacts"|"demo"|"proposals"} : undefined}
         initialSector={
           typeof query.sector === "string" ? query.sector : undefined
         }
       />
+      {!buyerProfiles && <BuyerDecisionGuide vendors={vendors}/>}
+      <section aria-labelledby="research-title">
+        <h2 id="research-title">About this research</h2>
+        <details><summary>Research coverage and method</summary>
+          <ShortlistEntityBlock entity={entity}/>
+          <p><a href="/sase/shortlist/research-methodology/">How the research works</a></p>
+          <p><a href="https://creativecommons.org/licenses/by/4.0/">Research licence CC BY 4.0 with attribution to Netify</a></p>
+        </details>
+        <p className="sourcing-small"><strong>How Netify is paid:</strong> {COMMISSION_DESCRIPTION}</p>
+      </section>
       <section>
         <h2>What comes back</h2>
+        <details><summary>Response timetable and follow-up</summary><p>{sourcingUndertaking()}</p></details>
         <p>
           Written proposals on one scope, connectivity pricing attached to the
           same requirement, missing costs identified and a decision pack with
@@ -141,7 +136,7 @@ export default async function ShortlistPage({
           to approach and request comparable proposals. You approve who receives
           your brief.
         </p>
-        <a className="sourcing-primary" href="#sourcing-requirement">Bring my shortlist →</a>
+        <a className="sourcing-primary" href="#sourcing-requirement">Bring my shortlist</a>
         <p className="sourcing-small">
           <a href="/sase/connector/">Connect your AI assistant</a>
         </p>
@@ -158,7 +153,6 @@ export default async function ShortlistPage({
         </a>
       </section>
       <section>
-        <p><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 with attribution to Netify</a></p>
         <h2>Provider questions</h2>
         {faqs.map((f) => (
           <details key={f.q}>
@@ -167,6 +161,7 @@ export default async function ShortlistPage({
           </details>
         ))}
       </section>
+      </div></div>
     </main>
   );
 }

@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {randomBytes,createHash} from 'node:crypto';
+import {FinalAgentAuth,AGENT_RESOURCE} from '../src/lib/final-agent-auth';
+import {MemoryPlatformStore} from '../src/lib/final-platform-store';
+let time=Date.now();const s=new MemoryPlatformStore(),a=new FinalAgentAuth(s,v=>'sealed:'+v,v=>v.slice(7),()=>new Date(time));
+await assert.rejects(()=>a.register({client_name:'bad',redirect_uris:['http://example.test/cb']}),/invalid_redirect/);
+const c=await a.register({client_name:'Synthetic assistant',redirect_uris:['https://example.test/cb']});const verifier=randomBytes(32).toString('base64url');const request={client_id:c.client_id,redirect_uri:'https://example.test/cb',response_type:'code',resource:AGENT_RESOURCE,scope:'project:read',state:'opaque-csrf-state',code_challenge_method:'S256',code_challenge:createHash('sha256').update(verifier).digest('base64url')};
+await assert.rejects(()=>a.request({...request,redirect_uri:'https://attacker.test/cb'}),/invalid_client/);await assert.rejects(()=>a.request({...request,scope:'send_supplier'}),/invalid_authorization/);
+const redirect=new URL(await a.consent(request,{ownerId:'fixture-owner',projectId:'00000000-0000-4000-8000-000000000001',capability:'secret-capability'}));assert.equal(redirect.searchParams.get('state'),request.state);assert(!redirect.href.includes('secret-capability'));const exchange={grant_type:'authorization_code',client_id:c.client_id,resource:AGENT_RESOURCE,redirect_uri:request.redirect_uri,code:redirect.searchParams.get('code')!,code_verifier:verifier};
+await assert.rejects(()=>a.exchange({...exchange,code_verifier:randomBytes(32).toString('base64url')}),/invalid_grant/);const token=await a.exchange(exchange);await assert.rejects(()=>a.exchange(exchange),/invalid_grant/);assert.equal((await a.authenticate(token.access_token,'00000000-0000-4000-8000-000000000001',false)).capability,'secret-capability');await assert.rejects(()=>a.authenticate(token.access_token,'different-project',false),/assistant_scope/);await assert.rejects(()=>a.authenticate(token.access_token,undefined,true),/assistant_scope/);
+const refreshed=await a.exchange({grant_type:'refresh_token',client_id:c.client_id,resource:AGENT_RESOURCE,refresh_token:token.refresh_token});await assert.rejects(()=>a.authenticate(token.access_token,undefined,false),/assistant_scope/);await assert.rejects(()=>a.exchange({grant_type:'refresh_token',client_id:c.client_id,resource:AGENT_RESOURCE,refresh_token:token.refresh_token}),/invalid_grant/);await a.revoke(refreshed.access_token,'fixture-owner');await assert.rejects(()=>a.authenticate(refreshed.access_token,undefined,false),/assistant_scope/);time+=8*86400000;await assert.rejects(()=>a.exchange({grant_type:'refresh_token',client_id:c.client_id,resource:AGENT_RESOURCE,refresh_token:refreshed.refresh_token}),/invalid_grant/);
+console.log('PASS: OAuth PKCE, exact redirects, state, resource audience, one-time codes, project/read/write isolation, refresh rotation, revocation and expiry; no external contact');
+// CIMD and reserved main-site resource
+const originalFetch=global.fetch;
+const metadataUrl='https://assistant.example/oauth/client.json';
+global.fetch=async(input)=>{
+ const url=String(input);
+ if(url===metadataUrl)return new Response(JSON.stringify({client_name:'CIMD assistant',redirect_uris:['https://assistant.example/cb'],client_id:metadataUrl}),{headers:{'content-type':'application/json'}});
+ if(url==='https://127.0.0.1/client.json'||url==='http://assistant.example/client.json')throw new Error('should not fetch');
+ throw new Error('unexpected fetch '+url);
+};
+const {readClientIdMetadata,allowedResource,MAIN_SITE_MCP_RESOURCE,AGENT_ISSUER}=await import('../src/lib/final-agent-auth');
+const doc=await readClientIdMetadata(metadataUrl);
+assert.equal(doc.client_name,'CIMD assistant');
+await assert.rejects(()=>readClientIdMetadata('https://127.0.0.1/client.json'),/invalid_client_metadata/);
+await assert.rejects(()=>readClientIdMetadata('http://assistant.example/client.json'),/invalid_client_metadata/);
+const cimdReq={client_id:metadataUrl,redirect_uri:'https://assistant.example/cb',response_type:'code',resource:MAIN_SITE_MCP_RESOURCE,scope:'project:read',state:'cimd-state',code_challenge_method:'S256',code_challenge:createHash('sha256').update(randomBytes(32).toString('base64url')).digest('base64url')};
+const validated=await a.request(cimdReq);assert.equal(validated.client.client_name,'CIMD assistant');
+assert.equal(allowedResource(MAIN_SITE_MCP_RESOURCE),true);
+assert.equal(allowedResource('https://evil.example/api/mcp/'),false);
+assert.match(AGENT_ISSUER,/\/sase$/);
+assert.doesNotMatch(AGENT_ISSUER,/project-8q2xb/);
+global.fetch=originalFetch;
+console.log('PASS: CIMD HTTPS metadata, blocked private hosts, main-site resource accepted, issuer is netify.co.uk/sase (or the preview host)');

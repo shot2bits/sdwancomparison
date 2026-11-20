@@ -25,8 +25,12 @@ export function publicationBlocker(row?: PublicationOutcome): string | null {
 }
 
 export type AttentionItem = { id: string; title: string; email: string; at: number; reason: string; status: string };
-export function attentionItem(project: {id:string;title:string;owner_email?:string;status:string;updated:number}, outcome: PublicationOutcome | undefined, connections: number): AttentionItem | null {
+export function attentionItem(project: {id:string;title:string;owner_email?:string;contact_email?:string;pending_submit?:unknown;status:string;updated:number}, outcome: PublicationOutcome | undefined, connections: number, issue?: import('./publication-issues').PublicationIssue | null): AttentionItem | null {
   const blocked = project.status !== 'published' && publicationBlocker(outcome);
+  const unfinished = project.status !== 'published' && Boolean(project.owner_email || project.contact_email) && (Boolean(project.pending_submit) || (issue && !issue.resolved));
+  if (unfinished && !blocked) return {id:project.id,title:project.title,email:project.owner_email || project.contact_email || '',at:issue?.at ?? project.updated,
+    reason:issue?.code === 'delivery_failed' ? 'The verification email was not accepted for sending. Check delivery and help the requester resume. Contact is unverified.' : 'A requester provided contact details but publication is unfinished. Check the saved project and correspondence. A prepared submission does not prove that email was sent or ignored.',
+    status:issue?.code === 'delivery_failed' ? 'Email delivery needs attention' : 'Publication unfinished — contact recorded'};
   if (!blocked && !(project.status === 'published' && connections === 0)) return null;
   return {id:project.id,title:project.title,email:project.owner_email || outcome?.email || '',at:blocked ? outcome!.at : project.updated,
     reason:blocked || 'Published project has no recorded supplier connections. Check eligibility and the buyer’s intended next step before any outreach.',
@@ -47,4 +51,9 @@ export function recoveryReminder(title: string, link: string, unsubscribe: strin
   ];
   return { subject, text: [...paragraphs, `Review saved project: ${link}`, `Unsubscribe: ${unsubscribe}`].join("\n\n"),
     html: paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join("") + `<p><a href="${escapeHtml(link)}">Review saved project</a></p><p><a href="${escapeHtml(unsubscribe)}">Unsubscribe</a></p>` };
+}
+
+/** No age limit on an unworked request. Age is not evidence of resolution. */
+export function retainSupplierFollowUp(updated: number, connections: number, now = Date.now()) {
+  return connections === 0 || now - updated < 30 * 86400000;
 }

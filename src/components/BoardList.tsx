@@ -140,7 +140,7 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
           {filtered.map((o) => {
             const dl = deadlineLabel(o);
             return (
-              <Link key={o.id} href={`/opportunities/${o.id}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
+              <Link key={o.id} href={`/opportunities/${o.id}/`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
                 <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
                   {/* One fact, one chip: "Full RFP responses" (the response mode)
                       next to "Full RFP included" (the attachment) read as a

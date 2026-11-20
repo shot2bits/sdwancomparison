@@ -1,8 +1,10 @@
 "use client";
 
+import { fireNetifyEvent } from "@/components/NetifyEvents";
 import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import PublicationPreview from "./PublicationPreview";
+import DraftResearchPreview from "./DraftResearchPreview";
 import { quickListingReadiness } from "@/lib/publication-policy";
 import {requestBrief,type BriefFields,type DocumentPurpose} from "@/lib/buying-workspace-project";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
@@ -369,6 +371,14 @@ export default function GuidedBuild({
   };
 
   const hasStarted = clauses.length > 0 || progress.ready > 0;
+  const preparedMeasured = useRef(false);
+  useEffect(() => {
+    if (hasStarted && !preparedMeasured.current) {
+      preparedMeasured.current = true;
+      fireNetifyEvent('rfp_draft_prepared', {format: documentPurpose === 'brief' ? 'brief' : entryMode === 'check' ? 'import' : rfpDepth === 'detailed' ? 'detailed-rfp' : 'short-rfp'});
+    }
+  }, [hasStarted, documentPurpose, entryMode, rfpDepth]);
+
   const briefReady = quickListingReadiness({ solutionScope: briefFields.scope ?? "", sector: briefFields.sector ?? "", siteCount: Number(briefFields.sites), regions: briefFields.regions ?? [], timescale: briefFields.timescale ?? "", outcome: briefFields.outcome ?? "", operatingModel: briefFields.operatingModel ?? "any" }).allowed;
   const canReviewPublication = publishReachable || briefReady;
   const hasProjectDetails = hasStarted || captured.length > 0 || [briefFields.sector, briefFields.sites, briefFields.timescale, briefFields.outcome].some(value => Boolean(value?.trim())) || Boolean(briefFields.regions?.length);
@@ -377,9 +387,10 @@ export default function GuidedBuild({
 
   return (
     <div className="lpos-builder" data-workspace-tab={workspaceTab}>
-      <div className="nf-workspace-intro"><h2>Build and review your RFP requirements</h2><p>Describe what you need, review your anonymous project notice and choose whether to publish it to the Netify Opportunity Board. A full RFP is optional.</p></div>
-      <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div>{(published || hasProjectDetails) && <button type="button" className="nf-calm-publish" onClick={onPublish}>{published || canReviewPublication ? "Review my opportunity" : "Complete my project brief"} →</button>}</div>
-      <details className="nf-format-options" open><summary>Project format and RFP depth</summary><section className="nf-project-formats" aria-label="Choose your project format"><strong>How would you like to build your project?</strong><div>
+
+      <div className="nf-calm-heading" data-started={hasStarted}><div><div className="nf-workspace-title"><h2>{displayDocumentTitle}</h2><span>{published ? "Published" : "Draft"}</span></div>{draftSaveStatus && <small className="nf-calm-save-status" role="status" data-error={draftSaveStatus.error}>{draftSaveStatus.label}</small>}</div>{(published || hasProjectDetails) && <button type="button" className="nf-calm-publish" onClick={onPublish}>{published ? "Review published notice" : "Review my brief"} →</button>}</div>
+      {!published && <div className="nf-draft-primary-actions">{privateDraftActions}</div>}
+      <details className="nf-format-options"><summary>Project format and RFP depth</summary><section className="nf-project-formats" aria-label="Choose your project format"><strong>How would you like to build your project?</strong><div>
         <button aria-pressed={documentPurpose === 'brief' && entryMode === 'build'} onClick={()=>{onDocumentPurposeChange?.('brief');onEntryModeChange('build');requestBrief();}}>Basic requirements<span>A short business brief</span></button>
         <button aria-pressed={documentPurpose === 'rfp' && entryMode === 'build' && rfpDepth === 'short'} onClick={()=>{onDocumentPurposeChange?.('rfp');onEntryModeChange('build');onRfpDepthChange('short');setWorkspaceTab('requirements');}}>Short RFP<span>Core supplier questions</span></button>
         <button aria-pressed={documentPurpose === 'rfp' && entryMode === 'build' && rfpDepth === 'detailed'} onClick={()=>{onDocumentPurposeChange?.('rfp');onEntryModeChange('build');onRfpDepthChange('detailed');setWorkspaceTab('requirements');}}>Detailed RFP<span>Full question bank and evidence</span></button>
@@ -389,7 +400,7 @@ export default function GuidedBuild({
       <nav className="nf-calm-tabs" aria-label="Project views">
         <button type="button" aria-current={workspaceTab === "overview" ? "page" : undefined} onClick={() => setWorkspaceTab("overview")}>Overview</button>
         <button type="button" aria-current={workspaceTab === "requirements" ? "page" : undefined} onClick={() => setWorkspaceTab("requirements")}>Requirements &amp; RFP</button>
-        <button type="button" aria-current={workspaceTab === "pack" ? "page" : undefined} onClick={() => setWorkspaceTab("pack")}>Supplier document</button>
+        <button type="button" aria-current={workspaceTab === "pack" ? "page" : undefined} onClick={() => setWorkspaceTab("pack")}>Preview my RFP</button>
         <button type="button" onClick={() => onSettingsOpenChange(true)}>Document settings</button>
       </nav>
       <div className="nf-guided-main">
@@ -618,10 +629,11 @@ export default function GuidedBuild({
         </section>
       </div>
 
-      {!published && <PublicationPreview fields={briefFields} onReview={onPublish}/> }
+      {!published && <DraftResearchPreview fields={briefFields}/>}
+      {!published && <details className="nf-optional-publication"><summary>Optional: review a public notice</summary><PublicationPreview fields={briefFields} onReview={onPublish}/></details>}
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
-          <div><h2>{displayDocumentTitle}</h2><span>{progress.ready} of {progress.total} full RFP sections ready</span></div>
+          <div><h2>{displayDocumentTitle}</h2><span>{rows.filter(row => row.state === "confirmed").length} of {rows.length} document sections confirmed</span></div>
           <span>{published ? "Published" : "Draft · not published"}</span>
           <button type="button" onClick={() => onSettingsOpenChange(true)}>⚙ &nbsp; Document settings</button>
         </div>
@@ -642,8 +654,8 @@ export default function GuidedBuild({
             </div>
           </section>
         )}
-        <details className="nf-document-progress"><summary>Document detail and readiness</summary><p>These measures describe RFP depth. A short project brief has its own publication requirements.</p><div className="lpos-metrics">
-          <div className="lpos-completeness"><span>Document completeness</span><p><i><b style={{ width: `${Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%` }} /></i><strong>{Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%</strong></p></div>
+        <details className="nf-document-progress"><summary>Document detail and readiness</summary><p>These measures describe your document. Additional supplier questions and publication are separate choices.</p><div className="lpos-metrics">
+          <div className="lpos-completeness"><span>Document completeness</span><p><i><b style={{ width: `${Math.round((rows.filter(row => row.state === "confirmed").length / Math.max(1, rows.length)) * 100)}%` }} /></i><strong>{Math.round((rows.filter(row => row.state === "confirmed").length / Math.max(1, rows.length)) * 100)}%</strong></p></div>
           <div><strong>{clauses.length}</strong><span>Requirements<br/>confirmed</span></div>
           <div><strong>{sectionQuestions.length}</strong><span>Supplier questions<br/>prepared</span></div>
           <div><strong>{Math.max(0, materialDecisionsRemaining)}</strong><span>Open decisions<br/>remaining</span></div>
@@ -665,11 +677,11 @@ export default function GuidedBuild({
             {shortlist.vendors.map((vendor, index) => (
               <div key={vendor.slug}><span aria-hidden="true">{index + 1}</span><p><strong>{vendor.name}</strong><small>Pinned from your comparison for supplier review.</small></p><button type="button" onClick={() => shortlist.onRemove(vendor.slug)} aria-label={`Remove ${vendor.name} from your shortlist`}>Remove</button></div>
             ))}
-            <p className="lpos-shortlist-note">These are your own picks. Netify&apos;s evaluated match across the whole market is computed the moment you publish, never before.</p>
+            <p className="lpos-shortlist-note">These are your own picks. Use the provider research preview to check published evidence before deciding whether to approach suppliers.</p>
           </div>
         )}
-        <div className="lpos-unlock"><span aria-hidden="true">{canReviewPublication ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{canReviewPublication ? "Ready for publication review" : hasStarted ? "Continue building your RFP" : shortlist?.vendors.length ? "Your shortlist is waiting" : "Start your RFP"}</strong><p>{canReviewPublication ? "Your project is ready for review. You can add more RFP detail later. Review your anonymous notice and verify your work email while the notice is a draft." : hasStarted ? advisorMessage : shortlist?.vendors.length ? "Your providers are pinned. Tell Netify your sector, site count and regions, then publish so they can respond." : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
-        <div className="lpos-document-actions"><button type="button" className="primary" onClick={canReviewPublication ? onPublish : onContinueBuilding}>{canReviewPublication ? "Review my opportunity" : "Continue to next requirement"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
+        <div className="lpos-unlock"><span aria-hidden="true">{canReviewPublication ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{canReviewPublication ? "Your private draft is ready to review" : hasStarted ? "Continue building your RFP" : shortlist?.vendors.length ? "Your shortlist is waiting" : "Start your RFP"}</strong><p>{canReviewPublication ? "Review and download your working draft. Continue answering open questions to improve it. Nothing is published or sent to suppliers." : hasStarted ? advisorMessage : shortlist?.vendors.length ? "Your providers are pinned. Tell Netify your sector, site count and regions, then publish so they can respond." : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
+        <div className="lpos-document-actions"><button type="button" className="primary" onClick={onContinueBuilding}>Continue to next requirement →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
       </aside>
       {settingsOpen && (
         <div className="lpos-settings-backdrop" role="presentation" onMouseDown={() => onSettingsOpenChange(false)}>
@@ -681,7 +693,6 @@ export default function GuidedBuild({
           </section>
         </div>
       )}
-      {privateDraftActions}
     </div>
   );
 }

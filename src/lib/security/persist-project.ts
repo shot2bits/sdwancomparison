@@ -6,7 +6,7 @@
  * both keys expire in two hours and the buyer index is never touched.
  */
 
-import { saveProject, newId, indexRfpForBuyer, kvRaw } from "@/lib/rfp-store";
+import { saveProject, newId, newSecretToken, indexRfpForBuyer, kvRaw } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
 import { buildSecurityProject, type CreateSecurityProjectInput } from "@/lib/security/create-project";
 import { buildEnvelopeUpdate } from "@/lib/workspace/envelope";
@@ -58,7 +58,7 @@ export async function createSecurityProject(
   envelopeBody?: Record<string, unknown>,
   coveredSections?: string[],
 ): Promise<CreatedSecurityProject | { rejected: CreateEnvelopeParticipation & { ok: false } }> {
-  const ids = { id: newId("rfp"), shareToken: newId("tok"), manageToken: newId("mtok") };
+  const ids = { id: newId("rfp"), shareToken: newSecretToken("tok"), manageToken: newSecretToken("mtok") };
   // Pins must be real marketplace vendors; anything else is dropped, cap 5
   // (the same rule the wizard's create route applies).
   const valid = new Set(getAllVendorSlugs());

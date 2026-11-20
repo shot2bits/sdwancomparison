@@ -25,7 +25,7 @@ export default function RfpSupplierLanding() {
       </p>
       <div className="flex flex-wrap gap-3 mb-8">
         <Link href="/supplier" className="rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Go to vendor dashboard</Link>
-        <Link href="/for-suppliers" className="rounded-full border border-[var(--ink-900)] px-5 py-2.5 text-sm no-underline transition-colors hover:bg-[var(--ink-900)] hover:text-white">For vendors and providers</Link>
+        <Link href="/for-suppliers/" className="rounded-full border border-[var(--ink-900)] px-5 py-2.5 text-sm no-underline transition-colors hover:bg-[var(--ink-900)] hover:text-white">For vendors and providers</Link>
       </div>
       <SignIn role="supplier" prompt="Sign in with your work email to see RFPs and opportunities you have been invited to." />
     </div>

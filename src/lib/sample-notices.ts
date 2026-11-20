@@ -140,5 +140,5 @@ export const SAMPLE_NOTICES: SampleNotice[] = [
 ];
 
 export function getSampleNotice(slug: string): SampleNotice | null {
-  return SAMPLE_NOTICES.find((s) => s.slug === slug) ?? null;
+  return SAMPLE_NOTICES.find((s) => s.slug === slug || s.id === slug) ?? null;
 }

@@ -1,0 +1,10 @@
+/* Scoped to the requested mode switch and its reseller panel only. */
+#netify-space .ns-workspace-mode{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 24px;background:#f7faf8;border-bottom:1px solid #cdded5;color:#224b3c;font:14px/1.4 system-ui,sans-serif}
+#netify-space .ns-mode-switch{display:inline-flex;gap:4px;border:1px solid #9cbdad;border-radius:10px;padding:4px;background:#fff}
+#netify-space .ns-mode-switch button{appearance:none;border:1px solid transparent;border-radius:7px;min-height:40px;min-width:100px;padding:8px 18px;font:600 14px/1.4 system-ui,sans-serif;background:transparent;color:#36584b;cursor:pointer}
+#netify-space .ns-mode-switch button[aria-pressed=true]{background:#22664e;border-color:#22664e;color:#fff}
+#netify-space .ns-mode-switch button:focus-visible{outline:3px solid #398fc2;outline-offset:2px}
+#netify-space .ns-mode-status{margin:0;font:600 14px/1.4 system-ui,sans-serif;color:#315c4b}
+#netify-space #ns-reseller-tools[hidden]{display:none!important}
+#netify-space #ns-reseller-tools>.rp-embedded{margin:16px 24px}
+@media(max-width:520px){#netify-space .ns-workspace-mode{padding:10px 16px;gap:9px}#netify-space .ns-mode-status{font-size:12px}#netify-space #ns-reseller-tools>.rp-embedded{margin:12px 16px;padding:16px}}

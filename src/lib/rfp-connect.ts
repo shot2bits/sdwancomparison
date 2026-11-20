@@ -5,7 +5,7 @@
  * asynchronous message thread.
  */
 
-import { getConnection, saveConnection, newId } from "@/lib/rfp-store";
+import { getConnection, saveConnection, newId, newSecretToken } from "@/lib/rfp-store";
 import { getShortlistDataset } from "@/lib/vendors";
 import { MESSAGE_TYPES, type ConnectionMessage, type MessageType, type SupplierConnection } from "@/lib/rfp-types";
 import type { ShortlistVendor } from "@/lib/shortlist-core";
@@ -40,7 +40,7 @@ export async function inviteSupplier(
     rfp_id: rfpId,
     vendor_slug: vendorSlug,
     vendor_name: vendor.name,
-    token: newId("stok"),
+    token: newSecretToken("stok"),
     status: "invited",
     delivery: { state: "not_attempted", updated_at: now },
     messages: intro

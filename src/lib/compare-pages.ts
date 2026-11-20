@@ -34,8 +34,9 @@ export const COMPARE_PAIRS: ComparePair[] = [
   pair("bt-business", "verizon-business"),
   pair("orange-business", "ntt"),
   pair("gtt", "colt-technology-services"),
-  // Wireless-first
-  pair("cradlepoint-ericsson", "peplink"),
+  // Wireless-first cradlepoint-ericsson vs peplink was listed here, but
+  // neither vendor is in the published shortlist dataset, so the page
+  // 404'd while the sitemap and related-pair links still pointed at it.
 ];
 
 export function getComparePair(slug: string): ComparePair | undefined {

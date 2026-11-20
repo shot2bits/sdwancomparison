@@ -23,13 +23,15 @@ type Session = { authenticated: boolean; role?: string; email?: string; vendor_s
  * caller passed one (the publish gates auto-continue), otherwise a full
  * reload so server-rendered surfaces pick up the session.
  */
-export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIntent, publicationVerification = false }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void; publishRfpId?: string; circuitIntent?: CircuitSignupIntent; publicationVerification?: boolean }) {
+export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIntent, publicationVerification = false, returnTo, projectSessionToken, onSignedOut, simple=false }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void; publishRfpId?: string; circuitIntent?: CircuitSignupIntent; publicationVerification?: boolean; returnTo?: string; projectSessionToken?: string; onSignedOut?:()=>void; simple?:boolean }) {
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState<string | null>(null);
   const [devLink, setDevLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [projectRequired, setProjectRequired] = useState(false);
+  const [pendingReview, setPendingReview] = useState<string | null>(null);
   const [codeOpen, setCodeOpen] = useState(false);
   const [challenge, setChallenge] = useState("");
   const [website, setWebsite] = useState("");
@@ -59,14 +61,15 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
   async function request() {
     if (busy) return;
     setBusy(true);
-    setError(null); setSent(null); setDevLink(null);
+    setError(null); setSent(null); setDevLink(null); setProjectRequired(false); setPendingReview(null);
     try {
       // Where sign-in was requested from: carried through the magic link so
       // the verify page can send the person straight back here afterwards.
-      const return_to = circuitIntent ? `/sase/circuit-pricing/?request=${encodeURIComponent(circuitIntent.id)}` : publishRfpId ? `/sase/rfp-builder/${publishRfpId}/?welcome=submitting` : sourcingReturnPath(window.location.search) ?? window.location.pathname + window.location.search;
-      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, ...(circuitIntent ? {circuit_intent:circuitIntent} : {}), attribution: firstTouch(), ...(role === "buyer" ? { bot_proof: { challenge, website } } : {}) }) });
+      const return_to = returnTo ?? (circuitIntent ? `/sase/circuit-pricing/?request=${encodeURIComponent(circuitIntent.id)}` : publishRfpId ? `/sase/rfp-builder/${publishRfpId}/?welcome=submitting` : sourcingReturnPath(window.location.search) ?? window.location.pathname + window.location.search);
+      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, ...(projectSessionToken ? {project_session_token:projectSessionToken} : {}), ...(circuitIntent ? {circuit_intent:circuitIntent} : {}), attribution: firstTouch(), ...(role === "buyer" ? { bot_proof: { challenge, website } } : {}) }) });
       const data = await res.json();
       if (!res.ok) {
+        setProjectRequired(data.publish_required === true);
         throw new Error(data.error ?? "Could not send a link.");
       }
       // Fix, 11 Aug 2026: emailed can now come back false on a 200 response
@@ -79,10 +82,12 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
       // below, unaffected by this. data.message carries the specific reason
       // when the API has one (e.g. a known prior bounce); otherwise this
       // falls back to a generic line.
-      if (data.emailed === false && !data.dev_link) {
+      if (data.access_pending === true) {
+        setPendingReview(data.message ?? "Your access request is waiting for Netify review. No sign-in email has been sent yet.");
+      } else if (data.emailed === false && !data.dev_link) {
         setError(data.message ?? "We could not confirm delivery to that address. Double-check it, try a different work email, or email support@netify.com and we will get you in.");
       } else {
-        setSent(data.message ?? `Sent. Click the link in the email, or type the 6-digit code from it below. Both stay valid for 60 minutes. Not there within a few minutes? Check spam, then press Send link again; the code stays the same.`);
+        setSent(data.message ?? (simple ? "Enter the 6-digit code from your email below." : `Sent. Click the link in the email, or type the 6-digit code from it below. Not there within a minute? Check spam.`));
         if (data.dev_link) setDevLink(data.dev_link);
       }
     } catch (e) { setError(e instanceof Error ? e.message : "Could not send a link."); }
@@ -95,6 +100,7 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
   async function logout() {
     await fetch("/sase/api/auth/logout", { method: "POST" });
     setSession({ authenticated: false });
+    onSignedOut?.();
   }
 
   function verified() {
@@ -127,23 +133,25 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId, circuitIn
       <div className="flex flex-wrap gap-2">
         <input value={website} onChange={(e) => setWebsite(e.target.value)} name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute h-px w-px overflow-hidden opacity-0 pointer-events-none" />
         <input aria-label="Work email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@yourcompany.com" className="min-w-0 flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" onKeyDown={(e) => { if (e.key === "Enter") void request(); }} />
-        <button onClick={request} disabled={busy || !email.includes("@") || (role === "buyer" && !challenge)} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{busy ? "Sending…" : publicationVerification ? "Send verification email" : "Send link"}</button>
+        <button onClick={request} disabled={busy || !email.includes("@") || (role === "buyer" && !challenge)} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{busy ? "Sending…" : simple ? "Email me a code" : publicationVerification ? "Send verification email" : "Send link"}</button>
       </div>
+      {pendingReview && <p role="status" className="mt-3 text-sm leading-6">{pendingReview}</p>}
       {sent && (
         <>
           <p className="text-sm text-emerald-700 mt-2">{sent}</p>
-          <CodeEntry defaultEmail={email} onVerified={verified} />
+          <CodeEntry defaultEmail={email} onVerified={verified} simple={simple}/>
         </>
       )}
       {devLink && <p className="text-xs text-[var(--ink-500)] mt-1">Preview link (email not configured): <a className="underline" href={devLink}>sign in</a></p>}
-      {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-700 mt-2">{error}</p>}
+      {projectRequired && <a className="mt-3 inline-block font-medium underline" href="/sase/shortlist/" data-access-route="project">Describe your requirement and prepare a request →</a>}
       {!sent && (
         <p className="text-xs text-[var(--ink-500)] mt-2">
           <button type="button" onClick={() => setCodeOpen((v) => !v)} className="underline hover:text-[var(--ink-900)]">Already have a 6-digit code from us?</button>
         </p>
       )}
       {!sent && codeOpen && <CodeEntry defaultEmail={email.includes("@") ? email : ""} onVerified={verified} />}
-      <p className="text-xs text-[var(--ink-500)] mt-2">We only email you about your RFPs, opportunities and RFP Builder and Marketplace features and benefits. No third-party marketing, and you can opt out at any time.</p>
+      <p className="text-xs text-[var(--ink-500)] mt-2">{simple?"No password. Use the same work email whenever you return.":"We only email you about your RFPs, opportunities and RFP Builder and Marketplace features and benefits. No third-party marketing, and you can opt out at any time."}</p>
       {/* The Netlify and netify.ai disambiguation used to stand here (R9,
           Robert's ruling 30 Jul 2026: it is gone from sign-in). Somebody
           reaching a sign-in box has already decided who we are; the

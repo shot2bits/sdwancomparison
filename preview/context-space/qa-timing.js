@@ -1,0 +1,2 @@
+/** Local acceptance instrumentation only; no project content or capabilities. */
+export function qaTiming(action,start,projectId,extra={}){const q=new URLSearchParams(location.search);if(q.get('qa')!=='phase1b')return;fetch('/api/context-preview/qa-timing',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action,projectId,browser:q.get('qaBrowser')||'iab',ms:Math.round((performance.now()-start)*10)/10,...extra})}).catch(()=>{});}

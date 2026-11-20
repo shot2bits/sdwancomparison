@@ -62,7 +62,7 @@ export default function SupplierVettingStandardPage() {
             The comparison dataset behind matching holds per-vendor capability evaluations with evaluation
             dates and named sources. Vendors and service providers are matched to opportunities from this dataset,
             not from self-description. The dataset and its sources are public on the{" "}
-            <Link href="/shortlist" className="underline">vendor comparison</Link>.
+            <Link href="/shortlist/" className="underline">vendor comparison</Link>.
           </p>
         </div>
         <div>
@@ -95,7 +95,7 @@ export default function SupplierVettingStandardPage() {
 
       <p className="mt-8 text-sm text-[var(--ink-500)]">
         Standard approved 29 July 2026. Questions, or a vendor wanting to register:{" "}
-        <Link href="/for-suppliers" className="underline">for vendors and providers</Link>.
+        <Link href="/for-suppliers/" className="underline">for vendors and providers</Link>.
       </p>
     </div>
   );

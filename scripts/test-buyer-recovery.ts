@@ -19,3 +19,23 @@ assert.equal(attentionItem(project,undefined,0),null);
 assert.match(attentionItem({...project,status:'published'},failed,0)!.status,/handoff/);
 assert.equal(attentionItem({...project,status:'published'},failed,1),null);
 console.log('PASS attention queue: blocked, ordinary draft, zero connections, resolved handoff');
+
+import {retainSupplierFollowUp} from '../src/lib/buyer-recovery';
+import {noticeResponseWindow} from '../src/lib/notice-presentation';
+const today=Date.parse('2026-10-31T12:00:00Z'),old=today-40*86400000;
+assert(retainSupplierFollowUp(old,0,today));
+assert(!retainSupplierFollowUp(old,1,today));
+assert(retainSupplierFollowUp(today,1,today));
+assert.equal(noticeResponseWindow({status:'open',response_deadline:old},today),'deadline_passed');
+assert.equal(noticeResponseWindow({status:'open',response_deadline:today+1},today),'open');
+assert.equal(noticeResponseWindow({status:'open',deadline:today},today),'deadline_passed');
+assert.equal(noticeResponseWindow({status:'open'},today),'open');
+assert.equal(noticeResponseWindow({status:'closed',response_deadline:old},today),'closed');
+assert.equal(noticeResponseWindow({status:'awarded'},today),'awarded');
+console.log('PASS unworked older requests retained and stated response-window status is truthful without rewriting stored notices');
+
+const contactedDraft={id:'rfp_contacted',title:'Private draft',status:'draft',updated:100,contact_email:'requester@business.example',pending_submit:{list_on_board:true}};
+assert.match(attentionItem(contactedDraft,undefined,0)!.status,/unfinished/);
+assert.match(attentionItem(contactedDraft,undefined,0,{at:101,stage:'verification',code:'delivery_failed'})!.reason,/not accepted for sending/);
+assert.equal(attentionItem({...contactedDraft,contact_email:'',pending_submit:undefined},undefined,0),null,'anonymous drafts are not contactable leads');
+console.log('PASS unfinished contacted requests and failed delivery are visible; anonymous drafts are not promoted to leads');

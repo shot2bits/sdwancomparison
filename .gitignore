@@ -49,3 +49,12 @@ next-env.d.ts
 /.private/provider-normalised/
 /.private/provider-review/
 .env*.local
+
+# Local research and generated acceptance artifacts stay in the checkpoint.
+/outputs/
+/reports/
+/.private/
+/data/network-presence/source-html/
+/docs/release/*.png
+__pycache__/
+*.pyc

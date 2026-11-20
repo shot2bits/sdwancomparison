@@ -1,6 +1,7 @@
 import { requestOriginAllowed } from "@/lib/request-origin";
 import {sourcingScopeHash,currentSourcingProposals} from "@/lib/sourcing-proposal-scope";
 import {recordMarketplaceFunnelEvent} from "@/lib/marketplace-funnel";
+import { getAllVendors } from "@/lib/vendors";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { z } from "zod";
 import { sessionFromRequest } from "@/lib/auth";
@@ -54,15 +55,16 @@ export async function GET(req: Request, ctx: Ctx) {
         { error: "Not a sourcing project." },
         { status: 404, headers },
       );
-    const [feed, responses, reviews] = await Promise.all([
+    const [feed, responses, reviews, request] = await Promise.all([
       kvGetJson<FeedItem[]>(`rfp:${id}:sourcing-pricing`),
       listResponses(id),
       listReviews(id),
+      kvGetJson<SourcingRecord>(`sourcing:request:${p.entrance_context.raw_input.sourcing_request_id}`),
     ]);
     const scoped=await currentSourcingProposals(p,feed??[]);
     const currentIds=new Set(scoped.current.map(f=>f.id));
     return Response.json(
-      { project: publicProject(p), scope_hash:scoped.scope_hash, feed:scoped.current, previous_feed:scoped.previous, responses:responses.filter(r=>currentIds.has(r.id)), reviews:reviews.filter(r=>currentIds.has(r.response_id)) },
+      { project: publicProject(p), sourcing_request: request?.project_id === id ? { status: request.status, brief: request.request.brief.supplier_brief, recipients: request.request.recipients.map(({ slug, actions }) => ({ slug, actions, name: getAllVendors().find(v => v.slug === slug)?.name ?? slug })) } : null, scope_hash:scoped.scope_hash, feed:scoped.current, previous_feed:scoped.previous, responses:responses.filter(r=>currentIds.has(r.id)), reviews:reviews.filter(r=>currentIds.has(r.response_id)) },
       { headers },
     );
   } catch {

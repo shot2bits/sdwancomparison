@@ -1,9 +1,0 @@
-{
-  "source": "neon",
-  "contract": "provider-match-records/2.0.0",
-  "matches": [
-    "Cisco",
-    "Aryaka"
-  ],
-  "isError": false
-}

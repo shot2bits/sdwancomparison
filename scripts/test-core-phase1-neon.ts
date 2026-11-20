@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import {randomBytes,randomUUID} from 'node:crypto';
+import {coreDatabase,readCoreProject,saveCoreProject,sha,canonical,CORE_BRANCH,coreProjection} from '../src/lib/core-phase1';
+import {siteReviewSignature,userReviewSignature} from '../preview/context-space/location-model.js';
+const sql=coreDatabase(),projects=await sql.query('SELECT id FROM netify_core_phase1.projects WHERE id=$1',['290472bb-415c-43db-9cb3-1dfd734b541b']);
+assert.equal(projects.length,1,'Target only the original Browser A project; imported projects remain separate');const id=projects[0].id;
+const edit=randomBytes(32).toString('base64url'),view=randomBytes(32).toString('base64url');
+await sql.query("INSERT INTO netify_core_phase1.capabilities(token_hash,project_id,authority) VALUES($1,$3,'edit'),($2,$3,'view')",[sha(edit),sha(view),id]);
+let checks=0;function pass(name:string){checks++;console.log('PASS '+name);}
+try{
+ const original=await readCoreProject(id,edit);assert.equal(original.snapshot.estate.sites.length,6);pass('Browser A created exactly one six-site Neon project');
+ const unchangedDb=JSON.stringify(await sql.query('SELECT current_revision,last_activity_at,expires_at FROM netify_core_phase1.projects WHERE id=$1',[id]));
+ await readCoreProject(id,view);await coreProjection(id,edit);
+ assert.equal(JSON.stringify(await sql.query('SELECT current_revision,last_activity_at,expires_at FROM netify_core_phase1.projects WHERE id=$1',[id])),unchangedDb);pass('project and RFP reads do not write or extend retention');
+ await assert.rejects(()=>saveCoreProject(id,view,original.snapshot,original.revision,randomUUID()),/project_access_denied/);
+ await assert.rejects(()=>readCoreProject(randomUUID(),edit),/project_access_denied/);
+ await assert.rejects(()=>readCoreProject(id,randomBytes(32).toString('base64url')),/project_access_denied/);pass('view cannot edit; wrong-project and incorrect capabilities fail closed');
+ const next=structuredClone(original.snapshot);next.packet.project.document.notes+='\nPHASE1 LOSSLESS CHECK '+('Original research qualification. '.repeat(300))+' FINAL MARKER';
+ next.estate.sites[0].original={source:'Phase 1 labelled test',qualification:'Unconfirmed source claim',originalValue:'unknown',fullText:'Source evidence. '.repeat(1000)+' END SOURCE'};
+ next.estate.planning??={};next.estate.planning.siteReviews={[next.estate.sites[0].id]:siteReviewSignature(next.estate,next.estate.sites[0])};
+ const op=randomUUID(),receipt=await saveCoreProject(id,edit,next,original.revision,op);
+ assert.equal(receipt.revision,original.revision+1);assert.deepEqual(await saveCoreProject(id,edit,next,original.revision,op),receipt);pass('scope version increments once; identical operation replay is idempotent');
+ const saved=await readCoreProject(id,edit);assert.deepEqual(saved.snapshot.estate.sites[0].original,next.estate.sites[0].original);assert(saved.snapshot.packet.project.document.notes.endsWith('FINAL MARKER'));assert.equal(saved.snapshot.estate.planning.siteReviews[next.estate.sites[0].id],next.estate.planning.siteReviews[next.estate.sites[0].id]);pass('long evidence, original values, qualifications and review signatures survive Neon JSON round trip');
+ const modified=structuredClone(next);modified.packet.project.document.notes+=' different';
+ await assert.rejects(()=>saveCoreProject(id,edit,modified,original.revision,op),/operation_key_reused/);pass('reused operation key with different content is rejected');
+ const left=structuredClone(saved.snapshot),right=structuredClone(saved.snapshot);left.packet.project.document.notes+=' A';right.packet.project.document.notes+=' B';
+ const both=await Promise.allSettled([saveCoreProject(id,edit,left,saved.revision,randomUUID()),saveCoreProject(id,edit,right,saved.revision,randomUUID())]);
+ assert.equal(both.filter(r=>r.status==='fulfilled').length,1);assert.equal(both.filter(r=>r.status==='rejected'&&r.reason.code==='revision_conflict').length,1);pass('simultaneous stale saves: exactly one winner, one explicit conflict, no lost update');
+ let current=await readCoreProject(id,edit),changed=structuredClone(current.snapshot);changed.estate.sites[0].notes+=' changed scope';
+ const result=await saveCoreProject(id,edit,changed,current.revision,randomUUID());const after=await readCoreProject(id,edit);assert(!after.snapshot.estate.planning.siteReviews[changed.estate.sites[0].id]);assert.equal(after.revision,result.revision);pass('site scope change invalidates its review; requested scope is not supplier-confirmed');
+ await assert.rejects(()=>sql.query("UPDATE netify_core_phase1.scope_revisions SET scope_hash=scope_hash WHERE project_id=$1",[id]),/Append-only/);
+ await assert.rejects(()=>sql.query("DELETE FROM netify_core_phase1.audit_events WHERE project_id=$1",[id]),/Append-only/);pass('scope history and audit events cannot be overwritten or deleted');
+ await assert.rejects(()=>sql.query("INSERT INTO netify_core_phase1.capabilities(token_hash,project_id,authority) VALUES($1,$2,'claim')",[sha(randomUUID()),id]));pass('claim authority cannot be issued before verified claiming is implemented');
+ const timing=await sql.query('SELECT extract(epoch FROM expires_at-last_activity_at)/86400 AS days FROM netify_core_phase1.projects WHERE id=$1',[id]);assert(Math.abs(Number(timing[0].days)-90)<0.001);pass('anonymous project access expires 90 days after recorded activity');
+ const expiry=await sql.query('SELECT expires_at FROM netify_core_phase1.projects WHERE id=$1',[id]);
+ await sql.query("UPDATE netify_core_phase1.projects SET expires_at=clock_timestamp()-interval '1 second' WHERE id=$1",[id]);
+ try{await assert.rejects(()=>readCoreProject(id,edit),/project_access_denied/);await assert.rejects(()=>saveCoreProject(id,edit,after.snapshot,after.revision,randomUUID()),/project_access_denied/);}finally{await sql.query('UPDATE netify_core_phase1.projects SET expires_at=$2 WHERE id=$1',[id,expiry[0].expires_at]);}pass('expired view/edit links are denied without deleting original evidence');
+ const query=JSON.stringify({site_index:[{sector:'manufacturing',city:'London',products:['sdwan']}]});
+ const matches=await sql.query('SELECT r.project_id FROM netify_core_phase1.scope_revisions r JOIN netify_core_phase1.projects p ON p.id=r.project_id AND p.current_revision=r.revision WHERE r.scope @> $1::jsonb AND p.id=$2',[query,id]);assert.equal(matches.length,1);
+ const explain=await sql.transaction([sql.query('SET LOCAL enable_seqscan=off',[]),sql.query('EXPLAIN SELECT project_id FROM netify_core_phase1.scope_revisions WHERE scope @> $1::jsonb',[query])]);assert(JSON.stringify(explain).includes('core_scope_search'));pass('same-site sector, location and inherited-product containment uses the canonical-scope GIN index');
+ current=await readCoreProject(id,edit);await saveCoreProject(id,edit,original.snapshot,current.revision,randomUUID());pass('original Browser A estate restored after destructive and conflict test cases');
+ const tables=await sql.query("SELECT table_name FROM information_schema.tables WHERE table_schema='netify_core_phase1' ORDER BY table_name",[]);
+ console.log(JSON.stringify({branch:CORE_BRANCH,project:id,checks,tables:tables.map(r=>r.table_name),result:'PASS',supplier_actions:0,production_writes:0}));
+}finally{await sql.query('UPDATE netify_core_phase1.capabilities SET revoked_at=clock_timestamp() WHERE token_hash IN ($1,$2)',[sha(edit),sha(view)]);}

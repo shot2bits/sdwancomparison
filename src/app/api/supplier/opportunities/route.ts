@@ -25,7 +25,7 @@ export async function GET(req: Request) {
   for (const id of invitedIds) {
     const o = await getOpportunity(id);
     if (o && o.status === "open") {
-      invited.push({ ...toPublicOpportunity(o), room_token: await getOrCreateOpportunityToken(o.id, slug) });
+      invited.push({ ...toPublicOpportunity(o), ...(o.privacy_contract==="opportunity-studio/1"?{workspace_url:`/studio/supplier/${o.source_rfp_id}/`}:{room_token:await getOrCreateOpportunityToken(o.id, slug)}) });
     }
   }
 
@@ -33,7 +33,8 @@ export async function GET(req: Request) {
   for (const p of await listPublicOpportunities()) {
     if (invitedIds.has(p.id)) continue;
     if (p.eligibility !== "open") continue;
-    open.push({ ...p, room_token: await getOrCreateOpportunityToken(p.id, slug) });
+    const stored=await getOpportunity(p.id);
+    open.push({ ...p, ...(stored?.privacy_contract==="opportunity-studio/1"?{workspace_url:`/studio/supplier/${stored.source_rfp_id}/`}:{room_token:await getOrCreateOpportunityToken(p.id,slug)}) });
   }
 
   return Response.json({ ok: true, vendor_slug: slug, invited, open }, { headers: cors });

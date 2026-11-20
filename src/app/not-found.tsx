@@ -37,7 +37,7 @@ export default function NotFound() {
           >
             Start an RFP
           </Link>
-          <Link href="/shortlist" className="text-sm underline text-[var(--ink-700)]">
+          <Link href="/shortlist/" className="text-sm underline text-[var(--ink-700)]">
             Compare the market
           </Link>
           <Link href="/opportunities/board" className="text-sm underline text-[var(--ink-700)]">

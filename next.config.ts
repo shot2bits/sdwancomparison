@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withBotId } from "botid/next/config";
 
 const nextConfig: NextConfig = {
   // This app is served under netify.co.uk/sase/* via a rewrite from the main
@@ -28,6 +29,8 @@ const nextConfig: NextConfig = {
   // made valid PDF uploads fail on Vercel because that worker disappeared.
   serverExternalPackages: ["pdf-parse", "@napi-rs/canvas"],
   outputFileTracingIncludes: {
+    "/marketplace{,/**}": ["./preview/context-space/**/*", "./data/**/*"],
+    "/api/context-preview/**": ["./preview/context-space/**/*", "./data/**/*"],
     "/api/workspace/ingest-file": [
       "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
       "./node_modules/@napi-rs/canvas/**/*",
@@ -59,17 +62,27 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "private, no-store" }] },
+      ...["/home/:path*", "/studio-preview/:path*"].map(source=>({source,headers:[{key:"Access-Control-Allow-Origin",value:"https://netify.co.uk"}]})),
       { source: "/shortlist/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       { source: "/best/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       { source: "/alternatives/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       {
         source: "/:path*",
-        headers: [{ key: "X-Robots-Tag", value: process.env.VERCEL_ENV === "production" ? "index, follow" : "noindex, nofollow" }],
+        headers: [
+          {key:"X-Content-Type-Options",value:"nosniff"},
+          {key:"X-Frame-Options",value:"SAMEORIGIN"},
+          {key:"Referrer-Policy",value:"strict-origin-when-cross-origin"},
+          {key:"Permissions-Policy",value:"camera=(), microphone=(), geolocation=()"},
+          {key:"Content-Security-Policy",value:"frame-ancestors 'self'; object-src 'none'; base-uri 'self'"},
+          { key: "X-Robots-Tag", value: process.env.VERCEL_ENV === "production" ? "index, follow" : "noindex, nofollow" }],
       },
     ];
   },
   async redirects() {
     return [
+      // Phase A briefly published /connect/. The single connector page is /connector/.
+      { source: "/connect", destination: "/connector/", permanent: true },
+      { source: "/connect/", destination: "/connector/", permanent: true },
       // The old shortlist subdomain is present in Bing AI citation data.
       // Give both slash variants a direct permanent hop to the exact
       // canonical URL before the generic subdomain retirement rule.
@@ -216,4 +229,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBotId(nextConfig);

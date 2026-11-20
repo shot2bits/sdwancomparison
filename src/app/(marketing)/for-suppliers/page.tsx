@@ -86,7 +86,7 @@ export default async function ForSuppliersPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {opps.map((o) => (
-              <Link key={o.id} href={`/opportunities/${o.id}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
+              <Link key={o.id} href={`/opportunities/${o.id}/`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
                 <div className="flex items-center gap-2 mb-1 text-xs">
                   <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 font-medium uppercase tracking-wide text-[var(--ink-600)]">{o.engagement_type === "auction" ? "Auction" : "Quote room"}</span>
                   {o.eligibility === "open" && <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Open to bid</span>}

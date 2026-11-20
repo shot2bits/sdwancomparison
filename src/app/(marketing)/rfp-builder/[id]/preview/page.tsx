@@ -181,7 +181,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
           <p className="m-0 mt-2 text-sm">
             {boardOppId && (
               <>
-                <Link href={`/opportunities/${boardOppId}`} className="font-medium underline">View your live board listing</Link>
+                <Link href={`/opportunities/${boardOppId}/`} className="font-medium underline">View your live board listing</Link>
                 <span className="mx-2 text-emerald-700/40">·</span>
               </>
             )}

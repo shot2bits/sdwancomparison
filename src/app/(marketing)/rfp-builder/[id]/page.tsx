@@ -1,6 +1,8 @@
+import {redirect} from 'next/navigation';
 import type { Metadata } from "next";
 import Link from "next/link";
 import SourcingProjectJourney from "@/components/SourcingProjectJourney";
+import "../../shortlist/sourcing.css";
 import RfpBuilder from "@/components/RfpBuilder";
 import { RFP_PATHS, getRfpPath } from "@/lib/rfp-paths";
 import { getProject } from "@/lib/rfp-store";
@@ -46,10 +48,11 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
     // of the hand-off. The header reads the project's engine flag only; no
     // private matter is rendered server-side.
     const proj = await getProject(id).catch(() => null);
+    if(proj?.entrance_context?.raw_input.studio_contract==="opportunity-studio/1")redirect(`/studio-preview/?project=${encodeURIComponent(id)}`);
     const isEngine = proj?.engine === "security_sourcing";
     const isSourcing = Boolean(proj?.entrance_context?.raw_input.sourcing_request_id);
     return (
-      <div className="max-w-6xl mx-auto px-6 py-16">
+      <div className={isSourcing ? "sourcing sourcing-project" : "max-w-6xl mx-auto px-6 py-16"}>
         {/* The project navigation renders on the builder too (Robert,
             21 July 2026: clicking RFP from the project was a one-way door;
             the browser back button was the only route home). Same bar as

@@ -10,10 +10,11 @@
 
 import { useState } from "react";
 
-export default function CodeEntry({ defaultEmail = "", onVerified }: { defaultEmail?: string; onVerified: () => void }) {
+export default function CodeEntry({ defaultEmail = "", onVerified, simple=false }: { defaultEmail?: string; onVerified: () => void; simple?:boolean }) {
   const [addr, setAddr] = useState(defaultEmail);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [publicationMessage, setPublicationMessage] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   async function submit() {
     const c = code.trim();
@@ -26,9 +27,11 @@ export default function CodeEntry({ defaultEmail = "", onVerified }: { defaultEm
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ code: c, email: e }),
       });
-      const d = (await r.json().catch(() => ({}))) as { error?: string };
+      const d = (await r.json().catch(() => ({}))) as { error?: string; publish_outcome?: {state:string;message?:string;return_url?:string} };
       if (!r.ok) throw new Error(d.error ?? "That code did not work.");
-      onVerified();
+      if (d.publish_outcome?.state === 'saved_unpublished') {
+        setPublicationMessage(d.publish_outcome.message || 'Your email is verified, but your project has not been published. Open your saved project to review and retry.');
+      } else onVerified();
     } catch (ex) {
       setErr(ex instanceof Error ? ex.message : "That code did not work.");
     } finally {
@@ -37,7 +40,7 @@ export default function CodeEntry({ defaultEmail = "", onVerified }: { defaultEm
   }
   return (
     <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
-      <p className="text-sm mb-1.5"><strong>Or type the 6-digit code from the email.</strong> Quicker than finding the link, and it works even if your company scans links:</p>
+      <p className="text-sm mb-1.5">{simple?<strong>Enter your 6-digit code.</strong>:<><strong>Or type the 6-digit code from the email.</strong> Quicker than finding the link, and it works even if your company scans links:</>}</p>
       <div className="flex flex-wrap items-center gap-2">
         {!defaultEmail && (
           <input
@@ -63,6 +66,7 @@ export default function CodeEntry({ defaultEmail = "", onVerified }: { defaultEm
           {busy ? "Checking..." : "Confirm with code"}
         </button>
       </div>
+      {publicationMessage && <p role="alert" className="mt-3">{publicationMessage} <a href="/sase/account/" className="underline">Open my saved projects</a></p>}
       {err && <p className="mt-1.5 text-sm text-red-700">{err}</p>}
     </div>
   );

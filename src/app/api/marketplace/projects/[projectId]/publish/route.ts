@@ -1,7 +1,9 @@
+import {ProviderMatchSourceUnavailable} from '@/lib/provider-match-source';
+import { recordPublicationIssue } from '@/lib/publication-issues';
 import { z } from "zod";
 import { sessionFromRequest } from "@/lib/auth";
 import { authenticateMarketplaceProject, withMarketplaceMutation, MarketplaceProjectConflict, MarketplaceProjectUnauthorised } from "@/lib/marketplace-project-session";
-import { getProject, saveProject } from "@/lib/rfp-store";
+import { getProject, saveProject, indexRfpForBuyer } from "@/lib/rfp-store";
 import { executePublish } from "@/lib/rfp-publish";
 import { isMarketUnlocked } from "@/lib/market-unlock";
 import { ProjectDetailsSchema } from "@/lib/rfp-types";
@@ -46,9 +48,11 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
       consent: project.consent?.version === input.consent_version ? project.consent : { version: input.consent_version, agreed_at: at, flow: "marketplace_project" },
       consents: priorConsent ? project.consents : [...(project.consents ?? []), { at, action: "marketplace.publish", granted_by: sessionEmail, via: "web", text: input.consent_text }],
     }));
+    await indexRfpForBuyer(sessionEmail, projectId);
     const result = await executePublish(consented, sessionEmail, { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in });
     const unlocked = await isMarketUnlocked(projectId);
     if (!publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })) {
+      await recordPublicationIssue(projectId, 'publication', 'publication_failed');
       await recordMarketplaceFunnelEvent({ event: "publication_incomplete", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web", detail: { board_created: Boolean(result.board.opportunity_id) } });
       return Response.json({ ok: false, code: "board_publication_incomplete", error: result.board.reason ?? "Board publication did not complete.", market_unlocked: false, publication_policy_version: PUBLICATION_POLICY_VERSION }, { status: 409 });
     }
@@ -57,6 +61,11 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
     return Response.json({ ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION });
     });
   } catch (error) {
+    if (!(error instanceof MarketplaceProjectUnauthorised)) await recordPublicationIssue(projectId, 'publication', 'publication_failed');
+    if(error instanceof ProviderMatchSourceUnavailable){
+      console.error('publication_dependency_unavailable',{code:'provider_feed_unavailable',project_id:projectId});
+      return Response.json({error:'Your project is saved, but publication is temporarily unavailable. Please retry shortly. Nothing has been published.'},{status:503});
+    }
     if (error instanceof MarketplaceProjectConflict) return Response.json({ error: error.message }, { status: 409 });
     if (error instanceof MarketplaceProjectUnauthorised) return Response.json({ error: "Project not found." }, { status: 404 });
     return Response.json({ error: error instanceof Error ? error.message : "Publication failed." }, { status: 400 });

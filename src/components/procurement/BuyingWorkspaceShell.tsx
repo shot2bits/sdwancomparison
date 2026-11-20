@@ -1,5 +1,5 @@
 "use client";
-import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
+import ProposalExample from "./ProposalExample";
 import ReleaseVersion from "@/components/ReleaseVersion";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 
@@ -8,7 +8,6 @@ import { useEffect, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 const BuyerAssistant = dynamic(() => import('./BuyerAssistant'), { loading: () => <p role="status">Loading workspace tools…</p> });
 import { MEGA_GROUPS } from '@/lib/nav';
-import { PublicationBenefits } from './PublicationBenefits';
 
 const CircuitPricing = dynamic(() => import('./CircuitPricing'), { loading: () => <p role="status">Loading circuit pricing…</p> });
 type View = 'circuits' | 'project' | 'compare' | 'responses' | 'tools' | 'memories' | 'skills';
@@ -37,6 +36,13 @@ export default function BuyingWorkspaceShell({ children, comparison, information
   useEffect(()=>{const frame=requestAnimationFrame(()=>{if(new URLSearchParams(window.location.search).has('request')){setView('circuits');setCircuitVisited(true)}});return()=>cancelAnimationFrame(frame)},[]);
   const [assistantVisited, setAssistantVisited] = useState(false);
   const [assistantMode, setAssistantMode] = useState<'memories' | 'skills'>('memories');
+  const [buyingIntent, setBuyingIntent] = useState<'prepare' | 'responses'>('prepare');
+  function chooseIntent(intent: 'prepare' | 'responses') {
+    setBuyingIntent(intent);
+    window.dispatchEvent(new CustomEvent('netify:buying-intent', {detail:intent}));
+    fireNetifyEvent('buying_intent_selected', {intent:intent === 'responses' ? 'pricing' : 'research'});
+    void projectTool(intent === 'responses' ? 'review' : 'brief');
+  }
   const [format, setFormat] = useState('brief');
   useEffect(() => { fireNetifyEvent('marketplace_builder_viewed', { intent: 'project' }); }, []);
   useEffect(() => {
@@ -61,7 +67,7 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <button className="nf-buying-new" onClick={()=>{try{startNewBuyingProject()}catch{window.alert("Your draft could not be archived. Nothing was deleted.");}}}>＋ New project</button><div className="nf-buying-project-label"><span>Workspace</span><strong>SASE &amp; SD-WAN procurement</strong></div>
       <nav aria-label="Buying workspace">
         <button onClick={() => navigate('project')} aria-current={view === 'project' ? 'page' : undefined}><span aria-hidden="true">▤</span>My project</button>
-        <button onClick={() => projectTool('review')}><span aria-hidden="true">◷</span>Review &amp; publish</button>
+        <button onClick={() => projectTool('review')}><span aria-hidden="true">◷</span>Review my brief</button>
         <button onClick={() => navigate('responses')} aria-current={view === 'responses' ? 'page' : undefined}><span aria-hidden="true">▱</span>Responses</button>
       </nav>
       <details className="nf-buying-more-navigation">
@@ -83,13 +89,13 @@ export default function BuyingWorkspaceShell({ children, comparison, information
       <div className="nf-buying-page">
         {assistantEnabled && assistantVisited && <div hidden={view !== 'memories' && view !== 'skills'}><BuyerAssistant mode={assistantMode} onCompare={() => navigate('compare')} onProject={() => navigate('project')} /></div>}
         <div hidden={view !== 'circuits'}>{circuitVisited && <CircuitPricing />}</div>
-        <div hidden={view !== 'project'} className="nf-buying-engine"><section className="nf-buying-start" aria-label="Ways to start your project"><h1>Build your SASE or SD-WAN requirements and find suitable providers.</h1><p>{SOURCING_DESCRIPTION}</p><PublicationBenefits compact /><nav aria-label="Start your buying journey"><button type="button" aria-pressed={format === 'brief'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('brief'); }}>Describe my project</button><button type="button" aria-pressed={format === 'import'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('import'); }}>Upload my existing RFP</button><button type="button" aria-pressed={format === 'detailed-rfp'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project' }); projectTool('detailed-rfp'); }}>Build a detailed RFP</button></nav><p className="nf-buying-subtle">A brief is enough to publish. A full RFP is optional. Publishing is free and does not commit you to buy.</p></section>{children}</div>
+        <div hidden={view !== 'project'} className="nf-buying-engine"><section className="nf-buying-start" aria-label="Ways to start your project"><h1>Turn your SASE or SD-WAN requirement into comparable supplier proposals.</h1><p>Start with a short description, paste your AI-written brief or bring an existing RFP. Netify helps prepare one clear scope and coordinate requests to suppliers you approve.</p><nav aria-label="Choose your next step"><button type="button" aria-pressed={buyingIntent === 'prepare'} onClick={() => chooseIntent('prepare')}>Help me prepare my requirements</button><button type="button" aria-pressed={buyingIntent === 'responses'} onClick={() => chooseIntent('responses')}>Help me get supplier proposals</button></nav><p>{buyingIntent === 'responses' ? 'Describe what you need, review your anonymous brief and verify your work email. A short brief is enough to start; a full RFP is optional.' : 'Build a private draft and download it for internal review. Ask for supplier responses when you are ready.'}</p><nav aria-label="Start your buying journey"><button type="button" aria-pressed={format === 'brief'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project', format: 'brief' }); projectTool('brief'); }}>Describe my project</button><button type="button" aria-pressed={format === 'import'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project', format: 'import' }); projectTool('import'); }}>Bring my existing document</button><button type="button" aria-pressed={format === 'detailed-rfp'} onClick={() => { fireNetifyEvent('marketplace_journey_started', { intent: 'project', format: 'detailed-rfp' }); projectTool('detailed-rfp'); }}>Build a detailed RFP</button></nav><p className="nf-buying-subtle">No account or publication needed to download. You approve publication and supplier recipients. Response times are agreed for your project; responses are not guaranteed.</p><ProposalExample /></section>{children}</div>
         <section hidden={view !== 'compare'} aria-label="Public provider comparison" className="nf-buying-research"><p className="nf-buying-eyebrow">Public research</p><h1>Compare SASE &amp; SD-WAN providers</h1><p>Explore capability differences. Turn your research into an anonymous project when you are ready.</p>{comparison}</section>
-        <section hidden={view !== 'responses'} className="nf-buying-responses"><p className="nf-buying-eyebrow">Supplier responses</p><h1>Bring every response together</h1><p>Open your published project to review supplier submissions, evidence, pricing and clarifications.</p><a className="nf-buying-primary" href="/sase/account/">Open my saved projects →</a><button onClick={() => projectTool('responses')}>View this project’s responses</button><p className="nf-buying-subtle">{SOURCING_DESCRIPTION}</p></section>
+        <section hidden={view !== 'responses'} className="nf-buying-responses"><p className="nf-buying-eyebrow">Supplier responses</p><h1>Bring every response together</h1><p>Open your published project to review supplier submissions, evidence, pricing and clarifications.</p><a className="nf-buying-primary" href="/sase/account/">Open my saved projects →</a><button onClick={() => projectTool('responses')}>View this project’s responses</button></section>
         <section hidden={view !== 'tools'} className="nf-buying-tools"><p className="nf-buying-eyebrow">Buying tools</p><h1>All tools</h1><p>Project controls, research and account tools. Options marked Coming soon are not available yet.</p><div className="nf-buying-tool-grid">
           <button onClick={() => projectTool('requirements')}><strong>Edit requirements</strong><span>Open your requirement editor. Choose Short or Detailed RFP there if you need supplier questions.</span></button>
           <button onClick={() => projectTool('review')}><strong>Review my project</strong><span>Review your basic brief or RFP using the format you have chosen. Nothing is published automatically.</span></button>
-          <button onClick={() => projectTool('tools')}><strong>Project tools</strong><span>{SOURCING_DESCRIPTION}</span></button>
+          <button onClick={() => projectTool('tools')}><strong>Project tools</strong><span>Open questions, research and supporting tools for this project.</span></button>
           {resources.map(([name, href, description]) => <ResourceCard key={href} name={name} href={href} description={description} />)}
         </div><details className="nf-buying-more-tools"><summary>More research, sector guides &amp; services</summary>{MEGA_GROUPS.map(group => <section key={group.label}><h2>{group.label}</h2><div className="nf-buying-tool-grid">{group.items.map(item => <ResourceCard key={item.href} name={item.label} href={item.href} description={item.desc} />)}{group.footerLink && <a href={group.footerLink.href}><strong>{group.footerLink.label}</strong></a>}</div></section>)}</details></section>
       </div>

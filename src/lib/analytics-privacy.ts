@@ -1,5 +1,5 @@
 /** Analytics uses route categories, never a buyer's query, token or document title. */
-const ROUTES = ["/sase/shortlist/sd-wan-vendors/", "/sase/shortlist/sd-wan-providers/", "/sase/shortlist/sd-wan-comparison/", "/sase/shortlist/sase-vendors/", "/sase/shortlist/sase-providers/", "/sase/shortlist/sase-comparison/", "/sase/shortlist/research-methodology/", "/sase/shortlist/confirm/","/sase-sd-wan-rfp-builder/", "/sase/home/", "/sase/shortlist/", "/sase/best/", "/sase/compare/", "/sase/vendors/", "/sase/examples/", "/sase/cost-estimator/", "/sase/pricing/", "/sase/circuit-pricing/", "/sase/connector/", "/sase/opportunities/", "/sase/rfp-builder/", "/sase/workspace/", "/sase/account/", "/sase/admin/"];
+const ROUTES = ["/sase/studio-preview/","/sase/studio/","/sase/shortlist/sd-wan-vendors/", "/sase/shortlist/sd-wan-providers/", "/sase/shortlist/sd-wan-comparison/", "/sase/shortlist/sase-vendors/", "/sase/shortlist/sase-providers/", "/sase/shortlist/sase-comparison/", "/sase/shortlist/research-methodology/", "/sase/shortlist/confirm/","/sase-sd-wan-rfp-builder/", "/sase/home/", "/sase/shortlist/", "/sase/best/", "/sase/compare/", "/sase/vendors/", "/sase/examples/", "/sase/cost-estimator/", "/sase/pricing/", "/sase/circuit-pricing/", "/sase/connector/", "/sase/opportunities/", "/sase/rfp-builder/", "/sase/workspace/", "/sase/account/", "/sase/admin/"];
 export function analyticsPath(value: string): string {
  try { const path=new URL(value,"https://netify.co.uk").pathname;return ROUTES.find(route=>path===route.slice(0,-1)||path.startsWith(route))??"/sase/"; } catch {return "/sase/";}
 }
@@ -9,9 +9,9 @@ export function analyticsReferrer(value:string):string {
 export function analyticsLocation(value:string):string {return "https://netify.co.uk"+analyticsPath(value);}
 export function analyticsProps(data:Record<string,unknown>):Record<string,string> {
  const out:Record<string,string>={};
- const numeric=["step","provider_count","matched","invited","gapCount","count"];
+ const numeric=["step","provider_count","matched","invited","gapCount","count","http_status"];
  const flags=["has_title","opt_in","aiUsed"];
- const enums:Record<string,readonly string[]>={source:["rfp_builder","shortlist","marketplace","sector","mcp","standing_action","route_diagnosis"],from:["link","hero"],flow:["submit","review"],method:["email","phone"],family:["cost","best","compare","sector","vendor"],intent:["pricing","research","project"],channel:["web","mcp"],field:["search","scope","sector","region","responseMode"]};
+ const enums:Record<string,readonly string[]>={stage:['save','preparation','publication'],destination:["project","returning","supplier","reseller"],source:["header","workspace","rfp_builder","shortlist","marketplace","sector","mcp","standing_action","route_diagnosis"],from:["link","hero"],flow:["submit","review"],method:["email","phone"],family:["cost","best","compare","sector","vendor"],intent:["pricing","research","project"],channel:["web","mcp"],format:["brief","import","short-rfp","detailed-rfp","docx","print"],status:["ready","empty","failed"],reason:["validation","storage","request"],field:["search","scope","sector","region","responseMode"]};
  for(const [key,value] of Object.entries(data)){
   if(numeric.includes(key)&&/^\d{1,6}$/.test(String(value)))out[key]=String(value);
   else if(flags.includes(key)&&["yes","no","true","false","1","0"].includes(String(value)))out[key]=String(value);

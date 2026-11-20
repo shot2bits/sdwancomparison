@@ -1,0 +1,5 @@
+import {readFile,writeFile} from 'node:fs/promises';import assert from 'node:assert/strict';
+let s=await readFile('db/migrations/20261115_core_delivery.sql','utf8');s=s.replaceAll('netify_core_purge_worker','netify_core_live_purge_worker').replaceAll('netify_core_runtime','netify_core_live_runtime').replaceAll('netify_core_purger','netify_core_live_purger');
+s=s.replaceAll('c.project_id IN (SELECT id FROM netify_core_phase1.projects WHERE disposable_fixture=true) AND ','').replaceAll('project_id IN (SELECT id FROM netify_core_phase1.projects WHERE disposable_fixture=true) AND ','');
+s=s.replaceAll("IF NOT p.disposable_fixture THEN RAISE EXCEPTION 'development_fixture_only';END IF;","IF p.environment<>'production' THEN RAISE EXCEPTION 'production_project_required';END IF;");
+s=s.replace(' -- Global operational counters are not removed by development fixture cleanup.'," DELETE FROM netify_core_phase1.identity_rate_limits WHERE window_at<clock_timestamp()-interval '1 day';GET DIAGNOSTICS n=ROW_COUNT;total=total+n;");assert(!s.includes('c.c.'));assert(!s.includes('disposable_fixture'));await writeFile('db/migrations/production/20261115_core_delivery.sql',s);

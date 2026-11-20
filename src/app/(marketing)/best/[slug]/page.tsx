@@ -1,3 +1,4 @@
+import { vendorProfileHref, VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
 import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
@@ -26,6 +27,7 @@ import {
   getSpeakableSchema,
 } from "@/lib/structured-data";
 import SourcedTable from "@/components/SourcedTable";
+import { SECTORS, formatDate, sectorResearch } from "@/lib/workbook-research";
 
 export const dynamic = "force-dynamic";
 
@@ -106,11 +108,11 @@ export default async function BestPage({ params }: Props) {
       position: v.position,
 
       name: v.name,
-      url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
+      url: vendorProfileHref(v.slug),
       item: {
         "@type": "Service",
         name: `${v.name} SD-WAN / SASE`,
-        url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
+        url: vendorProfileHref(v.slug),
         description: v.key_differentiators[0],
         provider: { "@type": "Organization", name: v.name, url: v.website },
         potentialAction: {
@@ -160,6 +162,17 @@ export default async function BestPage({ params }: Props) {
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <ShortlistEntityBlock entity={entity}/>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
+        {(() => {
+          const sector = SECTORS.find((x) => slug === `sd-wan-sase-providers-for-${x.slug}`);
+          if (!sector) return null;
+          const r = sectorResearch(sector.slug);
+          return (
+            <p className="mt-3 text-sm" data-research-sector>
+              Desk research updated {formatDate(r.updated)}: {r.cases.length} providers publish a {sector.name.toLowerCase()} customer case.{" "}
+              <Link href={`/research/sectors/${sector.slug}/`} className="underline">See the cited {sector.name.toLowerCase()} cases table</Link>
+            </p>
+          );
+        })()}
         {page.input.sector === "healthcare" && <p className="mt-3">For the BT/NHS route, see <a className="underline" href="https://netify.co.uk/sd-wan-for-healthcare/">BT SD-WAN and SASE for healthcare</a>.</p>}
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
           {`Netify's ${reviewedMonth} evidence directory, by proven capability count, verification date and name: `}
@@ -180,7 +193,7 @@ export default async function BestPage({ params }: Props) {
             <span aria-hidden="true">→</span>
           </Link>
           <Link
-            href="/vendors"
+            href={VENDOR_INDEX_URL}
             className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-zinc-900 hover:text-white transition-colors rounded-full text-sm"
           >
             All 30 vendors
@@ -251,7 +264,7 @@ export default async function BestPage({ params }: Props) {
           >
             <p className="eyebrow mb-1">Source evidence</p>
             <h2 className="text-xl mb-1">
-              <Link href={v.marketplace_url ?? `/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+              <Link href={vendorProfileHref(v.slug)} className="no-underline hover:text-[var(--accent)]">
                 {v.position}. {v.name}
               </Link>
             </h2>
@@ -318,7 +331,7 @@ export default async function BestPage({ params }: Props) {
           {BEST_PAGES.filter((p) => p.slug !== page.slug).slice(0, 12).map((p) => (
             <Link
               key={p.slug}
-              href={`/best/${p.slug}`}
+              href={`/best/${p.slug}/`}
               className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
             >
               {p.title.replace("Best SD-WAN and SASE providers for ", "")}

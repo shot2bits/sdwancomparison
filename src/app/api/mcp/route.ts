@@ -1,3 +1,6 @@
+import {buyerCoreSmokeAllowed} from '@/lib/core-launch-smoke';
+import {coreBuyerRegistryEnabled} from '@/lib/core-host';
+import {buyerMcpResponse} from '@/lib/core-buyer-mcp';
 import { SOURCING_TOOL_DEFINITIONS, SOURCING_TOOL_NAMES, callSourcingTool } from '@/lib/mcp-sourcing-tools';
 import { PROVIDER_CAPABILITY_CONTRACT } from "@/lib/provider-capability-contract";
 import { MCP_TOOL_DEFINITIONS, callMcpTool } from "@/lib/mcp-tools";
@@ -161,11 +164,13 @@ function annotatedTools() {
 
 export const runtime = "nodejs";
 
-export async function OPTIONS() {
+export async function OPTIONS(req: Request) {
+  if(coreBuyerRegistryEnabled()||await buyerCoreSmokeAllowed(req))return req?buyerMcpResponse(req):new Response(null,{status:403});
   return new Response(null, { status: 204, headers: MCP_CORS });
 }
 
 export async function POST(req: Request) {
+  if(coreBuyerRegistryEnabled()||await buyerCoreSmokeAllowed(req))return buyerMcpResponse(req);
   let body: JsonRpcRequest;
   try {
     body = await req.json();
@@ -279,6 +284,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+  if(coreBuyerRegistryEnabled()||await buyerCoreSmokeAllowed(req))return buyerMcpResponse(req);
   // Stateless server: no server-initiated SSE stream is offered.
   if ((req.headers.get("accept") ?? "").includes("text/event-stream")) {
     return new Response("SSE streams are not offered; POST JSON-RPC to this endpoint.", { status: 405, headers: MCP_CORS });

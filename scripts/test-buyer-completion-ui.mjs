@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {JSDOM} from 'jsdom';
+// This isolated process needs React's test helpers even during a production build.
+process.env.NODE_ENV='test';
+const dom=new JSDOM('<!doctype html><html><body></body></html>',{url:'https://fixture.test/sase/home/?project=rfp_fixtureowner&review=1'});
+for(const key of ['window','document','HTMLElement','Element','MutationObserver','Event','CustomEvent','location','history','localStorage','sessionStorage'])globalThis[key]=dom.window[key];
+Object.defineProperty(globalThis,'navigator',{value:dom.window.navigator,configurable:true});
+globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+globalThis.requestAnimationFrame=fn=>setTimeout(fn,0);
+dom.window.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};
+dom.window.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};
+const React=await import('react');globalThis.React=React;
+const {render,screen,waitFor,cleanup}=await import('@testing-library/react');
+const {default:Journey}=await import('../src/components/procurement/JourneyModeSelector.tsx');
+const calls=[];
+globalThis.fetch=async url=>{
+ calls.push(String(url));
+ if(String(url).endsWith('/auth/session'))return Response.json({authenticated:true,role:'buyer'});
+ if(String(url).endsWith('/recover'))return Response.json({project_session_token:'synthetic-new-browser-token'});
+ return Response.json({revision:2,buyer:{product_scope:'sdwan_only',sector:'manufacturing',site_count:5,regions:['uk_ireland'],operating_model:'managed',notes:'Replace the existing network across five sites.',organisation:'PRIVATE COMPANY'},entrance_context:{raw_input:{solution_scope:'sdwan',timescale:'Within six months'}},prepared:true,mode:'quick_list',marketplace_state:{publication_status:'published',market_unlock_status:'unlocked'},publication_receipt:{reference:'rfp_fixtureowner',published_at:1793484154345,notice_url:null,invitations_prepared:3,supplier_handoffs:0,responses:0}});
+};
+render(React.createElement(Journey));
+await waitFor(()=>assert.ok(screen.getByRole('heading',{name:'Your project is published'})));
+assert.ok(calls.some(url=>url.endsWith('/recover')),'second browser requests authenticated recovery');
+assert.equal(localStorage.getItem('netify_marketplace_project_rfp_fixtureowner'),'synthetic-new-browser-token');
+assert.ok(screen.getByText('Supplier invitations prepared'));
+assert.ok(screen.getByText('Supplier handoffs recorded'));
+assert.ok(screen.getByText('Responses received'));
+assert.equal(screen.queryByText('PRIVATE COMPANY'),null,'receipt preserves private company');
+cleanup();
+console.log('PASS second-device UI recovery, published receipt, honest invitation/handoff/response counts and private identity exclusion');

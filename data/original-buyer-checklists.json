@@ -1,0 +1,246 @@
+{
+  "version": "harry-original-checklists/2026-07",
+  "source_dataset": "sha256-0f697fc7fc4690bb",
+  "providers": {
+    "cisco": {
+      "source_document_sha256": "8fcf1064288e3796e01da74ffde22deb78f7db43461543167bab9fdfd7ac202b",
+      "paragraphs": [
+        "Before placing Cisco on your SASE shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On product selection: given the choice between Secure Access, Catalyst SD-WAN, Meraki SD-WAN and Secure Connect, which specific combination does Cisco recommend for our estate size and existing footprint, and why? On packaging and pricing: what does the Essentials-to-Advantage tier step-up actually unlock, and at our expected user count, what does a fully-featured SASE-grade quote look like compared to the entry tier? On FedRAMP scope: does our deployment need FedRAMP High/DoD IL5-level assurance, or would Cisco Secure Access's confirmed FedRAMP Moderate authorization meet our requirements? And on the AI-aware SASE capabilities announced in February 2026: which of these (AI traffic optimization, MCP visibility, intent-aware inspection) are generally available today versus still rolling out, and what licence tier do they require?"
+      ],
+      "source_document": "Cisco_SASE_Profile.docx"
+    },
+    "ntt-data": {
+      "source_document_sha256": "34cb0a15004d5b90322bc9f6831ff5271ca3e5558f080826fe50caa5a635b476",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform choice: given confirmed partnerships with both Palo Alto Networks (Prisma SASE) and Fortinet (Secure SD-WAN), which specific platform is being proposed for our deployment, and why? On compliance: can NTT DATA provide direct, current confirmation of ISO 27001 or SOC 2 certification status specifically for the SD-WAN/SASE service? On the recent delisting: what practical, operational changes, if any, have resulted from NTT DATA's full absorption into parent NTT, Inc. as of September 2025, and should we expect any changes to account management or service delivery? And on the confirmed Pick n Pay reference specifically: can NTT DATA provide a comparable reference for our own sector and scale, and what specific lessons from that deployment would apply to our own resilience requirements?"
+      ],
+      "source_document": "NTTDATA_ManagedSASE_Profile.docx"
+    },
+    "barracuda-secureedge": {
+      "source_document_sha256": "e6bc1a776b8c56f6a71c7f49be38d9d322d5230f0e8491973435f9d085c4349a",
+      "paragraphs": [
+        "Before placing Barracuda SecureEdge on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On compliance specifically: does SecureEdge itself, as distinct from the underlying cloud hosting infrastructure, hold direct FedRAMP, ISO 27001, or HIPAA certification? On the Microsoft Global Network dependency: what happens to SecureEdge's performance and availability during a Microsoft Azure or Microsoft Global Network outage, and is there a documented contingency plan? On RBI: given the confirmed reliance on proxy/filtering rather than remote browser isolation, what is Barracuda's roadmap, if any, for addressing high-risk browsing scenarios that competitors address with RBI directly? And on named customer references: can Barracuda provide a specific, named end-customer (not MSP partner) case study with quantified deployment outcomes, given this profile found none in the sources reviewed?"
+      ],
+      "source_document": "Barracuda_SecureEdge_Profile.docx"
+    },
+    "checkpoint": {
+      "source_document_sha256": "8f009c24b9c43f8cd900e6756ab31577b514e20bf0761764c26ff1e8784168fe",
+      "paragraphs": [
+        "Before placing Check Point SASE on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the Miercom validation specifically: can Check Point provide the full, underlying Miercom report directly, rather than only its own summary of the findings, so the specific test methodology and scope can be reviewed independently? On FedRAMP: does the platform currently hold, or have a stated roadmap toward, any FedRAMP authorization for US federal buyers? On pricing: given the documented per-user cost caution relative to simpler VPN alternatives, what does a realistic quote look like at the buyer's expected scale, and how does it compare directly to at least one named competitor at the same scale? And on naming: given the platform's two rebrands (Perimeter 81 to Harmony SASE to Check Point SASE Platform), is there a stated roadmap for further consolidation into the broader Check Point Infinity brand, and should buyers expect the name to change again?"
+      ],
+      "source_document": "CheckPoint_SASE_Profile.docx"
+    },
+    "hpe-aruba-edgeconnect": {
+      "source_document_sha256": "07a3bb87d50d005a403234e81ad03067cb1cac57713f0cdf8eee06207db3d854",
+      "paragraphs": [
+        "Before placing HPE Aruba Networking Unified SASE on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the Juniper acquisition specifically: given HPE now owns both this platform and Juniper's separate SASE-relevant products, what is the roadmap for rationalising or converging the two portfolios, and should a buyer expect product changes over the next 12-24 months? On FedRAMP scope: does the SSE/security layer specifically carry the same FedRAMP authorization confirmed for HPE Aruba Networking Central, or is federal-grade compliance currently limited to the networking-management platform? On architecture: for a buyer choosing the best-of-breed path with an existing SSE vendor, what is the actual policy-synchronisation and troubleshooting experience across two separate management consoles (EdgeConnect Orchestrator and the third-party SSE console) in daily operation? And on pricing: given no published figure exists, what does a realistic quote look like at the buyer's expected site count and user scale?"
+      ],
+      "source_document": "HPE_Aruba_EdgeConnect_Profile.docx"
+    },
+    "versa-networks": {
+      "source_document_sha256": "6e5eb605e5368d8d59b5ef2ac36c45caa18330ec42a32d13515c4e365540a24c",
+      "paragraphs": [
+        "Before placing VersaONE on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On compliance: can Versa provide direct, primary documentation confirming ISO 27001, SOC 2 and HIPAA certification status, given these were only found via a partner page in this research pass? On the FedRAMP Moderate authorization specifically: since it's delivered via SMX's Elevate Intelligent Automation Platform rather than an independently-sponsored Authority to Operate, does it cover our specific agency and use case, or does it require additional agency-specific sponsorship? On pricing: given no published list price or third-party benchmark was found, what does a realistic per-user or per-site cost look like at our expected scale, and how does the dual per-user/per-bandwidth pricing model Versa is reported to offer actually work in practise? And on deployment: for a team with no prior white-box SD-WAN hardware experience, what does a realistic onboarding and change-management timeline look like, given a named customer specifically described needing to work through internal engineering concerns before rollout?"
+      ],
+      "source_document": "Versa_Networks_Profile.docx"
+    },
+    "sonicwall-cse": {
+      "source_document_sha256": "cfe8dfdb9c78db5f3b1c2b65a6b7c651e8ae5bcb17705aedc7725f75d8e9fca5",
+      "paragraphs": [
+        "Before placing Cloud Secure Edge on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On FedRAMP specifically: does SonicWall have any current authorization, or a stated roadmap toward one, for Cloud Secure Edge? On pricing: given the confirmed absence of published, first-party pricing, what does a realistic quote look like at the buyer's expected user/device count, and how does the confirmed MySonicWall billing integration affect existing SonicWall customers' overall invoicing? On the threat-statistics distinction: can SonicWall confirm whether the large-scale GRID Threat Network statistics found in this research pass (billions of attacks defended annually) reflect telemetry specific to Cloud Secure Edge deployments, or the company's broader firewall/threat-network portfolio as a whole? And on named references: can SonicWall provide additional named customer references beyond Lemonade and XimpleIT, particularly for buyers outside the insurance and legal-services sectors specifically?"
+      ],
+      "source_document": "SonicWall_CSE_Profile.docx"
+    },
+    "expereo": {
+      "source_document_sha256": "b39c3d3dd65be3395572321bc8f470805f59d7f80d3aaa1ffb1a08b7ba1ef798",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the underlay-aggregation model specifically: which specific underlying internet providers/circuits will serve our exact site locations, and what redundancy exists at each? On the confirmed Cato Networks partnership: is this the only available SASE platform, or are alternatives available for buyers with an existing platform preference? On the confirmed Starlink LEO reseller relationship: what does this concretely offer for our specific site types, and what is the confirmed commercial and technical integration path? And on compliance: beyond the confirmed ISO 27001 certification, does Expereo hold or plan to pursue SOC 2, PCI DSS, or other frameworks relevant to our specific sector?"
+      ],
+      "source_document": "Expereo_ManagedSASE_Profile.docx"
+    },
+    "verizon": {
+      "source_document_sha256": "6715aadc516d77bcacb8d6e0a22d39cd178b5ccb1a43bd7c765f76f4e0e9776f",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform choice specifically: given six named, confirmed SASE/SD-WAN technology partners, which specific platform is being proposed for our deployment, and what is the specific rationale? On compliance scope: beyond the confirmed federal-sector case study involving Cisco Webex/CCA specifically, does Verizon hold a platform-agnostic, directly-issued compliance certificate (ISO 27001, SOC 2) covering the core SD-WAN/SASE service itself? On named references: can Verizon provide a fully-named, individually-identified customer reference, given every case study found in this research pass - manufacturing, healthcare, federal - was anonymised? And on the confirmed Managed SD Branch retail-analytics capability: exactly what data is collected, how is it stored, and what privacy/consent framework governs its use for our specific retail environment?"
+      ],
+      "source_document": "Verizon_ManagedSASE_Profile.docx"
+    },
+    "colt": {
+      "source_document_sha256": "85dd097981030839c1a2d0f032ef6f9519f264a3686df74bab15dc58c50e1659",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the August 2025 security incident specifically: what was the precise scope of the customer data accessed, what security-programme changes has Colt made since, and can Colt provide a current, independent security-posture attestation? On platform choice: is Zscaler available as a genuine, full alternative to Versa SASE, or is it currently limited to the specific, disclosed connectivity configuration found in this research pass? On compliance: can Colt provide direct, itemised confirmation of its current ISO 27001 certificate scope, and does it hold or plan to pursue SOC 2 or other frameworks relevant to our sector? And on the Lumen EMEA acquisition specifically: is the acquired network infrastructure now fully integrated into the Colt IQ Network, and are there any remaining service-continuity considerations for customers on that legacy infrastructure?"
+      ],
+      "source_document": "Colt_ManagedSASE_Profile.docx"
+    },
+    "ericsson-cradlepoint": {
+      "source_document_sha256": "786024b764f079c80a2b95d8a1d7bcbc2a89c787f6c1bd2f874e994d3a2ef5c3",
+      "paragraphs": [
+        "Before placing NetCloud SASE on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the brand transition: given the confirmed, active shift from 'Cradlepoint' to full Ericsson branding, what is the stated timeline, and should buyers expect further product-naming changes during an active contract term? On FedRAMP specifically: does Ericsson have any roadmap toward an independent, Cradlepoint-specific FedRAMP authorization, distinct from the confirmed, reused Axon-hosted environment for NetCloud Federal? On named references: can Ericsson Cradlepoint provide a specific, narrative customer case study with quantified, measured outcomes, given this profile found only technographic (confirmed-usage) evidence and a general award recognition rather than a full success story? And on pricing: given the confirmed absence of published, first-party pricing, what does a realistic quote look like at the buyer's expected scale, and how does it compare for genuinely cellular-first versus fixed-line-first use cases specifically?"
+      ],
+      "source_document": "EricssonCradlepoint_SASE_Profile.docx"
+    },
+    "juniper": {
+      "source_document_sha256": "b12095faf41877cc042cdd4f9a968441d761d50b59f30e1bc79b526064df7399",
+      "paragraphs": [
+        "Before placing Juniper Secure Edge on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the HPE acquisition specifically: given HPE now owns both this platform and the separate HPE Aruba Networking EdgeConnect SASE product, what is the roadmap for rationalising or converging the two portfolios, and should a buyer expect product changes over the next 12-24 months? On FedRAMP: does the SASE/SSE platform specifically carry, or have a stated roadmap toward, any FedRAMP authorization? On the malware-detection figure: can Juniper provide the underlying methodology or a named, independent third-party test supporting the confirmed 99.8% detection-effectiveness claim? And on UZTNA: what is the current, confirmed availability of Universal Zero Trust Network Access capability today, as distinct from the stated future vision described in Juniper's own materials?"
+      ],
+      "source_document": "Juniper_SASE_Profile.docx"
+    },
+    "netskope": {
+      "source_document_sha256": "3e8c31dc23f5e6f7c005428f7f108a0c8ea77036b08c285375a6cce18c2a5606",
+      "paragraphs": [
+        "Before placing Netskope on your SSE/SASE shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On packaging and tiers: exactly which capabilities sit in the base SSE bundle versus Max Advantage or the full SASE tier, and which of CASB API, UEBA, DSPM and DEM are priced as separate add-ons at your expected scale? On total first-year cost: given multiple independent sources describe Year 1 spend landing 30-50% above the quoted licence cost, what would professional services, DLP tuning, and Cloud Exchange infrastructure realistically add to the headline number? On SD-WAN maturity: how does Borderless SD-WAN compare in independent reference deployments to a backbone-first vendor for a genuinely branch-heavy estate? And on support: what deployment timeline and professional-services involvement should we expect, given the MinterEllisonRuddWatts case study's six-week rollout was professional-services-assisted rather than self-service?"
+      ],
+      "source_document": "Netskope_Profile.docx"
+    },
+    "cloudflare-one": {
+      "source_document_sha256": "de835569d200666d4d7a012faf1ec79b37e5f00451a999ee46f93b059fead40f",
+      "paragraphs": [
+        "Before placing Cloudflare One on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On FedRAMP specifically: what is the current status of the FedRAMP High authorization publicly announced as an active pursuit in February 2025 - has it been achieved, and if not, what is the realistic timeline? On Enterprise pricing: can Cloudflare provide a fully itemised, per-product cost breakdown for our specific requirements, rather than a single bundled figure, so we can compare line-by-line against alternatives? On CASB/DLP depth: for our specific data-protection and cloud-application-inspection requirements, how does Cloudflare's current inspection depth compare directly to the more established stacks buyers commonly evaluate alongside it? And on AI agent governance: which of the confirmed MCP-server security capabilities are generally available today versus still rolling out, and what would a pilot deployment for our own AI-agent traffic actually look like?"
+      ],
+      "source_document": "Cloudflare_One_Profile.docx"
+    },
+    "opensystems": {
+      "source_document_sha256": "992a51cd4882208b22b53edc748559c06f88046d0e5226dd4ef693eb9ddae1a3",
+      "paragraphs": [
+        "Before placing Open Systems on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the confirmed partner-delivered components: given the confirmed disclosure that ZTNA is delivered through Cyolo Security and SWG antivirus scanning through Avira, which other platform components are delivered natively versus through named third parties, and what is the practical implication for support escalation and SLA accountability? On compliance: does Open Systems have any current FedRAMP, SOC 2, PCI DSS, or HIPAA certification, or a stated roadmap toward one, given none were found confirmed in this research pass? On the recent ownership and leadership changes: what is Swiss Post's specific strategic intent for Open Systems following the 2024 acquisition, and what changes, if any, has the newly-appointed CEO (Dennis Monner, appointed late 2025) signalled for the product roadmap? And on pricing: given the confirmed absence of published, first-party pricing, what does a realistic quote look like at the buyer's expected scale under the confirmed OPEX cost model?"
+      ],
+      "source_document": "OpenSystems_SASE_Profile.docx"
+    },
+    "lumen": {
+      "source_document_sha256": "55fa9db769fe1536ce3b591866b708aabc7efb9728acfb88aaedf931c9563364",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the Versa-only architecture: is Versa Networks the only available SD-WAN/SASE platform, or are alternative platforms available for buyers with an existing preference? On compliance scope: given the confirmed NIST Federal Controls Assessment Confirmation Letter, does Lumen have any current FedRAMP authorization or roadmap toward one for this specific service? On pricing: beyond the confirmed, disclosed small-configuration pricing, what does a realistic quote look like for our specific, larger-scale requirement? And on named references: given the confirmed testimonials are disclosed as compensated endorsements, can Lumen provide additional, ideally uncompensated, customer references, and what has changed operationally for Lumen's enterprise customers, if anything, following the very recent completion of the AT&T consumer-fiber divestiture?"
+      ],
+      "source_document": "Lumen_ManagedSASE_Profile.docx"
+    },
+    "zscaler": {
+      "source_document_sha256": "473669d79a1e0a2346290d89339d7404f44ed601b64f4f508c13241d6311f281",
+      "paragraphs": [
+        "Before placing Zscaler on your SSE/SASE shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On packaging and tiers: which specific capabilities, advanced DLP, full AI-driven analytics, browser isolation, are actually included in the Business tier, and which require Transformation or Unlimited? On total cost of ownership: beyond baseline ZIA and ZPA, what would ZDX, workload licensing and Data Protection add-ons realistically add to the bill at your expected user and workload count, given third-party analyses describe 30-100% uplifts from these add-ons? On UK and regional compliance: can Zscaler provide direct documentation confirming Cyber Essentials Plus and any NHS DSPT-relevant status, rather than a general assurance that it's covered? And on branch connectivity: how mature is Zero Trust Branch/SD-WAN relative to the core security stack for a buyer with a genuinely large physical branch estate, and what does a reference deployment actually look like end to end?"
+      ],
+      "source_document": "Zscaler_Profile.docx"
+    },
+    "att": {
+      "source_document_sha256": "26436904ce720b95d88e19801ee883f38fffade8b8a30d128a53639533e98cca",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform choice specifically: given confirmed partnerships with Cisco, Palo Alto Networks, and Juniper, which specific platform is being proposed for our deployment, and what is the specific rationale? On the quantum-resilience claim: what does 'a clear, practical path to quantum resilience' actually mean in concrete, technical terms, and on what timeline? On compliance scope: can AT&T provide a platform-agnostic, directly-issued compliance certificate (ISO 27001, SOC 2, or FedRAMP authorization) covering the core SD-WAN/SASE service itself? On named references: can AT&T provide a fully-named, individually-identified customer reference for its SD-WAN or SASE service specifically? And on the Lumen integration: what assurance can AT&T provide that this major, ongoing corporate-integration effort will not affect service quality, account management, or roadmap priorities for our specific relationship?"
+      ],
+      "source_document": "ATT_ManagedSASE_Profile.docx"
+    },
+    "virgin-media-o2": {
+      "source_document_sha256": "d08598d503726300fb41df7a09921ae049a90f7915d9c74b11dde3e6c242e5d6",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On corporate structure specifically: which legal entity - Virgin Media O2 Business as previously structured, or the newly-formed O2 Daisy - will actually hold our contract, and what changes, if any, should we expect to product branding, account management, or support during the ongoing integration? On the Zscaler partnership: is Zscaler the only available SASE technology platform, or are alternative platforms available for buyers with an existing preference? On compliance: can VMO2/O2 Daisy provide a direct, primary compliance certificate (ISO 27001 specifically) for the SD-WAN/SASE service itself, rather than relying on third-party certification-body case studies? And on the Success Agreement commercial model: what are the specific eligibility criteria, and how does pricing and risk allocation actually differ from a traditional, deliverable-based contract?"
+      ],
+      "source_document": "VMO2_ManagedSASE_Profile.docx"
+    },
+    "aryaka": {
+      "source_document_sha256": "fa77dbbe7c278f3dd5e9cf7624701f60a3e66ce05424b817df1db2d0be91dc80",
+      "paragraphs": [
+        "Before placing Aryaka on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On compliance: does Aryaka currently hold, or have a stated roadmap toward, FedRAMP, SOC 2, or ISO 27001 certification, none of which were found confirmed in this research pass? On pricing: what is the current, up-to-date entry-level and enterprise pricing structure, given the confirmed 'under $150/site' figure found in this research pass is dated to March 2023? On financial trajectory: given Aryaka's status as a long-standing, venture-funded private company, what is the current path to profitability or exit, and how does that affect long-term platform stability? And on the managed-service model specifically: for buyers wanting more self-service control over configuration, what is the actual division of responsibility between Aryaka's managed operations team and the customer's own IT staff in daily practise?"
+      ],
+      "source_document": "Aryaka_SASE_Profile.docx"
+    },
+    "forcepoint": {
+      "source_document_sha256": "de38f5cbd2a3c0ae1c6ae1b4e94168337cb5c68b0b744bbc7583a9a24ff82bfd",
+      "paragraphs": [
+        "Before placing Forcepoint Data Security Cloud on a shortlist for a SASE-specific requirement, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On FedRAMP status specifically: does the current commercial Data Security Cloud platform hold an active FedRAMP authorization today, given the 2022 authorization was championed by the team that became Everfox in 2023-2024? On strategic direction: is FlexEdge Secure SD-WAN and the broader converged SASE/SSE story still a primary investment priority, or has it become secondary to the data-security-centric roadmap the 2025 rebrand and Getvisibility acquisition suggest? On case evidence: can Forcepoint provide a named, quantified customer reference specifically for a full converged SASE deployment (SD-WAN plus SSE together), rather than a standalone DLP or data-classification example? And on pricing: given no published figure exists for the full platform and standalone DLP pricing was the only benchmark found ($52/user/year), what does a realistic quote look like for the complete Data Security Cloud bundle at the buyer's expected scale?"
+      ],
+      "source_document": "Forcepoint_Profile.docx"
+    },
+    "cato-networks": {
+      "source_document_sha256": "42776f317535bb78b25b53a1ed47c12d30203bf36ed31f84250b088e1efaa30e",
+      "paragraphs": [
+        "Before placing Cato on your SASE shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On packaging and tiers: which specific capabilities, Inline/API CASB, DLP, RBI, are actually included in the baseline tier, and which need Premium, Enterprise, or a separate add-on SKU entirely? On regional PoP mapping: can Cato provide a current, dated PoP map confirming native coverage in your specific operating countries, particularly across the Middle East, Africa, or Latin America, where coverage across the market tends to be thinner generally? On the hardware model: are physical Cato Sockets purchased, leased, or bundled into the bandwidth subscription, and what's the standard SLA for hardware replacement (RMA) if something fails on site? And on regulated frameworks: for UK/EU healthcare, finance, or public sector estates specifically, can Cato actually provide direct compliance documentation for NHS DSPT, DORA, or NIS2, rather than a general assurance that it's somewhere on the roadmap?"
+      ],
+      "source_document": "Cato_Networks_Profile.docx"
+    },
+    "velocloud": {
+      "source_document_sha256": "9daec9279c68bde99e9ad6389be9e4d0d4f2db6c43824f1430f154c6d29b6c99",
+      "paragraphs": [
+        "Before placing VeloCloud on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On the security transition specifically: what is the exact, current-day security posture for a new customer signing today - is Edge Threat Management available yet, or does the buyer need a third-party SSE partner from day one, and for how long? On FedRAMP: can Arista confirm current, active FedRAMP authorization for the VeloCloud product as it exists today, given the confirmed historical authorization predates the current ownership by several years? On support continuity: for any organisation with an existing VeloCloud SASE Secured by Symantec deployment, what does the migration path look like ahead of the confirmed June 30, 2026 support end date? And on commercial terms: given the documented history of licensing-model changes during the Broadcom period, what specific terms - perpetual versus subscription, and any historical price-increase exposure - apply to a contract signed today under Arista?"
+      ],
+      "source_document": "VeloCloud_Profile.docx"
+    },
+    "orangebusiness": {
+      "source_document_sha256": "1a42f1d850ba631beea502a88b8f4b5ce2d575d4cf994c5beaecc300a0e40b0c",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform choice: given confirmed partnerships with Palo Alto Networks, Fortinet, Netskope, and Zscaler, which specific platform is being proposed for our deployment, and why? On compliance: beyond the confirmed ISO/IEC 27001:2022 certification, does Orange Business hold or plan to pursue SOC 2, PCI DSS, or other frameworks relevant to our sector? On the confirmed Orange Business segment decline: what is driving the confirmed 3.1% H1 2026 decline specifically, and what investment or strategic changes, if any, should we expect as a result? And on the confirmed Siemens reference: can Orange Business provide a comparable reference for our own sector and scale, and what specific lessons from that long-standing partnership would apply to our own requirements?"
+      ],
+      "source_document": "OrangeBusiness_ManagedSASE_Profile.docx"
+    },
+    "gtt": {
+      "source_document_sha256": "2ae38e3d9b054270d4687bf320995c013388677ba8fb8dd5dc29f5dae1e53c0e",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform choice: which of the two named partnerships (Palo Alto Networks Prisma SASE, or HPE Aruba/EdgeConnect/SSE) is being proposed for our deployment, and why? On compliance scope: does GTT hold a current SOC 2 attestation, given ISO 27001:2022 is directly confirmed but SOC 2 status was not independently confirmed in this research pass? On financial stability: given the confirmed historical NYSE delisting and current OTC trading status, what current, audited financial information can GTT provide directly to support long-term contract confidence? And on the confirmed Radisson Hotel Group reference specifically: can GTT provide a comparable reference for our own sector and scale, and what specific lessons from that large-scale, multi-region deployment would apply to our own requirements?"
+      ],
+      "source_document": "GTT_ManagedSASE_Profile.docx"
+    },
+    "palo-alto-prisma-sase": {
+      "source_document_sha256": "327637e9454b7e4b0311038d1cc0a3c29ec343370260567dbaf7c4c77d067c73",
+      "paragraphs": [
+        "Before placing Prisma SASE on your shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On packaging and platform pricing: how does the quote change if we buy Prisma SASE standalone versus as part of a multi-platform Platform Discount commitment, and what's the actual discount at our expected scale? On FedRAMP boundary: does our deployment need the GovCloud/public-sector boundary (FedRAMP High, DoD IL5) or would the commercial boundary (FedRAMP Moderate) meet our requirements - and what does moving between them cost or complicate? On implementation: given third-party estimates of $100,000-$500,000 for enterprise migration/implementation, what does Palo Alto's own professional-services quote look like for our specific estate size and complexity? And on learning curve: for a team with no prior Palo Alto/PAN-OS experience, what does a realistic ramp-up timeline and training investment look like before the team can operate Strata Cloud Manager independently?"
+      ],
+      "source_document": "PaloAlto_Prisma_SASE_Profile.docx"
+    },
+    "comcastbusiness": {
+      "source_document_sha256": "4d407f19f2ef5245eabf651c5ceb78435be62d3766882c74a230f956688cfbba",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform architecture: following the 2021 Masergy acquisition, what is the current, specific underlying SD-WAN/SASE technology platform, and how has it evolved from the originally-confirmed Fortinet/Silver Peak/Bitglass foundation? On compliance: can Comcast Business provide direct, primary confirmation of SOC 2 or ISO 27001 certification status, given neither was independently confirmed in this research pass? On the MEF 3.0/MEF 70 certification specifically: what does this certification concretely guarantee for our deployment, and can Comcast Business provide the certificate directly? And on the current Versant corporate separation: can Comcast Business confirm directly, in writing, that this separation has no bearing on the Business Services Connectivity segment, our account relationship, or service continuity?"
+      ],
+      "source_document": "ComcastBusiness_ManagedSASE_Profile.docx"
+    },
+    "fortinet-fortisase": {
+      "source_document_sha256": "636ed55b4048037f591938e1220628199ad6740a69d66dd436263ba34fa35b2f",
+      "paragraphs": [
+        "Before placing FortiSASE on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On tiers and total cost: exactly which capabilities in this profile's feature matrix are included at Standard versus Advanced versus Comprehensive, and what does the jump between tiers actually cost at the buyer's expected user count? On the Security Fabric discount: does the buyer's existing FortiGate estate qualify for preferred pricing, and what is the actual discount percentage at their scale? On compliance: can Fortinet confirm current FedRAMP status specifically (as distinct from GovRAMP), and if not yet achieved, what is the realistic timeline? On architecture: for a TLS-inspection-heavy deployment, what is the expected performance difference between FortiSASE's software-based cloud decryption and hardware-offloaded decryption on physical FortiGate appliances? And for multinational buyers: what does the separate China ordering process via an authorised SASE partner mean in practise for a unified global deployment?"
+      ],
+      "source_document": "Fortinet_FortiSASE_Profile.docx"
+    },
+    "bt": {
+      "source_document_sha256": "0489ff6960aec560d4da636b2874baf57e6e168b61e1f8d04ec0179bdb615f2d",
+      "paragraphs": [
+        "Before placing BT Managed SASE on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform choice specifically: exactly which underlying SASE platform (Fortinet or Meraki) is being proposed for this deployment, and why was it selected over the alternative? On the co-managed model: what does the RACI split actually look like in practise, and can BT provide a live portal demonstration showing exactly what visibility and control the customer retains directly? On compliance: beyond the confirmed HSCN accreditation, does the specific SASE service itself carry any independently-verified certifications (ISO 27001, SOC 2, or equivalent), distinct from BT Group's broader corporate compliance posture? And on migration history: given BT has offered managed SASE under at least two different underlying technology generations (VMware from 2022, Fortinet from 2024-2025), what is the current status of any legacy VMware-based deployments, and what would a migration path to the current platform look like for an existing customer?"
+      ],
+      "source_document": "BT_ManagedSASE_Profile.docx"
+    },
+    "vodafone": {
+      "source_document_sha256": "3a3ffb90ff296951cd1dd08596797816026af2b2744b34af511228472e4a93f8",
+      "paragraphs": [
+        "Before placing this service on a shortlist, it's worth getting clear answers to the following, ideally in writing rather than taken on trust from a slide.",
+        "On platform choice: exactly which underlying SD-WAN platform (VeloCloud or Cisco Meraki) and which SASE security platform (Zscaler or Fortinet) is being proposed for this specific deployment, and why? On compliance scope: does the confirmed ISO 27001 certification's 'International Network Connectivity' scope specifically cover the SD-WAN/SASE service we're evaluating, and can Vodafone confirm SOC 2/SOC 3 attestation extends beyond the Unified Communications product line to this service directly? On operational flexibility: given real customer reviews flagging limited flexibility for rapid changes, what does Vodafone's actual change-request and provisioning-time process look like in practise, with specific timeframes? And on corporate continuity: given Vodafone Group's active portfolio-simplification programme and referenced managed-services contract terminations in the UK, what assurance can Vodafone provide regarding long-term service continuity for our specific proposition?"
+      ],
+      "source_document": "Vodafone_ManagedSASE_Profile.docx"
+    }
+  }
+}

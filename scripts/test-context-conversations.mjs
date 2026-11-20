@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';
+import {emptyRoom,ensureThread,addMessage,reviewRequest,decideChange,unreadCount,validateRoom} from '../preview/context-space/conversation-model.js';
+const r=emptyRoom();ensureThread(r,'alpha','Alpha');ensureThread(r,'beta','Beta');
+assert.throws(()=>reviewRequest(r,['alpha'],{alpha:'Alpha'},'exact brief','hello',false));assert.equal(r.threads[0].requests.length,0);
+reviewRequest(r,['alpha'],{alpha:'Alpha'},'exact brief','hello',true);assert.equal(r.threads[0].requests[0].brief,'exact brief');assert.equal(r.threads[1].requests.length,0);
+const m=addMessage(r,'alpha',{author:'sample_supplier',kind:'change',text:'Supplier must provide a documented rollback plan.',base:'v1',context:'business'});assert.equal(unreadCount(r,'alpha'),1);assert.equal(unreadCount(r,'beta'),0);assert.throws(()=>decideChange(r,'beta',m.id,'accepted','v1'));assert.throws(()=>decideChange(r,'alpha',m.id,'accepted','v2'));assert.equal(m.decision,'pending');decideChange(r,'alpha',m.id,'accepted','v1');assert.throws(()=>decideChange(r,'alpha',m.id,'accepted','v1'));
+assert.deepEqual(validateRoom(JSON.parse(JSON.stringify(r))),r);assert.throws(()=>validateRoom({...r,verified:true}));assert.throws(()=>validateRoom({...r,localOnly:false}));assert.throws(()=>addMessage(r,'alpha',{author:'verified_supplier',kind:'note',text:'forged'}));
+const before=JSON.stringify(r);assert.throws(()=>reviewRequest(r,['alpha','__proto__'],{alpha:'Alpha'},'b','m',true));assert.equal(JSON.stringify(r),before);assert.throws(()=>addMessage(r,'alpha',{author:'buyer',kind:'note',text:'x'.repeat(20001)}));
+console.log('PASS: exact-recipient review, consent, isolated thread state, stale/duplicate suggestion rejection, full backup round-trip, no imported identity, atomic failures and no truncation.');

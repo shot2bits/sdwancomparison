@@ -1,3 +1,5 @@
+import {coreLiveEnabled} from '@/lib/core-host';
+import {recordPrivateMailEvent} from '@/lib/core-mail';
 import { Webhook } from "svix";
 import { kvConfigured } from "@/lib/rfp-store";
 import { getResendSend, recordBounce } from "@/lib/email-bounces";
@@ -29,6 +31,7 @@ type ResendBouncePayload = {
   created_at: string;
   data: {
     email_id?: string;
+    tags?: Record<string,string> | Array<{name:string;value:string}>;
     from?: string;
     to?: string | string[];
     bounce?: { message?: string; type?: string; subType?: string };
@@ -70,6 +73,10 @@ export async function POST(req: Request) {
     // transient failure and retry a request that will never verify.
     return Response.json({ error: "Signature verification failed." }, { status: 401 });
   }
+
+  const tags=payload.data.tags;const privateCore=Array.isArray(tags)?tags.some(t=>t.name==='netify_channel'&&t.value==='private_core'):tags?.netify_channel==='private_core';
+  if(privateCore){if(coreLiveEnabled()&&payload.data.email_id)await recordPrivateMailEvent(payload.data.email_id,payload.type);return Response.json({ok:true,private_project_event:true});}
+  if(coreLiveEnabled()&&payload.data.email_id&&await recordPrivateMailEvent(payload.data.email_id,payload.type))return Response.json({ok:true,private_project_event:true});
 
   if (payload.type !== "email.bounced" && payload.type !== "email.complained") {
     // Ack anything else (email.sent, email.delivered, email.opened, ...) —

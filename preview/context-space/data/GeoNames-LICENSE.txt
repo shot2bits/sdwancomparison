@@ -1,0 +1,6 @@
+GeoNames cities15000 and countryInfo extract. Downloaded 12 November 2026.
+Source: https://download.geonames.org/export/dump/
+Licence: Creative Commons Attribution 4.0 https://creativecommons.org/licenses/by/4.0/
+Attribution: GeoNames https://www.geonames.org/
+Derived JSON includes city names, aliases, coordinates, population and country/continent.
+City coordinates are approximate and do not establish business premises.

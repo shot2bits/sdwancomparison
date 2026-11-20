@@ -1,0 +1,52 @@
+{
+  "interface_and_map_source_preserved": true,
+  "files": {
+    "index.html": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "1f0fb2bbe9e7dcb620dc6b54ed2a62721f8a5eed4d4c9a2e514746b77977fdd9"
+    },
+    "styles.css": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "7b83fbc599ad106c73d532d299d7cf339869562c09be0237cda7fad2c2d4597a"
+    },
+    "location-workspace.css": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "c0c5b980e0b2aa43d40d336b90ef213bbdbbf3e81d18ecf60aa989cffd0367a6"
+    },
+    "location-workspace.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "4fbf09bae2176378015b7dc73d92ed3be9dfec4ea5cf96bceb4e215f195f902b"
+    },
+    "location-model.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "da3bcd8a006dd68a54d12d3672c86a206197bf4dd4545f449638455cc754d87f"
+    },
+    "location-map-motion.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "6d744725a9eda4f7ea99578e8f4dd595f68bc425a4ca290828723d7b8d276e3c"
+    },
+    "client.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "336e8fbe92345dcd1b94ef972b11958a0b008594a337b1577c9e797af719bf86"
+    },
+    "project-room.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "3f7aa0cb0aae9c5290f1cdb2459bf779bdfb06450bce0c9b492fdd95bf0afa7e"
+    },
+    "buying-workspace.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "2a4778ad6738fa6b3aa61ceec295811f01a5c9d0eee47b3f56df18c1a604e8f3"
+    },
+    "pricing-workspace.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "0ac90e5bffc83c1ccd6ab217b354afd3e4eb1a3fac22c0924b7e963b6616b0d5"
+    },
+    "workspace-mode.js": {
+      "same_as_accepted_checkpoint": true,
+      "sha256": "c2065810aba478d9a1dfbcbf390980a9323bf039920fa54d5b13cc3f1f58e826"
+    }
+  },
+  "hosting_changes": "Route and asset URL adaptation only; no layout/colour/navigation/section change.",
+  "launch_path": "/sase/locations/",
+  "homepage_unchanged": true
+}

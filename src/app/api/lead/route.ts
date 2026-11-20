@@ -1,11 +1,14 @@
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { activityKvBinding } from "@/lib/activity-storage";
-export const runtime = "edge";
+import { guardAnonymousSend, SendGuardError } from "@/lib/send-guard";
+// Node runtime: the shared send guard (BotID, rate limits) uses node:crypto.
+export const runtime = "nodejs";
 
 /**
  * Lead capture: KV first (system of record), email second (best effort).
  * Works without KV or Resend configured; missing services are skipped
- * and the lead still returns ok so the user is never blocked.
+ * and the lead still returns ok. No current page posts here; callers must
+ * load the marketplace BotID client and send form_elapsed_ms.
  */
 
 type LeadBody = {
@@ -13,6 +16,7 @@ type LeadBody = {
   email?: string;
   company?: string;
   company_url?: string; // honeypot
+  form_elapsed_ms?: number; // time on form, checked by send-guard
   shortlist_url?: string;
   criteria_summary?: string;
   top_vendors?: Array<string | {
@@ -121,11 +125,28 @@ export async function POST(req: Request) {
     return new Response(null, { status: 400 });
   }
 
-  // Honeypot: silently accept and drop
-  if (body.company_url) return Response.json({ ok: true });
-
-  if (!body.email || !body.name) {
+  if (!body.name) {
     return Response.json({ ok: false, error: "Name and email required." }, { status: 422 });
+  }
+
+  // Anonymous and mails both Netify and the address given, so it gets the
+  // same protection as the desk send: honeypot, time on form, BotID and the
+  // shared rate limits (send-guard.ts).
+  try {
+    const guarded = await guardAnonymousSend({
+      channel: "lead",
+      ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
+      email: body.email,
+      honeypot: body.company_url,
+      formElapsedMs: body.form_elapsed_ms,
+    });
+    body.email = guarded.email;
+  } catch (err) {
+    if (!(err instanceof SendGuardError)) throw err;
+    return Response.json(
+      { ok: false, error: err.userMessage, code: err.code },
+      { status: err.status, headers: err.retryAfterSeconds ? { "retry-after": String(err.retryAfterSeconds) } : undefined },
+    );
   }
 
   try {

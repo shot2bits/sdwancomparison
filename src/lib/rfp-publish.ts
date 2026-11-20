@@ -1,10 +1,14 @@
+import { queueAdminAlert, tryAdminAlert } from "./admin-alerts";
+import { isStudioProject, studioDraftFromProject, studioPublicationReadiness, studioReviewHash } from './studio-project';
+import { studioPublicNotice } from './opportunity-studio';
+import { resolvePublicationIssue } from '@/lib/publication-issues';
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { randomUUID } from "node:crypto";
 import { kvRaw } from "@/lib/rfp-store";
 import { currentBuyerFacts, currentPublicBrief, projectWithCurrentBuyerFacts, currentDocumentCounts, currentDocumentIsConsistent } from "@/lib/current-buyer-facts";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel-safe";
 import { isShortProject, shortProjectReadiness, shortProjectNotice, projectMatchingInput } from "@/lib/short-project";
-import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
+import { saveProject, saveOpportunity, getOpportunity, newId, newSecretToken, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
 import { ensureDistinctNoticeTitle } from "@/lib/notice-title";
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED_ACTION, ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
@@ -14,14 +18,12 @@ import { buildShortlist, MATCHING_RULES_VERSION } from "@/lib/shortlist-core";
 import { FEATURE_NAMES } from "@/lib/vendors";
 import { getStrictLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 import { SITE_URL } from "@/lib/structured-data";
-import { emailDomain } from "@/lib/access-control";
 import { toPublicOpportunity, OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
 import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validate";
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
 import { FOLLOW_UP_NOTE, PROMISES_PARAGRAPH } from "@/lib/publish-promises";
 import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION } from "@/lib/rfp-document";
-import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
 import {
   rfpContentSnapshot,
@@ -222,6 +224,7 @@ export async function listRfpOnBoard(
   );
 
   const base: Opportunity = OpportunitySchema.parse({
+    privacy_contract: isStudioProject(p) ? "opportunity-studio/1" : existing?.privacy_contract,
     id: existing?.id ?? newId("opp"),
     created: existing?.created ?? Date.now(),
     updated: Date.now(),
@@ -241,7 +244,7 @@ export async function listRfpOnBoard(
     eligibility: "open",
     visibility,
     awarded_vendor_slug: existing?.awarded_vendor_slug ?? null,
-    buyer_token: existing?.buyer_token ?? newId("btok"),
+    buyer_token: existing?.buyer_token ?? newSecretToken("btok"),
     invited: existing?.invited ?? [],
     feed: existing?.feed ?? [],
     buyer_visibility: "anonymous", // RFPs carry no org name; sector/size describe the buyer
@@ -270,6 +273,14 @@ export async function listRfpOnBoard(
     // revision id, e.g. a cosmetic re-list) rather than clearing it.
     source_published_revision_id: opts.publishedRevisionId ?? existing?.source_published_revision_id ?? "",
   });
+
+  if(isStudioProject(p)) {
+    const n=studioPublicNotice(studioDraftFromProject(p));
+    base.title=n.title; base.summary=n.summary; base.ai_summary=n.summary; base.timeline_note=n.timing;
+    const draft=studioDraftFromProject(p);
+    base.studio_users=Number(draft.users)||0; base.studio_service=draft.service; base.studio_format=draft.format;
+    base.users_band=n.size; base.budget_note='';
+  }
 
   // The public quality gate (Robert's ruling, 28 Jul 2026): no test data,
   // coherent figures, sector stated or explicitly not stated. A gate failure
@@ -358,44 +369,20 @@ export async function recoverUnlistedPublish(
 }
 
 /**
- * Publish notifications, best effort: an internal lead alert to the Netify
- * team and a confirmation to the buyer. Sent with the auth transport (Resend,
- * no-reply sender); failures never fail the publish, matching /api/lead.
+ * Buyer confirmations remain best effort through Resend. Internal team alerts
+ * use the durable admin-alert outbox independently of the buyer email.
  */
 function pinnedNoteFor(p: ProjectDetails): string {
   const pins = (p.buyer.pinned_vendors ?? []).filter(Boolean);
   return pins.length ? `<p><em>Includes the vendor${pins.length === 1 ? "" : "s"} you named for evaluation: ${pins.join(", ")}.</em></p>` : "";
 }
 
-/** Friendly label for the internal alert: which engine, and which door the
- *  buyer came through. Both fields pre-date Milestone 3 as schema (engine
- *  Piece B, source Piece 2) but neither was ever surfaced to a human until
- *  now — Robert's 10 Aug ask to make the emails reflect the current
- *  deployment. */
-function engineChannelLabel(p: ProjectDetails): string {
-  const engine = p.engine === "security_sourcing" ? "Security Sourcing" : "Network/SD-WAN";
-  const channel = p.source === "mcp" ? "AI agent (MCP)" : p.source === "wizard" ? "web wizard" : "unknown/pre-stamp";
-  return `${engine} &middot; via ${channel}`;
-}
-
 async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[], report?: MarketReport) {
   const key = activityMailKey();
   if (!key) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
-  const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
-  // The canonical Project view (Robert's copy, 21 Jul: the RFP Builder is
-  // "a deliberate escape hatch, never the main road"). Both the internal
-  // alert and the buyer confirmation used to point at that escape hatch
-  // (/rfp-builder/{id}/, still a real, live page) rather than the front
-  // door — fixed 10 Aug 2026.
+  // Buyer confirmations keep their existing owner workspace link.
   const rfpUrl = `${SITE_URL}/project/${p.id}/`;
-  const supplierNames = invited.map((v) => v.name).join("\n");
-  const org = [
-    p.buyer.sector && `Sector: ${sectorLabel(p.buyer.sector)}`,
-    p.buyer.organisation_size && p.buyer.organisation_size !== "any" && `Size: ${labelFor(RFP_ORG_SIZES, p.buyer.organisation_size)}`,
-    p.buyer.site_count && `Sites: ${p.buyer.site_count}`,
-    p.buyer.regions.length > 0 && `Regions: ${p.buyer.regions.join(", ")}`,
-  ].filter(Boolean).join("<br/>");
 
   const send = (payload: Record<string, unknown>) =>
     activityMailFetch("https://api.resend.com/emails", {
@@ -404,14 +391,12 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       body: JSON.stringify(payload),
     });
 
-  // Internal lead alert
-  await send({
-    from,
-    to,
-    reply_to: ownerEmail,
-    subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} vendors`,
-    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p><p>${engineChannelLabel(p)}</p>${org ? `<p>${org}</p>` : ""}<p><strong>Vendors auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}${pinnedNoteFor(p)}<p><a href="${rfpUrl}">Open the Project</a></p>`,
-  });
+  if(isStudioProject(p)) {
+    const workspaceUrl=`${SITE_URL}/studio-preview/?project=${encodeURIComponent(p.id)}`;
+    const format=studioDraftFromProject(p).format.toUpperCase();
+    await send({from,to:ownerEmail,subject:`Your Netify ${format} opportunity is published`,html:`<p>Your anonymous opportunity is published.</p><p>Approved suppliers can review your requirement and request to bid. You choose which requests to approve; approval opens a private conversation and does not automatically share your account details.</p><p>No response or purchase is guaranteed or required.</p><p><a href="${workspaceUrl}">Open your project</a> using the same work email.</p>`});
+    return;
+  }
 
   // Confirmation to the buyer, carrying the Market Report (18 July 2026):
   // the publish reward stated in the email itself — price band, matched
@@ -441,7 +426,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
     subject: "Your requirement is live. Here is what happens next",
     html:
       `<p>Hello,</p>` +
-      `<p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
+      `<p><strong>Project reference:</strong> ${p.id}</p><p><a href="${SITE_URL}/home/?project=${encodeURIComponent(p.id)}">Return to your saved project</a>. Sign in with the same work email on any device.</p><p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
       `<p><strong>What happens to your information:</strong> ${PROMISES_PARAGRAPH} The vetting standard is published at <a href="${SITE_URL}/supplier-vetting-standard/">${SITE_URL}/supplier-vetting-standard/</a>.</p>` +
       (invited.length === 0 ? "<p><strong>What happens next:</strong> No suppliers have been invited. Publication is complete, but supplier responses are not guaranteed. Review your requirements and the available provider evidence in your workspace.</p>" : `<p><strong>What happens next:</strong> ${invited.length} evaluated vendor${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>`) +
       bandBlock +
@@ -696,6 +681,8 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
     // rather than returning nothing; the snapshot below will be created.
   }
 
+  if(isStudioProject(project) && (project.entrance_context?.raw_input.studio_review_revision!==project.marketplace_revision || project.entrance_context?.raw_input.studio_review_hash!==studioReviewHash(project))) throw new Error("Review this current requirement and approve supplier sharing before publication.");
+
   const essentialBaseline = persistedEssentialBaselineChecklist({
     facts: project.facts,
     decisionLedger: project.decision_ledger,
@@ -709,7 +696,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
   // (below) so the fixture suite can exercise the REAL gate logic directly,
   // never a hand-duplicated copy that could silently drift from it.
   const activeQuestionCount = minimumContentQuestionCount(project);
-  const readiness = isShortProject(project)
+  const readiness = isStudioProject(project) ? studioPublicationReadiness(project) : isShortProject(project)
     ? shortProjectReadiness(project)
     : publicationReadiness({ baselineReady: essentialBaseline.ready, baselineRemaining: essentialBaseline.remaining, activeQuestionCount });
   if (!currentDocumentIsConsistent(project)) throw new Error("The saved document does not match your current confirmed facts. Save and review the current revision before publishing. Nothing has been sent.");
@@ -831,7 +818,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
       // hard failure, when this project's most recent save predates the
       // field or came from a client build that had not yet started
       // sending it (published-snapshot.ts's own frozen_content comment).
-      frozen_content: { title: working.title, buyer: projectWithCurrentBuyerFacts(working).buyer, rfp_sections: working.rfp_sections, living_document: working.procurement_document ?? null, facts: working.facts },
+      frozen_content: { ...(isStudioProject(working)?{studio_requirement:studioDraftFromProject(working)}:{}), title: working.title, buyer: projectWithCurrentBuyerFacts(working).buyer, rfp_sections: working.rfp_sections, living_document: working.procurement_document ?? null, facts: working.facts },
       created_at: Date.now(),
     });
     attempt = await savePublicationAttempt({
@@ -1110,7 +1097,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
   // already-invited slug. Already-invited slugs (from a resumed attempt)
   // still get their supplier_url reconstructed for THIS response, even
   // though inviteSupplier() itself is not called again for them.
-  const invitationPlan = attempt.invitation_plan ?? [];
+  const invitationPlan = isStudioProject(published) ? [] : attempt.invitation_plan ?? [];
   const alreadyInvited = new Set(attempt.invited_slugs);
   const invited: { slug: string; name: string; supplier_url: string }[] = [];
   for (const entry of invitationPlan) {
@@ -1256,7 +1243,7 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
       consent: latestPublishConsent(published),
       content_hash: contentHash(contentSnapshotForEvent),
       // Same treatment as the earlier FrozenRevision (step B) above.
-      frozen_content: { title: published.title, buyer: projectWithCurrentBuyerFacts(published).buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null, facts: published.facts },
+      frozen_content: { ...(isStudioProject(published)?{studio_requirement:studioDraftFromProject(published)}:{}), title: published.title, buyer: projectWithCurrentBuyerFacts(published).buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null, facts: published.facts },
       public_projection: { opportunity_id: board.opportunity_id ?? null, url: board.url ?? null, notice: publishedNotice ? toPublicOpportunity(publishedNotice) : null },
       private_requirement: { rfp_id: published.id },
       match_criteria: attempt.match_criteria ?? "",
@@ -1272,10 +1259,17 @@ async function executePublishLocked(project: ProjectDetails, sessionEmail: strin
       open_decisions: market_report.gaps,
       market_report,
     };
+    // Persist the alert intent first; cron checks for this exact committed snapshot.
+    const adminAlert = !published.test && board.listed
+      ? await queueAdminAlert({ kind: "project", reference: published.id, revision: snapshot.id, format: isStudioProject(published) && studioDraftFromProject(published).format === "rfi" ? "RFI" : "RFP" })
+      : null;
     await savePublishedSnapshot(project.id, snapshot);
+    if(!published.test&&board.listed)await import('./final-notifications').then(m=>m.queueOwnerNotification('legacy_opportunity_published',snapshot.id)).catch(()=>console.error('owner_notification_queue_unavailable'));
+    if (adminAlert) await tryAdminAlert(adminAlert);
   }
   // A resumed event repairs a missing snapshot without adding a governed revision.
 
+  await resolvePublicationIssue(project.id);
   // Notify only after the durable snapshot exists. A snapshot-write retry cannot resend these emails.
   try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
 

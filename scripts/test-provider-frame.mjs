@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {providerFrameEntries,providerFitStatus,providerRoleLabel} from '../preview/context-space/location-model.js';
+const catalogue=Array.from({length:30},(_,i)=>({slug:'provider-'+i,name:'Provider '+String(i).padStart(2,'0'),researchOnly:true,roles:['managed_service_provider']}));
+const ready={ready:true,missing:[]},gated={ready:false,missing:['Review site requirements']};
+const provider={...catalogue[0],researchOnly:false,group:'evidenced',findings:[{id:'product:sdwan',label:'SD-WAN',state:'evidenced',mandatory:true}],sector_reference:[{label:'Hospital case',source_urls:['https://example.com/case']}]};
+delete provider.researchOnly;
+const entries=providerFrameEntries({providerCatalogue:catalogue,providers:[provider]});assert.equal(entries.length,30);assert.equal(new Set(entries.map(p=>p.slug)).size,30);assert.equal(entries[0].researchOnly,false);assert.match(providerRoleLabel(entries[0]),/managed service provider/);
+assert(entries.every(p=>providerFitStatus(p,gated).kind==='awaiting'));assert.equal(providerFitStatus(provider,ready).kind,'evidenced');
+assert.equal(providerFitStatus(provider,ready,{busy:true}).kind,'awaiting');assert.equal(providerFitStatus(provider,ready,{error:'offline'}).kind,'awaiting');assert.equal(providerFitStatus(catalogue[1],ready).kind,'awaiting');
+assert.equal(providerFitStatus({...provider,sector_reference:[]},ready).kind,'confirmation');
+assert.equal(providerFitStatus({...provider,group:'excluded',findings:[{id:'coverage',label:'UK delivery',state:'not_evidenced',mandatory:true}]},ready).kind,'confirmation');
+const red={...provider,group:'excluded',findings:[{id:'coverage',label:'Required country',state:'not_supported',mandatory:true,qualification:'Published limitation'}]};assert.equal(providerFitStatus(red,ready).kind,'mismatch');assert.match(providerFitStatus(red,ready).reason,/Required country/);
+assert.equal(providerFitStatus({...red,findings:red.findings.map(f=>({...f,mandatory:false}))},ready).kind,'confirmation');
+assert.equal(providerFitStatus({...provider,findings:[]},ready).kind,'confirmation');
+console.log('PASS: 30-provider stable catalogue union, gated/current assessments, no stale green, sector evidence required, missing evidence amber, mandatory evidenced conflict red, provider roles and reasons.');

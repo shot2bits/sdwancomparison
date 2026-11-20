@@ -1,3 +1,4 @@
+import { hasCronSecret } from "@/lib/cron-auth";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { kvConfigured } from "@/lib/rfp-store";
 import { sessionFromRequest } from "@/lib/auth";
@@ -10,10 +11,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300; // generous ceiling; the loop self-limits to ~50s
 
 function cronAuthorised(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
   // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` when CRON_SECRET is set.
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  return hasCronSecret(req);
 }
 
 async function adminAuthorised(req: Request): Promise<boolean> {

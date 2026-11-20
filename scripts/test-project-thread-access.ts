@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {issueThreadAccess,redeemThreadAccess,type ThreadAccessStore,type ThreadAccessRecord} from '../src/lib/project-thread-access';
+import {authorizeConversation,type ConversationActor} from '../src/lib/project-conversation-policy';
+const now=Date.now(),id='20e65654-4301-428d-8c96-30ac49b894b9';
+const access={projectId:id,tenantId:'org-a',buyerSubject:'buyer',approvedProviders:['alpha','beta'],agentSubjects:[]};
+const actor:ConversationActor={subject:'buyer',tenantId:'org-a',projectId:id,role:'buyer',audience:'netify-project-api',verifiedWorkIdentity:true,scopes:['conversations:read'],expiresAt:now+3600000};
+const records=new Map<string,ThreadAccessRecord>();
+const store:ThreadAccessStore={async put(r){records.set(r.tokenHash,structuredClone(r));},async consume(hash,time){const r=records.get(hash);if(!r||r.revoked||r.consumedAt!==null||r.expiresAt<=time)return null;r.consumedAt=time;return structuredClone(r);}};
+const issued=await issueThreadAccess(actor,access,'alpha',store,60000,now);assert.equal(issued.token.length,43);assert(!JSON.stringify([...records.values()]).includes(issued.token));
+const results=await Promise.allSettled([redeemThreadAccess(issued.token,store,access,now),redeemThreadAccess(issued.token,store,access,now)]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+const guest=(results.find(r=>r.status==='fulfilled') as PromiseFulfilledResult<ConversationActor>).value;assert.equal(guest.verifiedWorkIdentity,false);assert(authorizeConversation(guest,access,'conversations:read','alpha',now));assert.throws(()=>authorizeConversation(guest,access,'conversations:read','beta',now));assert.throws(()=>authorizeConversation(guest,access,'messages:send','alpha',now));
+await assert.rejects(()=>issueThreadAccess({...actor,verifiedWorkIdentity:false},access,'alpha',store));await assert.rejects(()=>issueThreadAccess(actor,access,'alpha',store,24*60*60*1000));
+const expired=await issueThreadAccess(actor,access,'alpha',store,60000,now);await assert.rejects(()=>redeemThreadAccess(expired.token,store,access,now+60001));
+const revoked=await issueThreadAccess(actor,access,'alpha',store,60000,now);[...records.values()].at(-1)!.revoked=true;await assert.rejects(()=>redeemThreadAccess(revoked.token,store,access,now));
+const wrongOrg=await issueThreadAccess(actor,access,'alpha',store,60000,now);await assert.rejects(()=>redeemThreadAccess(wrongOrg.token,store,{...access,tenantId:'org-b'},now));
+assert.throws(()=>authorizeConversation({...actor,expiresAt:NaN},access,'conversations:read','alpha',now));
+console.log('PASS: high-entropy hashed access links; atomic single-use redemption; expiry/revocation; tenant and thread isolation; no identity or send privilege from link possession.');

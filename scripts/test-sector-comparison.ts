@@ -1,0 +1,76 @@
+import assert from 'node:assert/strict';
+import {compareSectorProviders,decisionPackMarkdown,SectorComparisonInputSchema,type PublishedProvider} from '../src/lib/sector-comparison';
+import {normalizeEvidenceRow} from '../src/lib/provider-evidence-normalization';
+const source={id:'source-1',url:'https://example.org/source',title:'Published evidence',source_status:'current',reliability_tier:'tier_1'};
+const supported={support_state:'supported',confidence:'high',freshness_state:'current',verified_date:'2026-07-22',evidence_source_ids:['source-1']};
+function provider(slug:string):PublishedProvider{return {provider:{slug,display_name:slug,provider_types:['managed_service_provider']},revision:{id:'revision-'+slug,dataset_version:'test-v1',reviewed_at:'2026-09-01'},products:[],capabilities:[{...supported,capability_code:'sd_wan'},{...supported,capability_code:'high_availability'}],geographies:[{...supported,geography:'UK coverage'}],service_models:[{...supported,model:'fully_managed'}],sector_evidence:[{suitability_state:'unknown',sector:'Banking / financial services',named_evidence:'Named banking customer',case_study_strength:'strong',freshness_state:'current',verified_date:'2026-07-22',evidence_source_ids:['source-1'],qualification:'A named customer reference, not confirmation of buyer suitability.'}],case_studies:[],evidence_sources:[source]};}
+const input=SectorComparisonInputSchema.parse({sector:'financial_services',sites:20,users:0,regions:['uk_ireland'],service_model:'fully_managed',scope:'sdwan',challenges:[{id:'resilience',mandatory:true}],notes:'Buyer context'});
+const native=provider('native'),partial=provider('partial'),gap=provider('gap'),negative=provider('negative'),stale=provider('stale'),unlinked=provider('unlinked');
+partial.capabilities[1].support_state='partially_supported';
+gap.capabilities[1]={...supported,capability_code:'high_availability',support_state:'not_supported',qualification:'Not assessed. No case study found. Evidence gap.',evidence_source_ids:[]};
+negative.capabilities[1]={...supported,capability_code:'high_availability',support_state:'not_supported',qualification:'The service does not support high availability.'};
+stale.capabilities[1].freshness_state='expired';unlinked.capabilities[1].evidence_source_ids=[];
+const raw=[native,partial,gap,negative,stale,unlinked];const original=JSON.stringify(raw);
+const result=compareSectorProviders(input,raw,['unavailable'],'2026-11-09T16:00:00Z');
+const bySlug=Object.fromEntries(result.providers.map(p=>[p.slug,p]));
+assert.equal(bySlug.native.group,'evidenced');assert.equal(bySlug.partial.group,'confirmation','partial support cannot satisfy a mandatory requirement without qualification');assert.equal(bySlug.gap.group,'confirmation','missing research is not a negative');assert.equal(bySlug.negative.group,'excluded','source-confirmed failure must exclude');assert.equal(bySlug.stale.group,'confirmation');assert.equal(bySlug.unlinked.group,'confirmation','source-free grades cannot support positive findings');
+assert.equal(bySlug.native.sector_reference.length,1,'named evidence survives without promoting sector suitability');assert.equal(JSON.stringify(raw),original,'published record and review dates are preserved');assert.deepEqual(compareSectorProviders(input,raw,['unavailable'],result.generated_at),result);
+const repaired=normalizeEvidenceRow({suitability_state:'not_supported',qualification:'No case study found; not assessed',verified_date:'2026-07-22',freshness_state:'current'});assert.equal(repaired.suitability_state,'requires_confirmation');assert.equal(repaired.verified_date,'2026-07-22');assert.equal(normalizeEvidenceRow(repaired).suitability_state,repaired.suitability_state);
+assert.equal(normalizeEvidenceRow({support_state:'not_supported',qualification:'Not assessed historically. Product explicitly does not support ZTNA.'}).support_state,'not_supported');
+assert.equal(SectorComparisonInputSchema.safeParse({...input,sites:-1}).success,false);assert.equal(SectorComparisonInputSchema.safeParse({...input,regions:[]}).success,false);assert.equal(SectorComparisonInputSchema.safeParse({...input,challenges:[{id:'invented',mandatory:true}]}).success,false);
+const pack=decisionPackMarkdown(result,['native','partial']);for(const text of ['Buyer context','Named banking customer','https://example.org/source','2026-07-22','revision-native','Questions for this supplier','No supplier has been contacted'])assert.ok(pack.includes(text),text);
+assert.ok(pack.includes('negative:')&&pack.includes('high availability'),'pack includes reasons for mandatory exclusions');assert.throws(()=>decisionPackMarkdown(result,[]));
+console.log('PASS sector comparison: mandatory vs partial/unknown, source linkage, stale reviews, sector references, deterministic groups, validation and complete decision pack.');
+assert.equal(SectorComparisonInputSchema.safeParse({...input,sites:0,users:20}).success,true);
+assert.equal(SectorComparisonInputSchema.safeParse({...input,sites:0,users:0}).success,false);
+assert.equal(SectorComparisonInputSchema.safeParse({...input,regions:['uk_ireland','uk_ireland']}).success,false);
+assert.equal(SectorComparisonInputSchema.safeParse({...input,challenges:[{id:'resilience',mandatory:false},{id:'resilience',mandatory:true}]}).success,false);
+const sase=compareSectorProviders({...input,scope:'sase'},[native]);
+assert.equal(sase.providers[0].findings.filter(f=>f.id.startsWith('scope:')).length,6);
+assert.ok(sase.providers[0].questions.every(q=>q.length>10));
+
+const matrix=pack.split('## Comparison matrix')[1].split('## ')[0].trim();
+assert.ok(matrix.split('\n').every(line=>line.startsWith('|')),'matrix must remain a valid contiguous Markdown table for Word export');
+const uncertainNegative=provider('uncertain-negative');uncertainNegative.capabilities[1]={...negative.capabilities[1],confidence:'low'};
+assert.equal(compareSectorProviders(input,[uncertainNegative]).providers[0].group,'confirmation','low confidence cannot establish a mandatory exclusion');
+// All public research remains available to richer comparisons and fingerprints.
+const rich=provider('rich');rich.compliance=[{...supported,framework:'ISO 27001',scope:'Named service only'}];rich.integrations=[{...supported,integration_name:'Microsoft Entra ID',delivery_relationship:'native'}];rich.case_studies=[{...supported,sector:'Financial services',named_customer:'Sector customer',outcome:'Supplier-reported outcome',qualification:'Limited named deployment'}];
+const extras=compareSectorProviders({...input,requirements:[{id:'iso27001',mandatory:true},{id:'entra',mandatory:false}]},[rich]);
+assert.equal(extras.providers[0].findings.find(f=>f.id==='extra:iso27001')!.state,'conditional','assurance is not a blanket compliance certification');
+assert.equal(extras.providers[0].findings.find(f=>f.id==='extra:entra')!.state,'conditional','integration listing is qualified, not compatibility certification');
+assert.equal(extras.providers[0].related_cases.length,1);assert.equal(extras.providers[0].research_counts.compliance,1);
+assert.notEqual(compareSectorProviders(input,[rich]).providers[0].evidence_fingerprint,compareSectorProviders(input,[{...rich,case_studies:[]}]).providers[0].evidence_fingerprint,'exports detect evidence changes even when the source revision ID is unchanged');
+const reviewedManaged=provider('reviewed-managed');reviewedManaged.service_models=[];reviewedManaged.capabilities.push({...supported,capability_code:'f01_fully_managed_service'});assert.equal(compareSectorProviders(input,[reviewedManaged]).providers[0].findings.find(f=>f.id==='service_model')!.state,'evidenced');
+const originalBt=provider('bt');originalBt.service_models=[];const priorDate=originalBt.revision.reviewed_at;const btResult=compareSectorProviders(input,[originalBt]);assert.equal(btResult.providers[0].findings.find(f=>f.id==='service_model')!.state,'evidenced');assert.equal(originalBt.revision.reviewed_at,priorDate);assert.equal(originalBt.service_models.length,0,'new primary research never mutates the imported record');
+const longText='Complete research line. '.repeat(400);rich.capabilities[0].qualification=longText;const full=compareSectorProviders(input,[rich]);assert.ok(decisionPackMarkdown(full,['rich']).includes(longText),'decision pack retains long source qualifications without character limits');
+assert.equal(SectorComparisonInputSchema.safeParse({...input,requirements:[{id:'made_up',mandatory:true}]}).success,false);
+assert.equal(SectorComparisonInputSchema.safeParse({...input,requirements:[{id:'iso27001',mandatory:true},{id:'iso27001',mandatory:false}]}).success,false);
+console.log('PASS complete research coverage, assurance/integration qualifications, record fingerprints, managed-service evidence and long-text export.');
+const headerModel=provider('header-model');headerModel.service_models=[{...supported,model:'other',qualification:'Source table: deployment_models\nSource subject: Fully managed deployment\nSupported: Yes'}];const modelResult=compareSectorProviders(input,[headerModel]);assert.equal(modelResult.providers[0].findings.find(f=>f.id==='service_model')!.state,'evidenced');assert.equal(headerModel.service_models[0].model,'other');
+const expiredAssurance={...rich,compliance:[{...supported,framework:'ISO 27001',expiry_or_review_date:'2025-01-01'}]};assert.equal(compareSectorProviders({...input,requirements:[{id:'iso27001',mandatory:true}]},[expiredAssurance]).providers[0].findings.find(f=>f.id==='extra:iso27001')!.state,'unconfirmed');
+const oldEvidence=provider('old-evidence');oldEvidence.capabilities[1]={...oldEvidence.capabilities[1],freshness_state:'expired',qualification:longText};const oldFinding=compareSectorProviders(input,[oldEvidence]).providers[0].findings.find(f=>f.id==='resilience')!;assert.ok(oldFinding.qualification.includes(longText),'unconfirmed findings preserve the full original qualification');assert.equal(oldFinding.reviewed_at,'2026-07-22');
+const hardFirst=provider('hard-first');hardFirst.geographies=[];hardFirst.capabilities=[{...supported,capability_code:'sd_wan'}];const preferencesFirst=provider('preferences-first');preferencesFirst.geographies=[];preferencesFirst.service_models=[];preferencesFirst.capabilities=[{...supported,capability_code:'sd_wan'},{...supported,capability_code:'high_availability'},{...supported,capability_code:'ztna'},{...supported,capability_code:'zero_touch_provisioning'}];const ordered=compareSectorProviders({...input,challenges:[{id:'resilience',mandatory:false},{id:'remote',mandatory:false},{id:'rollout',mandatory:false}]},[preferencesFirst,hardFirst]);assert.equal(ordered.providers[0].slug,'hard-first','optional features must not outrank better evidence for mandatory requirements');
+assert.equal(SectorComparisonInputSchema.safeParse({...input,notes:'A'.repeat(6001)}).success,false,'oversized notes are rejected, not silently shortened');assert.equal(SectorComparisonInputSchema.parse({...input,notes:'A'.repeat(6000)}).notes.length,6000);
+// Publishing permission covers the original checklists; preserve every paragraph
+// and keep current corrections separate from imported evidence and rankings.
+const {default:originalChecklists}=await import('../data/original-buyer-checklists.json');
+const {originalBuyerChecklist}=await import('../src/lib/original-buyer-checklist');
+assert.equal(Object.keys(originalChecklists.providers).length,30);
+for(const [slug,originalChecklist] of Object.entries(originalChecklists.providers)){
+ const checklist=originalBuyerChecklist(slug,originalChecklists.source_dataset)!;
+ assert.ok(checklist);assert.deepEqual(checklist.paragraphs,originalChecklist.paragraphs);
+ assert.equal(checklist.source_document_sha256.length,64);
+ assert.ok(checklist.fact_check.notes.length>0);assert.equal(checklist.fact_check.checked_at,'2026-11-10');
+ assert.ok(checklist.fact_check.notes.every(n=>n.source_urls.length&&n.source_urls.every(u=>u.startsWith('https://'))));
+ const fixture=provider(slug);fixture.revision.dataset_version=originalChecklists.source_dataset;
+ const comparison=compareSectorProviders(input,[fixture]);const pack=decisionPackMarkdown(comparison,[slug]);
+ for(const paragraph of originalChecklist.paragraphs)assert.ok(pack.includes(paragraph),'Complete original wording in '+slug+' pack');
+ for(const note of checklist.fact_check.notes){assert.ok(pack.includes(note.finding));for(const url of note.source_urls)assert.ok(pack.includes(url));}
+ const withoutEdition=structuredClone(fixture);withoutEdition.revision.dataset_version='newer-edition';
+ assert.equal(compareSectorProviders(input,[withoutEdition]).providers[0].buyer_checklist,null,'Do not attach original wording to a different dataset');
+ assert.equal(comparison.providers[0].group,compareSectorProviders(input,[withoutEdition]).providers[0].group,'Checklists never upgrade evidence grades');
+ assert.notEqual(comparison.providers[0].evidence_fingerprint,compareSectorProviders(input,[withoutEdition]).providers[0].evidence_fingerprint);
+}
+assert.equal(originalBuyerChecklist('unknown',originalChecklists.source_dataset),null);
+assert.ok(originalBuyerChecklist('gtt',originalChecklists.source_dataset)!.fact_check.notes.some(n=>n.status==='corrected'&&n.finding.includes('privately held')));
+console.log('PASS all 30 original checklists, 38 source-linked checks, complete exports, correct source edition and unchanged evidence grades.');

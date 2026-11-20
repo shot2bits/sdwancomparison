@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {scopeDigest,stableJSON,normaliseEstate,estateDocument,estatePage} from '../preview/context-space/estate-projection.js';
+import {siteReviewSignature,userReviewSignature,legacySiteReviewSignature,legacyUserReviewSignature,profileSignature,effective,estateReadiness} from '../preview/context-space/location-model.js';
+import {buildContextProject} from '../src/lib/context-project-preview';
+const fixture=JSON.parse(await readFile('/private/tmp/netify-phase1b/1000-snapshot.json','utf8'));const e=normaliseEstate(fixture.estate,fixture.packet.project.input),input=fixture.packet.project.input;
+assert.equal(scopeDigest({a:'🌏',b:[1,2]}),createHash('sha256').update(stableJSON({a:'🌏',b:[1,2]})).digest('hex'));
+assert.equal(Object.keys(e.sharedProfiles).length,1);assert(e.sites.every((s:any)=>!s.profile));
+assert.equal(estateReadiness(e,input).ready,true);
+const before=structuredClone(e),opened=normaliseEstate(e,input);assert.deepEqual(opened,before);
+const page=estatePage(e.sites,40,25);assert.equal(page.sites.length,25);assert.equal(page.sites.at(-1).id,'fixture-site-1000');
+const unchanged=siteReviewSignature(e,e.sites[1]),pinned=siteReviewSignature(e,e.sites[0]);const changed=structuredClone(e);changed.defaults.requirements+=' actual scope change';assert.notEqual(siteReviewSignature(changed,changed.sites[1]),unchanged);assert.equal(siteReviewSignature(changed,changed.sites[0]),pinned);
+const old=structuredClone(e);old.sites=old.sites.slice(0,6);old.planning.users.count=12;old.planning.users.remote=1;delete old.planning.siteReviews;old.planning.siteReviews=Object.fromEntries(old.sites.map((s:any)=>[s.id,legacySiteReviewSignature(old,s)]));const oldInput={...input,sites:6,users:12};old.planning.userReview=legacyUserReviewSignature(old,oldInput);old.planning.sharedSignature=JSON.stringify(old.defaults);const migrated=normaliseEstate(old,oldInput);assert.equal(estateReadiness(migrated,oldInput).ready,true);assert.equal(migrated.planning.userReview,userReviewSignature(migrated,oldInput));
+const built=buildContextProject(fixture.packet.project,e);for(let i=1;i<=1000;i++){assert(built.markdown.includes('fixture-site-'+String(i).padStart(4,'0')));assert(built.markdown.includes('END SITE '+i));}assert(built.markdown.includes('FINAL SOURCE MARKER'));assert(!built.project.input.custom.some((x:any)=>x.id==='location-estate-schedule'));
+const filtered=e.sites.filter((s:any)=>s.city==='London');assert(estatePage(filtered,40,25).sites.length>0);assert.equal(e.sites.length,1000);
+console.log('PASS: SHA-256, normalised plan pooling, 1000 complete sites, review-preserving legacy conversion, dependency-specific review invalidation, pagination, filters, full source and export markers.');

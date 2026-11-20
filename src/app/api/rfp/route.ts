@@ -1,7 +1,7 @@
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import { activityKvBinding } from "@/lib/activity-storage";
 import { corsHeaders, preflight } from "@/lib/cors";
-import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
+import { saveProject, newId, newSecretToken, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
 import { BuyerContextSchema, PROJECT_JOURNEY_MODES, ProjectDetailsSchema, SectorProfileStateSchema, type ProjectJourneyMode } from "@/lib/rfp-types";
 import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
@@ -195,8 +195,8 @@ export async function POST(req: Request) {
     buyer,
     rfp_sections: bankSet ? bankRfpSections(bankSet) : synthesiseSections(buyer),
     invited_vendors: [],
-    share_token: newId("tok"),
-    manage_token: newId("mtok"),
+    share_token: newSecretToken("tok"),
+    manage_token: newSecretToken("mtok"),
     source: "wizard",
     entrance_context: entranceContext,
     journey: {

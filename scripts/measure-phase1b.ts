@@ -1,0 +1,6 @@
+import {writeFile,mkdir} from 'node:fs/promises';
+import {coreDatabase,validatedSnapshot} from '../src/lib/core-phase1';
+import {estateFixture} from './phase1b-fixtures';
+const sql=coreDatabase(),row=(await sql.query('SELECT snapshot FROM netify_core_phase1.scope_revisions WHERE project_id=$1 ORDER BY revision DESC LIMIT 1',['290472bb-415c-43db-9cb3-1dfd734b541b']))[0];const template=typeof row.snapshot==='string'?JSON.parse(row.snapshot):row.snapshot;
+await mkdir('/private/tmp/netify-phase1b',{recursive:true});
+for(const n of [200,1000]){const s=validatedSnapshot(estateFixture(template,n));const payload=JSON.stringify({snapshot:s,operation_id:s.packet.project.id,credentials:{edit:'A'.repeat(43),view:'B'.repeat(43)}});const b={version:'netify-location-project/1',estate:s.estate,siteDrafts:s.siteDrafts,connectedProject:s.packet};await writeFile('/private/tmp/netify-phase1b/'+n+'-backup.json',JSON.stringify(b),{mode:0o600});await writeFile('/private/tmp/netify-phase1b/'+n+'-snapshot.json',JSON.stringify(s),{mode:0o600});console.log(JSON.stringify({locations:n,request_bytes:Buffer.byteLength(payload),snapshot_bytes:Buffer.byteLength(JSON.stringify(s)),site_profiles:Object.keys(s.estate.sharedProfiles??{}).length,headroom_under_4500000_bytes:4500000-Buffer.byteLength(payload),headroom_under_local_5000000:5000000-Buffer.byteLength(payload)}));}

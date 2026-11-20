@@ -1,10 +1,11 @@
-import { getAllVendorSlugs } from "@/lib/vendors";
+import { getAllVendorSlugs, getShortlistDataset } from "@/lib/vendors";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
 import { MARKETPLACE_EXAMPLES } from "@/lib/marketplace-examples";
+import { researchSitemapEntries } from "@/lib/research-sitemap";
 
 // Actual public sourcing content release, not the sitemap fetch time.
 const SOURCING_RELEASE_LASTMOD = "2026-09-30";
@@ -15,6 +16,15 @@ function sourcingLastmod(loc: string): string {
     || loc.startsWith(`${SITE_URL}/best/`)
     || loc.startsWith(`${SITE_URL}/alternatives/`)
     ? `<lastmod>${SOURCING_RELEASE_LASTMOD}</lastmod>` : "";
+}
+
+// Only list research pages that actually serve. /alternatives/[slug] renders from the published shortlist dataset, so a vendor
+// file outside it (fatpipe-networks, hughes) 404s.
+// /alternatives/peplink/ is a dedicated static page and still serves.
+const STATIC_ALTERNATIVES = new Set(["peplink"]);
+function servingAlternativeSlugs(): string[] {
+  const published = new Set(getShortlistDataset().map((v) => v.slug));
+  return getAllVendorSlugs().filter((slug) => published.has(slug) || STATIC_ALTERNATIVES.has(slug));
 }
 
 export async function GET() {
@@ -44,7 +54,8 @@ export async function GET() {
   } catch {
     /* sitemap stays valid without live notices */
   }
-  const urls: { loc: string; priority: string }[] = [
+  const research = researchSitemapEntries();
+  const urls: { loc: string; priority: string; lastmod?: string | null }[] = [
     { loc: "https://netify.co.uk/sase-sd-wan-rfp-builder/", priority: "1.0" },
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
@@ -88,7 +99,7 @@ export async function GET() {
       loc: `${SITE_URL}/best/${p.slug}`,
       priority: "0.9",
     })),
-    ...getAllVendorSlugs().map((slug) => ({
+    ...servingAlternativeSlugs().map((slug) => ({
       loc: `${SITE_URL}/alternatives/${slug}`,
       priority: "0.7",
     })),
@@ -100,12 +111,13 @@ export async function GET() {
       loc: `${SITE_URL}/compare/${p.slug}`,
       priority: "0.8",
     })),
+    ...research,
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
-    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc>${sourcingLastmod(u.loc)}<priority>${u.priority}</priority></url>`,
+    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : sourcingLastmod(u.loc)}<priority>${u.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>`;

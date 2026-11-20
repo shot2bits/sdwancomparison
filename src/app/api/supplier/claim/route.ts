@@ -1,6 +1,7 @@
+import { requestSupplierApproval } from "@/lib/admin-alerts";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
-import { kvConfigured, getVendorClaim, requestVendorClaim } from "@/lib/rfp-store";
+import { kvConfigured, getVendorClaim } from "@/lib/rfp-store";
 import { emailDomain } from "@/lib/access-control";
 
 export const runtime = "nodejs";
@@ -44,6 +45,6 @@ export async function POST(req: Request) {
     return Response.json({ error: "Sign in with your domain-verified vendor email to claim a profile." }, { status: 403, headers: cors });
   }
   const domain = emailDomain(session.email) ?? "";
-  const claim = await requestVendorClaim(session.vendor_slug, session.email, domain);
+  const claim = await requestSupplierApproval(session.vendor_slug, session.email, domain);
   return Response.json({ ok: true, vendor_slug: session.vendor_slug, status: claim.status }, { headers: cors });
 }

@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {normaliseLocationCandidate,newEstate,validateEstate,siteScopeMissing,estateReadiness,profileSignature} from '../preview/context-space/location-model.js';
+const london={id:'london-uk',city:'London',country:'United Kingdom',region:'uk_ireland',latitude:51.5,longitude:-.1};
+const canada={id:'london-ca',city:'London',country:'Canada',region:'north_america',latitude:42.98,longitude:-81.25};
+const raw={name:'London office',city:'London',country:'',region:'',count:1,users:25,selected:true,quote:'Full original office evidence',choices:[london,canada]};
+const ambiguous=normaliseLocationCandidate(raw);
+assert.equal(ambiguous.region,'');assert.equal(ambiguous.latitude,undefined);assert.equal(ambiguous.location_review_required,true);assert.deepEqual(raw.choices,[london,canada]);
+const unique=normaliseLocationCandidate({...raw,choices:[london]});assert.equal(unique.region,'uk_ireland');assert.equal(unique.latitude,51.5);assert.equal(unique.location_review_required,false);
+const explicit=normaliseLocationCandidate({...raw,...canada,choices:[london,canada],coordinateSource:'city'});assert.equal(explicit.country,'Canada');assert.equal(explicit.longitude,-81.25);
+const source=normaliseLocationCandidate({...raw,choices:[london],latitude:51.51,longitude:-.12,coordinateSource:'source'});assert.equal(source.latitude,51.51);assert.equal(source.longitude,-.12);assert.equal(source.region,'uk_ireland');
+const input={sector:'manufacturing',sites:1,users:25,regions:['uk_ireland'],products:[{id:'sdwan',included:true,features:[]}]};
+const estate=newEstate(input);estate.unallocated=0;estate.defaults.bandwidth='100 Mbps';estate.defaults.resilience='Diverse backup';estate.planning={sharedSignature:profileSignature(estate.defaults),siteReviews:{}};
+estate.sites=[{id:'pending-london',name:raw.name,city:raw.city,country:'Not supplied',region:'',type:'Office',count:1,users:25,lat:null,lng:null,notes:'',apps:'ERP',clouds:'Azure',circuit:'',overrides:{},original:raw}];
+estate.sources=[{id:'original-source',label:'Pasted source',text:'Complete supplied source, including original office evidence',importedAt:new Date().toISOString()}];
+const restored=validateEstate(JSON.parse(JSON.stringify(estate)));assert.deepEqual(restored.sources,estate.sources);assert.deepEqual(restored.sites[0].original,raw);
+assert(siteScopeMissing(restored,restored.sites[0]).includes('region'));assert(siteScopeMissing(restored,restored.sites[0]).includes('country'));assert.equal(estateReadiness(restored,input).ready,false);assert.equal(estateReadiness(restored,input).step,'review-sites');
+assert.throws(()=>validateEstate({...estate,sites:[{...estate.sites[0],region:'invented-region'}]}));
+console.log('PASS reviewed imports: unique and explicit city matches, no ambiguous-city guesses, source coordinates preserved, unresolved records retained with full evidence, invalid regions rejected and recommendations gated.');

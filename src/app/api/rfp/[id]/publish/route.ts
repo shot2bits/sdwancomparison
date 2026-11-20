@@ -1,3 +1,4 @@
+import { recordPublicationIssue } from '@/lib/publication-issues';
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 import { publicationOutcomes } from "@/lib/publication-outcomes";
 import { corsHeaders, preflight } from "@/lib/cors";
@@ -88,6 +89,7 @@ export async function POST(req: Request, ctx: Ctx) {
         { status: 409, headers: cors },
       );
     }
+    await recordPublicationIssue(id, 'publication', 'publication_failed');
     recordFailure(id, "publication", 409, "publication_refused");
     return Response.json({ error: (e as Error).message }, { status: 409, headers: cors });
   }
@@ -103,6 +105,7 @@ export async function POST(req: Request, ctx: Ctx) {
   // the lifecycle boundary explicit at the API: no public board id means
   // publication did not complete.
   if (!publicationCompleted({ publicBoardOpportunityId: board.opportunity_id, marketUnlockValid: marketUnlocked })) {
+    await recordPublicationIssue(id, 'publication', 'publication_failed');
     recordFailure(id, board.opportunity_id ? "market_unlock" : "board", 409, "board_publication_incomplete");
     return Response.json(
       {

@@ -1,3 +1,5 @@
+import {isStudioProject,studioDraftFromProject} from './studio-project';
+import type {StudioDraft} from './opportunity-studio';
 /**
  * Living Procurement Canvas Phase 2 (14 Aug 2026): the published snapshot.
  *
@@ -108,6 +110,7 @@ export function rfpContentSnapshot(p: ProjectDetails): Record<string, unknown> {
     buyer: projectWithCurrentBuyerFacts(p).buyer,
     ...(p.facts.length || p.envelope ? { facts: p.facts } : p.procurement_document ? { legacy_document_facts: p.procurement_document.factSnapshot } : {}),
     rfp_sections: p.rfp_sections,
+    ...(isStudioProject(p)?{studio_requirement:studioDraftFromProject(p)}:{}),
     ...(p.procurement_document ? {document_content:{facts:p.procurement_document.factSnapshot,clauses:p.procurement_document.clauses,response_groups:p.procurement_document.responseGroups}, source_ledger:p.source_ledger, decision_ledger:p.decision_ledger} : {}),
     nda: p.nda,
     // New short projects freeze their matching filters and deadline as well as the brief.
@@ -159,7 +162,7 @@ export type PublishedSnapshot = {
    *  one. `rfp_sections`/`buyer` remain the legacy fields, kept for every
    *  existing reader and for honest fallback when no living document was
    *  frozen. */
-  frozen_content: { title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null; facts?: ProjectDetails["facts"] };
+  frozen_content: { studio_requirement?:StudioDraft; title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null; facts?: ProjectDetails["facts"] };
   public_projection: { opportunity_id: string | null; url: string | null; notice?: ReturnType<typeof import("./opportunity-types").toPublicOpportunity> | null };
   private_requirement: { rfp_id: string };
   /** `buildShortlist()`'s own criteria_summary -- the SAME ranking engine
@@ -245,7 +248,7 @@ export type FrozenRevision = {
   content_hash: string;
   /** See PublishedSnapshot.frozen_content's own comment -- `living_document`
    *  added 17 Aug 2026, same optional/fallback treatment. */
-  frozen_content: { title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null; facts?: ProjectDetails["facts"] };
+  frozen_content: { studio_requirement?:StudioDraft; title: string; buyer: BuyerContext; rfp_sections: RfpSection[]; living_document?: LivingProcurementDocument | null; facts?: ProjectDetails["facts"] };
   created_at: number;
 };
 

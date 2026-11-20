@@ -1,3 +1,4 @@
+import { VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import { SOURCING_DESCRIPTION, SOURCING_TITLE } from "@/lib/sourcing-contract";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -39,7 +40,7 @@ export default function Home() {
         <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
           {SOURCING_DESCRIPTION}
         </p>
-        <Link href="/shortlist" className="inline-block rounded-full bg-amber-500 px-6 py-3 font-medium mb-6">Research providers and prepare your sourcing request</Link>
+        <Link href="/shortlist/" className="inline-block rounded-full bg-amber-500 px-6 py-3 font-medium mb-6">Research providers and prepare your sourcing request</Link>
         <HomeHeroForm />
         <ol className="mt-8 mb-0 flex list-none flex-wrap items-center gap-x-2 gap-y-1 p-0 text-sm text-[var(--ink-600)]">
           <li>1. Describe your project</li>
@@ -54,15 +55,15 @@ export default function Home() {
           <span className="mr-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800">New</span>
           Netify now works inside Claude, ChatGPT and Copilot: your AI assistant can compare the 30 vendors,
           estimate costs and draft your RFP for you.{" "}
-          <Link href="/connector" className="underline">Connect your assistant</Link>
+          <Link href="/connector/" className="underline">Connect your assistant</Link>
         </p>
         <p className="mt-3 text-sm text-[var(--ink-500)]">
           {totalCount} researched vendors and MSPs, graded against a {featureCount}-feature framework across {categoryCount} categories. Methodology v2026.1.
         </p>
         <div className="flex items-center gap-6 flex-wrap mt-5 text-sm">
-          <Link href="/how-it-works" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">How it works</Link>
-          <Link href="/vendors" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">Browse {totalCount} vendors</Link>
-          <Link href="/for-suppliers" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">For vendors and providers</Link>
+          <Link href="/how-it-works/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">How it works</Link>
+          <Link href={VENDOR_INDEX_URL} className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">Browse {totalCount} vendors</Link>
+          <Link href="/for-suppliers/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">For vendors and providers</Link>
           <a href="https://netify.co.uk" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">About Netify ↗</a>
         </div>
       </div>
@@ -154,7 +155,7 @@ export default function Home() {
       <section className="text-center py-12">
         <h2 className="mb-6">Start with the full vendor list.</h2>
         <Link
-          href="/vendors"
+          href={VENDOR_INDEX_URL}
           className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full"
         >
           Browse all {totalCount} vendors

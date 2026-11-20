@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {EMPTY_STUDIO_DRAFT, studioPublicNotice, studioSuggestions, studioReadiness, studioDocument, studioCanEngage, type StudioDraft} from '../src/lib/opportunity-studio';
+
+const questions=[{id:'Q1',category:'Commercial',text:'Provide itemised pricing and exclusions.'}];
+const d: StudioDraft={...EMPTY_STUDIO_DRAFT,requirement:'Private Company Ltd contact buyer@private.test: replace the VPN for 500 users at 10 offices.',scope:'SASE',sites:'10',users:'500',regions:['UK & Ireland'],timescale:'3–6 months',service:'Fully managed'};
+const p=JSON.stringify(studioPublicNotice(d));
+assert.ok(!p.includes('Private Company')&&!p.includes('buyer@private.test'),'public summary must not contain free-text requirement');
+assert.ok(p.includes('10–24 sites')&&p.includes('250–999 users'),'public board uses bands');
+assert.ok(!JSON.stringify(studioPublicNotice({...d,scope:'Private Company' as StudioDraft['scope'],timescale:'buyer@private.test',regions:['private.test']})).includes('private.test'),'public structured fields are allowlisted');
+assert.deepEqual(studioReadiness(d,questions),[]);
+assert.ok(studioReadiness({...d,sites:'1.5'},questions).some(x=>x.includes('whole-number')));
+assert.ok(studioReadiness({...d,sites:'',users:''},questions).some(x=>x.includes('site count or user count')));
+assert.deepEqual(studioReadiness({...d,sites:'',users:'500'},questions),[],'remote-only projects need not invent a site count');
+assert.ok(studioReadiness({...d,format:'rfp'},questions).some(x=>x.includes('supplier question')));
+assert.ok(studioReadiness({...d,format:'rfp',questionIds:['invented']},questions).some(x=>x.includes('supplier question')));
+assert.deepEqual(studioReadiness({...d,format:'rfp',questionIds:['Q1']},questions),[]);
+assert.ok(!studioDocument({...d,questionIds:['Q1']},questions).includes('[Q1]'),'RFI excludes detailed RFP questions');
+assert.ok(studioDocument({...d,format:'rfp',questionIds:['Q1']},questions).includes('[Q1]'));
+assert.deepEqual(studioSuggestions('We need fully managed SASE for 500 users and 10 UK offices.'),{scope:'SASE',users:'500',service:'Fully managed',regions:['UK & Ireland']},'no invented count if count and noun are separated');
+assert.deepEqual(studioSuggestions('500 users and 10 offices in the UK'),{sites:'10',users:'500',regions:['UK & Ireland']});
+assert.deepEqual(studioSuggestions('We have sites worldwide and need better performance.'),{},'worldwide does not silently select every region');
+for(const pub of [false,true])for(const approved of [false,true])assert.equal(studioCanEngage(pub,approved),pub&&approved);
+console.log('Opportunity Studio: public projection, RFI/RFP difference, explicit extraction, remote-only estate and supplier access checks passed.');

@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 CONTRACT_VERSION = "provider-knowledge/1.0.0"
-NORMALISER_VERSION = "provider-normaliser/1.0.1"
+NORMALISER_VERSION = "provider-normaliser/1.0.2"
 
 def clean(value): return re.sub(r"\s*\[\d+\]", "", value or "").strip()
 def key(value): return re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
@@ -81,6 +81,10 @@ def provider_types(value):
 def linked_evidence(values,evidence_by_number):
     return list(dict.fromkeys(eid for number in refs(values) for eid in evidence_by_number.get(number,[])))
 
+def full_qualification(table_name,row):
+    return "Source table: "+table_name+"\n"+"\n".join(k.replace("_"," ").capitalize()+": "+str(v).strip() for k,v in row.items() if str(v).strip())
+def service_model(label):
+    return {"fully managed deployment":"fully_managed","co-managed deployment":"co_managed","self-managed deployment":"self_managed"}.get(clean(label).lower(),"other")
 def normalise(profile):
     source=profile["source"]; fm=field_map(profile); slug=provider_slug(source["source_document_id"]); pid=f"provider:{slug}"
     entity_name=clean(fm.get("entity_name",slug.replace("-"," ").title()))
@@ -129,7 +133,7 @@ def normalise(profile):
         if state in {"supported","partially_supported","partner_delivered"} and not evidence_ids:
           state="requires_confirmation"
           diagnostics.append({"type":"positive_capability_without_evidence","table":table_name,"capability":label})
-        capabilities.append({"id":stable("capability",slug,table_name,label),"provider_id":pid,"product_id":None,"capability_code":code,"support_state":state,"qualification":clean(row.get("key_limitations","") or row.get("limitations","") or row.get("finding","")) or None,"confidence":confidence(row.get("confidence","")),"verified_date":date(row.get("last_verified","") or row.get("evidence_date","")) or default_verified,"freshness_state":"current","evidence_source_ids":evidence_ids})
+        capabilities.append({"id":stable("capability",slug,table_name,label),"provider_id":pid,"product_id":None,"capability_code":code,"support_state":state,"qualification":full_qualification(table_name,row),"confidence":confidence(row.get("confidence","")),"verified_date":date(row.get("last_verified","") or row.get("evidence_date","")) or default_verified,"freshness_state":"current","evidence_source_ids":evidence_ids})
     generic={"geographies":[],"service_models":[],"compliance":[],"integrations":[],"sector_evidence":[],"commercial":[],"case_studies":[],"evaluations":[]}
     specs={
       "geography_coverage":"geographies","deployment_models":"service_models","operations_support":"service_models","administration":"service_models","compliance":"compliance","integrations":"integrations","sector_evidence":"sector_evidence","commercial":"commercial","case_studies":"case_studies","strengths_and_watchouts":"evaluations","buyer_suitability":"evaluations","implementation_migration":"evaluations","risks_limitations":"evaluations","netify_evaluation":"evaluations"}
@@ -141,10 +145,10 @@ def normalise(profile):
         values=[clean(v) for v in row.values() if clean(v)];
         if not values: continue
         evidence_ids=linked_evidence(row.values(),evidence_by_number)
-        base={"id":stable(bucket,slug,table_name,str(idx)),"provider_id":pid,"qualification":" | ".join(values[1:])[:4000] or None,"confidence":confidence(row.get("confidence","")),"verified_date":date(row.get("last_verified","") or row.get("evidence_date","")) or default_verified,"freshness_state":"current","evidence_source_ids":evidence_ids}
+        base={"id":stable(bucket,slug,table_name,str(idx)),"provider_id":pid,"qualification":full_qualification(table_name,row),"confidence":confidence(row.get("confidence","")),"verified_date":date(row.get("last_verified","") or row.get("evidence_date","")) or default_verified,"freshness_state":"current","evidence_source_ids":evidence_ids}
         first=values[0]
         if bucket=="geographies": base.update({"geography":first,"delivery_type":clean(row.get("verified_finding","")) or "unspecified","delivery_relationship":"partner" if "partner" in row.get("direct_or_partner","").lower() else "owned" if "direct" in row.get("direct_or_partner","").lower() else "unknown"})
-        elif bucket=="service_models": base.update({"model":"other","support_state":support(row.get("supported","") or row.get("availability","") or row.get("how_it_works",""))})
+        elif bucket=="service_models": base.update({"model":service_model(first) if table_name=="deployment_models" else "other","support_state":support(row.get("supported","") or row.get("availability","") or row.get("how_it_works",""))})
         elif bucket=="compliance": base.update({"framework":first,"scope":clean(row.get("scope","")) or None,"support_state":support(row.get("status","")),"expiry_or_review_date":None})
         elif bucket=="integrations": base.update({"integration_name":first,"integration_type":clean(row.get("category","")) or "other","delivery_relationship":"api" if "api" in row.get("native_certified_api_partner","").lower() else "partner" if "partner" in row.get("native_certified_api_partner","").lower() else "native" if "native" in row.get("native_certified_api_partner","").lower() else "certified" if "certified" in row.get("native_certified_api_partner","").lower() else "unknown"})
         elif bucket=="sector_evidence": base.update({"sector":first,"suitability_state":sector_support(row.get("suitability","")),"named_evidence":clean(row.get("supporting_case_studies","")) or None,"case_study_strength":sector_case_strength(row.get("supporting_case_studies",""))})

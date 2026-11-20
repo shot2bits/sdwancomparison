@@ -1,0 +1,25 @@
+import 'server-only';
+import {z} from 'zod';
+import {type PlatformStore} from './final-platform-store';
+import {ProcurementEvidenceSchema,publicProcurementEvidence} from './procurement-foundation';
+import {supplierIsParticipating,type ParticipatingSupplier,type CommercialState} from './final-commercial';
+import {CoreError} from './core-phase1';
+const consent=z.object({reference:z.string().min(1).max(1000),at:z.string().datetime(),by:z.string().min(1),expiresAt:z.string().datetime()}).strict();
+export const PublicationSchema=z.discriminatedUnion('kind',[
+ z.object({kind:z.literal('fact'),evidence:ProcurementEvidenceSchema,supplierConsent:consent,buyerConsent:consent.nullable(),active:z.boolean()}).strict(),
+ z.object({kind:z.literal('benchmark_consent'),projectId:z.string().uuid(),quotationId:z.string().uuid(),supplierId:z.string().min(1),supplierConsent:consent,buyerConsent:consent,active:z.boolean()}).strict(),
+]);
+type Publication=z.infer<typeof PublicationSchema>;
+export class FinalEvidence {
+ constructor(private store:PlatformStore,private clock=()=>new Date()){}
+ async record(id:string,raw:unknown){const value=PublicationSchema.parse(raw);if(value.kind==='fact'&&(value.evidence.environment!=='live'||!['supplier_confirmation','buyer_report'].includes(value.evidence.kind)||value.evidence.kind==='buyer_report'&&!value.buyerConsent))throw new CoreError(422,'real_consented_evidence_required');return this.store.change<Publication,object>('public_evidence',id,()=>({value,result:{status:'recorded_not_published_until_enabled'}}),value.kind==='benchmark_consent'?value.projectId:undefined);}
+ async read(){const now=this.clock().getTime(),valid=(c:z.infer<typeof consent>|null)=>!!c&&Date.parse(c.at)<=now&&Date.parse(c.expiresAt)>now;const rows=(await this.store.list<Publication>('public_evidence')).map(r=>r.value).filter(v=>v.active&&valid(v.supplierConsent)&&(v.buyerConsent===null||valid(v.buyerConsent)));
+ const suppliers=(await this.store.list<ParticipatingSupplier>('supplier')).filter(r=>supplierIsParticipating(r.value,now)&&r.value.settings.environment==='live');
+ const participating=suppliers.map(r=>({id:r.id,name:r.value.settings.name,products:r.value.products,territories:r.value.territories,confirmed_at:r.value.updatedAt,source:'Netify supplier participation record'}));
+ const facts=publicProcurementEvidence(rows.filter((v):v is Extract<Publication,{kind:'fact'}>=>v.kind==='fact').map(v=>v.evidence),now);const groups=new Map<string,{quotationId:string;supplierId:string;amountMinor:number;issuedAt:string;validUntil:string}[]>();
+ for(const c of rows.filter((v):v is Extract<Publication,{kind:'benchmark_consent'}>=>v.kind==='benchmark_consent')){const record=(await this.store.read<CommercialState>('commercial',c.projectId))?.value,quote=record?.quotations.find(q=>q.original.id===c.quotationId&&q.original.supplierId===c.supplierId&&q.original.environment==='live'&&q.origin==='supplier_statement');if(!quote)continue;const q=quote.reviewed??quote.original;if(Date.parse(q.receivedAt)>now||q.taxBasis==='not_confirmed'||q.supplierAssumptions.length||q.dependencies?.length||q.outstandingChecks?.length)continue;
+ for(const line of q.lines){if(line.assumptions.length||line.exclusions.length||line.status!=='firm'||line.extracted&&(!line.reviewedAt||!line.reviewedBy)||line.amountMinor===null||!line.source?.issuedAt||!line.source.validUntil||Date.parse(line.source.issuedAt)>now||Date.parse(line.source.validUntil)<=now)continue;const request=record!.requests.find(r=>r.request.id===quote.requestId),component=request?.request.scope.lines.find(s=>s.id===line.scopeLineId)?.component;if(!component)continue;const scoped=request!.request.scope.lines.find(s=>s.id===line.scopeLineId)!;const key=JSON.stringify({component,products:[...scoped.products].sort(),features:[...scoped.features].sort(),currency:line.currency,charge:line.charge,period_months:line.periodMonths,unit:line.unit,quantity:line.quantity,term_months:q.termMonths,tax_basis:q.taxBasis,inclusions:[...line.inclusions].sort()});const entries=groups.get(key)??[];entries.push({quotationId:q.id,supplierId:q.supplierId,amountMinor:line.amountMinor,issuedAt:line.source.issuedAt,validUntil:line.source.validUntil});groups.set(key,entries);}}
+ const ranges=[];for(const [basis,entries] of groups){const ids=new Set(entries.map(e=>e.quotationId)),suppliers=new Set(entries.map(e=>e.supplierId));if(ids.size<5||suppliers.size<3)continue;ranges.push({...JSON.parse(basis),minimum_minor:Math.min(...entries.map(e=>e.amountMinor)),maximum_minor:Math.max(...entries.map(e=>e.amountMinor)),quotation_count:ids.size,supplier_count:suppliers.size,source:'Consented supplier quotations held by Netify',as_at:this.clock().toISOString(),valid_until:entries.map(e=>e.validUntil).sort()[0]});}
+ return {publisher:'Netify',version:'netify-consented-evidence/1',generated_at:this.clock().toISOString(),source_url:'https://netify.co.uk/sase/marketplace-evidence/',participating_suppliers:participating,facts:facts.filter(f=>f.kind==='supplier_confirmation'),outcomes:facts.filter(f=>f.kind==='buyer_report'),ranges};
+ }
+}

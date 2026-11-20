@@ -98,3 +98,12 @@ export function currentDocumentIsConsistent(project: ProjectDetails) {
 export function publicBriefFromFacts(facts: WorkspaceFact[], company: string) {
   return currentPublicBrief({facts,title:'',buyer:{organisation:company,notes:'',sector:null,site_count:null,regions:[],compliance:[],organisation_size:'any',operating_model:'any',product_scope:'not_stated',pinned_vendors:[]}});
 }
+
+/** Safe editable handover. A lack of narrative intent must not erase confirmed scope. */
+export function reviewBriefFromFacts(facts: WorkspaceFact[], company: string) {
+  const brief = publicBriefFromFacts(facts, company);
+  const confirmed = confirmedBuyerLedger(facts);
+  const scope = confirmed.find(f => f.path === 'procurement.buying')?.value;
+  const prefix = typeof scope === 'string' ? `${scope.toUpperCase()} requirements. ` : '';
+  return {...brief, outcome: brief.outcome || (brief.summary ? prefix + brief.summary : '')};
+}

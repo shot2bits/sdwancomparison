@@ -1,3 +1,6 @@
+import { hasCronSecret } from "@/lib/cron-auth";
+import { adminAlertSummary } from "@/lib/admin-alerts";
+import {isAdminEmail} from "@/lib/access-control";
 import { pendingSourcingNotifications } from "@/lib/sourcing-notifications";
 import {activityMailFetch, activityMailKey} from "@/lib/activity-mail";
 import {
@@ -60,9 +63,7 @@ function engineChannelCounts(projects: { engine?: string; source?: string }[]) {
 }
 
 function cronAuthorised(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  return hasCronSecret(req);
 }
 
 function delta(now: number, prev: number | undefined): string {
@@ -129,7 +130,9 @@ export async function GET(req: Request) {
   // Sessions created in the window, split by role; netify/admin excluded
   // from the headline count but reported.
   const sessionsNew = sessions.filter((s) => (s.created ?? 0) >= since);
-  const buyerSessionsNew = sessionsNew.filter((s) => s.role === "buyer");
+  const internalSession = (s: {email:string;role:string}) => s.role === "netify" || isAdminEmail(s.email) || /@(netify\.(com|co\.uk)|networkunion\.co\.uk)$/i.test(s.email);
+  const buyerSessionsNew = sessionsNew.filter((s) => s.role === "buyer" && !internalSession(s));
+  const internalSessionsNew = sessionsNew.filter(internalSession);
   const supplierSessionsNew = sessionsNew.filter((s) => s.role === "supplier");
   const buyerDomains = Array.from(new Set(buyerSessionsNew.map((s) => (s.email.split("@")[1] ?? "").toLowerCase()))).filter(Boolean);
 
@@ -146,13 +149,15 @@ export async function GET(req: Request) {
   const prevCombinedPublished =
     snapshot?.published !== undefined && snapshot?.opportunities !== undefined ? snapshot.published + snapshot.opportunities : undefined;
 
+  const adminAlerts = await adminAlertSummary();
   const sourcingNotifications = await pendingSourcingNotifications();
   const quiet = draftsNew.length === 0 && buyerSessionsNew.length === 0 && combinedPublishedNew === 0;
-  const subject = sourcingNotifications.desk_pending > 0 ? `Netify: ${sourcingNotifications.desk_pending} sourcing desk notifications need attention` : quiet
+  const subject = adminAlerts.pending + adminAlerts.needs_review > 0 ? `Netify: ${adminAlerts.pending + adminAlerts.needs_review} admin email alerts need attention` : sourcingNotifications.desk_pending > 0 ? `Netify: ${sourcingNotifications.desk_pending} sourcing desk notifications need attention` : quiet
     ? "Netify 07:30 digest: quiet 24h (0 published, 0 drafts)"
     : `Netify 07:30 digest: ${combinedPublishedNew} published, ${draftsNew.length} draft${draftsNew.length === 1 ? "" : "s"}, ${buyerSessionsNew.length} buyer sign-in${buyerSessionsNew.length === 1 ? "" : "s"}`;
 
   const lines = [
+    `Admin alerts: ${adminAlerts.pending} queued for retry; ${adminAlerts.needs_review} require delivery review. https://netify.co.uk/sase/admin/`,
     `Sourcing: ${sourcingNotifications.requests} confirmed requests; ${sourcingNotifications.desk_pending} desk notifications pending; ${sourcingNotifications.buyer_pending} buyer notifications pending. Review /sase/admin/sourcing/.`,
     "Published in the last 24 hours (the number that matters):",
     `- Total: ${combinedPublishedNew}`,
@@ -164,19 +169,20 @@ export async function GET(req: Request) {
     `- Of those, consent recorded: ${consentedNew.length}`,
     `- Buyer sign-ins: ${buyerSessionsNew.length}${buyerDomains.length ? ` (${buyerDomains.join(", ")})` : ""}`,
     `- Vendor sign-ins: ${supplierSessionsNew.length}`,
+    `- Internal/admin sign-ins (not buyers): ${internalSessionsNew.length}`,
     "",
     "Watch items:",
-    `- Buyers stuck at the email step (pending submit, link never clicked): ${stuckSubmits.length}${stuckBouncedCount ? ` (${stuckBouncedCount} confirmed bounced, see admin console)` : ""}`,
-    `- Vendor access requests waiting in the queue: ${pending.length}`,
+    `- Prepared submissions awaiting completion: ${stuckSubmits.length} (${stuckSubmits.filter((p,i)=>Boolean(p.owner_email || stuckContacts[i])).length} with a recorded contact; ${stuckBouncedCount} with a confirmed bounce). This does not establish that a verification email was sent.`,
+    `- Access-review queue: ${pending.length} domain entries (${pending.filter(p=>p.role === "buyer").length} buyer, ${pending.filter(p=>p.role === "supplier").length} supplier, ${pending.filter(p=>!p.role).length} historical role unspecified). These are not verified leads.`,
     "",
-    "Running totals:",
+    "Running totals (legacy stored counts; includes internal, test and unverified history):",
     `- Published (all paths): ${combinedPublishedTotal}${delta(combinedPublishedTotal, prevCombinedPublished)}`,
     `    - Project/RFP engine: ${publishedTotal}${delta(publishedTotal, snapshot?.published)}`,
     `    - Opportunity wizard: ${opportunitiesTotal}${delta(opportunitiesTotal, snapshot?.opportunities)}`,
     `- Buyer accounts: ${accountsTotal}${delta(accountsTotal, snapshot?.accounts)}`,
     `- Vendor responses: ${responsesTotal}${delta(responsesTotal, snapshot?.responses)}`,
     "",
-    `Admin console: https://netify.co.uk/sase/account/`,
+    `Admin console: https://netify.co.uk/sase/admin/`,
     "Netify daily digest. Reply to this address to reach the workspace.",
   ];
   const text = lines.join("\n");

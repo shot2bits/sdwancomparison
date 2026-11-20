@@ -1,3 +1,4 @@
+import {studioPublicNotice, STUDIO_REGIONS} from './opportunity-studio';
 /**
  * Opportunity / project notice: a buyer publishes a structured project notice
  * (procurement-notice style) describing a need, from underlay circuits to full
@@ -134,6 +135,10 @@ export const BUYER_VISIBILITY_TYPES = ["named", "anonymous"] as const;
 export type BuyerVisibility = (typeof BUYER_VISIBILITY_TYPES)[number];
 
 export const OpportunitySchema = z.object({
+  privacy_contract: z.literal("opportunity-studio/1").optional(),
+  studio_users:z.number().int().min(0).optional(),
+  studio_service:z.enum(["","Fully managed","Co-managed","Self-managed","Open to advice"]).optional(),
+  studio_format:z.enum(["rfi","rfp"]).optional(),
   id: z.string(),
   created: z.number(),
   updated: z.number(),
@@ -171,6 +176,8 @@ export const OpportunitySchema = z.object({
 
   /* --- Project notice fields (2026 marketplace rebuild). All defaulted. --- */
   buyer_visibility: z.enum(BUYER_VISIBILITY_TYPES).default("named"),
+  // The buyer separately agreed to show their company on the public board. Never set by default.
+  buyer_public_opt_in: z.boolean().default(false),
   buyer_sector: z.string().default(""),
   buyer_size_band: z.string().default(""),
   users_band: z.string().default(""),
@@ -224,6 +231,8 @@ export type Opportunity = z.infer<typeof OpportunitySchema>;
  * the figures.
  */
 export type PublicOpportunity = {
+  privacy_contract?: "opportunity-studio/1";
+  studio_format?: "rfi"|"rfp";
   id: string;
   created: number;
   updated: number;
@@ -284,7 +293,7 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
   const bids = o.feed.filter((f) => f.type === "pricing").length;
   const comments = o.feed.filter((f) => f.type === "comment").length;
   const last = o.feed.reduce((m, f) => Math.max(m, f.created), o.updated);
-  return {
+  const projection:PublicOpportunity = {
     id: o.id,
     created: o.created,
     updated: o.updated,
@@ -292,7 +301,7 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     // Policy v1: company identity is never part of the public board
     // projection. Historic named records remain readable in KV, but their
     // private stored identity is not re-exposed by current public routes.
-    buyer_org: anonymousBuyerOrganisation(),
+    buyer_org: o.buyer_public_opt_in === true && o.buyer_visibility === "named" ? o.buyer_org : anonymousBuyerOrganisation(),
     // Display title, derived when the stored title carries no information
     // ("Untitled SASE / SD-WAN RFP", the F1 numeric-sector artefact). One
     // application point so every public client renders the same word
@@ -344,4 +353,16 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     rfp_shape: o.rfp_shape ?? null,
     has_full_rfp: Boolean(o.source_rfp_id && o.response_mode === 'full_rfp' && (o.rfp_shape?.total ?? 0) > 0),
   };
+  if(o.privacy_contract==='opportunity-studio/1') {
+    // Strict studio allowlist: no arbitrary prose or exact estate sizes, even on historical writes.
+    const scope=o.scope.includes('sase')?'SASE':o.scope.includes('sd_wan')?'SD-WAN':'SSE';
+    const notice=studioPublicNotice({format:o.studio_format??'rfi',scope,sites:o.sites?String(o.sites):'',users:o.studio_users?String(o.studio_users):'',regions:o.regions.map(r=>STUDIO_REGIONS[['uk','eu','us','apac','me','latam','china'].indexOf(r)]).filter(Boolean),service:o.studio_service??'',timescale:o.timeline_note,requirement:'',questionIds:[]});
+    return {...projection,privacy_contract:'opportunity-studio/1',studio_format:o.studio_format??'rfi',buyer_org:'',title:notice.title,sites:null,site_band:notice.size,
+      summary:notice.summary,regions:o.regions.filter(r=>['uk','eu','us','apac','me','latam','china'].includes(r)),
+      budget_note:'',timeline_note:notice.timing,
+      buyer_sector:'not_stated',buyer_size_band:'',users_band:'',remote_users_band:'',cloud_platforms:[],
+      current_environment:'',desired_outcomes:'',compliance_requirements:[],evidence_requested:[],evaluation_priorities:[],
+      ai_summary:'',ai_assumptions:[],ai_gap_flags:[],rfp_shape:null};
+  }
+  return projection;
 }

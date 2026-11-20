@@ -1,11 +1,59 @@
 {
   "crons": [
-    { "path": "/sase/api/agent/run", "schedule": "0 8 * * *" },
-    { "path": "/sase/api/agent/run", "schedule": "0 15 * * *" },
-    { "path": "/sase/api/cron/publish-nudge", "schedule": "0 9 * * *" },
-    { "path": "/sase/api/cron/deadlines", "schedule": "30 8 * * *" },
-    { "path": "/sase/api/cron/daily-digest", "schedule": "30 6 * * *" },
-    { "path": "/sase/api/agent/run", "schedule": "30 7,13 * * *" },
-    { "path": "/sase/api/cron/account-activation", "schedule": "0 * * * *" }
+    {
+      "path": "/sase/api/agent/run",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/sase/api/agent/run",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/sase/api/cron/publish-nudge",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/sase/api/cron/deadlines",
+      "schedule": "30 8 * * *"
+    },
+    {
+      "path": "/sase/api/cron/daily-digest",
+      "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/sase/api/agent/run",
+      "schedule": "30 7,13 * * *"
+    },
+    {
+      "path": "/sase/api/cron/account-activation",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/sase/api/cron/admin-alerts",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/sase/api/core-maintenance/",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "buildCommand": "node node_modules/next/dist/bin/next build --webpack",
+  "rewrites": [
+    {
+      "source": "/.well-known/oauth-authorization-server",
+      "destination": "/sase/.well-known/oauth-authorization-server/"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource",
+      "destination": "/sase/.well-known/oauth-protected-resource/"
+    },
+    {
+      "source": "/marketplace/",
+      "destination": "/sase/marketplace/"
+    },
+    {
+      "source": "/marketplace/:path*",
+      "destination": "/sase/marketplace/:path*"
+    }
   ]
 }

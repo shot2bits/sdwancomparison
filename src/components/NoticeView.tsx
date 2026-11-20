@@ -5,7 +5,9 @@
  * preview, so what the buyer previews is exactly what gets published.
  */
 
+import { VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import Link from "next/link";
+import {noticeResponseWindow} from "@/lib/notice-presentation";
 import { RESPONSE_MODE_LABELS, type PublicOpportunity } from "@/lib/opportunity-types";
 import {
   SECTORS,
@@ -59,7 +61,8 @@ export default function NoticeView({
   isPreview?: boolean;
 }) {
   const o = notice;
-  const statusLabel = o.status === "open" ? "Open for responses" : o.status === "awarded" ? "Awarded" : "Closed";
+  const window = noticeResponseWindow(o);
+  const statusLabel = window === "deadline_passed" ? "Response deadline passed" : window === "open" ? "Open for responses" : window === "awarded" ? "Awarded" : "Closed";
   const sector = o.buyer_sector ? labelFor(SECTORS, o.buyer_sector) : "";
   const responseDeadline = formatDate(o.response_deadline ?? o.deadline);
 
@@ -68,7 +71,7 @@ export default function NoticeView({
       {isSample && (
         <p className="mb-4 rounded-sm border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800">
           <strong>Sample RFI.</strong> A worked example showing what a published RFI looks like, not a live opportunity.{" "}
-          <Link href="/opportunities/new" className="underline">Post your own project</Link>.
+          <Link prefetch={false} href="/opportunities/new" className="underline">Post your own project</Link>.
         </p>
       )}
       {isPreview && (
@@ -91,10 +94,10 @@ export default function NoticeView({
       {/* 1. Header */}
       <header className="mb-6">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Chip tone={o.status === "open" ? "green" : "neutral"}>{statusLabel}</Chip>
+          <Chip tone={window === "open" ? "green" : "neutral"}>{statusLabel}</Chip>
           {/* One fact, one chip (Harry's Section 1 finding, 28 Jul 2026):
               response mode and attachment merge when both say full RFP. */}
-          {o.response_mode === "full_rfp" && o.has_full_rfp ? (
+          {o.privacy_contract === "opportunity-studio/1" ? <Chip>{o.studio_format==="rfp"?"Detailed RFP":"Statement of requirements · RFI"}</Chip> : o.response_mode === "full_rfp" && o.has_full_rfp ? (
             <Chip tone="amber">Full RFP · issued and attached</Chip>
           ) : (
             <>
@@ -157,13 +160,13 @@ export default function NoticeView({
       <Section title="Scope and buyer context">
         <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
           <Fact label="Buyer" value={buyerLabel(o)} />
-          <Fact label="Sector" value={sector} />
+          {o.privacy_contract!=="opportunity-studio/1" && <Fact label="Sector" value={sector} />}
           <Fact label="Organisation size" value={o.buyer_size_band ? labelFor(SIZE_BANDS, o.buyer_size_band) : ""} />
           <Fact label="Regions" value={regionLabels(o).join(", ")} />
           {/* Always bands on the open surface (Robert's ruling, 28 Jul 2026):
               real notices carry site_band from the projection; exact counts
               render only for sample notices about invented organisations. */}
-          <Fact label="Sites" value={o.site_band ?? (o.sites != null ? String(o.sites) : "")} />
+          <Fact label={o.privacy_contract==="opportunity-studio/1"?"Estate size":"Sites"} value={o.site_band ?? (o.sites != null ? String(o.sites) : "")} />
           <Fact label="Users" value={o.users_band ? labelFor(USERS_BANDS, o.users_band) : ""} />
           <Fact label="Remote users" value={o.remote_users_band ? labelFor(USERS_BANDS, o.remote_users_band) : ""} />
           <Fact label="Cloud platforms" value={labelsFor(CLOUD_PLATFORMS, o.cloud_platforms).join(", ")} />
@@ -179,7 +182,7 @@ export default function NoticeView({
           <Fact label="Response deadline" value={responseDeadline ?? "None set, responses accepted while open"} />
           <Fact label="Decision target" value={formatDate(o.decision_target)} />
           <Fact label="Target go-live" value={formatDate(o.go_live_target)} />
-          {o.timeline_note && <p className="pt-2 text-sm text-[var(--ink-700)]">{o.timeline_note}</p>}
+          {o.timeline_note && <Fact label="Buying timescale" value={o.timeline_note} />}
         </div>
       </Section>
 
@@ -204,10 +207,10 @@ export default function NoticeView({
 
       <Section title="How suppliers can reply">
         <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
-          <li>
+          {o.privacy_contract === "opportunity-studio/1" ? <li>Approved suppliers can review the requirement and request to bid. The buyer chooses which requests to approve before a private conversation begins.</li> : <li>
             Response mode: <strong>{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</strong>.
-          </li>
-          <li>Browsing this opportunity is open to everyone. Responding requires vendor sign-in with a verified work email.</li>
+          </li>}
+          <li>Browsing this opportunity is open to everyone. Responding requires an approved supplier profile and verified work email.</li>
           <li>Pricing submitted by vendors is private to the buyer and never shown publicly.</li>
           {o.eligibility === "invited" && <li>This opportunity is invite-only: the buyer selects which vendors may respond.</li>}
           {o.evidence_requested.length > 0 && (
@@ -246,10 +249,10 @@ export default function NoticeView({
       {/* 10. Related resources */}
       <Section title="Related Netify resources">
         <ul className="list-disc space-y-1 pl-5 text-sm">
-          <li><Link href="/rfp-builder/questions" className="underline">Netify RFP question bank</Link></li>
-          <li><Link href="/rfp-builder/sample-rfp" className="underline">Sample RFP</Link></li>
-          <li><Link href="/shortlist" className="underline">Shortlist builder</Link></li>
-          <li><Link href="/vendors" className="underline">Vendor profiles</Link></li>
+          <li><Link prefetch={false} href="/rfp-builder/questions" className="underline">Netify RFP question bank</Link></li>
+          <li><Link prefetch={false} href="/rfp-builder/sample-rfp" className="underline">Sample RFP</Link></li>
+          <li><Link prefetch={false} href="/shortlist/" className="underline">Shortlist builder</Link></li>
+          <li><Link prefetch={false} href={VENDOR_INDEX_URL} className="underline">Vendor profiles</Link></li>
           <li><a href="https://netify.co.uk/methodology/" className="underline">Netify research methodology</a></li>
         </ul>
       </Section>

@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {buildEstateOverlayView,OverlayRecordSchema} from '../src/lib/estate-overlays';
+const r={id:'fixture-site',kind:'site',projectId:'fixture-project',providerId:null,label:'Fixture location',country:'United Kingdom',services:[],latitude:51,longitude:0,accuracy:'approximate_city',owner:'Fixture buyer',source:'Synthetic fixture',sourceUrl:null,verifiedAt:null,recordedAt:'2026-11-12T00:00:00Z',validUntil:null,confirmation:'buyer_declared',tier:'private'};
+const pop={...r,id:'fixture-pop',kind:'pop',projectId:null,providerId:'fixture-provider',label:'Synthetic PoP',services:['Fixture service'],accuracy:'source_coordinate',verifiedAt:'2026-11-01T00:00:00Z',validUntil:'2026-11-10T00:00:00Z',confirmation:'published_source',tier:'public'};
+const options={projectId:'fixture-project',providerIds:['fixture-provider'],enabled:['pop' as const]};
+const view=buildEstateOverlayView([r,pop],options,new Date('2026-11-12T00:00:00Z'));
+assert.deepEqual(view.rows.map(r=>r.id),view.mapPoints.map(r=>r.id));assert.equal(view.rows[1].freshness,'stale');assert(view.rows[1].qualification.includes('does not establish'));
+assert.equal(buildEstateOverlayView([r],options).controls.length,1);
+assert.equal(buildEstateOverlayView([r,pop],{...options,providerIds:['different']}).rows.length,1);
+assert.equal(buildEstateOverlayView([{...r,projectId:'other'}],options).rows.length,0);
+assert(!OverlayRecordSchema.safeParse({...pop,kind:'country_delivery'}).success);
+assert(!OverlayRecordSchema.safeParse({...r,tier:'public'}).success);
+console.log('PASS R1 layer contracts: no empty controls, shared map/table IDs, private sites, supplier-confirmed delivery, provider filters and visible staleness.');
