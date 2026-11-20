@@ -38,6 +38,9 @@ export type BestPage = {
 
 const YEAR = "2026";
 
+// Lower-case a page label inside a sentence without breaking acronyms.
+const lc = (label: string) => label.toLowerCase().replace(/\bmpls\b/g, "MPLS");
+
 function sectorPage(key: SectorKey, slugPart: string, sectorContext: string): BestPage {
   const label = SECTOR_LABELS[key];
   return {
@@ -45,21 +48,21 @@ function sectorPage(key: SectorKey, slugPart: string, sectorContext: string): Be
     input: { sector: key, shortlist_size: 10 },
     title: `Best SD-WAN and SASE providers for ${label}`,
     metaTitle: `Best SD-WAN and SASE: ${label} (${YEAR})`,
-    metaDescription: `Ranked ${YEAR} shortlist of SD-WAN and SASE providers with ${label.toLowerCase()} sector evidence, scored across 40 capability features by Netify.`,
-    h1: `Best SD-WAN and SASE providers for ${label.toLowerCase()} (${YEAR})`,
-    intro: `Ranked shortlist of SD-WAN and SASE providers with public evidence of ${label.toLowerCase()} sector capability, scored against the Netify 40-feature evaluation matrix plus regional coverage, cloud support, AI capability and resilience. ${sectorContext} Sector grades are indicative desk research; confirm via RFP.`,
+    metaDescription: `Ranked ${YEAR} shortlist of SD-WAN and SASE providers with ${lc(label)} sector evidence, scored across 40 capability features by Netify.`,
+    h1: `Best SD-WAN and SASE providers for ${lc(label)} (${YEAR})`,
+    intro: `Ranked shortlist of SD-WAN and SASE providers with public evidence of ${lc(label)} sector capability, scored against the Netify 40-feature evaluation matrix plus regional coverage, cloud support, AI capability and resilience. ${sectorContext} Sector grades are indicative desk research; confirm via RFP.`,
     faqs: [
       {
-        q: `Which SD-WAN and SASE providers are strongest for ${label.toLowerCase()}?`,
-        a: `Based on the Netify capability matrix, the leading providers for ${label.toLowerCase()} are listed in the ranking above. Each is graded on public evidence of sector capability, such as case studies, dedicated offerings and certifications, alongside 40 technical and service features.`,
+        q: `Which SD-WAN and SASE providers are strongest for ${lc(label)}?`,
+        a: `Based on the Netify capability matrix, the leading providers for ${lc(label)} are listed in the ranking above. Each is graded on public evidence of sector capability, such as case studies, dedicated offerings and certifications, alongside 40 technical and service features.`,
       },
       {
-        q: `How is this ${label.toLowerCase()} ranking calculated?`,
-        a: `Providers without confirmed ${label.toLowerCase()} sector evidence are excluded. The remainder are scored on a weighted average across 40 capability features (graded yes, partial, via partner, via managed service, not primary or not confirmed) with the sector grade weighted at double. The same engine powers the interactive shortlist builder, the MCP tool and this page, so results are reproducible.`,
+        q: `How is this ${lc(label)} ranking calculated?`,
+        a: `Providers without confirmed ${lc(label)} sector evidence are excluded. The remainder are scored on a weighted average across 40 capability features (graded yes, partial, via partner, via managed service, not primary or not confirmed) with the sector grade weighted at double. The same engine powers the interactive shortlist builder, the MCP tool and this page, so results are reproducible.`,
       },
       {
         q: `Can I adjust this shortlist for my own requirements?`,
-        a: `Yes. The interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the ${label.toLowerCase()} filter. Every configuration is a shareable URL.`,
+        a: `Yes. The interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the ${lc(label)} filter. Every configuration is a shareable URL.`,
       },
     ],
   };
@@ -70,15 +73,15 @@ function orgPage(key: OrgSizeKey, slugPart: string): BestPage {
   return {
     slug: `sd-wan-sase-providers-for-${slugPart}`,
     input: { organisation_size: key, shortlist_size: 10 },
-    title: `Best SD-WAN and SASE providers for ${label.toLowerCase()}`,
+    title: `Best SD-WAN and SASE providers for ${lc(label)}`,
     metaTitle: `Best SD-WAN and SASE: ${label} (${YEAR})`,
-    metaDescription: `Ranked ${YEAR} shortlist of SD-WAN and SASE providers positioned for ${label.toLowerCase()} buyers, scored across 40 features by Netify.`,
-    h1: `Best SD-WAN and SASE providers for ${label.toLowerCase()} (${YEAR})`,
-    intro: `Ranked shortlist of SD-WAN and SASE providers positioned for ${label.toLowerCase()} organisations, scored against the Netify 40-feature evaluation matrix. Organisation fit grades reflect public positioning, reference customers and commercial models, and are indicative desk research; confirm via RFP.`,
+    metaDescription: `Ranked ${YEAR} shortlist of SD-WAN and SASE providers positioned for ${lc(label)} buyers, scored across 40 features by Netify.`,
+    h1: `Best SD-WAN and SASE providers for ${lc(label)} (${YEAR})`,
+    intro: `Ranked shortlist of SD-WAN and SASE providers positioned for ${lc(label)} organisations, scored against the Netify 40-feature evaluation matrix. Organisation fit grades reflect public positioning, reference customers and commercial models, and are indicative desk research; confirm via RFP.`,
     faqs: [
       {
-        q: `Which SD-WAN and SASE providers fit ${label.toLowerCase()} organisations best?`,
-        a: `The ranking above lists providers with confirmed positioning for ${label.toLowerCase()} buyers, ordered by weighted capability score across the Netify 40-feature matrix.`,
+        q: `Which SD-WAN and SASE providers fit ${lc(label)} organisations best?`,
+        a: `The ranking above lists providers with confirmed positioning for ${lc(label)} buyers, ordered by weighted capability score across the Netify 40-feature matrix.`,
       },
       {
         q: "How is this ranking calculated?",
@@ -97,15 +100,15 @@ function intentPage(key: IntentKey, slugPart: string, context: string): BestPage
   return {
     slug: `sd-wan-sase-providers-for-${slugPart}`,
     input: { intent: key, shortlist_size: 10 },
-    title: `Best SD-WAN and SASE providers for ${label.toLowerCase()}`,
+    title: `Best SD-WAN and SASE providers for ${lc(label)}`,
     metaTitle: `Best SD-WAN and SASE: ${label} (${YEAR})`,
-    metaDescription: `Ranked ${YEAR} shortlist of SD-WAN and SASE providers for ${label.toLowerCase()} projects, scored across 40 features by Netify.`,
-    h1: `Best SD-WAN and SASE providers for ${label.toLowerCase()} (${YEAR})`,
-    intro: `Ranked shortlist of SD-WAN and SASE providers for buyers prioritising ${label.toLowerCase()}. ${context} Scores use the Netify 40-feature matrix with weighting adjusted for this priority. Grades are based on public evidence; confirm via RFP.`,
+    metaDescription: `Ranked ${YEAR} shortlist of SD-WAN and SASE providers for ${lc(label)} projects, scored across 40 features by Netify.`,
+    h1: `Best SD-WAN and SASE providers for ${lc(label)} (${YEAR})`,
+    intro: `Ranked shortlist of SD-WAN and SASE providers for buyers prioritising ${lc(label)}. ${context} Scores use the Netify 40-feature matrix with weighting adjusted for this priority. Grades are based on public evidence; confirm via RFP.`,
     faqs: [
       {
-        q: `Which SD-WAN and SASE providers are best for ${label.toLowerCase()}?`,
-        a: `The ranking above orders providers by weighted capability score with feature weighting tuned for ${label.toLowerCase()}: the features that matter most for this priority carry more than double weight.`,
+        q: `Which SD-WAN and SASE providers are best for ${lc(label)}?`,
+        a: `The ranking above orders providers by weighted capability score with feature weighting tuned for ${lc(label)}: the features that matter most for this priority carry more than double weight.`,
       },
       {
         q: "How is this ranking calculated?",
