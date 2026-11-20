@@ -5,6 +5,7 @@
  * preview, so what the buyer previews is exactly what gets published.
  */
 
+import { VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import Link from "next/link";
 import {noticeResponseWindow} from "@/lib/notice-presentation";
 import { RESPONSE_MODE_LABELS, type PublicOpportunity } from "@/lib/opportunity-types";
@@ -251,7 +252,7 @@ export default function NoticeView({
           <li><Link prefetch={false} href="/rfp-builder/questions" className="underline">Netify RFP question bank</Link></li>
           <li><Link prefetch={false} href="/rfp-builder/sample-rfp" className="underline">Sample RFP</Link></li>
           <li><Link prefetch={false} href="/shortlist/" className="underline">Shortlist builder</Link></li>
-          <li><Link prefetch={false} href="/vendors/" className="underline">Vendor profiles</Link></li>
+          <li><Link prefetch={false} href={VENDOR_INDEX_URL} className="underline">Vendor profiles</Link></li>
           <li><a href="https://netify.co.uk/methodology/" className="underline">Netify research methodology</a></li>
         </ul>
       </Section>

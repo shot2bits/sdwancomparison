@@ -1,3 +1,4 @@
+import { vendorProfileHref, VENDOR_INDEX_URL } from "@/lib/vendor-links";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { shortlistEntity, bestFor } from "@/lib/shortlist-entity";
 import ShortlistEntityBlock from "@/components/ShortlistEntityBlock";
@@ -107,11 +108,11 @@ export default async function BestPage({ params }: Props) {
       position: v.position,
 
       name: v.name,
-      url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
+      url: vendorProfileHref(v.slug),
       item: {
         "@type": "Service",
         name: `${v.name} SD-WAN / SASE`,
-        url: v.marketplace_url ?? `${SITE_URL}/vendors/${v.slug}`,
+        url: vendorProfileHref(v.slug),
         description: v.key_differentiators[0],
         provider: { "@type": "Organization", name: v.name, url: v.website },
         potentialAction: {
@@ -192,7 +193,7 @@ export default async function BestPage({ params }: Props) {
             <span aria-hidden="true">→</span>
           </Link>
           <Link
-            href="/vendors/"
+            href={VENDOR_INDEX_URL}
             className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-zinc-900 hover:text-white transition-colors rounded-full text-sm"
           >
             All 30 vendors
@@ -263,7 +264,7 @@ export default async function BestPage({ params }: Props) {
           >
             <p className="eyebrow mb-1">Source evidence</p>
             <h2 className="text-xl mb-1">
-              <Link href={v.marketplace_url ?? `/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+              <Link href={vendorProfileHref(v.slug)} className="no-underline hover:text-[var(--accent)]">
                 {v.position}. {v.name}
               </Link>
             </h2>

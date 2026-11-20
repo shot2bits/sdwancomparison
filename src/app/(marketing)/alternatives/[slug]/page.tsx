@@ -1,3 +1,4 @@
+import { vendorProfileHref } from "@/lib/vendor-links";
 import { SHORTLIST_FAQS } from "@/lib/shortlist-content";
 import { SOURCING_DESCRIPTION } from "@/lib/sourcing-contract";
 import { publicProviderEvidence } from "@/lib/public-provider-evidence";
@@ -81,7 +82,7 @@ export default async function AlternativesPage({ params }: Props) {
       "@type": "ListItem",
 
       name: v.name,
-      url: `${SITE_URL}/vendors/${v.slug}`,
+      url: vendorProfileHref(v.slug),
     })),
   };
 
@@ -117,7 +118,7 @@ export default async function AlternativesPage({ params }: Props) {
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
-            href={`/vendors/${slug}/`}
+            href={vendorProfileHref(slug)}
             className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-zinc-900 hover:text-white transition-colors rounded-full text-sm"
           >
             Full {vendor.name} profile
@@ -155,7 +156,7 @@ export default async function AlternativesPage({ params }: Props) {
               {sameCategory.has(v.slug) && " · Same category"}
             </p>
             <h2 className="text-xl mb-1">
-              <Link href={`/vendors/${v.slug}/`} className="no-underline hover:text-[var(--accent)]">
+              <Link href={vendorProfileHref(v.slug)} className="no-underline hover:text-[var(--accent)]">
                 {v.name}
               </Link>
             </h2>

@@ -1,3 +1,4 @@
+import { vendorProfileHref } from "@/lib/vendor-links";
 import type { ShortlistVendor } from "./shortlist-core";
 import featureDefinitions from "../../data/feature-definitions.json";
 import { shortlistEntity, providerTypes } from "./shortlist-entity";
@@ -30,7 +31,7 @@ export function shortlistSchema(
           item: {
             "@type": "Organization",
             name: v.name,
-            url: `${SITE_URL}/vendors/${v.slug}/`,
+            url: vendorProfileHref(v.slug),
             sameAs: v.website,
             additionalType: Object.entries(providerTypes(v))
               .filter(([, yes]) => yes)

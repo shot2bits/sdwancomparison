@@ -189,9 +189,8 @@ export const BEST_PAGES: BestPage[] = [
   intentPage("rapid_deployment", "rapid-deployment", "Typical needs include cloud-delivered onboarding, zero-touch provisioning and cellular options for instant connectivity."),
   {
     ...intentPage("remote_workforce", "remote-and-hybrid-work", "Typical needs include ZTNA for private apps, secure web access for any location and consistent policy off-network."),
-    // Full hybrid & remote work buyer guide on the main site (July 2026).
-    // This page remains its live ranking source; equity consolidates there.
-    canonicalOverride: "https://netify.co.uk/sd-wan-sase-for-hybrid-remote-work/",
+    // No canonical override (20 Nov 2026): the main site now 301s
+    // /sd-wan-sase-for-hybrid-remote-work/ to this page, so this page is its own canonical.
   },
   intentPage("security_consolidation", "security-consolidation", "Typical goals include collapsing point security products into a single SASE platform with one policy and one console."),
   intentPage("global_expansion", "global-expansion", "Typical needs include private backbones, regional breakout, data residency control and coverage into new markets."),
