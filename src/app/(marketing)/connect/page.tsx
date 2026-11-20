@@ -71,7 +71,7 @@ export default function ConnectPage(){
      <li>You read the six digit code from your inbox and give it to your assistant, which calls <code>verify_access_code</code> and receives an <code>access_token</code>.</li>
      <li>Your assistant passes the token to the tools below, either as the <code>access_token</code> argument or as an <code>Authorization: Bearer</code> header.</li>
     </ol>
-    <p className="mb-3 text-sm text-slate-700">Publishing needs <code>consent_publish: true</code>. The public board is anonymised: names, emails, phone numbers, company and exact addresses are removed. Set <code>show_company</code> only if you want your company shown. The formatted RFP and the recommended-providers pack download together as one bundle after you publish. Humans can use the same rules at <a className="underline" href="/sase/rfp-bundle/">the RFP bundle page</a>.</p>
+    <p className="mb-3 text-sm text-slate-700">Publishing needs <code>consent_publish: true</code>. The public board is anonymised: it shows only the sector, products, number of sites and users, and region. Your free-text description stays private unless you show your company. Set <code>show_company</code> only if you want your company shown. The formatted RFP and the recommended-providers pack download together as one bundle after you publish. Humans can use the same rules at <a className="underline" href="/sase/rfp-bundle/">the RFP bundle page</a>.</p>
     <ul className="space-y-2 text-sm">
      {MARKET_TOOLS.filter(t=>t.access==='buyer'||['request_access_code','verify_access_code'].includes(t.name)).map(t=><li key={t.name}><code className="font-semibold">{t.name}</code>: {t.description}</li>)}
     </ul>
