@@ -27,7 +27,7 @@ Research: ${SITE_URL}/shortlist/data.json
 Service: ${SITE_URL}/shortlist/
 Market Record: ${SITE_URL}/shortlist/market-record.json/
 MCP: ${SITE_URL}/api/mcp/
-Connect your AI agent (setup for Claude, ChatGPT, Cursor and other MCP clients): ${SITE_URL}/connect/
+Connect your AI agent (setup for Claude, ChatGPT, Cursor and other MCP clients): ${SITE_URL}/connector/
 Server card: ${SITE_URL}/.well-known/mcp.json
 OpenAPI: ${SITE_URL}/openapi.json
 Open marketplace tools, no sign-in: ${MARKET_TOOL_VIEWS.map(t=>t.name).join(', ')}

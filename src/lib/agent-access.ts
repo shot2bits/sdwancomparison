@@ -42,7 +42,7 @@ export async function businessEmail(value:unknown){
 
 async function sendCode(email:string,code:string,pending?:Pending){
  const key=activityMailKey();
- const publishes=pending?.consent_publish?'<p>Entering this code confirms you control this address. Because you agreed to publish, your requirement will then be posted to the Netify opportunity board'+(pending.show_company?' with your company name shown':', anonymised, with no names, emails, phone numbers or company shown')+', and made available to Netify\'s curated providers.</p>':'';
+ const publishes=pending?.consent_publish?'<p>Entering this code confirms you control this address. Because you agreed to publish, Netify will list your requirement privately with curated vendors and providers, and show it on the public opportunity board'+(pending.show_company?' with your company name shown. Naming your company reaches a wider audience of providers and vendors you may not have considered.':', without your company name, and without names, emails or phone numbers.')+'</p>':'';
  const html=`<p>Your Netify verification code is:</p><p style="font-size:26px;letter-spacing:6px;font-weight:bold">${code}</p><p>It expires in 15 minutes and works once.</p>${publishes}<p>If you did not ask for this, ignore this email and nothing will be published.</p>`;
  const text=`Your Netify verification code is ${code}. It expires in 15 minutes and works once. If you did not ask for this, ignore this email.`;
  if(!key){if(isPreview())return false;throw new MarketError(503,'sign_in_unavailable');}

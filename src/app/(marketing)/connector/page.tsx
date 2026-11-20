@@ -1,106 +1,107 @@
-import type { Metadata } from "next";
-import { PRICING_ROUTES } from "@/lib/pricing-routes";
-import { SOURCING_TOOL_DEFINITIONS } from "@/lib/mcp-sourcing-tools";
-import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tool-definitions";
-import { MCP_RFP_TOOL_DEFINITIONS } from "@/lib/mcp-rfp-tools";
-import { MCP_COST_TOOL_DEFINITIONS } from "@/lib/mcp-cost-tools";
-import { SECURITY_TOOL_DEFINITIONS_ALL } from "@/lib/mcp-security-tools";
-import { WORKSPACE_TOOL_DEFINITIONS } from "@/lib/mcp-workspace-tools";
-import { MCP_ACCESS_GROUPS } from "@/lib/capabilities";
-import { TOOL_ANNOTATIONS } from "@/lib/mcp-annotations";
-import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema } from "@/lib/structured-data";
+import type {Metadata} from 'next';
+import {liveCatalogue} from '@/lib/mcp-live-catalogue';
+import {SITE_URL,getOrganizationSchema,getBreadcrumbSchema} from '@/lib/structured-data';
 
-const ENDPOINT = `${SITE_URL}/api/mcp/`;
-const DESCRIPTION = "Use Netify's sourced SASE and SD-WAN research through a supported MCP client. Compare named providers, check evidence, prepare requirements and estimate indicative cost bands. Public research needs no account; private project and supplier actions have additional access checks.";
+const ENDPOINT=`${SITE_URL}/api/mcp/`;
+const TITLE='Connect your AI agent to the SD-WAN and SASE marketplace';
+const DESCRIPTION='Add the Netify marketplace to Claude, ChatGPT, Cursor or any MCP client by URL. Search providers, compare evidence, read published list prices, build an RFP and read the opportunity board.';
 
-export const metadata: Metadata = {
-  title: "Netify MCP connector: SASE and SD-WAN research and procurement",
-  description: "Compare sourced SASE and SD-WAN providers and prepare requirements through MCP. Public research is open; private actions and publication require additional approval.",
-  alternates: { canonical: `${SITE_URL}/connector/` },
-  openGraph: { title: "Netify MCP connector", description: DESCRIPTION, url: `${SITE_URL}/connector/`, type: "website", locale: "en_GB" },
+export const metadata:Metadata={
+ title:TITLE,description:DESCRIPTION,
+ alternates:{canonical:`${SITE_URL}/connector/`},
+ openGraph:{title:TITLE,description:DESCRIPTION,url:`${SITE_URL}/connector/`,type:'website',locale:'en_GB'},
 };
 
-export default function ConnectorPage() {
-  const definitions = [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL, ...WORKSPACE_TOOL_DEFINITIONS];
-  const defByName = new Map<string, { name: string; description: string }>(definitions.map((tool) => [tool.name, tool]));
-  const schemas = [getOrganizationSchema(), getBreadcrumbSchema("Connector", "/connector"), {
-    "@context": "https://schema.org", "@type": "SoftwareApplication", "@id": `${SITE_URL}/connector/#connector`,
-    name: "Netify SASE & SD-WAN Marketplace connector (MCP)", applicationCategory: "BusinessApplication",
-    operatingSystem: "Supported Model Context Protocol clients", url: `${SITE_URL}/connector/`, description: DESCRIPTION,
-    publisher: { "@id": "https://netify.co.uk/#organization" },
-  }];
-  return (
-    <div className="mx-auto min-w-0 max-w-4xl px-6 py-12 [overflow-wrap:anywhere]">
-      {schemas.map((schema, index) => <script key={index} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />)}
-      <p className="mb-2 text-sm text-slate-600">Netify connector · Model Context Protocol</p>
-      <h1 id="page-h1" className="mb-3">Use Netify research from your AI assistant</h1>
-      <p id="answer" className="max-w-3xl text-lg text-slate-700">{DESCRIPTION}</p>
-      <p className="mt-4 text-slate-700">An assistant can help prepare an RFP or a basic statement of requirements. Netify adds a governed question bank, sourced provider comparisons and a private sourcing process for approving named recipients and requesting supplier responses. A public marketplace opportunity is a separate, optional journey with its own buyer approval.</p>
+const claudeCode=`claude mcp add --transport http netify ${ENDPOINT}`;
+const cursorJson=JSON.stringify({mcpServers:{netify:{url:ENDPOINT}}},null,2);
+const curlList=`curl -s ${ENDPOINT} \\\n  -H 'content-type: application/json' \\\n  -H 'accept: application/json, text/event-stream' \\\n  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`;
+const curlCall=`curl -s ${ENDPOINT} \\\n  -H 'content-type: application/json' \\\n  -H 'accept: application/json, text/event-stream' \\\n  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_providers","arguments":{"sector":"retail","need":"zero trust access","limit":5}}}'`;
 
-      <section className="mt-7 rounded-lg border border-slate-200 bg-slate-50 p-5" aria-labelledby="mcp-endpoint">
-        <h2 id="mcp-endpoint" className="mb-2 text-lg font-semibold">Connect public research</h2>
-        <code className="block overflow-x-auto text-sm">{ENDPOINT}</code>
-        <p className="mt-3 text-sm text-slate-600">Use this exact URL, including the trailing slash, in a supported client&apos;s remote MCP settings. Public research needs no authentication. Private project credentials and verified buyer or supplier identity are separate requirements; adding this endpoint does not sign you into a private project.</p>
-        <p className="mt-3 text-sm text-slate-600">Availability and administrator permissions vary between clients, including ChatGPT, Claude and Copilot Studio. Follow your client&apos;s current remote MCP setup instructions. This page does not claim an approved app-directory listing or universal client compatibility.</p>
-        <p className="mt-3 text-sm"><a className="underline" href="/sase/.well-known/mcp-server-metadata.json">Server metadata</a> · <a className="underline" href="/sase/capabilities.json">Capabilities and access flags</a> · <a className="underline" href={ENDPOINT}>Endpoint discovery</a></p>
-      </section>
+function Code({children}:{children:string}){return <pre className="mt-2 overflow-x-auto rounded-md bg-slate-900 p-3 text-xs text-slate-100"><code>{children}</code></pre>;}
 
-      <section className="mt-10" aria-labelledby="mcp-sourcing">
-        <h2 id="mcp-sourcing" className="mb-3 text-xl font-semibold">Turn a shortlist into a sourcing request</h2>
-        <p className="text-sm text-slate-700">Bring a brief or research shortlist into the same Netify service. Requests require buyer-confirmed recipients and request-specific work-email confirmation before desk review. No public listing is required for this private sourcing journey.</p>
-        <ul className="mt-4 space-y-4 text-sm text-slate-700">
-          {SOURCING_TOOL_DEFINITIONS.map((tool) => (
-            <li key={tool.name}><code>{tool.name}</code><p className="mt-1">{tool.description}</p></li>
-          ))}
-        </ul>
-        <p className="mt-4 text-sm text-slate-600">The public server exposes these actions through tools/list. Installed connectors may expose an older catalogue. If prepare_sourcing_plan is unavailable, refresh the client connection or continue on the website below; do not publish an opportunity as a substitute for a private request. ChatGPT app availability is subject to app approval.</p>
-        <p className="mt-3 text-sm"><a className="underline" href="/sase/shortlist/#sourcing-requirement">Bring your shortlist on the website</a></p>
-      </section>
+export default function ConnectorPage(){
+ const tools=liveCatalogue();
+ const open=tools.filter(t=>t.group==='open');
+ const verified=tools.filter(t=>t.group==='verified');
+ const project=tools.filter(t=>t.group==='project');
+ const hasThreads=verified.some(t=>t.name==='send_message');
+ const schemas=[getOrganizationSchema(),getBreadcrumbSchema('Connect your AI agent','/connector'),{
+  '@context':'https://schema.org','@type':'SoftwareApplication','@id':`${SITE_URL}/connector/#connector`,
+  name:'Netify SASE and SD-WAN Marketplace connector (MCP)',applicationCategory:'BusinessApplication',
+  operatingSystem:'Supported Model Context Protocol clients',url:`${SITE_URL}/connector/`,description:DESCRIPTION,
+  publisher:{'@id':'https://netify.co.uk/#organization'},
+ }];
+ return (
+  <div className="mx-auto min-w-0 max-w-4xl px-6 py-12 [overflow-wrap:anywhere]">
+   {schemas.map((s,i)=><script key={i} type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(s)}}/>)}
+   <p className="mb-2 text-sm text-slate-600">Netify marketplace · Model Context Protocol</p>
+   <h1 id="page-h1" className="mb-3">{TITLE}</h1>
+   <p className="max-w-3xl text-lg text-slate-700">{DESCRIPTION} The server is a standard remote MCP server over Streamable HTTP, so any assistant that accepts a server URL can use it. The tool list on this page is the same list the server returns.</p>
 
-      <section className="mt-10" aria-labelledby="mcp-evidence">
-        <h2 id="mcp-evidence" className="mb-3 text-xl font-semibold">Evidence your assistant can use</h2>
-        <ul className="list-disc space-y-2 pl-5 text-sm text-slate-700">
-          <li><code>compare_vendors</code> compares two or three named providers and returns a link to continue the comparison on Netify. Public comparison does not require publication.</li>
-          <li><code>verify_claim</code> returns source evidence and dates where available; unsupported claims remain unconfirmed. <code>list_exclusions</code> explains excluded or conflicting evidence.</li>
-          <li><code>workspace_cycle</code> and <code>workspace_ingest</code> return requirements with provenance, including stated facts and labelled inferences. They do not publish a project.</li>
-          <li><code>build_sase_shortlist</code> previews aggregate coverage. The legacy published-project tool <code>get_unlocked_matches</code> requires publication and verified ownership. For open named evidence matches without publication, use <code>prepare_sourcing_plan</code> above.</li>
-        </ul>
-        <p className="mt-4 text-sm"><a className="underline" href="/sase/rfp-builder/questions/">Read the question bank</a> · <a className="underline" href="/sase/question-bank.json">Question data</a> · <a className="underline" href="/sase/rfp-validation-methodology.json">Validation method</a> · <a className="underline" href="/sase/shortlist/">Compare providers</a></p>
-      </section>
+   <section className="mt-7 rounded-lg border border-slate-200 bg-slate-50 p-5" aria-labelledby="endpoint">
+    <h2 id="endpoint" className="mb-2 text-lg font-semibold">Server URL</h2>
+    <code className="block overflow-x-auto text-sm">{ENDPOINT}</code>
+    <p className="mt-3 text-sm text-slate-600">Use this exact URL, including the trailing slash. No sign-in is needed to add it or to use the open tools below. Private project tools use the marketplace authorisation server at <code>https://netify.co.uk/sase</code>.</p>
+    <p className="mt-3 text-sm"><a className="underline" href="/sase/.well-known/mcp.json">Server card</a> · <a className="underline" href="/sase/.well-known/oauth-protected-resource/">Protected resource metadata</a> · <a className="underline" href="/sase/openapi.json">OpenAPI description</a> · <a className="underline" href="/sase/llms.txt">llms.txt</a></p>
+   </section>
 
-      <section className="mt-10" aria-labelledby="mcp-pricing">
-        <h2 id="mcp-pricing" className="mb-3 text-xl font-semibold">Pricing and a worked example</h2>
-        <ul className="space-y-4 text-sm leading-6 text-slate-700">{PRICING_ROUTES.map(route => <li key={route.id}><a className="font-semibold underline" href={route.href}>{route.title}</a><p>{route.description}</p></li>)}</ul>
-        <p className="mt-4 text-sm"><a className="underline" href="/sase/examples/manufacturing-rfp/">See the manufacturing RFP walkthrough</a> · <a className="underline" href="/sase/examples/manufacturing-rfp/data.json">Read its machine-readable example</a>. Both label the illustrative supplier responses as fictional.</p>
-      </section>
-
-      <section className="mt-10" aria-labelledby="mcp-tool-access">
-        <h2 id="mcp-tool-access" className="mb-3 text-xl font-semibold">Tools and their access requirements</h2>
-        <p className="mb-5 text-sm text-slate-600">The descriptions below come from the implemented tool definitions. Read-only does not mean public: some reads require private credentials. Open a tool to review its exact conditions before using it.</p>
-        <div className="space-y-7">
-          {MCP_ACCESS_GROUPS.map((group) => <section key={group.access} data-mcp-access={group.access}>
-            <h3 className="font-semibold">{group.title}</h3><p className="mb-3 mt-1 text-sm text-slate-600">{group.description}</p>
-            <div className="divide-y divide-slate-200 border-y border-slate-200">{group.tools.map((name) => {
-              const tool = defByName.get(name);
-              if (!tool) throw new Error(`Public capability references an unknown MCP tool: ${name}`);
-              return <details key={name} className="py-3"><summary className="cursor-pointer text-sm"><code>{name}</code><span className="ml-2 text-slate-600">{TOOL_ANNOTATIONS[name]?.title ?? ""}</span></summary><p className="mt-3 text-sm leading-6 text-slate-700">{tool.description}</p></details>;
-            })}</div>
-          </section>)}
-        </div>
-      </section>
-
-      <section className="mt-10 text-sm text-slate-700">
-        <h2 className="mb-3 text-xl font-semibold">Continue with your project</h2>
-        <p>Use a Short or Detailed RFP, bring an existing RFP or RFI, or publish a basic requirements brief. Keep your bespoke questions and review what suppliers will receive. A project credential is not consent to publish. Supplier RFP submissions currently require the verified web response form.</p>
-        <p className="mt-3"><a className="underline" href="https://netify.co.uk/sase-sd-wan-rfp-builder/">Open the buying workspace</a> · <a className="underline" href="/sase/opportunities/board/">View the opportunity board</a> · <a className="underline" href="/sase/cost-estimator/">Estimate cost bands</a></p>
-        <h2 className="mb-3 mt-8 text-xl font-semibold">Privacy and permissions</h2>
-        <p className="mb-3">The current service does not provide an OAuth identity bridge. Private actions requiring a verified web session must continue on the website. Never paste session cookies into an assistant. A successful public connection is not proof of directory listing or private-client access.</p>
-        <p className="mb-3">Confirm each action before an agent saves or changes a project. Publication has its own versioned consent. After a timeout, read the saved state before retrying; automatic retries require explicit tool support. Published facts and evidence remain frozen together. Zero confirmed matches means no suppliers were invited.</p>
-        <p>Public research does not require sign-in. Stateless tools do not create a project; draft-creation tools store private project data and return a credential. Do not share private tokens or buyer documents without authorization. Buyer identity and supplier pricing are protected by the relevant project permissions.</p>
-        <p className="mt-3"><a className="underline" href="https://netify.co.uk/privacy-policy/">Privacy policy</a> · <a className="underline" href="https://netify.co.uk/terms-conditions/">Terms</a> · Support: support@netify.com</p>
-        <h2 className="mb-3 mt-8 text-xl font-semibold">BT buying and reseller services</h2>
-        <p>Netify also provides a separate BT companion endpoint at <code>https://netify.co.uk/api/mcp/</code>. Its tools, access conditions and commercial scope are separate from this marketplace connector. See <a className="underline" href="https://netify.co.uk/bt-reseller-programme/">BT reseller information</a> before using it.</p>
-      </section>
+   <section className="mt-10" aria-labelledby="setup">
+    <h2 id="setup" className="mb-3 text-xl font-semibold">Set it up</h2>
+    <div className="space-y-6">
+     <div><h3 className="font-semibold">Claude</h3>
+      <p className="mt-1 text-sm text-slate-700">In Claude on the web or desktop, open Settings, then Connectors, and add a custom connector with the server URL above. Menu names change between releases. Leave any sign-in fields empty for the open tools.</p>
+      <p className="mt-2 text-sm text-slate-700">In Claude Code, run:</p><Code>{claudeCode}</Code></div>
+     <div><h3 className="font-semibold">ChatGPT</h3>
+      <p className="mt-1 text-sm text-slate-700">Custom connectors are available on some ChatGPT plans and may need developer mode or an administrator to enable them. Where your plan allows it, create a connector from Settings, choose MCP server, paste the server URL and select no authentication for the open tools.</p></div>
+     <div><h3 className="font-semibold">Cursor</h3>
+      <p className="mt-1 text-sm text-slate-700">Add this to <code>.cursor/mcp.json</code> in your project, or to your global MCP settings:</p><Code>{cursorJson}</Code></div>
+     <div><h3 className="font-semibold">Grok and other MCP clients</h3>
+      <p className="mt-1 text-sm text-slate-700">Add a remote MCP server with transport set to Streamable HTTP and the server URL above. Clients that only support local servers can use a bridge such as <code>npx mcp-remote {ENDPOINT}</code>.</p></div>
+     <div><h3 className="font-semibold">Check it from a terminal</h3>
+      <p className="mt-1 text-sm text-slate-700">List the tools:</p><Code>{curlList}</Code>
+      <p className="mt-3 text-sm text-slate-700">Call one:</p><Code>{curlCall}</Code></div>
     </div>
-  );
+   </section>
+
+   <section className="mt-10" aria-labelledby="open-tools">
+    <h2 id="open-tools" className="mb-3 text-xl font-semibold">Open tools, no sign-in</h2>
+    <p className="mb-3 text-sm text-slate-700">These read published research. Results carry sources and access dates. They are unverified desk research and not quotes, endorsements or rankings of quality.</p>
+    <ul className="space-y-2 text-sm">
+     {open.map(t=><li key={t.name}><code className="font-semibold">{t.name}</code>: {t.description}</li>)}
+    </ul>
+   </section>
+
+   {verified.length>0&&<section className="mt-10" aria-labelledby="buyer-tools">
+    <h2 id="buyer-tools" className="mb-3 text-xl font-semibold">Publishing and downloads need a verified work email</h2>
+    <ol className="mb-4 list-decimal space-y-1 pl-5 text-sm text-slate-700">
+     <li>Your assistant calls <code>request_access_code</code> with your work email. Free email such as Gmail, Outlook, Hotmail, Yahoo and iCloud is rejected.</li>
+     <li>You read the six digit code from your inbox and give it to your assistant, which calls <code>verify_access_code</code> and receives an <code>access_token</code>.</li>
+     <li>Your assistant passes the token to the tools below, either as the <code>access_token</code> argument or as an <code>Authorization: Bearer</code> header.</li>
+    </ol>
+    <p className="mb-3 text-sm text-slate-700">Downloading the RFP and recommended-providers pack needs a work email, your agreement to publish, and an actual publish. Netify then lists the requirement privately with the marketplace&apos;s curated vendors and providers. The public board shows it without your company name unless you opt in. Set <code>show_company</code> with <code>company_name</code> if you want your company named publicly. Naming your company reaches a wider audience of providers and vendors you may not have considered. Your free-text description stays private unless you show your company.</p>
+    {hasThreads&&<p className="mb-3 text-sm text-slate-700">Conversations: <code>send_message</code> and <code>request_expert_help</code> open a private thread with a provider or the Netify team, and <code>read_thread</code> shows the replies. Providers reply from a one-time link in their email and need no account. The Netify team can join any thread. You can message a provider once Netify has invited it to your requirement or it has responded. Until provider messaging is switched on, messages to providers are held and the Netify team can see them. Messages to the Netify team work now.</p>}
+    <ul className="space-y-2 text-sm">
+     {verified.map(t=><li key={t.name}><code className="font-semibold">{t.name}</code>: {t.description}</li>)}
+    </ul>
+   </section>}
+
+   {project.length>0&&<section className="mt-10" aria-labelledby="project-tools">
+    <h2 id="project-tools" className="mb-3 text-xl font-semibold">Private project tools</h2>
+    <p className="mb-3 text-sm text-slate-700">These need a project link and, for writes, a verified owner in the web view. Supplier approval and sending are never assistant actions.</p>
+    <ul className="space-y-2 text-sm">
+     {project.map(t=><li key={t.name}><code className="font-semibold">{t.name}</code>: {t.description}</li>)}
+    </ul>
+   </section>}
+
+   <section className="mt-10" aria-labelledby="safety">
+    <h2 id="safety" className="mb-3 text-xl font-semibold">What to expect</h2>
+    <ul className="list-disc space-y-2 pl-5 text-sm text-slate-700">
+     <li>Open tools need no account. Publishing, the bundle download and conversations need a verified work email.</li>
+     <li>Private project tools use the marketplace authorisation server. The issuer is <code>https://netify.co.uk/sase</code>.</li>
+     <li>Research results are desk research with sources. They are not quotes or a recommendation to buy.</li>
+     <li>The same rules apply to people on the website and to assistants.</li>
+    </ul>
+   </section>
+  </div>
+ );
 }

@@ -79,6 +79,9 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Phase A briefly published /connect/. The single connector page is /connector/.
+      { source: "/connect", destination: "/connector/", permanent: true },
+      { source: "/connect/", destination: "/connector/", permanent: true },
       // The old shortlist subdomain is present in Bing AI citation data.
       // Give both slash variants a direct permanent hop to the exact
       // canonical URL before the generic subdomain retirement rule.
