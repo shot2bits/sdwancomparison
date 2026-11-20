@@ -26,7 +26,7 @@ const findingView=(f:Finding)=>({field_id:f.field_id,theme:f.theme,question:f.qu
 const providerCard=(p:{slug:string;name:string;roles:string[]})=>({slug:p.slug,name:p.name,roles:p.roles.map(r=>ROLE_LABEL[r]??r),profile_url:vendorProfileHref(p.slug),evidence_url:`https://netify.co.uk/sase/research/providers/${p.slug}/`});
 
 const searchSchema=z.object({query:z.string().max(200).optional(),sector:z.enum(sectorSlugs).optional(),need:z.string().max(300).optional(),location:z.string().max(100).optional(),role:z.enum(['technology_vendor','managed_service_provider','carrier_network_provider','hybrid_provider','integrator']).optional(),limit:z.number().int().min(1).max(30).default(10)}).strict();
-function search(a:z.infer<typeof searchSchema>){
+export function search(a:z.infer<typeof searchSchema>){
  const terms=(s?:string)=>lc(s).split(/[^a-z0-9+]+/).filter(w=>w.length>2);
  const needTerms=[...new Set([...terms(a.need),...terms(a.query)])],loc=lc(a.location).trim();
  const rows=RESEARCH.providers.filter(p=>!a.role||p.roles.includes(a.role)).map(p=>{
@@ -72,7 +72,7 @@ function listPrices(a:z.infer<typeof priceSchema>){
 
 const productIds=CONTEXT_PRODUCTS.map(p=>p.id) as [string,...string[]];
 const rfpSchema=z.object({
- organisation:z.object({sector:z.enum(['retail_ecommerce','manufacturing','financial_services','healthcare','other']).default('other'),size_band:z.string().max(60).optional(),description:z.string().max(1500).optional()}).strict().default({sector:'other'}),
+ organisation:z.object({sector:z.enum(['retail_ecommerce','manufacturing','financial_services','healthcare','government_public_sector','education','energy_utilities','transport_logistics','professional_services','hospitality_leisure','other']).default('other'),size_band:z.string().max(60).optional(),description:z.string().max(1500).optional()}).strict().default({sector:'other'}),
  products:z.array(z.enum(productIds)).min(1).max(13),
  sites:z.object({count:z.number().int().min(1).max(100000),regions:z.array(z.string().max(60)).max(20).default([]),notes:z.string().max(1500).optional()}).strict(),
  users:z.object({count:z.number().int().min(1).max(1000000),remote:z.number().int().min(0).max(1000000).default(0)}).strict(),
@@ -88,7 +88,7 @@ const rfpSchema=z.object({
 export type RfpInput=z.infer<typeof rfpSchema>;
 export function buildRfp(a:RfpInput){
  const label=(id:string)=>CONTEXT_PRODUCTS.find(p=>p.id===id)?.label??id;
- const pack=a.organisation.sector==='other'?null:sectorPack(a.organisation.sector);
+ const pack=sectorPack(a.organisation.sector);
  const canon=canonicalQuestions();
  const words=new Set(a.products.flatMap(id=>lc(label(id)).split(/[^a-z]+/).filter(w=>w.length>2)));
  const scored=canon.map(q=>({q,s:[...words].filter(w=>lc(q.category+' '+q.text).includes(w)).length}));

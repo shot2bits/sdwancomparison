@@ -176,6 +176,8 @@ export const OpportunitySchema = z.object({
 
   /* --- Project notice fields (2026 marketplace rebuild). All defaulted. --- */
   buyer_visibility: z.enum(BUYER_VISIBILITY_TYPES).default("named"),
+  // The buyer separately agreed to show their company on the public board. Never set by default.
+  buyer_public_opt_in: z.boolean().default(false),
   buyer_sector: z.string().default(""),
   buyer_size_band: z.string().default(""),
   users_band: z.string().default(""),
@@ -299,7 +301,7 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     // Policy v1: company identity is never part of the public board
     // projection. Historic named records remain readable in KV, but their
     // private stored identity is not re-exposed by current public routes.
-    buyer_org: anonymousBuyerOrganisation(),
+    buyer_org: o.buyer_public_opt_in === true && o.buyer_visibility === "named" ? o.buyer_org : anonymousBuyerOrganisation(),
     // Display title, derived when the stored title carries no information
     // ("Untitled SASE / SD-WAN RFP", the F1 numeric-sector artefact). One
     // application point so every public client renders the same word

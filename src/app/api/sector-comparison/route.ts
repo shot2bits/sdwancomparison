@@ -8,6 +8,8 @@ import {loadSectorComparisonRecords} from '@/lib/sector-comparison-source';
 import {requestOriginAllowed} from '@/lib/request-origin';
 import {sourcingPlanAllowed} from '@/lib/sourcing-plan-limit';
 import {renderRfpDocx} from '@/lib/rfp-export-docx';
+import {requireDownloadAccess} from '@/lib/agent-access';
+import {MarketError} from '@/lib/marketplace-mcp';
 export const runtime='nodejs';
 export const maxDuration=60;
 const schema=z.object({input:SectorComparisonInputSchema,format:z.enum(['json','docx','markdown','research_json','research_archive']).default('json'),include_full_research:z.boolean().default(false),advisory_review:z.string().max(50000).optional(),expected_fingerprints:z.record(z.string(),z.string()).default({}),expected_revisions:z.record(z.string(),z.string()).default({}),providers:z.array(z.string().regex(/^[a-z0-9-]+$/)).max(30).default([])}).strict();
@@ -20,6 +22,7 @@ export async function POST(req:Request){
   if(!await sourcingPlanAllowed('sector-comparison:'+ (req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()??'local')))return Response.json({error:'Please wait a minute before trying again.'},{status:429,headers:{...headers,'Retry-After':'60'}});
   const raw=await req.text();if(raw.length>120000)return Response.json({error:'Brief too large.'},{status:413,headers});
   const parsed=schema.safeParse(JSON.parse(raw));if(!parsed.success)return Response.json({error:'Check your sector, sites, users and requirements.'},{status:400,headers});
+  if(parsed.data.format!=='json'){try{await requireDownloadAccess(req.headers.get('authorization'));}catch(e){if(e instanceof MarketError)return Response.json({error:e.code==='verified_email_required'?'access_required':e.code,message:'Downloads need a verified work email and your agreement to publish your requirement to the opportunity board. The comparison itself stays open.',...e.detail},{status:e.status===401?401:403,headers});throw e;}}
   const {providers,unavailable}=await loadSectorComparisonRecords();
   const result=compareSectorProviders(parsed.data.input,providers,unavailable);
   if(parsed.data.format==='json')return Response.json(result,{headers});
