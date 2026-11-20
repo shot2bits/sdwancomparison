@@ -21,7 +21,7 @@ export default function RfpBundleForm(){
    {done?(
     <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-5" role="status">
      <h2 className="text-lg font-semibold">Your bundle is ready</h2>
-     {done.published&&<p className="mt-2 text-sm">Your requirement is on the opportunity board{done.published.company_shown_publicly?' with your company name shown':', anonymised'}. <a className="underline" href={done.published.notice_url.replace('https://netify.co.uk','')}>View the public notice</a>.</p>}
+     {done.published&&<p className="mt-2 text-sm">Your requirement is listed privately with Netify&apos;s curated vendors and providers{done.published.company_shown_publicly?' and your company name is shown on the public board':', and the public board shows it without your company name'}. <a className="underline" href={done.published.notice_url.replace('https://netify.co.uk','')}>View the public notice</a>.</p>}
      <div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>void get('markdown')} disabled={!!busy} className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white">{busy==='markdown'?'Preparing…':'Download Markdown'}</button><button onClick={()=>void get('docx')} disabled={!!busy} className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white">{busy==='docx'?'Preparing…':'Download Word document'}</button></div>
      {error&&<p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
     </div>

@@ -24,5 +24,6 @@ const call=async(name:string,args:unknown)=>(await OPEN_TOOLS.find(t=>t.name===n
  for(const n of ['search_providers','compare_providers','get_sector_shortlist','get_list_prices','build_rfp','get_opportunity_board','get_provider_evidence','create_project'])assert.ok(names.includes(n),n);
  const call=await rpc('tools/call',{name:'search_providers',arguments:{sector:'healthcare',limit:3}});assert.equal(call.result.isError,false);assert.ok(call.result.structuredContent.data.providers.length>0);
  const bad=await rpc('tools/call',{name:'build_rfp',arguments:{}});assert.equal(bad.result.isError,true);assert.equal(bad.result.structuredContent.error,'invalid_arguments');
+ const {liveCatalogue}=await import('../src/lib/mcp-live-catalogue');const documented=liveCatalogue().map(t=>t.name).sort();assert.deepEqual(documented,[...names].sort(),'connector page catalogue must equal tools/list');
  console.log('mcp dispatch ok, tools:',names.length);
 })();
