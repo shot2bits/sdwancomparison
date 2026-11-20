@@ -14,6 +14,7 @@ import { publicEvidenceProviders, publicEvidenceOutput, PUBLIC_EVIDENCE_ORDER, P
 import { UK_BUYING_SITUATIONS, PROVIDER_ROLE_GUIDE } from "@/lib/uk-shortlist";
 import { FEATURES } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
+import { RESEARCH } from "@/lib/workbook-research";
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
 import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 import { createHash } from "node:crypto";
@@ -36,6 +37,7 @@ export async function GET(request: Request) {
       title: entity.h1,
       description: entity.count_sentence,
       publisher: "Netify Group Limited",
+      workbook_research: { contract_version: RESEARCH.contract_version, dataset_version: RESEARCH.dataset_version, updated_date: RESEARCH.updated_date, evidence_window: RESEARCH.evidence_window, counts: RESEARCH.counts, publication_status: RESEARCH.publication_status, page: `${SITE_URL}/research/`, data: `${SITE_URL}/research/data.json`, list_prices: `${SITE_URL}/research/list-prices/` },
       sector_comparison: {introduction:SECTOR_COMPARISON_INTRO,worked_example:SECTOR_COMPARISON_EXAMPLE,version:SECTOR_COMPARISON_VERSION,sector_scenarios:SECTOR_PRIORITIES,scenario_capability_checks:SCENARIO_CHECKS,scenario_method:"Buying scenarios add advisory evidence checks and a supplier acceptance test. Feature evidence does not prove buyer-specific design or application suitability.", schema_url:`${SITE_URL}/api/sector-comparison/`, method:"POST", description:"Sector requirements, source-linked provider findings, Harry’s original buyer checklists with dated fact checks, and Word or Markdown decision packs. Research does not contact suppliers.", formats:["json","docx","markdown","research_json","research_archive"], full_research_appendix:"Set include_full_research to true for every published field and row of selected providers", brief_review_url:`${SITE_URL}/api/sector-comparison/review/`, export_requires:"Selected provider slugs and expected_revisions and expected_fingerprints from the comparison response"},
       buyer_profile_version: buyerProfiles.version,
       buyer_profiles_checked_at: buyerProfiles.checked_at,

@@ -5,6 +5,8 @@ import { BEST_PAGES } from "@/lib/best-pages";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { bestFor, shortlistEntity } from "@/lib/shortlist-entity";
 import { SITE_URL } from "@/lib/structured-data";
+import { COMPARE_PAIRS } from "@/lib/compare-pages";
+import { RESEARCH, SECTORS, compareResearch, money, priceLabels, providerName, researchSummarySentence, sectorResearch } from "@/lib/workbook-research";
 
 /**
  * llms-full.txt: the complete provider evidence as plain text for AI agents
@@ -36,6 +38,19 @@ export async function GET() {
     }
     sections.push("");
   }
+
+  sections.push(`## Desk research (updated ${RESEARCH.updated_date}, dataset ${RESEARCH.dataset_version})`, researchSummarySentence(), `Hub: ${SITE_URL}/research/ · Data: ${SITE_URL}/research/data.json`, "");
+  for (const s of SECTORS) {
+    const r = sectorResearch(s.slug);
+    sections.push(`### Best SD-WAN and SASE providers for ${s.name.toLowerCase()} by published cases (${r.cases.length}${r.thin ? ", thin evidence" : ""})`, `Canonical: ${SITE_URL}/research/sectors/${s.slug}/`);
+    for (const row of r.rows) sections.push(`${row.provider}: ${row.case.customer}${row.case.site_count !== null ? ` (${row.case.site_count_qualifier === "At least" ? "at least " : ""}${row.case.site_count} sites)` : ""}. Source: ${row.source?.url ?? ""} (accessed ${row.case.accessed_date ?? ""}, unverified provider claim)`);
+    sections.push("");
+  }
+  sections.push("### Head-to-head desk research verdicts");
+  for (const p of COMPARE_PAIRS) sections.push(`${providerName(p.a)} vs ${providerName(p.b)} (${SITE_URL}/compare/${p.slug}/): ${compareResearch(p.a, p.b).verdict}`);
+  sections.push("", `### Published list prices (not quotes) · ${SITE_URL}/research/list-prices/`);
+  for (const l of RESEARCH.price_lines.filter((x) => x.amount !== null)) sections.push(`${providerName(l.slug)} · ${l.product}: ${money(l.amount, l.currency)}${l.charge_unit ? ` per ${l.charge_unit}` : ""}${l.period && !/^other/i.test(l.period) ? ` / ${l.period.toLowerCase()}` : ""} [${priceLabels(l).join("; ")}] seen ${l.observed_date ?? ""}`);
+  sections.push("");
 
   sections.push("## All 30 vendor profiles");
   for (const v of vendors) {

@@ -1,5 +1,9 @@
 import review from "../../data/shortlist-review.json";
 import { UK_CARRIER_REVIEWS } from "./provider-projection-review";
+import providerRoles from "../../data/research/provider-roles.json";
+
+/** Provider roles recorded in the research workbook (slug -> roles). */
+const RESEARCH_ROLES = providerRoles.roles as Record<string, string[]>;
 import {
   SECTOR_KEYS,
   SECTOR_LABELS,
@@ -20,7 +24,9 @@ export function providerTypes(v: ShortlistVendor) {
     ) &&
       /(vendor|platform|network services)/i.test(category));
   const carrier =
-    /carrier/.test(category) || Boolean(UK_CARRIER_REVIEWS[v.slug]);
+    /carrier/.test(category) ||
+    Boolean(UK_CARRIER_REVIEWS[v.slug]) ||
+    Boolean(RESEARCH_ROLES[v.slug]?.includes("carrier_network_provider"));
   const managed = /managed .*provider/.test(category);
   return { technology, carrier, managed };
 }
@@ -71,6 +77,10 @@ export function shortlistEntity(
   const counts = {
     providers: vendors.length,
     technology_vendors: types.filter((t) => t.technology).length,
+    // Carriers are counted from provider roles. UK entity status is a
+    // separate, evidence-gated fact reported in uk_sentence; it must not
+    // gate the carrier count (it previously produced "0 UK carriers").
+    carriers: types.filter((t) => t.carrier).length,
     uk_carriers: vendors.filter(
       (v, i) =>
         types[i].carrier && ["uk_hq", "uk_entity"].includes(v.uk_delivery),
@@ -80,9 +90,7 @@ export function shortlistEntity(
   const overlap = vendors.some(
     (v, i) =>
       Number(types[i].technology) +
-        Number(
-          types[i].carrier && ["uk_hq", "uk_entity"].includes(v.uk_delivery),
-        ) +
+        Number(types[i].carrier) +
         Number(types[i].managed) >
       1,
   );
@@ -101,8 +109,8 @@ export function shortlistEntity(
   return {
     h1,
     counts,
-    count_sentence: `Compare ${vendors.length} researched SD-WAN and SASE providers across operating model, network and security capability. ${counts.technology_vendors} technology vendors; ${counts.uk_carriers} UK carriers; ${counts.managed_service_providers} managed service providers${overlap ? "; overlapping categories counted in each type" : ""}.`,
-    uk_sentence: `${uk} UK-headquartered or UK-entity providers; ${pending} UK entity statuses not yet reviewed; ${reviewed ? `latest UK entity evidence review ${reviewed}` : "no active dated UK entity review"}. UK entity evidence does not establish availability at individual sites.`,
+    count_sentence: `Compare ${vendors.length} researched SD-WAN and SASE providers across operating model, network and security capability. ${counts.technology_vendors} technology vendors; ${counts.carriers} carriers or network providers; ${counts.managed_service_providers} managed service providers${overlap ? "; overlapping categories counted in each type" : ""}.`,
+    uk_sentence: `${uk} UK-headquartered or UK-entity providers (${counts.uk_carriers} of ${counts.carriers} carriers have a reviewed UK entity); ${pending} UK entity statuses not yet reviewed; ${reviewed ? `latest UK entity evidence review ${reviewed}` : "no active dated UK entity review"}. UK entity evidence does not establish availability at individual sites.`,
     market_structure_sentence: review.market_structure_sentence,
     desk_sentence: review.desk_sentence,
     reviewer: {

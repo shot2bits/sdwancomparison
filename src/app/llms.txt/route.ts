@@ -7,10 +7,13 @@ import { MCP_TOOL_DEFINITIONS } from '@/lib/mcp-tool-definitions';
 import { SOURCING_TOOL_DEFINITIONS } from '@/lib/mcp-sourcing-tools';
 import { sourcingUndertaking,SOURCING_TITLE,SOURCING_DESCRIPTION,COMMISSION_DESCRIPTION } from '@/lib/sourcing-contract';
 import { SITE_URL } from '@/lib/structured-data';
+import { CASE_PAGE_SECTORS, RESEARCH, SECTORS, researchSummarySentence } from '@/lib/workbook-research';
+const researchBlock=()=>`## Desk research (updated ${RESEARCH.updated_date})\n${researchSummarySentence()}\nDataset version: ${RESEARCH.dataset_version}\nResearch hub: ${SITE_URL}/research/\nResearch data (JSON): ${SITE_URL}/research/data.json\nPublished list prices (not quotes): ${SITE_URL}/research/list-prices/\n${CASE_PAGE_SECTORS.map(s=>`${SECTORS.find(x=>x.slug===s)?.name} case studies: ${SITE_URL}/research/cases/${s}/`).join('\n')}\nBest providers by sector (cited cases): ${SECTORS.map(s=>`${SITE_URL}/research/sectors/${s.slug}/`).join(' ')}\nProvider evidence: ${SITE_URL}/research/providers/<provider-slug>/\n`;
 export async function GET(){const entity=shortlistEntity((await getLiveShortlistDataset()).vendors); return new Response(`${entity.h1}
 ${entity.count_sentence}
 ${entity.uk_sentence}
 
+${researchBlock()}
 ## ${SOURCING_TITLE}
 ${SOURCING_DESCRIPTION}
 ${sourcingUndertaking()}

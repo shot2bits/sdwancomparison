@@ -65,7 +65,9 @@
     "test:harry-feedback": "node --import tsx scripts/test-harry-feedback.ts && node --import tsx scripts/test-harry-feedback-ui.mjs",
     "test:rfp-completion": "node --import tsx scripts/test-rfp-completion.ts && node --import tsx scripts/test-rfp-research-ui.mjs",
     "test:account-access": "tsx scripts/test-account-access.ts",
-    "test:buyer-completion": "tsx scripts/test-buyer-completion.ts && node --import tsx scripts/test-buyer-completion-ui.mjs"
+    "test:buyer-completion": "tsx scripts/test-buyer-completion.ts && node --import tsx scripts/test-buyer-completion-ui.mjs",
+    "test:research-import": "tsx scripts/test-research-import.ts",
+    "research:import": "node scripts/import-research-workbooks.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

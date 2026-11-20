@@ -26,6 +26,7 @@ import {
   getSpeakableSchema,
 } from "@/lib/structured-data";
 import SourcedTable from "@/components/SourcedTable";
+import { SECTORS, formatDate, sectorResearch } from "@/lib/workbook-research";
 
 export const dynamic = "force-dynamic";
 
@@ -160,6 +161,17 @@ export default async function BestPage({ params }: Props) {
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <ShortlistEntityBlock entity={entity}/>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
+        {(() => {
+          const sector = SECTORS.find((x) => slug === `sd-wan-sase-providers-for-${x.slug}`);
+          if (!sector) return null;
+          const r = sectorResearch(sector.slug);
+          return (
+            <p className="mt-3 text-sm" data-research-sector>
+              Desk research updated {formatDate(r.updated)}: {r.cases.length} providers publish a {sector.name.toLowerCase()} customer case.{" "}
+              <Link href={`/research/sectors/${sector.slug}/`} className="underline">See the cited {sector.name.toLowerCase()} cases table</Link>
+            </p>
+          );
+        })()}
         {page.input.sector === "healthcare" && <p className="mt-3">For the BT/NHS route, see <a className="underline" href="https://netify.co.uk/sd-wan-for-healthcare/">BT SD-WAN and SASE for healthcare</a>.</p>}
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
           {`Netify's ${reviewedMonth} evidence directory, by proven capability count, verification date and name: `}

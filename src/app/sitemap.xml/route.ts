@@ -5,6 +5,7 @@ import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
 import { MARKETPLACE_EXAMPLES } from "@/lib/marketplace-examples";
+import { CASE_PAGE_SECTORS, RESEARCH, SECTORS, researchSlugs, providerResearch, sectorResearch } from "@/lib/workbook-research";
 
 // Actual public sourcing content release, not the sitemap fetch time.
 const SOURCING_RELEASE_LASTMOD = "2026-09-30";
@@ -53,7 +54,15 @@ export async function GET() {
   } catch {
     /* sitemap stays valid without live notices */
   }
-  const urls: { loc: string; priority: string }[] = [
+  // Workbook desk research pages carry the date of their own evidence.
+  const research: { loc: string; priority: string; lastmod?: string | null }[] = [
+    { loc: `${SITE_URL}/research/`, priority: "0.9", lastmod: RESEARCH.updated_date },
+    { loc: `${SITE_URL}/research/list-prices/`, priority: "0.9", lastmod: RESEARCH.evidence_window.pricing_observed_to },
+    ...SECTORS.map((s) => ({ loc: `${SITE_URL}/research/sectors/${s.slug}/`, priority: "0.8", lastmod: sectorResearch(s.slug).updated })),
+    ...CASE_PAGE_SECTORS.map((s) => ({ loc: `${SITE_URL}/research/cases/${s}/`, priority: "0.9", lastmod: sectorResearch(s).updated })),
+    ...researchSlugs().map((slug) => ({ loc: `${SITE_URL}/research/providers/${slug}/`, priority: "0.7", lastmod: providerResearch(slug).updated })),
+  ];
+  const urls: { loc: string; priority: string; lastmod?: string | null }[] = [
     { loc: "https://netify.co.uk/sase-sd-wan-rfp-builder/", priority: "1.0" },
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
@@ -109,12 +118,13 @@ export async function GET() {
       loc: `${SITE_URL}/compare/${p.slug}`,
       priority: "0.8",
     })),
+    ...research,
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
-    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc>${sourcingLastmod(u.loc)}<priority>${u.priority}</priority></url>`,
+    (u) => `  <url><loc>${u.loc.endsWith("/") || /\.[a-z]+$/i.test(u.loc) ? u.loc : u.loc + "/"}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : sourcingLastmod(u.loc)}<priority>${u.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>`;

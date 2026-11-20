@@ -1,5 +1,6 @@
 import 'server-only';
 import {getShortlistDataset} from './vendors';
+import {RESEARCH,CASE_PAGE_SECTORS,SECTORS as RESEARCH_SECTORS,formatDate,researchSummarySentence} from './workbook-research';
 
 /** The bare https://netify.co.uk/marketplace/ landing is the product URL the
  *  sitemap lists and AI answers should cite. It used to ship
@@ -66,6 +67,12 @@ export function landingAnswers(){
   LANDING_FAQS.map(f=>`<h3 style="font-size:17px;margin:20px 0 4px">${esc(f.q)}</h3><p style="margin:0">${esc(f.a)}</p>`).join('')+
   `<h3 style="font-size:17px;margin:28px 0 6px">Best SD-WAN and SASE providers by sector</h3><p style="margin:0">${SECTORS.map(([n,s])=>a(`/sase/best/sd-wan-sase-providers-for-${s}/`,n)).join(' · ')}</p>`+
   `<h3 style="font-size:17px;margin:20px 0 6px">Head-to-head comparisons</h3><p style="margin:0">${COMPARISONS.map(([n,s])=>a(`/sase/compare/${s}/`,n)).join(' · ')} · ${a('/sase/compare/','All comparisons')}</p>`+
+  `<h3 style="font-size:17px;margin:20px 0 6px">Desk research, updated ${esc(formatDate(RESEARCH.updated_date))}</h3><p style="margin:0 0 6px">${esc(researchSummarySentence())}</p><p style="margin:0">${[
+   a('/sase/research/','All provider research'),
+   ...CASE_PAGE_SECTORS.map(s=>a(`/sase/research/cases/${s}/`,`${RESEARCH_SECTORS.find(x=>x.slug===s)?.name??s} SD-WAN and SASE case studies`)),
+   a('/sase/research/list-prices/','Published SD-WAN and SASE list prices'),
+   ...RESEARCH_SECTORS.map(s=>a(`/sase/research/sectors/${s.slug}/`,`${s.name}: providers with cited cases`)),
+  ].join(' · ')}</p>`+
   `<h3 style="font-size:17px;margin:20px 0 6px">Research and RFP resources</h3><p style="margin:0">${[
    a('/sase/shortlist/','SD-WAN and SASE provider shortlist'),a('/sase/shortlist/sd-wan-vendors/','SD-WAN vendors compared'),a('/sase/shortlist/sase-vendors/','SASE vendors compared'),a('/sase/shortlist/managed-sd-wan/','Managed SD-WAN providers compared'),
    a('/sase/alternatives/bt-business/','BT alternatives'),a('/sase/rfp-builder/questions/','SASE and SD-WAN RFP question bank'),a('/sase/rfp-builder/sample-rfp/','Sample RFP'),a('/sase/shortlist/data.json','Research dataset (JSON)'),

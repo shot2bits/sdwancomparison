@@ -17,6 +17,8 @@ import {
 } from "@/lib/structured-data";
 import { datasetVerifiedIso, datasetVerifiedMonth } from "@/lib/dataset-date";
 import SourcedTable from "@/components/SourcedTable";
+import WorkbookComparison from "@/components/research/WorkbookComparison";
+import { compareResearch, formatDate } from "@/lib/workbook-research";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -60,7 +62,9 @@ export default async function ComparePage({ params }: Props) {
   if (!c) notFound();
   const [a, b] = c.slugs;
 
+  const research = compareResearch(cp.a, cp.b);
   const faqs = [
+    { q: `${c.names[a]} or ${c.names[b]}: what does the latest desk research show?`, a: research.verdict },
     { q: `${c.names[a]} or ${c.names[b]}: how should I compare them?`, a: c.summary },
     { q: `Where can I check ${c.names[a]}'s evidence?`, a: "Read the source grades below and open the provider profile for the supporting evidence. Unknown does not mean unsupported." },
     { q: `Where can I check ${c.names[b]}'s evidence?`, a: SHORTLIST_FAQS[0].a },
@@ -78,7 +82,7 @@ export default async function ComparePage({ params }: Props) {
       description: c.summary,
       author: { "@type": "Organization", name: "Netify research team", url: "https://netify.co.uk/about-netify/" },
       publisher: { "@id": `${SITE_URL}/#organization` },
-      dateModified: datasetVerifiedIso(),
+      dateModified: research.updated ?? datasetVerifiedIso(),
       mainEntityOfPage: `${SITE_URL}/compare/${pair}`,
     },
     getShortlistFaqSchema(faqs),
@@ -114,7 +118,10 @@ export default async function ComparePage({ params }: Props) {
           profiles before deciding.
         </p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">{c.summary}</p>
+        {research.updated && <p className="mt-2 text-sm text-[var(--ink-500)]">Desk research updated {formatDate(research.updated)}.</p>}
       </div>
+
+      <WorkbookComparison a={cp.a} b={cp.b} />
 
       <div className="grid sm:grid-cols-2 gap-4 mb-10">
         {c.slugs.map((s) => (

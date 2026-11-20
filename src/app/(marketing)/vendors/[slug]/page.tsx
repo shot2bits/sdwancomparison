@@ -1,3 +1,4 @@
+import { formatDate, providerResearch } from "@/lib/workbook-research";
 import "../../shortlist/sourcing.css";
 import { cache } from "react";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
@@ -221,6 +222,16 @@ export default async function VendorPage({ params }: Props) {
                 Last verified {vendor.last_verified}
               </span>
             </div>
+            {(() => {
+              const research = providerResearch(vendor.slug);
+              if (!research.provider) return null;
+              return (
+                <p className="mt-4 text-sm" data-research-updated>
+                  <strong>Updated {formatDate(research.updated)}:</strong> {research.newSources.length} new sources, {research.findings.length} sourced findings and {research.cases.length} published customer case{research.cases.length === 1 ? "" : "s"} (unverified provider claims).{" "}
+                  <a href={`/sase/research/providers/${vendor.slug}/`} className="underline">Read the {vendor.name} desk research</a>
+                </p>
+              );
+            })()}
           </div>
 
           {/* Score sidebar */}
