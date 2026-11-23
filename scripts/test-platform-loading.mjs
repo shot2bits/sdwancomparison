@@ -3,8 +3,23 @@ import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {withPlatformLoading,platformLoadingScript} from '../src/lib/platform-loading.ts';
 const original=await readFile('preview/context-space/index.html','utf8');
-const html=withPlatformLoading(original);
+const locationSource=await readFile('preview/context-space/location-workspace.js','utf8');
+const html=withPlatformLoading(original,true);
+const privateDom=new JSDOM(withPlatformLoading(original),{runScripts:'outside-only'});
+assert.equal(privateDom.window.document.getElementById('netify-marketplace-startup'),null);
+assert.equal(privateDom.window.getComputedStyle(privateDom.window.document.getElementById('netify-platform-startup')).position,'fixed');
+privateDom.window.close();
 const dom=new JSDOM(html,{url:'https://netify.co.uk/marketplace/?core=new',runScripts:'outside-only'}),w=dom.window;
+const startup=w.document.getElementById('netify-marketplace-startup');
+assert.ok(startup);
+assert.ok(locationSource.includes(startup.querySelector('h1').outerHTML));
+assert.ok(locationSource.includes(startup.querySelector('header p').outerHTML));
+assert.deepEqual([...startup.querySelectorAll('nav a')].map(link=>link.getAttribute('href')),[
+ '/sase/research/', '/sase/compare/', '/sase/rfp-builder/questions/'
+]);
+assert.ok(startup.querySelector('.netify-startup-map > #netify-platform-startup'));
+assert.equal(w.getComputedStyle(startup).visibility,'visible');
+assert.equal(w.getComputedStyle(w.document.getElementById('netify-platform-startup')).position,'static');
 let timeout=()=>{};
 w.setTimeout=((callback)=>{timeout=callback;return 1;});
 w.eval(platformLoadingScript);
@@ -25,6 +40,7 @@ const pricing=w.document.createElement('section');pricing.id='ns-pricing-workspa
 await Promise.resolve();
 assert.equal(w.document.documentElement.getAttribute('data-platform-ready'),'true');
 assert.equal(w.document.getElementById('netify-platform-startup'),null);
+assert.equal(w.document.getElementById('netify-marketplace-startup'),null);
 assert.notEqual(w.getComputedStyle(w.document.getElementById('netify-space')).visibility,'hidden');
 assert.equal(w.document.querySelectorAll('#ns-marketplace-h1').length,1);
 dom.window.close();
